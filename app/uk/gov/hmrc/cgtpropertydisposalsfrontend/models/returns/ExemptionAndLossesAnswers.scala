@@ -17,13 +17,17 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait ExemptionAndLossesAnswers extends Product with Serializable
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object ExemptionAndLossesAnswers {
 
+  @Lenses
   final case class IncompleteExemptionAndLossesAnswers(
     inYearLosses: Option[AmountInPence],
     previousYearsLosses: Option[AmountInPence],
@@ -33,6 +37,13 @@ object ExemptionAndLossesAnswers {
   object IncompleteExemptionAndLossesAnswers {
 
     val empty: IncompleteExemptionAndLossesAnswers = IncompleteExemptionAndLossesAnswers(None, None, None)
+
+    def fromCompleteAnswers(c: CompleteExemptionAndLossesAnswers): IncompleteExemptionAndLossesAnswers =
+      IncompleteExemptionAndLossesAnswers(
+        Some(c.inYearLosses),
+        Some(c.previousYearsLosses),
+        Some(c.annualExemptAmount)
+      )
 
   }
 
@@ -51,6 +62,13 @@ object ExemptionAndLossesAnswers {
       case i: IncompleteExemptionAndLossesAnswers => ifIncomplete(i)
       case c: CompleteExemptionAndLossesAnswers   => ifComplete(c)
     }
+
+    def unset[A](
+      fieldLens: IncompleteExemptionAndLossesAnswers.type => Lens[IncompleteExemptionAndLossesAnswers, Option[A]]
+    ): IncompleteExemptionAndLossesAnswers =
+      fieldLens(IncompleteExemptionAndLossesAnswers).set(None)(
+        fold(identity, IncompleteExemptionAndLossesAnswers.fromCompleteAnswers)
+      )
 
   }
 

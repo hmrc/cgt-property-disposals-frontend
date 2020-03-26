@@ -338,7 +338,17 @@ class CommonTriageQuestionsControllerSpec
           draftReturn = draftReturn.copy(
             triageAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self)
-            )
+            ),
+            propertyAddress           = None,
+            disposalDetailsAnswers    = None,
+            acquisitionDetailsAnswers = None,
+            reliefDetailsAnswers = draftReturn.reliefDetailsAnswers.map(
+              _.unset(_.privateResidentsRelief)
+                .unset(_.lettingsRelief)
+            ),
+            yearToDateLiabilityAnswers = None,
+            initialGainOrLoss          = None,
+            uploadSupportingDocuments  = None
           )
         )
 
@@ -412,7 +422,15 @@ class CommonTriageQuestionsControllerSpec
             val newAnswers =
               IncompleteSingleDisposalTriageAnswers
                 .fromCompleteAnswers(answers)
-                .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
+                .copy(
+                  wasAUKResident       = None,
+                  countryOfResidence   = None,
+                  assetType            = None,
+                  disposalDate         = None,
+                  tooEarlyDisposalDate = None,
+                  completionDate       = None,
+                  individualUserType   = Some(IndividualUserType.PersonalRepresentative)
+                )
 
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "2"),
@@ -447,7 +465,16 @@ class CommonTriageQuestionsControllerSpec
             val newAnswers =
               IncompleteMultipleDisposalsTriageAnswers
                 .fromCompleteAnswers(answers)
-                .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
+                .copy(
+                  wasAUKResident               = None,
+                  countryOfResidence           = None,
+                  assetTypes                   = None,
+                  wereAllPropertiesResidential = None,
+                  taxYear                      = None,
+                  taxYearAfter6April2020       = None,
+                  completionDate               = None,
+                  individualUserType           = Some(IndividualUserType.PersonalRepresentative)
+                )
 
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "2"),
@@ -468,7 +495,21 @@ class CommonTriageQuestionsControllerSpec
               performAction("individualUserType" -> "1"),
               IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
             )(
-              IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Capacitor)),
+              d =>
+                d.copy(
+                  triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
+                    .copy(individualUserType = Some(IndividualUserType.Capacitor)),
+                  propertyAddress           = None,
+                  disposalDetailsAnswers    = None,
+                  acquisitionDetailsAnswers = None,
+                  reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+                    _.unset(_.privateResidentsRelief)
+                      .unset(_.lettingsRelief)
+                  ),
+                  yearToDateLiabilityAnswers = None,
+                  initialGainOrLoss          = None,
+                  uploadSupportingDocuments  = None
+                ),
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -480,13 +521,34 @@ class CommonTriageQuestionsControllerSpec
             val newAnswers =
               IncompleteSingleDisposalTriageAnswers
                 .fromCompleteAnswers(answers)
-                .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
+                .copy(
+                  wasAUKResident       = None,
+                  countryOfResidence   = None,
+                  assetType            = None,
+                  disposalDate         = None,
+                  tooEarlyDisposalDate = None,
+                  completionDate       = None,
+                  individualUserType   = Some(IndividualUserType.PersonalRepresentative)
+                )
 
             testSuccessfulUpdateFillingOutReturn(
               performAction("individualUserType" -> "2"),
               answers
             )(
-              newAnswers,
+              d =>
+                d.copy(
+                  triageAnswers             = newAnswers,
+                  propertyAddress           = None,
+                  disposalDetailsAnswers    = None,
+                  acquisitionDetailsAnswers = None,
+                  reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+                    _.unset(_.privateResidentsRelief)
+                      .unset(_.lettingsRelief)
+                  ),
+                  yearToDateLiabilityAnswers = None,
+                  initialGainOrLoss          = None,
+                  uploadSupportingDocuments  = None
+                ),
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -1494,11 +1556,11 @@ class CommonTriageQuestionsControllerSpec
   }
 
   def testSuccessfulUpdateFillingOutReturn(performAction: => Future[Result], answers: SingleDisposalTriageAnswers)(
-    updatedAnswers: SingleDisposalTriageAnswers,
+    updatedDraftReturn: DraftSingleDisposalReturn => DraftSingleDisposalReturn,
     expectedRedirect: Call
   ): Unit = {
     val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
-    val updatedJourney                  = journey.copy(draftReturn = draftReturn.copy(triageAnswers = updatedAnswers))
+    val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn(draftReturn))
 
     inSequence {
       mockAuthWithNoRetrievals()

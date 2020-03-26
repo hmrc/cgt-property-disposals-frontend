@@ -37,13 +37,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Other, Sold}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -141,12 +138,14 @@ class SingleDisposalsTriageController @Inject() (
                       draftReturn = d.copy(
                         triageAnswers = newAnswers,
                         disposalDetailsAnswers = d.disposalDetailsAnswers.map(
-                          _.unset(IncompleteDisposalDetailsAnswers.disposalPrice)
-                            .unset(IncompleteDisposalDetailsAnswers.disposalFees)
+                          _.unset(_.disposalPrice)
+                            .unset(_.disposalFees)
                         ),
-                        reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-                          _.unset(IncompleteReliefDetailsAnswers.otherReliefs)
-                        )
+                        initialGainOrLoss          = None,
+                        reliefDetailsAnswers       = None,
+                        exemptionAndLossesAnswers  = None,
+                        yearToDateLiabilityAnswers = None,
+                        uploadSupportingDocuments  = None
                       )
                     )
                 }
@@ -198,13 +197,28 @@ class SingleDisposalsTriageController @Inject() (
             state.map(_._2)
           } else {
             val newAnswers = answers
-              .unset(IncompleteSingleDisposalTriageAnswers.countryOfResidence)
-              .unset(IncompleteSingleDisposalTriageAnswers.assetType)
+              .unset(_.assetType)
+              .unset(_.countryOfResidence)
               .copy(wasAUKResident = Some(wasAUKResident))
 
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)), {
-                case (d, r) => r.copy(draftReturn = d.copy(triageAnswers = newAnswers))
+                case (d, r) =>
+                  r.copy(draftReturn = d.copy(
+                    triageAnswers             = newAnswers,
+                    propertyAddress           = None,
+                    disposalDetailsAnswers    = None,
+                    acquisitionDetailsAnswers = None,
+                    initialGainOrLoss         = None,
+                    reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+                      _.unset(_.privateResidentsRelief)
+                        .unset(_.lettingsRelief)
+                    ),
+                    exemptionAndLossesAnswers  = None,
+                    yearToDateLiabilityAnswers = None,
+                    uploadSupportingDocuments  = None
+                  )
+                  )
               }
             )
           }
@@ -261,7 +275,7 @@ class SingleDisposalsTriageController @Inject() (
               // make sure we unset first to avoid being in a complete state with non residential
               val newAnswers =
                 answers
-                  .unset(IncompleteSingleDisposalTriageAnswers.assetType)
+                  .unset(_.assetType)
                   .copy(assetType = Some(assetType))
 
               state.bimap(
@@ -336,14 +350,7 @@ class SingleDisposalsTriageController @Inject() (
                         updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
                         newState = state.bimap(
                           _.copy(newReturnTriageAnswers = Right(updatedAnswers)), {
-                            case (d, r) =>
-                              r.copy(draftReturn = d.copy(
-                                triageAnswers = updatedAnswers,
-                                acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
-                                  _.unset(IncompleteAcquisitionDetailsAnswers.acquisitionDate)
-                                )
-                              )
-                              )
+                            case (d, r) => r.copy(draftReturn = updateDraftReturnForDisposalDate(d, updatedAnswers))
                           }
                         )
                         _ <- newState.fold(
@@ -378,6 +385,36 @@ class SingleDisposalsTriageController @Inject() (
     }
   }
 
+  private def updateDraftReturnForDisposalDate(
+    currentDraftReturn: DraftSingleDisposalReturn,
+    newAnswers: IncompleteSingleDisposalTriageAnswers
+  ): DraftSingleDisposalReturn =
+    currentDraftReturn.copy(
+      triageAnswers = newAnswers,
+      acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
+        _.unset(_.acquisitionDate)
+          .unset(_.acquisitionPrice)
+          .unset(_.rebasedAcquisitionPrice)
+          .unset(_.shouldUseRebase)
+      ),
+      initialGainOrLoss = None,
+      reliefDetailsAnswers = currentDraftReturn.reliefDetailsAnswers.map(
+        _.unset(_.privateResidentsRelief)
+          .unset(_.lettingsRelief)
+      ),
+      yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers.flatMap {
+        case _: NonCalculatedYTDAnswers => None
+        case c: CalculatedYTDAnswers =>
+          Some(
+            c.unset(_.hasEstimatedDetails)
+              .unset(_.calculatedTaxDue)
+              .unset(_.taxDue)
+              .unset(_.mandatoryEvidence)
+          )
+      },
+      uploadSupportingDocuments = None
+    )
+
   private def updateDisposalDate(
     d: LocalDate,
     taxYear: Option[TaxYear],
@@ -397,12 +434,12 @@ class SingleDisposalsTriageController @Inject() (
 
     taxYear.fold {
       answers.fold(
-        _.copy(disposalDate = None, tooEarlyDisposalDate = Some(d)),
+        _.copy(disposalDate = None, tooEarlyDisposalDate = Some(d), completionDate = None),
         updateCompleteAnswers(_, Left(d))
       )
     } { taxYear =>
       answers.fold(
-        _.copy(disposalDate = Some(DisposalDate(d, taxYear)), tooEarlyDisposalDate = None),
+        _.copy(disposalDate = Some(DisposalDate(d, taxYear)), tooEarlyDisposalDate = None, completionDate = None),
         updateCompleteAnswers(_, Right(DisposalDate(d, taxYear)))
       )
     }
@@ -459,8 +496,26 @@ class SingleDisposalsTriageController @Inject() (
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
                       acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
-                        _.unset(IncompleteAcquisitionDetailsAnswers.acquisitionDate)
-                      )
+                        _.unset(_.acquisitionDate)
+                          .unset(_.acquisitionPrice)
+                          .unset(_.rebasedAcquisitionPrice)
+                          .unset(_.shouldUseRebase)
+                      ),
+                      initialGainOrLoss = None,
+                      reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+                        _.unset(_.privateResidentsRelief)
+                          .unset(_.lettingsRelief)
+                      ),
+                      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+                        case _: NonCalculatedYTDAnswers => None
+                        case c: CalculatedYTDAnswers =>
+                          Some(
+                            c.unset(_.hasEstimatedDetails)
+                              .unset(_.calculatedTaxDue)
+                              .unset(_.taxDue)
+                              .unset(_.mandatoryEvidence)
+                          )
+                      }
                     )
                   )
               }
@@ -520,8 +575,13 @@ class SingleDisposalsTriageController @Inject() (
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
                       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-                        case _: CalculatedYTDAnswers    => None
-                        case n: NonCalculatedYTDAnswers => Some(n)
+                        case _: CalculatedYTDAnswers => None
+                        case n: NonCalculatedYTDAnswers =>
+                          Some(
+                            n.unset(
+                              _.hasEstimatedDetails
+                            )
+                          )
                       }
                     )
                   )
@@ -588,7 +648,24 @@ class SingleDisposalsTriageController @Inject() (
                         triageAnswers             = newAnswers,
                         propertyAddress           = None,
                         disposalDetailsAnswers    = None,
-                        acquisitionDetailsAnswers = None
+                        acquisitionDetailsAnswers = None,
+                        initialGainOrLoss         = None,
+                        reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+                          _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
+                        ),
+                        yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+                          case c: CalculatedYTDAnswers =>
+                            Some(
+                              c.unset(_.hasEstimatedDetails)
+                                .unset(_.calculatedTaxDue)
+                                .unset(_.taxDue)
+                                .unset(_.mandatoryEvidence)
+                            )
+
+                          case _: NonCalculatedYTDAnswers =>
+                            None
+                        },
+                        uploadSupportingDocuments = None
                       )
                     )
                 }
@@ -743,20 +820,7 @@ class SingleDisposalsTriageController @Inject() (
             lazy val continueToTaskList = Redirect(returnsRoutes.TaskListController.taskList())
 
             def toFillingOurNewReturn(startingNewDraftReturn: StartingNewDraftReturn): Future[Result] = {
-              val newDraftReturn =
-                DraftSingleDisposalReturn(
-                  uuidGenerator.nextId(),
-                  complete,
-                  None,
-                  None,
-                  None,
-                  None,
-                  None,
-                  None,
-                  None,
-                  None,
-                  LocalDateUtils.today()
-                )
+              val newDraftReturn = DraftSingleDisposalReturn.newDraftReturn(uuidGenerator.nextId(), complete)
               val result = for {
                 _ <- returnsService.storeDraftReturn(
                       newDraftReturn,

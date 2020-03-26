@@ -71,9 +71,9 @@ object YearToDateLiabilityAnswers {
       }
 
       def unset[A](
-        fieldLens: Lens[IncompleteNonCalculatedYTDAnswers, Option[A]]
+        fieldLens: IncompleteNonCalculatedYTDAnswers.type => Lens[IncompleteNonCalculatedYTDAnswers, Option[A]]
       ): IncompleteNonCalculatedYTDAnswers =
-        fieldLens.set(None)(
+        fieldLens(IncompleteNonCalculatedYTDAnswers).set(None)(
           fold(identity, IncompleteNonCalculatedYTDAnswers.fromCompleteAnswers)
         )
     }
@@ -130,9 +130,9 @@ object YearToDateLiabilityAnswers {
       }
 
       def unset[A](
-        fieldLens: Lens[IncompleteCalculatedYTDAnswers, Option[A]]
+        fieldLens: IncompleteCalculatedYTDAnswers.type => Lens[IncompleteCalculatedYTDAnswers, Option[A]]
       ): IncompleteCalculatedYTDAnswers =
-        fieldLens.set(None)(
+        fieldLens(IncompleteCalculatedYTDAnswers).set(None)(
           fold(identity, IncompleteCalculatedYTDAnswers.fromCompleteAnswers)
         )
     }

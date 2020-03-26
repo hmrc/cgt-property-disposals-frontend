@@ -83,9 +83,9 @@ object SingleDisposalTriageAnswers {
     }
 
     def unset[A](
-      fieldLens: Lens[IncompleteSingleDisposalTriageAnswers, Option[A]]
+      fieldLens: IncompleteSingleDisposalTriageAnswers.type => Lens[IncompleteSingleDisposalTriageAnswers, Option[A]]
     ): IncompleteSingleDisposalTriageAnswers =
-      fieldLens.set(None)(
+      fieldLens(IncompleteSingleDisposalTriageAnswers).set(None)(
         fold(identity, IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers)
       )
 

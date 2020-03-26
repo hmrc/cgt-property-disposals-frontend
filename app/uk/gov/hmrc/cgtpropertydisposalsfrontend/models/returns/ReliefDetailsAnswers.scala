@@ -60,9 +60,9 @@ object ReliefDetailsAnswers {
     }
 
     def unset[A](
-      fieldLens: Lens[IncompleteReliefDetailsAnswers, Option[A]]
+      fieldLens: IncompleteReliefDetailsAnswers.type => Lens[IncompleteReliefDetailsAnswers, Option[A]]
     ): IncompleteReliefDetailsAnswers =
-      fieldLens.set(None)(
+      fieldLens(IncompleteReliefDetailsAnswers).set(None)(
         fold(identity, IncompleteReliefDetailsAnswers.fromCompleteAnswers)
       )
 

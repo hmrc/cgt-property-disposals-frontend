@@ -81,9 +81,11 @@ object MultipleDisposalsTriageAnswers {
     }
 
     def unset[A](
-      fieldLens: Lens[IncompleteMultipleDisposalsTriageAnswers, Option[A]]
+      fieldLens: IncompleteMultipleDisposalsTriageAnswers.type => Lens[IncompleteMultipleDisposalsTriageAnswers, Option[
+        A
+      ]]
     ): IncompleteMultipleDisposalsTriageAnswers =
-      fieldLens.set(None)(
+      fieldLens(IncompleteMultipleDisposalsTriageAnswers).set(None)(
         fold(identity, IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers)
       )
   }
