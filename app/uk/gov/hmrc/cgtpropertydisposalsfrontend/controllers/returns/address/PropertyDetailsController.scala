@@ -396,7 +396,7 @@ class PropertyDetailsController @Inject() (
 
                 val f    = getDisposalDateFrom(taxYear, completionDate)
                 val form = disposalDate.fold(f)(c => f.fill(c.value))
-                Ok(multipleDisposalsDisposalDatePage(form))
+                Ok(multipleDisposalsDisposalDatePage(form, r.subscribedDetails.isATrust))
 
               case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
@@ -430,7 +430,8 @@ class PropertyDetailsController @Inject() (
 
                       BadRequest(
                         multipleDisposalsDisposalDatePage(
-                          formWithErrors.copy(errors = updatedFormWithErrors)
+                          formWithErrors.copy(errors = updatedFormWithErrors),
+                          r.subscribedDetails.isATrust
                         )
                       )
                     }, { date =>
