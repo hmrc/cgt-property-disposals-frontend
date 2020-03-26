@@ -1,0 +1,51 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
+
+@this(
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+)
+
+@(answers: CompleteUploadSupportingDocuments)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+
+ @key = @{"uploadDocumentsWithSupportingDocuments.check-your-answers"}
+
+     @title = @{messages(s"$key.title")}
+
+      @cyaSection() {
+
+        @cyaRow(
+            messages("uploadDocumentsWithSupportingDocuments.check-your-answers.do-you-want-to-upload-documents"),
+            Html(answers.hasSupportingDocuments.toString),
+            Some(cyaChange(messages("uploadDocumentsWithSupportingDocuments.check-your-answers.cya-change"), routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload().url)),
+            "do-you-want-to-upload-supporting-evidence-value"
+        )
+
+        @for((doc, fileIndex) <- answers.documents.zipWithIndex) {
+            @cyaRow(
+               "Supporting Evidence File " + fileIndex.toString,
+               Html(doc.fileName),
+               Some(cyaChange(messages(s"$key.cya-change"), routes.UploadSupportingDocumentsController.changeOrDeleteFile().url)),
+               s"supporting-document-$fileIndex-value"
+            )
+        }
+}

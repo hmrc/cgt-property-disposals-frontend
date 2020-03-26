@@ -32,35 +32,35 @@
 
 @(form: Form[Boolean], backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"hasSupportingDocsToUpload"}
-@title = @{messages(s"$key.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+    @key = @{"hasSupportingDocsToUpload"}
+    @title = @{messages(s"$key.title")}
+    @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
-@backLinkComponent(backLink)
+    @backLinkComponent(backLink)
 
-@if(hasErrors) {
-@errorSummary(form)
-}
-
-@caption(messages(s"$key.caption"))
-
-@formWrapper(routes.UploadSupportingDocumentsController.hasSupportingDocsToUploadSubmit(), 'novalidate -> "novalidate") {
-
-    @yesNo(
-        fieldId = key,
-        label = pageHeading(title),
-        labelAsHeading = true,
-        errorKey = form.error(key).map(e => e.message),
-        hasErrors = hasErrors,
-        selected = form.value,
-        helpText = Some(Html(messages(s"$key.help-text"))),
-        yesContent = None
-    )
-        @submitButton(messages("button.saveAndContinue"))
+    @if(hasErrors) {
+        @errorSummary(form)
     }
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+    @caption(messages(s"$key.caption"))
+
+    @formWrapper(routes.UploadSupportingDocumentsController.hasSupportingDocsToUploadSubmit(), 'novalidate -> "novalidate") {
+
+        @yesNo(
+            fieldId = key,
+            label = pageHeading(title),
+            labelAsHeading = true,
+            errorKey = form.error(key).map(e => e.message),
+            hasErrors = hasErrors,
+            selected = form.value,
+            helpText = Some(Html(messages(s"$key.help-text"))),
+            yesContent = None
+        )
+            @submitButton(messages("button.saveAndContinue"))
+        }
+
+        @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

@@ -17,19 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs
 import cats.Eq
 import cats.data.EitherT
-import cats.instances.boolean._
 import cats.instances.future._
-import cats.syntax.either._
 import cats.syntax.eq._
-import com.google.inject.{Inject, Singleton}
-import play.api.Configuration
-import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText, of}
-import play.api.http.Writeable
-import play.api.mvc._
-import cats.Eq
-import cats.data.EitherT
-import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
@@ -43,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.hasSupportingDocsToUploadForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.{CompleteUploadSupportingDocuments, IncompleteUploadSupportingDocuments}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, UploadSupportingDocuments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
@@ -66,7 +55,7 @@ class UploadSupportingDocumentsController @Inject() (
   cc: MessagesControllerComponents,
   val config: Configuration,
   hasSupportingDocsToUploadPage: pages.has_supporting_docs_to_upload,
-  checkYourAnswersPage : pages.check_your_answers,
+  checkYourAnswersPage: pages.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -85,11 +74,11 @@ class UploadSupportingDocumentsController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(_, _, _, d: DraftReturn))) =>
         d match {
-          case SingleDisposalDraftReturn(_, _, _, _, _, _, _, _, _, uploadSupportingDocuments, _) =>
+          case DraftSingleDisposalReturn(_, _, _, _, _, _, _, _, _, uploadSupportingDocuments, _) =>
             uploadSupportingDocuments.fold[Future[Result]](
               f(s, r, IncompleteUploadSupportingDocuments.empty)
             )(f(s, r, _))
-          case MultipleDisposalsDraftReturn(_, _, _, _, _, uploadSupportingDocuments, _) =>
+          case DraftMultipleDisposalsReturn(_, _, _, _, _, uploadSupportingDocuments, _) =>
             uploadSupportingDocuments.fold[Future[Result]](
               f(s, r, IncompleteUploadSupportingDocuments.empty)
             )(f(s, r, _))
@@ -160,7 +149,7 @@ class UploadSupportingDocumentsController @Inject() (
           )(
             updateAnswers = (b, draftReturn) => {
               draftReturn match {
-                case s @ SingleDisposalDraftReturn(
+                case s @ DraftSingleDisposalReturn(
                       _,
                       _,
                       _,
@@ -173,8 +162,8 @@ class UploadSupportingDocumentsController @Inject() (
                       uploadSupportingDocuments,
                       _
                     ) =>
-                  s.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocuments(b)))
-                case m @ MultipleDisposalsDraftReturn(
+                  s.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocuments(b, List.empty))) // FIXME : List value
+                case m @ DraftMultipleDisposalsReturn(
                       _,
                       _,
                       _,
@@ -183,7 +172,7 @@ class UploadSupportingDocumentsController @Inject() (
                       uploadSupportingDocuments,
                       _
                     ) =>
-                  m.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocuments(b)))
+                  m.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocuments(b, List.empty))) // FIXME : List value
               }
             }
           )
@@ -207,14 +196,22 @@ class UploadSupportingDocumentsController @Inject() (
       }
   }
 
+  def changeOrDeleteFile() = authenticatedActionWithSessionData.async { implicit request =>
+    Ok("changing file")
+  }
+
+  def changeOrDeleteFileSubmit() = authenticatedActionWithSessionData.async { implicit request =>
+    Ok("submitted change")
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSupportingDocumentChoices(request) {
       case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
-          case (c: UploadSupportingDocuments, s: SingleDisposalDraftReturn) =>
+          case (c: UploadSupportingDocuments, s: DraftSingleDisposalReturn) =>
             checkYourAnswersHandleCalculated(c, fillingOutReturn, s)
 
-          case (c: UploadSupportingDocuments, s: MultipleDisposalsDraftReturn) => //TODO: fix - collapse into one
+          case (c: UploadSupportingDocuments, s: DraftMultipleDisposalsReturn) => //TODO: fix - collapse into one
             checkYourAnswersHandleCalculated(c, fillingOutReturn, s)
 
           case _ =>
@@ -225,9 +222,8 @@ class UploadSupportingDocumentsController @Inject() (
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    Ok()
+    Ok("check your answers submit")
   }
-
 
   private def commonSubmitBehaviour[Y <: UploadSupportingDocuments, D <: DraftReturn: Eq, A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
@@ -281,7 +277,7 @@ class UploadSupportingDocumentsController @Inject() (
     answers match {
       case IncompleteUploadSupportingDocuments(hasSupportingDocuments) =>
         Redirect(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload())
-      case CompleteUploadSupportingDocuments(hasSupportingDocuments) =>
+      case CompleteUploadSupportingDocuments(hasSupportingDocuments, uploadeddocs) => //FIXME: list value
         Ok("checkYourAnswersPage(c)") //TODO: needs to be enriched to show all the docs uploaded
     }
 

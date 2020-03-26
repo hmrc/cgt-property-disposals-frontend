@@ -143,7 +143,7 @@ class MultipleDisposalsTriageController @Inject() (
   private def updateNumberOfPropertiesWithRedirect(
     numberOfProperties: Int,
     currentAnswers: MultipleDisposalsTriageAnswers,
-    currentState: Either[StartingNewDraftReturn, (FillingOutReturn, MultipleDisposalsDraftReturn)]
+    currentState: Either[StartingNewDraftReturn, (FillingOutReturn, DraftMultipleDisposalsReturn)]
   ): (Either[StartingNewDraftReturn, FillingOutReturn], Call) = {
     val newAnswersWithRedirectTo =
       if (numberOfProperties > 1)
@@ -167,7 +167,7 @@ class MultipleDisposalsTriageController @Inject() (
           val newDraftReturn = newAnswersWithRedirectTo._1.bimap(
             multipleDisposalsTriageAnswers => d.copy(triageAnswers = multipleDisposalsTriageAnswers),
             incompleteSingleDisposalTriageAnswers =>
-              SingleDisposalDraftReturn(
+              DraftSingleDisposalReturn(
                 d.id,
                 incompleteSingleDisposalTriageAnswers,
                 None,
@@ -715,7 +715,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
 
               case c: CompleteMultipleDisposalsTriageAnswers =>
-                val newDraftReturn = MultipleDisposalsDraftReturn.newDraftReturn(uuidGenerator.nextId(), c)
+                val newDraftReturn = DraftMultipleDisposalsReturn.newDraftReturn(uuidGenerator.nextId(), c)
                 val newJourney = FillingOutReturn(
                   startingNewDraftReturn.subscribedDetails,
                   startingNewDraftReturn.ggCredId,
@@ -750,7 +750,7 @@ class MultipleDisposalsTriageController @Inject() (
   private def withMultipleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (
       SessionData,
-      Either[StartingNewDraftReturn, (FillingOutReturn, MultipleDisposalsDraftReturn)],
+      Either[StartingNewDraftReturn, (FillingOutReturn, DraftMultipleDisposalsReturn)],
       MultipleDisposalsTriageAnswers
     ) => Future[Result]
   ): Future[Result] =
@@ -758,7 +758,7 @@ class MultipleDisposalsTriageController @Inject() (
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t)))) =>
         f(session, Left(s), t)
 
-      case Some((session, r @ FillingOutReturn(_, _, _, m: MultipleDisposalsDraftReturn))) =>
+      case Some((session, r @ FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn))) =>
         f(session, Right(r -> m), m.triageAnswers)
 
       case _ =>
@@ -788,7 +788,7 @@ class MultipleDisposalsTriageController @Inject() (
   }
 
   private def updateState(
-    currentState: Either[StartingNewDraftReturn, (FillingOutReturn, MultipleDisposalsDraftReturn)],
+    currentState: Either[StartingNewDraftReturn, (FillingOutReturn, DraftMultipleDisposalsReturn)],
     newAnswers: MultipleDisposalsTriageAnswers
   ): Either[StartingNewDraftReturn, FillingOutReturn] =
     currentState.bimap(

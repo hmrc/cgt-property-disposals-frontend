@@ -17,11 +17,19 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat}
 
 sealed trait UploadSupportingDocuments extends Product with Serializable
 
 object UploadSupportingDocuments {
+
+  final case class SupportingDocuments(
+    fileName: String
+  )
+
+  object SupportingDocuments {
+    implicit val format = Json.format[SupportingDocuments]
+  }
 
   final case class IncompleteUploadSupportingDocuments(
     hasSupportingDocuments: Option[Boolean]
@@ -33,7 +41,8 @@ object UploadSupportingDocuments {
   }
 
   final case class CompleteUploadSupportingDocuments(
-    hasSupportingDocuments: Boolean
+    hasSupportingDocuments: Boolean,
+    documents: List[SupportingDocuments]
   ) extends UploadSupportingDocuments
 
   implicit class UploadSupportingDocumentsOps(private val a: UploadSupportingDocuments) extends AnyVal {

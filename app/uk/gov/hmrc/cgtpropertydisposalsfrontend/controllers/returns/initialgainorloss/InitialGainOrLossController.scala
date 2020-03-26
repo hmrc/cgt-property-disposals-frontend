@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.Inn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -112,20 +112,20 @@ class InitialGainOrLossController @Inject() (
   private def withFillingOutReturnAndAnswers(request: RequestWithSessionData[_])(
     processReturnAndAnswersIntoResult: (
       FillingOutReturn,
-      SingleDisposalDraftReturn,
+      DraftSingleDisposalReturn,
       Option[AmountInPence]
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
 
-      case Some(fillingOutReturn @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn)) =>
+      case Some(fillingOutReturn @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn)) =>
         processReturnAndAnswersIntoResult(fillingOutReturn, d, d.initialGainOrLoss)
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def submit[A, P: Writeable, R](
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     fillingOutReturn: FillingOutReturn
   )(form: Form[A])(
     page: Form[A] => P

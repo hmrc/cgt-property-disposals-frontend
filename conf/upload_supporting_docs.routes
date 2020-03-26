@@ -2,6 +2,8 @@ GET    /supporting-documents/do-you-want-to-upload-any-supporting-docs      uk.g
 POST   /supporting-documents/do-you-want-to-upload-any-supporting-docs      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.hasSupportingDocsToUploadSubmit()
 
 
+GET    /supporting-documents/change-or-delete-file                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.changeOrDeleteFile()
+POST   /supporting-documents/change-or-delete-file                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.changeOrDeleteFileSubmit()
 
 GET    /supporting-documents/check-your-answers                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.checkYourAnswers()
 POST   /supporting-documents/check-your-answers                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.checkYourAnswersSubmit()

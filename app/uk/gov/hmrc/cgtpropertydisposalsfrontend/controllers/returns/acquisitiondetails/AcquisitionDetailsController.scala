@@ -79,12 +79,12 @@ class AcquisitionDetailsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
-      SingleDisposalDraftReturn,
+      DraftSingleDisposalReturn,
       AcquisitionDetailsAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteAcquisitionDetailsAnswers.empty)
         )(f(s, r, d, _))
@@ -92,7 +92,7 @@ class AcquisitionDetailsController @Inject() (
     }
 
   private def withAssetTypeAndResidentialStatus(
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     answers: AcquisitionDetailsAnswers
   )(f: (AssetType, Boolean) => Future[Result]): Future[Result] =
     draftReturn.triageAnswers.fold(
@@ -104,7 +104,7 @@ class AcquisitionDetailsController @Inject() (
     }
 
   private def withDisposalDate(
-    draftReturn: SingleDisposalDraftReturn
+    draftReturn: DraftSingleDisposalReturn
   )(f: DisposalDate => Future[Result]): Future[Result] =
     draftReturn.triageAnswers
       .fold(_.disposalDate, c => Some(c.disposalDate))
@@ -151,7 +151,7 @@ class AcquisitionDetailsController @Inject() (
 
   private def commonSubmitBehaviour[A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
-    currentDraftReturn: SingleDisposalDraftReturn,
+    currentDraftReturn: DraftSingleDisposalReturn,
     currentAnswers: AcquisitionDetailsAnswers
   )(form: Form[A])(
     page: (Form[A], Call) => P

@@ -29,6 +29,7 @@ import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
@@ -67,7 +68,7 @@ trait ReturnsService {
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, CompleteSingleDisposalReturn]
+  ): EitherT[Future, Error, CompleteReturn]
 
 }
 
@@ -196,10 +197,10 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, auditService: A
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, CompleteSingleDisposalReturn] =
+  ): EitherT[Future, Error, CompleteReturn] =
     connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
       if (response.status === OK) {
-        response.parseJSON[CompleteSingleDisposalReturn]().leftMap(Error(_))
+        response.parseJSON[CompleteReturn]().leftMap(Error(_))
       } else {
         Left(Error(s"call to list returns came back with status ${response.status}"))
       }
