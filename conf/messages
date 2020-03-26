@@ -733,9 +733,9 @@ enterPostcode.returns.singleDisposal.title=Find the address of the UK property y
 address-select.returns.singleDisposal.title=Select the address of the UK property you disposed of
 address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
 
-enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK properties you disposed of
-address-select.returns.multipleDisposals.title=Select the address of one of the UK properties you disposed of
-address.uk.returns.multipleDisposals.title=Enter the address of one of the UK properties you disposed of
+enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK property disposals
+address-select.returns.multipleDisposals.title=Select the address of the property
+address.uk.returns.multipleDisposals.title=Enter the address of one of the UK properties disposed of
 
 returns.property-address.cya.title=Check your answers
 returns.property-details.multiple-disposals.cya.guidanceLink=Help completing this section
