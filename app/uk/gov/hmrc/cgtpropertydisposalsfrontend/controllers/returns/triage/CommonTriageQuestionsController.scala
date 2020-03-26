@@ -164,7 +164,8 @@ class CommonTriageQuestionsController @Inject() (
           howManyPropertiesPage(
             form,
             howManyPropertiesBackLink(state),
-            state.isRight
+            state.isRight,
+            state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
           )
         )
     }
@@ -181,7 +182,8 @@ class CommonTriageQuestionsController @Inject() (
                 howManyPropertiesPage(
                   formWithErrors,
                   howManyPropertiesBackLink(state),
-                  state.isRight
+                  state.isRight,
+                  state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
                 )
               ), { numberOfProperties =>
               if (getNumberOfProperties(state).contains(numberOfProperties)) {
@@ -247,6 +249,7 @@ class CommonTriageQuestionsController @Inject() (
     withState(request) {
       case (_, state) =>
         val triageAnswers = triageAnswersFomState(state)
+        val isATrust      = state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
         lazy val backLink = triageAnswers.fold(
           _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
           _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
@@ -258,8 +261,8 @@ class CommonTriageQuestionsController @Inject() (
         ) match {
           case None => Redirect(redirectToCheckYourAnswers(state))
           case Some(wasUk) =>
-            if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink))
-            else Ok(disposalDateTooEarlyNonUkResidents(backLink))
+            if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink, isATrust))
+            else Ok(disposalDateTooEarlyNonUkResidents(backLink, isATrust))
         }
     }
   }

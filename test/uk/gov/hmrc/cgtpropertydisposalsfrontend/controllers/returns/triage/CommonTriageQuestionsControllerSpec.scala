@@ -974,7 +974,7 @@ class CommonTriageQuestionsControllerSpec
                 )
                 doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.uk.p2",
-                  viewConfig.reportingCgtBefore6April2020
+                  viewConfig.cgtLegacyUrl
                 )
               }
             )

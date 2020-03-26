@@ -32,11 +32,13 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[Country], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Country], backLink: Call, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"countryCode"}
-@title = @{messages(if (isAgent) "triage.enterCountry.agent.title" else "triage.enterCountry.title")}
+@messageKey = @{"triage.enterCountry"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@title = @{messages(s"$messageKey$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
@@ -58,11 +60,11 @@
             hasErrors = form.error(key).nonEmpty,
             errorKey = form.error(key).map(e => e.message),
             autoComplete = AutoCompleteType.Country,
-            helpText = Some(Html(messages(if (isAgent) "triage.enterCountry.agent.helpText" else "triage.enterCountry.helpText"))),
+            helpText = Some(Html(messages(s"$messageKey$userKey.helpText"))),
             labelAsHeading = true
         )
 
-        <p>@Html(messages(if (isAgent) "triage.enterCountry.agent.link" else "triage.enterCountry.link", appConfig.workOurYouResidenceStatusUrl))</p>
+        <p>@Html(messages(s"$messageKey$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
         @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
