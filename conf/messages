@@ -593,8 +593,8 @@ ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the 
 ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
 
 disposalDate.title=What date did you exchange contracts when disposing of the property?
-disposalDate.agent.title=When the property was disposed of what date were contracts exchanged?
-disposalDate.trust.title=When the property was disposed of what date were contracts exchanged?
+disposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
+disposalDate.trust.title=When the property was disposed of, what date were contracts exchanged?
 disposalDate.indirectDisposal.title=What date did you sell the shares?
 disposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
 disposalDate.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
@@ -1333,8 +1333,8 @@ hasSupportingDocsToUpload.error.required=Select yes if you want to upload any su
 hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
 
 multipleDisposalsDisposalDate.title=What date did you exchange contracts when disposing of the property?
-multipleDisposalsDisposalDate.agent.title=When the property was disposed of what date were contracts exchanged?
-multipleDisposalsDisposalDate.trust.title=When the property was disposed of what date were contracts exchanged?
+multipleDisposalsDisposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
+multipleDisposalsDisposalDate.trust.title=When the property was disposed of, what date were contracts exchanged?
 multipleDisposalsDisposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
 multipleDisposalsDisposalDate.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 multipleDisposalsDisposalDate.trust.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
@@ -1356,7 +1356,9 @@ multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Contract exchange dat
 multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
 multipleDisposalsDisposalPrice.title=What was the disposal value of the property?
-multipleDisposalsDisposalPrice.helpText=This is the amount you got when you sold the property or its market value if you disposed of it another key. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.trust.helpText=This is the amount the trust got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
 
@@ -1367,10 +1369,16 @@ multipleDisposalsDisposalPrice.error.tooSmall=Amount must a number more than 0 a
 
 multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
+multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
 multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if they built an extension or replaced a basic kitchen with a luxury one. They cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. The trust cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
 multipleDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
+multipleDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of the costs, they can only claim their share.
+multipleDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, it can only claim its share.
 
 multipleDisposalsAcquisitionPrice.error.invalid=Amount must be a number
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86
