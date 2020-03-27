@@ -66,6 +66,9 @@ object ReliefDetailsAnswers {
         fold(identity, IncompleteReliefDetailsAnswers.fromCompleteAnswers)
       )
 
+    def unsetPrrAndLettingRelief(): IncompleteReliefDetailsAnswers =
+      unset(_.privateResidentsRelief).unset(_.lettingsRelief)
+
   }
 
   implicit val eq: Eq[ReliefDetailsAnswers] = Eq.fromUniversalEquals

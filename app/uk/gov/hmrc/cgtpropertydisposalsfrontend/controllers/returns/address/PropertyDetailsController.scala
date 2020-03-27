@@ -124,12 +124,7 @@ class PropertyDetailsController @Inject() (
               EitherT.pure(journey)
             else {
               val updatedDraftReturn = m.copy(
-                examplePropertyDetailsAnswers = Some(
-                  answers.fold(
-                    _.copy(address = Some(a)),
-                    _.copy(address = a)
-                  )
-                )
+                examplePropertyDetailsAnswers = Some(answers.unset(_.disposalDate).copy(address = Some(a)))
               )
               returnsService
                 .storeDraftReturn(
@@ -530,7 +525,10 @@ class PropertyDetailsController @Inject() (
                           _.copy(disposalPrice = Some(AmountInPence.fromPounds(disposalPrice))),
                           _.copy(disposalPrice = AmountInPence.fromPounds(disposalPrice))
                         )
-                    val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
+                    val updatedDraftReturn = m.copy(
+                      examplePropertyDetailsAnswers = Some(updatedAnswers),
+                      yearToDateLiabilityAnswers    = None
+                    )
                     val result = for {
                       _ <- returnsService.storeDraftReturn(
                             updatedDraftReturn,
@@ -607,7 +605,10 @@ class PropertyDetailsController @Inject() (
                           _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(acquisitionPrice))),
                           _.copy(acquisitionPrice = AmountInPence.fromPounds(acquisitionPrice))
                         )
-                    val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
+                    val updatedDraftReturn = m.copy(
+                      examplePropertyDetailsAnswers = Some(updatedAnswers),
+                      yearToDateLiabilityAnswers    = None
+                    )
                     val result = for {
                       _ <- returnsService.storeDraftReturn(
                             updatedDraftReturn,
