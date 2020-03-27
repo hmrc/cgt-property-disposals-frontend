@@ -220,8 +220,8 @@ nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbe
 nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
 nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
 nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
-countryCode.error.required=Enter a country from the options presented as you type
-countryCode.error.notFound=Enter a real country
+countryCode.error.required=Select a country from the options presented as you type
+countryCode.error.notFound=Select a country from the options presented as you type
 
 address-select.title=Select your contact address
 address-select.error.required=Select the contact address or enter it manually if it is not shown
@@ -593,8 +593,8 @@ ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the 
 ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
 
 disposalDate.title=What date did you exchange contracts when disposing of the property?
-disposalDate.agent.title=When the property was disposed of what date were contracts exchanged?
-disposalDate.trust.title=When the property was disposed of what date were contracts exchanged?
+disposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
+disposalDate.trust.title=When the property was disposed of, what date were contracts exchanged?
 disposalDate.indirectDisposal.title=What date did you sell the shares?
 disposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
 disposalDate.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
@@ -1404,11 +1404,12 @@ subsequentReturnExit.p1=At the moment, only the first return for UK property sal
 subsequentReturnExit.p2=You’ll need to contact HMRC and ask for a paper return to be posted to you.
 subsequentReturnExit.p3=Have your National Insurance number or your Self Assessment Unique Taxpayer Reference to hand if you have one.
 
-subsequentReturnExit.openingTimes=Opening times:
+subsequentReturnExit.openingTimes.title=Opening times:
 subsequentReturnExit.openingTimes.monToFri=8am to 4pm, Monday to Friday
 subsequentReturnExit.closingTimes=Closed weekends and bank holidays
 subsequentReturnExit.phoneAgent.title=Agent Dedicated Line:
 subsequentReturnExit.telephone.title=Telephone:
+subsequentReturnExit.inside-uk-telephone.title=Inside UK:
 subsequentReturnExit.outside-uk-telephone.title=Outside UK:
 subsequentReturnExit.getHelp=Get help
 subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
