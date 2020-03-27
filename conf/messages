@@ -1404,11 +1404,12 @@ subsequentReturnExit.p1=At the moment, only the first return for UK property sal
 subsequentReturnExit.p2=You’ll need to contact HMRC and ask for a paper return to be posted to you.
 subsequentReturnExit.p3=Have your National Insurance number or your Self Assessment Unique Taxpayer Reference to hand if you have one.
 
-subsequentReturnExit.openingTimes=Opening times:
+subsequentReturnExit.openingTimes.title=Opening times:
 subsequentReturnExit.openingTimes.monToFri=8am to 4pm, Monday to Friday
 subsequentReturnExit.closingTimes=Closed weekends and bank holidays
 subsequentReturnExit.phoneAgent.title=Agent Dedicated Line:
 subsequentReturnExit.telephone.title=Telephone:
+subsequentReturnExit.inside-uk-telephone.title=Inside UK:
 subsequentReturnExit.outside-uk-telephone.title=Outside UK:
 subsequentReturnExit.getHelp=Get help
 subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
