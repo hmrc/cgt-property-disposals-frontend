@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, LocalDateUtils, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -350,18 +350,9 @@ class CommonTriageQuestionsController @Inject() (
           _.copy(newReturnTriageAnswers = Right(newTriageAnswers)),
           fillingOutReturn =>
             fillingOutReturn.copy(
-              draftReturn = DraftSingleDisposalReturn(
+              draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
-                newTriageAnswers,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                LocalDateUtils.today()
+                newTriageAnswers
               )
             )
         )
@@ -387,28 +378,31 @@ class CommonTriageQuestionsController @Inject() (
     state: Either[StartingNewDraftReturn, FillingOutReturn],
     individualUserType: IndividualUserType
   ): Either[StartingNewDraftReturn, FillingOutReturn] = {
-    def updateMultipleDisposalsAnswers(m: MultipleDisposalsTriageAnswers): MultipleDisposalsTriageAnswers =
-      m.fold[MultipleDisposalsTriageAnswers](
-        _.copy(individualUserType = Some(individualUserType)),
-        IncompleteMultipleDisposalsTriageAnswers
-          .fromCompleteAnswers(_)
-          .copy(individualUserType = Some(individualUserType))
-      )
+    def updateSingleDisposalAnswers(i: SingleDisposalTriageAnswers): IncompleteSingleDisposalTriageAnswers =
+      i.unset(_.wasAUKResident)
+        .unset(_.countryOfResidence)
+        .unset(_.assetType)
+        .unset(_.disposalDate)
+        .unset(_.tooEarlyDisposalDate)
+        .unset(_.completionDate)
+        .copy(individualUserType = Some(individualUserType))
 
-    def updateSingleDisposalAnswers(s: SingleDisposalTriageAnswers): SingleDisposalTriageAnswers =
-      s.fold(
-        _.copy(individualUserType = Some(individualUserType)),
-        IncompleteSingleDisposalTriageAnswers
-          .fromCompleteAnswers(_)
-          .copy(individualUserType = Some(individualUserType))
-      )
+    def updateMultipleDisposalAnswers(i: MultipleDisposalsTriageAnswers): IncompleteMultipleDisposalsTriageAnswers =
+      i.unset(_.wasAUKResident)
+        .unset(_.countryOfResidence)
+        .unset(_.assetTypes)
+        .unset(_.wereAllPropertiesResidential)
+        .unset(_.taxYear)
+        .unset(_.taxYearAfter6April2020)
+        .unset(_.completionDate)
+        .copy(individualUserType = Some(individualUserType))
 
     val answers = triageAnswersFomState(state)
 
     state.bimap(
       _.copy(
         newReturnTriageAnswers = answers.bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
-          updateMultipleDisposalsAnswers,
+          updateMultipleDisposalAnswers,
           updateSingleDisposalAnswers
         )
       ),
@@ -417,11 +411,24 @@ class CommonTriageQuestionsController @Inject() (
           draftReturn = r.draftReturn.fold[DraftReturn](
             m =>
               m.copy(
-                triageAnswers = updateMultipleDisposalsAnswers(m.triageAnswers)
+                triageAnswers                 = updateMultipleDisposalAnswers(m.triageAnswers),
+                examplePropertyDetailsAnswers = None,
+                yearToDateLiabilityAnswers    = None,
+                uploadSupportingDocuments     = None
               ),
             s =>
               s.copy(
-                triageAnswers = updateSingleDisposalAnswers(s.triageAnswers)
+                triageAnswers             = updateSingleDisposalAnswers(s.triageAnswers),
+                propertyAddress           = None,
+                disposalDetailsAnswers    = None,
+                acquisitionDetailsAnswers = None,
+                reliefDetailsAnswers = s.reliefDetailsAnswers.map(
+                  _.unset(_.privateResidentsRelief)
+                    .unset(_.lettingsRelief)
+                ),
+                yearToDateLiabilityAnswers = None,
+                initialGainOrLoss          = None,
+                uploadSupportingDocuments  = None
               )
           )
         )

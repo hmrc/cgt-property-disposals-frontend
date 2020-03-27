@@ -17,14 +17,18 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait ExamplePropertyDetailsAnswers extends Product with Serializable
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object ExamplePropertyDetailsAnswers {
 
+  @Lenses
   final case class IncompleteExamplePropertyDetailsAnswers(
     address: Option[UkAddress],
     disposalDate: Option[DisposalDate],
@@ -35,6 +39,15 @@ object ExamplePropertyDetailsAnswers {
   object IncompleteExamplePropertyDetailsAnswers {
     val empty: IncompleteExamplePropertyDetailsAnswers =
       IncompleteExamplePropertyDetailsAnswers(None, None, None, None)
+
+    def fromCompleteAnswers(c: CompleteExamplePropertyDetailsAnswers): IncompleteExamplePropertyDetailsAnswers =
+      IncompleteExamplePropertyDetailsAnswers(
+        Some(c.address),
+        Some(c.disposalDate),
+        Some(c.disposalPrice),
+        Some(c.acquisitionPrice)
+      )
+
   }
 
   final case class CompleteExamplePropertyDetailsAnswers(
@@ -55,6 +68,15 @@ object ExamplePropertyDetailsAnswers {
       case i: IncompleteExamplePropertyDetailsAnswers => whenIncomplete(i)
       case c: CompleteExamplePropertyDetailsAnswers   => whenComplete(c)
     }
+
+    def unset[A](
+      fieldLens: IncompleteExamplePropertyDetailsAnswers.type => Lens[IncompleteExamplePropertyDetailsAnswers, Option[
+        A
+      ]]
+    ): IncompleteExamplePropertyDetailsAnswers =
+      fieldLens(IncompleteExamplePropertyDetailsAnswers).set(None)(
+        fold(identity, IncompleteExamplePropertyDetailsAnswers.fromCompleteAnswers)
+      )
 
   }
 
