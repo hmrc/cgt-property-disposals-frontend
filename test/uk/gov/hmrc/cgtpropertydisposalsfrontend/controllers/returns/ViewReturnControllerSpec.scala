@@ -204,7 +204,8 @@ class ViewReturnControllerSpec
               completeSingleDisposalReturn,
               userType,
               rebasingUtil.isUk(completeSingleDisposalReturn),
-              rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn)
+              rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn),
+              viewingReturn.subscribedDetails.isATrust
             )
         }
       }
@@ -241,7 +242,8 @@ class ViewReturnControllerSpec
             validateMultipleDisposalsCheckAllYourAnswersSections(
               document,
               completeMultipleDisposalsReturn,
-              userType
+              userType,
+              sampleViewingReturn.subscribedDetails.isATrust
             )
         }
       }

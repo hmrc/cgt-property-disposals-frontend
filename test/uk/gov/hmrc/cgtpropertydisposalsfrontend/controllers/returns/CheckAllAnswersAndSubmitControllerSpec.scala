@@ -164,7 +164,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   completeReturn,
                   userType,
                   rebasingEligibilityUtil.isUk(completeReturn),
-                  rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
+                  rebasingEligibilityUtil.isEligibleForRebase(completeReturn),
+                  completeFillingOutReturn.subscribedDetails.isATrust
                 )
                 doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
                 doc
@@ -235,7 +236,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                 validateMultipleDisposalsCheckAllYourAnswersSections(
                   doc,
                   completeReturn,
-                  userType
+                  userType,
+                  completeFillingOutReturn.subscribedDetails.isATrust
                 )
                 doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
                 doc
@@ -670,7 +672,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     completeReturn: CompleteSingleDisposalReturn,
     userType: Option[UserType],
     isUk: Boolean,
-    isRebasing: Boolean
+    isRebasing: Boolean,
+    isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
@@ -695,7 +698,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     )
     validateExemptionAndLossesCheckYourAnswersPage(
       completeReturn.exemptionsAndLossesDetails,
-      doc
+      doc,
+      isATrust
     )
 
     completeReturn.yearToDateLiabilityAnswers.fold(
@@ -707,7 +711,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
   def validateMultipleDisposalsCheckAllYourAnswersSections(
     doc: Document,
     completeReturn: CompleteMultipleDisposalsReturn,
-    userType: Option[UserType]
+    userType: Option[UserType],
+    isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     validateMultipleDisposalsTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
@@ -722,7 +727,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
 
     validateExemptionAndLossesCheckYourAnswersPage(
       completeReturn.exemptionAndLossesAnswers,
-      doc
+      doc,
+      isATrust
     )
 
     validateNonCalculatedYearToDateLiabilityPage(completeReturn.yearToDateLiabilityAnswers, doc)

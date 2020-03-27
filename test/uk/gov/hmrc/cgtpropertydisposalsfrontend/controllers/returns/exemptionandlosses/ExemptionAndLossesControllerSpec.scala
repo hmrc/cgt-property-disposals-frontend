@@ -1317,7 +1317,7 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("exemptionsAndLosses.cya.title"), { doc =>
-              validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc)
+              validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc, journey.subscribedDetails.isATrust)
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
                 .checkYourAnswersSubmit()
                 .url
@@ -1341,7 +1341,7 @@ class ExemptionAndLossesControllerSpec
         checkPageIsDisplayed(
           performAction(),
           messageFromMessageKey("exemptionsAndLosses.cya.title"), { doc =>
-            validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc)
+            validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc, journey.subscribedDetails.isATrust)
             doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
               .checkYourAnswersSubmit()
               .url
@@ -1462,7 +1462,8 @@ class ExemptionAndLossesControllerSpec
 object ExemptionAndLossesControllerSpec extends Matchers {
   def validateExemptionAndLossesCheckYourAnswersPage(
     completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
-    doc: Document
+    doc: Document,
+    isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     if (completeExemptionAndLossesAnswers.inYearLosses.isZero) {
@@ -1481,6 +1482,16 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       doc.select("#previousYearsLossesValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
         completeExemptionAndLossesAnswers.previousYearsLosses.inPounds()
       )
+    }
+
+    if (isATrust) {
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?"
+    } else {
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
     }
 
     doc.select("#annualExemptAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
