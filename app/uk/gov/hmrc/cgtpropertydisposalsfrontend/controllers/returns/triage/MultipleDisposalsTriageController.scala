@@ -210,10 +210,10 @@ class MultipleDisposalsTriageController @Inject() (
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               } else {
                 val updatedAnswers = answers
-                  .unset(_.wasAUKResident)
                   .unset(_.countryOfResidence)
                   .unset(_.assetTypes)
                   .unset(_.wereAllPropertiesResidential)
+                  .copy(wasAUKResident = Some(wereUKResident))
 
                 val newState = updateState(
                   state,
@@ -490,17 +490,11 @@ class MultipleDisposalsTriageController @Inject() (
                     answers.fold[MultipleDisposalsTriageAnswers](
                       _.copy(assetTypes = Some(assetTypes)),
                       complete =>
-                        IncompleteMultipleDisposalsTriageAnswers(
-                          complete.individualUserType,
-                          Some(complete.numberOfProperties),
-                          Some(false),
-                          Some(complete.countryOfResidence),
-                          None,
-                          Some(assetTypes),
-                          Some(true),
-                          Some(complete.taxYear),
-                          Some(complete.completionDate)
-                        )
+                        IncompleteMultipleDisposalsTriageAnswers
+                          .fromCompleteAnswers(complete)
+                          .copy(
+                            assetTypes = Some(assetTypes)
+                          )
                     )
 
                   val newState = updateState(

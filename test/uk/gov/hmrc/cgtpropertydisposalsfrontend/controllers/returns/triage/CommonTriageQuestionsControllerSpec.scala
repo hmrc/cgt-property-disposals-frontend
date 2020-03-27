@@ -96,6 +96,24 @@ class CommonTriageQuestionsControllerSpec
     )
   }
 
+  def sessionDataWithFillingOutReturn(
+    multipleDisposalsTriageAnswers: MultipleDisposalsTriageAnswers
+  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
+    val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+      triageAnswers = multipleDisposalsTriageAnswers
+    )
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn       = draftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+    )
+
+    (
+      SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)),
+      fillingOutReturn,
+      draftReturn
+    )
+  }
+
   "CommonTriageQuestionsController" when {
 
     "handling requests to display the who is individual representing page" must {
@@ -553,6 +571,39 @@ class CommonTriageQuestionsControllerSpec
             )
           }
 
+          "the user is on a multiple disposal journey and they have completed the triage section" in {
+            val answers =
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(IndividualUserType.Self))
+
+            val newAnswers =
+              IncompleteMultipleDisposalsTriageAnswers
+                .fromCompleteAnswers(answers)
+                .copy(
+                  wasAUKResident               = None,
+                  countryOfResidence           = None,
+                  assetTypes                   = None,
+                  wereAllPropertiesResidential = None,
+                  taxYear                      = None,
+                  taxYearAfter6April2020       = None,
+                  completionDate               = None,
+                  individualUserType           = Some(IndividualUserType.PersonalRepresentative)
+                )
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction("individualUserType" -> "2"),
+              answers
+            )(
+              d =>
+                d.copy(
+                  triageAnswers                 = newAnswers,
+                  examplePropertyDetailsAnswers = None,
+                  yearToDateLiabilityAnswers    = None,
+                  uploadSupportingDocuments     = None
+                ),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
         }
       }
 
@@ -771,7 +822,33 @@ class CommonTriageQuestionsControllerSpec
       "show an error page" when {
 
         "there is an error updating a draft return" ignore {
-          // TODO: implement when multple disposals triage section can be completed
+          val formData = "numberOfProperties" -> "0"
+          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
+            IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+              individualUserType = Some(IndividualUserType.Self)
+            )
+          )
+
+          val updatedDraftReturn =
+            DraftSingleDisposalReturn.newDraftReturn(
+              draftReturn.id,
+              IncompleteSingleDisposalTriageAnswers.empty.copy(
+                individualUserType         = Some(IndividualUserType.Self),
+                hasConfirmedSingleDisposal = true
+              )
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData))
         }
 
         "there is an error updating the session" in {
@@ -903,8 +980,53 @@ class CommonTriageQuestionsControllerSpec
           }
         }
 
-        "the user is filling in a return and" ignore {
-          // TODO: fill in when multiple disposals journey can be completed
+        "the user is filling in a return and" when {
+
+          "they are on a single disposal journey and change the answer to more than one property" in {
+            forAll { c: CompleteSingleDisposalTriageAnswers =>
+              val answers = c.copy(
+                individualUserType = Some(IndividualUserType.Self)
+              )
+
+              testSuccessfulUpdateFillingOutReturn(
+                performAction("numberOfProperties" -> "1"),
+                answers
+              )(
+                d =>
+                  DraftMultipleDisposalsReturn.newDraftReturn(
+                    d.id,
+                    IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                      individualUserType = Some(IndividualUserType.Self)
+                    )
+                  ),
+                routes.MultipleDisposalsTriageController.checkYourAnswers()
+              )
+            }
+          }
+
+          "they are on a multiple disposals journey and change the answer to one property" in {
+            forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+              val answers = c.copy(
+                individualUserType = Some(IndividualUserType.Self)
+              )
+
+              testSuccessfulUpdateFillingOutReturn(
+                performAction("numberOfProperties" -> "0"),
+                answers
+              )(
+                d =>
+                  DraftSingleDisposalReturn.newDraftReturn(
+                    d.id,
+                    IncompleteSingleDisposalTriageAnswers.empty.copy(
+                      individualUserType         = Some(IndividualUserType.Self),
+                      hasConfirmedSingleDisposal = true
+                    )
+                  ),
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            }
+          }
+
         }
 
       }
@@ -1556,7 +1678,7 @@ class CommonTriageQuestionsControllerSpec
   }
 
   def testSuccessfulUpdateFillingOutReturn(performAction: => Future[Result], answers: SingleDisposalTriageAnswers)(
-    updatedDraftReturn: DraftSingleDisposalReturn => DraftSingleDisposalReturn,
+    updatedDraftReturn: DraftSingleDisposalReturn => DraftReturn,
     expectedRedirect: Call
   ): Unit = {
     val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
@@ -1574,7 +1696,27 @@ class CommonTriageQuestionsControllerSpec
     }
 
     checkIsRedirect(performAction, expectedRedirect)
+  }
 
+  def testSuccessfulUpdateFillingOutReturn(performAction: => Future[Result], answers: MultipleDisposalsTriageAnswers)(
+    updatedDraftReturn: DraftMultipleDisposalsReturn => DraftReturn,
+    expectedRedirect: Call
+  ): Unit = {
+    val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+    val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn(draftReturn))
+
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(session)
+      mockStoreDraftReturn(
+        updatedJourney.draftReturn,
+        journey.subscribedDetails.cgtReference,
+        journey.agentReferenceNumber
+      )(Right(()))
+      mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+    }
+
+    checkIsRedirect(performAction, expectedRedirect)
   }
 
 }
