@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.CompleteUploadSupportingDocumentAnswers
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -25,14 +25,14 @@
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(answers: CompleteUploadSupportingDocuments)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteUploadSupportingDocumentAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
     @key = @{"upload-supporting-documents.check-your-answers"}
 
     @title = @{messages(s"$key.title")}
 
     @hasSupportingDocs = @{
-        answers.hasSupportingDocuments match {
+        answers.doYouWantToUploadSupportingDocuments match {
             case true => "Yes"
             case false => "No"
         }
@@ -43,7 +43,7 @@
         @cyaRow(
             messages("upload-supporting-documents.check-your-answers.do-you-want-to-upload-documents"),
             Html(hasSupportingDocs),
-            Some(cyaChange(messages("upload-supporting-documents.check-your-answers.cya-change"), routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload().url)),
+            Some(cyaChange(messages("upload-supporting-documents.check-your-answers.cya-change"), routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocuments().url)),
             "do-you-want-to-upload-supporting-evidence-value"
         )
 

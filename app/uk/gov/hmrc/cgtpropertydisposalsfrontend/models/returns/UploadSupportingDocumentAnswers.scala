@@ -19,9 +19,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 
-sealed trait UploadSupportingDocuments extends Product with Serializable
+sealed trait UploadSupportingDocumentAnswers extends Product with Serializable
 
-object UploadSupportingDocuments {
+object UploadSupportingDocumentAnswers {
 
   final case class SupportingDocuments(
     reference: String,
@@ -32,33 +32,33 @@ object UploadSupportingDocuments {
     implicit val format = Json.format[SupportingDocuments]
   }
 
-  final case class IncompleteUploadSupportingDocuments(
-    hasSupportingDocuments: Option[Boolean]
-  ) extends UploadSupportingDocuments
+  final case class IncompleteUploadSupportingDocumentAnswers(
+    doYouWantToUploadSupportingDocuments: Option[Boolean]
+  ) extends UploadSupportingDocumentAnswers
 
-  object IncompleteUploadSupportingDocuments {
-    val empty: IncompleteUploadSupportingDocuments =
-      IncompleteUploadSupportingDocuments(None)
+  object IncompleteUploadSupportingDocumentAnswers {
+    val empty: IncompleteUploadSupportingDocumentAnswers =
+      IncompleteUploadSupportingDocumentAnswers(None)
   }
 
-  final case class CompleteUploadSupportingDocuments(
-    hasSupportingDocuments: Boolean,
+  final case class CompleteUploadSupportingDocumentAnswers(
+    doYouWantToUploadSupportingDocuments: Boolean,
     documents: List[SupportingDocuments]
-  ) extends UploadSupportingDocuments
+  ) extends UploadSupportingDocumentAnswers
 
-  implicit class UploadSupportingDocumentsOps(private val a: UploadSupportingDocuments) extends AnyVal {
+  implicit class UploadSupportingDocumentsOps(private val a: UploadSupportingDocumentAnswers) extends AnyVal {
 
     def fold[A](
-      ifIncomplete: IncompleteUploadSupportingDocuments => A,
-      ifComplete: CompleteUploadSupportingDocuments => A
+      ifIncomplete: IncompleteUploadSupportingDocumentAnswers => A,
+      ifComplete: CompleteUploadSupportingDocumentAnswers => A
     ): A = a match {
-      case i: IncompleteUploadSupportingDocuments => ifIncomplete(i)
-      case c: CompleteUploadSupportingDocuments   => ifComplete(c)
+      case i: IncompleteUploadSupportingDocumentAnswers => ifIncomplete(i)
+      case c: CompleteUploadSupportingDocumentAnswers   => ifComplete(c)
     }
 
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[UploadSupportingDocuments] = derived.oformat()
+  implicit val format: OFormat[UploadSupportingDocumentAnswers] = derived.oformat()
 
 }

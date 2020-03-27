@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.concurrent.Future
 
-class UploadSupportingDocumentsControllerSpec
+class UploadSupportingDocumentStatusControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
@@ -61,8 +61,8 @@ class UploadSupportingDocumentsControllerSpec
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   def sessionWithState(
-    uploadSupportingDocAnswer: Option[UploadSupportingDocuments],
-    disposalDate: Option[DisposalDate]
+                        uploadSupportingDocAnswer: Option[UploadSupportingDocumentAnswers],
+                        disposalDate: Option[DisposalDate]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
     val draftReturn = sample[DraftSingleDisposalReturn].copy(uploadSupportingDocuments = uploadSupportingDocAnswer)
@@ -76,14 +76,14 @@ class UploadSupportingDocumentsControllerSpec
   }
 
   def sessionWithState(
-    uploadSupportingDocAnswer1: UploadSupportingDocuments,
-    disposalDate: DisposalDate
+                        uploadSupportingDocAnswer1: UploadSupportingDocumentAnswers,
+                        disposalDate: DisposalDate
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithState(Some(uploadSupportingDocAnswer1), Some(disposalDate))
 
   def draftReturnWithCompleteJourneys(
-    uploadSupportingDocAnswer: Option[UploadSupportingDocuments],
-    disposalDate: DisposalDate
+                                       uploadSupportingDocAnswer: Option[UploadSupportingDocumentAnswers],
+                                       disposalDate: DisposalDate
   ) =
     DraftSingleDisposalReturn(
       UUID.randomUUID(),

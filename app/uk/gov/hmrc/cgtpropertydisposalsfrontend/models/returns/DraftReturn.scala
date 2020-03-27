@@ -41,7 +41,7 @@ final case class DraftSingleDisposalReturn(
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   initialGainOrLoss: Option[AmountInPence],
-  uploadSupportingDocuments: Option[UploadSupportingDocuments],
+  uploadSupportingDocuments: Option[UploadSupportingDocumentAnswers],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -57,7 +57,7 @@ final case class DraftMultipleDisposalsReturn(
   examplePropertyDetailsAnswers: Option[ExamplePropertyDetailsAnswers],
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
-  uploadSupportingDocuments: Option[UploadSupportingDocuments],
+  uploadSupportingDocuments: Option[UploadSupportingDocumentAnswers],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 

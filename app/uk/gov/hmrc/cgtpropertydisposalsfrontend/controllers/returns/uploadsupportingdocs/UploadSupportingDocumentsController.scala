@@ -29,10 +29,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.hasSupportingDocsToUploadForm
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocumentsForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.{CompleteUploadSupportingDocuments, IncompleteUploadSupportingDocuments, SupportingDocuments}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocuments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.{CompleteUploadSupportingDocumentAnswers, IncompleteUploadSupportingDocumentAnswers, SupportingDocuments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocumentAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
@@ -69,39 +69,39 @@ class UploadSupportingDocumentsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
-      UploadSupportingDocuments
+      UploadSupportingDocumentAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(_, _, _, d: DraftReturn))) =>
         d match {
-          case DraftSingleDisposalReturn(_, _, _, _, _, _, _, _, _, uploadSupportingDocuments, _) =>
-            uploadSupportingDocuments.fold[Future[Result]](
-              f(s, r, IncompleteUploadSupportingDocuments.empty)
+          case DraftSingleDisposalReturn(_, _, _, _, _, _, _, _, _, maybeSupportingDocumentsAnswers, _) =>
+            maybeSupportingDocumentsAnswers.fold[Future[Result]](
+              f(s, r, IncompleteUploadSupportingDocumentAnswers.empty)
             )(f(s, r, _))
-          case DraftMultipleDisposalsReturn(_, _, _, _, _, uploadSupportingDocuments, _) =>
-            uploadSupportingDocuments.fold[Future[Result]](
-              f(s, r, IncompleteUploadSupportingDocuments.empty)
+          case DraftMultipleDisposalsReturn(_, _, _, _, _, maybeSupportingDocumentsAnswers, _) =>
+            maybeSupportingDocumentsAnswers.fold[Future[Result]](
+              f(s, r, IncompleteUploadSupportingDocumentAnswers.empty)
             )(f(s, r, _))
         }
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def withSupportingDocsAnswers(
-    answers: UploadSupportingDocuments
+    answers: UploadSupportingDocumentAnswers
   )(f: Boolean => Future[Result]): Future[Result] =
     answers
-      .fold(_.hasSupportingDocuments, c => Some(c.hasSupportingDocuments))
+      .fold(_.doYouWantToUploadSupportingDocuments, c => Some(c.doYouWantToUploadSupportingDocuments))
       .fold[Future[Result]](Future.successful(Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())))(
         f
       )
 
   private def commonDisplayBehaviour[A, P: Writeable, R](
-    currentAnswers: UploadSupportingDocuments
-  )(form: UploadSupportingDocuments => Form[A])(
+    currentAnswers: UploadSupportingDocumentAnswers
+  )(form: UploadSupportingDocumentAnswers => Form[A])(
     page: (Form[A], Call) => P
   )(
-    requiredPreviousAnswer: UploadSupportingDocuments => Option[R],
+    requiredPreviousAnswer: UploadSupportingDocumentAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
@@ -114,30 +114,33 @@ class UploadSupportingDocumentsController @Inject() (
       Redirect(redirectToIfNoRequiredPreviousAnswer)
     }
 
-  def hasSupportingDocsToUpload(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSupportingDocumentChoices(request) { (_, _, answers) =>
-      commonDisplayBehaviour(answers)(
-        form = _.fold(
-          _.hasSupportingDocuments.fold(hasSupportingDocsToUploadForm)(hasSupportingDocsToUploadForm.fill),
-          c => hasSupportingDocsToUploadForm.fill(c.hasSupportingDocuments)
+  //TODO: does this read the session store once the user has answered this question?
+  def doYouWantToUploadSupportingDocuments(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withSupportingDocumentChoices(request) { (_, _, answers) =>
+        commonDisplayBehaviour(answers)(
+          form = _.fold(
+            _.doYouWantToUploadSupportingDocuments
+              .fold(doYouWantToUploadSupportingDocumentsForm)(doYouWantToUploadSupportingDocumentsForm.fill),
+            c => doYouWantToUploadSupportingDocumentsForm.fill(c.doYouWantToUploadSupportingDocuments)
+          )
+        )(
+          page = hasSupportingDocsToUploadPage(_, _)
+        )(
+          requiredPreviousAnswer = { _ =>
+            Some(())
+          },
+          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
         )
-      )(
-        page = hasSupportingDocsToUploadPage(_, _)
-      )(
-        requiredPreviousAnswer = { _ =>
-          Some(())
-        },
-        redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
-      )
-    }
+      }
   }
 
-  def hasSupportingDocsToUploadSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+  def doYouWantToUploadSupportingDocumentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withSupportingDocumentChoices(request) {
         case (_, fillingOutReturn, answers) =>
           commonSubmitBehaviour(fillingOutReturn, fillingOutReturn.draftReturn, answers)(
-            form = hasSupportingDocsToUploadForm
+            form = doYouWantToUploadSupportingDocumentsForm
           )(page = {
             case (form, backLink) =>
               val updatedForm = form
@@ -163,7 +166,7 @@ class UploadSupportingDocumentsController @Inject() (
                       uploadSupportingDocuments,
                       _
                     ) =>
-                  s.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocuments(b, List.empty))) // FIXME : List value
+                  s.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocumentAnswers(b, List.empty))) // FIXME : List value
                 case m @ DraftMultipleDisposalsReturn(
                       _,
                       _,
@@ -173,7 +176,7 @@ class UploadSupportingDocumentsController @Inject() (
                       uploadSupportingDocuments,
                       _
                     ) =>
-                  m.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocuments(b, List.empty))) // FIXME : List value
+                  m.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocumentAnswers(b, List.empty))) // FIXME : List value
               }
             }
           )
@@ -185,13 +188,15 @@ class UploadSupportingDocumentsController @Inject() (
       withSupportingDocumentChoices(request) { (_, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
-            _.hasSupportingDocuments.fold(hasSupportingDocsToUploadForm)(hasSupportingDocsToUploadForm.fill),
-            c => hasSupportingDocsToUploadForm.fill(c.hasSupportingDocuments)
+            _.doYouWantToUploadSupportingDocuments
+              .fold(doYouWantToUploadSupportingDocumentsForm)(doYouWantToUploadSupportingDocumentsForm.fill),
+            c => doYouWantToUploadSupportingDocumentsForm.fill(c.doYouWantToUploadSupportingDocuments)
           )
         )(
           page = hasSupportingDocsToUploadPage(_, _)
         )(
-          requiredPreviousAnswer               = _.fold(_.hasSupportingDocuments, c => Some(c.hasSupportingDocuments)),
+          requiredPreviousAnswer =
+            _.fold(_.doYouWantToUploadSupportingDocuments, c => Some(c.doYouWantToUploadSupportingDocuments)),
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList() //TODO: do I really want to go here??
         )
       }
@@ -214,10 +219,10 @@ class UploadSupportingDocumentsController @Inject() (
     withSupportingDocumentChoices(request) {
       case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
-          case (c: UploadSupportingDocuments, s: DraftSingleDisposalReturn) =>
+          case (c: UploadSupportingDocumentAnswers, s: DraftSingleDisposalReturn) =>
             checkYourAnswersHandleCalculated(c, fillingOutReturn, s)
 
-          case (c: UploadSupportingDocuments, s: DraftMultipleDisposalsReturn) => //TODO: fix - collapse into one
+          case (c: UploadSupportingDocumentAnswers, s: DraftMultipleDisposalsReturn) => //TODO: fix - collapse into one
             checkYourAnswersHandleCalculated(c, fillingOutReturn, s)
 
           case _ =>
@@ -231,7 +236,7 @@ class UploadSupportingDocumentsController @Inject() (
     Ok("check your answers submit")
   }
 
-  private def commonSubmitBehaviour[Y <: UploadSupportingDocuments, D <: DraftReturn: Eq, A, P: Writeable, R](
+  private def commonSubmitBehaviour[Y <: UploadSupportingDocumentAnswers, D <: DraftReturn: Eq, A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
     currentDraftReturn: D,
     currentAnswers: Y
@@ -276,27 +281,27 @@ class UploadSupportingDocumentsController @Inject() (
       )
 
   private def checkYourAnswersHandleCalculated(
-    answers: UploadSupportingDocuments,
+    answers: UploadSupportingDocumentAnswers,
     fillingOutReturn: FillingOutReturn,
     draftReturn: DraftReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case IncompleteUploadSupportingDocuments(hasSupportingDocuments) =>
-        Redirect(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload())
+      case IncompleteUploadSupportingDocumentAnswers(hasSupportingDocuments) =>
+        Redirect(routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocuments())
       //Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
       //Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("1", "f1")))))
-      case CompleteUploadSupportingDocuments(hasSupportingDocuments, uploadeddocs) => //FIXME: list value
-        Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("2", "f1")))))
+      case CompleteUploadSupportingDocumentAnswers(hasSupportingDocuments, uploadeddocs) => //FIXME: list value
+        Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(true, List(SupportingDocuments("2", "f1")))))
     }
 
 }
 
 object UploadSupportingDocumentsController {
 
-  val hasSupportingDocsToUploadForm: Form[Boolean] =
+  val doYouWantToUploadSupportingDocumentsForm: Form[Boolean] =
     Form(
       mapping(
-        "hasSupportingDocsToUpload" -> of(BooleanFormatter.formatter)
+        "do-you-want-to-upload-supporting-documents" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
