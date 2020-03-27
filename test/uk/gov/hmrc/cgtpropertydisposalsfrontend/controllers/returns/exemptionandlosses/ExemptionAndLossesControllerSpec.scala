@@ -1484,16 +1484,14 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       )
     }
 
-    if (completeExemptionAndLossesAnswers.annualExemptAmount.isPositive) {
-      if (isATrust) {
-        doc
-          .select("#annualExemptAmount-question")
-          .text() shouldBe "How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?"
-      } else {
-        doc
-          .select("#annualExemptAmount-question")
-          .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
-      }
+    if (isATrust) {
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?"
+    } else {
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
     }
 
     doc.select("#annualExemptAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
