@@ -282,9 +282,9 @@ class UploadSupportingDocumentsController @Inject() (
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
       case IncompleteUploadSupportingDocuments(hasSupportingDocuments) =>
-        //Redirect(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload())
-        //Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
-        Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("1", "f1")))))
+        Redirect(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload())
+      //Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
+      //Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("1", "f1")))))
       case CompleteUploadSupportingDocuments(hasSupportingDocuments, uploadeddocs) => //FIXME: list value
         Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("2", "f1")))))
     }
