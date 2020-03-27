@@ -264,7 +264,7 @@ class ExemptionAndLossesController @Inject() (
 
   def annualExemptAmount(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) {
-      case (_, _, draftReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           commonDisplayBehaviour(
             answers
@@ -275,7 +275,7 @@ class ExemptionAndLossesController @Inject() (
               c => emptyForm.fill(c.annualExemptAmount.inPounds())
             )
           })(
-            page = annualExemptAmountPage(_, _, disposalDate)
+            page = annualExemptAmountPage(_, _, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
           )(
             requiredPreviousAnswer = _.fold(
               _.previousYearsLosses,
@@ -307,7 +307,7 @@ class ExemptionAndLossesController @Inject() (
                 )
               )
               )
-              annualExemptAmountPage(updatedForm, backlink, disposalDate)
+              annualExemptAmountPage(updatedForm, backlink, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
             }
           )(
             requiredPreviousAnswer = _.fold(
