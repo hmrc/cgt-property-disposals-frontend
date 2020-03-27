@@ -1385,20 +1385,20 @@ class ReliefDetailsControllerSpec
             AmountInPence(0),
             Some(sample[OtherReliefs])
           )
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(sessionWithReliefDetailsAnswers(completeAnswersWithoutResidentialRelief)._1)
-            }
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithReliefDetailsAnswers(completeAnswersWithoutResidentialRelief)._1)
+          }
 
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("reliefDetails.cya.title"), { doc =>
-                validateReliefDetailsCheckYourAnswersPage(completeAnswersWithoutResidentialRelief, doc)
-                doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
-                  .checkYourAnswersSubmit()
-                  .url
-              }
-            )
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("reliefDetails.cya.title"), { doc =>
+              validateReliefDetailsCheckYourAnswersPage(completeAnswersWithoutResidentialRelief, doc)
+              doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
         }
       }
 
@@ -1523,7 +1523,7 @@ object ReliefDetailsControllerSpec extends Matchers {
       }
     } else {
       doc.select("#lettingsReliefValue-answer").hasText shouldBe false
-      doc.select("#lettingsRelief-answer").hasText shouldBe false
+      doc.select("#lettingsRelief-answer").hasText      shouldBe false
     }
 
     reliefDetailsAnswers.otherReliefs.foreach {

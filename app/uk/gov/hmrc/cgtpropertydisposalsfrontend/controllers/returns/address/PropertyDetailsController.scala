@@ -348,7 +348,7 @@ class PropertyDetailsController @Inject() (
                   _ => controllers.returns.routes.TaskListController.taskList(),
                   _ => routes.PropertyDetailsController.checkYourAnswers()
                 )
-            Ok(multipleDisposalsGuidancePage(backLink))
+            Ok(multipleDisposalsGuidancePage(backLink, r.subscribedDetails.isATrust))
         }
     }
   }
@@ -396,7 +396,7 @@ class PropertyDetailsController @Inject() (
 
                 val f    = getDisposalDateFrom(taxYear, completionDate)
                 val form = disposalDate.fold(f)(c => f.fill(c.value))
-                Ok(multipleDisposalsDisposalDatePage(form))
+                Ok(multipleDisposalsDisposalDatePage(form, r.subscribedDetails.isATrust))
 
               case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
@@ -430,7 +430,8 @@ class PropertyDetailsController @Inject() (
 
                       BadRequest(
                         multipleDisposalsDisposalDatePage(
-                          formWithErrors.copy(errors = updatedFormWithErrors)
+                          formWithErrors.copy(errors = updatedFormWithErrors),
+                          r.subscribedDetails.isATrust
                         )
                       )
                     }, { date =>
@@ -496,7 +497,7 @@ class PropertyDetailsController @Inject() (
 
             val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
 
-            Ok(multipleDisposalsDisposalPricePage(form, backLink))
+            Ok(multipleDisposalsDisposalPricePage(form, backLink, r.subscribedDetails.isATrust))
         }
     }
   }
@@ -516,7 +517,7 @@ class PropertyDetailsController @Inject() (
               .fold(
                 formWithErrors =>
                   BadRequest(
-                    multipleDisposalsDisposalPricePage(formWithErrors, backLink)
+                    multipleDisposalsDisposalPricePage(formWithErrors, backLink, r.subscribedDetails.isATrust)
                   ), { disposalPrice =>
                   if (answers
                         .fold(_.disposalPrice, c => Some(c.disposalPrice))
@@ -573,7 +574,7 @@ class PropertyDetailsController @Inject() (
 
             val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
 
-            Ok(multipleDisposalsAcquisitionPricePage(form, backLink))
+            Ok(multipleDisposalsAcquisitionPricePage(form, backLink, r.subscribedDetails.isATrust))
         }
     }
   }
@@ -593,7 +594,7 @@ class PropertyDetailsController @Inject() (
               .fold(
                 formWithErrors =>
                   BadRequest(
-                    multipleDisposalsAcquisitionPricePage(formWithErrors, backLink)
+                    multipleDisposalsAcquisitionPricePage(formWithErrors, backLink, r.subscribedDetails.isATrust)
                   ), { acquisitionPrice =>
                   if (answers
                         .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
@@ -678,11 +679,18 @@ class PropertyDetailsController @Inject() (
                       logger.warn("Could not update draft return", e)
                       errorHandler.errorResult()
                     },
-                    _ => Ok(multipleDisposalsCheckYourAnswersPage(completeAnswers, hasNonResidentialAssetType))
+                    _ =>
+                      Ok(
+                        multipleDisposalsCheckYourAnswersPage(
+                          completeAnswers,
+                          hasNonResidentialAssetType,
+                          r.subscribedDetails.isATrust
+                        )
+                      )
                   )
 
                 case c: CompleteExamplePropertyDetailsAnswers =>
-                  Ok(multipleDisposalsCheckYourAnswersPage(c, hasNonResidentialAssetType))
+                  Ok(multipleDisposalsCheckYourAnswersPage(c, hasNonResidentialAssetType, r.subscribedDetails.isATrust))
 
               }
 

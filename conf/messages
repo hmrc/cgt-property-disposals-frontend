@@ -717,21 +717,25 @@ returns.property-details.multipleDisposals.caption=Details of one property dispo
 
 property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
 property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.
+property-details.multiple-disposals.guidance.agent.p1=You should enter the details of the property that gave your client the largest gain or the smallest loss.
+property-details.multiple-disposals.guidance.trust.p1=You should enter the details of the property that gave the trust the largest gain or the smallest loss.
 property-details.multiple-disposals.guidance.p2=For that one property, you’ll need to enter:
 property-details.multiple-disposals.guidance.li1=property’s UK address
 property-details.multiple-disposals.guidance.li2=contract exchange date
 property-details.multiple-disposals.guidance.li3=disposal amount, less disposal costs
 property-details.multiple-disposals.guidance.li4=acquisition amount, plus improvement and acquisition costs
 property-details.multiple-disposals.guidance.p3=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.agent.p3=Contract exchange usually happens when your client and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.trust.p3=Contract exchange usually happens when the trust and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
 
 enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
 address-select.returns.singleDisposal.title=Select the address of the UK property you disposed of
 address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
 
-enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK properties you disposed of
-address-select.returns.multipleDisposals.title=Select the address of one of the UK properties you disposed of
-address.uk.returns.multipleDisposals.title=Enter the address of one of the UK properties you disposed of
+enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK property disposals
+address-select.returns.multipleDisposals.title=Select the address of the property
+address.uk.returns.multipleDisposals.title=Enter the address of one of the UK properties disposed of
 
 returns.property-address.cya.title=Check your answers
 returns.property-details.multiple-disposals.cya.guidanceLink=Help completing this section
@@ -959,14 +963,26 @@ previousYearsLossesValue.error.required=Enter an amount of Capital Gains Tax los
 previousYearsLossesValue.label=Amount of losses from previous tax years
 previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
 
-annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
-annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {2}.
+annualExemptAmount.individual.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
+annualExemptAmount.trust.title=How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?
+
+annualExemptAmount.individual.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {2}.
+annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount. <br/> <br/>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
+
+annualExemptAmount.trust.details.1.header=What is the Annual Exempt Amount?
+annualExemptAmount.trust.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
+annualExemptAmount.trust.details.2.header=Who are vulnerable beneficiaries?
+annualExemptAmount.trust.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
+
+annualExemptAmount.individual.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
+
+annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
+
 annualExemptAmount.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,000
 annualExemptAmount.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
 annualExemptAmount.error.tooSmall=Annual Exempt Amount must be 0 or more
-annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
-annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
+
 
 
 taxableGainOrLoss.title=Did you make an overall gain on loss on the property sale or disposal?
@@ -1329,7 +1345,12 @@ hasSupportingDocsToUpload.error.required=Select yes if you want to upload any su
 hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
 
 multipleDisposalsDisposalDate.title=What date did you exchange contracts when disposing of the property?
+multipleDisposalsDisposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
+multipleDisposalsDisposalDate.trust.title=When the property was disposed of, what date were contracts exchanged?
 multipleDisposalsDisposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
+multipleDisposalsDisposalDate.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
+multipleDisposalsDisposalDate.trust.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
+
 multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 
 multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
@@ -1347,7 +1368,9 @@ multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Contract exchange dat
 multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
 multipleDisposalsDisposalPrice.title=What was the disposal value of the property?
-multipleDisposalsDisposalPrice.helpText=This is the amount you got when you sold the property or its market value if you disposed of it another key. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.trust.helpText=This is the amount the trust got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
 
@@ -1358,10 +1381,16 @@ multipleDisposalsDisposalPrice.error.tooSmall=Amount must a number more than 0 a
 
 multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
+multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
-multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxary one. You cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if they built an extension or replaced a basic kitchen with a luxury one. They cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. The trust cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
 multipleDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
+multipleDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of the costs, they can only claim their share.
+multipleDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, it can only claim its share.
 
 multipleDisposalsAcquisitionPrice.error.invalid=Amount must be a number
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86

@@ -17,13 +17,17 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait AcquisitionDetailsAnswers extends Product with Serializable
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object AcquisitionDetailsAnswers {
 
+  @Lenses
   final case class IncompleteAcquisitionDetailsAnswers(
     acquisitionMethod: Option[AcquisitionMethod],
     acquisitionDate: Option[AcquisitionDate],
@@ -38,6 +42,18 @@ object AcquisitionDetailsAnswers {
 
     val empty: IncompleteAcquisitionDetailsAnswers =
       IncompleteAcquisitionDetailsAnswers(None, None, None, None, None, None, None)
+
+    def fromCompleteAnswers(c: CompleteAcquisitionDetailsAnswers): IncompleteAcquisitionDetailsAnswers =
+      IncompleteAcquisitionDetailsAnswers(
+        Some(c.acquisitionMethod),
+        Some(c.acquisitionDate),
+        Some(c.acquisitionPrice),
+        c.rebasedAcquisitionPrice,
+        Some(c.improvementCosts),
+        Some(c.acquisitionFees),
+        Some(c.shouldUseRebase)
+      )
+
   }
 
   final case class CompleteAcquisitionDetailsAnswers(
@@ -59,6 +75,13 @@ object AcquisitionDetailsAnswers {
       case i: IncompleteAcquisitionDetailsAnswers => ifIncomplete(i)
       case c: CompleteAcquisitionDetailsAnswers   => ifComplete(c)
     }
+
+    def unset[A](
+      fieldLens: IncompleteAcquisitionDetailsAnswers.type => Lens[IncompleteAcquisitionDetailsAnswers, Option[A]]
+    ): IncompleteAcquisitionDetailsAnswers =
+      fieldLens(IncompleteAcquisitionDetailsAnswers).set(None)(
+        fold(identity, IncompleteAcquisitionDetailsAnswers.fromCompleteAnswers)
+      )
 
   }
 
