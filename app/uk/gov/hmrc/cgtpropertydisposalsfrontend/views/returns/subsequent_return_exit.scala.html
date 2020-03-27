@@ -40,21 +40,24 @@
     <p>
         <h2 class="heading-medium">@messages(s"$key.telephone.title")</h2>
     </p>
-    <p>
-        @messages(s"$key.inside-uk-telephone.title")
-        <br />
-        <span class="bold">@viewConfig.hmrcTelephone</span>
-    </p>
-    <p>
-        @messages(s"$key.outside-uk-telephone.title")
-        <br />
-        <span class="bold">@viewConfig.outsideUkPhone</span>
-    </p>
-    <p>
-        @messages(s"$key.phoneAgent.title")
-        <br />
-        <span class="bold">@viewConfig.agentDedicatedLine</span>
-    </p>
+
+    <div class="panel panel-border-wide">
+        <p>
+            @messages(s"$key.inside-uk-telephone.title")
+            <br />
+            <span class="bold">@viewConfig.hmrcTelephone</span>
+        </p>
+        <p>
+            @messages(s"$key.outside-uk-telephone.title")
+            <br />
+            <span class="bold">@viewConfig.outsideUkPhone</span>
+        </p>
+        <p>
+            @messages(s"$key.phoneAgent.title")
+            <br />
+            <span class="bold">@viewConfig.agentDedicatedLine</span>
+        </p>
+    </div>
 
     <p>
         <h2 class="heading-medium">@messages(s"$key.openingTimes.title")</h2>
