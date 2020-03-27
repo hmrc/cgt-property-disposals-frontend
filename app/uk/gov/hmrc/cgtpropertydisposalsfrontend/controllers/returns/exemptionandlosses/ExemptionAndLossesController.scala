@@ -332,7 +332,7 @@ class ExemptionAndLossesController @Inject() (
         withDisposalDate(draftReturn) { disposalDate =>
           answers match {
             case c: CompleteExemptionAndLossesAnswers =>
-              Ok(checkYourAnswersPage(c, disposalDate))
+              Ok(checkYourAnswersPage(c, disposalDate, fillingOutReturn.subscribedDetails.isATrust))
 
             case IncompleteExemptionAndLossesAnswers(None, _, _) =>
               Redirect(routes.ExemptionAndLossesController.inYearLosses())
@@ -367,10 +367,14 @@ class ExemptionAndLossesController @Inject() (
                     )
               } yield ()
 
-              result.fold({ e =>
-                logger.warn("Could not update the session", e)
-                errorHandler.errorResult()
-              }, _ => Ok(checkYourAnswersPage(completeAnswers, disposalDate)))
+              result.fold(
+                { e =>
+                  logger.warn("Could not update the session", e)
+                  errorHandler.errorResult()
+                },
+                _ =>
+                  Ok(checkYourAnswersPage(completeAnswers, disposalDate, fillingOutReturn.subscribedDetails.isATrust))
+              )
           }
         }
 
