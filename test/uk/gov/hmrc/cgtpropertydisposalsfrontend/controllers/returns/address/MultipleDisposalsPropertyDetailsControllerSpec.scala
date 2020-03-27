@@ -40,6 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
@@ -928,7 +929,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = draftReturn
+                    draftReturn = draftReturn,
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
                   )
                 )
               )
@@ -1064,7 +1068,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = draftReturn
+                    draftReturn = draftReturn,
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
                   )
                 )
               )
@@ -1096,6 +1103,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                         completionDate = CompletionDate(taxYear.endDateExclusive.minusDays(10L))
                       ),
                       examplePropertyDetailsAnswers = None
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
                   )
                 )
@@ -1305,7 +1315,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[DraftSingleDisposalReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn],
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
                   )
                 )
               )
@@ -1326,7 +1339,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = draftReturn
+                    draftReturn = draftReturn,
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
                   )
                 )
               )
@@ -1412,6 +1428,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                           disposalPrice = Some(disposalPrice)
                         )
                       )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
                   )
                 )
@@ -1440,6 +1459,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
                       )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
                   )
                 )
@@ -1573,7 +1595,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[DraftSingleDisposalReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn],
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
                   )
                 )
               )
@@ -1594,7 +1619,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = draftReturn
+                    draftReturn = draftReturn,
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
                   )
                 )
               )
@@ -1679,6 +1707,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                           acquisitionPrice = Some(acquisitionPrice)
                         )
                       )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
                   )
                 )
@@ -1707,6 +1738,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
                       )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
                   )
                 )
@@ -1865,6 +1899,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[FillingOutReturn].copy(
                   draftReturn = currentDraftReturn.copy(
                     examplePropertyDetailsAnswers = None
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
                   )
                 )
               )
@@ -1886,6 +1923,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[FillingOutReturn].copy(
                   draftReturn = currentDraftReturn.copy(
                     examplePropertyDetailsAnswers = Some(allQuestionsAnswered.copy(address = None))
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
                   )
                 )
               )
@@ -1909,6 +1949,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     examplePropertyDetailsAnswers = Some(
                       allQuestionsAnswered.copy(disposalDate = None)
                     )
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
                   )
                 )
               )
@@ -1936,6 +1979,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     examplePropertyDetailsAnswers = Some(
                       allQuestionsAnswered.copy(disposalPrice = None)
                     )
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
                   )
                 )
               )
@@ -1963,6 +2009,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     examplePropertyDetailsAnswers = Some(
                       allQuestionsAnswered.copy(acquisitionPrice = None)
                     )
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
                   )
                 )
               )
@@ -2099,6 +2148,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[FillingOutReturn].copy(
                   draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                     triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(assetTypes = None)
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
                   )
                 )
               )
@@ -2124,6 +2176,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                       assetTypes = List(AssetType.Residential)
                     )
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
                   )
                 )
               )
