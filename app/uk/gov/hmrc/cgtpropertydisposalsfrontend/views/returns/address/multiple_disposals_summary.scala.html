@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -29,7 +30,11 @@ cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
 cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
-@(answers: CompleteExamplePropertyDetailsAnswers, hasNonResidentialAssetType: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+@(answers: CompleteExamplePropertyDetailsAnswers, hasNonResidentialAssetType: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 
 @cyaSection() {
     @cyaRow(
@@ -43,21 +48,21 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     )
 
     @cyaRow(
-        messages("returns.property-address.cyaLabel.disposal-date"),
+        messages(s"multipleDisposalsDisposalDate$userKey.title"),
         Html(LocalDateUtils.govDisplayFormat(answers.disposalDate.value)),
         Some(cyaChange(messages("returns.property-address.cyaChange.disposal-date"), returns.address.routes.PropertyDetailsController.disposalDate().url)),
         "multipleDisposalsDisposalDate"
     )
 
     @cyaRow(
-        messages("returns.property-address.cyaLabel.disposal-price"),
+        messages("multipleDisposalsDisposalPrice.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
         Some(cyaChange(messages("returns.property-address.cyaChange.disposal-price"), returns.address.routes.PropertyDetailsController.disposalPrice().url)),
         "multipleDisposalsDisposalPrice"
     )
 
     @cyaRow(
-        messages("returns.property-address.cyaLabel.acquisition-price"),
+        messages("multipleDisposalsAcquisitionPrice.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
         Some(cyaChange(messages("returns.property-address.cyaChange.acquisition-price"), returns.address.routes.PropertyDetailsController.acquisitionPrice().url)),
         "multipleDisposalsAcquisitionPrice"
