@@ -42,7 +42,10 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{disposalDate.taxYear}
 @annualExemptAmountString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountGeneral.inPounds()) }
+@annualExemptAmountForVulnerableString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountNonVulnerableTrust.inPounds()) }
 
+@individualHelpText = @{ Some(Html( messages( s"$key.helpText", taxYear.startDateInclusive.getYear.toString, taxYear.endDateExclusive.getYear.toString, annualExemptAmountString ) )) }
+@trustHelpText = @{ Some(Html( messages( s"$key.helpText", taxYear.startDateInclusive.getYear.toString, taxYear.endDateExclusive.getYear.toString, annualExemptAmountForVulnerableString, annualExemptAmountString ) )) }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -62,14 +65,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             hasErrors =  form.error(baseKey).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(
-                messages(
-                    s"$key.helpText",
-                    taxYear.startDateInclusive.getYear.toString,
-                    taxYear.endDateExclusive.getYear.toString,
-                    annualExemptAmountString
-                )
-            )),
+            helpText = if(isTrust) trustHelpText else individualHelpText,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
