@@ -36,17 +36,18 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{rou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.collection.JavaConverters._
@@ -72,6 +73,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   lazy val controller = instanceOf[PropertyDetailsController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
+
+  def messageKey(userType: UserType) = userType match {
+    case Individual   => ""
+    case Organisation => ".trust"
+    case Agent        => ".agent"
+  }
 
   override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
     case a: UkAddress =>
@@ -141,14 +148,19 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         def test(
           draftReturn: DraftMultipleDisposalsReturn,
-          expectedBackLink: Call
+          expectedBackLink: Call,
+          userType: UserType
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
+                userType = Some(userType),
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
+                    ),
                     draftReturn = draftReturn
                   )
                 )
@@ -165,34 +177,102 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 .attr("action") shouldBe routes.PropertyDetailsController
                 .multipleDisposalsGuidanceSubmit()
                 .url
+              doc.select("#content > article > p:nth-child(4)").text() shouldBe messageFromMessageKey(
+                s"property-details.multiple-disposals.guidance${messageKey(userType)}.p1"
+              )
+              doc.select("#content > article > p:nth-child(7)").text() shouldBe messageFromMessageKey(
+                s"property-details.multiple-disposals.guidance${messageKey(userType)}.p3"
+              )
             }
           )
         }
 
-        "the user has not started this section before" in {
+        "individual user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
-            controllers.returns.routes.TaskListController.taskList()
+            controllers.returns.routes.TaskListController.taskList(),
+            Individual
           )
         }
 
-        "the user has started but not completed this section" in {
+        "trust user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = None
+            ),
+            controllers.returns.routes.TaskListController.taskList(),
+            Organisation
+          )
+        }
+        "agent user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = None
+            ),
+            controllers.returns.routes.TaskListController.taskList(),
+            Agent
+          )
+        }
+
+        "individual user has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
             ),
-            controllers.returns.routes.TaskListController.taskList()
+            controllers.returns.routes.TaskListController.taskList(),
+            Individual
           )
         }
 
-        "the user has completed this section" in {
+        "trust user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+            ),
+            controllers.returns.routes.TaskListController.taskList(),
+            Organisation
+          )
+        }
+
+        "agent user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+            ),
+            controllers.returns.routes.TaskListController.taskList(),
+            Agent
+          )
+        }
+
+        "individual user has completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
-            routes.PropertyDetailsController.checkYourAnswers()
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+
+        "trust user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Organisation
+          )
+        }
+
+        "agent user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Agent
           )
         }
 
@@ -922,16 +1002,21 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         val triageAnswersWithTaxYear = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear)
 
-        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
+        def test(
+          draftReturn: DraftMultipleDisposalsReturn,
+          expectedBackLink: Call,
+          userType: UserType
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
+                userType = Some(userType),
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name = Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     )
                   )
                 )
@@ -941,21 +1026,48 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("multipleDisposalsDisposalDate.title")
+            messageFromMessageKey(s"multipleDisposalsDisposalDate${messageKey(userType)}.title"), { doc =>
+              doc.select("#multipleDisposalsDisposalDate-form-hint").text() shouldBe messageFromMessageKey(
+                s"multipleDisposalsDisposalDate${messageKey(userType)}.helpText"
+              )
+            }
           )
         }
 
-        "the user has not started this section before" in {
+        "individual user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers                 = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.enterUkAddress()
+            routes.PropertyDetailsController.enterUkAddress(),
+            Individual
           )
         }
 
-        "the user has started but not completed this section" in {
+        "trust user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers                 = triageAnswersWithTaxYear,
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.enterUkAddress(),
+            Organisation
+          )
+        }
+
+        "agent user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers                 = triageAnswersWithTaxYear,
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.enterUkAddress(),
+            Agent
+          )
+        }
+
+        "individual user has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = triageAnswersWithTaxYear,
@@ -965,11 +1077,42 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.enterUkAddress()
+            routes.PropertyDetailsController.enterUkAddress(),
+            Individual
           )
         }
 
-        "the user has completed this section" in {
+        "trust user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers = triageAnswersWithTaxYear,
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  disposalDate = None
+                )
+              )
+            ),
+            routes.PropertyDetailsController.enterUkAddress(),
+            Organisation
+          )
+        }
+
+        "agent user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers = triageAnswersWithTaxYear,
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  disposalDate = None
+                )
+              )
+            ),
+            routes.PropertyDetailsController.enterUkAddress(),
+            Agent
+          )
+        }
+
+        "individual user has completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = triageAnswersWithTaxYear,
@@ -979,7 +1122,38 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers()
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+
+        "trust user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers = triageAnswersWithTaxYear,
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  disposalDate = disposalDate
+                )
+              )
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Organisation
+          )
+        }
+
+        "agent user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers = triageAnswersWithTaxYear,
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  disposalDate = disposalDate
+                )
+              )
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Agent
           )
         }
 
@@ -1332,16 +1506,21 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
+        def test(
+          draftReturn: DraftMultipleDisposalsReturn,
+          expectedBackLink: Call,
+          userType: UserType
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
+                userType = Some(userType),
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name = Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     )
                   )
                 )
@@ -1351,27 +1530,51 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("multipleDisposalsDisposalPrice.title"), { doc =>
+            messageFromMessageKey(s"multipleDisposalsDisposalPrice.title"), { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.PropertyDetailsController
                 .disposalPriceSubmit()
                 .url
+              doc.select("#multipleDisposalsDisposalPrice-form-hint").text() shouldBe messageFromMessageKey(
+                s"multipleDisposalsDisposalPrice${messageKey(userType)}.helpText"
+              )
             }
           )
         }
 
-        "the user has not started this section before" in {
+        "individual user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.disposalDate()
+            routes.PropertyDetailsController.disposalDate(),
+            Individual
           )
         }
 
-        "the user has started but not completed this section" in {
+        "trust user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.disposalDate(),
+            Organisation
+          )
+        }
+
+        "agent user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.disposalDate(),
+            Agent
+          )
+        }
+
+        "individual user has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
@@ -1380,11 +1583,40 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.disposalDate()
+            routes.PropertyDetailsController.disposalDate(),
+            Individual
           )
         }
 
-        "the user has completed this section" in {
+        "trust user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  disposalPrice = None
+                )
+              )
+            ),
+            routes.PropertyDetailsController.disposalDate(),
+            Organisation
+          )
+        }
+
+        "agent user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  disposalPrice = None
+                )
+              )
+            ),
+            routes.PropertyDetailsController.disposalDate(),
+            Agent
+          )
+        }
+
+        "individual user has completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
@@ -1393,10 +1625,38 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers()
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Individual
           )
         }
 
+        "trust user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  disposalPrice = sample[AmountInPence]
+                )
+              )
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Organisation
+          )
+        }
+
+        "agent user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  disposalPrice = sample[AmountInPence]
+                )
+              )
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Agent
+          )
+        }
       }
 
     }
@@ -1612,16 +1872,21 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
+        def test(
+          draftReturn: DraftMultipleDisposalsReturn,
+          expectedBackLink: Call,
+          userType: UserType
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
+                userType = Some(userType),
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
-                      name = Right(sample[IndividualName])
+                      name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     )
                   )
                 )
@@ -1631,27 +1896,51 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("multipleDisposalsAcquisitionPrice.title"), { doc =>
+            messageFromMessageKey(s"multipleDisposalsAcquisitionPrice.title"), { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.PropertyDetailsController
                 .acquisitionPriceSubmit()
                 .url
+              doc.select("#multipleDisposalsAcquisitionPrice-form-hint").text() shouldBe messageFromMessageKey(
+                s"multipleDisposalsAcquisitionPrice${messageKey(userType)}.helpText"
+              )
             }
           )
         }
 
-        "the user has not started this section before" in {
+        "individual user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.disposalPrice()
+            routes.PropertyDetailsController.disposalPrice(),
+            Individual
           )
         }
 
-        "the user has started but not completed this section" in {
+        "trust user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Organisation
+          )
+        }
+
+        "agent user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Agent
+          )
+        }
+
+        "individual user has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
@@ -1660,11 +1949,40 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.disposalPrice()
+            routes.PropertyDetailsController.disposalPrice(),
+            Individual
           )
         }
 
-        "the user has completed this section" in {
+        "trust user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              )
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Organisation
+          )
+        }
+
+        "agent user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              )
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Agent
+          )
+        }
+
+        "individual user has completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
@@ -1673,7 +1991,36 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers()
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+
+        "trust user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              )
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Organisation
+          )
+        }
+
+        "agent user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              )
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Agent
           )
         }
 
