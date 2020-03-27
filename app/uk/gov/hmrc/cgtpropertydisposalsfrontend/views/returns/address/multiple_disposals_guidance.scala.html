@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,9 +30,12 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call, isATrust: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("property-details.multiple-disposals.guidance.title")}
+@key = @{"property-details.multiple-disposals.guidance"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
     @backLinkComponent(backLink)
@@ -39,27 +43,28 @@
     @caption(messages("returns.property-details.multipleDisposals.caption"))
 
     @pageHeading(title)
+
     <p>
-    @messages("property-details.multiple-disposals.guidance.p1")
+      @messages(s"$key$userKey.p1")
     </p>
 
     <p>
-    @messages("property-details.multiple-disposals.guidance.p2")
+      @messages(s"$key.p2")
     </p>
 
     <ul class="list-bullet">
-        <li>@messages("property-details.multiple-disposals.guidance.li1")</li>
-        <li>@messages("property-details.multiple-disposals.guidance.li2")</li>
-        <li>@messages("property-details.multiple-disposals.guidance.li3")</li>
-        <li>@messages("property-details.multiple-disposals.guidance.li4")</li>
+        <li>@messages(s"$key.li1")</li>
+        <li>@messages(s"$key.li2")</li>
+        <li>@messages(s"$key.li3")</li>
+        <li>@messages(s"$key.li4")</li>
     </ul>
 
     <p>
-        @messages("property-details.multiple-disposals.guidance.p3")
+      @messages(s"$key$userKey.p3")
     </p>
 
     <p>
-        @messages("property-details.multiple-disposals.guidance.p4")
+      @messages(s"$key.p4")
     </p>
 
     @formWrapper(routes.PropertyDetailsController.multipleDisposalsGuidanceSubmit()) {
