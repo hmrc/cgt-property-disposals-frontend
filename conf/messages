@@ -224,9 +224,20 @@ countryCode.error.required=Select a country from the options presented as you ty
 countryCode.error.notFound=Select a country from the options presented as you type
 
 address-select.title=Select your contact address
+address-select.agent.title=Select your contact address
+address-select.trust.title=Select your contact address
 address-select.error.required=Select the contact address or enter it manually if it is not shown
+address-select.agent.error.required=Select the contact address or enter it manually if it is not shown
+address-select.trust.error.required=Select the contact address or enter it manually if it is not shown
+address-select.returns.error.required=Select the address you disposed of or enter it manually if it is not shown
+address-select.returns.agent.error.required=Select the address your client disposed of or enter it manually if it is not shown
+address-select.returns.trust.error.required=Select the address the trust disposed of or enter it manually if it is not shown
 address-select.error.number=Select the contact address or enter it manually if it is not shown
+address-select.agent.error.number=Select the contact address or enter it manually if it is not shown
+address-select.trust.error.number=Select the contact address or enter it manually if it is not shown
 address-select.invalid=Select the contact address or enter it manually if it is not shown
+address-select.agent.invalid=Select the contact address or enter it manually if it is not shown
+address-select.trust.invalid=Select the contact address or enter it manually if it is not shown
 
 subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
@@ -730,8 +741,14 @@ property-details.multiple-disposals.guidance.trust.p3=Contract exchange usually 
 property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
 
 enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
+enterPostcode.returns.agent.singleDisposal.title=Find the address of the UK property your client disposed of
+enterPostcode.returns.trust.singleDisposal.title=Find the address of the UK property the trust disposed of
 address-select.returns.singleDisposal.title=Select the address of the UK property you disposed of
+address-select.returns.agent.singleDisposal.title=Select the address of the UK property your client disposed of
+address-select.returns.trust.singleDisposal.title=Select the address of the UK property the trust disposed of
 address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
+address.uk.returns.agent.singleDisposal.title=Enter the address of the UK property your client disposed of
+address.uk.returns.trust.singleDisposal.title=Enter the address of the UK property the trust disposed of
 
 enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK property disposals
 address-select.returns.multipleDisposals.title=Select the address of the property

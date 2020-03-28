@@ -61,6 +61,9 @@ class RegistrationChangeAddressController @Inject() (
   override val toAddressJourneyType: RegistrationReady => RegistrationReadyAddressJourney =
     RegistrationReadyAddressJourney.apply
 
+  // trusts do not use this journey
+  def isATrust(journey: RegistrationReady): Boolean = false
+
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, RegistrationReady)] =
