@@ -72,223 +72,216 @@ class CommonTriageQuestionsController @Inject() (
     state.fold(_.subscribedDetails.userType(), _.subscribedDetails.userType()).isRight
 
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) {
-      case (_, state) =>
-        if (!isIndividual(state))
-          Redirect(routes.CommonTriageQuestionsController.howManyProperties())
-        else {
-          val form = {
-            val f = whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
-            getIndividualUserType(state).fold(f)(f.fill)
-          }
-
-          Ok(
-            whoAreYouReportingForPage(
-              form,
-              None,
-              state.isRight
-            )
-          )
+    withState(request) { (_, state) =>
+      if (!isIndividual(state))
+        Redirect(routes.CommonTriageQuestionsController.howManyProperties())
+      else {
+        val form = {
+          val f = whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
+          getIndividualUserType(state).fold(f)(f.fill)
         }
+
+        Ok(
+          whoAreYouReportingForPage(
+            form,
+            None,
+            state.isRight
+          )
+        )
+      }
     }
   }
 
   def whoIsIndividualRepresentingSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withState(request) {
-        case (_, state) =>
-          if (!isIndividual(state))
-            Redirect(routes.CommonTriageQuestionsController.howManyProperties())
-          else {
-            whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
-              .bindFromRequest()
-              .fold(
-                formWithErrors =>
-                  BadRequest(
-                    whoAreYouReportingForPage(
-                      formWithErrors,
-                      None,
-                      state.isRight
-                    )
-                  ), { individualUserType =>
-                  val answers    = triageAnswersFomState(state)
-                  val redirectTo = redirectToCheckYourAnswers(state)
-
-                  val oldIndividualUserType = answers.fold(
-                    _.fold(_.individualUserType, c => c.individualUserType),
-                    _.fold(_.individualUserType, c => c.individualUserType)
+      withState(request) { (_, state) =>
+        if (!isIndividual(state))
+          Redirect(routes.CommonTriageQuestionsController.howManyProperties())
+        else {
+          whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                BadRequest(
+                  whoAreYouReportingForPage(
+                    formWithErrors,
+                    None,
+                    state.isRight
                   )
+                ), { individualUserType =>
+                val answers    = triageAnswersFomState(state)
+                val redirectTo = redirectToCheckYourAnswers(state)
 
-                  if (oldIndividualUserType.contains(individualUserType)) {
-                    Redirect(redirectTo)
-                  } else {
+                val oldIndividualUserType = answers.fold(
+                  _.fold(_.individualUserType, c => c.individualUserType),
+                  _.fold(_.individualUserType, c => c.individualUserType)
+                )
 
-                    val updatedState = updateIndividualUserType(state, individualUserType)
-                    val result =
-                      for {
-                        _ <- updatedState.fold(
-                              _ => EitherT.pure[Future, Error](()),
-                              fillingOutReturn =>
-                                returnsService
-                                  .storeDraftReturn(
-                                    fillingOutReturn.draftReturn,
-                                    fillingOutReturn.subscribedDetails.cgtReference,
-                                    fillingOutReturn.agentReferenceNumber
-                                  )
-                            )
-                        _ <- EitherT(
-                              updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
-                            )
-                      } yield ()
+                if (oldIndividualUserType.contains(individualUserType)) {
+                  Redirect(redirectTo)
+                } else {
 
-                    result.fold(
-                      { e =>
-                        logger.warn("Could not perform updates", e)
-                        errorHandler.errorResult()
-                      },
-                      _ => Redirect(redirectTo)
-                    )
-                  }
+                  val updatedState = updateIndividualUserType(state, individualUserType)
+                  val result =
+                    for {
+                      _ <- updatedState.fold(
+                            _ => EitherT.pure[Future, Error](()),
+                            fillingOutReturn =>
+                              returnsService
+                                .storeDraftReturn(
+                                  fillingOutReturn.draftReturn,
+                                  fillingOutReturn.subscribedDetails.cgtReference,
+                                  fillingOutReturn.agentReferenceNumber
+                                )
+                          )
+                      _ <- EitherT(
+                            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
+                          )
+                    } yield ()
+
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not perform updates", e)
+                      errorHandler.errorResult()
+                    },
+                    _ => Redirect(redirectTo)
+                  )
                 }
-              )
-          }
+              }
+            )
+        }
       }
   }
 
   def howManyProperties(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) {
-      case (_, state) =>
-        val form =
-          getNumberOfProperties(state).fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
-        Ok(
-          howManyPropertiesPage(
-            form,
-            howManyPropertiesBackLink(state),
-            state.isRight,
-            state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
-          )
+    withState(request) { (_, state) =>
+      val form =
+        getNumberOfProperties(state).fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
+      Ok(
+        howManyPropertiesPage(
+          form,
+          howManyPropertiesBackLink(state),
+          state.isRight,
+          state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
         )
+      )
     }
   }
 
   def howManyPropertiesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) {
-      case (_, state) =>
-        numberOfPropertiesForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors =>
-              BadRequest(
-                howManyPropertiesPage(
-                  formWithErrors,
-                  howManyPropertiesBackLink(state),
-                  state.isRight,
-                  state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
-                )
-              ), { numberOfProperties =>
-              if (getNumberOfProperties(state).contains(numberOfProperties)) {
-                Redirect(redirectToCheckYourAnswers(state))
-              } else {
-                val updatedState = updateNumberOfProperties(state, numberOfProperties)
+    withState(request) { (_, state) =>
+      numberOfPropertiesForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            BadRequest(
+              howManyPropertiesPage(
+                formWithErrors,
+                howManyPropertiesBackLink(state),
+                state.isRight,
+                state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
+              )
+            ), { numberOfProperties =>
+            if (getNumberOfProperties(state).contains(numberOfProperties)) {
+              Redirect(redirectToCheckYourAnswers(state))
+            } else {
+              val updatedState = updateNumberOfProperties(state, numberOfProperties)
 
-                val result =
-                  for {
-                    _ <- updatedState.fold(
-                          _ => EitherT.pure[Future, Error](()),
-                          fillingOutReturn =>
-                            returnsService
-                              .storeDraftReturn(
-                                fillingOutReturn.draftReturn,
-                                fillingOutReturn.subscribedDetails.cgtReference,
-                                fillingOutReturn.agentReferenceNumber
-                              )
-                        )
-                    _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge))))
-                  } yield ()
+              val result =
+                for {
+                  _ <- updatedState.fold(
+                        _ => EitherT.pure[Future, Error](()),
+                        fillingOutReturn =>
+                          returnsService
+                            .storeDraftReturn(
+                              fillingOutReturn.draftReturn,
+                              fillingOutReturn.subscribedDetails.cgtReference,
+                              fillingOutReturn.agentReferenceNumber
+                            )
+                      )
+                  _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge))))
+                } yield ()
 
-                result.fold(
-                  { e =>
-                    logger.warn("Could not perform updates", e)
-                    errorHandler.errorResult()
-                  },
-                  _ => Redirect(redirectToCheckYourAnswers(updatedState))
-                )
-              }
-
+              result.fold(
+                { e =>
+                  logger.warn("Could not perform updates", e)
+                  errorHandler.errorResult()
+                },
+                _ => Redirect(redirectToCheckYourAnswers(updatedState))
+              )
             }
-          )
+
+          }
+        )
     }
   }
 
   def ukResidentCanOnlyDisposeResidential(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withState(request) {
-        case (_, state) =>
-          val triageAnswers = triageAnswersFomState(state)
-          val isAssetTypeNonResidential: Boolean = triageAnswers.fold(
-            _.fold(_.wereAllPropertiesResidential.contains(false), _.assetTypes === List(AssetType.NonResidential)),
-            _.fold(_.assetType.contains(AssetType.NonResidential), _.assetType === AssetType.NonResidential)
-          )
-          val wasUkResident = triageAnswers.fold(
-            _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-            _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
-          )
-          lazy val backLink = triageAnswers.fold(
-            _ => routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
-            _ => routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()
-          )
+      withState(request) { (_, state) =>
+        val triageAnswers = triageAnswersFomState(state)
+        val isAssetTypeNonResidential: Boolean = triageAnswers.fold(
+          _.fold(_.wereAllPropertiesResidential.contains(false), _.assetTypes === List(AssetType.NonResidential)),
+          _.fold(_.assetType.contains(AssetType.NonResidential), _.assetType === AssetType.NonResidential)
+        )
+        val wasUkResident = triageAnswers.fold(
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+        )
+        lazy val backLink = triageAnswers.fold(
+          _ => routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
+          _ => routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()
+        )
 
-          wasUkResident match {
-            case Some(true) if isAssetTypeNonResidential => Ok(ukResidentCanOnlyDisposeResidentialPage(backLink))
-            case _                                       => Redirect(redirectToCheckYourAnswers(state))
-          }
+        wasUkResident match {
+          case Some(true) if isAssetTypeNonResidential => Ok(ukResidentCanOnlyDisposeResidentialPage(backLink))
+          case _                                       => Redirect(redirectToCheckYourAnswers(state))
+        }
       }
   }
 
   def disposalDateTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) {
-      case (_, state) =>
-        val triageAnswers = triageAnswersFomState(state)
-        val isATrust      = state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
-        lazy val backLink = triageAnswers.fold(
-          _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
-          _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
-        )
+    withState(request) { (_, state) =>
+      val triageAnswers = triageAnswersFomState(state)
+      val isATrust      = state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
+      lazy val backLink = triageAnswers.fold(
+        _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+        _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
+      )
 
-        triageAnswers.fold(
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
-        ) match {
-          case None => Redirect(redirectToCheckYourAnswers(state))
-          case Some(wasUk) =>
-            if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink, isATrust))
-            else Ok(disposalDateTooEarlyNonUkResidents(backLink, isATrust))
-        }
+      triageAnswers.fold(
+        _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+        _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+      ) match {
+        case None => Redirect(redirectToCheckYourAnswers(state))
+        case Some(wasUk) =>
+          if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink, isATrust))
+          else Ok(disposalDateTooEarlyNonUkResidents(backLink, isATrust))
+      }
     }
   }
 
   def assetTypeNotYetImplemented(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) {
-      case (_, state) =>
-        val triageAnswers = triageAnswersFomState(state)
-        lazy val backLink = triageAnswers.fold(
-          _ => routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents(),
-          _ => routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
+    withState(request) { (_, state) =>
+      val triageAnswers = triageAnswersFomState(state)
+      lazy val backLink = triageAnswers.fold(
+        _ => routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents(),
+        _ => routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
+      )
+
+      def hasSupportedAssetType(assetTypes: List[AssetType]): Boolean =
+        assetTypes === List(AssetType.Residential) || assetTypes === List(AssetType.NonResidential)
+
+      triageAnswers.fold[Option[List[AssetType]]](
+        _.fold(_.assetTypes, c => Some(c.assetTypes)),
+        _.fold(
+          i => i.assetType.map(a => List(a)),
+          c => Some(List(c.assetType))
         )
-
-        def hasSupportedAssetType(assetTypes: List[AssetType]): Boolean =
-          assetTypes === List(AssetType.Residential) || assetTypes === List(AssetType.NonResidential)
-
-        triageAnswers.fold[Option[List[AssetType]]](
-          _.fold(_.assetTypes, c => Some(c.assetTypes)),
-          _.fold(
-            i => i.assetType.map(a => List(a)),
-            c => Some(List(c.assetType))
-          )
-        ) match {
-          case Some(assetTypes) if !hasSupportedAssetType(assetTypes) => Ok(assetTypeNotYetImplementedPage(backLink))
-          case _                                                      => Redirect(redirectToCheckYourAnswers(state))
-        }
+      ) match {
+        case Some(assetTypes) if !hasSupportedAssetType(assetTypes) => Ok(assetTypeNotYetImplementedPage(backLink))
+        case _                                                      => Redirect(redirectToCheckYourAnswers(state))
+      }
     }
   }
 
@@ -300,19 +293,18 @@ class CommonTriageQuestionsController @Inject() (
 
   def capacitorsAndPersonalRepresentativesNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withState(request) {
-        case (_, state) =>
-          val individualUserType = getIndividualUserType(state)
-          if (individualUserType.contains(IndividualUserType.Capacitor) || individualUserType
-                .contains(IndividualUserType.PersonalRepresentative))
-            Ok(capacitorsAndPersonalRepresentativesNotHandledPage())
-          else
-            Redirect(
-              triageAnswersFomState(state).fold(
-                _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                _ => routes.SingleDisposalsTriageController.checkYourAnswers()
-              )
+      withState(request) { (_, state) =>
+        val individualUserType = getIndividualUserType(state)
+        if (individualUserType.contains(IndividualUserType.Capacitor) || individualUserType
+              .contains(IndividualUserType.PersonalRepresentative))
+          Ok(capacitorsAndPersonalRepresentativesNotHandledPage())
+        else
+          Redirect(
+            triageAnswersFomState(state).fold(
+              _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              _ => routes.SingleDisposalsTriageController.checkYourAnswers()
             )
+          )
       }
   }
 
@@ -418,14 +410,11 @@ class CommonTriageQuestionsController @Inject() (
               ),
             s =>
               s.copy(
-                triageAnswers             = updateSingleDisposalAnswers(s.triageAnswers),
-                propertyAddress           = None,
-                disposalDetailsAnswers    = None,
-                acquisitionDetailsAnswers = None,
-                reliefDetailsAnswers = s.reliefDetailsAnswers.map(
-                  _.unset(_.privateResidentsRelief)
-                    .unset(_.lettingsRelief)
-                ),
+                triageAnswers              = updateSingleDisposalAnswers(s.triageAnswers),
+                propertyAddress            = None,
+                disposalDetailsAnswers     = None,
+                acquisitionDetailsAnswers  = None,
+                reliefDetailsAnswers       = s.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss          = None,
                 uploadSupportingDocuments  = None

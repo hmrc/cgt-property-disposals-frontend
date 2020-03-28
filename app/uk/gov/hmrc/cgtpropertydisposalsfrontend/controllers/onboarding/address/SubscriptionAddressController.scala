@@ -69,6 +69,8 @@ class SubscriptionAddressController @Inject() (
   val subscriptionReadyAddressSourceLens: Lens[SubscriptionReady, AddressSource] =
     lens[SubscriptionReady].subscriptionDetails.addressSource
 
+  def isATrust(journey: SubscriptionReady): Boolean = journey.subscriptionDetails.name.isLeft
+
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, SubscriptionReady)] =

@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
@@ -92,7 +92,9 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
+      behave like displayEnterUkAddressPage(UserType.Organisation, performAction)
 
     }
 
@@ -138,7 +140,9 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(performAction)
+      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Agent, performAction)
+      behave like enterPostcodePage(UserType.Organisation, performAction)
 
     }
 
@@ -161,6 +165,19 @@ class SubscriptionAddressControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like displaySelectAddress(
+        UserType.Individual,
+        performAction,
+        controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Agent,
+        performAction,
+        controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Organisation,
         performAction,
         controllers.onboarding.routes.SubscriptionController.checkYourDetails()
       )

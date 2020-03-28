@@ -54,6 +54,8 @@ trait AddressController[J <: JourneyStatus] {
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
+  def isATrust(journey: J): Boolean
+
   def updateAddress(journey: J, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier,
     request: Request[_]
@@ -123,7 +125,8 @@ trait AddressController[J <: JourneyStatus] {
               backLinkCall,
               enterUkAddressSubmitCall,
               enterPostcodeCall,
-              toAddressJourneyType(journey)
+              toAddressJourneyType(journey),
+              isATrust(journey)
             )
           )
       }
@@ -143,7 +146,8 @@ trait AddressController[J <: JourneyStatus] {
                     backLinkCall,
                     enterUkAddressSubmitCall,
                     enterPostcodeCall,
-                    toAddressJourneyType(journey)
+                    toAddressJourneyType(journey),
+                    isATrust(journey)
                   )
                 ),
               storeAddress(continueCall, journey, true)
@@ -201,7 +205,8 @@ trait AddressController[J <: JourneyStatus] {
               enterPostcodePageBackLink(journey),
               enterPostcodeSubmitCall,
               enterUkAddressCall,
-              toAddressJourneyType(journey)
+              toAddressJourneyType(journey),
+              isATrust(journey)
             )
           )
       }
@@ -221,7 +226,8 @@ trait AddressController[J <: JourneyStatus] {
                     enterPostcodePageBackLink(journey),
                     enterPostcodeSubmitCall,
                     enterUkAddressCall,
-                    toAddressJourneyType(journey)
+                    toAddressJourneyType(journey),
+                    isATrust(journey)
                   )
                 ), {
                 case AddressLookupRequest(postcode, filter) =>
@@ -233,7 +239,8 @@ trait AddressController[J <: JourneyStatus] {
                         isUkCall,
                         enterPostcodeSubmitCall,
                         enterUkAddressCall,
-                        toAddressJourneyType(journey)
+                        toAddressJourneyType(journey),
+                        isATrust(journey)
                       )
                     )
                   }
@@ -286,7 +293,8 @@ trait AddressController[J <: JourneyStatus] {
                   enterPostcodeCall,
                   selectAddressSubmitCall,
                   enterUkAddressCall,
-                  toAddressJourneyType(journey)
+                  toAddressJourneyType(journey),
+                  isATrust(journey)
                 )
               )
           }
@@ -314,7 +322,8 @@ trait AddressController[J <: JourneyStatus] {
                         enterPostcodeCall,
                         selectAddressSubmitCall,
                         enterUkAddressCall,
-                        toAddressJourneyType(journey)
+                        toAddressJourneyType(journey),
+                        isATrust(journey)
                       )
                     ),
                   storeAddress(continueCall, journey, false)

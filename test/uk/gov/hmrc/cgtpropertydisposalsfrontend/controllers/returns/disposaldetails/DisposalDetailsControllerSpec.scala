@@ -167,6 +167,23 @@ class DisposalDetailsControllerSpec
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.howMuchDidYouOwnSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: DisposalDetailsAnswers) =
+        d.copy(
+          disposalDetailsAnswers = Some(newAnswers),
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
+            _.unset(_.acquisitionDate)
+              .unset(_.acquisitionPrice)
+              .unset(_.rebasedAcquisitionPrice)
+              .unset(_.shouldUseRebase)
+          ),
+          initialGainOrLoss = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief)
+              .unset(_.lettingsRelief)
+          ),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+        )
+
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
       "show a form error" when {
@@ -228,13 +245,8 @@ class DisposalDetailsControllerSpec
         val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Half)
         val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
         val newShare                        = ShareOfProperty.Full
-        val newDraftReturn = draftReturn.copy(
-          disposalDetailsAnswers = Some(
-            currentAnswers.copy(
-              shareOfProperty = newShare
-            )
-          )
-        )
+        val newDraftReturn =
+          updateDraftReturn(draftReturn, IncompleteDisposalDetailsAnswers(Some(newShare), None, None))
 
         "there is an error updating the draft return" in {
 
@@ -273,18 +285,18 @@ class DisposalDetailsControllerSpec
 
       }
 
-      "redirect to the disposal price page" when {
+      "redirect to the cya page" when {
 
         "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
           val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
           val (newShare, newShareValue)       = ShareOfProperty.Full -> "0"
           val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
-            shareOfProperty = Some(newShare)
+            shareOfProperty = Some(newShare),
+            disposalPrice   = None,
+            disposalFees    = None
           )
-          val newDraftReturn = draftReturn.copy(
-            disposalDetailsAnswers = Some(updatedAnswers)
-          )
+          val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -301,7 +313,7 @@ class DisposalDetailsControllerSpec
 
           checkIsRedirect(
             performAction(Seq("shareOfProperty" -> newShareValue)),
-            controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
           )
         }
 
@@ -311,11 +323,11 @@ class DisposalDetailsControllerSpec
           val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
           val (newShare, newShareValue)       = ShareOfProperty.Half -> "1"
           val updatedAnswers = currentAnswers.copy(
-            shareOfProperty = Some(newShare)
+            shareOfProperty = Some(newShare),
+            disposalPrice   = None,
+            disposalFees    = None
           )
-          val newDraftReturn = draftReturn.copy(
-            disposalDetailsAnswers = Some(updatedAnswers)
-          )
+          val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -332,47 +344,43 @@ class DisposalDetailsControllerSpec
 
           checkIsRedirect(
             performAction(Seq("shareOfProperty" -> newShareValue)),
-            controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
           )
 
         }
 
-      }
-
-      "redirect to the cya page" when {
-
         "the user has answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val percentage = 40.23
-          val currentAnswers =
-            sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Full)
-          val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+          forAll { c: CompleteDisposalDetailsAnswers =>
+            val currentAnswers                  = c.copy(shareOfProperty = ShareOfProperty.Full)
+            val percentage                      = 40.23
+            val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
-          val (newShare, newShareValue) = ShareOfProperty.Other(percentage) -> "2"
-          val newDraftReturn = draftReturn.copy(
-            disposalDetailsAnswers = Some(
-              currentAnswers.copy(
-                shareOfProperty = newShare
+            val (newShare, newShareValue) = ShareOfProperty.Other(percentage) -> "2"
+            val newDraftReturn =
+              updateDraftReturn(draftReturn, IncompleteDisposalDetailsAnswers(Some(newShare), None, None))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
               )
+              mockStoreSession(
+                session.copy(
+                  journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
+                )
+              )(Right(()))
+            }
+            checkIsRedirect(
+              performAction(Seq("shareOfProperty" -> newShareValue, "percentageShare" -> percentage.toString)),
+              controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
             )
-          )
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
-              Right(())
-            )
-            mockStoreSession(
-              session.copy(
-                journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
-              )
-            )(Right(()))
           }
-
-          checkIsRedirect(
-            performAction(Seq("shareOfProperty" -> newShareValue, "percentageShare" -> percentage.toString)),
-            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-          )
 
         }
 
@@ -399,13 +407,8 @@ class DisposalDetailsControllerSpec
 
       "convert a submitted option of 'Other' with value 100 to the 'Full' option" in {
         val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
-
-        val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
-          shareOfProperty = Some(ShareOfProperty.Full)
-        )
-        val newDraftReturn = draftReturn.copy(
-          disposalDetailsAnswers = Some(updatedAnswers)
-        )
+        val newDraftReturn =
+          updateDraftReturn(draftReturn, IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Full), None, None))
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -422,19 +425,14 @@ class DisposalDetailsControllerSpec
 
         checkIsRedirect(
           performAction(Seq("shareOfProperty" -> "2", "percentageShare" -> "100")),
-          controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
         )
       }
 
       "convert a submitted option of 'Other' with value 50 to the 'Half' option" in {
         val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
-
-        val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
-          shareOfProperty = Some(ShareOfProperty.Half)
-        )
-        val newDraftReturn = draftReturn.copy(
-          disposalDetailsAnswers = Some(updatedAnswers)
-        )
+        val newDraftReturn =
+          updateDraftReturn(draftReturn, IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Half), None, None))
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -451,7 +449,7 @@ class DisposalDetailsControllerSpec
 
         checkIsRedirect(
           performAction(Seq("shareOfProperty" -> "2", "percentageShare" -> "50")),
-          controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
         )
       }
 
@@ -571,6 +569,17 @@ class DisposalDetailsControllerSpec
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWasDisposalPriceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: DisposalDetailsAnswers) =
+        d.copy(
+          disposalDetailsAnswers = Some(newAnswers),
+          initialGainOrLoss      = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief)
+              .unset(_.lettingsRelief)
+          ),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+        )
+
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
       behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
@@ -617,13 +626,7 @@ class DisposalDetailsControllerSpec
         val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
         val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
         val newDisposalPrice                = AmountInPence.fromPounds(2d)
-        val newDraftReturn = draftReturn.copy(
-          disposalDetailsAnswers = Some(
-            currentAnswers.copy(
-              disposalPrice = newDisposalPrice
-            )
-          )
-        )
+        val newDraftReturn                  = updateDraftReturn(draftReturn, currentAnswers.copy(disposalPrice = newDisposalPrice))
 
         "there is an error updating the draft return" in {
 
@@ -661,7 +664,7 @@ class DisposalDetailsControllerSpec
 
       }
 
-      "redirect to the disposal fees page" when {
+      "redirect to the cya page" when {
 
         "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
@@ -675,9 +678,7 @@ class DisposalDetailsControllerSpec
           val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
             disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
           )
-          val newDraftReturn = draftReturn.copy(
-            disposalDetailsAnswers = Some(updatedAnswers)
-          )
+          val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -697,7 +698,7 @@ class DisposalDetailsControllerSpec
 
           checkIsRedirect(
             performAction(Seq("disposalPrice" -> newDisposalPrice.toString)),
-            controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees()
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
           )
         }
 
@@ -711,50 +712,8 @@ class DisposalDetailsControllerSpec
           val updatedAnswers = currentAnswers.copy(
             disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
           )
-          val newDraftReturn = draftReturn.copy(
-            disposalDetailsAnswers = Some(updatedAnswers)
-          )
+          val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
-              Right(())
-            )
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  draftReturn = newDraftReturn
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(Seq("disposalPrice" -> newDisposalPrice.toString)),
-            controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees()
-          )
-
-        }
-
-      }
-
-      "redirect to the cya page" when {
-
-        "the user has answered all of the disposal details questions " +
-          "and the draft return and session data has been successfully updated" in {
-          val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
-          val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
-
-          val newDisposalPrice = 2d
-          val newDraftReturn = draftReturn.copy(
-            disposalDetailsAnswers = Some(
-              currentAnswers.copy(
-                disposalPrice = AmountInPence.fromPounds(newDisposalPrice)
-              )
-            )
-          )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -776,6 +735,46 @@ class DisposalDetailsControllerSpec
             controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
           )
 
+        }
+
+        "the user has answered all of the disposal details questions " +
+          "and the draft return and session data has been successfully updated" in {
+          forAll { c: CompleteDisposalDetailsAnswers =>
+            val currentAnswers                  = c.copy(disposalPrice = AmountInPence.fromPounds(1d))
+            val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+
+            val newDisposalPrice = 2d
+            val newDraftReturn = updateDraftReturn(
+              draftReturn,
+              currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice))
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
+              )
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    draftReturn = newDraftReturn
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(Seq("disposalPrice" -> newDisposalPrice.toString)),
+              controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+            )
+
+          }
         }
 
       }
@@ -964,6 +963,17 @@ class DisposalDetailsControllerSpec
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWereDisposalFeesSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: DisposalDetailsAnswers) =
+        d.copy(
+          disposalDetailsAnswers = Some(newAnswers),
+          initialGainOrLoss      = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.lettingsRelief)
+              .unset(_.privateResidentsRelief)
+          ),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+        )
+
       val requiredPreviousAnswers = IncompleteDisposalDetailsAnswers.empty
         .copy(shareOfProperty = Some(ShareOfProperty.Full), disposalPrice = Some(AmountInPence.fromPounds(2d)))
 
@@ -1031,11 +1041,10 @@ class DisposalDetailsControllerSpec
         val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
         val newDisposalFees = AmountInPence.fromPounds(2d)
-        val newDraftReturn = draftReturn.copy(
-          disposalDetailsAnswers = Some(
-            currentAnswers.copy(
-              disposalFees = newDisposalFees
-            )
+        val newDraftReturn = updateDraftReturn(
+          draftReturn,
+          currentAnswers.copy(
+            disposalFees = newDisposalFees
           )
         )
 
@@ -1070,7 +1079,7 @@ class DisposalDetailsControllerSpec
 
       }
 
-      "redirect to the check your answers page" when {
+      "redirect to the cya page" when {
 
         "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
@@ -1084,9 +1093,7 @@ class DisposalDetailsControllerSpec
           val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
             disposalFees = Some(AmountInPence.fromPounds(newDisposalFees))
           )
-          val newDraftReturn = draftReturn.copy(
-            disposalDetailsAnswers = Some(updatedAnswers)
-          )
+          val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1103,21 +1110,16 @@ class DisposalDetailsControllerSpec
           )
         }
 
-      }
-
-      "redirect to the cya page" when {
-
         "the user has answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
           val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
           val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
           val newDisposalFees = 2d
-          val newDraftReturn = draftReturn.copy(
-            disposalDetailsAnswers = Some(
-              currentAnswers.copy(
-                disposalFees = AmountInPence.fromPounds(newDisposalFees)
-              )
+          val newDraftReturn = updateDraftReturn(
+            draftReturn,
+            currentAnswers.copy(
+              disposalFees = AmountInPence.fromPounds(newDisposalFees)
             )
           )
           inSequence {

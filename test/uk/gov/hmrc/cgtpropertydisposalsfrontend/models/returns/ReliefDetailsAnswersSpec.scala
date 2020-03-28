@@ -39,16 +39,16 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
 
     "ReliefDetailsAnswers" must {
 
-      "have a method which unsets fields" when {
+      val otherReliefs    = sample[OtherReliefsOption.OtherReliefs]
+      val completeAnswers = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+      val incompleteAnswers =
+        IncompleteReliefDetailsAnswers(
+          Some(completeAnswers.privateResidentsRelief),
+          Some(completeAnswers.lettingsRelief),
+          Some(otherReliefs)
+        )
 
-        val otherReliefs    = sample[OtherReliefsOption.OtherReliefs]
-        val completeAnswers = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
-        val incompleteAnswers =
-          IncompleteReliefDetailsAnswers(
-            Some(completeAnswers.privateResidentsRelief),
-            Some(completeAnswers.lettingsRelief),
-            Some(otherReliefs)
-          )
+      "have a method which unsets fields" when {
 
         "given incomplete answers" in {
           incompleteAnswers.unset(_.privateResidentsRelief) shouldBe incompleteAnswers.copy(privateResidentsRelief =
@@ -64,6 +64,18 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
           completeAnswers.unset(_.otherReliefs)           shouldBe incompleteAnswers.copy(otherReliefs           = None)
         }
 
+      }
+
+      "have a method which unsets values of private residents relief and letting relief" in {
+        val expectedResult =
+          IncompleteReliefDetailsAnswers(
+            None,
+            None,
+            Some(otherReliefs)
+          )
+
+        incompleteAnswers.unsetPrrAndLettingRelief() shouldBe expectedResult
+        completeAnswers.unsetPrrAndLettingRelief()   shouldBe expectedResult
       }
 
     }

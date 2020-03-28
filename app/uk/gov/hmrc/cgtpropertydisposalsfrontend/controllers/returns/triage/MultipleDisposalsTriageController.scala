@@ -81,63 +81,59 @@ class MultipleDisposalsTriageController @Inject() (
     with SessionUpdates {
 
   def guidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        val backLink = answers.fold(
-          _ => routes.CommonTriageQuestionsController.howManyProperties(),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-        Ok(guidancePage(backLink, state.isRight))
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      val backLink = answers.fold(
+        _ => routes.CommonTriageQuestionsController.howManyProperties(),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      )
+      Ok(guidancePage(backLink, state.isRight))
     }
   }
 
   def guidanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, _, answers) =>
-        answers.fold(
-          _ => Redirect(routes.MultipleDisposalsTriageController.howManyDisposals()),
-          _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-        )
+    withMultipleDisposalTriageAnswers(request) { (_, _, answers) =>
+      answers.fold(
+        _ => Redirect(routes.MultipleDisposalsTriageController.howManyDisposals()),
+        _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+      )
     }
   }
 
   def howManyDisposals(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        val numberOfDisposals = answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties))
-        val form              = numberOfDisposals.fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
-        val backLink = answers.fold(
-          _ => routes.MultipleDisposalsTriageController.guidance(),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-        Ok(howManyPropertiesPage(form, backLink, state.isRight))
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      val numberOfDisposals = answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties))
+      val form              = numberOfDisposals.fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
+      val backLink = answers.fold(
+        _ => routes.MultipleDisposalsTriageController.guidance(),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      )
+      Ok(howManyPropertiesPage(form, backLink, state.isRight))
     }
   }
 
   def howManyDisposalsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        numberOfPropertiesForm
-          .bindFromRequest()
-          .fold(
-            { formWithErrors =>
-              val backLink = answers.fold(
-                _ => routes.MultipleDisposalsTriageController.guidance(),
-                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-              )
-              BadRequest(
-                howManyPropertiesPage(formWithErrors, backLink, state.isRight)
-              )
-            }, { numberOfProperties =>
-              if (answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties)).contains(numberOfProperties)) {
-                Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-              } else {
-                val (newState, redirectTo) = updateNumberOfPropertiesWithRedirect(numberOfProperties, answers, state)
-                updateStateAndThen(newState, Redirect(redirectTo))
-              }
-
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      numberOfPropertiesForm
+        .bindFromRequest()
+        .fold(
+          { formWithErrors =>
+            val backLink = answers.fold(
+              _ => routes.MultipleDisposalsTriageController.guidance(),
+              _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+            BadRequest(
+              howManyPropertiesPage(formWithErrors, backLink, state.isRight)
+            )
+          }, { numberOfProperties =>
+            if (answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties)).contains(numberOfProperties)) {
+              Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+            } else {
+              val (newState, redirectTo) = updateNumberOfPropertiesWithRedirect(numberOfProperties, answers, state)
+              updateStateAndThen(newState, Redirect(redirectTo))
             }
-          )
+
+          }
+        )
     }
   }
 
@@ -177,147 +173,82 @@ class MultipleDisposalsTriageController @Inject() (
   }
 
   def wereYouAUKResident(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        val wereYouUKResident = answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
-        val form              = wereYouUKResident.fold(wasAUkResidentForm)(wasAUkResidentForm.fill)
-        val backLink = answers.fold(
-          _ => routes.MultipleDisposalsTriageController.howManyDisposals(),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      val wereYouUKResident = answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+      val form              = wereYouUKResident.fold(wasAUkResidentForm)(wasAUkResidentForm.fill)
+      val backLink = answers.fold(
+        _ => routes.MultipleDisposalsTriageController.howManyDisposals(),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      )
 
-        Ok(wereYouAUKResidentPage(form, backLink, state.isRight))
+      Ok(wereYouAUKResidentPage(form, backLink, state.isRight))
     }
   }
 
   def wereYouAUKResidentSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        wasAUkResidentForm
-          .bindFromRequest()
-          .fold(
-            { formWithErrors =>
-              val backLink = answers.fold(
-                _ => routes.MultipleDisposalsTriageController.howManyDisposals(),
-                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-              )
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      wasAUkResidentForm
+        .bindFromRequest()
+        .fold(
+          { formWithErrors =>
+            val backLink = answers.fold(
+              _ => routes.MultipleDisposalsTriageController.howManyDisposals(),
+              _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
 
-              BadRequest(
-                wereYouAUKResidentPage(formWithErrors, backLink, state.isRight)
-              )
-            }, { wereUKResident =>
-              if (answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())).contains(wereUKResident)) {
-                Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-              } else {
-                val updatedAnswers = answers
-                  .unset(_.countryOfResidence)
-                  .unset(_.assetTypes)
-                  .unset(_.wereAllPropertiesResidential)
-                  .copy(wasAUKResident = Some(wereUKResident))
+            BadRequest(
+              wereYouAUKResidentPage(formWithErrors, backLink, state.isRight)
+            )
+          }, { wereUKResident =>
+            if (answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())).contains(wereUKResident)) {
+              Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+            } else {
+              val updatedAnswers = answers
+                .unset(_.countryOfResidence)
+                .unset(_.assetTypes)
+                .unset(_.wereAllPropertiesResidential)
+                .copy(wasAUKResident = Some(wereUKResident))
 
-                val newState = updateState(
-                  state,
-                  updatedAnswers,
-                  d =>
-                    d.copy(
-                      examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
-                        _.unset(_.address)
-                          .unset(_.disposalPrice)
-                          .unset(_.acquisitionPrice)
-                      ),
-                      yearToDateLiabilityAnswers = None,
-                      uploadSupportingDocuments  = None
-                    )
-                )
-                updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
-              }
+              val newState = updateState(
+                state,
+                updatedAnswers,
+                d =>
+                  d.copy(
+                    examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
+                      _.unset(_.address)
+                        .unset(_.disposalPrice)
+                        .unset(_.acquisitionPrice)
+                    ),
+                    yearToDateLiabilityAnswers = None,
+                    uploadSupportingDocuments  = None
+                  )
+              )
+              updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
             }
-          )
+          }
+        )
     }
   }
 
   def wereAllPropertiesResidential(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withMultipleDisposalTriageAnswers(request) {
-        case (_, state, answers) =>
-          val werePropertiesResidential =
-            answers.fold(_.wereAllPropertiesResidential, c => Some(c.assetTypes === List(AssetType.Residential)))
-          val form =
-            werePropertiesResidential.fold(wereAllPropertiesResidentialForm)(wereAllPropertiesResidentialForm.fill)
-          val backLink = answers.fold(
-            _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
-            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-          Ok(wereAllPropertiesResidentialPage(form, backLink, state.isRight))
+      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+        val werePropertiesResidential =
+          answers.fold(_.wereAllPropertiesResidential, c => Some(c.assetTypes === List(AssetType.Residential)))
+        val form =
+          werePropertiesResidential.fold(wereAllPropertiesResidentialForm)(wereAllPropertiesResidentialForm.fill)
+        val backLink = answers.fold(
+          _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+        Ok(wereAllPropertiesResidentialPage(form, backLink, state.isRight))
       }
   }
 
   def wereAllPropertiesResidentialSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withMultipleDisposalTriageAnswers(request) {
-        case (_, state, answers) =>
-          wereAllPropertiesResidentialForm
-            .bindFromRequest()
-            .fold(
-              { formWithErrors =>
-                val backLink = answers.fold(
-                  _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
-                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-                )
-                BadRequest(
-                  wereAllPropertiesResidentialPage(
-                    formWithErrors,
-                    backLink,
-                    state.isRight
-                  )
-                )
-              }, { wereAllPropertiesResidential =>
-                if (answers
-                      .fold(_.wereAllPropertiesResidential, c => Some(isResidentialAssetType(c.assetTypes)))
-                      .contains(wereAllPropertiesResidential)) {
-                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                } else {
-                  val updatedAnswers =
-                    answers
-                      .fold(identity, IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers)
-                      .copy(
-                        wereAllPropertiesResidential = Some(wereAllPropertiesResidential),
-                        assetTypes                   = Some(assetType(wereAllPropertiesResidential))
-                      )
-
-                  val newState = updateState(state, updatedAnswers, identity)
-                  updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
-                }
-              }
-            )
-      }
-  }
-
-  def countryOfResidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        val wasUkResident = answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
-
-        if (!wasUkResident.contains(false)) {
-          Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-        } else {
-          val countryOfResidence =
-            answers.fold(_.countryOfResidence, c => Some(c.countryOfResidence))
-          val form =
-            countryOfResidence.fold(countryOfResidenceForm)(countryOfResidenceForm.fill)
-          val backLink = answers.fold(
-            _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
-            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-          Ok(countryOfResidencePage(form, backLink, state.isRight))
-        }
-    }
-  }
-
-  def countryOfResidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        countryOfResidenceForm
+      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+        wereAllPropertiesResidentialForm
           .bindFromRequest()
           .fold(
             { formWithErrors =>
@@ -325,252 +256,305 @@ class MultipleDisposalsTriageController @Inject() (
                 _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
                 _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
-
               BadRequest(
-                countryOfResidencePage(
+                wereAllPropertiesResidentialPage(
                   formWithErrors,
                   backLink,
                   state.isRight
                 )
               )
-            }, { countryOfResidence =>
+            }, { wereAllPropertiesResidential =>
               if (answers
-                    .fold(_.countryOfResidence, c => Some(c.countryOfResidence))
-                    .contains(countryOfResidence)) {
+                    .fold(_.wereAllPropertiesResidential, c => Some(isResidentialAssetType(c.assetTypes)))
+                    .contains(wereAllPropertiesResidential)) {
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               } else {
                 val updatedAnswers =
-                  answers.fold[MultipleDisposalsTriageAnswers](
-                    _.copy(countryOfResidence = Some(countryOfResidence)),
-                    _.copy(countryOfResidence = countryOfResidence)
-                  )
-
-                val newState = updateState(
-                  state,
-                  updatedAnswers,
-                  d =>
-                    d.copy(
-                      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-                        case _: CalculatedYTDAnswers    => None
-                        case n: NonCalculatedYTDAnswers => Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
-                      }
+                  answers
+                    .fold(identity, IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers)
+                    .copy(
+                      wereAllPropertiesResidential = Some(wereAllPropertiesResidential),
+                      assetTypes                   = Some(assetType(wereAllPropertiesResidential))
                     )
-                )
+
+                val newState = updateState(state, updatedAnswers, identity)
                 updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
               }
-
             }
           )
+      }
+  }
+
+  def countryOfResidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      val wasUkResident = answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+
+      if (!wasUkResident.contains(false)) {
+        Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+      } else {
+        val countryOfResidence =
+          answers.fold(_.countryOfResidence, c => Some(c.countryOfResidence))
+        val form =
+          countryOfResidence.fold(countryOfResidenceForm)(countryOfResidenceForm.fill)
+        val backLink = answers.fold(
+          _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+        Ok(countryOfResidencePage(form, backLink, state.isRight))
+      }
+    }
+  }
+
+  def countryOfResidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      countryOfResidenceForm
+        .bindFromRequest()
+        .fold(
+          { formWithErrors =>
+            val backLink = answers.fold(
+              _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+              _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+
+            BadRequest(
+              countryOfResidencePage(
+                formWithErrors,
+                backLink,
+                state.isRight
+              )
+            )
+          }, { countryOfResidence =>
+            if (answers
+                  .fold(_.countryOfResidence, c => Some(c.countryOfResidence))
+                  .contains(countryOfResidence)) {
+              Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+            } else {
+              val updatedAnswers =
+                answers.fold[MultipleDisposalsTriageAnswers](
+                  _.copy(countryOfResidence = Some(countryOfResidence)),
+                  _.copy(countryOfResidence = countryOfResidence)
+                )
+
+              val newState = updateState(
+                state,
+                updatedAnswers,
+                d =>
+                  d.copy(
+                    yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+                      case _: CalculatedYTDAnswers    => None
+                      case n: NonCalculatedYTDAnswers => Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
+                    }
+                  )
+              )
+              updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
+            }
+
+          }
+        )
     }
   }
 
   def whenWereContractsExchanged(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        val taxYearExchanged = answers.fold(_.taxYearAfter6April2020, _ => Some(true))
-        val form             = taxYearExchanged.fold(taxYearExchangedForm)(taxYearExchangedForm.fill)
-        val backLink = answers.fold(
-          i => incompleteJourneyTaxYearBackLink(i.wasAUKResident.contains(true)),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      val taxYearExchanged = answers.fold(_.taxYearAfter6April2020, _ => Some(true))
+      val form             = taxYearExchanged.fold(taxYearExchangedForm)(taxYearExchangedForm.fill)
+      val backLink = answers.fold(
+        i => incompleteJourneyTaxYearBackLink(i.wasAUKResident.contains(true)),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      )
+      Ok(
+        taxYearExchangedPage(
+          form,
+          backLink,
+          state.isRight
         )
-        Ok(
-          taxYearExchangedPage(
-            form,
-            backLink,
-            state.isRight
-          )
-        )
+      )
     }
   }
 
   def whenWereContractsExchangedSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withMultipleDisposalTriageAnswers(request) {
-        case (_, state, answers) =>
-          taxYearExchangedForm
-            .bindFromRequest()
-            .fold(
-              { formWithErrors =>
-                val backLink = answers.fold(
-                  i => incompleteJourneyTaxYearBackLink(i.wasAUKResident.contains(true)),
-                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-                )
-                BadRequest(
-                  taxYearExchangedPage(
-                    formWithErrors,
-                    backLink,
-                    state.isRight
-                  )
-                )
-              }, { taxYearAfter6April2020 =>
-                if (answers.fold(_.taxYearAfter6April2020, _ => Some(true)).contains(taxYearAfter6April2020)) {
-                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                } else {
-
-                  val result =
-                    for {
-                      taxYear <- if (taxYearAfter6April2020) taxYearService.taxYear(LocalDateUtils.today())
-                                else EitherT.pure[Future, Error](None)
-                      updatedAnswers <- EitherT.fromEither[Future](
-                                         updateTaxYearToAnswers(taxYearAfter6April2020, taxYear, answers)
-                                       )
-                      newState = updateState(
-                        state,
-                        updatedAnswers,
-                        d =>
-                          d.copy(examplePropertyDetailsAnswers =
-                            d.examplePropertyDetailsAnswers.map(_.unset(_.disposalDate))
-                          )
-                      )
-                      _ <- newState.fold(
-                            _ => EitherT.pure[Future, Error](()),
-                            r =>
-                              returnsService.storeDraftReturn(
-                                r.draftReturn,
-                                r.subscribedDetails.cgtReference,
-                                r.agentReferenceNumber
-                              )
-                          )
-                      _ <- EitherT(
-                            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState.merge)))
-                          )
-                    } yield ()
-
-                  result.fold(
-                    { e =>
-                      logger.warn("Could not find tax year or update session", e)
-                      errorHandler.errorResult()
-                    },
-                    _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                  )
-
-                }
-              }
-            )
-      }
-  }
-
-  def assetTypeForNonUkResidents(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        val assetType = answers.fold(_.assetTypes, c => Some(c.assetTypes))
-        val form      = assetType.fold(assetTypeForNonUkResidentsForm)(assetTypeForNonUkResidentsForm.fill)
-        val backLink = answers.fold(
-          _ => routes.MultipleDisposalsTriageController.countryOfResidence(),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-        Ok(assetTypeForNonUkResidentsPage(form, backLink, state.isRight))
-    }
-  }
-
-  def assetTypeForNonUkResidentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withMultipleDisposalTriageAnswers(request) {
-        case (_, state, answers) =>
-          assetTypeForNonUkResidentsForm
-            .bindFromRequest()
-            .fold(
-              { formWithErrors =>
-                val backLink = answers.fold(
-                  _ => routes.MultipleDisposalsTriageController.countryOfResidence(),
-                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-                )
-                BadRequest(
-                  assetTypeForNonUkResidentsPage(
-                    formWithErrors,
-                    backLink,
-                    state.isRight
-                  )
-                )
-              }, { assetTypes =>
-                if (answers.fold(_.assetTypes, c => Some(c.assetTypes)).contains(assetTypes)) {
-                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                } else {
-                  val updatedAnswers =
-                    answers.fold[MultipleDisposalsTriageAnswers](
-                      _.copy(assetTypes = Some(assetTypes)),
-                      complete =>
-                        IncompleteMultipleDisposalsTriageAnswers
-                          .fromCompleteAnswers(complete)
-                          .copy(
-                            assetTypes = Some(assetTypes)
-                          )
-                    )
-
-                  val newState = updateState(
-                    state,
-                    updatedAnswers,
-                    d =>
-                      d.copy(
-                        examplePropertyDetailsAnswers = None,
-                        yearToDateLiabilityAnswers    = None,
-                        uploadSupportingDocuments     = None
-                      )
-                  )
-                  updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
-                }
-              }
-            )
-      }
-  }
-
-  def completionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        val completionDate = answers.fold(_.completionDate, c => Some(c.completionDate))
-        val today          = LocalDateUtils.today()
-        val form           = completionDate.fold(completionDateForm(today))(completionDateForm(today).fill)
-        val backLink = answers.fold(
-          _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-        Ok(completionDatePage(form, backLink, state.isRight))
-    }
-  }
-
-  def completionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, answers) =>
-        completionDateForm(LocalDateUtils.today())
+      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+        taxYearExchangedForm
           .bindFromRequest()
           .fold(
             { formWithErrors =>
               val backLink = answers.fold(
-                _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+                i => incompleteJourneyTaxYearBackLink(i.wasAUKResident.contains(true)),
                 _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
               BadRequest(
-                completionDatePage(
+                taxYearExchangedPage(
                   formWithErrors,
                   backLink,
                   state.isRight
                 )
               )
-            }, { completionDate =>
-              if (answers.fold(_.completionDate, c => Some(c.completionDate)).contains(completionDate)) {
+            }, { taxYearAfter6April2020 =>
+              if (answers.fold(_.taxYearAfter6April2020, _ => Some(true)).contains(taxYearAfter6April2020)) {
+                Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+              } else {
+
+                val result =
+                  for {
+                    taxYear <- if (taxYearAfter6April2020) taxYearService.taxYear(LocalDateUtils.today())
+                              else EitherT.pure[Future, Error](None)
+                    updatedAnswers <- EitherT.fromEither[Future](
+                                       updateTaxYearToAnswers(taxYearAfter6April2020, taxYear, answers)
+                                     )
+                    newState = updateState(
+                      state,
+                      updatedAnswers,
+                      d =>
+                        d.copy(examplePropertyDetailsAnswers =
+                          d.examplePropertyDetailsAnswers.map(_.unset(_.disposalDate))
+                        )
+                    )
+                    _ <- newState.fold(
+                          _ => EitherT.pure[Future, Error](()),
+                          r =>
+                            returnsService.storeDraftReturn(
+                              r.draftReturn,
+                              r.subscribedDetails.cgtReference,
+                              r.agentReferenceNumber
+                            )
+                        )
+                    _ <- EitherT(
+                          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState.merge)))
+                        )
+                  } yield ()
+
+                result.fold(
+                  { e =>
+                    logger.warn("Could not find tax year or update session", e)
+                    errorHandler.errorResult()
+                  },
+                  _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                )
+
+              }
+            }
+          )
+      }
+  }
+
+  def assetTypeForNonUkResidents(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      val assetType = answers.fold(_.assetTypes, c => Some(c.assetTypes))
+      val form      = assetType.fold(assetTypeForNonUkResidentsForm)(assetTypeForNonUkResidentsForm.fill)
+      val backLink = answers.fold(
+        _ => routes.MultipleDisposalsTriageController.countryOfResidence(),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      )
+      Ok(assetTypeForNonUkResidentsPage(form, backLink, state.isRight))
+    }
+  }
+
+  def assetTypeForNonUkResidentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+        assetTypeForNonUkResidentsForm
+          .bindFromRequest()
+          .fold(
+            { formWithErrors =>
+              val backLink = answers.fold(
+                _ => routes.MultipleDisposalsTriageController.countryOfResidence(),
+                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+              )
+              BadRequest(
+                assetTypeForNonUkResidentsPage(
+                  formWithErrors,
+                  backLink,
+                  state.isRight
+                )
+              )
+            }, { assetTypes =>
+              if (answers.fold(_.assetTypes, c => Some(c.assetTypes)).contains(assetTypes)) {
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               } else {
                 val updatedAnswers =
                   answers.fold[MultipleDisposalsTriageAnswers](
-                    _.copy(completionDate = Some(completionDate)),
-                    _.copy(completionDate = completionDate)
+                    _.copy(assetTypes = Some(assetTypes)),
+                    complete =>
+                      IncompleteMultipleDisposalsTriageAnswers
+                        .fromCompleteAnswers(complete)
+                        .copy(
+                          assetTypes = Some(assetTypes)
+                        )
                   )
+
                 val newState = updateState(
                   state,
                   updatedAnswers,
                   d =>
                     d.copy(
-                      examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
-                        _.unset(_.disposalDate)
-                      ),
-                      yearToDateLiabilityAnswers = None
+                      examplePropertyDetailsAnswers = None,
+                      yearToDateLiabilityAnswers    = None,
+                      uploadSupportingDocuments     = None
                     )
                 )
                 updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
-
               }
             }
           )
+      }
+  }
+
+  def completionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      val completionDate = answers.fold(_.completionDate, c => Some(c.completionDate))
+      val today          = LocalDateUtils.today()
+      val form           = completionDate.fold(completionDateForm(today))(completionDateForm(today).fill)
+      val backLink = answers.fold(
+        _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      )
+      Ok(completionDatePage(form, backLink, state.isRight))
+    }
+  }
+
+  def completionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      completionDateForm(LocalDateUtils.today())
+        .bindFromRequest()
+        .fold(
+          { formWithErrors =>
+            val backLink = answers.fold(
+              _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+              _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+            BadRequest(
+              completionDatePage(
+                formWithErrors,
+                backLink,
+                state.isRight
+              )
+            )
+          }, { completionDate =>
+            if (answers.fold(_.completionDate, c => Some(c.completionDate)).contains(completionDate)) {
+              Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+            } else {
+              val updatedAnswers =
+                answers.fold[MultipleDisposalsTriageAnswers](
+                  _.copy(completionDate = Some(completionDate)),
+                  _.copy(completionDate = completionDate)
+                )
+              val newState = updateState(
+                state,
+                updatedAnswers,
+                d =>
+                  d.copy(
+                    examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
+                      _.unset(_.disposalDate)
+                    ),
+                    yearToDateLiabilityAnswers = None
+                  )
+              )
+              updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
+
+            }
+          }
+        )
     }
   }
 
@@ -594,131 +578,129 @@ class MultipleDisposalsTriageController @Inject() (
     }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, state, triageAnswers) =>
-        val isIndividual = state.fold(_.subscribedDetails, _._1.subscribedDetails).userType().isRight
+    withMultipleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      val isIndividual = state.fold(_.subscribedDetails, _._1.subscribedDetails).userType().isRight
 
-        triageAnswers match {
-          case IncompleteMultipleDisposalsTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
-            Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
+      triageAnswers match {
+        case IncompleteMultipleDisposalsTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
+          Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
-          case IncompleteMultipleDisposalsTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _) =>
-            Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+        case IncompleteMultipleDisposalsTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _) =>
+          Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
 
-          case IncompleteMultipleDisposalsTriageAnswers(
-              Some(IndividualUserType.PersonalRepresentative),
-              _,
-              _,
-              _,
-              _,
-              _,
-              _,
-              _,
-              _
-              ) =>
-            Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+        case IncompleteMultipleDisposalsTriageAnswers(
+            Some(IndividualUserType.PersonalRepresentative),
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _
+            ) =>
+          Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, None, _, _, _, _, _, _, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.guidance())
+        case IncompleteMultipleDisposalsTriageAnswers(_, None, _, _, _, _, _, _, _) =>
+          Redirect(routes.MultipleDisposalsTriageController.guidance())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, None, _, _, _, _, _, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.wereYouAUKResident())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, None, _, _, _, _, _, _) =>
+          Redirect(routes.MultipleDisposalsTriageController.wereYouAUKResident())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), None, _, _, _, _, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.countryOfResidence())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), None, _, _, _, _, _) =>
+          Redirect(routes.MultipleDisposalsTriageController.countryOfResidence())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, None, _, _, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, None, _, _, _) =>
+          Redirect(routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _, _)
-              if (assetTypes =!= List(AssetType.Residential) && assetTypes =!= List(AssetType.NonResidential)) =>
-            Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _, _)
+            if (assetTypes =!= List(AssetType.Residential) && assetTypes =!= List(AssetType.NonResidential)) =>
+          Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, None, _, _, _, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.wereAllPropertiesResidential())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, None, _, _, _, _) =>
+          Redirect(routes.MultipleDisposalsTriageController.wereAllPropertiesResidential())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, Some(false), _, _, _, _) =>
-            Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, Some(false), _, _, _, _) =>
+          Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, None, _, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, None, _, _) =>
+          Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, Some(false), _, _) =>
-            Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, Some(false), _, _) =>
+          Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, Some(true), None, _) =>
-            logger.warn("No tax year was found when we expected one")
-            errorHandler.errorResult()
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, Some(true), None, _) =>
+          logger.warn("No tax year was found when we expected one")
+          errorHandler.errorResult()
 
-          case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, _, _, None) =>
-            Redirect(routes.MultipleDisposalsTriageController.completionDate())
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, _, _, None) =>
+          Redirect(routes.MultipleDisposalsTriageController.completionDate())
 
-          case IncompleteMultipleDisposalsTriageAnswers(
-              i,
-              Some(n),
-              Some(true),
-              _,
-              Some(true),
-              Some(a),
-              Some(true),
-              Some(t),
-              Some(d)
-              ) =>
-            val completeAnswers = CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, t, d)
-            updateStateAndThen(
-              updateState(state, completeAnswers, identity),
-              Ok(checkYourAnswersPage(completeAnswers, state.isRight))
-            )
+        case IncompleteMultipleDisposalsTriageAnswers(
+            i,
+            Some(n),
+            Some(true),
+            _,
+            Some(true),
+            Some(a),
+            Some(true),
+            Some(t),
+            Some(d)
+            ) =>
+          val completeAnswers = CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, t, d)
+          updateStateAndThen(
+            updateState(state, completeAnswers, identity),
+            Ok(checkYourAnswersPage(completeAnswers, state.isRight))
+          )
 
-          case IncompleteMultipleDisposalsTriageAnswers(
-              i,
-              Some(n),
-              Some(false),
-              Some(c),
-              _,
-              Some(a),
-              Some(true),
-              Some(t),
-              Some(d)
-              ) =>
-            val completeAnswers = CompleteMultipleDisposalsTriageAnswers(i, n, c, a, t, d)
-            updateStateAndThen(
-              updateState(state, completeAnswers, identity),
-              Ok(checkYourAnswersPage(completeAnswers, state.isRight))
-            )
+        case IncompleteMultipleDisposalsTriageAnswers(
+            i,
+            Some(n),
+            Some(false),
+            Some(c),
+            _,
+            Some(a),
+            Some(true),
+            Some(t),
+            Some(d)
+            ) =>
+          val completeAnswers = CompleteMultipleDisposalsTriageAnswers(i, n, c, a, t, d)
+          updateStateAndThen(
+            updateState(state, completeAnswers, identity),
+            Ok(checkYourAnswersPage(completeAnswers, state.isRight))
+          )
 
-          case c: CompleteMultipleDisposalsTriageAnswers =>
-            Ok(checkYourAnswersPage(c, state.isRight))
-        }
+        case c: CompleteMultipleDisposalsTriageAnswers =>
+          Ok(checkYourAnswersPage(c, state.isRight))
+      }
     }
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withMultipleDisposalTriageAnswers(request) {
-      case (_, journey, answers) =>
-        journey match {
-          case Right(_) => Redirect(controllers.returns.routes.TaskListController.taskList())
+    withMultipleDisposalTriageAnswers(request) { (_, journey, answers) =>
+      journey match {
+        case Right(_) => Redirect(controllers.returns.routes.TaskListController.taskList())
 
-          case Left(startingNewDraftReturn) =>
-            answers match {
-              case _: IncompleteMultipleDisposalsTriageAnswers =>
-                Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+        case Left(startingNewDraftReturn) =>
+          answers match {
+            case _: IncompleteMultipleDisposalsTriageAnswers =>
+              Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
 
-              case c: CompleteMultipleDisposalsTriageAnswers =>
-                val newDraftReturn = DraftMultipleDisposalsReturn.newDraftReturn(uuidGenerator.nextId(), c)
-                val newJourney = FillingOutReturn(
-                  startingNewDraftReturn.subscribedDetails,
-                  startingNewDraftReturn.ggCredId,
-                  startingNewDraftReturn.agentReferenceNumber,
-                  newDraftReturn
-                )
+            case c: CompleteMultipleDisposalsTriageAnswers =>
+              val newDraftReturn = DraftMultipleDisposalsReturn.newDraftReturn(uuidGenerator.nextId(), c)
+              val newJourney = FillingOutReturn(
+                startingNewDraftReturn.subscribedDetails,
+                startingNewDraftReturn.ggCredId,
+                startingNewDraftReturn.agentReferenceNumber,
+                newDraftReturn
+              )
 
-                updateStateAndThen(
-                  Right(newJourney),
-                  Redirect(controllers.returns.routes.TaskListController.taskList())
-                )
-            }
-        }
+              updateStateAndThen(
+                Right(newJourney),
+                Redirect(controllers.returns.routes.TaskListController.taskList())
+              )
+          }
+      }
 
     }
 

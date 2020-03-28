@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftSingleDisposalReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.collection.JavaConverters._
@@ -101,7 +101,9 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
+      behave like displayEnterUkAddressPage(UserType.Organisation, performAction)
 
     }
 
@@ -125,7 +127,9 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(performAction)
+      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Agent, performAction)
+      behave like enterPostcodePage(UserType.Organisation, performAction)
 
     }
 
@@ -148,6 +152,19 @@ class SingleDisposalPropertyDetailsControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like displaySelectAddress(
+        UserType.Individual,
+        performAction,
+        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Agent,
+        performAction,
+        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Organisation,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )

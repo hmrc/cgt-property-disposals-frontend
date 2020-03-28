@@ -135,7 +135,24 @@ object YearToDateLiabilityAnswers {
         fieldLens(IncompleteCalculatedYTDAnswers).set(None)(
           fold(identity, IncompleteCalculatedYTDAnswers.fromCompleteAnswers)
         )
+
     }
+
+  }
+
+  implicit class YearToDateLiabilityAnswersOps(private val y: YearToDateLiabilityAnswers) extends AnyVal {
+
+    def unsetAllButIncomeDetails(): Option[YearToDateLiabilityAnswers] =
+      y match {
+        case c: CalculatedYTDAnswers =>
+          Some(
+            c.unset(_.hasEstimatedDetails)
+              .unset(_.calculatedTaxDue)
+              .unset(_.taxDue)
+              .unset(_.mandatoryEvidence)
+          )
+        case _: NonCalculatedYTDAnswers => None
+      }
 
   }
 

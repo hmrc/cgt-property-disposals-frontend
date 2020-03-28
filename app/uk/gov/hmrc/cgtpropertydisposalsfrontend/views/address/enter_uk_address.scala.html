@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -32,9 +33,11 @@
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType[_])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType[_], isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"address"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @line1Key = @{s"${key}-line1"}
 @line2Key = @{s"${key}-line2"}
 @line3Key = @{s"${key}-town"}
@@ -45,7 +48,7 @@
   case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
     f.journey.draftReturn.fold(
       _ => messages("address.uk.returns.multipleDisposals.title"),
-      _ => messages("address.uk.returns.singleDisposal.title")
+      _ => messages(s"address.uk.returns$userKey.singleDisposal.title")
     )
   case _ => messages("address.uk.title")
 }}
