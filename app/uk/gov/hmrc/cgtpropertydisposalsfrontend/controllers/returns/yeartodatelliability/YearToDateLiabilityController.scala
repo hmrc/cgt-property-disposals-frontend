@@ -409,20 +409,13 @@ class YearToDateLiabilityController @Inject() (
                       draftReturn
                     } else {
                       val newAnswers =
-                        calculatedAnswers.fold(
-                          { incomplete =>
-                            val hadRequiredPersonalAllowance = incomplete.estimatedIncome.exists(_.value > 0L)
-                            val nowRequiresPersonalAllowance = i > 0
-
-                            if (hadRequiredPersonalAllowance =!= nowRequiresPersonalAllowance)
-                              incomplete.copy(estimatedIncome = Some(estimatedIncome), personalAllowance = None)
-                            else
-                              incomplete.copy(estimatedIncome = Some(estimatedIncome))
-                          },
-                          _ =>
-                            IncompleteCalculatedYTDAnswers.empty
-                              .copy(estimatedIncome = Some(estimatedIncome))
-                        )
+                        calculatedAnswers
+                          .unset(_.personalAllowance)
+                          .unset(_.hasEstimatedDetails)
+                          .unset(_.calculatedTaxDue)
+                          .unset(_.taxDue)
+                          .unset(_.mandatoryEvidence)
+                          .copy(estimatedIncome = Some(AmountInPence.fromPounds(i)))
 
                       draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
                     }
@@ -505,18 +498,14 @@ class YearToDateLiabilityController @Inject() (
                             .contains(personalAllowance)) {
                         draftReturn
                       } else {
-                        draftReturn.copy(
-                          yearToDateLiabilityAnswers = Some(
-                            calculatedAnswers.fold(
-                              _.copy(personalAllowance = Some(personalAllowance)),
-                              complete =>
-                                IncompleteCalculatedYTDAnswers.empty.copy(
-                                  estimatedIncome   = Some(complete.estimatedIncome),
-                                  personalAllowance = Some(personalAllowance)
-                                )
-                            )
-                          )
-                        )
+                        val newAnswers = calculatedAnswers
+                          .unset(_.hasEstimatedDetails)
+                          .unset(_.calculatedTaxDue)
+                          .unset(_.taxDue)
+                          .unset(_.mandatoryEvidence)
+                          .copy(personalAllowance = Some(AmountInPence.fromPounds(p)))
+
+                        draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
                       }
                   }
                 } else {
@@ -624,26 +613,13 @@ class YearToDateLiabilityController @Inject() (
                 .contains(hasEstimated)) {
             draftReturn
           } else {
-            draftReturn.copy(
-              yearToDateLiabilityAnswers = Some(
-                calculatedAnswers.fold(
-                  _.copy(
-                    hasEstimatedDetails = Some(hasEstimated),
-                    calculatedTaxDue    = None,
-                    mandatoryEvidence   = None
-                  ),
-                  complete =>
-                    IncompleteCalculatedYTDAnswers(
-                      Some(complete.estimatedIncome),
-                      complete.personalAllowance,
-                      Some(hasEstimated),
-                      None,
-                      None,
-                      None
-                    )
-                )
-              )
-            )
+            val newAnswers = calculatedAnswers
+              .unset(_.calculatedTaxDue)
+              .unset(_.taxDue)
+              .unset(_.mandatoryEvidence)
+              .copy(hasEstimatedDetails = Some(hasEstimated))
+
+            draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
           }
       }
     }
@@ -667,16 +643,15 @@ class YearToDateLiabilityController @Inject() (
               .contains(hasEstimated)) {
           draftReturn
         } else {
-          val updatedAnswers = nonCalculatedAnswers.fold(
-            _.copy(hasEstimatedDetails = Some(hasEstimated)),
-            _.copy(hasEstimatedDetails = hasEstimated)
-          )
+          val newAnswers = nonCalculatedAnswers
+            .unset(_.taxDue)
+            .copy(hasEstimatedDetails = Some(hasEstimated))
 
           draftReturn.fold(
             _.copy(
-              yearToDateLiabilityAnswers = Some(updatedAnswers)
+              yearToDateLiabilityAnswers = Some(newAnswers)
             ),
-            _.copy(yearToDateLiabilityAnswers = Some(updatedAnswers))
+            _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
           )
         }
     }
@@ -793,18 +768,7 @@ class YearToDateLiabilityController @Inject() (
                               draftReturn
                             } else {
                               val updatedAnswers =
-                                calculatedAnswers.fold(
-                                  _.copy(taxDue = Some(taxDue), mandatoryEvidence = None),
-                                  complete =>
-                                    IncompleteCalculatedYTDAnswers(
-                                      Some(complete.estimatedIncome),
-                                      complete.personalAllowance,
-                                      Some(complete.hasEstimatedDetails),
-                                      Some(calculatedTaxDue),
-                                      Some(taxDue),
-                                      None
-                                    )
-                                )
+                                calculatedAnswers.unset(_.mandatoryEvidence).copy(taxDue = Some(taxDue))
                               draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers))
                             }
                         }
@@ -954,14 +918,22 @@ class YearToDateLiabilityController @Inject() (
               redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
             ) {
               case (amount, draftReturn) =>
-                val newAnswers = nonCalculatedAnswers.fold(
-                  _.copy(taxableGainOrLoss = Some(AmountInPence.fromPounds(amount))),
-                  _.copy(taxableGainOrLoss = AmountInPence.fromPounds(amount))
-                )
-                draftReturn.fold(
-                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-                )
+                val taxableGainOrLoss = AmountInPence.fromPounds(amount)
+                if (nonCalculatedAnswers
+                      .fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss))
+                      .contains(taxableGainOrLoss))
+                  draftReturn
+                else {
+                  val newAnswers = nonCalculatedAnswers
+                    .unset(_.hasEstimatedDetails)
+                    .unset(_.taxDue)
+                    .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
+
+                  draftReturn.fold(
+                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                  )
+                }
             }
         }
     }
@@ -1012,14 +984,21 @@ class YearToDateLiabilityController @Inject() (
                 redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
               ) {
                 case (amount, draftReturn) =>
-                  val newAnswers = nonCalculatedAnswers.fold(
-                    _.copy(taxDue = Some(AmountInPence.fromPounds(amount))),
-                    _.copy(taxDue = AmountInPence.fromPounds(amount))
-                  )
-                  draftReturn.fold(
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-                  )
+                  val taxDue = AmountInPence.fromPounds(amount)
+
+                  if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue))
+                    draftReturn
+                  else {
+                    val newAnswers = nonCalculatedAnswers.fold(
+                      _.copy(taxDue = Some(taxDue)),
+                      _.copy(taxDue = taxDue)
+                    )
+
+                    draftReturn.fold(
+                      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                      _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                    )
+                  }
               }
           }
       }

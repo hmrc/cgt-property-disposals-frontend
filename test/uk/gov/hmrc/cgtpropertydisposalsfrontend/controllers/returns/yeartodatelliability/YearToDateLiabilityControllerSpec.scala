@@ -309,8 +309,8 @@ class YearToDateLiabilityControllerSpec
           val answers = sample[IncompleteCalculatedYTDAnswers]
           testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
             performAction("estimatedIncome" -> "1"),
-            answers.copy(estimatedIncome = Some(AmountInPence(1L))),
-            answers.copy(estimatedIncome = Some(AmountInPence(100L)))
+            answers.copy(estimatedIncome                              = Some(AmountInPence(1L))),
+            IncompleteCalculatedYTDAnswers.empty.copy(estimatedIncome = Some(AmountInPence(100L)))
           )
         }
 
@@ -326,39 +326,6 @@ class YearToDateLiabilityControllerSpec
           )
         }
 
-      }
-
-      "remove any personal allowance from the answers" when {
-
-        "the user had entered a non-zero income and has now just submitted a zero income and " +
-          "the journey was incomplete" in {
-          val oldAnswers =
-            sample[IncompleteCalculatedYTDAnswers].copy(
-              estimatedIncome   = Some(AmountInPence(1L)),
-              personalAllowance = Some(AmountInPence(1L))
-            )
-
-          testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
-            performAction("estimatedIncome" -> "0"),
-            oldAnswers,
-            oldAnswers.copy(estimatedIncome = Some(AmountInPence.zero), personalAllowance = None)
-          )
-        }
-
-        "the user had entered a zero income and has now just submitted a non-zero income and " +
-          "the journey was incomplete" in {
-          val oldAnswers =
-            sample[IncompleteCalculatedYTDAnswers].copy(
-              estimatedIncome   = Some(AmountInPence.zero),
-              personalAllowance = Some(AmountInPence(1L))
-            )
-
-          testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
-            performAction("estimatedIncome" -> "1"),
-            oldAnswers,
-            oldAnswers.copy(estimatedIncome = Some(AmountInPence(100L)), personalAllowance = None)
-          )
-        }
       }
 
       "not do any updates if the submitted answer is the same as one already stored in session and" when {
@@ -594,7 +561,7 @@ class YearToDateLiabilityControllerSpec
               hasEstimatedDetails = Some(sample[Boolean])
             )
 
-          val newAnswers = oldAnswers.copy(personalAllowance = Some(AmountInPence(100L)))
+          val newAnswers = oldAnswers.copy(personalAllowance = Some(AmountInPence(100L)), hasEstimatedDetails = None)
 
           testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
             performAction("personalAllowance" -> "1"),
@@ -1098,6 +1065,12 @@ class YearToDateLiabilityControllerSpec
                   hasEstimatedDetails = true
                 )
 
+              val newAnswers = IncompleteNonCalculatedYTDAnswers(
+                Some(answers.taxableGainOrLoss),
+                Some(false),
+                None
+              )
+
               val (session, journey, draftReturn) = sessionWithSingleDisposalState(
                 Some(answers),
                 Some(sample[DisposalDate]),
@@ -1107,7 +1080,7 @@ class YearToDateLiabilityControllerSpec
                 )
               )
               val updatedDraftReturn =
-                draftReturn.copy(yearToDateLiabilityAnswers = Some(answers.copy(hasEstimatedDetails = false)))
+                draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
               val updatedSession = session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
               )
@@ -1133,7 +1106,7 @@ class YearToDateLiabilityControllerSpec
           }
         }
 
-        "not do any updated" when {
+        "not do any updates" when {
 
           "the answer in the session is the same as the one already stored" in {
             val answers =
@@ -1415,7 +1388,7 @@ class YearToDateLiabilityControllerSpec
 
     }
 
-    "handling submitted answers to the tax due page" must {
+    "handling submitted answers to the tax due page for a calculated journey" must {
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.taxDueSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
@@ -2174,7 +2147,7 @@ class YearToDateLiabilityControllerSpec
 
       }
 
-      "redirect to the task list page" when {
+      "redirect to the check your answers page" when {
 
         "all updates are successful and" when {
 
@@ -2209,13 +2182,13 @@ class YearToDateLiabilityControllerSpec
             val newAmount = AmountInPence(0L)
             val answers =
               sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(1L))
-
+            val newAnswers = IncompleteNonCalculatedYTDAnswers(Some(newAmount), None, None)
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
                 "taxableGainOrLoss" -> "2"
               ),
               answers,
-              answers.copy(taxableGainOrLoss = newAmount)
+              newAnswers
             )
           }
 
