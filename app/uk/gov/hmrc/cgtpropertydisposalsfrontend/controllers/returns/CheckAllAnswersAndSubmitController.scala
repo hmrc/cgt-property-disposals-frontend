@@ -61,61 +61,59 @@ class CheckAllAnswersAndSubmitController @Inject() (
     with Logging {
 
   def checkAllAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withCompleteDraftReturn(request) {
-      case (_, fillingOutReturn, completeReturn) =>
-        Ok(
-          checkAllAnswersPage(
-            completeReturn,
-            rebasingEligibilityUtil,
-            fillingOutReturn.subscribedDetails.isATrust
-          )
+    withCompleteDraftReturn(request) { (_, fillingOutReturn, completeReturn) =>
+      Ok(
+        checkAllAnswersPage(
+          completeReturn,
+          rebasingEligibilityUtil,
+          fillingOutReturn.subscribedDetails.isATrust
         )
+      )
     }
   }
 
   def checkAllAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withCompleteDraftReturn(request) {
-      case (_, fillingOutReturn, completeReturn) =>
-        val result =
-          for {
-            response <- EitherT.liftF(submitReturn(completeReturn, fillingOutReturn))
-            newJourneyStatus = response match {
-              case _: SubmitReturnError =>
-                SubmitReturnFailed(
-                  fillingOutReturn.subscribedDetails,
-                  fillingOutReturn.ggCredId,
-                  fillingOutReturn.agentReferenceNumber
-                )
-              case SubmitReturnSuccess(submitReturnResponse) =>
-                JustSubmittedReturn(
-                  fillingOutReturn.subscribedDetails,
-                  fillingOutReturn.ggCredId,
-                  fillingOutReturn.agentReferenceNumber,
-                  completeReturn,
-                  submitReturnResponse
-                )
-            }
-            _ <- EitherT(
-                  updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(newJourneyStatus))
-                  )
-                )
-          } yield response
-
-        result.fold(
-          { e =>
-            logger.warn("Error while trying to update session", e)
-            errorHandler.errorResult()
-          }, {
-            case SubmitReturnError(e) =>
-              logger.warn(s"Could not submit return}", e)
-              Redirect(routes.CheckAllAnswersAndSubmitController.submissionError())
-
-            case SubmitReturnSuccess(r) =>
-              logger.info(s"Successfully submitted return with submission id ${r.formBundleId}")
-              Redirect(routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
+    withCompleteDraftReturn(request) { (_, fillingOutReturn, completeReturn) =>
+      val result =
+        for {
+          response <- EitherT.liftF(submitReturn(completeReturn, fillingOutReturn))
+          newJourneyStatus = response match {
+            case _: SubmitReturnError =>
+              SubmitReturnFailed(
+                fillingOutReturn.subscribedDetails,
+                fillingOutReturn.ggCredId,
+                fillingOutReturn.agentReferenceNumber
+              )
+            case SubmitReturnSuccess(submitReturnResponse) =>
+              JustSubmittedReturn(
+                fillingOutReturn.subscribedDetails,
+                fillingOutReturn.ggCredId,
+                fillingOutReturn.agentReferenceNumber,
+                completeReturn,
+                submitReturnResponse
+              )
           }
-        )
+          _ <- EitherT(
+                updateSession(sessionStore, request)(
+                  _.copy(journeyStatus = Some(newJourneyStatus))
+                )
+              )
+        } yield response
+
+      result.fold(
+        { e =>
+          logger.warn("Error while trying to update session", e)
+          errorHandler.errorResult()
+        }, {
+          case SubmitReturnError(e) =>
+            logger.warn(s"Could not submit return}", e)
+            Redirect(routes.CheckAllAnswersAndSubmitController.submissionError())
+
+          case SubmitReturnSuccess(r) =>
+            logger.info(s"Successfully submitted return with submission id ${r.formBundleId}")
+            Redirect(routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
+        }
+      )
 
     }
   }

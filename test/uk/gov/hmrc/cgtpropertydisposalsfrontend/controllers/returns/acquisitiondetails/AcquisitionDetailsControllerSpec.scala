@@ -112,6 +112,16 @@ class AcquisitionDetailsControllerSpec
     )
   }
 
+  def commonUpdateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: AcquisitionDetailsAnswers) =
+    d.copy(
+      acquisitionDetailsAnswers = Some(newAnswers),
+      initialGainOrLoss         = None,
+      reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+        _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
+      ),
+      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+    )
+
   "AcquisitionDetailsController" when {
 
     "handling requests to display the acquisition method page" must {
@@ -227,9 +237,9 @@ class AcquisitionDetailsControllerSpec
 
         val (method, methodValue)           = AcquisitionMethod.Bought -> 0
         val (session, journey, draftReturn) = sessionWithState(None, None, None, None)
-        val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
+        val updatedDraftReturn = commonUpdateDraftReturn(
+          draftReturn,
           IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
-        )
         )
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -270,9 +280,9 @@ class AcquisitionDetailsControllerSpec
 
           def test(data: (String, String)*)(method: AcquisitionMethod): Unit = {
             val (session, journey, draftReturn) = sessionWithState(None, None, None, None)
-            val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
+            val updatedDraftReturn = commonUpdateDraftReturn(
+              draftReturn,
               IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
-            )
             )
             val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -313,11 +323,18 @@ class AcquisitionDetailsControllerSpec
           def test(data: (String, String)*)(oldMethod: AcquisitionMethod, method: AcquisitionMethod): Unit = {
             val answers                         = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = oldMethod)
             val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-            val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
-              answers.copy(acquisitionMethod = method)
+            val updatedAnswers = IncompleteAcquisitionDetailsAnswers(
+              Some(method),
+              Some(answers.acquisitionDate),
+              None,
+              None,
+              Some(answers.improvementCosts),
+              None,
+              None
             )
-            )
-            val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+            val updatedDraftReturn = commonUpdateDraftReturn(draftReturn, updatedAnswers)
+            val updatedSession     = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -501,8 +518,6 @@ class AcquisitionDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
-
       "redirect to the task list page" when {
 
         "there is no disposal date in the session" in {
@@ -568,11 +583,20 @@ class AcquisitionDetailsControllerSpec
         val wasUkResident = sample[Boolean]
         val (session, journey, draftReturn) =
           sessionWithState(answers, sample[AssetType], wasUkResident, disposalDate)
-        val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
-          answers.copy(acquisitionDate = acquisitionDate)
-        )
-        )
-        val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+        val newAnswers =
+          IncompleteAcquisitionDetailsAnswers(
+            Some(answers.acquisitionMethod),
+            Some(acquisitionDate),
+            None,
+            None,
+            Some(answers.improvementCosts),
+            Some(answers.acquisitionFees),
+            None
+          )
+
+        val updatedDraftReturn = commonUpdateDraftReturn(draftReturn, newAnswers)
+        val updatedSession     = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
         "there is an error updating the draft return" in {
           inSequence {
@@ -613,7 +637,7 @@ class AcquisitionDetailsControllerSpec
           newAnswers: AcquisitionDetailsAnswers
         ): Unit = {
           val (session, journey, draftReturn) = sessionWithState(oldAnswers, assetType, wasUkResident, disposalDate)
-          val updatedDraftReturn              = draftReturn.copy(acquisitionDetailsAnswers = Some(newAnswers))
+          val updatedDraftReturn              = commonUpdateDraftReturn(draftReturn, newAnswers)
           val updatedSession                  = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
           inSequence {
@@ -649,159 +673,28 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        def rebasingCriteriaTests(
-          assetType: AssetType,
-          wasUkResident: Boolean,
-          rebasingCutOffDate: LocalDate
-        ): Unit = {
-          "the user did satisfy the rebasing criteria and they now do not satisfy it and the acquisition " +
-            "details section was incomplete" in {
-            val oldAnswers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-              acquisitionMethod       = Some(AcquisitionMethod.Bought),
-              acquisitionDate         = Some(AcquisitionDate(rebasingCutOffDate.minusDays(1L))),
-              rebasedAcquisitionPrice = Some(sample[AmountInPence])
-            )
-
-            test(
-              assetType,
-              wasUkResident,
-              rebasingCutOffDate,
-              oldAnswers,
-              oldAnswers
-                .copy(acquisitionDate = Some(AcquisitionDate(rebasingCutOffDate)), rebasedAcquisitionPrice = None)
-            )
-          }
-
-          "the user did satisfy the rebasing criteria and they now do not satisfy it and the acquisition " +
-            "details section was complete" in {
-            val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
-              acquisitionDate         = AcquisitionDate(rebasingCutOffDate.minusDays(1L)),
-              rebasedAcquisitionPrice = Some(sample[AmountInPence])
-            )
-
-            test(
-              assetType,
-              wasUkResident,
-              rebasingCutOffDate,
-              oldAnswers,
-              oldAnswers.copy(acquisitionDate = AcquisitionDate(rebasingCutOffDate), rebasedAcquisitionPrice = None)
-            )
-
-          }
-
-          "the user did not satisfy the rebasing criteria and they satisfy now it and the acquisition " +
-            "details section was incomplete" in {
-            val oldAnswers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-              acquisitionMethod       = Some(AcquisitionMethod.Bought),
-              acquisitionDate         = Some(AcquisitionDate(rebasingCutOffDate)),
-              acquisitionPrice        = Some(sample[AmountInPence]),
-              rebasedAcquisitionPrice = Some(sample[AmountInPence])
-            )
-
-            test(
-              assetType,
-              wasUkResident,
-              rebasingCutOffDate.minusDays(1L),
-              oldAnswers,
-              oldAnswers.copy(
-                acquisitionDate         = Some(AcquisitionDate(rebasingCutOffDate.minusDays(1L))),
-                acquisitionPrice        = None,
-                rebasedAcquisitionPrice = None
-              )
-            )
-
-          }
-
-          "the user did not satisfy the rebasing criteria and they satisfy now it and the acquisition " +
-            "details section was complete" in {
-            val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
-              acquisitionDate         = AcquisitionDate(rebasingCutOffDate),
-              acquisitionPrice        = sample[AmountInPence],
-              rebasedAcquisitionPrice = Some(sample[AmountInPence])
-            )
-
-            test(
-              assetType,
-              wasUkResident,
-              rebasingCutOffDate.minusDays(1L),
-              oldAnswers,
-              IncompleteAcquisitionDetailsAnswers(
-                Some(oldAnswers.acquisitionMethod),
-                Some(AcquisitionDate(rebasingCutOffDate.minusDays(1L))),
-                None,
-                None,
-                Some(oldAnswers.improvementCosts),
-                Some(oldAnswers.acquisitionFees),
-                Some(oldAnswers.shouldUseRebase)
-              )
-            )
-
-          }
-
-          "the user still does not satisfy the rebasing criteria and the acquisition details section " +
-            "was incomplete" in {
-            val oldAnswers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-              acquisitionMethod       = Some(AcquisitionMethod.Bought),
-              acquisitionDate         = Some(AcquisitionDate(rebasingCutOffDate)),
-              acquisitionPrice        = Some(sample[AmountInPence]),
-              rebasedAcquisitionPrice = Some(sample[AmountInPence])
-            )
-
-            test(
-              assetType,
-              wasUkResident,
-              rebasingCutOffDate.plusDays(1L),
-              oldAnswers,
-              oldAnswers.copy(
-                acquisitionDate = Some(AcquisitionDate(rebasingCutOffDate.plusDays(1L)))
-              )
-            )
-          }
-
-          "the user still does not satisfy the rebasing criteria and the acquisition details section " +
-            "was complete" in {
-            val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
-              acquisitionDate         = AcquisitionDate(rebasingCutOffDate),
-              acquisitionPrice        = sample[AmountInPence],
-              rebasedAcquisitionPrice = Some(sample[AmountInPence])
-            )
-
-            test(
-              assetType,
-              wasUkResident,
-              rebasingCutOffDate.plusDays(1L),
-              oldAnswers,
-              oldAnswers.copy(
-                acquisitionDate = AcquisitionDate(rebasingCutOffDate.plusDays(1L))
-              )
-            )
-          }
-        }
-
-        "when the user was a uk resident and is disposing of a residential property and " when {
-
-          behave like rebasingCriteriaTests(AssetType.Residential, true, ukResidents)
-
-        }
-
-        "when the user was a non uk resident and is disposing of a residential property and " when {
-
-          behave like rebasingCriteriaTests(
-            AssetType.Residential,
-            false,
-            RebasingCutoffDates.nonUkResidentsResidentialProperty
+        "the user has completed this section before" in {
+          val date = disposalDate.value
+          val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
+            acquisitionDate = AcquisitionDate(date.minusDays(1L))
+          )
+          val newAnswers = IncompleteAcquisitionDetailsAnswers(
+            Some(oldAnswers.acquisitionMethod),
+            Some(AcquisitionDate(date)),
+            None,
+            None,
+            Some(oldAnswers.improvementCosts),
+            Some(oldAnswers.acquisitionFees),
+            None
           )
 
-        }
-
-        "when the user was a non uk resident and is disposing of a non-residential property and " when {
-
-          behave like rebasingCriteriaTests(
-            AssetType.NonResidential,
-            false,
-            RebasingCutoffDates.nonUkResidentsNonResidentialProperty
+          test(
+            sample[AssetType],
+            sample[Boolean],
+            date,
+            oldAnswers,
+            newAnswers
           )
-
         }
 
       }
@@ -967,8 +860,10 @@ class AcquisitionDetailsControllerSpec
         val answers = IncompleteAcquisitionDetailsAnswers.empty
           .copy(acquisitionMethod = Some(AcquisitionMethod.Bought), acquisitionDate = Some(sample[AcquisitionDate]))
         val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-        val updatedDraftReturn = draftReturn
-          .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = Some(AmountInPence(123L)))))
+        val updatedDraftReturn = commonUpdateDraftReturn(
+          draftReturn,
+          answers.copy(acquisitionPrice = Some(AmountInPence(123L)))
+        )
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
         "there is an error updating the draft return" in {
@@ -1008,8 +903,10 @@ class AcquisitionDetailsControllerSpec
           val answers = IncompleteAcquisitionDetailsAnswers.empty
             .copy(acquisitionMethod = Some(sample[AcquisitionMethod]), acquisitionDate = Some(sample[AcquisitionDate]))
           val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-          val updatedDraftReturn = draftReturn
-            .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = Some(AmountInPence(123400L)))))
+          val updatedDraftReturn = commonUpdateDraftReturn(
+            draftReturn,
+            answers.copy(acquisitionPrice = Some(AmountInPence(123400L)))
+          )
           val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
           inSequence {
@@ -1032,8 +929,11 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was complete" in {
           val answers                         = sample[CompleteAcquisitionDetailsAnswers]
           val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-          val updatedDraftReturn = draftReturn
-            .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = AmountInPence(123456L))))
+          val updatedDraftReturn =
+            commonUpdateDraftReturn(
+              draftReturn,
+              answers.copy(acquisitionPrice = AmountInPence(123456L))
+            )
           val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
           inSequence {
@@ -1358,13 +1258,13 @@ class AcquisitionDetailsControllerSpec
           acquisitionPrice = Some(sample[AmountInPence])
         )
         val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
-        val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
+        val updatedDraftReturn = commonUpdateDraftReturn(
+          draftReturn,
           answers.copy(
             rebasedAcquisitionPrice = Some(AmountInPence(123L)),
             acquisitionPrice        = Some(AmountInPence(123L)),
             shouldUseRebase         = Some(true)
           )
-        )
         )
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -1422,15 +1322,14 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = Some(sample[AmountInPence])
                 )
                 val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
-                val updatedDraftReturn = draftReturn
-                  .copy(acquisitionDetailsAnswers = Some(
-                    answers.copy(
-                      rebasedAcquisitionPrice = Some(expectedAmountInPence),
-                      acquisitionPrice        = Some(expectedAmountInPence),
-                      shouldUseRebase         = Some(true)
-                    )
+                val updatedDraftReturn = commonUpdateDraftReturn(
+                  draftReturn,
+                  answers.copy(
+                    rebasedAcquisitionPrice = Some(expectedAmountInPence),
+                    acquisitionPrice        = Some(expectedAmountInPence),
+                    shouldUseRebase         = Some(true)
                   )
-                  )
+                )
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
                 inSequence {
@@ -1461,15 +1360,14 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
                 )
                 val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
-                val updatedDraftReturn = draftReturn
-                  .copy(acquisitionDetailsAnswers = Some(
-                    answers.copy(
-                      rebasedAcquisitionPrice = Some(expectedAmountInPence),
-                      acquisitionPrice        = expectedAmountInPence,
-                      shouldUseRebase         = true
-                    )
+                val updatedDraftReturn = commonUpdateDraftReturn(
+                  draftReturn,
+                  answers.copy(
+                    rebasedAcquisitionPrice = Some(expectedAmountInPence),
+                    acquisitionPrice        = expectedAmountInPence,
+                    shouldUseRebase         = true
                   )
-                  )
+                )
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
                 inSequence {
@@ -1826,8 +1724,10 @@ class AcquisitionDetailsControllerSpec
           rebasedAcquisitionPrice = Some(sample[AmountInPence])
         )
         val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
-        val updatedDraftReturn = draftReturn
-          .copy(acquisitionDetailsAnswers = Some(answers.copy(improvementCosts = Some(AmountInPence(123L)))))
+        val updatedDraftReturn = commonUpdateDraftReturn(
+          draftReturn,
+          answers.copy(improvementCosts = Some(AmountInPence(123L)))
+        )
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
         "there is an error updating the draft return" in {
@@ -1887,8 +1787,10 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 )
                 val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
-                val updatedDraftReturn = draftReturn
-                  .copy(acquisitionDetailsAnswers = Some(answers.copy(improvementCosts = Some(expectedAmountInPence))))
+                val updatedDraftReturn = commonUpdateDraftReturn(
+                  draftReturn,
+                  answers.copy(improvementCosts = Some(expectedAmountInPence))
+                )
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
                 inSequence {
@@ -1922,8 +1824,10 @@ class AcquisitionDetailsControllerSpec
                     improvementCosts        = AmountInPence(expectedAmountInPence.value + 1L)
                   )
                 val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
-                val updatedDraftReturn = draftReturn
-                  .copy(acquisitionDetailsAnswers = Some(answers.copy(improvementCosts = expectedAmountInPence)))
+                val updatedDraftReturn = commonUpdateDraftReturn(
+                  draftReturn,
+                  answers.copy(improvementCosts = expectedAmountInPence)
+                )
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
                 inSequence {
@@ -2145,8 +2049,10 @@ class AcquisitionDetailsControllerSpec
           improvementCosts = Some(sample[AmountInPence])
         )
         val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-        val updatedDraftReturn = draftReturn
-          .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionFees = Some(AmountInPence(123L)))))
+        val updatedDraftReturn = commonUpdateDraftReturn(
+          draftReturn,
+          answers.copy(acquisitionFees = Some(AmountInPence(123L)))
+        )
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
         "there is an error updating the draft return" in {
@@ -2204,8 +2110,10 @@ class AcquisitionDetailsControllerSpec
                 val answers =
                   IncompleteAcquisitionDetailsAnswers.empty.copy(improvementCosts = Some(sample[AmountInPence]))
                 val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-                val updatedDraftReturn = draftReturn
-                  .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionFees = Some(expectedAmountInPence))))
+                val updatedDraftReturn = commonUpdateDraftReturn(
+                  draftReturn,
+                  answers.copy(acquisitionFees = Some(expectedAmountInPence))
+                )
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
                 inSequence {
@@ -2235,8 +2143,10 @@ class AcquisitionDetailsControllerSpec
                   sample[CompleteAcquisitionDetailsAnswers]
                     .copy(acquisitionFees = AmountInPence(expectedAmountInPence.value + 1L))
                 val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-                val updatedDraftReturn = draftReturn
-                  .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionFees = expectedAmountInPence)))
+                val updatedDraftReturn = commonUpdateDraftReturn(
+                  draftReturn,
+                  answers.copy(acquisitionFees = expectedAmountInPence)
+                )
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
                 inSequence {
