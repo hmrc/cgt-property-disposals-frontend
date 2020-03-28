@@ -141,30 +141,41 @@ class ExemptionAndLossesController @Inject() (
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
             val newAnswers = updateAnswers(value, currentAnswers)
-            val newDraftReturn = currentDraftReturn.fold(
-              _.copy(exemptionAndLossesAnswers = Some(newAnswers)),
-              _.copy(exemptionAndLossesAnswers = Some(newAnswers))
-            )
 
-            val result = for {
-              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
-                  else
-                    returnsService.storeDraftReturn(
+            if (currentAnswers === newAnswers)
+              Redirect(routes.ExemptionAndLossesController.checkYourAnswers())
+            else {
+              val newDraftReturn = currentDraftReturn.fold(
+                m =>
+                  m.copy(
+                    exemptionAndLossesAnswers  = Some(newAnswers),
+                    yearToDateLiabilityAnswers = m.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+                  ),
+                s =>
+                  s.copy(
+                    exemptionAndLossesAnswers  = Some(newAnswers),
+                    yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+                  )
+              )
+
+              val result = for {
+                _ <- returnsService.storeDraftReturn(
                       newDraftReturn,
                       currentFillingOutReturn.subscribedDetails.cgtReference,
                       currentFillingOutReturn.agentReferenceNumber
                     )
-              _ <- EitherT(
-                    updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
+                      )
                     )
-                  )
-            } yield ()
+              } yield ()
 
-            result.fold({ e =>
-              logger.warn("Could not update draft return", e)
-              errorHandler.errorResult()
-            }, _ => Redirect(routes.ExemptionAndLossesController.checkYourAnswers()))
+              result.fold({ e =>
+                logger.warn("Could not update draft return", e)
+                errorHandler.errorResult()
+              }, _ => Redirect(routes.ExemptionAndLossesController.checkYourAnswers()))
+            }
           }
         )
     } else {

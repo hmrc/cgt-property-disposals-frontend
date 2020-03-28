@@ -942,7 +942,8 @@ class ReliefDetailsControllerSpec
         val currentDraftReturn = sample[DraftSingleDisposalReturn].copy(
           reliefDetailsAnswers       = Some(currentAnswers),
           exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
-          yearToDateLiabilityAnswers = Some(sample[YearToDateLiabilityAnswers])
+          yearToDateLiabilityAnswers = Some(sample[YearToDateLiabilityAnswers]),
+          uploadSupportingDocuments  = Some(sample[UploadSupportingDocuments])
         )
         val currentJourney = sample[FillingOutReturn].copy(draftReturn = currentDraftReturn)
 
@@ -955,7 +956,8 @@ class ReliefDetailsControllerSpec
             )
           ),
           exemptionAndLossesAnswers  = None,
-          yearToDateLiabilityAnswers = None
+          yearToDateLiabilityAnswers = None,
+          uploadSupportingDocuments  = None
         )
 
         "there is an error updating the draft return" in {
@@ -1070,7 +1072,8 @@ class ReliefDetailsControllerSpec
             oldDraftReturn.copy(
               reliefDetailsAnswers       = Some(updatedAnswers),
               exemptionAndLossesAnswers  = None,
-              yearToDateLiabilityAnswers = None
+              yearToDateLiabilityAnswers = None,
+              uploadSupportingDocuments  = None
             )
 
           testSuccessfulUpdatesAfterSubmit(

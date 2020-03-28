@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.kernel.Eq
 import julienrf.json.derived
 import monocle.Lens
 import monocle.macros.Lenses
@@ -71,6 +72,8 @@ object ExemptionAndLossesAnswers {
       )
 
   }
+
+  implicit val eq: Eq[ExemptionAndLossesAnswers] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[ExemptionAndLossesAnswers] = derived.oformat()
