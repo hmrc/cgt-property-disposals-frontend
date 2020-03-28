@@ -381,9 +381,9 @@ class YearToDateLiabilityController @Inject() (
               )
             }
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-      }
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
     }
   }
 
@@ -393,45 +393,45 @@ class YearToDateLiabilityController @Inject() (
         Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
       case (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-          withDisposalDate(draftReturn) { disposalDate =>
-            commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
-              form = estimatedIncomeForm
-            )(
-              page = { (form, backLink) =>
-                estimatedIncomePage(form, backLink, disposalDate)
-              }
-            )(
-              requiredPreviousAnswer               = _ => Some(()),
-              redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
-            )(
-              updateAnswers = { (i, draftReturn) =>
-                val estimatedIncome = AmountInPence.fromPounds(i)
-
-                if (calculatedAnswers
-                      .fold(_.estimatedIncome, c => Some(c.estimatedIncome))
-                      .contains(estimatedIncome)) {
-                  draftReturn
-                } else {
-                  val newAnswers =
-                    calculatedAnswers
-                      .unset(_.personalAllowance)
-                      .unset(_.hasEstimatedDetails)
-                      .unset(_.calculatedTaxDue)
-                      .unset(_.taxDue)
-                      .unset(_.mandatoryEvidence)
-                      .copy(estimatedIncome = Some(AmountInPence.fromPounds(i)))
-
-                  draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+        (answers, fillingOutReturn.draftReturn) match {
+          case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
+            withDisposalDate(draftReturn) { disposalDate =>
+              commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
+                form = estimatedIncomeForm
+              )(
+                page = { (form, backLink) =>
+                  estimatedIncomePage(form, backLink, disposalDate)
                 }
-              }
-            )
-          }
+              )(
+                requiredPreviousAnswer               = _ => Some(()),
+                redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+              )(
+                updateAnswers = { (i, draftReturn) =>
+                  val estimatedIncome = AmountInPence.fromPounds(i)
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-      }
+                  if (calculatedAnswers
+                        .fold(_.estimatedIncome, c => Some(c.estimatedIncome))
+                        .contains(estimatedIncome)) {
+                    draftReturn
+                  } else {
+                    val newAnswers =
+                      calculatedAnswers
+                        .unset(_.personalAllowance)
+                        .unset(_.hasEstimatedDetails)
+                        .unset(_.calculatedTaxDue)
+                        .unset(_.taxDue)
+                        .unset(_.mandatoryEvidence)
+                        .copy(estimatedIncome = Some(AmountInPence.fromPounds(i)))
+
+                    draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                  }
+                }
+              )
+            }
+
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
     }
   }
 
@@ -465,9 +465,9 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-      }
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
     }
   }
 
@@ -514,9 +514,9 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-      }
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
     }
   }
 
@@ -761,7 +761,6 @@ class YearToDateLiabilityController @Inject() (
       }
     }
 
-
   def taxDueSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
       case (_, fillingOutReturn, answers) =>
@@ -840,7 +839,6 @@ class YearToDateLiabilityController @Inject() (
           }
       }
     }
-
 
   def uploadMandatoryEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
@@ -1061,12 +1059,12 @@ class YearToDateLiabilityController @Inject() (
               checkYourAnswersHandleCalculated(c, fillingOutReturn, s, disposalDate)
             }
 
-        case (n: NonCalculatedYTDAnswers, d) =>
-          checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d)
+          case (n: NonCalculatedYTDAnswers, d) =>
+            checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d)
 
-        case (_: CalculatedYTDAnswers, _: DraftMultipleDisposalsReturn) =>
-          logger.warn("Found calculated year to date liability answers on a multiple disposals draft return")
-          errorHandler.errorResult()
+          case (_: CalculatedYTDAnswers, _: DraftMultipleDisposalsReturn) =>
+            logger.warn("Found calculated year to date liability answers on a multiple disposals draft return")
+            errorHandler.errorResult()
 
         }
     }
