@@ -478,30 +478,26 @@ class YearToDateLiabilityController @Inject() (
               if (estimatedIncome.value > 0L) {
                 commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
                   form = personalAllowanceForm(disposalDate)
-                )(page = {
-                  case (form, backLink) =>
-                    personalAllowancePage(form, backLink, disposalDate)
-                })(
+                )(page = (form, backLink) => personalAllowancePage(form, backLink, disposalDate))(
                   requiredPreviousAnswer = _.fold(_.estimatedIncome, c => Some(c.estimatedIncome)),
                   routes.YearToDateLiabilityController.estimatedIncome()
-                ) {
-                  case (p, draftReturn) =>
-                    val personalAllowance = AmountInPence.fromPounds(p)
-                    if (calculatedAnswers
-                          .fold(_.personalAllowance, _.personalAllowance)
-                          .contains(personalAllowance)) {
-                      draftReturn
-                    } else {
-                      val newAnswers = calculatedAnswers
-                        .unset(_.hasEstimatedDetails)
-                        .unset(_.calculatedTaxDue)
-                        .unset(_.taxDue)
-                        .unset(_.mandatoryEvidence)
-                        .copy(personalAllowance = Some(AmountInPence.fromPounds(p)))
+                ) { (p, draftReturn) =>
+                  val personalAllowance = AmountInPence.fromPounds(p)
+                  if (calculatedAnswers
+                        .fold(_.personalAllowance, _.personalAllowance)
+                        .contains(personalAllowance)) {
+                    draftReturn
+                  } else {
+                    val newAnswers = calculatedAnswers
+                      .unset(_.hasEstimatedDetails)
+                      .unset(_.calculatedTaxDue)
+                      .unset(_.taxDue)
+                      .unset(_.mandatoryEvidence)
+                      .copy(personalAllowance = Some(AmountInPence.fromPounds(p)))
 
-                      draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                    draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
 
-                    }
+                  }
                 }
               } else {
                 Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -632,21 +628,20 @@ class YearToDateLiabilityController @Inject() (
           case _                         => routes.YearToDateLiabilityController.estimatedIncome()
         }
       }
-    ) {
-      case (hasEstimated, draftReturn) =>
-        if (calculatedAnswers
-              .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
-              .contains(hasEstimated)) {
-          draftReturn
-        } else {
-          val newAnswers = calculatedAnswers
-            .unset(_.calculatedTaxDue)
-            .unset(_.taxDue)
-            .unset(_.mandatoryEvidence)
-            .copy(hasEstimatedDetails = Some(hasEstimated))
+    ) { (hasEstimated, draftReturn) =>
+      if (calculatedAnswers
+            .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
+            .contains(hasEstimated)) {
+        draftReturn
+      } else {
+        val newAnswers = calculatedAnswers
+          .unset(_.calculatedTaxDue)
+          .unset(_.taxDue)
+          .unset(_.mandatoryEvidence)
+          .copy(hasEstimatedDetails = Some(hasEstimated))
 
-          draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-        }
+        draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+      }
     }
 
   private def handleNonCalculatedEstimatedDetailsSubmit(
