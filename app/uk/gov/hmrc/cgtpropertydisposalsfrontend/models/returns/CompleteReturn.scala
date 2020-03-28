@@ -74,6 +74,7 @@ object CompleteReturn {
     reliefDetails: CompleteReliefDetailsAnswers,
     exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
     yearToDateLiabilityAnswers: Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers],
+    uploadSupportingDocumentAnswers: CompleteUploadSupportingDocumentAnswers,
     initialGainOrLoss: Option[AmountInPence]
   ) extends CompleteReturn
 
@@ -91,10 +92,10 @@ object CompleteReturn {
             Some(e: CompleteExemptionAndLossesAnswers),
             Some(y: CompleteCalculatedYTDAnswers),
             i,
-            _,
+            Some(u: CompleteUploadSupportingDocumentAnswers),
             _
             ) =>
-          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Right(y), i))
+          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Right(y), u, i))
 
         case DraftSingleDisposalReturn(
             _,
@@ -106,10 +107,10 @@ object CompleteReturn {
             Some(e: CompleteExemptionAndLossesAnswers),
             Some(y: CompleteNonCalculatedYTDAnswers),
             i,
-            _,
+            Some(u: CompleteUploadSupportingDocumentAnswers),
             _
             ) =>
-          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Left(y), i))
+          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Left(y), u, i))
 
         case _ =>
           None

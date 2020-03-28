@@ -1415,11 +1415,11 @@ subsequentReturnExit.getHelp=Get help
 subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
 subsequentReturnExit.helpWithCallCharges=Find out about call charges
 
-hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
-hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
-hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
-hasSupportingDocsToUpload.caption=Supporting evidence
-hasSupportingDocsToUpload.help-text=Up to 4 documents can be uploaded to support your return. For example, spreadsheets with calculations, invoices, receipts or valuations.
+do-you-want-to-upload-supporting-documents.title=Do you want to upload any supporting docs?
+do-you-want-to-upload-supporting-documents.error.required=Select yes if you want to upload any supporting documents
+do-you-want-to-upload-supporting-documents.error.boolean=Select yes if you want to upload any supporting documents
+do-you-want-to-upload-supporting-documents.caption=Supporting evidence
+do-you-want-to-upload-supporting-documents.help-text=Up to 4 documents can be uploaded to support your return. For example, spreadsheets with calculations, invoices, receipts or valuations.
 
 upload-supporting-documents.check-your-answers.title=Upload a document with your supporting evidence
 upload-supporting-documents.check-your-answers.error.required=Upload a file to support your return
