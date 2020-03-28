@@ -17,25 +17,29 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, isATrust: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"hasEstimatedDetails"}
-@title = @{messages(s"$key.title")}
+@helpText = @{messages(s"$key.helpText")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@title = @{messages(s"$key.title")}
 
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
@@ -54,8 +58,8 @@
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = None,
-            yesContent = Some(Html(messages(s"$key.yes.content")))
+            helpText = Some(Html(helpText)),
+            yesContent = Some(Html(messages(s"$key$userKey.yes.content")))
         )
         @submitButton(messages("button.saveAndContinue"))
     }

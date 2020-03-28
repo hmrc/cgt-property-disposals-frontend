@@ -1051,17 +1051,19 @@ estimatedIncome.error.tooSmall=Estimated income must be a number between 0 and 5
 estimatedIncome.error.tooLarge=Estimated income must be a number between 0 and 50,000,000,000.00
 estimatedIncome.error.tooManyDecimals=Estimated income must be 2 decimal places or less, for example 23,040.50 or 76,000
 
-personalAllowance.title=How much of your Personal Allowance do you want to apply?
-personalAllowance.helpText=Based on your income for the tax year {0} to {1}, you can apply up to {2}.
+personalAllowance.title=What is your Personal Allowance for tax year {0} to {1}?
+personalAllowance.helpText=	We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}. Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
 personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.error.invalid=Personal Allowance amount must only include numbers, for example 12,500 or 207.50
 personalAllowance.error.tooSmall=Personal Allowance amount must be a number between 0 and {0}
-personalAllowance.error.tooLarge=Personal Allowance amount must be a number between 0 and {0}
+personalAllowance.error.tooLarge=User can only enter a maximum of {0} in this field for tax year {1} / {2}
 personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 decimal places or less, for example 12,500 or 200.50
 
 hasEstimatedDetails.title=Have any of the details in this return been estimated?
-hasEstimatedDetails.yes.content=You’ll need to confirm any estimates with HMRC when you get the details. You can do this through your Self Assessment tax return or this service.
+hasEstimatedDetails.helpText=If you estimated any amounts, you’ll need to provide the final amounts to HMRC later. For example, the property’s value.
+hasEstimatedDetails.agent.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
+hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
