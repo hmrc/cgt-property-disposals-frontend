@@ -26,7 +26,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, accounts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -108,7 +108,9 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
+      behave like displayEnterUkAddressPage(UserType.Organisation, performAction)
 
     }
 
@@ -155,7 +157,9 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(performAction)
+      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Agent, performAction)
+      behave like enterPostcodePage(UserType.Organisation, performAction)
 
     }
 
@@ -177,8 +181,23 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(performAction, controllers.accounts.routes.AccountController.manageYourDetails())
+      behave like displaySelectAddress(
+        UserType.Individual,
+        performAction,
+        controllers.accounts.routes.AccountController.manageYourDetails()
+      )
 
+      behave like displaySelectAddress(
+        UserType.Agent,
+        performAction,
+        controllers.accounts.routes.AccountController.manageYourDetails()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Organisation,
+        performAction,
+        controllers.accounts.routes.AccountController.manageYourDetails()
+      )
     }
 
     "handling submitted selected addresses" must {

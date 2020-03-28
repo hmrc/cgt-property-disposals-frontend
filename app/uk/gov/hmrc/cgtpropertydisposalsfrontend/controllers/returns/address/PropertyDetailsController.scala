@@ -85,6 +85,8 @@ class PropertyDetailsController @Inject() (
   override val toAddressJourneyType: FillingOutReturn => FillingOutReturnAddressJourney =
     FillingOutReturnAddressJourney.apply
 
+  def isATrust(journey: FillingOutReturn): Boolean = journey.subscribedDetails.isATrust
+
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, FillingOutReturn)] =
