@@ -92,7 +92,7 @@
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @s.yearToDateLiabilityAnswers.fold(
               nonCalculatedYearToDateLiabilitySummary(_),
-              calculatedYearToDateLiabilitySummary(_)
+              calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate)
           )
       }
 
