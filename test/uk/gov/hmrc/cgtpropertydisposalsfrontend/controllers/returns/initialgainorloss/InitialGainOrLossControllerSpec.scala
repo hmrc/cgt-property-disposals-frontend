@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss
 
+import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -30,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorSc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
@@ -158,6 +159,13 @@ class InitialGainOrLossControllerSpec
       def performAction(data: (String, String)*): Future[Result] =
         controller.submitInitialGainOrLoss()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswer: AmountInPence) =
+        d.copy(
+          initialGainOrLoss          = Some(newAnswer),
+          reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+        )
+
       behave like redirectToStartBehaviour(() => performAction())
 
       "show a technical error page" when {
@@ -165,8 +173,7 @@ class InitialGainOrLossControllerSpec
         "there is an error updating the draft return in return service " in {
           val (session, journey, draftReturn) =
             sessionWithState(Some(AmountInPence(1L)))
-          val updatedDraftReturn =
-            draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0L)))
+          val updatedDraftReturn = updateDraftReturn(draftReturn, AmountInPence(0L))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -183,9 +190,8 @@ class InitialGainOrLossControllerSpec
 
         "there is an error updating the session" in {
           val (session, journey, draftReturn) = sessionWithState(None)
-          val updatedDraftReturn =
-            draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0L)))
-          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedDraftReturn              = updateDraftReturn(draftReturn, AmountInPence(0L))
+          val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -278,26 +284,27 @@ class InitialGainOrLossControllerSpec
       "redirect to check your answers" when {
 
         "initial gain or loss has been entered correctly" in {
-          val (session, journey, draftReturn) =
-            sessionWithState(Some(AmountInPence(500L)))
-          val newDraftReturn =
-            draftReturn.copy(initialGainOrLoss = Some(AmountInPence(600)))
-          val updatedJourney = journey.copy(draftReturn = newDraftReturn)
+          forAll(Gen.choose(0L, 100L).map(AmountInPence(_))) { amountInPence: AmountInPence =>
+            val (session, journey, draftReturn) =
+              sessionWithState(Some(AmountInPence(amountInPence.value - 1L)))
+            val newDraftReturn = updateDraftReturn(draftReturn, amountInPence)
+            val updatedJourney = journey.copy(draftReturn = newDraftReturn)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(
-              newDraftReturn,
-              updatedJourney.subscribedDetails.cgtReference,
-              updatedJourney.agentReferenceNumber
-            )(Right(()))
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                updatedJourney.subscribedDetails.cgtReference,
+                updatedJourney.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+            checkIsRedirect(
+              performAction("initialGainOrLoss" -> "0", "loss" -> "", "gain" -> s"${amountInPence.inPounds()}"),
+              routes.InitialGainOrLossController.checkYourAnswers()
+            )
           }
-          checkIsRedirect(
-            performAction("initialGainOrLoss" -> "0", "loss" -> "", "gain" -> "6"),
-            routes.InitialGainOrLossController.checkYourAnswers()
-          )
         }
 
       }

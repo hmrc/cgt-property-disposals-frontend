@@ -418,14 +418,11 @@ class CommonTriageQuestionsController @Inject() (
               ),
             s =>
               s.copy(
-                triageAnswers             = updateSingleDisposalAnswers(s.triageAnswers),
-                propertyAddress           = None,
-                disposalDetailsAnswers    = None,
-                acquisitionDetailsAnswers = None,
-                reliefDetailsAnswers = s.reliefDetailsAnswers.map(
-                  _.unset(_.privateResidentsRelief)
-                    .unset(_.lettingsRelief)
-                ),
+                triageAnswers              = updateSingleDisposalAnswers(s.triageAnswers),
+                propertyAddress            = None,
+                disposalDetailsAnswers     = None,
+                acquisitionDetailsAnswers  = None,
+                reliefDetailsAnswers       = s.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss          = None,
                 uploadSupportingDocuments  = None

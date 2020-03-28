@@ -19,15 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgain
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
-import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.InitialGainOrLossController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
@@ -71,17 +70,46 @@ class InitialGainOrLossController @Inject() (
 
   def submitInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) {
-      case (fillingOutReturn, draftReturn, _) => {
-        submit(
-          draftReturn,
-          fillingOutReturn
-        )(form = initialGainOrLossForm)(
-          page = initialGainOrLossesPage(_, getBackLink(draftReturn.initialGainOrLoss))
-        )(amount => AmountInPence.fromPounds(amount))
-      }
-      case _ =>
-        Redirect(routes.InitialGainOrLossController.enterInitialGainOrLoss())
+      case (fillingOutReturn, draftReturn, answers) =>
+        val backLink = getBackLink(answers)
+        initialGainOrLossForm
+          .bindFromRequest()
+          .fold(
+            formWithErrors => BadRequest(initialGainOrLossesPage(formWithErrors, backLink)), { value =>
+              if (answers.map(_.inPounds()).contains(value))
+                Redirect(routes.InitialGainOrLossController.checkYourAnswers())
+              else {
+                val updatedDraftReturn =
+                  draftReturn.copy(
+                    initialGainOrLoss    = Some(AmountInPence.fromPounds(value)),
+                    reliefDetailsAnswers = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                    yearToDateLiabilityAnswers =
+                      draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+                  )
 
+                val result = for {
+                  _ <- returnsService.storeDraftReturn(
+                        updatedDraftReturn,
+                        fillingOutReturn.subscribedDetails.cgtReference,
+                        fillingOutReturn.agentReferenceNumber
+                      )
+                  _ <- EitherT(
+                        updateSession(sessionStore, request)(
+                          _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
+                        )
+                      )
+                } yield ()
+
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update draft return", e)
+                    errorHandler.errorResult()
+                  },
+                  _ => Redirect(routes.InitialGainOrLossController.checkYourAnswers())
+                )
+              }
+            }
+          )
     }
   }
 
@@ -124,46 +152,9 @@ class InitialGainOrLossController @Inject() (
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
-  private def submit[A, P: Writeable, R](
-    draftReturn: DraftSingleDisposalReturn,
-    fillingOutReturn: FillingOutReturn
-  )(form: Form[A])(
-    page: Form[A] => P
-  )(
-    convertValueToAnswer: A => AmountInPence
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    form
-      .bindFromRequest()
-      .fold(
-        formWithErrors => BadRequest(page(formWithErrors)), { value =>
-          val newAnswer: AmountInPence = convertValueToAnswer(value)
-          val updatedDraftReturn =
-            draftReturn.copy(initialGainOrLoss = Some(newAnswer))
+}
 
-          val result = for {
-            _ <- if (updatedDraftReturn === draftReturn) EitherT.pure(())
-                else
-                  returnsService.storeDraftReturn(
-                    updatedDraftReturn,
-                    fillingOutReturn.subscribedDetails.cgtReference,
-                    fillingOutReturn.agentReferenceNumber
-                  )
-            _ <- EitherT(
-                  updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
-                  )
-                )
-          } yield ()
-
-          result.fold(
-            { e =>
-              logger.warn("Could not update draft return", e)
-              errorHandler.errorResult()
-            },
-            _ => Redirect(routes.InitialGainOrLossController.checkYourAnswers())
-          )
-        }
-      )
+object InitialGainOrLossController {
 
   val initialGainOrLossForm: Form[BigDecimal] = {
     val (outerId, gainId, lossId) = ("initialGainOrLoss", "gain", "loss")
@@ -205,4 +196,5 @@ class InitialGainOrLossController @Inject() (
       )(identity)(Some(_))
     )
   }
+
 }

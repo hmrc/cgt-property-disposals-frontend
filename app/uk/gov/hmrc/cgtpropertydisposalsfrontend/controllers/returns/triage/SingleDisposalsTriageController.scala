@@ -205,15 +205,12 @@ class SingleDisposalsTriageController @Inject() (
               _.copy(newReturnTriageAnswers = Right(newAnswers)), {
                 case (d, r) =>
                   r.copy(draftReturn = d.copy(
-                    triageAnswers             = newAnswers,
-                    propertyAddress           = None,
-                    disposalDetailsAnswers    = None,
-                    acquisitionDetailsAnswers = None,
-                    initialGainOrLoss         = None,
-                    reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-                      _.unset(_.privateResidentsRelief)
-                        .unset(_.lettingsRelief)
-                    ),
+                    triageAnswers              = newAnswers,
+                    propertyAddress            = None,
+                    disposalDetailsAnswers     = None,
+                    acquisitionDetailsAnswers  = None,
+                    initialGainOrLoss          = None,
+                    reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                     exemptionAndLossesAnswers  = None,
                     yearToDateLiabilityAnswers = None,
                     uploadSupportingDocuments  = None
@@ -397,22 +394,10 @@ class SingleDisposalsTriageController @Inject() (
           .unset(_.rebasedAcquisitionPrice)
           .unset(_.shouldUseRebase)
       ),
-      initialGainOrLoss = None,
-      reliefDetailsAnswers = currentDraftReturn.reliefDetailsAnswers.map(
-        _.unset(_.privateResidentsRelief)
-          .unset(_.lettingsRelief)
-      ),
-      yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers.flatMap {
-        case _: NonCalculatedYTDAnswers => None
-        case c: CalculatedYTDAnswers =>
-          Some(
-            c.unset(_.hasEstimatedDetails)
-              .unset(_.calculatedTaxDue)
-              .unset(_.taxDue)
-              .unset(_.mandatoryEvidence)
-          )
-      },
-      uploadSupportingDocuments = None
+      initialGainOrLoss          = None,
+      reliefDetailsAnswers       = currentDraftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+      yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+      uploadSupportingDocuments  = None
     )
 
   private def updateDisposalDate(
@@ -501,21 +486,9 @@ class SingleDisposalsTriageController @Inject() (
                           .unset(_.rebasedAcquisitionPrice)
                           .unset(_.shouldUseRebase)
                       ),
-                      initialGainOrLoss = None,
-                      reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-                        _.unset(_.privateResidentsRelief)
-                          .unset(_.lettingsRelief)
-                      ),
-                      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-                        case _: NonCalculatedYTDAnswers => None
-                        case c: CalculatedYTDAnswers =>
-                          Some(
-                            c.unset(_.hasEstimatedDetails)
-                              .unset(_.calculatedTaxDue)
-                              .unset(_.taxDue)
-                              .unset(_.mandatoryEvidence)
-                          )
-                      }
+                      initialGainOrLoss          = None,
+                      reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
                     )
                   )
               }
@@ -645,27 +618,14 @@ class SingleDisposalsTriageController @Inject() (
                   case (d, r) =>
                     r.copy(
                       draftReturn = d.copy(
-                        triageAnswers             = newAnswers,
-                        propertyAddress           = None,
-                        disposalDetailsAnswers    = None,
-                        acquisitionDetailsAnswers = None,
-                        initialGainOrLoss         = None,
-                        reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-                          _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
-                        ),
-                        yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-                          case c: CalculatedYTDAnswers =>
-                            Some(
-                              c.unset(_.hasEstimatedDetails)
-                                .unset(_.calculatedTaxDue)
-                                .unset(_.taxDue)
-                                .unset(_.mandatoryEvidence)
-                            )
-
-                          case _: NonCalculatedYTDAnswers =>
-                            None
-                        },
-                        uploadSupportingDocuments = None
+                        triageAnswers              = newAnswers,
+                        propertyAddress            = None,
+                        disposalDetailsAnswers     = None,
+                        acquisitionDetailsAnswers  = None,
+                        initialGainOrLoss          = None,
+                        reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                        yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+                        uploadSupportingDocuments  = None
                       )
                     )
                 }
