@@ -114,15 +114,14 @@ class InitialGainOrLossController @Inject() (
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) {
-      case (_, _, answers) =>
-        answers match {
-          case Some(completeInitialGainOrLossAnswers) =>
-            Ok(checkYourAnswersPage(completeInitialGainOrLossAnswers))
+    withFillingOutReturnAndAnswers(request) { (_, _, answers) =>
+      answers match {
+        case Some(completeInitialGainOrLossAnswers) =>
+          Ok(checkYourAnswersPage(completeInitialGainOrLossAnswers))
 
-          case None =>
-            Redirect(routes.InitialGainOrLossController.enterInitialGainOrLoss())
-        }
+        case None =>
+          Redirect(routes.InitialGainOrLossController.enterInitialGainOrLoss())
+      }
     }
   }
 

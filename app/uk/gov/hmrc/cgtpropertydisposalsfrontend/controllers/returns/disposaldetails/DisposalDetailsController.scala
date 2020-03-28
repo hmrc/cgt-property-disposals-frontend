@@ -204,30 +204,29 @@ class DisposalDetailsController @Inject() (
           requiredPreviousAnswer               = _ => Some(()),
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
         )(
-          updateAnswers = {
-            case (percentage, answers, draftReturn) =>
-              if (answers.fold(_.shareOfProperty, c => Some(c.shareOfProperty)).contains(percentage))
-                draftReturn
-              else {
-                val newAnswers = answers
-                  .unset(_.disposalPrice)
-                  .unset(_.disposalFees)
-                  .copy(shareOfProperty = Some(percentage))
+          updateAnswers = { (percentage, answers, draftReturn) =>
+            if (answers.fold(_.shareOfProperty, c => Some(c.shareOfProperty)).contains(percentage))
+              draftReturn
+            else {
+              val newAnswers = answers
+                .unset(_.disposalPrice)
+                .unset(_.disposalFees)
+                .copy(shareOfProperty = Some(percentage))
 
-                draftReturn.copy(
-                  disposalDetailsAnswers = Some(newAnswers),
-                  acquisitionDetailsAnswers = draftReturn.acquisitionDetailsAnswers.map(
-                    _.unset(_.acquisitionDate)
-                      .unset(_.acquisitionPrice)
-                      .unset(_.rebasedAcquisitionPrice)
-                      .unset(_.shouldUseRebase)
-                  ),
-                  initialGainOrLoss    = None,
-                  reliefDetailsAnswers = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
-                  yearToDateLiabilityAnswers =
-                    draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
-                )
-              }
+              draftReturn.copy(
+                disposalDetailsAnswers = Some(newAnswers),
+                acquisitionDetailsAnswers = draftReturn.acquisitionDetailsAnswers.map(
+                  _.unset(_.acquisitionDate)
+                    .unset(_.acquisitionPrice)
+                    .unset(_.rebasedAcquisitionPrice)
+                    .unset(_.shouldUseRebase)
+                ),
+                initialGainOrLoss    = None,
+                reliefDetailsAnswers = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                yearToDateLiabilityAnswers =
+                  draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+              )
+            }
           }
         )
     }
@@ -268,25 +267,24 @@ class DisposalDetailsController @Inject() (
               redirectToIfNoRequiredPreviousAnswer =
                 controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
             )(
-              updateAnswers = {
-                case (price, answers, draftReturn) =>
-                  if (answers.fold(_.disposalPrice, c => Some(c.disposalPrice)).exists(_.inPounds() === price))
-                    draftReturn
-                  else {
-                    val newAnswers = answers.fold(
-                      _.copy(disposalPrice = Some(fromPounds(price))),
-                      _.copy(disposalPrice = fromPounds(price))
-                    )
+              updateAnswers = { (price, answers, draftReturn) =>
+                if (answers.fold(_.disposalPrice, c => Some(c.disposalPrice)).exists(_.inPounds() === price))
+                  draftReturn
+                else {
+                  val newAnswers = answers.fold(
+                    _.copy(disposalPrice = Some(fromPounds(price))),
+                    _.copy(disposalPrice = fromPounds(price))
+                  )
 
-                    draftReturn.copy(
-                      disposalDetailsAnswers = Some(newAnswers),
-                      initialGainOrLoss      = None,
-                      reliefDetailsAnswers   = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
-                      yearToDateLiabilityAnswers =
-                        draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
-                    )
+                  draftReturn.copy(
+                    disposalDetailsAnswers = Some(newAnswers),
+                    initialGainOrLoss      = None,
+                    reliefDetailsAnswers   = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                    yearToDateLiabilityAnswers =
+                      draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+                  )
 
-                  }
+                }
 
               }
             )
@@ -329,25 +327,24 @@ class DisposalDetailsController @Inject() (
               redirectToIfNoRequiredPreviousAnswer =
                 controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
             )(
-              updateAnswers = {
-                case (price, answers, draftReturn) =>
-                  if (answers.fold(_.disposalFees, c => Some(c.disposalFees)).exists(_.inPounds() === price))
-                    draftReturn
-                  else {
-                    val newAnswers =
-                      answers.fold(
-                        _.copy(disposalFees = Some(fromPounds(price))),
-                        _.copy(disposalFees = fromPounds(price))
-                      )
-
-                    draftReturn.copy(
-                      disposalDetailsAnswers = Some(newAnswers),
-                      initialGainOrLoss      = None,
-                      reliefDetailsAnswers   = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
-                      yearToDateLiabilityAnswers =
-                        draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+              updateAnswers = { (price, answers, draftReturn) =>
+                if (answers.fold(_.disposalFees, c => Some(c.disposalFees)).exists(_.inPounds() === price))
+                  draftReturn
+                else {
+                  val newAnswers =
+                    answers.fold(
+                      _.copy(disposalFees = Some(fromPounds(price))),
+                      _.copy(disposalFees = fromPounds(price))
                     )
-                  }
+
+                  draftReturn.copy(
+                    disposalDetailsAnswers = Some(newAnswers),
+                    initialGainOrLoss      = None,
+                    reliefDetailsAnswers   = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                    yearToDateLiabilityAnswers =
+                      draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+                  )
+                }
               }
             )
         }
