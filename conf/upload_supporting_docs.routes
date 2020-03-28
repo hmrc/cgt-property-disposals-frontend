@@ -1,6 +1,8 @@
 GET    /supporting-evidence/supporting-evidence                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocuments()
 POST   /supporting-evidence/supporting-evidence                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocumentsSubmit()
 
+GET    /supporting-evidence/supporting-evidence-upload                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.uploadDocumentWithSupportingEvidence()
+
 GET    /supporting-documents/change-or-delete-file                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.changeOrDeleteFile()
 POST   /supporting-documents/change-or-delete-file                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.changeOrDeleteFileSubmit()
 

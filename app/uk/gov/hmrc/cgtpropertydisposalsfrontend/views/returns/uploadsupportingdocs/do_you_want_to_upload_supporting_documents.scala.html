@@ -36,32 +36,32 @@
     @title = @{messages(s"$key.title")}
     @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+    @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
-    @backLinkComponent(backLink)
+        @backLinkComponent(backLink)
 
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
+        @if(hasErrors) {
+            @errorSummary(form)
+        }
 
-    @caption(messages(s"$key.caption"))
+        @caption(messages(s"$key.caption"))
 
-    @formWrapper(routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocumentsSubmit(), 'novalidate -> "novalidate") {
+        @formWrapper(routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocumentsSubmit(), 'novalidate -> "novalidate") {
 
-        @yesNo(
-            fieldId = key,
-            label = pageHeading(title),
-            labelAsHeading = true,
-            errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors,
-            selected = form.value,
-            helpText = Some(Html(messages(s"$key.help-text"))),
-            yesContent = None
-        )
+            @yesNo(
+                fieldId = key,
+                label = pageHeading(title),
+                labelAsHeading = true,
+                errorKey = form.error(key).map(e => e.message),
+                hasErrors = hasErrors,
+                selected = form.value,
+                helpText = Some(Html(messages(s"$key.help-text"))),
+                yesContent = None
+            )
 
-        @submitButton(messages("button.saveAndContinue"))
+            @submitButton(messages("button.saveAndContinue"))
 
-    }
+        }
 
         @returnToSummaryLink(displayReturnToSummaryLink = true)
 

@@ -56,7 +56,8 @@ class UploadSupportingDocumentsController @Inject() (
   val config: Configuration,
   doYouWantToUploadSupportingDocumentsPage: pages.do_you_want_to_upload_supporting_documents,
   checkYourAnswersPage: pages.check_your_answers,
-  changeOrDeletePage: pages.change_or_delete_supporting_document
+  changeOrDeletePage: pages.change_or_delete_supporting_document,
+  uploadDocumentWithSupportingEvidencePage: pages.upload_document_with_supporting_evidence
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -244,7 +245,7 @@ class UploadSupportingDocumentsController @Inject() (
             c => doYouWantToUploadSupportingDocumentsForm.fill(c.doYouWantToUploadSupportingDocuments)
           )
         )(
-          page = doYouWantToUploadSupportingDocumentsPage(_, _)
+          page = uploadDocumentWithSupportingEvidencePage(_, _, "")
         )(
           requiredPreviousAnswer =
             _.fold(_.doYouWantToUploadSupportingDocuments, c => Some(c.doYouWantToUploadSupportingDocuments)),
@@ -296,7 +297,7 @@ class UploadSupportingDocumentsController @Inject() (
       case IncompleteUploadSupportingDocumentAnswers(None) =>
         Redirect(routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocuments())
       case IncompleteUploadSupportingDocumentAnswers(Some(true)) =>
-        Redirect(routes.UploadSupportingDocumentsController.)
+        Redirect(routes.UploadSupportingDocumentsController.uploadDocumentWithSupportingEvidence())
       case IncompleteUploadSupportingDocumentAnswers(Some(false)) =>
         Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(false, List.empty)))
       case CompleteUploadSupportingDocumentAnswers(hasSupportingDocuments, uploadeddocs) => //FIXME: list value
