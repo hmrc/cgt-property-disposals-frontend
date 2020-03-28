@@ -185,7 +185,7 @@ class TaskListControllerSpec
             "initialGainOrLoss",
             messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
             initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
-            TaskListStatus.ToDo
+            TaskListStatus.InProgress
           )
         }
 
@@ -219,6 +219,7 @@ class TaskListControllerSpec
             TaskListStatus.Complete
           )
         }
+
       }
 
       "display the page with the proper Enter property address section status" when {
@@ -248,6 +249,7 @@ class TaskListControllerSpec
             TaskListStatus.Complete
           )
         }
+
       }
 
       "display the page with the proper disposal details section status" when {
@@ -292,6 +294,7 @@ class TaskListControllerSpec
             TaskListStatus.Complete
           )
         }
+
       }
 
       "display the page with the proper acquisition details section status" when {
@@ -337,6 +340,7 @@ class TaskListControllerSpec
             TaskListStatus.Complete
           )
         }
+
       }
 
       "display the page with the proper reliefs details section status" when {
@@ -645,7 +649,7 @@ class TaskListControllerSpec
               ),
               initialGainOrLoss = None
             ),
-            TaskListStatus.ToDo
+            TaskListStatus.InProgress
           )
         }
 
@@ -680,6 +684,7 @@ class TaskListControllerSpec
       }
 
       "display the page with Save and come back later link" when {
+
         "the session data indicates that they are filling in a return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -701,6 +706,7 @@ class TaskListControllerSpec
             .confirmDraftReturn()
             .url
         }
+
       }
     }
   }

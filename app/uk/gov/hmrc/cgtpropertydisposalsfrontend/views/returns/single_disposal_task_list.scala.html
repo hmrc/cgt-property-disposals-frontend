@@ -71,7 +71,7 @@
     (acquistionDetailsState, disposalDetailsState) match {
         case (TaskListStatus.Complete, TaskListStatus.Complete) =>
             draftReturn.initialGainOrLoss.fold[TaskListStatus](TaskListStatus.InProgress)(_ => TaskListStatus.Complete)
-        case (TaskListStatus.Complete, _) => TaskListStatus.CannotStart
+        case _ => TaskListStatus.CannotStart
     }
 }
 
