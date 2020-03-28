@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.{routes => nameRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -99,7 +99,8 @@ class RegistrationEnterAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
 
     }
 
@@ -145,7 +146,8 @@ class RegistrationEnterAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(performAction)
+      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Agent, performAction)
 
     }
 
@@ -171,6 +173,13 @@ class RegistrationEnterAddressControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like displaySelectAddress(
+        UserType.Individual,
+        performAction,
+        nameRoutes.RegistrationEnterIndividualNameController.enterIndividualName()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Agent,
         performAction,
         nameRoutes.RegistrationEnterIndividualNameController.enterIndividualName()
       )

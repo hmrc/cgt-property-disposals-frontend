@@ -235,9 +235,15 @@ address-select.returns.trust.error.required=Select the address the trust dispose
 address-select.error.number=Select the contact address or enter it manually if it is not shown
 address-select.agent.error.number=Select the contact address or enter it manually if it is not shown
 address-select.trust.error.number=Select the contact address or enter it manually if it is not shown
+address-select.returns.error.number=Select the contact address or enter it manually if it is not shown
+address-select.returns.agent.error.number=Select the contact address or enter it manually if it is not shown
+address-select.returns.trust.error.number=Select the contact address or enter it manually if it is not shown
 address-select.invalid=Select the contact address or enter it manually if it is not shown
 address-select.agent.invalid=Select the contact address or enter it manually if it is not shown
 address-select.trust.invalid=Select the contact address or enter it manually if it is not shown
+address-select.returns.invalid=Select the contact address or enter it manually if it is not shown
+address-select.returns.agent.invalid=Select the contact address or enter it manually if it is not shown
+address-select.returns.trust.invalid=Select the contact address or enter it manually if it is not shown
 
 subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account

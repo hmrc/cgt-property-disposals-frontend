@@ -46,7 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.collection.JavaConverters._
@@ -764,7 +764,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
 
     }
 
@@ -788,7 +788,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(performAction)
+      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Agent, performAction)
+      behave like enterPostcodePage(UserType.Organisation, performAction)
 
     }
 
@@ -811,6 +813,19 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like displaySelectAddress(
+        UserType.Individual,
+        performAction,
+        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Agent,
+        performAction,
+        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Organisation,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )
