@@ -29,7 +29,7 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
 import play.mvc.Http.Status
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan => _, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -53,11 +53,11 @@ final object UpscanInitiateRequest {
 @ImplementedBy(classOf[UpscanConnectorImpl])
 trait UpscanConnector {
 
-  def getUpscanSnapshot(cgtReference: CgtReference)(
+  def getUpscanSnapshot(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, UpscanSnapshot]
 
-  def initiate(cgtReference: CgtReference)(
+  def initiate(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -65,7 +65,7 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
-  def getFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
+  def getFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]]
 
@@ -109,9 +109,9 @@ class UpscanConnectorImpl @Inject() (
   private val maxFileSize: Long = getUpscanInitiateConfig[Long]("max-file-size")
 
   override def getUpscanSnapshot(
-    cgtReference: CgtReference
+    draftReturnId: DraftReturnId
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanSnapshot] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-snapshot-info/cgt-reference/${cgtReference.value}"
+    val url = baseUrl + s"/cgt-property-disposals/upscan-snapshot-info/draft-return-id/${draftReturnId.value}"
     EitherT[Future, Error, UpscanSnapshot](
       http
         .get(url)
@@ -127,11 +127,11 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
-  override def initiate(cgtReference: CgtReference)(
+  override def initiate(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val payload = UpscanInitiateRequest(
-      baseUrl + s"/cgt-property-disposals/upscan-call-back/cgt-reference/${cgtReference.value}",
+      baseUrl + s"/cgt-property-disposals/upscan-call-back/draft-return-id/${draftReturnId.value}",
       minFileSize,
       maxFileSize
     )
@@ -168,7 +168,7 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
-  override def getFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
+  override def getFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]] = {
     val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/${upscanInitiateReference.value}"

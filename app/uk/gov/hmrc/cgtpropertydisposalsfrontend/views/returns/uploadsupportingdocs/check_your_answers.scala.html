@@ -24,7 +24,7 @@
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_docs_summary
+    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_evidence_summary
 )
 
 @(answers: CompleteUploadSupportingDocumentAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
@@ -39,7 +39,9 @@
 
         @summary(answers)
 
-        <a href="url">Add another file</span></a>
+        <a href=@routes.UploadSupportingDocumentsController.uploadDocumentWithSupportingEvidence().url>Add another file</span></a>
+
+        <br>
 
         @formWrapper(routes.UploadSupportingDocumentsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
 

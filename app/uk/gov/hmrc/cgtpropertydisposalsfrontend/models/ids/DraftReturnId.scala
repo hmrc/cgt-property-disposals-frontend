@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-sealed trait UpscanInitiateResponse
+import play.api.libs.json.Json
 
-object UpscanInitiateResponse {
-  case object MaximumFileUploadReached extends UpscanInitiateResponse
-  case object FailedToGetUpscanSnapshot extends UpscanInitiateResponse
-  final case class UpscanInitiateSuccess(upscanInitiateReference: UpscanInitiateReference)
-      extends UpscanInitiateResponse
+final case class DraftReturnId(value: String) extends AnyVal
+
+object DraftReturnId {
+  implicit val format = Json.format[DraftReturnId]
 }

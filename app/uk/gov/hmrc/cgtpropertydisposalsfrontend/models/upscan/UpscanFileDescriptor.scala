@@ -16,15 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
+import java.time.LocalDateTime
+
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus
 
 final case class UpscanFileDescriptor(
-  key: String,
+  upscanInitiateReference: UpscanInitiateReference,
+  draftReturnId: DraftReturnId,
   cgtReference: CgtReference,
   fileDescriptor: FileDescriptor,
+  timestamp: LocalDateTime,
   status: UpscanFileDescriptorStatus
 )
 

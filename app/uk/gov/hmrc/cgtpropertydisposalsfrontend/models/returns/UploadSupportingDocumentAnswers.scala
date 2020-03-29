@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 
-sealed trait UploadSupportingDocumentAnswers extends Product with Serializable
+sealed trait UploadSupportingDocumentAnswers extends Product with Serializable //FIXME: change name to upload supporting evidence answer
 
 object UploadSupportingDocumentAnswers {
 
@@ -33,12 +33,13 @@ object UploadSupportingDocumentAnswers {
   }
 
   final case class IncompleteUploadSupportingDocumentAnswers(
-    doYouWantToUploadSupportingDocuments: Option[Boolean]
+    doYouWantToUploadSupportingDocuments: Option[Boolean],
+    documents: List[SupportingDocuments]
   ) extends UploadSupportingDocumentAnswers
 
   object IncompleteUploadSupportingDocumentAnswers {
     val empty: IncompleteUploadSupportingDocumentAnswers =
-      IncompleteUploadSupportingDocumentAnswers(None)
+      IncompleteUploadSupportingDocumentAnswers(None, List.empty)
   }
 
   final case class CompleteUploadSupportingDocumentAnswers(

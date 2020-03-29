@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.READY_TO_UPLOAD
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInititateResponseStored
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInitiateSuccess
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UpscanFileDescriptor, UpscanInitiateRawResponse, UpscanSnapshot}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -129,7 +129,7 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with MockFactory {
           )
         }
         await(service.initiate(cgtReference).value) shouldBe Right(
-          UpscanInititateResponseStored(fd.fileDescriptor.reference)
+          UpscanInitiateSuccess(fd.fileDescriptor.reference)
         )
       }
     }

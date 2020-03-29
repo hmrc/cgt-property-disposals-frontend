@@ -27,6 +27,9 @@
 
 @(answers: CompleteUploadSupportingDocumentAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
+    @deleteUrl=@{routes.UploadSupportingDocumentsController.changeSupportingEvidence().url}
+    @changeUrl=@{routes.UploadSupportingDocumentsController.deleteSupportingEvidence().url}
+
     @key = @{"upload-supporting-documents.check-your-answers"}
 
     @title = @{messages(s"$key.title")}
@@ -48,12 +51,18 @@
         )
 
         @for((document, fileIndex) <- answers.documents.zipWithIndex) {
-            @cyaRow(
-                "Supporting evidence file " + (fileIndex + 1).toString,
-                Html(document.fileName),
-                Some(cyaChange(messages(s"$key.cya-change"), routes.UploadSupportingDocumentsController.changeOrDeleteFile().url)),
-                s"supporting-document-$fileIndex-value"
-            )
+
+            <div>
+                <dt class="cya-question" id="question">
+                    Supporting evidence file @{fileIndex + 1}
+                </dt>
+                <dd class="cya-answer" id="answer">
+                    @document.fileName
+                </dd>
+                <dd class="cya-change"><a href=@changeUrl>Change<span class="visuallyhidden">"change"</span></a></dd>
+                <dd class="cya-change"><a href=@deleteUrl>Delete<span class="visuallyhidden">"delete"</span></a></dd>
+            </div>
+
         }
 
     }

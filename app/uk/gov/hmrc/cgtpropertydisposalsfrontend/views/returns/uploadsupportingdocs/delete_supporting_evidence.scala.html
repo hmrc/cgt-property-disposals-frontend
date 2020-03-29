@@ -50,10 +50,6 @@
 
         @formWrapper(action = upscanRoutes.UpscanController.upload(), 'enctype -> "multipart/form-data") {
 
-            @CSRF.formField
-            <input type="hidden" name="reference" value="@document.fold("No reference")(d => d.reference)" />
-            <input type="file" name="file" />
-
             @cyaSection() {
 
                 @cyaRow(
@@ -67,9 +63,8 @@
 
             @submitButton(messages("button.saveAndContinue"))
 
-        }
+    }
 
-        @returnToSummaryLink(displayReturnToSummaryLink = true)
-
+    @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

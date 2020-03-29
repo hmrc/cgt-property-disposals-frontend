@@ -61,8 +61,8 @@ class UploadSupportingDocumentStatusControllerSpec
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   def sessionWithState(
-                        uploadSupportingDocAnswer: Option[UploadSupportingDocumentAnswers],
-                        disposalDate: Option[DisposalDate]
+    uploadSupportingDocAnswer: Option[UploadSupportingDocumentAnswers],
+    disposalDate: Option[DisposalDate]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
     val draftReturn = sample[DraftSingleDisposalReturn].copy(uploadSupportingDocuments = uploadSupportingDocAnswer)
@@ -76,14 +76,14 @@ class UploadSupportingDocumentStatusControllerSpec
   }
 
   def sessionWithState(
-                        uploadSupportingDocAnswer1: UploadSupportingDocumentAnswers,
-                        disposalDate: DisposalDate
+    uploadSupportingDocAnswer1: UploadSupportingDocumentAnswers,
+    disposalDate: DisposalDate
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithState(Some(uploadSupportingDocAnswer1), Some(disposalDate))
 
   def draftReturnWithCompleteJourneys(
-                                       uploadSupportingDocAnswer: Option[UploadSupportingDocumentAnswers],
-                                       disposalDate: DisposalDate
+    uploadSupportingDocAnswer: Option[UploadSupportingDocumentAnswers],
+    disposalDate: DisposalDate
   ) =
     DraftSingleDisposalReturn(
       UUID.randomUUID(),

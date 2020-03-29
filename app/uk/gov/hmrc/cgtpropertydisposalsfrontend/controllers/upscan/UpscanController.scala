@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan
 
+import java.time.LocalDateTime
+
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
 import cats.data.EitherT
@@ -31,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.UPLOADED
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
@@ -86,17 +89,20 @@ class UpscanController @Inject() (
   def upscan(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSubscribedUser(request) { (_, subscribed) =>
-        upscanService.initiate(subscribed.subscribedDetails.cgtReference).value.map {
-          case Left(error) =>
-            logger.warn(s"could not initiate upscan due to $error")
-            errorHandler.errorResult(None)
-          case Right(upscanInitiateResponse) =>
-            upscanInitiateResponse match {
-              case FailedToGetUpscanSnapshot                => errorHandler.errorResult(None)
-              case MaximumFileUploadReached                 => Ok(upscanLimitPage())
-              case UpscanInititateResponseStored(reference) => Ok(upscanPage(reference))
-            }
-        }
+        upscanService
+          .initiate(DraftReturnId(""), subscribed.subscribedDetails.cgtReference, LocalDateTime.now())
+          .value
+          .map {
+            case Left(error) =>
+              logger.warn(s"could not initiate upscan due to $error")
+              errorHandler.errorResult(None)
+            case Right(upscanInitiateResponse) =>
+              upscanInitiateResponse match {
+                case FailedToGetUpscanSnapshot        => errorHandler.errorResult(None)
+                case MaximumFileUploadReached         => Ok(upscanLimitPage())
+                case UpscanInitiateSuccess(reference) => Ok(upscanPage(reference))
+              }
+          }
       }
     }
 
@@ -112,7 +118,7 @@ class UpscanController @Inject() (
                       )
           maybeUpscanFileDescriptor <- upscanService
                                         .getUpscanFileDescriptor(
-                                          subscribed.subscribedDetails.cgtReference,
+                                          DraftReturnId(""), //FIXME this neeeds to be removed from here or fix the value for the draft return id
                                           UpscanInitiateReference(reference)
                                         )
           upscanFileDescriptor <- EitherT.fromOption(

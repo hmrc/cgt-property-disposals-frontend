@@ -17,6 +17,7 @@
 @import helper._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateReference
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -24,13 +25,13 @@
 )
 
 @(
- reference : String
+ reference : UpscanInitiateReference
 )(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
 
 @mainTemplate(title = "Upload file", userType = None) {
  @form(action = routes.UpscanController.upload(), 'enctype -> "multipart/form-data"){
  @CSRF.formField
-  <input type="hidden" name="reference" value="@reference" />
+  <input type="hidden" name="reference" value="@{reference.value}" />
   <input type="file" name="file" />
   <input type="submit" value="Submit"/>
  }
