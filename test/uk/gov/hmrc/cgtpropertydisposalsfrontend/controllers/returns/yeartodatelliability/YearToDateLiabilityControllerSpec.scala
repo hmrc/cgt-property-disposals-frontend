@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability
 
+import java.time.LocalDate
 import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.order._
+import cats.syntax.either._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -51,7 +53,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingD
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -104,9 +106,11 @@ class YearToDateLiabilityControllerSpec
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
     val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    val fillingOutReturnWithTrust =
+      journey.copy(subscribedDetails = journey.subscribedDetails.copy(name = Right(sample[IndividualName])))
     (
-      SessionData.empty.copy(journeyStatus = Some(journey)),
-      journey,
+      SessionData.empty.copy(journeyStatus = Some(fillingOutReturnWithTrust)),
+      fillingOutReturnWithTrust,
       draftReturn
     )
   }
@@ -123,7 +127,10 @@ class YearToDateLiabilityControllerSpec
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
-    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    val journey = sample[FillingOutReturn].copy(
+      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+      draftReturn       = draftReturn
+    )
     (
       SessionData.empty.copy(journeyStatus = Some(journey)),
       journey,
@@ -261,6 +268,32 @@ class YearToDateLiabilityControllerSpec
         }
 
       }
+
+      "redirect the page" when {
+        "the user is a Trust" in {
+          val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
+            None,
+            Some(sample[DisposalDate]),
+            Some(completeReliefDetailsAnswersWithNoOtherReliefs)
+          )
+
+          val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
+            fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              session.copy(journeyStatus = Some(fillingOutReturnWithTrust))
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+      }
     }
 
     "handling submitted answers to the estimated income page" must {
@@ -397,7 +430,30 @@ class YearToDateLiabilityControllerSpec
 
           checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
         }
+        "the user is a Trust" in {
+          val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
+            sample[CompleteCalculatedYTDAnswers].copy(
+              estimatedIncome = AmountInPence(100)
+            ),
+            sample[DisposalDate]
+          )
 
+          val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
+            fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              session.copy(journeyStatus = Some(fillingOutReturnWithTrust))
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
       }
 
       "display the page" when {
@@ -405,6 +461,8 @@ class YearToDateLiabilityControllerSpec
         "the estimated income is greater than zero and" when {
 
           "the section is incomplete" in {
+            val taxYear2020 =
+              sample[TaxYear].copy(startDateInclusive = LocalDate.of(2020, 4, 6), LocalDate.of(2021, 4, 6))
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -413,14 +471,18 @@ class YearToDateLiabilityControllerSpec
                     estimatedIncome   = Some(AmountInPence.fromPounds(12.34)),
                     personalAllowance = None
                   ),
-                  sample[DisposalDate]
+                  sample[DisposalDate].copy(taxYear = taxYear2020)
                 )._1
               )
             }
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("personalAllowance.title"), { doc =>
+              messageFromMessageKey(
+                "personalAllowance.title",
+                taxYear2020.startDateInclusive.getYear.toString,
+                taxYear2020.endDateExclusive.getYear.toString
+              ), { doc =>
                 doc.select("#back").attr("href") shouldBe routes.YearToDateLiabilityController
                   .estimatedIncome()
                   .url
@@ -434,6 +496,7 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the section is complete" in {
+            val disposalDate = sample[DisposalDate]
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -442,14 +505,18 @@ class YearToDateLiabilityControllerSpec
                     estimatedIncome   = AmountInPence(1L),
                     personalAllowance = Some(AmountInPence(1234L))
                   ),
-                  sample[DisposalDate]
+                  disposalDate
                 )._1
               )
             }
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("personalAllowance.title"), { doc =>
+              messageFromMessageKey(
+                "personalAllowance.title",
+                disposalDate.taxYear.startDateInclusive.getYear.toString,
+                disposalDate.taxYear.endDateExclusive.getYear.toString
+              ), { doc =>
                 doc.select("#personalAllowance").attr("value") shouldBe "12.34"
                 doc.select("#back").attr("href") shouldBe routes.YearToDateLiabilityController
                   .checkYourAnswers()
@@ -521,24 +588,39 @@ class YearToDateLiabilityControllerSpec
       "show a form error" when {
 
         "the amount of money is invalid" in {
-          val personalAllowance = AmountInPence(100000L)
-          val taxYear           = sample[TaxYear].copy(personalAllowance = personalAllowance)
-          val disposalDate      = sample[DisposalDate].copy(taxYear = taxYear)
+          val personalAllowance    = AmountInPence(1250000L)
+          val maxPersonalAllowance = AmountInPence(2000000L)
+          val taxYear =
+            sample[TaxYear].copy(personalAllowance = personalAllowance, maxPersonalAllowance = maxPersonalAllowance)
+          val disposalDate = sample[DisposalDate].copy(taxYear = taxYear)
           val session = sessionWithSingleDisposalState(
             IncompleteCalculatedYTDAnswers.empty.copy(
               estimatedIncome = Some(AmountInPence(1L))
             ),
             disposalDate
           )._1
-
+          val args = Map(
+            "personalAllowance.error.tooSmall" -> List(
+              MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.maxPersonalAllowance.inPounds())
+            ),
+            "personalAllowance.error.tooLarge" -> List(
+              MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.maxPersonalAllowance.inPounds()),
+              disposalDate.taxYear.startDateInclusive.getYear.toString,
+              disposalDate.taxYear.endDateExclusive.getYear.toString
+            )
+          )
           AmountOfMoneyErrorScenarios
-            .amountOfMoneyErrorScenarios("personalAllowance", personalAllowance.inPounds())
+            .amountOfMoneyErrorScenarios("personalAllowance", maxPersonalAllowance.inPounds())
             .foreach { scenario =>
               withClue(s"For $scenario: ") {
                 testFormError(scenario.formData: _*)(
                   scenario.expectedErrorMessageKey,
-                  MoneyUtils.formatAmountOfMoneyWithoutPoundSign(taxYear.personalAllowance.inPounds())
-                )("personalAllowance.title")(
+                  args.getOrElse(scenario.expectedErrorMessageKey, Nil)
+                )(
+                  "personalAllowance.title",
+                  disposalDate.taxYear.startDateInclusive.getYear.toString,
+                  disposalDate.taxYear.endDateExclusive.getYear.toString
+                )(
                   performAction,
                   session
                 )
@@ -809,6 +891,70 @@ class YearToDateLiabilityControllerSpec
             )
             test(
               sessionWithMultipleDisposalsState(answers)._1,
+              routes.YearToDateLiabilityController.checkYourAnswers(), { doc =>
+                doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
+              }
+            )
+          }
+
+        }
+
+      }
+
+      "handling a TRUST user on a non-calculated journey" must {
+
+        "display the page" when {
+
+          def testCompletedWithTrust(
+            answers: YearToDateLiabilityAnswers,
+            backLink: Call,
+            extraChecks: Document => Unit = _ => ()
+          ): Unit = {
+            val (session, fillingOutReturn, _) = sessionWithMultipleDisposalsState(answers)
+            val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
+              fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
+            )
+            val sessionDataWithTrust = session.copy(journeyStatus = Some(fillingOutReturnWithTrust))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionDataWithTrust)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("hasEstimatedDetails.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe backLink.url
+                doc.select("#hasEstimatedDetails > #yes-content").text shouldBe messageFromMessageKey(
+                  "hasEstimatedDetails.trust.yes.content"
+                )
+                doc
+                  .select("#content > article > form")
+                  .attr("action") shouldBe routes.YearToDateLiabilityController
+                  .hasEstimatedDetailsSubmit()
+                  .url
+                extraChecks(doc)
+              }
+            )
+          }
+
+          "the user has not answered the question yet" in {
+            testCompletedWithTrust(
+              IncompleteNonCalculatedYTDAnswers.empty.copy(
+                taxableGainOrLoss   = Some(AmountInPence(100)),
+                hasEstimatedDetails = None
+              ),
+              returns.routes.TaskListController.taskList()
+            )
+          }
+
+          "the user has answered the question before" in {
+            val answers = sample[CompleteNonCalculatedYTDAnswers].copy(
+              hasEstimatedDetails = true
+            )
+
+            testCompletedWithTrust(
+              answers,
               routes.YearToDateLiabilityController.checkYourAnswers(), { doc =>
                 doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
               }
@@ -1256,7 +1402,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "there is an error storing the calculated tax due" in {
-          val subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
+          val subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
 
           val answers = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome     = Some(AmountInPence(1L)),
@@ -1264,7 +1410,7 @@ class YearToDateLiabilityControllerSpec
             hasEstimatedDetails = Some(false)
           )
 
-          val calculateCgtTaxDueRequest = calculateRequest(AmountInPence(1L), AmountInPence(2L), isATrust = true)
+          val calculateCgtTaxDueRequest = calculateRequest(AmountInPence(1L), AmountInPence(2L), isATrust = false)
           val calculatedTaxDue          = sample[CalculatedTaxDue]
           val draftReturn               = draftReturnWithAnswers(answers)
           val fillingOutReturn =
@@ -1630,6 +1776,24 @@ class YearToDateLiabilityControllerSpec
           checkIsRedirect(performAction(), expectedRedirect)
         }
 
+        def testRedirectWhenIsATrust(
+          answers: IncompleteCalculatedYTDAnswers,
+          expectedRedirect: Call
+        ): Unit = {
+
+          val (sessionData, fillingOutReturn, _) = sessionWithSingleDisposalState(answers, sample[DisposalDate])
+          val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
+            fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
+          )
+          val sessionDataWithTrust = sessionData.copy(journeyStatus = Some(fillingOutReturnWithTrust))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithTrust)
+          }
+
+          checkIsRedirect(performAction(), expectedRedirect)
+        }
+
         behave like redirectToStartBehaviour(performAction)
 
         behave like unsuccessfulUpdateBehaviourForSingleDisposal(
@@ -1649,6 +1813,15 @@ class YearToDateLiabilityControllerSpec
 
         }
 
+        "do NOT redirect to the estimated income page" when {
+          "the user is a Trust" in {
+            testRedirectWhenIsATrust(
+              allQuestionAnswered.copy(estimatedIncome = None, hasEstimatedDetails = None),
+              routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+          }
+        }
+
         "redirect to the personal allowance page" when {
 
           "that question has not been answered yet and the estimated income is non zero" in {
@@ -1661,6 +1834,15 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
+        }
+
+        "do NOT redirect to the personal allowance page" when {
+          "the user is a Trust" in {
+            testRedirectWhenIsATrust(
+              allQuestionAnswered.copy(personalAllowance = None, hasEstimatedDetails = None),
+              routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+          }
         }
 
         "redirect to the has estimated details  page" when {
@@ -1785,9 +1967,33 @@ class YearToDateLiabilityControllerSpec
           answers: IncompleteNonCalculatedYTDAnswers,
           expectedRedirect: Call
         ): Unit = {
+
+          val (sessionData, fillingOutReturn, _) = sessionWithMultipleDisposalsState(answers)
+          val fillingOutReturnWithIndividual = fillingOutReturn.copy(subscribedDetails =
+            fillingOutReturn.subscribedDetails.copy(name = Right(sample[IndividualName]))
+          )
+          val sessionDataWithIndividual = sessionData.copy(journeyStatus = Some(fillingOutReturnWithIndividual))
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithMultipleDisposalsState(answers)._1)
+            mockGetSession(sessionDataWithIndividual)
+          }
+
+          checkIsRedirect(performAction(), expectedRedirect)
+        }
+
+        def testRedirectWhenIsATrust(
+          answers: IncompleteNonCalculatedYTDAnswers,
+          expectedRedirect: Call
+        ): Unit = {
+
+          val (sessionData, fillingOutReturn, _) = sessionWithMultipleDisposalsState(answers)
+          val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
+            fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
+          )
+          val sessionDataWithTrust = sessionData.copy(journeyStatus = Some(fillingOutReturnWithTrust))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithTrust)
           }
 
           checkIsRedirect(performAction(), expectedRedirect)
@@ -1820,7 +2026,12 @@ class YearToDateLiabilityControllerSpec
             )
 
           }
-
+          "the user IS a trust" in {
+            testRedirectWhenIsATrust(
+              allQuestionAnswered.copy(hasEstimatedDetails = None),
+              routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+          }
         }
 
         "redirect to the non-calculated enter tax due page" when {
@@ -2626,8 +2837,11 @@ class YearToDateLiabilityControllerSpec
     updatedDraftReturn: DraftReturn,
     result: () => Future[Result]
   ): Unit = {
-    val journey = sample[FillingOutReturn].copy(draftReturn = currentDraftReturn)
-    val session = SessionData.empty.copy(journeyStatus      = Some(journey))
+    val journey = sample[FillingOutReturn].copy(
+      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+      draftReturn       = currentDraftReturn
+    )
+    val session = SessionData.empty.copy(journeyStatus = Some(journey))
 
     val updatedSession = SessionData.empty.copy(journeyStatus = Some(
       journey.copy(draftReturn = updatedDraftReturn)
@@ -2673,7 +2887,7 @@ class YearToDateLiabilityControllerSpec
 
   def testFormError(
     data: (String, String)*
-  )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
+  )(expectedErrorMessageKey: String, errorArgs: Seq[String] = Nil)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithSingleDisposalState(
       sample[CompleteCalculatedYTDAnswers],
@@ -2684,10 +2898,9 @@ class YearToDateLiabilityControllerSpec
       mockAuthWithNoRetrievals()
       mockGetSession(currentSession)
     }
-
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
+      messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
@@ -2703,8 +2916,12 @@ class YearToDateLiabilityControllerSpec
     oldDraftReturn: DraftReturn,
     updatedDraftReturn: DraftReturn
   ): Unit = {
-    val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-    val session = SessionData.empty.copy(journeyStatus      = Some(journey))
+    val journey = sample[FillingOutReturn].copy(
+      draftReturn       = oldDraftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+    )
+
+    val session = SessionData.empty.copy(journeyStatus = Some(journey))
 
     inSequence {
       mockAuthWithNoRetrievals()

@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -27,8 +28,10 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteCalculatedYTDAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
-
+@(answers: CompleteCalculatedYTDAnswers, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
+@taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
+@personalAllowance = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.personalAllowance.inPounds())}
 @cyaSection() {
     @cyaRow(
         messages("estimatedIncome.title"),
@@ -38,7 +41,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     )
     @answers.personalAllowance.map { personalAllowance =>
         @cyaRow(
-            messages("personalAllowance.title"),
+            messages("personalAllowance.title", taxYearStartYear, taxYearEndYear),
             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
             Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityController.personalAllowance().url)),
             "personalAllowance-value"
