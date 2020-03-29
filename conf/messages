@@ -1164,6 +1164,7 @@ confirmationOfSubmission.returnToAccount=Go to your <a href="{0}">Capital Gains 
 viewReturn.title=View return
 viewReturn.heading.taxOwed=Tax owed for return
 viewReturn.heading.reference=Return reference number
+viewReturn.heading.payment.reference=Payment reference number
 viewReturn.printLink=Print or save this page for your records
 viewReturn.charges.heading=Payments
 viewReturn.charges.description=Description

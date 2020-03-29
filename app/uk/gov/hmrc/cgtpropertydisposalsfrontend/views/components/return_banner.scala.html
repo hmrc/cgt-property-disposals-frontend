@@ -17,10 +17,16 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 
 @this()
 
-@(heading: String, taxOwed: AmountInPence, reference: String, name: String, userType: Option[UserType])(implicit messages: Messages)
+@(heading: String, returnSummary: ReturnSummary, subscribedDetails: SubscribedDetails, userType: Option[UserType])(implicit messages: Messages)
+
+@taxOwed = @{returnSummary.mainReturnChargeAmount.withFloorZero}
+@name = @{subscribedDetails.name.fold(_.value, e => e.firstName + " " + e.lastName)}
+@reference = @{if(taxOwed.isPositive) subscribedDetails.cgtReference.value else returnSummary.submissionId}
 
 <div class="govuk-box-highlight govuk-box-highlight--status">
     @{userType match {
@@ -36,7 +42,7 @@
     </span>
   </p>
   <p>
-    @messages("viewReturn.heading.reference")
+    @messages(if(taxOwed.isPositive) "viewReturn.heading.payment.reference" else "viewReturn.heading.reference")
     <span class="heading-xlarge" id="heading-reference">
       @reference
     </span>

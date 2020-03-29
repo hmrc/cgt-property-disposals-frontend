@@ -48,7 +48,7 @@
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, returnSummary.mainReturnChargeAmount.withFloorZero, returnSummary.submissionId, subscribedDetails.name.fold(_.value, e => e.firstName + " " + e.lastName), request.userType)
+  @returnHeading(title, returnSummary, subscribedDetails, request.userType)
 
   <p class="js-enabled">
    <a href="JavaScript: window.print()">
