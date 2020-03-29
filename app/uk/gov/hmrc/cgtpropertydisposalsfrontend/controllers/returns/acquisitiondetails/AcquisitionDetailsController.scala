@@ -742,7 +742,7 @@ class AcquisitionDetailsController @Inject() (
     }
   }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { _ =>
     Redirect(controllers.returns.routes.TaskListController.taskList())
   }
 

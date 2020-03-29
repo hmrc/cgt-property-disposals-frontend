@@ -45,18 +45,19 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
   .settings(addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full))
+  .settings(addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.6.0" cross CrossVersion.full))
   .settings(scalaVersion := "2.12.10")
   .settings(
     majorVersion := 1,
-    addCompilerPlugin(scalafixSemanticdb),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
+  .settings(routesImport := Seq.empty)
+  .settings(TwirlKeys.templateImports := Seq.empty)
   .settings(
     scalacOptions ++= Seq(
       "-Ypartial-unification",
       "-Yrangepos",
-      "-Ywarn-unused:imports",
-      "-P:semanticdb:exclude:^*.scala.html$|^*.routes$"
+      "-Ywarn-unused:imports"
     )
   )
   .settings(publishingSettings: _*)

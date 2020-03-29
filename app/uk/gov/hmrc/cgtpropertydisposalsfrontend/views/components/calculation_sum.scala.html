@@ -20,7 +20,7 @@
   sumPart: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum_part
 )
 
-@(parts: List[SumPartDisplay], total: SumPartDisplay)(implicit messages: Messages)
+@(parts: List[SumPartDisplay], total: SumPartDisplay)
 
   <dl class="govuk-check-your-answers cya-questions-long">
     @{ parts.map(sumPart(_)) }

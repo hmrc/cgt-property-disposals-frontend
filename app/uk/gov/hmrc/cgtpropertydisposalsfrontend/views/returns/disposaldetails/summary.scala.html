@@ -14,8 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
@@ -27,7 +28,7 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod)(implicit messages: Messages)
 @formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
 @disposalPriceTitle =@{messages(s"disposalPrice.${disposalMethod.toString}.title")}
 @disposalFeesTitle = @{messages(s"disposalFees.${disposalMethod.toString}.title")}

@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.api.mvc.Call
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
@@ -30,7 +33,7 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(backLink: Call, isATrust: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"property-details.multiple-disposals.guidance"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

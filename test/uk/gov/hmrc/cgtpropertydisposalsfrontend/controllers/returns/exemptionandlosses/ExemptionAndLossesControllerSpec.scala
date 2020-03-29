@@ -20,7 +20,7 @@ import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -1473,7 +1473,7 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
     doc: Document,
     isATrust: Boolean
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
 
     if (completeExemptionAndLossesAnswers.inYearLosses.isZero) {
       doc.select("#inYearLosses-answer").text shouldBe "No"

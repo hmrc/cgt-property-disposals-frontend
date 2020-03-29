@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
@@ -33,7 +36,7 @@
         scriptElem: Option[Html] = None,
         withSignOutLink: Boolean = true,
         sidebar: Option[Html] = None,
-        accountMenu: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages, appConfig: ViewConfig)
+        accountMenu: Option[Html] = None)(mainContent: Html)(implicit messages: Messages, appConfig: ViewConfig)
 
 @serviceInfoContent = @{accountMenu.fold(Html(""))(s => s)}
 

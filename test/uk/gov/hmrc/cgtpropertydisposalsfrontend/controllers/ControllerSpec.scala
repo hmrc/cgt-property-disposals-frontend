@@ -102,7 +102,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     expectedTitle: String,
     contentChecks: Document => Unit = _ => (),
     expectedStatus: Int             = OK
-  )(implicit messagesApi: MessagesApi): Unit = {
+  ): Unit = {
     redirectLocation(result) shouldBe None
     status(result)           shouldBe expectedStatus
 

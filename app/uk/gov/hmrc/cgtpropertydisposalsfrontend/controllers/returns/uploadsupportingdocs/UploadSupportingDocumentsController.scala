@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{uploadsupportingdocs => pages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class UploadSupportingDocumentsController @Inject() (
@@ -47,7 +47,7 @@ class UploadSupportingDocumentsController @Inject() (
   cc: MessagesControllerComponents,
   val config: Configuration,
   hasSupportingDocsToUploadPage: pages.has_supporting_docs_to_upload
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+)(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
@@ -126,7 +126,7 @@ class UploadSupportingDocumentsController @Inject() (
     }
   }
 
-  def checkYourAnswers() = Action { implicit request =>
+  def checkYourAnswers() = Action { _ =>
     Ok("TODO - check your answers stub") // dummy action for now
   }
 

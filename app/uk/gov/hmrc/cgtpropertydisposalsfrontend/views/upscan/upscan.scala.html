@@ -14,13 +14,16 @@
  * limitations under the License.
  *@
 
-@import helper._
+@import play.api.i18n.Messages
+@import play.api.mvc.Request
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.routes
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 )
 
 @(
@@ -28,8 +31,7 @@
 )(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
 
 @mainTemplate(title = "Upload file", userType = None) {
- @form(action = routes.UpscanController.upload(), 'enctype -> "multipart/form-data"){
- @CSRF.formField
+ @formWrapper(action = routes.UpscanController.upload(), 'enctype -> "multipart/form-data"){
   <input type="hidden" name="reference" value="@reference" />
   <input type="file" name="file" />
   <input type="submit" value="Submit"/>

@@ -118,18 +118,15 @@ object UKAddressLookupServiceImpl {
 
   final case class AddressLookupResponse(addresses: List[RawAddress])
 
+  private final case class InnerAddress(address: RawAddress)
+
   implicit val addressLookupResponseReads: Reads[AddressLookupResponse] =
     new Reads[AddressLookupResponse] {
-
-      final case class Inner(address: RawAddress)
-
-      object Inner {
-        implicit val format: OFormat[Inner] = Json.format[Inner]
-      }
+      implicit val reads: Reads[InnerAddress] = Json.reads[InnerAddress]
 
       override def reads(json: JsValue): JsResult[AddressLookupResponse] =
         json
-          .validate[List[Inner]]
+          .validate[List[InnerAddress]]
           .map(l => AddressLookupResponse(l.map(_.address)))
     }
 

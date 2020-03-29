@@ -14,17 +14,17 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import cats.instances.long._
 @import cats.syntax.eq._
 @import java.time.LocalDate
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -33,7 +33,7 @@
         addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteAcquisitionDetailsAnswers, cutoffDate: LocalDate, isUk: Boolean, isRebasing: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteAcquisitionDetailsAnswers, cutoffDate: LocalDate, isUk: Boolean, isRebasing: Boolean)(implicit messages: Messages)
 @acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
     case AcquisitionMethod.Bought => (messages("returns.acquisitionMethod.Bought"), messages("acquisitionPriceBought.title"))

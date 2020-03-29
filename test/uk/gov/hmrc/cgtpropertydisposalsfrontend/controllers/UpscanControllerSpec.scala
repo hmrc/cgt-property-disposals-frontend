@@ -151,7 +151,6 @@ class UpscanControllerSpec
         val subscribed              = sample[Subscribed]
         val cgtReference            = sample[CgtReference]
         val upscanInitiateReference = UpscanInitiateReference("some-upscan-ref")
-        val upscanFileDescriptor    = sample[UpscanFileDescriptor].copy(cgtReference = cgtReference)
 
         val subscribedDetails    = subscribed.subscribedDetails
         val newSubscribedDetails = subscribedDetails.copy(cgtReference = cgtReference)
@@ -163,17 +162,6 @@ class UpscanControllerSpec
         )
         val sessionData =
           SessionData.empty.copy(journeyStatus = Some(subscribed.copy(subscribedDetails = newSubscribedDetails)))
-
-        val userFile =
-          mp.files
-            .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
-
-        val prepared: MultipartFormData[Source[ByteString, Any]] =
-          mp.copy(
-            files = userFile,
-            dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
-              .mapValues(fieldValue => Seq(fieldValue))
-          )
 
         inSequence {
           mockAuthWithNoRetrievals()

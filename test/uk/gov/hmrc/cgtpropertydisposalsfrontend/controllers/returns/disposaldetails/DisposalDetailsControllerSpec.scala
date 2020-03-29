@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldet
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
@@ -1496,7 +1496,7 @@ object DisposalDetailsControllerSpec extends Matchers {
   def validateDisposalDetailsCheckYourAnswersPage(
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
     doc
       .select("#propertyShare-answer")
       .text()
