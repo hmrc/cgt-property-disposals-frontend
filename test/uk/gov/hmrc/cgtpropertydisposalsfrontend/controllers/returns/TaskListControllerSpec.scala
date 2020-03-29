@@ -500,6 +500,20 @@ class TaskListControllerSpec
           )
         }
 
+        "the losses and exemptions section section has been completed and the section has not been started yet" in {
+          test(
+            sample[DraftSingleDisposalReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
+            ),
+            TaskListStatus.Complete
+          )
+        }
+
         "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
@@ -527,6 +541,7 @@ class TaskListControllerSpec
             TaskListStatus.Complete
           )
         }
+
       }
 
       "display the page with the proper year to date liability section status" when {
