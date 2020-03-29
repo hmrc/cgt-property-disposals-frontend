@@ -16,13 +16,19 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this()
 
-@(heading: String, taxOwed: AmountInPence, reference: String)(implicit messages: Messages)
+@(heading: String, taxOwed: AmountInPence, reference: String, name: String, userType: Option[UserType])(implicit messages: Messages)
 
 <div class="govuk-box-highlight govuk-box-highlight--status">
-  <h1 class="heading-xlarge">@heading</h1>
+    @{userType match {
+        case Some(UserType.Organisation) => "Trust: " + name
+        case Some(UserType.Agent) => "Client: " + name
+        case _ => ""
+    }}
+    <h1 class="heading-xlarge">@heading</h1>
   <p>
     @messages("viewReturn.heading.taxOwed")
     <span class="heading-xlarge" id="heading-tax-owed">

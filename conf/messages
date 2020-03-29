@@ -1161,7 +1161,7 @@ confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
 confirmationOfSubmission.returnToAccount=Go to your <a href="{0}">Capital Gains Tax on UK property account</a>.
 
-viewReturn.title=Your return
+viewReturn.title=View return
 viewReturn.heading.taxOwed=Tax owed for return
 viewReturn.heading.reference=Return reference number
 viewReturn.printLink=Print or save this page for your records
