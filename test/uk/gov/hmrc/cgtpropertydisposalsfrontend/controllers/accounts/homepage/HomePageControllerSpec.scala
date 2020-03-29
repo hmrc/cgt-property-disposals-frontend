@@ -23,8 +23,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.order._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
-import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Request, Result}
@@ -32,7 +31,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.privatebeta.PrivateBetaHomePageController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
@@ -56,16 +54,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait HomePageControllerSpec
+class HomePageControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
-
-  override lazy val additionalConfig: Configuration = Configuration(
-    "application.router" -> "prod.Routes"
-  )
 
   val mockReturnsService = mock[ReturnsService]
 
@@ -117,14 +111,6 @@ trait HomePageControllerSpec
       ))
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
-
-}
-
-class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nSupport {
-
-  override lazy val additionalConfig: Configuration = Configuration(
-    "application.router" -> "prod.Routes"
-  )
 
   lazy val controller = instanceOf[HomePageController]
 
@@ -1192,76 +1178,6 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           checkIsRedirect(performAction(), paymentsJourney.nextUrl)
         }
 
-      }
-
-    }
-
-  }
-
-}
-
-class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
-
-  override lazy val additionalConfig: Configuration = Configuration(
-    "application.router" -> "private_beta.Routes"
-  )
-
-  lazy val controller = instanceOf[PrivateBetaHomePageController]
-
-  implicit val messagesApi: MessagesApi = controller.messagesApi
-
-  def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
-    redirectToStartWhenInvalidJourney(
-      performAction, {
-        case _: Subscribed => true
-        case _             => false
-      }
-    )
-
-  val subscribed = sample[Subscribed]
-
-  "The HomePage Controller" when {
-
-    "handling requests for account home for private beta" must {
-
-      def performAction(): Future[Result] = controller.privateBetaHomepage()(FakeRequest())
-
-      behave like redirectToStartBehaviour(performAction)
-
-      "display the home page" in {
-        val sessionData =
-          SessionData.empty.copy(journeyStatus = Some(subscribed))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionData)
-        }
-
-        val result  = performAction()
-        val content = contentAsString(result)
-
-        status(result) shouldBe OK
-        content shouldNot include(messageFromMessageKey("account.agent.prefix"))
-        content should include(messageFromMessageKey("account.home.title"))
-        content shouldNot include(messageFromMessageKey("account.home.button.start-a-new-return"))
-      }
-
-      "display the home page for agents" in {
-        val sessionData =
-          SessionData.empty.copy(journeyStatus = Some(subscribed), userType = Some(UserType.Agent))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionData)
-        }
-
-        val result  = performAction()
-        val content = contentAsString(result)
-
-        status(result) shouldBe OK
-        content        should include(messageFromMessageKey("account.home.title"))
-        content        should include(messageFromMessageKey("account.agent.prefix"))
-        content        should include(subscribed.subscribedDetails.makeAccountName())
       }
 
     }

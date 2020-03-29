@@ -64,7 +64,7 @@ class PaymentsConnectorImplSpec extends WordSpec with Matchers with MockFactory 
       val chargeReference = sample[String]
       val amount          = sample[AmountInPence]
       val returnCall      = controllers.routes.StartController.start()
-      val backCall        = controllers.routes.EmailWhitelistingController.thereIsAProblem()
+      val backCall        = controllers.returns.routes.TaskListController.taskList()
       val expectedUrl     = "http://host:123/pay-api/capital-gains-tax/journey/start"
 
       behave like connectorBehaviour(

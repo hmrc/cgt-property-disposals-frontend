@@ -1,4 +1,10 @@
 # Account Home
+GET /account-home                                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.homepage()
+GET /start-new-return                                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.startNewReturn()
+GET /resume-draft-return/:id                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.resumeDraftReturn(id: java.util.UUID)
+GET /view-sent-return/:submissionId                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.viewSentReturn(submissionId: String)
+GET /pay-total-outstanding                                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.payTotalAmountLeftToPay()
+GET /exit/report-another-way                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.exitForSubsequentReturn()
 
 GET /signed-out                                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.signedOut()
 
