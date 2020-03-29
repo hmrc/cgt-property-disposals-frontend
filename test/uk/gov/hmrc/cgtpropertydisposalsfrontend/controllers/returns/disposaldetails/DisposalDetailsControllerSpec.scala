@@ -1496,7 +1496,7 @@ object DisposalDetailsControllerSpec extends Matchers {
   def validateDisposalDetailsCheckYourAnswersPage(
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
     doc
       .select("#propertyShare-answer")
       .text()

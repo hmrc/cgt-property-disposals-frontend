@@ -1473,7 +1473,7 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
     doc: Document,
     isATrust: Boolean
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
 
     if (completeExemptionAndLossesAnswers.inYearLosses.isZero) {
       doc.select("#inYearLosses-answer").text shouldBe "No"

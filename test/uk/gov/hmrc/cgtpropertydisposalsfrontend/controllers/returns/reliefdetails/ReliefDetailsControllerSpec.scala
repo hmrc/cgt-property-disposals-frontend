@@ -40,7 +40,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -839,8 +838,6 @@ class ReliefDetailsControllerSpec
 
       behave like noLettingsReliefBehaviour(() => performAction(Seq.empty))
 
-      val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
-
       "show a form error for amount" when {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
@@ -1513,7 +1510,7 @@ object ReliefDetailsControllerSpec extends Matchers {
   def validateReliefDetailsCheckYourAnswersPage(
     reliefDetailsAnswers: CompleteReliefDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
 
     if (reliefDetailsAnswers.privateResidentsRelief.isZero) {
       doc.select("#privateResidentsReliefValue-answer").text shouldBe "No"

@@ -168,13 +168,6 @@ class UpscanControllerSpec
           mp.files
             .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
 
-        val prepared: MultipartFormData[Source[ByteString, Any]] =
-          mp.copy(
-            files = userFile,
-            dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
-              .mapValues(fieldValue => Seq(fieldValue))
-          )
-
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionData)

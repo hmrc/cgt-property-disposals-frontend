@@ -2229,7 +2229,7 @@ object MultipleDisposalsPropertyDetailsControllerSpec extends Matchers {
   def validateExamplePropertyDetailsSummary(
     examplePropertyDetailsAnswers: CompleteExamplePropertyDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
     val ukAddress = examplePropertyDetailsAnswers.address
 
     doc.select("#property-address-answer").text() shouldBe

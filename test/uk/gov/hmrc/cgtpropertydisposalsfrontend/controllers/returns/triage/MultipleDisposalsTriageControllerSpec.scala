@@ -1977,7 +1977,6 @@ class MultipleDisposalsTriageControllerSpec
     "handling requests to display the asset type for non-uk residents page" must {
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
-      val country                    = Country(countryCode, Some(countryName))
 
       def performAction(): Future[Result] =
         controller.assetTypeForNonUkResidents()(FakeRequest())

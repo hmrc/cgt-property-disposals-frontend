@@ -45,6 +45,7 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
   .settings(addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full))
+  .settings(addCompilerPlugin("com.github.ghik" % "silencer-plugin" % "1.6.0" cross CrossVersion.full))
   .settings(scalaVersion := "2.12.10")
   .settings(
     majorVersion := 1,
@@ -56,7 +57,11 @@ lazy val microservice = Project(appName, file("."))
       "-Ypartial-unification",
       "-Yrangepos",
       "-Ywarn-unused:imports",
-      "-P:semanticdb:exclude:^*.scala.html$|^*.routes$"
+      "-P:semanticdb:exclude:^*.scala.html$|^*.routes$",
+      // silence import warning on twirl comments
+      "-P:silencer:lineContentFilters=@*",
+      // Make sure you only exclude warnings for the project directories, i.e. make builds reproducible
+      s"-P:silencer:sourceRoots=${baseDirectory.value.getCanonicalPath}"
     )
   )
   .settings(publishingSettings: _*)
