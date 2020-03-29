@@ -69,6 +69,8 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val marketValue: String                      = getString("external-url.market-value")
   val trustsTaxFreeAllowance: String           = getString("external-url.trusts-tax-free-allowance")
   val trustsForVulnerable: String              = getString("external-url.trusts-for-vulnerable")
+  val trustsAllowableCostsUrl: String          = getString("external-url.trusts-allowable-costs")
+  val nonResidentsRebasingUrl: String          = getString("external-url.non-resident-rebasing")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
