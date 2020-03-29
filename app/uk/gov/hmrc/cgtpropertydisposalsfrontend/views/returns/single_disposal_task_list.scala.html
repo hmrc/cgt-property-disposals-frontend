@@ -45,40 +45,39 @@
 @acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
 @uploadSupportingDocsState = @{draftReturn.uploadSupportingDocuments.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
 
-@initialGainOrLossState = @{
+@canSeeInitialGainOrLoss = @{
+
     def shouldSeeSection(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
-    val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
-    (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
-        case (_, _, _) if countryOfResidence.isUk() => false
-        case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
-          if acquisitionDate.isBefore(residentialBeforeDate) => true
-        case (_, _, _) => false
-    }
-    }
-
-    def canSeeInitialGainOrLoss = {
-        (draftReturn.triageAnswers) match {
-            case IncompleteSingleDisposalTriageAnswers(_, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) =>
-                shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
-            case CompleteSingleDisposalTriageAnswers(_, _, countryOfResidence, assetType, _, _) =>
-                shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
-            case _ =>
-                false
+        val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
+        (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
+            case (_, _, _) if countryOfResidence.isUk() => false
+            case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
+                if acquisitionDate.isBefore(residentialBeforeDate) => true
+            case (_, _, _) => false
         }
     }
 
-    if(canSeeInitialGainOrLoss)
-        draftReturn.initialGainOrLoss match {
-            case (Some(_)) => TaskListStatus.Complete
-            case _ => TaskListStatus.ToDo
-        }
-    else
-        TaskListStatus.CannotStart
-
+    (draftReturn.triageAnswers) match {
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) =>
+            shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
+        case CompleteSingleDisposalTriageAnswers(_, _, countryOfResidence, assetType, _, _) =>
+            shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
+        case _ =>
+            false
+    }
 }
 
+@initialGainOrLossState = @{
+    (acquistionDetailsState, disposalDetailsState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete) =>
+            draftReturn.initialGainOrLoss.fold[TaskListStatus](TaskListStatus.InProgress)(_ => TaskListStatus.Complete)
+        case _ => TaskListStatus.CannotStart
+    }
+}
+
+
 @reliefDetailsState = @{
-    (propertyAddressState, disposalDetailsState, acquistionDetailsState) match {
+    (disposalDetailsState, acquistionDetailsState,initialGainOrLossState) match {
         case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
             draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
         case _ => TaskListStatus.CannotStart
@@ -89,14 +88,13 @@
     reliefDetailsState match {
         case TaskListStatus.Complete =>
             draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
-        case _ =>
-            TaskListStatus.CannotStart
+        case _ => TaskListStatus.CannotStart
     }
 }
 
 @ytdLiabilityState = @{
-  (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
-    case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+  (disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
+    case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
       draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
           case c: CalculatedYTDAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
           case n: NonCalculatedYTDAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
@@ -159,22 +157,18 @@
                 returns.acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers().url, acquistionDetailsState)
             </li>
 
+            @if(canSeeInitialGainOrLoss) {
+            <li id="initialGainOrLoss" class="app-task-list__item">
+                @taskLink(messages("task-list.enter-initial-gain-or-loss.link"),
+                returns.initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss().url, initialGainOrLossState)
+            </li>
+            }
+
             <li id="reliefDetails" class="app-task-list__item">
                 @taskLink(messages("task-list.relief-details.link"),
                 returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers().url, reliefDetailsState)
             </li>
 
-
-            @initialGainOrLossState match {
-            case TaskListStatus.CannotStart => {}
-            case _ => {
-            <li id="initialGainOrLoss" class="app-task-list__item">
-                @taskLink(messages("task-list.enter-initial-gain-or-loss.link"),
-                returns.initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss().url, initialGainOrLossState)
-
-            </li>
-            }
-            }
         </ul>
     </li>
 
