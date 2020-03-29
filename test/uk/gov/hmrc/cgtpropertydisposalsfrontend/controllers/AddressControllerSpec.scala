@@ -27,7 +27,10 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Country, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -83,6 +86,28 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
   lazy val sessionWithValidJourneyStatus =
     SessionData.empty.copy(journeyStatus = Some(validJourneyStatus))
+
+  def userMessageKey(userType: UserType): String = userType match {
+    case UserType.Individual   => ""
+    case UserType.Organisation => ".trust"
+    case UserType.Agent        => ".agent"
+  }
+
+  def userTypeClue(userType: UserType): String = userType match {
+    case UserType.Individual   => "an individual"
+    case UserType.Organisation => "a trust"
+    case UserType.Agent        => "an agent"
+  }
+
+  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
+    case UserType.Agent => Some(sample[AgentReferenceNumber])
+    case _              => None
+  }
+
+  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
+    case UserType.Organisation => Left(sample[TrustName])
+    case _                     => Right(sample[IndividualName])
+  }
 
   def displayIsUkBehaviour(
     performAction: () => Future[Result]
@@ -183,23 +208,41 @@ trait AddressControllerSpec[J <: JourneyStatus]
     }
   }
 
-  def displayEnterUkAddressPage(performAction: () => Future[Result])(implicit messagesApi: MessagesApi): Unit =
-    "display the enter UK address page" when {
+  def displayEnterUkAddressPage(userType: UserType, performAction: () => Future[Result])(
+    implicit messagesApi: MessagesApi
+  ): Unit =
+    s"display the enter UK address page for ${userTypeClue(userType)}" when {
       val expectedTitleMessageKey =
         controller.toAddressJourneyType(validJourneyStatus) match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             f.journey.draftReturn.fold(
               _ => "address.uk.returns.multipleDisposals.title",
-              _ => "address.uk.returns.singleDisposal.title"
+              _ => s"address.uk.returns${userMessageKey(userType)}.singleDisposal.title"
             )
           case _ => "address.uk.title"
         }
 
       "the endpoint is requested" in {
-        val session = SessionData.empty.copy(
-          journeyStatus       = Some(validJourneyStatus),
-          addressLookupResult = Some(addressLookupResult)
-        )
+        val session = controller.toAddressJourneyType(validJourneyStatus) match {
+          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+            SessionData.empty.copy(
+              userType = Some(userType),
+              journeyStatus = Some(
+                f.journey.copy(
+                  subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+                  agentReferenceNumber = setAgentReferenceNumber(userType)
+                )
+              ),
+              addressLookupResult = Some(addressLookupResult)
+            )
+          case _ =>
+            SessionData.empty.copy(
+              userType            = Some(userType),
+              journeyStatus       = Some(validJourneyStatus),
+              addressLookupResult = Some(addressLookupResult)
+            )
+        }
+
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
@@ -505,22 +548,44 @@ trait AddressControllerSpec[J <: JourneyStatus]
     }
   }
 
-  def enterPostcodePage(performAction: () => Future[Result])(implicit messagesApi: MessagesApi): Unit =
-    "display the enter postcode page" when {
+  def enterPostcodePage(userType: UserType, performAction: () => Future[Result])(
+    implicit messagesApi: MessagesApi
+  ): Unit =
+    s"display the enter postcode page for ${userTypeClue(userType)}" when {
       val expectedTitleMessageKey =
         controller.toAddressJourneyType(validJourneyStatus) match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             f.journey.draftReturn.fold(
               _ => "enterPostcode.returns.multipleDisposals.title",
-              _ => "enterPostcode.returns.singleDisposal.title"
+              _ => s"enterPostcode.returns${userMessageKey(userType)}.singleDisposal.title"
             )
           case _ => "enterPostcode.title"
         }
 
+      val session = controller.toAddressJourneyType(validJourneyStatus) match {
+        case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+          SessionData.empty.copy(
+            userType = Some(userType),
+            journeyStatus = Some(
+              f.journey.copy(
+                subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+                agentReferenceNumber = setAgentReferenceNumber(userType)
+              )
+            ),
+            addressLookupResult = Some(addressLookupResult)
+          )
+        case _ =>
+          SessionData.empty.copy(
+            userType            = Some(userType),
+            journeyStatus       = Some(validJourneyStatus),
+            addressLookupResult = Some(addressLookupResult)
+          )
+      }
+
       "there is no address lookup result in session" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithValidJourneyStatus)
+          mockGetSession(session)
         }
 
         contentAsString(performAction()) should include(messageFromMessageKey(expectedTitleMessageKey))
@@ -528,9 +593,25 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
       "there is an address lookup result in session" in {
         val addressLookupResult = AddressLookupResult(postcode, None, List.empty)
-        val session = sessionWithValidJourneyStatus.copy(
-          addressLookupResult = Some(addressLookupResult)
-        )
+        val session = controller.toAddressJourneyType(validJourneyStatus) match {
+          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+            SessionData.empty.copy(
+              userType = Some(userType),
+              journeyStatus = Some(
+                f.journey.copy(
+                  subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+                  agentReferenceNumber = setAgentReferenceNumber(userType)
+                )
+              ),
+              addressLookupResult = Some(addressLookupResult)
+            )
+          case _ =>
+            SessionData.empty.copy(
+              userType            = Some(userType),
+              journeyStatus       = Some(validJourneyStatus),
+              addressLookupResult = Some(addressLookupResult)
+            )
+        }
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -728,12 +809,12 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
   }
 
-  def displaySelectAddress(performAction: () => Future[Result], whenNoAddressLookupResult: Call)(
+  def displaySelectAddress(userType: UserType, performAction: () => Future[Result], whenNoAddressLookupResult: Call)(
     implicit messagesApi: MessagesApi
   ): Unit = {
     s"redirect to ${whenNoAddressLookupResult.url}" when {
 
-      "there is not address lookup result in session" in {
+      s"there is not address lookup result in session for ${userTypeClue(userType)}" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
@@ -745,20 +826,36 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
     }
 
-    "display the select address page" when {
+    s"display the select address page for ${userTypeClue(userType)}" when {
       val expectedMessageTitleKey = controller.toAddressJourneyType(validJourneyStatus) match {
         case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
           f.journey.draftReturn.fold(
             _ => "address-select.returns.multipleDisposals.title",
-            _ => "address-select.returns.singleDisposal.title"
+            _ => s"address-select.returns${userMessageKey(userType)}.singleDisposal.title"
           )
         case _ => "address-select.title"
       }
 
-      "there is an address lookup result in session" in {
-        val session = sessionWithValidJourneyStatus.copy(
-          addressLookupResult = Some(addressLookupResult)
-        )
+      s"there is an address lookup result in session for ${userTypeClue(userType)}" in {
+        val session = controller.toAddressJourneyType(validJourneyStatus) match {
+          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+            SessionData.empty.copy(
+              userType = Some(userType),
+              journeyStatus = Some(
+                f.journey.copy(
+                  subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+                  agentReferenceNumber = setAgentReferenceNumber(userType)
+                )
+              ),
+              addressLookupResult = Some(addressLookupResult)
+            )
+          case _ =>
+            SessionData.empty.copy(
+              userType            = Some(userType),
+              journeyStatus       = Some(validJourneyStatus),
+              addressLookupResult = Some(addressLookupResult)
+            )
+        }
 
         inSequence {
           mockAuthWithNoRetrievals()

@@ -87,12 +87,12 @@
           @reliefDetailsSummary(s.reliefDetails)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-          @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate)
+          @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @s.yearToDateLiabilityAnswers.fold(
               nonCalculatedYearToDateLiabilitySummary(_),
-              calculatedYearToDateLiabilitySummary(_)
+              calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate)
           )
       }
 
@@ -101,10 +101,10 @@
           @multipleDisposalsTriageSummary(m.triageAnswers)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
-          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential))
+          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-          @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate)
+          @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers)

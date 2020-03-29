@@ -17,11 +17,14 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait YearToDateLiabilityAnswers extends Product with Serializable
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object YearToDateLiabilityAnswers {
 
   sealed trait CalculatedYTDAnswers extends YearToDateLiabilityAnswers
@@ -30,6 +33,7 @@ object YearToDateLiabilityAnswers {
 
   object NonCalculatedYTDAnswers {
 
+    @Lenses
     final case class IncompleteNonCalculatedYTDAnswers(
       taxableGainOrLoss: Option[AmountInPence],
       hasEstimatedDetails: Option[Boolean],
@@ -39,6 +43,15 @@ object YearToDateLiabilityAnswers {
     object IncompleteNonCalculatedYTDAnswers {
       val empty: IncompleteNonCalculatedYTDAnswers =
         IncompleteNonCalculatedYTDAnswers(None, None, None)
+
+      def fromCompleteAnswers(
+        c: CompleteNonCalculatedYTDAnswers
+      ): IncompleteNonCalculatedYTDAnswers =
+        IncompleteNonCalculatedYTDAnswers(
+          Some(c.taxableGainOrLoss),
+          Some(c.hasEstimatedDetails),
+          Some(c.taxDue)
+        )
     }
 
     final case class CompleteNonCalculatedYTDAnswers(
@@ -56,11 +69,20 @@ object YearToDateLiabilityAnswers {
         case i: IncompleteNonCalculatedYTDAnswers => ifIncomplete(i)
         case c: CompleteNonCalculatedYTDAnswers   => ifComplete(c)
       }
+
+      def unset[A](
+        fieldLens: IncompleteNonCalculatedYTDAnswers.type => Lens[IncompleteNonCalculatedYTDAnswers, Option[A]]
+      ): IncompleteNonCalculatedYTDAnswers =
+        fieldLens(IncompleteNonCalculatedYTDAnswers).set(None)(
+          fold(identity, IncompleteNonCalculatedYTDAnswers.fromCompleteAnswers)
+        )
     }
 
   }
 
   object CalculatedYTDAnswers {
+
+    @Lenses
     final case class IncompleteCalculatedYTDAnswers(
       estimatedIncome: Option[AmountInPence],
       personalAllowance: Option[AmountInPence],
@@ -73,6 +95,19 @@ object YearToDateLiabilityAnswers {
     object IncompleteCalculatedYTDAnswers {
       val empty: IncompleteCalculatedYTDAnswers =
         IncompleteCalculatedYTDAnswers(None, None, None, None, None, None)
+
+      def fromCompleteAnswers(
+        c: CompleteCalculatedYTDAnswers
+      ): IncompleteCalculatedYTDAnswers =
+        IncompleteCalculatedYTDAnswers(
+          Some(c.estimatedIncome),
+          c.personalAllowance,
+          Some(c.hasEstimatedDetails),
+          Some(c.calculatedTaxDue),
+          Some(c.taxDue),
+          c.mandatoryEvidence
+        )
+
     }
 
     final case class CompleteCalculatedYTDAnswers(
@@ -93,7 +128,31 @@ object YearToDateLiabilityAnswers {
         case i: IncompleteCalculatedYTDAnswers => ifIncomplete(i)
         case c: CompleteCalculatedYTDAnswers   => ifComplete(c)
       }
+
+      def unset[A](
+        fieldLens: IncompleteCalculatedYTDAnswers.type => Lens[IncompleteCalculatedYTDAnswers, Option[A]]
+      ): IncompleteCalculatedYTDAnswers =
+        fieldLens(IncompleteCalculatedYTDAnswers).set(None)(
+          fold(identity, IncompleteCalculatedYTDAnswers.fromCompleteAnswers)
+        )
+
     }
+
+  }
+
+  implicit class YearToDateLiabilityAnswersOps(private val y: YearToDateLiabilityAnswers) extends AnyVal {
+
+    def unsetAllButIncomeDetails(): Option[YearToDateLiabilityAnswers] =
+      y match {
+        case c: CalculatedYTDAnswers =>
+          Some(
+            c.unset(_.hasEstimatedDetails)
+              .unset(_.calculatedTaxDue)
+              .unset(_.taxDue)
+              .unset(_.mandatoryEvidence)
+          )
+        case _: NonCalculatedYTDAnswers => None
+      }
 
   }
 

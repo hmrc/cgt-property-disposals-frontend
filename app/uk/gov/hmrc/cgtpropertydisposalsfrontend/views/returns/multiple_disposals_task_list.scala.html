@@ -55,9 +55,13 @@ messages("service.title")
 }
 
 @ytdLiabilityState = @{
-    draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
-        case c: CalculatedYTDAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
-        case n: NonCalculatedYTDAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+    exemptionsAndLossesState match {
+        case TaskListStatus.Complete =>
+            draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
+                case c: CalculatedYTDAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+                case n: NonCalculatedYTDAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+            }
+        case _ => TaskListStatus.CannotStart
     }
 }
 

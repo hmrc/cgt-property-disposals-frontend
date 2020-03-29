@@ -74,9 +74,9 @@ class HomePageController @Inject() (
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser { (_, subscribed) =>
-      val exitFlag = (subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty)
+      val exitForSubsequentReturnFlag = (subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty)
 
-      exitFlag match {
+      exitForSubsequentReturnFlag match {
         case true =>
           Redirect(routes.HomePageController.exitForSubsequentReturn())
 

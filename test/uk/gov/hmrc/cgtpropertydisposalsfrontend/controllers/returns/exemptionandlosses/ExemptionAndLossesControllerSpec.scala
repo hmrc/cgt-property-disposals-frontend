@@ -34,8 +34,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
@@ -60,7 +65,9 @@ class ExemptionAndLossesControllerSpec
       bind[ReturnsService].toInstance(mockReturnsService)
     )
 
-  lazy val controller = instanceOf[ExemptionAndLossesController]
+  lazy val controller    = instanceOf[ExemptionAndLossesController]
+  val individualUserType = Right(IndividualName("Hodor", "Hodor"))
+  val trustUserType      = Left(TrustName("Littlefinger"))
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -74,7 +81,8 @@ class ExemptionAndLossesControllerSpec
 
   def sessionWithSingleDisposalsState(
     answers: Option[ExemptionAndLossesAnswers],
-    disposalDate: Option[DisposalDate]
+    disposalDate: Option[DisposalDate],
+    userType: Either[TrustName, IndividualName]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn =
       sample[DraftSingleDisposalReturn].copy(
@@ -84,7 +92,17 @@ class ExemptionAndLossesControllerSpec
         exemptionAndLossesAnswers = answers
       )
 
-    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    val subscribe = SubscribedDetails(
+      userType,
+      sample[Email],
+      sample[UkAddress],
+      sample[ContactName],
+      sample[CgtReference],
+      None,
+      sample[Boolean]
+    )
+
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn, subscribedDetails = subscribe)
 
     (
       SessionData.empty.copy(journeyStatus = Some(journey)),
@@ -95,13 +113,15 @@ class ExemptionAndLossesControllerSpec
 
   def sessionWithSingleDisposalState(
     answers: ExemptionAndLossesAnswers,
-    disposalDate: DisposalDate
+    disposalDate: DisposalDate,
+    userType: Either[TrustName, IndividualName]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
-    sessionWithSingleDisposalsState(Some(answers), Some(disposalDate))
+    sessionWithSingleDisposalsState(Some(answers), Some(disposalDate), userType)
 
   def sessionWithMultipleDisposalsState(
     answers: Option[ExemptionAndLossesAnswers],
-    disposalDate: Option[DisposalDate]
+    disposalDate: Option[DisposalDate],
+    userType: Either[TrustName, IndividualName]
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn =
       sample[DraftMultipleDisposalsReturn].copy(
@@ -110,7 +130,16 @@ class ExemptionAndLossesControllerSpec
         exemptionAndLossesAnswers = answers
       )
 
-    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    val subscribe = SubscribedDetails(
+      userType,
+      sample[Email],
+      sample[UkAddress],
+      sample[ContactName],
+      sample[CgtReference],
+      None,
+      sample[Boolean]
+    )
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn, subscribedDetails = subscribe)
 
     (
       SessionData.empty.copy(journeyStatus = Some(journey)),
@@ -121,9 +150,10 @@ class ExemptionAndLossesControllerSpec
 
   def sessionWithMultipleDisposalsState(
     answers: ExemptionAndLossesAnswers,
-    disposalDate: DisposalDate
+    disposalDate: DisposalDate,
+    userType: Either[TrustName, IndividualName]
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) =
-    sessionWithMultipleDisposalsState(Some(answers), Some(disposalDate))
+    sessionWithMultipleDisposalsState(Some(answers), Some(disposalDate), userType)
 
   "AcquisitionDetailsController" when {
 
@@ -141,7 +171,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithSingleDisposalsState(
                 Some(sample[CompleteExemptionAndLossesAnswers]),
-                None
+                None,
+                individualUserType
               )._1
             )
           }
@@ -160,7 +191,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithSingleDisposalsState(
                 None,
-                Some(disposalDate)
+                Some(disposalDate),
+                individualUserType
               )._1
             )
           }
@@ -187,7 +219,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithMultipleDisposalsState(
                 sample[CompleteExemptionAndLossesAnswers],
-                disposalDate
+                disposalDate,
+                individualUserType
               )._1
             )
           }
@@ -216,7 +249,8 @@ class ExemptionAndLossesControllerSpec
                 sample[IncompleteExemptionAndLossesAnswers].copy(
                   inYearLosses = Some(AmountInPence.zero)
                 ),
-                disposalDate
+                disposalDate,
+                individualUserType
               )._1
             )
           }
@@ -243,7 +277,8 @@ class ExemptionAndLossesControllerSpec
                 sample[IncompleteExemptionAndLossesAnswers].copy(
                   inYearLosses = Some(amountInPence)
                 ),
-                disposalDate
+                disposalDate,
+                individualUserType
               )._1
             )
           }
@@ -280,7 +315,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithSingleDisposalsState(
                 Some(sample[CompleteExemptionAndLossesAnswers]),
-                None
+                None,
+                individualUserType
               )._1
             )
           }
@@ -296,7 +332,8 @@ class ExemptionAndLossesControllerSpec
 
         val session = sessionWithMultipleDisposalsState(
           sample[CompleteExemptionAndLossesAnswers],
-          disposalDate
+          disposalDate,
+          individualUserType
         )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
@@ -338,10 +375,10 @@ class ExemptionAndLossesControllerSpec
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(inYearLosses = AmountInPence(newAmount.value + 1L))
         val (session, journey, draftReturn) =
-          sessionWithSingleDisposalState(answers, sample[DisposalDate])
-        val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
-          answers.copy(inYearLosses = newAmount)
-        )
+          sessionWithSingleDisposalState(answers, sample[DisposalDate], individualUserType)
+        val updatedDraftReturn = draftReturn.copy(
+          exemptionAndLossesAnswers  = Some(answers.copy(inYearLosses = newAmount)),
+          yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
         "there is an error updating the draft return" in {
@@ -446,7 +483,7 @@ class ExemptionAndLossesControllerSpec
         "the value submitted hasn't changed" in {
           val answers =
             sample[CompleteExemptionAndLossesAnswers].copy(inYearLosses = AmountInPence.zero)
-          val session = sessionWithSingleDisposalState(answers, sample[DisposalDate])._1
+          val session = sessionWithSingleDisposalState(answers, sample[DisposalDate], individualUserType)._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -478,7 +515,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithSingleDisposalState(
                 sample[IncompleteExemptionAndLossesAnswers].copy(inYearLosses = None),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
@@ -496,7 +534,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithMultipleDisposalsState(
                 sample[IncompleteExemptionAndLossesAnswers].copy(inYearLosses = Some(sample[AmountInPence])),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
@@ -520,7 +559,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithSingleDisposalState(
                 sample[CompleteExemptionAndLossesAnswers],
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
@@ -547,7 +587,8 @@ class ExemptionAndLossesControllerSpec
                   inYearLosses        = Some(sample[AmountInPence]),
                   previousYearsLosses = Some(AmountInPence.zero)
                 ),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
@@ -572,7 +613,8 @@ class ExemptionAndLossesControllerSpec
                   inYearLosses        = Some(sample[AmountInPence]),
                   previousYearsLosses = Some(amountInPence)
                 ),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
@@ -607,7 +649,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithMultipleDisposalsState(
                 sample[IncompleteExemptionAndLossesAnswers].copy(inYearLosses = None),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
@@ -654,10 +697,10 @@ class ExemptionAndLossesControllerSpec
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(previousYearsLosses = AmountInPence(newAmount.value + 1L))
         val (session, journey, draftReturn) =
-          sessionWithSingleDisposalState(answers, sample[DisposalDate])
-        val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
-          answers.copy(previousYearsLosses = newAmount)
-        )
+          sessionWithSingleDisposalState(answers, sample[DisposalDate], individualUserType)
+        val updatedDraftReturn = draftReturn.copy(
+          exemptionAndLossesAnswers  = Some(answers.copy(previousYearsLosses = newAmount)),
+          yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
         "there is an error updating the draft return" in {
@@ -769,7 +812,7 @@ class ExemptionAndLossesControllerSpec
         "the value submitted hasn't changed" in {
           val answers =
             sample[CompleteExemptionAndLossesAnswers].copy(previousYearsLosses = AmountInPence(1L))
-          val session = sessionWithMultipleDisposalsState(answers, sample[DisposalDate])._1
+          val session = sessionWithMultipleDisposalsState(answers, sample[DisposalDate], individualUserType)._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -803,7 +846,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithMultipleDisposalsState(
                 Some(sample[CompleteExemptionAndLossesAnswers]),
-                None
+                None,
+                individualUserType
               )._1
             )
           }
@@ -822,7 +866,8 @@ class ExemptionAndLossesControllerSpec
               sessionWithSingleDisposalState(
                 sample[IncompleteExemptionAndLossesAnswers]
                   .copy(previousYearsLosses = None),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
@@ -841,14 +886,15 @@ class ExemptionAndLossesControllerSpec
               sessionWithMultipleDisposalsState(
                 sample[IncompleteExemptionAndLossesAnswers]
                   .copy(previousYearsLosses = Some(sample[AmountInPence]), annualExemptAmount = None),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "annualExemptAmount.title"
+              "annualExemptAmount.individual.title"
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.ExemptionAndLossesController.previousYearsLosses().url
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
@@ -865,14 +911,15 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithSingleDisposalState(
                 sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = amount),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "annualExemptAmount.title"
+              "annualExemptAmount.individual.title"
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.ExemptionAndLossesController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
@@ -880,6 +927,68 @@ class ExemptionAndLossesControllerSpec
                 .url
               doc.select("#annualExemptAmount").attr("value") shouldBe "10"
 
+            }
+          )
+        }
+
+        "the user type is an individual" in {
+          val amount = AmountInPence(1000L)
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = amount),
+                sample[DisposalDate],
+                individualUserType
+              )._1
+            )
+          }
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "annualExemptAmount.individual.title"
+            ), { doc =>
+              doc.select("#annualExemptAmount-form-hint").text() contains messageFromMessageKey(
+                "annualExemptAmount.individual.helpText"
+              )
+              doc.select("#content > article > form > p > a").text() contains messageFromMessageKey(
+                "annualExemptAmount.individual.link"
+              )
+            }
+          )
+        }
+
+        "the user type is a trust" in {
+          val amount = AmountInPence(1000L)
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = amount),
+                sample[DisposalDate],
+                trustUserType
+              )._1
+            )
+          }
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "annualExemptAmount.trust.title"
+            ), { doc =>
+              doc.select("#content > article > form > p > a").text() contains messageFromMessageKey(
+                "annualExemptAmount.trust.link"
+              )
+              doc.select("#annualExemptAmount-form-hint").text() contains messageFromMessageKey(
+                "annualExemptAmount.trust.helpText"
+              )
+              doc.select("#content > article > form > details:nth-child(3) > summary > span") contains messageFromMessageKey(
+                "annualExemptAmount.trust.details.1.header"
+              )
+              doc.select("#details-content-0") contains messageFromMessageKey("annualExemptAmount.trust.details.1.body")
+              doc.select("#content > article > form > details:nth-child(4) > summary > span") contains messageFromMessageKey(
+                "annualExemptAmount.trust.details.2.header"
+              )
+              doc.select("#details-content-1") contains messageFromMessageKey("annualExemptAmount.trust.details.2.body")
             }
           )
         }
@@ -908,7 +1017,8 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithSingleDisposalsState(
                 Some(sample[CompleteExemptionAndLossesAnswers]),
-                None
+                None,
+                individualUserType
               )._1
             )
           }
@@ -927,7 +1037,8 @@ class ExemptionAndLossesControllerSpec
               sessionWithMultipleDisposalsState(
                 sample[IncompleteExemptionAndLossesAnswers]
                   .copy(previousYearsLosses = None),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                individualUserType
               )._1
             )
           }
@@ -942,14 +1053,15 @@ class ExemptionAndLossesControllerSpec
         val currentSession =
           sessionWithSingleDisposalState(
             sample[CompleteExemptionAndLossesAnswers],
-            disposalDate
+            disposalDate,
+            individualUserType
           )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
           testFormError(data: _*)(
             expectedErrorKey,
             MoneyUtils.formatAmountOfMoneyWithoutPoundSign(disposalDate.taxYear.annualExemptAmountGeneral.inPounds())
-          )("annualExemptAmount.title")(performAction, currentSession)
+          )("annualExemptAmount.individual.title")(performAction, currentSession)
 
         "the amount of money is invalid" in {
           amountOfMoneyErrorScenarios("annualExemptAmount", maximumAnnualExemptAmount.inPounds()).foreach { scenario =>
@@ -967,10 +1079,12 @@ class ExemptionAndLossesControllerSpec
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = AmountInPence(newAmount.value + 1L))
         val (session, journey, draftReturn) =
-          sessionWithMultipleDisposalsState(answers, disposalDate)
-        val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
-          answers.copy(annualExemptAmount = newAmount)
-        )
+          sessionWithMultipleDisposalsState(answers, disposalDate, individualUserType)
+        val updatedDraftReturn = draftReturn.copy(
+          exemptionAndLossesAnswers = Some(
+            answers.copy(annualExemptAmount = newAmount)
+          ),
+          yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
         "there is an error updating the draft return" in {
@@ -1062,7 +1176,7 @@ class ExemptionAndLossesControllerSpec
         "the value submitted hasn't changed" in {
           val answers =
             sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = AmountInPence(1L))
-          val session = sessionWithMultipleDisposalsState(answers, disposalDate)._1
+          val session = sessionWithMultipleDisposalsState(answers, disposalDate, individualUserType)._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1094,7 +1208,7 @@ class ExemptionAndLossesControllerSpec
       )
 
       val (session, journey, draftReturn) =
-        sessionWithSingleDisposalState(allQuestionsAnswered, sample[DisposalDate])
+        sessionWithSingleDisposalState(allQuestionsAnswered, sample[DisposalDate], individualUserType)
       val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
       val updatedSession     = session.copy(journeyStatus                 = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -1105,15 +1219,15 @@ class ExemptionAndLossesControllerSpec
         expectedRedirect: Call
       ): Unit =
         List(
-          sessionWithSingleDisposalState(answers, sample[DisposalDate])._1,
-          sessionWithMultipleDisposalsState(answers, sample[DisposalDate])._1
+          sessionWithSingleDisposalState(answers, sample[DisposalDate], individualUserType)._1,
+          sessionWithMultipleDisposalsState(answers, sample[DisposalDate], individualUserType)._1
         ).foreach { session =>
           withClue(s"For sesssion $session: ") {
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionWithSingleDisposalState(answers, sample[DisposalDate])._1
+                sessionWithSingleDisposalState(answers, sample[DisposalDate], individualUserType)._1
               )
             }
 
@@ -1203,7 +1317,7 @@ class ExemptionAndLossesControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("exemptionsAndLosses.cya.title"), { doc =>
-                validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc)
+                validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc, journey.subscribedDetails.isATrust)
                 doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
                   .checkYourAnswersSubmit()
                   .url
@@ -1227,7 +1341,7 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("exemptionsAndLosses.cya.title"), { doc =>
-              validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc)
+              validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc, journey.subscribedDetails.isATrust)
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
                 .checkYourAnswersSubmit()
                 .url
@@ -1267,7 +1381,8 @@ class ExemptionAndLossesControllerSpec
           mockGetSession(
             sessionWithSingleDisposalState(
               sample[CompleteExemptionAndLossesAnswers],
-              sample[DisposalDate]
+              sample[DisposalDate],
+              individualUserType
             )._1
           )
         }
@@ -1285,7 +1400,8 @@ class ExemptionAndLossesControllerSpec
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithSingleDisposalState(
       sample[CompleteExemptionAndLossesAnswers],
-      sample[DisposalDate]
+      sample[DisposalDate],
+      individualUserType
     )._1
   ): Unit = {
     inSequence {
@@ -1312,16 +1428,23 @@ class ExemptionAndLossesControllerSpec
     disposalDate: DisposalDate = sample[DisposalDate]
   ): Unit =
     List(
-      sessionWithSingleDisposalState(oldAnswers, disposalDate),
-      sessionWithMultipleDisposalsState(oldAnswers, disposalDate)
+      sessionWithSingleDisposalState(oldAnswers, disposalDate, individualUserType),
+      sessionWithMultipleDisposalsState(oldAnswers, disposalDate, individualUserType)
     ).foreach {
       case (session, journey, draftReturn) =>
         withClue(s"For initial session $session: ") {
           val updatedDraftReturn = draftReturn.fold(
-            _.copy(exemptionAndLossesAnswers = Some(newAnswers)),
-            _.copy(exemptionAndLossesAnswers = Some(newAnswers))
+            m =>
+              m.copy(
+                exemptionAndLossesAnswers  = Some(newAnswers),
+                yearToDateLiabilityAnswers = m.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+              ),
+            s =>
+              s.copy(
+                exemptionAndLossesAnswers  = Some(newAnswers),
+                yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+              )
           )
-
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -1348,7 +1471,8 @@ class ExemptionAndLossesControllerSpec
 object ExemptionAndLossesControllerSpec extends Matchers {
   def validateExemptionAndLossesCheckYourAnswersPage(
     completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
-    doc: Document
+    doc: Document,
+    isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     if (completeExemptionAndLossesAnswers.inYearLosses.isZero) {
@@ -1367,6 +1491,16 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       doc.select("#previousYearsLossesValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
         completeExemptionAndLossesAnswers.previousYearsLosses.inPounds()
       )
+    }
+
+    if (isATrust) {
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?"
+    } else {
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
     }
 
     doc.select("#annualExemptAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(

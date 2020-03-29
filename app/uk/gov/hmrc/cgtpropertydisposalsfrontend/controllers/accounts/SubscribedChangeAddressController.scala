@@ -63,6 +63,7 @@ class SubscribedChangeAddressController @Inject() (
 
   override val toAddressJourneyType: Subscribed => SubscribedAddressJourney = SubscribedAddressJourney.apply
 
+  def isATrust(journey: Subscribed): Boolean = journey.subscribedDetails.isATrust
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, Subscribed)] =

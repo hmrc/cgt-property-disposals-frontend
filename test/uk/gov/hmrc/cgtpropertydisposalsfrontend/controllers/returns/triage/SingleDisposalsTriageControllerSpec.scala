@@ -21,7 +21,6 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -45,6 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, Tru
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -213,6 +213,20 @@ class SingleDisposalsTriageControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howDidYouDisposeOfPropertySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: SingleDisposalTriageAnswers) =
+        d.copy(
+          triageAnswers = newAnswers,
+          disposalDetailsAnswers = d.disposalDetailsAnswers.map(
+            _.unset(_.disposalPrice)
+              .unset(_.disposalFees)
+          ),
+          initialGainOrLoss          = None,
+          reliefDetailsAnswers       = None,
+          exemptionAndLossesAnswers  = None,
+          yearToDateLiabilityAnswers = None,
+          uploadSupportingDocuments  = None
+        )
+
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
 
@@ -243,11 +257,12 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+      behave like unsuccessfulUpdatesBehaviour(
         performAction,
         requiredPreviousAnswers,
         List("disposalMethod" -> "0"),
-        requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold))
+        requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)),
+        updateDraftReturn
       )
 
       "handle successful updates" when {
@@ -279,15 +294,30 @@ class SingleDisposalsTriageControllerSpec
 
         "the user is filling out a draft return and" when {
 
-          "the section is complete" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
-            testSuccessfulUpdateFillingOutReturn(
-              performAction,
-              completeAnswers.copy(disposalMethod = DisposalMethod.Sold),
-              List("disposalMethod" -> "1"),
-              completeAnswers.copy(disposalMethod = DisposalMethod.Gifted),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+          def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: SingleDisposalTriageAnswers) =
+            d.copy(
+              triageAnswers = newAnswers,
+              disposalDetailsAnswers = d.disposalDetailsAnswers.map(
+                _.unset(_.disposalPrice)
+                  .unset(_.disposalFees)
+              ),
+              initialGainOrLoss          = None,
+              reliefDetailsAnswers       = None,
+              exemptionAndLossesAnswers  = None,
+              yearToDateLiabilityAnswers = None,
+              uploadSupportingDocuments  = None
             )
+
+          "the section is complete" in {
+            forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeAnswers.copy(disposalMethod = DisposalMethod.Sold),
+                List("disposalMethod" -> "1"),
+                updateDraftReturn(_, completeAnswers.copy(disposalMethod = DisposalMethod.Gifted)),
+                checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+              )
+            }
           }
 
           "the section is incomplete" in {
@@ -295,7 +325,19 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("disposalMethod" -> "0"),
-              requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)),
+              d =>
+                d.copy(
+                  triageAnswers = requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)),
+                  disposalDetailsAnswers = d.disposalDetailsAnswers.map(
+                    _.unset(_.disposalPrice)
+                      .unset(_.disposalFees)
+                  ),
+                  initialGainOrLoss          = None,
+                  reliefDetailsAnswers       = None,
+                  exemptionAndLossesAnswers  = None,
+                  yearToDateLiabilityAnswers = None,
+                  uploadSupportingDocuments  = None
+                ),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
@@ -394,6 +436,22 @@ class SingleDisposalsTriageControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: SingleDisposalTriageAnswers) =
+        d.copy(
+          triageAnswers             = newAnswers,
+          propertyAddress           = None,
+          disposalDetailsAnswers    = None,
+          acquisitionDetailsAnswers = None,
+          initialGainOrLoss         = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief)
+              .unset(_.lettingsRelief)
+          ),
+          exemptionAndLossesAnswers  = None,
+          yearToDateLiabilityAnswers = None,
+          uploadSupportingDocuments  = None
+        )
+
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(disposalMethod = Some(DisposalMethod.Sold))
 
@@ -419,18 +477,20 @@ class SingleDisposalsTriageControllerSpec
         }
       }
 
-      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+      behave like unsuccessfulUpdatesBehaviour(
         performAction,
         requiredPreviousAnswers,
         List("wereYouAUKResident" -> "true"),
-        requiredPreviousAnswers.copy(wasAUKResident = Some(true))
+        requiredPreviousAnswers.copy(wasAUKResident = Some(true)),
+        updateDraftReturn
       )
 
       "handle successful updates" when {
 
         "the user is starting a new draft return and" when {
 
-          "the user has answered some questions but not complete the section and has changed their answer from not in the uk to was in the uk" in {
+          "the user has answered some questions but not complete the section and has " +
+            "changed their answer from not in the uk to was in the uk" in {
             val answers = requiredPreviousAnswers.copy(
               wasAUKResident     = Some(false),
               countryOfResidence = Some(Country("AB", None)),
@@ -446,7 +506,8 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
-          "the user has answered some questions but not complete the section and has changed their answer from was in the uk to not in the uk" in {
+          "the user has answered some questions but not complete the section and has " +
+            "changed their answer from was in the uk to not in the uk" in {
             val answers = requiredPreviousAnswers
               .copy(wasAUKResident = Some(true), countryOfResidence = None, assetType = Some(AssetType.Residential))
 
@@ -459,7 +520,8 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
-          "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
+          "the user has complete the section and has changed their answer from " +
+            "not in the uk to was in the uk" in {
             val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
             testSuccessfulUpdateStartingNewDraft(
               performAction,
@@ -480,7 +542,8 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
-          "the user has completed the section and has changed their answer from was in the uk to not in the uk" in {
+          "the user has completed the section and has changed their answer from " +
+            "was in the uk to not in the uk" in {
             val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
             testSuccessfulUpdateStartingNewDraft(
               performAction,
@@ -506,24 +569,27 @@ class SingleDisposalsTriageControllerSpec
         "the user is filling out a draft return and" when {
 
           "the section is complete" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
-            testSuccessfulUpdateFillingOutReturn(
-              performAction,
-              completeAnswers.copy(countryOfResidence = Country("AB", None)),
-              List("wereYouAUKResident" -> "true"),
-              IncompleteSingleDisposalTriageAnswers(
-                completeAnswers.individualUserType,
-                true,
-                Some(completeAnswers.disposalMethod),
-                Some(true),
-                None,
-                None,
-                Some(completeAnswers.disposalDate),
-                Some(completeAnswers.completionDate),
-                None
-              ),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
-            )
+            forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
+              val newAnswers =
+                IncompleteSingleDisposalTriageAnswers(
+                  completeAnswers.individualUserType,
+                  true,
+                  Some(completeAnswers.disposalMethod),
+                  Some(true),
+                  None,
+                  None,
+                  Some(completeAnswers.disposalDate),
+                  Some(completeAnswers.completionDate),
+                  None
+                )
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeAnswers.copy(countryOfResidence = Country("AB", None)),
+                List("wereYouAUKResident" -> "true"),
+                updateDraftReturn(_, newAnswers),
+                checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+              )
+            }
           }
 
           "the section is incomplete" in {
@@ -534,7 +600,10 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               answers,
               List("wereYouAUKResident" -> "false"),
-              requiredPreviousAnswers.copy(wasAUKResident = Some(false), countryOfResidence = None, assetType = None),
+              updateDraftReturn(
+                _,
+                requiredPreviousAnswers.copy(wasAUKResident = Some(false), countryOfResidence = None, assetType = None)
+              ),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
@@ -668,11 +737,12 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+      behave like unsuccessfulUpdatesBehaviour(
         performAction,
         requiredPreviousAnswers,
         List("didYouDisposeOfResidentialProperty" -> "true"),
-        requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential))
+        requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
+        { case (draftReturn, answers) => draftReturn.copy(triageAnswers = answers) }
       )
 
       "handle successful updates" when {
@@ -723,22 +793,24 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("didYouDisposeOfResidentialProperty" -> "true"),
-              requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
+              _.copy(triageAnswers = requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential))),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
 
           "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
-            testSuccessfulUpdateFillingOutReturn(
-              performAction,
-              completeAnswers.copy(assetType = Residential),
-              List("didYouDisposeOfResidentialProperty" -> "false"),
-              IncompleteSingleDisposalTriageAnswers
-                .fromCompleteAnswers(completeAnswers)
-                .copy(assetType = Some(NonResidential)),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
-            )
+            forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeAnswers.copy(assetType = Residential),
+                List("didYouDisposeOfResidentialProperty" -> "false"),
+                _.copy(triageAnswers = IncompleteSingleDisposalTriageAnswers
+                  .fromCompleteAnswers(completeAnswers)
+                  .copy(assetType = Some(NonResidential))
+                ),
+                checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+              )
+            }
           }
         }
       }
@@ -890,6 +962,33 @@ class SingleDisposalsTriageControllerSpec
           "disposalDate-year"  -> date.getYear().toString
         )
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: SingleDisposalTriageAnswers) =
+        d.copy(
+          triageAnswers = newAnswers,
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
+            _.unset(_.acquisitionDate)
+              .unset(_.acquisitionPrice)
+              .unset(_.rebasedAcquisitionPrice)
+              .unset(_.shouldUseRebase)
+          ),
+          initialGainOrLoss = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief)
+              .unset(_.lettingsRelief)
+          ),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+            case _: NonCalculatedYTDAnswers => None
+            case c: CalculatedYTDAnswers =>
+              Some(
+                c.unset(_.hasEstimatedDetails)
+                  .unset(_.calculatedTaxDue)
+                  .unset(_.taxDue)
+                  .unset(_.mandatoryEvidence)
+              )
+          },
+          uploadSupportingDocuments = None
+        )
+
       val tomorrow = today.plusDays(1L)
 
       val taxYear = sample[TaxYear]
@@ -958,11 +1057,12 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+      behave like unsuccessfulUpdatesBehaviour(
         performAction,
         requiredPreviousAnswers,
         formData(today),
         requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(today, taxYear))),
+        updateDraftReturn,
         () => mockGetTaxYear(today)(Right(Some(taxYear)))
       )
 
@@ -977,7 +1077,7 @@ class SingleDisposalsTriageControllerSpec
               requiredPreviousAnswers,
               formData(today),
               requiredPreviousAnswers
-                .copy(tooEarlyDisposalDate = Some(today)),
+                .copy(tooEarlyDisposalDate = Some(today), disposalDate = None, completionDate = None),
               checkIsRedirect(_, routes.CommonTriageQuestionsController.disposalDateTooEarly()),
               () => mockGetTaxYear(today)(Right(None))
             )
@@ -1020,8 +1120,7 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               formData(today),
-              requiredPreviousAnswers
-                .copy(disposalDate = Some(DisposalDate(today, taxYear))),
+              updateDraftReturn(_, requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(today, taxYear)))),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
               () => mockGetTaxYear(today)(Right(Some(taxYear)))
             )
@@ -1029,29 +1128,31 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the section is complete" in {
-            val completeJourney =
-              sample[CompleteSingleDisposalTriageAnswers]
-                .copy(disposalDate = DisposalDate(today, taxYear))
-            val date = today.minusDays(1L)
+            forAll { c: CompleteSingleDisposalTriageAnswers =>
+              val completeJourney = c.copy(disposalDate = DisposalDate(today, taxYear))
+              val date            = today.minusDays(1L)
+              val newAnswers =
+                IncompleteSingleDisposalTriageAnswers(
+                  completeJourney.individualUserType,
+                  true,
+                  Some(completeJourney.disposalMethod),
+                  Some(completeJourney.countryOfResidence.isUk()),
+                  if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
+                  Some(completeJourney.assetType),
+                  Some(DisposalDate(date, taxYear)),
+                  None,
+                  None
+                )
 
-            testSuccessfulUpdateFillingOutReturn(
-              performAction,
-              completeJourney,
-              formData(date),
-              IncompleteSingleDisposalTriageAnswers(
-                completeJourney.individualUserType,
-                true,
-                Some(completeJourney.disposalMethod),
-                Some(completeJourney.countryOfResidence.isUk()),
-                if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
-                Some(completeJourney.assetType),
-                Some(DisposalDate(date, taxYear)),
-                None,
-                None
-              ),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
-              () => mockGetTaxYear(date)(Right(Some(taxYear)))
-            )
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeJourney,
+                formData(date),
+                updateDraftReturn(_, newAnswers),
+                checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
+                () => mockGetTaxYear(date)(Right(Some(taxYear)))
+              )
+            }
           }
         }
 
@@ -1178,6 +1279,32 @@ class SingleDisposalsTriageControllerSpec
           "completionDate-year"  -> date.getYear().toString
         )
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: SingleDisposalTriageAnswers) =
+        d.copy(
+          triageAnswers = newAnswers,
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
+            _.unset(_.acquisitionDate)
+              .unset(_.acquisitionPrice)
+              .unset(_.rebasedAcquisitionPrice)
+              .unset(_.shouldUseRebase)
+          ),
+          initialGainOrLoss = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief)
+              .unset(_.lettingsRelief)
+          ),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+            case _: NonCalculatedYTDAnswers => None
+            case c: CalculatedYTDAnswers =>
+              Some(
+                c.unset(_.hasEstimatedDetails)
+                  .unset(_.calculatedTaxDue)
+                  .unset(_.taxDue)
+                  .unset(_.mandatoryEvidence)
+              )
+          }
+        )
+
       val disposalDate = DisposalDate(today.minusDays(5L), sample[TaxYear])
 
       val tomorrow = today.plusDays(1L)
@@ -1230,11 +1357,12 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+      behave like unsuccessfulUpdatesBehaviour(
         performAction,
         requiredPreviousAnswers,
         formData(disposalDate.value),
-        requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value)))
+        requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))),
+        updateDraftReturn
       )
 
       "handle valid dates" when {
@@ -1276,24 +1404,25 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               formData(completionDate.value),
-              requiredPreviousAnswers.copy(completionDate = Some(completionDate)),
+              updateDraftReturn(_, requiredPreviousAnswers.copy(completionDate = Some(completionDate))),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
 
           "the section is complete" in {
-            val completionDate = CompletionDate(disposalDate.value.plusDays(1L))
-            val completeAnswers =
-              sample[CompleteSingleDisposalTriageAnswers]
-                .copy(completionDate = CompletionDate(disposalDate.value), disposalDate = disposalDate)
+            forAll { c: CompleteSingleDisposalTriageAnswers =>
+              val completionDate = CompletionDate(disposalDate.value.plusDays(1L))
+              val completeAnswers =
+                c.copy(completionDate = CompletionDate(disposalDate.value), disposalDate = disposalDate)
 
-            testSuccessfulUpdateFillingOutReturn(
-              performAction,
-              completeAnswers,
-              formData(completionDate.value),
-              completeAnswers.copy(completionDate = completionDate),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
-            )
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeAnswers,
+                formData(completionDate.value),
+                updateDraftReturn(_, completeAnswers.copy(completionDate = completionDate)),
+                checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+              )
+            }
           }
         }
 
@@ -1428,6 +1557,20 @@ class SingleDisposalsTriageControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: SingleDisposalTriageAnswers) =
+        d.copy(
+          triageAnswers = newAnswers,
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+            case _: CalculatedYTDAnswers => None
+            case n: NonCalculatedYTDAnswers =>
+              Some(
+                n.unset(
+                  _.hasEstimatedDetails
+                )
+              )
+          }
+        )
+
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
           individualUserType         = Some(IndividualUserType.Self),
@@ -1498,11 +1641,12 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+      behave like unsuccessfulUpdatesBehaviour(
         performAction,
         requiredPreviousAnswers,
         List("countryCode" -> countryCode),
-        requiredPreviousAnswers.copy(countryOfResidence = Some(country))
+        requiredPreviousAnswers.copy(countryOfResidence = Some(country)),
+        updateDraftReturn
       )
 
       "handle successful updates" when {
@@ -1539,21 +1683,22 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("countryCode" -> countryCode),
-              requiredPreviousAnswers.copy(countryOfResidence = Some(country)),
+              updateDraftReturn(_, requiredPreviousAnswers.copy(countryOfResidence = Some(country))),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
 
           "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
-            val completeAnswers =
-              sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country("CC", None))
-            testSuccessfulUpdateFillingOutReturn(
-              performAction,
-              completeAnswers,
-              List("countryCode" -> countryCode),
-              completeAnswers.copy(countryOfResidence = country),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
-            )
+            forAll { c: CompleteSingleDisposalTriageAnswers =>
+              val completeAnswers = c.copy(countryOfResidence = Country("CC", None))
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeAnswers,
+                List("countryCode" -> countryCode),
+                updateDraftReturn(_, completeAnswers.copy(countryOfResidence = country)),
+                checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+              )
+            }
           }
         }
       }
@@ -1652,6 +1797,34 @@ class SingleDisposalsTriageControllerSpec
 
     "handling submitted answers to the asset type for non uk residents page" must {
 
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.assetTypeForNonUkResidentsSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: SingleDisposalTriageAnswers) =
+        d.copy(
+          triageAnswers             = newAnswers,
+          propertyAddress           = None,
+          disposalDetailsAnswers    = None,
+          acquisitionDetailsAnswers = None,
+          initialGainOrLoss         = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
+          ),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+            case c: CalculatedYTDAnswers =>
+              Some(
+                c.unset(_.hasEstimatedDetails)
+                  .unset(_.calculatedTaxDue)
+                  .unset(_.taxDue)
+                  .unset(_.mandatoryEvidence)
+              )
+
+            case _: NonCalculatedYTDAnswers =>
+              None
+          },
+          uploadSupportingDocuments = None
+        )
+
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
           individualUserType         = Some(sample[IndividualUserType]),
@@ -1660,9 +1833,6 @@ class SingleDisposalsTriageControllerSpec
           wasAUKResident             = Some(false),
           countryOfResidence         = Some(sample[Country])
         )
-
-      def performAction(formData: (String, String)*): Future[Result] =
-        controller.assetTypeForNonUkResidentsSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
@@ -1691,11 +1861,12 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+      behave like unsuccessfulUpdatesBehaviour(
         performAction,
         requiredPreviousAnswers,
         List("assetTypeForNonUkResidents" -> "0"),
-        requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential))
+        requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
+        updateDraftReturn
       )
 
       "handle successful updates" when {
@@ -1718,17 +1889,7 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               completeAnswers.copy(assetType = AssetType.Residential),
               List("assetTypeForNonUkResidents" -> "1"),
-              IncompleteSingleDisposalTriageAnswers(
-                completeAnswers.individualUserType,
-                true,
-                Some(completeAnswers.disposalMethod),
-                Some(false),
-                Some(completeAnswers.countryOfResidence),
-                Some(AssetType.NonResidential),
-                None,
-                None,
-                None
-              ),
+              completeAnswers.copy(assetType = AssetType.NonResidential),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
@@ -1738,35 +1899,29 @@ class SingleDisposalsTriageControllerSpec
         "the user is filling out a draft return and" when {
 
           "the section is complete" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
-            testSuccessfulUpdateStartingNewDraft(
-              performAction,
-              completeAnswers.copy(assetType = AssetType.Residential),
-              List("assetTypeForNonUkResidents" -> "2"),
-              IncompleteSingleDisposalTriageAnswers(
-                completeAnswers.individualUserType,
-                true,
-                Some(completeAnswers.disposalMethod),
-                Some(false),
-                Some(completeAnswers.countryOfResidence),
-                Some(AssetType.MixedUse),
-                None,
-                None,
-                None
-              ),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
-            )
-
+            forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeAnswers.copy(assetType = AssetType.Residential),
+                List("assetTypeForNonUkResidents" -> "2"),
+                updateDraftReturn(
+                  _,
+                  completeAnswers.copy(assetType = AssetType.MixedUse)
+                ),
+                checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+              )
+            }
           }
 
           "the section is incomplete" in {
-            testSuccessfulUpdateStartingNewDraft(
+            testSuccessfulUpdateFillingOutReturn(
               performAction,
-              requiredPreviousAnswers
-                .copy(disposalDate = Some(sample[DisposalDate]), completionDate = Some(sample[CompletionDate])),
+              requiredPreviousAnswers,
               List("assetTypeForNonUkResidents" -> "3"),
-              requiredPreviousAnswers
-                .copy(assetType = Some(AssetType.IndirectDisposal), disposalDate = None, completionDate = None),
+              updateDraftReturn(
+                _,
+                requiredPreviousAnswers.copy(assetType = Some(AssetType.IndirectDisposal))
+              ),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
@@ -2440,11 +2595,12 @@ class SingleDisposalsTriageControllerSpec
       }
     }
 
-  def unsuccessfulUpdatesStartingNewDraftBehaviour(
+  def unsuccessfulUpdatesBehaviour(
     performAction: Seq[(String, String)] => Future[Result],
     currentAnswers: SingleDisposalTriageAnswers,
     formData: Seq[(String, String)],
     updatedAnswers: SingleDisposalTriageAnswers,
+    updateDraftReturn: (DraftSingleDisposalReturn, SingleDisposalTriageAnswers) => DraftSingleDisposalReturn,
     extraMockActions: () => Unit = () => ()
   ): Unit =
     "show an error page" when {
@@ -2469,11 +2625,10 @@ class SingleDisposalsTriageControllerSpec
       }
 
       "the user is filling in a draft return and" when {
-        val draftReturn        = sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
-        val updatedDraftReturn = draftReturn.copy(triageAnswers                       = updatedAnswers)
-
+        val draftReturn             = sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
+        val updatedDraftReturn      = updateDraftReturn(draftReturn, updatedAnswers)
         val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
-        val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn         = updatedDraftReturn)
+        val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
 
         "there is an error updating the draft return" in {
           inSequence {
@@ -2536,12 +2691,12 @@ class SingleDisposalsTriageControllerSpec
     performAction: Seq[(String, String)] => Future[Result],
     currentAnswers: SingleDisposalTriageAnswers,
     formData: Seq[(String, String)],
-    updatedAnswers: SingleDisposalTriageAnswers,
+    updateDraftReturn: DraftSingleDisposalReturn => DraftSingleDisposalReturn,
     checkNextResult: Future[Result] => Unit,
     extraMockActions: () => Unit = () => ()
   ): Unit = {
     val draftReturn        = sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
-    val updatedDraftReturn = draftReturn.copy(triageAnswers                       = updatedAnswers)
+    val updatedDraftReturn = updateDraftReturn(draftReturn)
 
     val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
     val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn         = updatedDraftReturn)

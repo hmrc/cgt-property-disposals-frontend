@@ -49,6 +49,9 @@ object DraftSingleDisposalReturn {
 
   implicit val eq: Eq[DraftSingleDisposalReturn] = Eq.fromUniversalEquals[DraftSingleDisposalReturn]
 
+  def newDraftReturn(id: UUID, triageAnswers: SingleDisposalTriageAnswers): DraftSingleDisposalReturn =
+    DraftSingleDisposalReturn(id, triageAnswers, None, None, None, None, None, None, None, None, LocalDateUtils.today())
+
 }
 
 final case class DraftMultipleDisposalsReturn(
@@ -63,7 +66,7 @@ final case class DraftMultipleDisposalsReturn(
 
 object DraftMultipleDisposalsReturn {
 
-  def newDraftReturn(id: UUID, triageAnswers: MultipleDisposalsTriageAnswers) =
+  def newDraftReturn(id: UUID, triageAnswers: MultipleDisposalsTriageAnswers): DraftMultipleDisposalsReturn =
     DraftMultipleDisposalsReturn(id, triageAnswers, None, None, None, None, LocalDateUtils.today())
 
 }

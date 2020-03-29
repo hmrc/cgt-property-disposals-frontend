@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails
 
 import cats.data.{EitherT, NonEmptyList, Validated, ValidatedNel}
+import cats.instances.boolean._
 import cats.instances.future._
 import cats.syntax.apply._
 import cats.syntax.either._
@@ -155,219 +156,195 @@ class ReliefDetailsController @Inject() (
     }
 
   def privateResidentsRelief(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, _, _, answers) =>
-        commonDisplayBehaviour(answers)(
-          form = _.fold(
-            _.privateResidentsRelief.fold(privateResidentsReliefForm)(a => privateResidentsReliefForm.fill(a.inPounds())
-            ),
-            c => privateResidentsReliefForm.fill(c.privateResidentsRelief.inPounds())
-          )
-        )(
-          page = privateResidentsReliefPage(_, _)
-        )(
-          hasRequiredPreviousAnswer = _ => true,
-          _ => controllers.returns.routes.TaskListController.taskList()
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, _, _, answers) =>
+      commonDisplayBehaviour(answers)(
+        form = _.fold(
+          _.privateResidentsRelief.fold(privateResidentsReliefForm)(a => privateResidentsReliefForm.fill(a.inPounds())),
+          c => privateResidentsReliefForm.fill(c.privateResidentsRelief.inPounds())
         )
+      )(
+        page = privateResidentsReliefPage(_, _)
+      )(
+        hasRequiredPreviousAnswer = _ => true,
+        _ => controllers.returns.routes.TaskListController.taskList()
+      )
     }
   }
 
   def privateResidentsReliefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) {
-        case (_, fillingOutReturn, draftReturn, answers) =>
-          commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
-            form = privateResidentsReliefForm
-          )(
-            page = {
-              case (form, backLink) =>
-                privateResidentsReliefPage(form, backLink)
+      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+        commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
+          form = privateResidentsReliefForm
+        )(
+          page = { (form, backLink) =>
+            privateResidentsReliefPage(form, backLink)
+          }
+        )(
+          hasRequiredPreviousAnswer            = _ => true,
+          redirectToIfNoRequiredPreviousAnswer = _ => controllers.returns.routes.TaskListController.taskList()
+        )(
+          updateDraftReturn = { (p, draftReturn) =>
+            if (answers
+                  .fold(_.privateResidentsRelief, c => Some(c.privateResidentsRelief))
+                  .map(_.inPounds())
+                  .contains(p))
+              draftReturn
+            else {
+
+              draftReturn.copy(
+                reliefDetailsAnswers = Some(
+                  answers
+                    .unset(_.lettingsRelief)
+                    .copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)))
+                ),
+                yearToDateLiabilityAnswers =
+                  draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+              )
             }
-          )(
-            hasRequiredPreviousAnswer            = _ => true,
-            redirectToIfNoRequiredPreviousAnswer = _ => controllers.returns.routes.TaskListController.taskList()
-          )(
-            updateDraftReturn = {
-              case (p, draftReturn) =>
-                fromMaybeReliefsToPrivateResidentsReliefAmount(draftReturn) match {
-                  case Some(value) if (value === AmountInPence.fromPounds(p)) => {
-                    draftReturn
-                  }
-                  case _ => {
-                    draftReturn.copy(
-                      reliefDetailsAnswers = Some(
-                        answers.fold(
-                          _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)), lettingsRelief = None),
-                          c =>
-                            IncompleteReliefDetailsAnswers(
-                              Some(AmountInPence.fromPounds(p)),
-                              None,
-                              c.otherReliefs
-                            )
-                        )
-                      )
-                    )
-                  }
-                }
-            }
-          )
+          }
+        )
       }
   }
 
-  private def fromMaybeReliefsToPrivateResidentsReliefAmount(
-    draftReturn: DraftSingleDisposalReturn
-  ): Option[AmountInPence] = {
-    val privateResidentsRelief = draftReturn.reliefDetailsAnswers
-      .flatMap(answers =>
-        answers.fold[Option[AmountInPence]](
-          incomplete => incomplete.privateResidentsRelief,
-          p => Some(p.privateResidentsRelief)
-        )
-      )
-    privateResidentsRelief
-  }
-
   def lettingsRelief(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, reliefDetailsAnswers) =>
-      withTaxYear(fillingOutReturn, draftReturn, reliefDetailsAnswers) {
-        lettingsDisplayBehaviour
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, _, draftReturn, answers) =>
+      withTaxYear(draftReturn) { taxYear =>
+        commonDisplayBehaviour(answers)(
+          form = _.fold(
+            _.lettingsRelief.fold(
+              lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
+            )(a => lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount).fill(a.inPounds())),
+            c => lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount).fill(c.lettingsRelief.inPounds())
+          )
+        )(
+          page = lettingsReliefPage(_, _)
+        )(
+          hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
+          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
+        )
       }
     }
   }
 
   def lettingsReliefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, reliefDetailsAnswers) =>
-      withTaxYear(fillingOutReturn, draftReturn, reliefDetailsAnswers) {
-        lettingsSubmitBehaviour
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withTaxYear(draftReturn) { taxYear =>
+        commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
+          form = lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
+        )(page = lettingsReliefPage(_, _))(
+          hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
+          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
+        )(
+          updateDraftReturn = { (p, draftReturn) =>
+            if (answers.fold(_.lettingsRelief, c => Some(c.lettingsRelief)).map(_.inPounds()).contains(p))
+              draftReturn
+            else
+              draftReturn.copy(
+                reliefDetailsAnswers = Some(
+                  answers.fold(
+                    _.copy(lettingsRelief = Some(AmountInPence.fromPounds(p))),
+                    _.copy(lettingsRelief = AmountInPence.fromPounds(p))
+                  )
+                ),
+                yearToDateLiabilityAnswers =
+                  draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+              )
+          }
+        )
       }
     }
   }
 
-  def lettingsDisplayBehaviour(
-    fillingOutReturn: FillingOutReturn,
-    draftReturn: DraftSingleDisposalReturn,
-    answers: ReliefDetailsAnswers,
-    taxYear: TaxYear
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    commonDisplayBehaviour(answers)(
-      form = _.fold(
-        _.lettingsRelief.fold(
-          lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
-        )(a => lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount).fill(a.inPounds())),
-        c => lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount).fill(c.lettingsRelief.inPounds())
-      )
-    )(
-      page = lettingsReliefPage(_, _)
-    )(
-      hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
-      redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
+  private def withTaxYear(draftReturn: DraftSingleDisposalReturn)(f: TaxYear => Future[Result]): Future[Result] =
+    draftReturn.triageAnswers.fold(
+      _.disposalDate.fold[Future[Result]](
+        Redirect(controllers.returns.routes.TaskListController.taskList())
+      )(disposalDate => f(disposalDate.taxYear)),
+      complete => f(complete.disposalDate.taxYear)
     )
 
-  def withTaxYear(
-    fillingOutReturn: FillingOutReturn,
-    draftReturn: DraftSingleDisposalReturn,
-    reliefDetailsAnswers: ReliefDetailsAnswers
-  )(
-    f: (FillingOutReturn, DraftSingleDisposalReturn, ReliefDetailsAnswers, TaxYear) => Future[Result]
-  ): Future[Result] = {
-    val fallBackRoute: Future[Result] = Redirect(controllers.returns.routes.TaskListController.taskList())
-    draftReturn.triageAnswers.fold[Future[Result]](
-      incomplete =>
-        incomplete.disposalDate.fold(fallBackRoute)(disposalDate =>
-          f(fillingOutReturn, draftReturn, reliefDetailsAnswers, disposalDate.taxYear)
-        ),
-      complete => f(fillingOutReturn, draftReturn, reliefDetailsAnswers, complete.disposalDate.taxYear)
-    )
-  }
-
-  private def lettingsSubmitBehaviour(
-    fillingOutReturn: FillingOutReturn,
-    draftReturn: DraftSingleDisposalReturn,
-    answers: ReliefDetailsAnswers,
-    taxYear: TaxYear
-  )(implicit request: RequestWithSessionData[_]) =
-    commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
-      form = lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
-    )(page = lettingsReliefPage(_, _))(
-      hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
-      redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
-    )(
-      updateDraftReturn = {
-        case (p, draftReturn) =>
-          draftReturn.copy(
-            reliefDetailsAnswers = Some(
-              answers.fold(
-                _.copy(lettingsRelief = Some(AmountInPence.fromPounds(p))),
-                _.copy(lettingsRelief = AmountInPence.fromPounds(p))
-              )
-            )
-          )
-      }
-    )
   def otherReliefs(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, _, _, answers) =>
-        commonDisplayBehaviour(answers)(
-          form = _.fold(
-            _.otherReliefs.fold(otherReliefsForm)(
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, _, _, answers) =>
+      commonDisplayBehaviour(answers)(
+        form = _.fold(
+          _.otherReliefs.fold(otherReliefsForm)(
+            _.fold(
+              otherReliefs => otherReliefsForm.fill(Left(otherReliefs.name -> otherReliefs.amount.inPounds)),
+              () => otherReliefsForm.fill(Right(()))
+            )
+          ),
+          c =>
+            c.otherReliefs.fold(otherReliefsForm)(
               _.fold(
                 otherReliefs => otherReliefsForm.fill(Left(otherReliefs.name -> otherReliefs.amount.inPounds)),
                 () => otherReliefsForm.fill(Right(()))
               )
-            ),
-            c =>
-              c.otherReliefs.fold(otherReliefsForm)(
-                _.fold(
-                  otherReliefs => otherReliefsForm.fill(Left(otherReliefs.name -> otherReliefs.amount.inPounds)),
-                  () => otherReliefsForm.fill(Right(()))
-                )
-              )
-          )
-        )(
-          page = otherReliefsPage(_, _)
-        )(
-          hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
-          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
+            )
         )
+      )(
+        page = otherReliefsPage(_, _)
+      )(
+        hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
+        redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
+      )
     }
   }
 
   def otherReliefsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, fillingOutReturn, draftReturn, answers) =>
-        commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
-          form = otherReliefsForm
-        )(page = otherReliefsPage(_, _))(
-          hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
-          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
-        )(
-          updateDraftReturn = {
-            case (maybeOtherReliefs, draftReturn) =>
-              val otherReliefs = maybeOtherReliefs
-                .bimap({
-                  case (name, amount) =>
-                    OtherReliefsOption.OtherReliefs(name, AmountInPence.fromPounds(amount))
-                }, _ => OtherReliefsOption.NoOtherReliefs)
-                .merge
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
+        form = otherReliefsForm
+      )(page = otherReliefsPage(_, _))(
+        hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
+        redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
+      )(
+        updateDraftReturn = { (maybeOtherReliefs, draftReturn) =>
+          val existingOtherReliefs = answers.fold(_.otherReliefs, _.otherReliefs)
+          val otherReliefs = maybeOtherReliefs
+            .bimap({
+              case (name, amount) =>
+                OtherReliefsOption.OtherReliefs(name, AmountInPence.fromPounds(amount))
+            }, _ => OtherReliefsOption.NoOtherReliefs)
+            .merge
 
-              val updatedReliefDetailsAnswers =
-                answers.fold(
-                  _.copy(otherReliefs = Some(otherReliefs)),
-                  _.copy(otherReliefs = Some(otherReliefs))
-                )
+          if (existingOtherReliefs.contains(otherReliefs))
+            draftReturn
+          else {
+            val updatedReliefDetailsAnswers =
+              answers.fold(
+                _.copy(otherReliefs = Some(otherReliefs)),
+                _.copy(otherReliefs = Some(otherReliefs))
+              )
 
-              if (answers === updatedReliefDetailsAnswers) {
-                draftReturn
-              } else {
-                draftReturn.copy(
-                  reliefDetailsAnswers       = Some(updatedReliefDetailsAnswers),
-                  yearToDateLiabilityAnswers = None
-                )
-              }
+            val (hadSelectedOtherReliefs, hasSelectedOtherReliefs) =
+              existingOtherReliefs.exists(selectedOtherReliefs) -> selectedOtherReliefs(otherReliefs)
+
+            if (hadSelectedOtherReliefs =!= hasSelectedOtherReliefs)
+              draftReturn.copy(
+                reliefDetailsAnswers       = Some(updatedReliefDetailsAnswers),
+                exemptionAndLossesAnswers  = None,
+                yearToDateLiabilityAnswers = None,
+                uploadSupportingDocuments  = None
+              )
+            else
+              draftReturn.copy(
+                reliefDetailsAnswers = Some(updatedReliefDetailsAnswers),
+                yearToDateLiabilityAnswers =
+                  draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+              )
           }
-        )
+
+        }
+      )
     }
   }
+
+  private def selectedOtherReliefs(option: OtherReliefsOption): Boolean =
+    option match {
+      case _: OtherReliefsOption.OtherReliefs => true
+      case _                                  => false
+    }
 
   private def hasRequiredPreviousAnswerForOtherReliefs(answers: ReliefDetailsAnswers): Boolean = {
     val privateResidentsRelief = answers.fold(_.privateResidentsRelief, c => Some(c.privateResidentsRelief))
@@ -382,30 +359,29 @@ class ReliefDetailsController @Inject() (
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, fillingOutReturn, draftReturn, answers) =>
-        answers match {
-          case c: CompleteReliefDetailsAnswers =>
-            Ok(checkYouAnswersPage(c))
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      answers match {
+        case c: CompleteReliefDetailsAnswers =>
+          Ok(checkYouAnswersPage(c))
 
-          case IncompleteReliefDetailsAnswers(None, _, _) =>
-            Redirect(routes.ReliefDetailsController.privateResidentsRelief())
+        case IncompleteReliefDetailsAnswers(None, _, _) =>
+          Redirect(routes.ReliefDetailsController.privateResidentsRelief())
 
-          case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), None, None) =>
-            Redirect(routes.ReliefDetailsController.otherReliefs())
+        case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), None, None) =>
+          Redirect(routes.ReliefDetailsController.otherReliefs())
 
-          case IncompleteReliefDetailsAnswers(_, None, None) =>
-            Redirect(routes.ReliefDetailsController.lettingsRelief())
+        case IncompleteReliefDetailsAnswers(_, None, None) =>
+          Redirect(routes.ReliefDetailsController.lettingsRelief())
 
-          case IncompleteReliefDetailsAnswers(_, _, None) =>
-            Redirect(routes.ReliefDetailsController.otherReliefs())
+        case IncompleteReliefDetailsAnswers(_, _, None) =>
+          Redirect(routes.ReliefDetailsController.otherReliefs())
 
-          case IncompleteReliefDetailsAnswers(Some(prr), None, or) =>
-            completeRelief(fillingOutReturn, draftReturn, prr, AmountInPence(0), or)
+        case IncompleteReliefDetailsAnswers(Some(prr), None, or) =>
+          completeRelief(fillingOutReturn, draftReturn, prr, AmountInPence(0), or)
 
-          case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or) =>
-            completeRelief(fillingOutReturn, draftReturn, prr, lr, or)
-        }
+        case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or) =>
+          completeRelief(fillingOutReturn, draftReturn, prr, lr, or)
+      }
     }
 
   }
@@ -441,9 +417,8 @@ class ReliefDetailsController @Inject() (
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case _ =>
-        Redirect(controllers.returns.routes.TaskListController.taskList())
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, _, _, _) =>
+      Redirect(controllers.returns.routes.TaskListController.taskList())
     }
   }
 

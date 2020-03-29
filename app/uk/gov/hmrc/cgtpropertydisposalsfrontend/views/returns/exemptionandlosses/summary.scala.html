@@ -29,7 +29,7 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @cyaSection() {
   @if(answers.inYearLosses.value === 0L) {
@@ -85,7 +85,7 @@
   }
 
   @cyaRow(
-    messages("annualExemptAmount.title"),
+    messages(if(isATrust) "annualExemptAmount.trust.title" else "annualExemptAmount.individual.title"),
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),
     Some(cyaChange(messages("exemptionsAndLosses.cyaChange.annualExemptAmount"), routes.ExemptionAndLossesController.annualExemptAmount().url)),
     "annualExemptAmount"

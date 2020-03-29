@@ -60,6 +60,9 @@ class RegistrationEnterAddressController @Inject() (
   override val toAddressJourneyType: IndividualSupplyingInformation => IndividualSupplyingInformationAddressJourney =
     IndividualSupplyingInformationAddressJourney.apply
 
+  // trusts do not use this journey
+  def isATrust(journey: IndividualSupplyingInformation): Boolean = false
+
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =

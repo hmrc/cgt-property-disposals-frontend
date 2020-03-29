@@ -38,26 +38,32 @@
     <p>@messages(s"$key.p3")</p>
 
     <p>
-        @messages(s"$key.telephone.title")
-        <br />
-        <span class="bold">@viewConfig.hmrcTelephone</span>
-    </p>
-    <p>
-        @messages(s"$key.outside-uk-telephone.title")
-        <br />
-        <span class="bold">@viewConfig.outsideUkPhone</span>
-    </p>
-    <p>
-        @messages(s"$key.phoneAgent.title")
-        <br />
-        <span class="bold">@viewConfig.agentDedicatedLine</span>
+        <h2 class="heading-medium">@messages(s"$key.telephone.title")</h2>
     </p>
 
-    <br />
-    <p>@messages(s"$key.openingTimes")</p>
+    <div class="panel panel-border-wide">
+        <p>
+            @messages(s"$key.inside-uk-telephone.title")
+            <br />
+            <span class="bold">@viewConfig.hmrcTelephone</span>
+        </p>
+        <p>
+            @messages(s"$key.outside-uk-telephone.title")
+            <br />
+            <span class="bold">@viewConfig.outsideUkPhone</span>
+        </p>
+        <p>
+            @messages(s"$key.phoneAgent.title")
+            <br />
+            <span class="bold">@viewConfig.agentDedicatedLine</span>
+        </p>
+    </div>
+
+    <p>
+        <h2 class="heading-medium">@messages(s"$key.openingTimes.title")</h2>
+    </p>
     <p>@messages(s"$key.openingTimes.monToFri")
     <p>@messages(s"$key.closingTimes")</p>
-    <br />
 
     <p>
         @messages(s"$key.getHelp") <a href="@viewConfig.additionalNeedsUrl">@messages(s"$key.additionalNeedsLink")</a>.
