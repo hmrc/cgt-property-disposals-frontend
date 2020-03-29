@@ -775,28 +775,6 @@ class TaskListControllerSpec
         )
       }
 
-      def testSectionNonExistent(draftReturn: DraftMultipleDisposalsReturn)(
-        sectionLinkId: String
-      ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(fillingOutReturn)
-            )
-          )
-        }
-
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("service.title"), { doc =>
-            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
-          }
-        )
-      }
-
       "display the page with the proper multiple disposal triage section status" when {
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
