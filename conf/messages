@@ -1057,7 +1057,7 @@ personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal All
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.error.invalid=Personal Allowance amount must only include numbers, for example 12,500 or 207.50
 personalAllowance.error.tooSmall=Personal Allowance amount must be a number between 0 and {0}
-personalAllowance.error.tooLarge=User can only enter a maximum of {0} in this field for tax year {1}/{2}
+personalAllowance.error.tooLarge=Personal Allowance must be {0} or less
 personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 decimal places or less, for example 12,500 or 200.50
 
 hasEstimatedDetails.title=Have any of the details in this return been estimated?
