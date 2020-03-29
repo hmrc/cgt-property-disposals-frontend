@@ -54,11 +54,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftSingleDisposalReturn, Source}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.IncompleteNonCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, UploadSupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -83,7 +87,7 @@ class TaskListControllerSpec
 
   "TaskListController" when {
 
-    "handling requests to display the task list page" must {
+    "handling requests to display the single disposal task list page" must {
 
       def performAction(): Future[Result] = controller.taskList()(FakeRequest())
 
@@ -152,7 +156,7 @@ class TaskListControllerSpec
         )
       }
 
-      "display the page with the proper triage section status" when {
+      "display the page with the proper single disposal triage section status" when {
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
           val incompleteTriage =
@@ -363,7 +367,7 @@ class TaskListControllerSpec
               reliefDetailsAnswers      = None,
               exemptionAndLossesAnswers = None
             ),
-            TaskListStatus.CannotStart
+            TaskListStatus.ToDo
           )
         }
 
@@ -404,7 +408,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
-              propertyAddress           = Some(sample[UkAddress]),
+              propertyAddress           = None,
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = None,
@@ -500,7 +504,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
-              propertyAddress           = Some(sample[UkAddress]),
+              propertyAddress           = None,
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
@@ -584,7 +588,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
-              propertyAddress            = Some(sample[UkAddress]),
+              propertyAddress            = None,
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
@@ -599,7 +603,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
-              propertyAddress            = Some(sample[UkAddress]),
+              propertyAddress            = None,
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
@@ -709,5 +713,242 @@ class TaskListControllerSpec
 
       }
     }
+
+    "handling requests to display the multiple disposal task list page" must {
+
+      def performAction(): Future[Result] = controller.taskList()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: FillingOutReturn => true
+          case _                   => false
+        }
+      )
+
+      def testStateOfSection(draftReturn: DraftMultipleDisposalsReturn)(
+        sectionLinkId: String,
+        sectionLinkText: String,
+        sectionLinkHref: Call,
+        sectionsStatus: TaskListStatus,
+        extraChecks: Document => Unit = _ => ()
+      ): Unit = {
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("service.title"), { doc =>
+            sectionsStatus match {
+              case TaskListStatus.CannotStart =>
+                doc.select(s"li#$sectionLinkId > span").text shouldBe sectionLinkText
+
+              case _ =>
+                doc.select(s"li#$sectionLinkId > a").text         shouldBe sectionLinkText
+                doc.select(s"li#$sectionLinkId > a").attr("href") shouldBe sectionLinkHref.url
+            }
+
+            doc.select(s"li#$sectionLinkId > strong").text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+            extraChecks(doc)
+          }
+        )
+      }
+
+      def testSectionNonExistent(draftReturn: DraftMultipleDisposalsReturn)(
+        sectionLinkId: String
+      ): Unit = {
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("service.title"), { doc =>
+            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
+          }
+        )
+      }
+
+      "display the page with the proper multiple disposal triage section status" when {
+
+        "the session data indicates that they are filling in a return and the triage section is incomplete" in {
+          val incompleteTriage = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers]
+          )
+
+          testStateOfSection(
+            incompleteTriage
+          )(
+            "canTheyUseOurService",
+            messageFromMessageKey("task-list.triage.link"),
+            triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the triage section is complete" in {
+          val completeTraige = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+          )
+
+          testStateOfSection(
+            completeTraige
+          )(
+            "canTheyUseOurService",
+            messageFromMessageKey("task-list.triage.link"),
+            triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+        }
+
+      }
+
+      "display the page with the enter details of one property section status" when {
+
+        "the session data indicates that they are filling in a return and the enter details of one property section is incomplete" in {
+          val incompletePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+          )
+
+          testStateOfSection(
+            incompletePropertyDetails
+          )(
+            "examplePropertyDetails",
+            messageFromMessageKey("task-list.enter-example-property-address.link"),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the enter details of one property section is complete" in {
+          val completePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+          )
+
+          testStateOfSection(
+            completePropertyDetails
+          )(
+            "examplePropertyDetails",
+            messageFromMessageKey("task-list.enter-example-property-address.link"),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the enter losses and exemptions section status" when {
+
+        "the session data indicates that they are filling in a return and the enter losses and exemptions section is incomplete" in {
+          val incompleteExemptionAndLossesAnswers = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+            exemptionAndLossesAnswers     = Some(sample[IncompleteExemptionAndLossesAnswers])
+          )
+
+          testStateOfSection(
+            incompleteExemptionAndLossesAnswers
+          )(
+            "exemptionsAndLosses",
+            messageFromMessageKey("task-list.exemptions-and-losses.link"),
+            exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the enter losses and exemptions section is complete" in {
+          val completeExemptionAndLossesAnswers = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+            exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers])
+          )
+
+          testStateOfSection(
+            completeExemptionAndLossesAnswers
+          )(
+            "exemptionsAndLosses",
+            messageFromMessageKey("task-list.exemptions-and-losses.link"),
+            exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the enter capital gains tax liability so far this tax year section status" when {
+
+        "the session data indicates that they are filling in a return and" +
+          " the enter capital gains tax liability so far this tax year section is incomplete" in {
+          val incompleteNonCalculatedYTDAnswers = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+            exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
+            yearToDateLiabilityAnswers    = Some(sample[NonCalculatedYTDAnswers])
+          )
+
+          testStateOfSection(
+            incompleteNonCalculatedYTDAnswers
+          )(
+            "enterCgtLiability",
+            messageFromMessageKey("task-list.enter-cgt-liability.link"),
+            yeartodatelliability.routes.YearToDateLiabilityController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the check and send return, pay any tax due section status" when {
+
+        "the session data indicates that they are filling in a return and" +
+          " the check and send return, pay any tax due section is incomplete" in {
+          val checkAllAnswersAndSubmitAnswers = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+            exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
+            yearToDateLiabilityAnswers    = Some(sample[CalculatedYTDAnswers]),
+            uploadSupportingDocuments     = Some(sample[UploadSupportingDocuments])
+          )
+
+          testStateOfSection(
+            checkAllAnswersAndSubmitAnswers
+          )(
+            "checkAndSendReturn",
+            messageFromMessageKey("task-list.check-and-send-return.link"),
+            routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
+            TaskListStatus.ToDo
+          )
+
+        }
+
+      }
+
+    }
+
   }
 }
