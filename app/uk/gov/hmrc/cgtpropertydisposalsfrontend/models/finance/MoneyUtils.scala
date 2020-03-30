@@ -41,15 +41,22 @@ object MoneyUtils {
   def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String =
     formatAmountOfMoneyWithPoundSign(d).replaceAllLiterally("£", "")
 
-  def validateAmountOfMoney(key: String, isTooSmall: BigDecimal => Boolean, isTooLarge: BigDecimal => Boolean)(
+  def validateAmountOfMoney(
+    key: String,
+    isTooSmall: BigDecimal => Boolean,
+    isTooLarge: BigDecimal => Boolean,
+    tooSmallArgs: List[String] = Nil,
+    tooLargeArgs: List[String] = Nil
+  )(
     s: String
   ): Either[FormError, BigDecimal] =
     Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
       .leftMap(_ => FormError(key, "error.invalid"))
       .flatMap { d =>
-        if (isTooSmall(d)) Left(FormError(key, "error.tooSmall"))
-        else if (isTooLarge(d)) Left(FormError(key, "error.tooLarge"))
-        else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
+        if (isTooSmall(d)) Left(FormError(key, "error.tooSmall", tooSmallArgs))
+        else if (isTooLarge(d)) {
+          Left(FormError(key, "error.tooLarge", tooLargeArgs))
+        } else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
         else Right(d)
       }
 
@@ -65,12 +72,16 @@ object MoneyUtils {
 
   def amountInPoundsFormatter(
     isTooSmall: BigDecimal => Boolean,
-    isTooLarge: BigDecimal => Boolean
+    isTooLarge: BigDecimal => Boolean,
+    tooSmallArgs: List[String] = Nil,
+    tooLargeArgs: List[String] = Nil
   ): Formatter[BigDecimal] =
     new Formatter[BigDecimal] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BigDecimal] = {
         val result =
-          FormUtils.readValue(key, data, identity).flatMap(validateAmountOfMoney(key, isTooSmall, isTooLarge)(_))
+          FormUtils
+            .readValue(key, data, identity)
+            .flatMap(validateAmountOfMoney(key, isTooSmall, isTooLarge, tooSmallArgs, tooLargeArgs)(_))
         result.leftMap(Seq(_))
       }
 

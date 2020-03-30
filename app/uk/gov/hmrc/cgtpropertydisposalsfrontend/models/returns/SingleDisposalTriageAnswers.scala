@@ -20,13 +20,17 @@ import java.time.LocalDate
 
 import cats.Eq
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
 sealed trait SingleDisposalTriageAnswers extends Product with Serializable
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object SingleDisposalTriageAnswers {
 
+  @Lenses
   final case class IncompleteSingleDisposalTriageAnswers(
     individualUserType: Option[IndividualUserType],
     hasConfirmedSingleDisposal: Boolean,
@@ -55,6 +59,8 @@ object SingleDisposalTriageAnswers {
         Some(c.completionDate),
         None
       )
+
+    implicit val format: OFormat[IncompleteSingleDisposalTriageAnswers] = Json.format
   }
 
   final case class CompleteSingleDisposalTriageAnswers(
@@ -75,6 +81,13 @@ object SingleDisposalTriageAnswers {
       case incomplete: IncompleteSingleDisposalTriageAnswers => ifIncomplete(incomplete)
       case complete: CompleteSingleDisposalTriageAnswers     => ifComplete(complete)
     }
+
+    def unset[A](
+      fieldLens: IncompleteSingleDisposalTriageAnswers.type => Lens[IncompleteSingleDisposalTriageAnswers, Option[A]]
+    ): IncompleteSingleDisposalTriageAnswers =
+      fieldLens(IncompleteSingleDisposalTriageAnswers).set(None)(
+        fold(identity, IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers)
+      )
 
   }
 

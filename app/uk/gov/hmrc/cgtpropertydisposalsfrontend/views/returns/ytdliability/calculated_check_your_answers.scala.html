@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,7 +29,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary
 )
 
-@(answers: CompleteCalculatedYTDAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteCalculatedYTDAnswers, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("ytdLiability.cya.title")}
@@ -37,7 +38,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliabilit
 
  @pageHeading(title, Some(messages("ytdLiability.caption")))
 
- @summary(answers)
+ @summary(answers, disposalDate)
 
  @formWrapper(routes.YearToDateLiabilityController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))

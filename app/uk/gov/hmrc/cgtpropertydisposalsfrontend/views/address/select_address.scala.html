@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -33,15 +34,21 @@
  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-
-@(addresses: List[Address], form: Form[Address], backLink: Call, submit: Call, enterUkAddress: Call, addressJourneyType: AddressJourneyType[_])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(addresses: List[Address], form: Form[Address], backLink: Call, submit: Call, enterUkAddress: Call, addressJourneyType: AddressJourneyType[_],
+        isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"address-select"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent." else if (isATrust) ".trust." else ""}
+@journeyErrorKey = @{ addressJourneyType match {
+ case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
+ case _ => ""
+}}
 @title = @{ addressJourneyType match {
  case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
   f.journey.draftReturn.fold(
-   _ => messages("address-select.returns.multipleDisposals.title"),
-   _ => messages("address-select.returns.singleDisposal.title")
+   _ => messages(s"$key.returns.multipleDisposals.title"),
+   _ => messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
   )
  case _ => messages("address-select.title")
 }}
@@ -54,7 +61,7 @@
  @backLinkComponent(backLink)
 
  @if(hasErrors) {
-  @errorSummary(form)
+  @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
  }
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
@@ -64,7 +71,7 @@
    selected = form.value.map(addresses.indexOf(_)),
    label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
    labelAsHeading = true,
-   errorKey = form.error(key).map(e => e.message),
+   errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${userKey.stripPrefix(".")}${e.message}"),
    hasErrors = hasErrors
   )
 

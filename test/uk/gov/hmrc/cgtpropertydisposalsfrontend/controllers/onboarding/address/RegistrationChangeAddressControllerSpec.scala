@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 
 import scala.concurrent.Future
@@ -89,7 +89,8 @@ class RegistrationChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
 
     }
 
@@ -135,7 +136,8 @@ class RegistrationChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(performAction)
+      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Agent, performAction)
 
     }
 
@@ -161,6 +163,13 @@ class RegistrationChangeAddressControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like displaySelectAddress(
+        UserType.Individual,
+        performAction,
+        controllers.onboarding.routes.RegistrationController.checkYourAnswers()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Agent,
         performAction,
         controllers.onboarding.routes.RegistrationController.checkYourAnswers()
       )

@@ -60,7 +60,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     with ReturnsServiceSupport {
 
   val incompleteAnswers =
-    IncompleteExamplePropertyDetailsAnswers.empty.copy(address = Some(ukAddress(1)))
+    IncompleteExamplePropertyDetailsAnswers.empty.copy(
+      address      = Some(ukAddress(1)),
+      disposalDate = Some(sample[DisposalDate])
+    )
 
   val draftReturn: DraftMultipleDisposalsReturn =
     sample[DraftMultipleDisposalsReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
@@ -82,8 +85,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
   override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
     case a: UkAddress =>
-      journey.copy(draftReturn =
-        draftReturn.copy(examplePropertyDetailsAnswers = Some(incompleteAnswers.copy(address = Some(a))))
+      journey.copy(draftReturn = draftReturn.copy(examplePropertyDetailsAnswers = Some(
+        incompleteAnswers.copy(address = Some(a), disposalDate = None)
+      )
+      )
       )
     case _: NonUkAddress => journey
   }
@@ -91,8 +96,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   override val mockUpdateAddress: Option[(FillingOutReturn, Address, Either[Error, Unit]) => Unit] =
     Some {
       case (newDetails: FillingOutReturn, a: UkAddress, r: Either[Error, Unit]) =>
+        val newAnswers = incompleteAnswers.copy(address = Some(a), disposalDate = None)
         mockStoreDraftReturn(
-          draftReturn.copy(examplePropertyDetailsAnswers = Some(incompleteAnswers.copy(address = Some(a)))),
+          draftReturn.copy(examplePropertyDetailsAnswers = Some(newAnswers)),
           newDetails.subscribedDetails.cgtReference,
           newDetails.agentReferenceNumber
         )(r)
@@ -792,7 +798,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         val newAddress = UkAddress("1", None, None, None, Postcode("ZZ00ZZ"))
 
         val newDraftReturn = draftReturn.copy(
-          examplePropertyDetailsAnswers = Some(answers.copy(address = newAddress))
+          examplePropertyDetailsAnswers = Some(
+            IncompleteExamplePropertyDetailsAnswers(
+              Some(newAddress),
+              None,
+              Some(answers.disposalPrice),
+              Some(answers.acquisitionPrice)
+            )
+          )
         )
         val newJourney = journey.copy(draftReturn = newDraftReturn)
 
@@ -844,7 +857,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
 
     }
 
@@ -868,7 +881,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(performAction)
+      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Agent, performAction)
+      behave like enterPostcodePage(UserType.Organisation, performAction)
 
     }
 
@@ -891,6 +906,19 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like displaySelectAddress(
+        UserType.Individual,
+        performAction,
+        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Agent,
+        performAction,
+        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+      )
+
+      behave like displaySelectAddress(
+        UserType.Organisation,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )
@@ -1797,7 +1825,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               answers.copy(
                 disposalPrice = AmountInPence.fromPounds(10)
               )
-            )
+            ),
+            yearToDateLiabilityAnswers = None
           )
 
           test(
@@ -1825,7 +1854,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               answers.copy(
                 disposalPrice = Some(AmountInPence.fromPounds(10))
               )
-            )
+            ),
+            yearToDateLiabilityAnswers = None
           )
 
           test(
@@ -2162,7 +2192,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               answers.copy(
                 acquisitionPrice = AmountInPence.fromPounds(100)
               )
-            )
+            ),
+            yearToDateLiabilityAnswers = None
           )
 
           test(
@@ -2189,7 +2220,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               answers.copy(
                 acquisitionPrice = Some(AmountInPence.fromPounds(100))
               )
-            )
+            ),
+            yearToDateLiabilityAnswers = None
           )
 
           test(

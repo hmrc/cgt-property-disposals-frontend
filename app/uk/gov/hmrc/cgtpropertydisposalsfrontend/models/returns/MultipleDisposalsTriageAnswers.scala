@@ -20,14 +20,18 @@ import cats.syntax.eq._
 import cats.instances.list._
 
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
 sealed trait MultipleDisposalsTriageAnswers
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object MultipleDisposalsTriageAnswers {
 
+  @Lenses
   final case class IncompleteMultipleDisposalsTriageAnswers(
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Option[Int],
@@ -75,6 +79,15 @@ object MultipleDisposalsTriageAnswers {
       case i: IncompleteMultipleDisposalsTriageAnswers => ifIncomplete(i)
       case c: CompleteMultipleDisposalsTriageAnswers   => ifComplete(c)
     }
+
+    def unset[A](
+      fieldLens: IncompleteMultipleDisposalsTriageAnswers.type => Lens[IncompleteMultipleDisposalsTriageAnswers, Option[
+        A
+      ]]
+    ): IncompleteMultipleDisposalsTriageAnswers =
+      fieldLens(IncompleteMultipleDisposalsTriageAnswers).set(None)(
+        fold(identity, IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers)
+      )
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

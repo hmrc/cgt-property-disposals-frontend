@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupRequest
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -36,15 +37,19 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         backLink: Call,
         submit: Call,
         enterUkAddress: Call,
-        addressJourneyType: AddressJourneyType[_])(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+        addressJourneyType: AddressJourneyType[_],
+        isATrust: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@returnsKey = @{"enterPostcode.returns"}
 @postcodeFilterKey = @{"filter"}
 @title = @{ addressJourneyType match {
  case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
   f.journey.draftReturn.fold(
-    _ => messages("enterPostcode.returns.multipleDisposals.title"),
-   _ => messages("enterPostcode.returns.singleDisposal.title")
+    _ => messages(s"$returnsKey.multipleDisposals.title"),
+    _ => messages(s"$returnsKey$userKey.singleDisposal.title")
   )
  case _ => messages("enterPostcode.title")
 }}
