@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -30,11 +31,13 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[AcquisitionDate], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[AcquisitionDate], backLink: Call, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"acquisitionDate"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @hasErrors = @{form.hasErrors}
-@title = @{messages("acquisitionDate.title")}
+@title = @{messages(s"$key$userKey.title")}
 @errorKey = @{List("acquisitionDate-day", "acquisitionDate-month", "acquisitionDate-year", "acquisitionDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
@@ -42,7 +45,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, errorKey.map(e => s"${e.key}$userKey"))
     }
 
     @formWrapper(routes.AcquisitionDetailsController.acquisitionDateSubmit(), 'novalidate -> "novalidate") {
@@ -52,9 +55,9 @@
             dayValue = form.data.get("acquisitionDate-day"),
             monthValue = form.data.get("acquisitionDate-month"),
             yearValue = form.data.get("acquisitionDate-year"),
-            helpText = Some(Html(messages("acquisitionDate.helpText"))),
+            helpText = Some(Html(messages(s"$key$userKey.helpText"))),
             labelAsHeading = true,
-            errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
+            errorKey = errorKey.map(e => s"${e.key}$userKey.${e.message}"),
             hasErrors = hasErrors
         )
         @submitButton(messages("button.saveAndContinue"))
