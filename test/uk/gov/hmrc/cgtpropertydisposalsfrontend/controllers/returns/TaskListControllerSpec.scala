@@ -365,7 +365,8 @@ class TaskListControllerSpec
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = None,
-              exemptionAndLossesAnswers = None
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = Some(sample[AmountInPence])
             ),
             TaskListStatus.ToDo
           )
@@ -380,7 +381,8 @@ class TaskListControllerSpec
                 disposalDetailsAnswers    = disposalDetailsState,
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
                 reliefDetailsAnswers      = None,
-                exemptionAndLossesAnswers = None
+                exemptionAndLossesAnswers = None,
+                initialGainOrLoss         = None
               ),
               TaskListStatus.CannotStart
             )
@@ -396,7 +398,8 @@ class TaskListControllerSpec
                 disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = acquisitionDetailsAnswers,
                 reliefDetailsAnswers      = None,
-                exemptionAndLossesAnswers = None
+                exemptionAndLossesAnswers = None,
+                initialGainOrLoss         = None
               ),
               TaskListStatus.CannotStart
             )
@@ -408,11 +411,12 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
-              propertyAddress           = None,
+              propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = None,
-              exemptionAndLossesAnswers = None
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = Some(sample[AmountInPence])
             ),
             TaskListStatus.ToDo
           )
@@ -427,7 +431,8 @@ class TaskListControllerSpec
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = Some(sample[IncompleteReliefDetailsAnswers]),
-              exemptionAndLossesAnswers = None
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = Some(sample[AmountInPence])
             ),
             TaskListStatus.InProgress
           )
@@ -441,7 +446,8 @@ class TaskListControllerSpec
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
-              exemptionAndLossesAnswers = None
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = Some(sample[AmountInPence])
             ),
             TaskListStatus.Complete
           )
