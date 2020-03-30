@@ -34,7 +34,7 @@ import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 
 import scala.concurrent.Future
 
-class ConfirmDraftReturnControllerSpec
+class ReturnSavedControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
@@ -50,12 +50,12 @@ class ConfirmDraftReturnControllerSpec
     bind[ReturnsService].toInstance(mockReturnsService)
   )
 
-  lazy val controller                  = instanceOf[ConfirmDraftReturnController]
+  lazy val controller                  = instanceOf[ReturnSavedController]
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   private def performAction(): Future[Result] = controller.confirmDraftReturn()(FakeRequest())
 
-  "ConfirmDraftReturnController" when {
+  "ReturnSavedController" when {
 
     "handling requests with empty session data it should redirect to start" in {
       inSequence {

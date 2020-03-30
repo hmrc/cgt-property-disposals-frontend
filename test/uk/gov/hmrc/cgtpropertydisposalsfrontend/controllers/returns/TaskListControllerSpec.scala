@@ -721,7 +721,7 @@ class TaskListControllerSpec
           doc.select("h1").text shouldBe messageFromMessageKey("service.title")
           doc
             .select("a#saveAndComeBackLater")
-            .attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes.ConfirmDraftReturnController
+            .attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes.ReturnSavedController
             .confirmDraftReturn()
             .url
         }
