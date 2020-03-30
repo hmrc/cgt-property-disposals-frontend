@@ -64,7 +64,7 @@ class ReturnSavedController @Inject() (
             )
             errorHandler.errorResult()
           },
-          _ => Ok(returnSavedPage(draftReturnWithLastUpdated))
+          _ => Ok(returnSavedPage(draftReturnWithLastUpdated, subscribedDetails.isATrust))
         )
       }
       case _ =>

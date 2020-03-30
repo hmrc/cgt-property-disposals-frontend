@@ -284,7 +284,7 @@ class InitialGainOrLossControllerSpec
       "redirect to check your answers" when {
 
         "initial gain or loss has been entered correctly" in {
-          forAll(Gen.choose(0L, 100L).map(AmountInPence(_))) { amountInPence: AmountInPence =>
+          forAll(Gen.choose(10L, 100L).map(AmountInPence(_))) { amountInPence: AmountInPence =>
             val (session, journey, draftReturn) =
               sessionWithState(Some(AmountInPence(amountInPence.value - 1L)))
             val newDraftReturn = updateDraftReturn(draftReturn, amountInPence)

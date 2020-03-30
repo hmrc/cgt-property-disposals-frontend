@@ -21,16 +21,20 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, accounts, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
 import scala.concurrent.Future
 
@@ -53,106 +57,144 @@ class ReturnSavedControllerSpec
   lazy val controller                  = instanceOf[ReturnSavedController]
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  private def performAction(): Future[Result] = controller.confirmDraftReturn()(FakeRequest())
+  private def performAction(): Future[Result] = controller.draftReturnSaved()(FakeRequest())
 
   "ReturnSavedController" when {
 
-    "handling requests with empty session data it should redirect to start" in {
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          SessionData.empty
-        )
-      }
+    "handling requests to display the draft return saved page" must {
 
-      checkIsRedirect(performAction(), "/capital-gains-tax-uk-property/start")
-    }
+      "redirect to the start endpoint" when {
 
-    "handling requests with session with return should save the data and show proper text" in {
+        "there isn't any session data" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty
+            )
+          }
 
-      val fillingOutReturn = sample[FillingOutReturn]
-      val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
-        _.copy(lastUpdatedDate = LocalDateUtils.today()),
-        _.copy(lastUpdatedDate = LocalDateUtils.today())
-      )
-
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          SessionData.empty.copy(
-            journeyStatus = Some(fillingOutReturn)
-          )
-        )
-        mockStoreDraftReturn(
-          updatedDraftReturn,
-          fillingOutReturn.subscribedDetails.cgtReference,
-          fillingOutReturn.agentReferenceNumber
-        )(Right(()))
-      }
-
-      val result: Future[Result] = performAction()
-      status(result) shouldBe OK
-      val formattedDate: String = LocalDateUtils.govDisplayFormat(LocalDateUtils.today().plusDays(29))
-      contentAsString(result) should include(messageFromMessageKey("confirmDraftReturn.warning", formattedDate))
-    }
-
-    "handling requests with session with return proper error when StoreDraftReturn service fails" in {
-
-      val fillingOutReturn = sample[FillingOutReturn]
-      val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
-        _.copy(lastUpdatedDate = LocalDateUtils.today()),
-        _.copy(lastUpdatedDate = LocalDateUtils.today())
-      )
-
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          SessionData.empty.copy(
-            journeyStatus = Some(fillingOutReturn)
-          )
-        )
-        mockStoreDraftReturn(
-          updatedDraftReturn,
-          fillingOutReturn.subscribedDetails.cgtReference,
-          fillingOutReturn.agentReferenceNumber
-        )(
-          Left(Error("Some Error"))
-        )
-      }
-
-      val result: Future[Result] = performAction()
-      status(result) shouldBe INTERNAL_SERVER_ERROR
-    }
-
-    "handling requests with session with return should save the data and show the page with proper back and accounts home button and right title" in {
-
-      val fillingOutReturn = sample[FillingOutReturn]
-      val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
-        _.copy(lastUpdatedDate = LocalDateUtils.today()),
-        _.copy(lastUpdatedDate = LocalDateUtils.today())
-      )
-
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          SessionData.empty.copy(
-            journeyStatus = Some(fillingOutReturn)
-          )
-        )
-        mockStoreDraftReturn(
-          updatedDraftReturn,
-          fillingOutReturn.subscribedDetails.cgtReference,
-          fillingOutReturn.agentReferenceNumber
-        )(Right(()))
-      }
-
-      checkPageIsDisplayed(
-        performAction(),
-        messageFromMessageKey("confirmDraftReturn.title"), { doc =>
-          doc.select("#back").attr("href")   shouldBe returns.routes.TaskListController.taskList().url
-          doc.select(".button").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
+          checkIsRedirect(performAction(), controllers.routes.StartController.start())
         }
-      )
+
+      }
+
+      "display the page" when {
+
+        def test(
+          session: SessionData,
+          journey: FillingOutReturn,
+          updatedDraftReturn: DraftReturn,
+          expectedWarningMessageKey: String
+        ) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+          }
+
+          val formattedDate: String = LocalDateUtils.govDisplayFormat(LocalDateUtils.today().plusDays(29))
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("draftReturnSaved.title"), { doc =>
+              doc.select("#back").attr("href")   shouldBe returns.routes.TaskListController.taskList().url
+              doc.select(".button").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
+              doc.select("#content > article > div > strong").text() shouldBe messageFromMessageKey(
+                expectedWarningMessageKey,
+                formattedDate
+              )
+
+            }
+          )
+        }
+
+        def fillingOutReturn(name: Either[TrustName, IndividualName]) = sample[FillingOutReturn].copy(
+          subscribedDetails = sample[SubscribedDetails].copy(name = name)
+        )
+
+        "the user is an individual" in {
+          val journey = fillingOutReturn(Right(sample[IndividualName]))
+
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(journey),
+              userType      = Some(UserType.Individual)
+            ),
+            journey,
+            journey.draftReturn.fold(
+              _.copy(lastUpdatedDate = LocalDateUtils.today()),
+              _.copy(lastUpdatedDate = LocalDateUtils.today())
+            ),
+            "draftReturnSaved.warning"
+          )
+        }
+
+        "the user is a trust" in {
+          val journey = fillingOutReturn(Left(sample[TrustName]))
+
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(journey),
+              userType      = Some(UserType.Organisation)
+            ),
+            journey,
+            journey.draftReturn.fold(
+              _.copy(lastUpdatedDate = LocalDateUtils.today()),
+              _.copy(lastUpdatedDate = LocalDateUtils.today())
+            ),
+            "draftReturnSaved.trust.warning"
+          )
+        }
+
+        "the user is an agent" in {
+          val journey =
+            fillingOutReturn(Left(sample[TrustName])).copy(agentReferenceNumber = Some(sample[AgentReferenceNumber]))
+
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(journey),
+              userType      = Some(UserType.Agent)
+            ),
+            journey,
+            journey.draftReturn.fold(
+              _.copy(lastUpdatedDate = LocalDateUtils.today()),
+              _.copy(lastUpdatedDate = LocalDateUtils.today())
+            ),
+            "draftReturnSaved.agent.warning"
+          )
+        }
+
+      }
+
+      "show an error page" when {
+
+        "there is an error updating the draft return" in {
+          val journey = sample[FillingOutReturn]
+          val updatedDraftReturn = journey.draftReturn.fold(
+            _.copy(lastUpdatedDate = LocalDateUtils.today()),
+            _.copy(lastUpdatedDate = LocalDateUtils.today())
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(journey)))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Left(Error("Some Error"))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
 
     }
 

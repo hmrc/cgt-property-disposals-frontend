@@ -722,7 +722,7 @@ class TaskListControllerSpec
           doc
             .select("a#saveAndComeBackLater")
             .attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes.ReturnSavedController
-            .confirmDraftReturn()
+            .draftReturnSaved()
             .url
         }
 
