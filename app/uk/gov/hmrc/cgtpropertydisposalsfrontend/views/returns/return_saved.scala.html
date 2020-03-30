@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -30,24 +31,25 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftReturn, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@title = @{messages("confirmDraftReturn.title")}
-
+@title = @{messages("draftReturnSaved.title")}
+@isAnAgent = @{ request.userType.contains(UserType.Agent)}
+@warningMessageKey = @{ s"draftReturnSaved${if(isAnAgent) ".agent" else if (isATrust) ".trust" else ""}.warning" }
 @mainTemplate(title = title, userType = request.userType) {
 
   @backLinkComponent(returns.routes.TaskListController.taskList())
 
   @pageHeading(title)
 
-  @warning(messages("confirmDraftReturn.warning",  LocalDateUtils.govDisplayFormat(draftReturn.lastUpdatedDate.plusDays(29))))
+  @warning(messages(warningMessageKey, LocalDateUtils.govDisplayFormat(draftReturn.lastUpdatedDate.plusDays(29))))
 
   <p>
-    @messages("confirmDraftReturn.p1")
+    @messages("draftReturnSaved.p1")
   </p>
 
   <p>
-    @messages("confirmDraftReturn.p2")
+    @messages("draftReturnSaved.p2")
   </p>
 
   <a class="button" role="button" href="@{accounts.homepage.routes.HomePageController.homepage().url}">
