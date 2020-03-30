@@ -365,7 +365,8 @@ class TaskListControllerSpec
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = None,
-              exemptionAndLossesAnswers = None
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = Some(sample[AmountInPence])
             ),
             TaskListStatus.ToDo
           )
@@ -380,14 +381,15 @@ class TaskListControllerSpec
                 disposalDetailsAnswers    = disposalDetailsState,
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
                 reliefDetailsAnswers      = None,
-                exemptionAndLossesAnswers = None
+                exemptionAndLossesAnswers = None,
+                initialGainOrLoss         = None
               ),
               TaskListStatus.CannotStart
             )
           }
         }
 
-        "the session data indicates that the acuquisition details section is not yet complete" in {
+        "the session data indicates that the acquisition details section is not yet complete" in {
           List(None, Some(sample[IncompleteAcquisitionDetailsAnswers])).foreach { acquisitionDetailsAnswers =>
             test(
               sample[DraftSingleDisposalReturn].copy(
@@ -396,7 +398,8 @@ class TaskListControllerSpec
                 disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = acquisitionDetailsAnswers,
                 reliefDetailsAnswers      = None,
-                exemptionAndLossesAnswers = None
+                exemptionAndLossesAnswers = None,
+                initialGainOrLoss         = None
               ),
               TaskListStatus.CannotStart
             )
@@ -408,11 +411,12 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
-              propertyAddress           = None,
+              propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = None,
-              exemptionAndLossesAnswers = None
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = Some(sample[AmountInPence])
             ),
             TaskListStatus.ToDo
           )
@@ -427,7 +431,8 @@ class TaskListControllerSpec
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = Some(sample[IncompleteReliefDetailsAnswers]),
-              exemptionAndLossesAnswers = None
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = Some(sample[AmountInPence])
             ),
             TaskListStatus.InProgress
           )
@@ -441,11 +446,39 @@ class TaskListControllerSpec
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
-              exemptionAndLossesAnswers = None
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = Some(sample[AmountInPence])
             ),
             TaskListStatus.Complete
           )
         }
+
+        "the initial gain or loss section is not completed, " +
+          " the property address, disposal details & acquisition details sections have been completed" in {
+          val (countryCode, countryName) = "HK" -> "Hong Kong"
+          val country                    = Country(countryCode, Some(countryName))
+
+          test(
+            sample[DraftSingleDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                countryOfResidence = country,
+                assetType          = AssetType.Residential
+              ),
+              propertyAddress        = None,
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = AcquisitionDate(LocalDate.of(1200, 1, 1))
+                )
+              ),
+              reliefDetailsAnswers      = None,
+              exemptionAndLossesAnswers = None,
+              initialGainOrLoss         = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
       }
 
       "display the page with the proper exemptions and losses section status" when {
