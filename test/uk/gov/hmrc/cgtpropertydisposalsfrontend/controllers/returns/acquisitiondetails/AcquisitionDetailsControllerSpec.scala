@@ -42,6 +42,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, _}
@@ -71,6 +74,28 @@ class AcquisitionDetailsControllerSpec
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
+  def userMessageKey(userType: UserType): String = userType match {
+    case UserType.Individual   => ""
+    case UserType.Organisation => ".trust"
+    case UserType.Agent        => ".agent"
+  }
+
+  def userTypeClue(userType: UserType): String = userType match {
+    case UserType.Individual   => "an individual"
+    case UserType.Organisation => "a trust"
+    case UserType.Agent        => "an agent"
+  }
+
+  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
+    case UserType.Agent => Some(sample[AgentReferenceNumber])
+    case _              => None
+  }
+
+  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
+    case UserType.Organisation => Left(sample[TrustName])
+    case _                     => Right(sample[IndividualName])
+  }
+
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
       performAction, {
@@ -83,14 +108,16 @@ class AcquisitionDetailsControllerSpec
     answers: AcquisitionDetailsAnswers,
     assetType: AssetType,
     wasUkResident: Boolean,
+    userType: UserType,
     disposalDate: DisposalDate = sample[DisposalDate]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
-    sessionWithState(Some(answers), Some(assetType), Some(wasUkResident), Some(disposalDate))
+    sessionWithState(Some(answers), Some(assetType), Some(wasUkResident), userType, Some(disposalDate))
 
   def sessionWithState(
     answers: Option[AcquisitionDetailsAnswers],
     assetType: Option[AssetType],
     wasUkResident: Option[Boolean],
+    userType: UserType,
     disposalDate: Option[DisposalDate]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn =
@@ -103,10 +130,19 @@ class AcquisitionDetailsControllerSpec
         acquisitionDetailsAnswers = answers
       )
 
-    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    val journey = sample[FillingOutReturn].copy(
+      draftReturn          = draftReturn,
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      subscribedDetails = sample[SubscribedDetails].copy(
+        name = setNameForUserType(userType)
+      )
+    )
 
     (
-      SessionData.empty.copy(journeyStatus = Some(journey)),
+      SessionData.empty.copy(
+        userType      = Some(userType),
+        journeyStatus = Some(journey)
+      ),
       journey,
       draftReturn
     )
@@ -132,12 +168,14 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        "the user hsa not completed the acquisition details section of the return" in {
+        "an individual has not completed the acquisition details section of the return" in {
           List(Some(IncompleteAcquisitionDetailsAnswers.empty), None).foreach { answers =>
             withClue(s"For answers $answers: ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(sessionWithState(answers, None, None, Some(sample[DisposalDate]))._1)
+                mockGetSession(
+                  sessionWithState(answers, None, None, UserType.Individual, Some(sample[DisposalDate]))._1
+                )
               }
 
               checkPageIsDisplayed(
@@ -154,7 +192,53 @@ class AcquisitionDetailsControllerSpec
           }
         }
 
-        "the user hsa already completed the acquisition details section of the return" in {
+        "an agent has not completed the acquisition details section of the return" in {
+          List(Some(IncompleteAcquisitionDetailsAnswers.empty), None).foreach { answers =>
+            withClue(s"For answers $answers: ") {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(sessionWithState(answers, None, None, UserType.Agent, Some(sample[DisposalDate]))._1)
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("acquisitionMethod.agent.title"), { doc =>
+                  doc.select("#back").attr("href") shouldBe controllers.returns.routes.TaskListController.taskList().url
+                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                    .acquisitionMethodSubmit()
+                    .url
+                }
+              )
+
+            }
+          }
+        }
+
+        "a trust has not completed the acquisition details section of the return" in {
+          List(Some(IncompleteAcquisitionDetailsAnswers.empty), None).foreach { answers =>
+            withClue(s"For answers $answers: ") {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithState(answers, None, None, UserType.Organisation, Some(sample[DisposalDate]))._1
+                )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("acquisitionMethod.agent.title"), { doc =>
+                  doc.select("#back").attr("href") shouldBe controllers.returns.routes.TaskListController.taskList().url
+                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                    .acquisitionMethodSubmit()
+                    .url
+                }
+              )
+
+            }
+          }
+        }
+
+        "an individual has already completed the acquisition details section of the return" in {
           List(Some(IncompleteAcquisitionDetailsAnswers.empty), None).foreach { answers =>
             withClue(s"For answers $answers: ") {
               inSequence {
@@ -163,7 +247,9 @@ class AcquisitionDetailsControllerSpec
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers],
                     sample[AssetType],
-                    sample[Boolean]
+                    sample[Boolean],
+                    UserType.Individual,
+                    sample[DisposalDate]
                   )._1
                 )
               }
@@ -181,8 +267,65 @@ class AcquisitionDetailsControllerSpec
             }
           }
         }
-      }
 
+        "an agent has already completed the acquisition details section of the return" in {
+          List(Some(IncompleteAcquisitionDetailsAnswers.empty), None).foreach { answers =>
+            withClue(s"For answers $answers: ") {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithState(
+                    sample[CompleteAcquisitionDetailsAnswers],
+                    sample[AssetType],
+                    sample[Boolean],
+                    UserType.Agent
+                  )._1
+                )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("acquisitionMethod.agent.title"), { doc =>
+                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
+                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                    .acquisitionMethodSubmit()
+                    .url
+                }
+              )
+
+            }
+          }
+        }
+
+        "a trust has already completed the acquisition details section of the return" in {
+          List(Some(IncompleteAcquisitionDetailsAnswers.empty), None).foreach { answers =>
+            withClue(s"For answers $answers: ") {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithState(
+                    sample[CompleteAcquisitionDetailsAnswers],
+                    sample[AssetType],
+                    sample[Boolean],
+                    UserType.Organisation
+                  )._1
+                )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("acquisitionMethod.agent.title"), { doc =>
+                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
+                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                    .acquisitionMethodSubmit()
+                    .url
+                }
+              )
+
+            }
+          }
+        }
+      }
     }
 
     "handling submitted answers to the acquisition method page" must {
@@ -236,7 +379,7 @@ class AcquisitionDetailsControllerSpec
       "show an error page" when {
 
         val (method, methodValue)           = AcquisitionMethod.Bought -> 0
-        val (session, journey, draftReturn) = sessionWithState(None, None, None, None)
+        val (session, journey, draftReturn) = sessionWithState(None, None, None, UserType.Individual, None)
         val updatedDraftReturn = commonUpdateDraftReturn(
           draftReturn,
           IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
@@ -279,7 +422,7 @@ class AcquisitionDetailsControllerSpec
         "the acquisition details journey is incomplete and" when {
 
           def test(data: (String, String)*)(method: AcquisitionMethod): Unit = {
-            val (session, journey, draftReturn) = sessionWithState(None, None, None, None)
+            val (session, journey, draftReturn) = sessionWithState(None, None, None, UserType.Individual, None)
             val updatedDraftReturn = commonUpdateDraftReturn(
               draftReturn,
               IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
@@ -321,8 +464,9 @@ class AcquisitionDetailsControllerSpec
         "the acquisition details journey is complete and" when {
 
           def test(data: (String, String)*)(oldMethod: AcquisitionMethod, method: AcquisitionMethod): Unit = {
-            val answers                         = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = oldMethod)
-            val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+            val answers = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = oldMethod)
+            val (session, journey, draftReturn) =
+              sessionWithState(answers, sample[AssetType], sample[Boolean], UserType.Individual)
             val updatedAnswers = IncompleteAcquisitionDetailsAnswers(
               Some(method),
               Some(answers.acquisitionDate),
@@ -396,7 +540,7 @@ class AcquisitionDetailsControllerSpec
             case (data, answers) =>
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(sessionWithState(answers, sample[AssetType], sample[Boolean])._1)
+                mockGetSession(sessionWithState(answers, sample[AssetType], sample[Boolean], UserType.Individual)._1)
               }
 
               checkIsRedirect(performAction(data: _*), routes.AcquisitionDetailsController.checkYourAnswers())
@@ -423,6 +567,7 @@ class AcquisitionDetailsControllerSpec
                 Some(sample[CompleteAcquisitionDetailsAnswers]),
                 Some(sample[AssetType]),
                 Some(sample[Boolean]),
+                UserType.Individual,
                 None
               )._1
             )
@@ -442,7 +587,8 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = None),
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -463,7 +609,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionMethod = Some(AcquisitionMethod.Bought)
                 ),
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -483,7 +630,12 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithState(sample[CompleteAcquisitionDetailsAnswers], sample[AssetType], sample[Boolean])._1
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers],
+                sample[AssetType],
+                sample[Boolean],
+                UserType.Individual
+              )._1
             )
           }
 
@@ -528,6 +680,7 @@ class AcquisitionDetailsControllerSpec
                 Some(sample[CompleteAcquisitionDetailsAnswers]),
                 Some(sample[AssetType]),
                 Some(sample[Boolean]),
+                UserType.Individual,
                 None
               )._1
             )
@@ -547,6 +700,7 @@ class AcquisitionDetailsControllerSpec
               sample[CompleteAcquisitionDetailsAnswers],
               sample[AssetType],
               sample[Boolean],
+              UserType.Individual,
               disposalDate
             )._1
           )
@@ -582,7 +736,7 @@ class AcquisitionDetailsControllerSpec
           .copy(acquisitionDate = AcquisitionDate(acquisitionDate.value.plusDays(1L)))
         val wasUkResident = sample[Boolean]
         val (session, journey, draftReturn) =
-          sessionWithState(answers, sample[AssetType], wasUkResident, disposalDate)
+          sessionWithState(answers, sample[AssetType], wasUkResident, UserType.Individual, disposalDate)
 
         val newAnswers =
           IncompleteAcquisitionDetailsAnswers(
@@ -636,9 +790,10 @@ class AcquisitionDetailsControllerSpec
           oldAnswers: AcquisitionDetailsAnswers,
           newAnswers: AcquisitionDetailsAnswers
         ): Unit = {
-          val (session, journey, draftReturn) = sessionWithState(oldAnswers, assetType, wasUkResident, disposalDate)
-          val updatedDraftReturn              = commonUpdateDraftReturn(draftReturn, newAnswers)
-          val updatedSession                  = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+          val (session, journey, draftReturn) =
+            sessionWithState(oldAnswers, assetType, wasUkResident, UserType.Individual, disposalDate)
+          val updatedDraftReturn = commonUpdateDraftReturn(draftReturn, newAnswers)
+          val updatedSession     = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -726,7 +881,8 @@ class AcquisitionDetailsControllerSpec
                 sessionWithState(
                   answers,
                   sample[AssetType],
-                  sample[Boolean]
+                  sample[Boolean],
+                  UserType.Individual
                 )._1
               )
             }
@@ -760,7 +916,8 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 answers,
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -806,7 +963,8 @@ class AcquisitionDetailsControllerSpec
             val scenarioSession = sessionWithState(
               answers,
               sample[AssetType],
-              sample[Boolean]
+              sample[Boolean],
+              UserType.Individual
             )._1
 
             val contextKey = answers.acquisitionMethod match {
@@ -833,7 +991,8 @@ class AcquisitionDetailsControllerSpec
             val scenarioSession = sessionWithState(
               answers,
               sample[AssetType],
-              sample[Boolean]
+              sample[Boolean],
+              UserType.Individual
             )._1
 
             val contextKey = answers.acquisitionMethod match {
@@ -859,7 +1018,8 @@ class AcquisitionDetailsControllerSpec
         val price = 1.23d
         val answers = IncompleteAcquisitionDetailsAnswers.empty
           .copy(acquisitionMethod = Some(AcquisitionMethod.Bought), acquisitionDate = Some(sample[AcquisitionDate]))
-        val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, sample[AssetType], sample[Boolean], UserType.Individual)
         val updatedDraftReturn = commonUpdateDraftReturn(
           draftReturn,
           answers.copy(acquisitionPrice = Some(AmountInPence(123L)))
@@ -902,7 +1062,8 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was incomplete" in {
           val answers = IncompleteAcquisitionDetailsAnswers.empty
             .copy(acquisitionMethod = Some(sample[AcquisitionMethod]), acquisitionDate = Some(sample[AcquisitionDate]))
-          val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+          val (session, journey, draftReturn) =
+            sessionWithState(answers, sample[AssetType], sample[Boolean], UserType.Individual)
           val updatedDraftReturn = commonUpdateDraftReturn(
             draftReturn,
             answers.copy(acquisitionPrice = Some(AmountInPence(123400L)))
@@ -927,8 +1088,9 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the price submitted is valid and the journey was complete" in {
-          val answers                         = sample[CompleteAcquisitionDetailsAnswers]
-          val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+          val answers = sample[CompleteAcquisitionDetailsAnswers]
+          val (session, journey, draftReturn) =
+            sessionWithState(answers, sample[AssetType], sample[Boolean], UserType.Individual)
           val updatedDraftReturn =
             commonUpdateDraftReturn(
               draftReturn,
@@ -983,7 +1145,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
-                false
+                false,
+                UserType.Individual
               )._1
             )
           }
@@ -1006,7 +1169,8 @@ class AcquisitionDetailsControllerSpec
                 acquisitionMethod = None
               ),
               sample[AssetType],
-              true
+              true,
+              UserType.Individual
             )._1
           )
         }
@@ -1028,7 +1192,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionDate = AcquisitionDate(ukResidents.plusDays(1))
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1051,7 +1216,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
-                false
+                false,
+                UserType.Individual
               )._1
             )
           }
@@ -1070,7 +1236,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionMethod = Some(AcquisitionMethod.Bought)
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1099,7 +1266,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                false
+                false,
+                UserType.Individual
               )._1
             )
           }
@@ -1125,7 +1293,8 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1154,7 +1323,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(AmountInPence(1L))
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1200,7 +1370,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = None
                 ),
                 AssetType.NonResidential,
-                false
+                false,
+                UserType.Individual
               )._1
             )
           }
@@ -1222,7 +1393,8 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1257,7 +1429,8 @@ class AcquisitionDetailsControllerSpec
           acquisitionDate  = Some(AcquisitionDate(ukResidents.minusDays(2))),
           acquisitionPrice = Some(sample[AmountInPence])
         )
-        val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, AssetType.Residential, true, UserType.Individual)
         val updatedDraftReturn = commonUpdateDraftReturn(
           draftReturn,
           answers.copy(
@@ -1321,7 +1494,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionDate  = Some(acquisitionDate),
                   acquisitionPrice = Some(sample[AmountInPence])
                 )
-                val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+                val (session, journey, draftReturn) =
+                  sessionWithState(answers, AssetType.Residential, true, UserType.Individual)
                 val updatedDraftReturn = commonUpdateDraftReturn(
                   draftReturn,
                   answers.copy(
@@ -1359,7 +1533,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionDate         = acquisitionDate,
                   rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
                 )
-                val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+                val (session, journey, draftReturn) =
+                  sessionWithState(answers, AssetType.Residential, true, UserType.Individual)
                 val updatedDraftReturn = commonUpdateDraftReturn(
                   draftReturn,
                   answers.copy(
@@ -1416,7 +1591,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1441,7 +1617,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1466,7 +1643,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1495,7 +1673,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1521,7 +1700,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1547,7 +1727,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1574,7 +1755,8 @@ class AcquisitionDetailsControllerSpec
                   improvementCosts        = AmountInPence.zero
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
 
@@ -1601,7 +1783,8 @@ class AcquisitionDetailsControllerSpec
                   improvementCosts        = AmountInPence(2L)
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
 
@@ -1647,7 +1830,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1672,7 +1856,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -1723,7 +1908,8 @@ class AcquisitionDetailsControllerSpec
           acquisitionPrice        = Some(sample[AmountInPence]),
           rebasedAcquisitionPrice = Some(sample[AmountInPence])
         )
-        val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, AssetType.Residential, true, UserType.Individual)
         val updatedDraftReturn = commonUpdateDraftReturn(
           draftReturn,
           answers.copy(improvementCosts = Some(AmountInPence(123L)))
@@ -1786,7 +1972,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice        = Some(sample[AmountInPence]),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 )
-                val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+                val (session, journey, draftReturn) =
+                  sessionWithState(answers, AssetType.Residential, true, UserType.Individual)
                 val updatedDraftReturn = commonUpdateDraftReturn(
                   draftReturn,
                   answers.copy(improvementCosts = Some(expectedAmountInPence))
@@ -1823,7 +2010,8 @@ class AcquisitionDetailsControllerSpec
                     rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                     improvementCosts        = AmountInPence(expectedAmountInPence.value + 1L)
                   )
-                val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+                val (session, journey, draftReturn) =
+                  sessionWithState(answers, AssetType.Residential, true, UserType.Individual)
                 val updatedDraftReturn = commonUpdateDraftReturn(
                   draftReturn,
                   answers.copy(improvementCosts = expectedAmountInPence)
@@ -1869,7 +2057,8 @@ class AcquisitionDetailsControllerSpec
                   improvementCosts = None
                 ),
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -1893,7 +2082,8 @@ class AcquisitionDetailsControllerSpec
                   improvementCosts = Some(sample[AmountInPence])
                 ),
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -1916,7 +2106,8 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers],
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -1939,7 +2130,8 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence.zero),
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -1961,7 +2153,8 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence(3L)),
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -1998,7 +2191,8 @@ class AcquisitionDetailsControllerSpec
                   improvementCosts = None
                 ),
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -2048,7 +2242,8 @@ class AcquisitionDetailsControllerSpec
         val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
           improvementCosts = Some(sample[AmountInPence])
         )
-        val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, sample[AssetType], sample[Boolean], UserType.Individual)
         val updatedDraftReturn = commonUpdateDraftReturn(
           draftReturn,
           answers.copy(acquisitionFees = Some(AmountInPence(123L)))
@@ -2109,7 +2304,8 @@ class AcquisitionDetailsControllerSpec
               withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
                 val answers =
                   IncompleteAcquisitionDetailsAnswers.empty.copy(improvementCosts = Some(sample[AmountInPence]))
-                val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+                val (session, journey, draftReturn) =
+                  sessionWithState(answers, sample[AssetType], sample[Boolean], UserType.Individual)
                 val updatedDraftReturn = commonUpdateDraftReturn(
                   draftReturn,
                   answers.copy(acquisitionFees = Some(expectedAmountInPence))
@@ -2142,7 +2338,8 @@ class AcquisitionDetailsControllerSpec
                 val answers =
                   sample[CompleteAcquisitionDetailsAnswers]
                     .copy(acquisitionFees = AmountInPence(expectedAmountInPence.value + 1L))
-                val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+                val (session, journey, draftReturn) =
+                  sessionWithState(answers, sample[AssetType], sample[Boolean], UserType.Individual)
                 val updatedDraftReturn = commonUpdateDraftReturn(
                   draftReturn,
                   answers.copy(acquisitionFees = expectedAmountInPence)
@@ -2189,7 +2386,8 @@ class AcquisitionDetailsControllerSpec
                   improvementCosts = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                false
+                false,
+                UserType.Individual
               )._1
             )
           }
@@ -2213,7 +2411,8 @@ class AcquisitionDetailsControllerSpec
                   improvementCosts = Some(sample[AmountInPence])
                 ),
                 AssetType.NonResidential,
-                false
+                false,
+                UserType.Individual
               )._1
             )
           }
@@ -2241,7 +2440,8 @@ class AcquisitionDetailsControllerSpec
                   improvementCosts = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1
             )
           }
@@ -2274,6 +2474,7 @@ class AcquisitionDetailsControllerSpec
                 .copy(acquisitionDate = AcquisitionDate(nonUkResidentsNonResidentialProperty.minusDays(1))),
               AssetType.NonResidential,
               false,
+              UserType.Individual,
               disposalDate
             )._1
           )
@@ -2294,6 +2495,7 @@ class AcquisitionDetailsControllerSpec
                 .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.minusDays(1))),
               AssetType.Residential,
               false,
+              UserType.Individual,
               disposalDate
             )._1
           )
@@ -2351,7 +2553,8 @@ class AcquisitionDetailsControllerSpec
             sessionWithState(
               allQuestionsAnswered.copy(acquisitionMethod = None),
               sample[AssetType],
-              sample[Boolean]
+              sample[Boolean],
+              UserType.Individual
             )._1,
             routes.AcquisitionDetailsController.acquisitionMethod()
           )
@@ -2366,7 +2569,8 @@ class AcquisitionDetailsControllerSpec
             sessionWithState(
               allQuestionsAnswered.copy(acquisitionDate = None),
               sample[AssetType],
-              sample[Boolean]
+              sample[Boolean],
+              UserType.Individual
             )._1,
             routes.AcquisitionDetailsController.acquisitionDate()
           )
@@ -2382,7 +2586,8 @@ class AcquisitionDetailsControllerSpec
               allQuestionsAnswered
                 .copy(acquisitionPrice = None, acquisitionDate = Some(AcquisitionDate(LocalDate.now()))),
               sample[AssetType],
-              sample[Boolean]
+              sample[Boolean],
+              UserType.Individual
             )._1,
             routes.AcquisitionDetailsController.acquisitionPrice()
           )
@@ -2402,7 +2607,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
-                true
+                true,
+                UserType.Individual
               )._1,
               routes.AcquisitionDetailsController.rebasedAcquisitionPrice()
             )
@@ -2417,7 +2623,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
-                false
+                false,
+                UserType.Individual
               )._1,
               routes.AcquisitionDetailsController.rebasedAcquisitionPrice()
             )
@@ -2432,7 +2639,8 @@ class AcquisitionDetailsControllerSpec
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.NonResidential,
-                false
+                false,
+                UserType.Individual
               )._1,
               routes.AcquisitionDetailsController.rebasedAcquisitionPrice()
             )
@@ -2449,7 +2657,8 @@ class AcquisitionDetailsControllerSpec
             sessionWithState(
               allQuestionsAnswered.copy(improvementCosts = None),
               sample[AssetType],
-              sample[Boolean]
+              sample[Boolean],
+              UserType.Individual
             )._1,
             routes.AcquisitionDetailsController.improvementCosts()
           )
@@ -2464,7 +2673,8 @@ class AcquisitionDetailsControllerSpec
             sessionWithState(
               allQuestionsAnswered.copy(acquisitionFees = None),
               sample[AssetType],
-              sample[Boolean]
+              sample[Boolean],
+              UserType.Individual
             )._1,
             routes.AcquisitionDetailsController.acquisitionFees()
           )
@@ -2473,9 +2683,10 @@ class AcquisitionDetailsControllerSpec
       }
 
       "show an error page when the user has just answered all of the questions and" when {
-        val (session, journey, draftReturn) = sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean])
-        val newDraftReturn                  = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
-        val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
+        val (session, journey, draftReturn) =
+          sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean], UserType.Individual)
+        val newDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+        val updatedJourney = journey.copy(draftReturn                   = newDraftReturn)
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2508,7 +2719,7 @@ class AcquisitionDetailsControllerSpec
 
         "the user has just answered all the questions and all updates are successful" in {
           val (session, journey, draftReturn) =
-            sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean])
+            sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean], UserType.Individual)
           val newDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
           val updatedJourney = journey.copy(draftReturn                   = newDraftReturn)
 
@@ -2544,7 +2755,7 @@ class AcquisitionDetailsControllerSpec
           val assetType = AssetType.NonResidential
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithState(nonUkRebasing, assetType, false)._1)
+            mockGetSession(sessionWithState(nonUkRebasing, assetType, false, UserType.Individual)._1)
           }
 
           checkPageIsDisplayed(
@@ -2576,7 +2787,7 @@ class AcquisitionDetailsControllerSpec
           val assetType = AssetType.NonResidential
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithState(nonUkRebasing, assetType, true)._1)
+            mockGetSession(sessionWithState(nonUkRebasing, assetType, true, UserType.Individual)._1)
           }
 
           checkPageIsDisplayed(
@@ -2608,7 +2819,7 @@ class AcquisitionDetailsControllerSpec
           val assetType = AssetType.NonResidential
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithState(nonUkRebasing, assetType, true)._1)
+            mockGetSession(sessionWithState(nonUkRebasing, assetType, true, UserType.Individual)._1)
           }
 
           checkPageIsDisplayed(
@@ -2640,7 +2851,7 @@ class AcquisitionDetailsControllerSpec
           val assetType = AssetType.NonResidential
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithState(nonUkRebasing, assetType, false)._1)
+            mockGetSession(sessionWithState(nonUkRebasing, assetType, false, UserType.Individual)._1)
           }
 
           checkPageIsDisplayed(
@@ -2692,7 +2903,7 @@ class AcquisitionDetailsControllerSpec
                   val assetType = AssetType.NonResidential
                   inSequence {
                     mockAuthWithNoRetrievals()
-                    mockGetSession(sessionWithState(nonUkRebasing, assetType, false)._1)
+                    mockGetSession(sessionWithState(nonUkRebasing, assetType, false, UserType.Individual)._1)
                   }
 
                   checkPageIsDisplayed(
@@ -2718,7 +2929,8 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers],
                 sample[AssetType],
-                sample[Boolean]
+                sample[Boolean],
+                UserType.Individual
               )._1
             )
           }
@@ -2740,6 +2952,7 @@ class AcquisitionDetailsControllerSpec
                 Some(sample[CompleteAcquisitionDetailsAnswers]),
                 None,
                 Some(sample[Boolean]),
+                UserType.Individual,
                 Some(sample[DisposalDate])
               )._1
             )
@@ -2756,6 +2969,7 @@ class AcquisitionDetailsControllerSpec
                 Some(sample[CompleteAcquisitionDetailsAnswers]),
                 Some(sample[AssetType]),
                 None,
+                UserType.Individual,
                 Some(sample[DisposalDate])
               )._1
             )
@@ -2789,6 +3003,7 @@ class AcquisitionDetailsControllerSpec
                 ),
                 Some(sample[AssetType]),
                 Some(sample[Boolean]),
+                UserType.Individual,
                 Some(sample[DisposalDate])
               )._1
             )
@@ -2822,6 +3037,7 @@ class AcquisitionDetailsControllerSpec
                 ),
                 Some(sample[AssetType]),
                 Some(sample[Boolean]),
+                UserType.Individual,
                 Some(sample[DisposalDate])
               )._1
             )
@@ -2839,7 +3055,8 @@ class AcquisitionDetailsControllerSpec
     currentSession: SessionData = sessionWithState(
       sample[CompleteAcquisitionDetailsAnswers].copy(rebasedAcquisitionPrice = Some(sample[AmountInPence])),
       sample[AssetType],
-      sample[Boolean]
+      sample[Boolean],
+      UserType.Individual
     )._1
   ): Unit = {
     inSequence {
