@@ -120,7 +120,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     endDateExclusive   = LocalDate.of(2020, 4, 6)
   )
 
-  val disposalDate = DisposalDate(value = LocalDate.of(2020, 3, 20), taxYear = taxYear)
+  val disposalDate = DisposalDate(value = LocalDate.of(2020, 3, 10), taxYear = taxYear)
 
   "AddressController" when {
 
