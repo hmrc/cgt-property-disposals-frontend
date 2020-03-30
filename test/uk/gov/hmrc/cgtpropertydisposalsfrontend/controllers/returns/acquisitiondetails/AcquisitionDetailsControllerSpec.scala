@@ -2046,7 +2046,7 @@ class AcquisitionDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      "redirect to th improvement costs page" when {
+      "redirect to the improvement costs page" when {
 
         "that question hasn't been answered" in {
           inSequence {
@@ -2073,16 +2073,18 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        "the acquisition details section has not yet been completed" in {
+        "the acquisition details section has not yet been completed without rebasing" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(AcquisitionDate(nonUkResidentsNonResidentialProperty.plusDays(2L))),
+                  shouldUseRebase  = Some(false),
                   improvementCosts = Some(sample[AmountInPence])
                 ),
-                sample[AssetType],
-                sample[Boolean],
+                AssetType.NonResidential,
+                false,
                 UserType.Individual
               )._1
             )
@@ -2099,13 +2101,44 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        "the acquisition details section has been completed" in {
+        "the acquisition details section has not yet been completed with rebasing" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers],
-                sample[AssetType],
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(AcquisitionDate(ukResidents.minusDays(2L))),
+                  shouldUseRebase  = Some(true),
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true,
+                UserType.Individual
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionFees.rebased.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.improvementCosts().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionFeesSubmit()
+                .url
+            }
+          )
+        }
+
+        "the acquisition details section has been completed without rebasing" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.plusDays(1L)),
+                  shouldUseRebase = false
+                ),
+                AssetType.Residential,
                 sample[Boolean],
                 UserType.Individual
               )._1
@@ -2123,12 +2156,43 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
+        "the acquisition details section has been completed with rebasing" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = AcquisitionDate(ukResidents.minusDays(1L)),
+                  shouldUseRebase = true
+                ),
+                AssetType.Residential,
+                true,
+                UserType.Individual
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionFees.rebased.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionFeesSubmit()
+                .url
+            }
+          )
+        }
+
         "the amount in the session is zero" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence.zero),
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.plusDays(2L)),
+                  acquisitionFees = AmountInPence.zero,
+                  shouldUseRebase = false
+                ),
                 sample[AssetType],
                 sample[Boolean],
                 UserType.Individual
@@ -2151,7 +2215,11 @@ class AcquisitionDetailsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence(3L)),
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.plusDays(2L)),
+                  acquisitionFees = AmountInPence(3L),
+                  shouldUseRebase = false
+                ),
                 sample[AssetType],
                 sample[Boolean],
                 UserType.Individual
@@ -3053,7 +3121,10 @@ class AcquisitionDetailsControllerSpec
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithState(
-      sample[CompleteAcquisitionDetailsAnswers].copy(rebasedAcquisitionPrice = Some(sample[AmountInPence])),
+      sample[CompleteAcquisitionDetailsAnswers].copy(
+        rebasedAcquisitionPrice = Some(sample[AmountInPence]),
+        shouldUseRebase         = false
+      ),
       sample[AssetType],
       sample[Boolean],
       UserType.Individual
