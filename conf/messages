@@ -769,7 +769,10 @@ returns.property-address.cyaLabel.acquisition-price=What was the acquisition amo
 returns.property-address.cyaChange.property-address=the address of the property
 
 returns.disposal-details.caption=Sale or disposal details
-shareOfProperty.title=How much of the property did you own?
+
+shareOfProperty.agent.title=How much of the property did your client own?
+shareOfProperty.trust.title=How much of the property did the trust own?
+
 shareOfProperty.error.required=Select how much of the property you owned
 shareOfProperty.error.invalid=Select how much of the property you owned
 returns.shareOfProperty.Full=100%
