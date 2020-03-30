@@ -81,6 +81,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     case Individual   => ""
     case Organisation => ".trust"
     case Agent        => ".agent"
+    case other        => sys.error(s"User type '$other' not handled")
   }
 
   override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
