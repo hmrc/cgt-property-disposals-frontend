@@ -160,10 +160,12 @@ confirmEmail.verified.p1=We’ll use this address to contact you about your Capi
 confirmEmail.verified.p2=Your email has not been updated in other government services.
 confirmEmail.resent=Confirmation email sent:
 
-confirmDraftReturn.title=Your Capital Gains Tax on UK property return will be saved for 30 days
-confirmDraftReturn.warning=After {0} all the details in your Capital Gains Tax on UK property return will be deleted.
-confirmDraftReturn.p1=After that date, you’ll need to start again.
-confirmDraftReturn.p2=We will keep a return that is ‘In progress’ for 30 days from the day it was last saved. We will only save uploads for 7 days from the last day they were saved.
+draftReturnSaved.title=Your Capital Gains Tax on UK property return will be saved for 30 days
+draftReturnSaved.warning=After {0} all the details in your Capital Gains Tax on UK property return will be deleted.
+draftReturnSaved.trust.warning=After {0} all the details in the trust’s Capital Gains Tax on UK property return will be deleted.
+draftReturnSaved.agent.warning=After {0} all the details in the client’s Capital Gains Tax on UK property return will be deleted.
+draftReturnSaved.p1=After that date, you’ll need to start again.
+draftReturnSaved.p2=We will keep a return that is ‘In progress’ for 30 days from the day it was last saved. We will only save uploads for 7 days from the last day they were saved.
 
 contactName.title=Change contact name
 contactName.extraContent=The contact name you use for other government services will not change.

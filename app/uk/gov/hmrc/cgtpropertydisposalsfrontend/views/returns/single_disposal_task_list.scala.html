@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
+@import cats.syntax.eq._
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -75,11 +76,11 @@
     }
 }
 
-
 @reliefDetailsState = @{
-    (disposalDetailsState, acquistionDetailsState,initialGainOrLossState) match {
-        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-            draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+    (disposalDetailsState, acquistionDetailsState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete) =>
+            if(canSeeInitialGainOrLoss && initialGainOrLossState =!= TaskListStatus.Complete) TaskListStatus.CannotStart
+            else draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
         case _ => TaskListStatus.CannotStart
     }
 }
@@ -206,7 +207,7 @@
 </ol>
 
 <p><a id="saveAndComeBackLater" href="@{
-        returns.routes.ConfirmDraftReturnController.confirmDraftReturn()
+        returns.routes.DraftReturnSavedController.draftReturnSaved()
     }">@messages("task-list.save-and-come-back.link")</a></p>
 
 }
