@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
 import scala.concurrent.Future
 
-class ReturnSavedControllerSpec
+class DraftReturnSavedControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
@@ -54,12 +54,12 @@ class ReturnSavedControllerSpec
     bind[ReturnsService].toInstance(mockReturnsService)
   )
 
-  lazy val controller                  = instanceOf[ReturnSavedController]
+  lazy val controller                  = instanceOf[DraftReturnSavedController]
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   private def performAction(): Future[Result] = controller.draftReturnSaved()(FakeRequest())
 
-  "ReturnSavedController" when {
+  "DraftReturnSavedController" when {
 
     "handling requests to display the draft return saved page" must {
 

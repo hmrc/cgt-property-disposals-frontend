@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
@@ -61,8 +61,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.IncompleteNonCalculatedYTDAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, UploadSupportingDocuments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -721,9 +720,7 @@ class TaskListControllerSpec
           doc.select("h1").text shouldBe messageFromMessageKey("service.title")
           doc
             .select("a#saveAndComeBackLater")
-            .attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes.ReturnSavedController
-            .draftReturnSaved()
-            .url
+            .attr("href") shouldBe routes.DraftReturnSavedController.draftReturnSaved().url
         }
 
       }
