@@ -168,10 +168,11 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
+  //TODO: BE needs to change now because we can have multiple draft returns and each draft return can have multiple files for a cgt ref
   override def getFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/${upscanInitiateReference.value}"
+    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/${upscanInitiateReference.value}" //FIXME: this has to add the drft id and then the BE needs to change to use it
     EitherT[Future, Error, Option[UpscanFileDescriptor]](
       http
         .get(url)

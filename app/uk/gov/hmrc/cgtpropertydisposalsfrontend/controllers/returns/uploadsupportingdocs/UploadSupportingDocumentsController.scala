@@ -18,28 +18,31 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsuppo
 import java.time.LocalDateTime
 import java.util.UUID
 
+import akka.stream.scaladsl.{FileIO, Source}
+import akka.util.ByteString
 import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
+import configs.Configs
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of, _}
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocumentsForm
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.{CompleteUploadSupportingDocumentAnswers, IncompleteUploadSupportingDocumentAnswers, SupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocumentAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.{FailedToGetUpscanSnapshot, UpscanInitiateSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.{FailedToGetUpscanSnapshot, MaximumFileUploadReached, UpscanInitiateSuccess}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -47,6 +50,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{uploadsupportingdocs => pages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import configs.Configs
+import configs.syntax._
+import play.api.libs.Files
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.UPLOADED
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,8 +67,9 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
   upscanService: UpscanService,
+  upscanConnector: UpscanConnector,
   cc: MessagesControllerComponents,
-  val config: Configuration,
+  val configuration: Configuration,
   doYouWantToUploadSupportingEvidencePage: pages.do_you_want_to_upload_supporting_evidence,
   uploadSupportingEvidencePage: pages.upload_supporting_evidence,
   deleteSupportingEvidencePage: pages.delete_supporting_evidence,
@@ -71,6 +81,13 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
+
+  private def getUpscanInitiateConfig[A: Configs](key: String): A =
+    configuration.underlying
+      .get[A](s"microservice.services.upscan-initiate.$key")
+      .value
+
+  private val maxFileSize: Int = getUpscanInitiateConfig[Int]("max-file-size")
 
   private def withUploadSupportingDocumentsAnswers(
     request: RequestWithSessionData[_]
@@ -84,16 +101,16 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(sd: SubscribedDetails, _, _, d: DraftReturn))) =>
+      case Some((s, r @ FillingOutReturn(c: SubscribedDetails, _, _, d: DraftReturn))) =>
         d match {
           case DraftSingleDisposalReturn(i, _, _, _, _, _, _, _, _, maybeSupportingDocumentsAnswers, _) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
-              f(i, sd.cgtReference, s, r, IncompleteUploadSupportingDocumentAnswers.empty)
-            )(f(i, sd.cgtReference, s, r, _))
+              f(i, c.cgtReference, s, r, IncompleteUploadSupportingDocumentAnswers.empty)
+            )(f(i, c.cgtReference, s, r, _))
           case DraftMultipleDisposalsReturn(i, _, _, _, _, maybeSupportingDocumentsAnswers, _) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
-              f(i, sd.cgtReference, s, r, IncompleteUploadSupportingDocumentAnswers.empty)
-            )(f(i, sd.cgtReference, s, r, _))
+              f(i, c.cgtReference, s, r, IncompleteUploadSupportingDocumentAnswers.empty)
+            )(f(i, c.cgtReference, s, r, _))
         }
       case _ => Redirect(controllers.routes.StartController.start())
     }
@@ -245,21 +262,19 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
 
   // This method does not deal with answers so we don't need it here???? - this is the design work - how to handle this and bring the data into the main data structure that
   // works the other pages eg Incomplete and Complete...
-  def uploadDocumentWithSupportingEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withUploadSupportingDocumentsAnswers(request) { (draftReturnId, cgtRef, _, _, answers) =>
-        upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
-          case Left(error) =>
-            logger.warn(s"could not initiate upscan due to $error")
-            errorHandler.errorResult(None)
-          case Right(upscanInitiateResponse) =>
-            upscanInitiateResponse match {
-              case FailedToGetUpscanSnapshot => errorHandler.errorResult(None)
-              //  case MaximumFileUploadReached                 => Ok(upscanLimitPage())
-              //case UpscanInititateResponseStored(reference) => Ok(upscanPage(reference))
-              case UpscanInitiateSuccess(reference) => Ok(uploadSupportingEvidencePage(reference))
-            }
-        }
+  def uploadSupportingEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withUploadSupportingDocumentsAnswers(request) { (draftReturnId, cgtRef, _, fillingOutReturn, answers) =>
+      upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
+        case Left(error) =>
+          logger.warn(s"could not initiate upscan due to $error")
+          errorHandler.errorResult(None)
+        case Right(upscanInitiateResponse) =>
+          upscanInitiateResponse match {
+            case FailedToGetUpscanSnapshot        => errorHandler.errorResult(None)
+            case MaximumFileUploadReached         => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
+            case UpscanInitiateSuccess(reference) => Ok(uploadSupportingEvidencePage(reference)) //FIXME: backlink???
+          }
+      }
 
 //        commonDisplayBehaviour(answers)(
 //          form = _.fold(
@@ -274,7 +289,71 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
 //            _.fold(_.doYouWantToUploadSupportingDocuments, c => Some(c.doYouWantToUploadSupportingDocuments)),
 //          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList() //TODO: do I really want to go here??
 //        )
+    }
+  }
+
+//  def uploadSupportingEvidenceSubmit() = authenticatedActionWithSessionData.async { implicit request =>
+//    //TODO: do form validation - client check if file has been chosen and block if not and als of file types validation  - Ali do this
+//    //TODO: check for success status from upload:
+//    //TODO: if success, store the upscan reference in the answers list and redirect to status page with check virus scan results
+//    //TODO: if error, show error page and do not store
+//    Future.successful(Ok("uploaded"))
+//  }
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  def uploadSupportingEvidenceSubmit(): Action[MultipartFormData[Files.TemporaryFile]] =
+    authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
+      withUploadSupportingDocumentsAnswers(request) { (draftReturnId, _, _, _, _) =>
+        val multipart: MultipartFormData[Files.TemporaryFile] = request.body
+        val result = for {
+          reference <- EitherT.fromOption(
+                        multipart.dataParts.get("reference").flatMap(_.headOption),
+                        Error("missing upscan file descriptor id")
+                      )
+          maybeUpscanFileDescriptor <- upscanService
+                                        .getUpscanFileDescriptor(
+                                          DraftReturnId(draftReturnId.toString), //TODO: make sure this is used downstream
+                                          UpscanInitiateReference(reference)
+                                        )
+          upscanFileDescriptor <- EitherT.fromOption(
+                                   maybeUpscanFileDescriptor,
+                                   Error("failed to retrieve upscan file descriptor details")
+                                 )
+          prepared <- EitherT.fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
+          _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+          _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+        //TODO: update session store as well here - need to add file name and upscan reference
+
+        } yield ()
+
+        result.fold(
+          error => {
+            logger.warn(s"failed to upload file with error: $error")
+            errorHandler.errorResult(None)
+          },
+          _ => {
+
+            Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
+          } // TODO: need to update the session store with new answers based on this uploaded file (just reference )
+        )
       }
+    }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  private def handleGetFileDescriptorResult(
+    multipart: MultipartFormData[Files.TemporaryFile],
+    upscanFileDescriptor: UpscanFileDescriptor
+  ): Either[Error, MultipartFormData[Source[ByteString, Any]]] = {
+    val userFile =
+      multipart.files
+        .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
+    val prepared: MultipartFormData[Source[ByteString, Any]] =
+      multipart
+        .copy(
+          files = userFile,
+          dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
+            .mapValues(fieldValue => Seq(fieldValue))
+        )
+    Right(prepared)
   }
 
   def changeSupportingEvidence() = authenticatedActionWithSessionData.async { implicit request =>
@@ -336,9 +415,10 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
       //FIXME: what should be passed in as list or what do I do with the lists?
       case IncompleteUploadSupportingDocumentAnswers(None, _) => // TODO: change name to IncompleteUploadSupportingEvidenceAnswers
         Redirect(routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocuments())
+      case IncompleteUploadSupportingDocumentAnswers(Some(true), List.empty) =>
+        Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidence())
       case IncompleteUploadSupportingDocumentAnswers(Some(true), _) =>
-        Redirect(routes.UploadSupportingDocumentsController.uploadDocumentWithSupportingEvidence())
-      //Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(true, List(SupportingDocuments("2", "f1"))))) //TODO: remove this
+        Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(true, List(SupportingDocuments("2", "f1"))))) //TODO: remove this
       case IncompleteUploadSupportingDocumentAnswers(Some(false), _) =>
         val completeAnswers = CompleteUploadSupportingDocumentAnswers(false, List.empty)
         val newDraftReturn =
@@ -401,15 +481,6 @@ object UploadSupportingDocumentsController {
       mapping(
         "do-you-want-to-upload-supporting-documents" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
-    )
-
-  final case class SupportingEvidenceFile(name: String) //FIXME
-
-  val uploadSupportingDocumentForm: Form[SupportingEvidenceFile] =
-    Form(
-      mapping(
-        "supporting-evidence-file" -> nonEmptyText
-      )(SupportingEvidenceFile.apply)(SupportingEvidenceFile.unapply)
     )
 
 }

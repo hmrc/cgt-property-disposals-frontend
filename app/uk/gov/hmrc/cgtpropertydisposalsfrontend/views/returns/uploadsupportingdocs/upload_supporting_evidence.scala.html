@@ -43,7 +43,7 @@
 
        @pageHeading(title, Some(messages(s"$key.caption")), Some(messages(s"$key.help-text")))
 
-       @formWrapper(action = upscanRoutes.UpscanController.upload(), 'enctype -> "multipart/form-data") {
+       @formWrapper(action = routes.UploadSupportingDocumentsController.uploadSupportingEvidenceSubmit(), 'enctype -> "multipart/form-data") {
 
             <input type="hidden" name="reference" value="@{reference.value}" />
             <input type="file" name="file" />

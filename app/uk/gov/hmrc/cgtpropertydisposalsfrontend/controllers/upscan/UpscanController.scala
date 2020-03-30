@@ -86,6 +86,7 @@ class UpscanController @Inject() (
 
   private val maxFileSize: Int = getUpscanInitiateConfig[Int]("max-file-size")
 
+  //TODO: handled in the upload evidence controller now - take this out
   def upscan(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSubscribedUser(request) { (_, subscribed) =>

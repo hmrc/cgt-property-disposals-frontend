@@ -25,7 +25,7 @@ object UploadSupportingDocumentAnswers {
 
   final case class SupportingDocuments(
     reference: String,
-    fileName: String
+    fileName: String //FIXME do we need this? if not then we don't need this data structure  as we can use UpscanInitiateReference
   )
 
   object SupportingDocuments {
