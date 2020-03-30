@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individu
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
@@ -167,7 +167,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
                     ),
-                    draftReturn = draftReturn
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None,
+                    draftReturn          = draftReturn
                   )
                 )
               )
@@ -1045,7 +1046,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
-                    )
+                    ),
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
@@ -1549,7 +1551,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
-                    )
+                    ),
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
@@ -1917,7 +1920,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = if (userType === Organisation) Left(sample[TrustName]) else Right(sample[IndividualName])
-                    )
+                    ),
+                    agentReferenceNumber = if (userType === Agent) Some(sample[AgentReferenceNumber]) else None
                   )
                 )
               )
