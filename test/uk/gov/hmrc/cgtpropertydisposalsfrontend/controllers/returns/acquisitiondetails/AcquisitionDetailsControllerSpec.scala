@@ -226,7 +226,7 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("acquisitionMethod.agent.title"), { doc =>
+                messageFromMessageKey("acquisitionMethod.trust.title"), { doc =>
                   doc.select("#back").attr("href") shouldBe controllers.returns.routes.TaskListController.taskList().url
                   doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionMethodSubmit()
@@ -314,7 +314,7 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("acquisitionMethod.agent.title"), { doc =>
+                messageFromMessageKey("acquisitionMethod.trust.title"), { doc =>
                   doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
                   doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionMethodSubmit()
