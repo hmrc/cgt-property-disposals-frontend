@@ -46,6 +46,16 @@
     case _ => false
   }
 }
+@acquisitionPrice = @{
+  acquisitionDetails.rebasedAcquisitionPrice match {
+    case Some(r) if acquisitionDetails.shouldUseRebase => r
+    case _ => acquisitionDetails.acquisitionPrice
+  }
+}
+
+@rebasingKey = @{
+  if(acquisitionDetails.shouldUseRebase) ".rebased" else ""
+}
 
   @if(isUserSupplied) {
     <p>
@@ -78,9 +88,9 @@
     @calcSum(
       List(
         SumPartDisplay(
-          label = messages("calculator.acquisitionPrice"),
+          label = messages(s"calculator.acquisitionPrice$rebasingKey"),
           operator = None,
-          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(acquisitionDetails.acquisitionPrice.inPounds())
+          amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(acquisitionPrice.inPounds())
         ),
         SumPartDisplay(
           label = messages("calculator.improvementCosts"),

@@ -98,7 +98,13 @@
       }
       <li>
         @calcRow(calculatedTax.amountOfTaxDue, messages(s"$key.amountOfTaxDue"), showGainType = false)
-        @details(messages("calculator.showWorkings"), taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, assetType, isATrust))
+        @details(messages("calculator.showWorkings"), taxOwedWorkings(
+          estimatedIncome,
+          personalAllowance,
+          calculatedTax,
+          taxYear,
+          assetType,
+          isATrust))
       </li>
     </ul>
 
