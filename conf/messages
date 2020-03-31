@@ -1173,7 +1173,7 @@ personalAllowance.error.tooSmall=Personal Allowance amount must be a number betw
 personalAllowance.error.tooLarge=Personal Allowance must be {0} or less
 personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 decimal places or less, for example 12,500 or 200.50
 
-hasEstimatedDetails.title=Have any of the details in this return been estimated?
+hasEstimatedDetails.title=Have any of the amounts in this return been estimated?
 hasEstimatedDetails.helpText=If you estimated any amounts, you’ll need to provide the final amounts to HMRC later. For example, the property’s value.
 hasEstimatedDetails.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
 hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
