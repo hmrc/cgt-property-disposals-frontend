@@ -1200,6 +1200,7 @@ calculator.disposalFees=Disposal costs
 calculator.total.disposalAmount=Property disposal amount less costs
 
 calculator.acquisitionPrice=Property acquisition amount
+calculator.acquisitionPrice.rebased=Property acquisition amount (rebased)
 calculator.improvementCosts=Improvement costs
 calculator.acquisitionFees=Acquisition costs
 calculator.total.acquisitionAmount=Property acquisition amount plus costs
