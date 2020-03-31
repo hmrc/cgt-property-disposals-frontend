@@ -45,7 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.{CompleteUploadSupportingDocumentAnswers, IncompleteUploadSupportingDocumentAnswers, SupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocumentAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.{FAILED, READY, UPLOADED}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.{FailedToGetUpscanSnapshot, MaximumFileUploadReached, UpscanInitiateSuccess}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.{FailedToGetUpscanSnapshot, UpscanInitiateSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -384,7 +384,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   def uploadSupportingEvidenceVirusCheck(reference: String) = authenticatedActionWithSessionData.async {
     implicit request =>
       withUploadSupportingDocumentsAnswers(request) { (draftReturnId, cgtRef, _, fillingOutReturn, answers) =>
-        Ok(uploadSupportingEvidenceUpscanCheckPage(UpscanInitiateReference(reference), FAILED)) //FIXME: make sure correct status is pumped in for this file by looking at DB
+        Ok(uploadSupportingEvidenceUpscanCheckPage(UpscanInitiateReference(reference), READY)) //FIXME: make sure correct status is pumped in for this file by looking at DB
       }
   }
 
@@ -424,18 +424,72 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   }
 
   def deleteSupportingEvidence(id: String) = authenticatedActionWithSessionData.async { implicit request =>
-    Ok(
-      changeOrDeletePage(
-        Some(SupportingDocuments("1", "filename")),
-        routes.UploadSupportingDocumentsController.checkYourAnswers()
-      )
-    )
+    withUploadSupportingDocumentsAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
+      //TODO: delete session data - done
+      //TODO: delete draft return - done
+      //TODO: delete upscan db - done
+
+      val result = for {
+        _ <- upscanService.removeFile(DraftReturnId(draftReturnId.toString), UpscanInitiateReference(id))
+        updatedAnswers: UploadSupportingDocumentAnswers = answers match {
+          case IncompleteUploadSupportingDocumentAnswers(a, b) =>
+            IncompleteUploadSupportingDocumentAnswers(a, b.filterNot(c => c.reference == id))
+          case CompleteUploadSupportingDocumentAnswers(a, b) =>
+            CompleteUploadSupportingDocumentAnswers(a, b.filterNot(c => c.reference == id))
+        }
+        newDraftReturn = fillingOutReturn.draftReturn match {
+          case s @ DraftSingleDisposalReturn(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _
+              ) =>
+            s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+          case m @ DraftMultipleDisposalsReturn(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _
+              ) =>
+            m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+        }
+
+        _ <- returnsService
+              .storeDraftReturn(
+                newDraftReturn,
+                fillingOutReturn.subscribedDetails.cgtReference,
+                fillingOutReturn.agentReferenceNumber
+              )
+        _ <- EitherT(
+              updateSession(sessionStore, request)(
+                _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+              )
+            )
+      } yield ()
+
+      result.fold({ e =>
+        logger.warn("Could not update session", e)
+        errorHandler.errorResult()
+      }, _ => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()))
+    }
   }
 
+  //TODO: remove this and the endpoint
   def deleteSupportingEvidenceSubmit() = authenticatedActionWithSessionData.async { implicit request =>
     Ok("deleted file")
   }
 
+  //TODO: it shows files which have failed - shouldn't do that - filter them out
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withUploadSupportingDocumentsAnswers(request) { (_, _, _, fillingOutReturn, answers) =>
       (answers, fillingOutReturn.draftReturn) match {

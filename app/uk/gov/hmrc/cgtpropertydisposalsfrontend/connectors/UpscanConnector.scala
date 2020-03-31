@@ -77,6 +77,14 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
+  def removeFile(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
+  def removeAllFiles(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
 }
 @Singleton
 class UpscanConnectorImpl @Inject() (
@@ -120,6 +128,39 @@ class UpscanConnectorImpl @Inject() (
             case JsSuccess(upscanSnapshot, _) => Right(upscanSnapshot)
             case JsError(errors)              => Left(Error(s"failed to get upscan snapshot: $errors"))
           }
+        }
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+  }
+
+  override def removeFile(
+    draftReturnId: DraftReturnId,
+    upscanInitiateReference: UpscanInitiateReference
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
+    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
+    EitherT[Future, Error, Unit](
+      http
+        .get(url)
+        .map { httpResponse =>
+          Right(()) //FIXME
+        }
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+  }
+
+  override def removeAllFiles(
+    draftReturnId: DraftReturnId
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
+    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/draft-return-id/${draftReturnId.value}"
+    EitherT[Future, Error, Unit](
+      http
+        .get(url)
+        .map { httpResponse =>
+          Right(()) //FIXME
         }
         .recover {
           case NonFatal(e) => Left(Error(e))
