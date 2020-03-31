@@ -564,8 +564,8 @@ triage.enterCountry.helpText=It’s usually the day you and the new owner swappe
 triage.enterCountry.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.trust.helpText=It’s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
+triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
@@ -1330,6 +1330,8 @@ viewReturn.agentNameLine=Client: {0}
 viewReturn.summaryHeading=Your return
 
 multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
+multiple-disposals.guidance.agent.title=Your client sold or disposed of 2 or more properties
+multiple-disposals.guidance.trust.title=The trust sold or disposed of 2 or more properties
 multiple-disposals.guidance.p1=You can report all property sales (or ‘disposals’) in the same return. You can only do this if they all had:
 multiple-disposals.guidance.li1=the same ‘completion’ date
 multiple-disposals.guidance.li2=contract ‘exchange’ dates on or after 6 April 2020
@@ -1340,6 +1342,8 @@ multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and �
 multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property.
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multiple-disposals.guidance.details.agent.link=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day your client got the money from the sale or disposal and the new owner got the keys.
+multiple-disposals.guidance.details.trust.link=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day the trust got the money from the sale or disposal and the new owner got the keys.
 
 returns.list.title=Sent returns
 returns.list.ref=Return ref:
@@ -1372,9 +1376,19 @@ multipleDisposalsNumberOfProperties.error.tooSmall=Number of disposals must be 2
 multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 999 or less
 
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.trust.title=Was the trust a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
 
+multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.agent.error.required=Select yes if your client was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.agent.error.boolean=Select yes if your client was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.trust.error.required=Select yes if the trust was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.trust.error.boolean=Select yes if the trust was a UK resident on all of the contract exchange dates
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
+multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 
 multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
 multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
@@ -1387,7 +1401,11 @@ multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of 
 multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
 
 multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
+multipleDisposalsCountryOfResidence.agent.title=What country was your client a resident of when they exchanged contracts?
+multipleDisposalsCountryOfResidence.trust.title=What country was the trust a resident of when they exchanged contracts?
 multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+multipleDisposalsCountryOfResidence.agent.helpText=It's usually the day your client and the new owner swapped contracts and they paid a deposit.
+multipleDisposalsCountryOfResidence.trust.helpText=It's usually the day the trust and the new owner swapped contracts and they paid a deposit.
 
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
@@ -1442,16 +1460,26 @@ multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">excha
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
 
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.trust.title=What types of property or assets did the trust dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.helpText=Select all that apply.
 multipleDisposalsAssetTypeForNonUkResidents.Residential=Residential
 multipleDisposalsAssetTypeForNonUkResidents.Residential.helpText=Includes houses, flats, or other dwellings, including their gardens or grounds.
 multipleDisposalsAssetTypeForNonUkResidents.NonResidential=Non-residential
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse=Mixed use
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse.helpText=Part of the property was residential while you owned it.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.agent.helpText=Part of the property was residential and part was non-residential while your client owned it
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.trust.helpText=Part of the property was residential and part was non-residential while the trust owned it
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
+multipleDisposalsAssetTypeForNonUkResidents.agent.IndirectDisposal=Company shares - your client made an indirect disposal
+multipleDisposalsAssetTypeForNonUkResidents.trust.IndirectDisposal=Company shares - the trust made an indirect disposal
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 multipleDisposalsAssetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+multipleDisposalsAssetTypeForNonUkResidents.agent.error.required=Select the types of property or assets your client disposed of
+multipleDisposalsAssetTypeForNonUkResidents.trust.error.required=Select the types of property or assets the trust disposed of
+multipleDisposalsAssetTypeForNonUkResidents.agent.error.invalid=Select the types of property or assets your client disposed of
+multipleDisposalsAssetTypeForNonUkResidents.trust.error.invalid=Select the types of property or assets the trust disposed of
 
 multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
 multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.

@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, JourneyStatus, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -81,13 +81,17 @@ class MultipleDisposalsTriageController @Inject() (
     with SessionUpdates {
 
   def guidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    println(request.userType)
     withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
       val backLink = answers.fold(
         _ => routes.CommonTriageQuestionsController.howManyProperties(),
         _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
       )
-      Ok(guidancePage(backLink, state.isRight))
+      Ok(
+        guidancePage(backLink, state.isRight, state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust))
+      )
     }
+
   }
 
   def guidanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -181,7 +185,14 @@ class MultipleDisposalsTriageController @Inject() (
         _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
       )
 
-      Ok(wereYouAUKResidentPage(form, backLink, state.isRight))
+      Ok(
+        wereYouAUKResidentPage(
+          form,
+          backLink,
+          state.isRight,
+          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+        )
+      )
     }
   }
 
@@ -197,7 +208,12 @@ class MultipleDisposalsTriageController @Inject() (
             )
 
             BadRequest(
-              wereYouAUKResidentPage(formWithErrors, backLink, state.isRight)
+              wereYouAUKResidentPage(
+                formWithErrors,
+                backLink,
+                state.isRight,
+                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+              )
             )
           }, { wereUKResident =>
             if (answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())).contains(wereUKResident)) {
@@ -300,7 +316,14 @@ class MultipleDisposalsTriageController @Inject() (
           _ => routes.MultipleDisposalsTriageController.wereYouAUKResident(),
           _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
-        Ok(countryOfResidencePage(form, backLink, state.isRight))
+        Ok(
+          countryOfResidencePage(
+            form,
+            backLink,
+            state.isRight,
+            state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+          )
+        )
       }
     }
   }
@@ -320,7 +343,8 @@ class MultipleDisposalsTriageController @Inject() (
               countryOfResidencePage(
                 formWithErrors,
                 backLink,
-                state.isRight
+                state.isRight,
+                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
               )
             )
           }, { countryOfResidence =>
@@ -446,7 +470,14 @@ class MultipleDisposalsTriageController @Inject() (
         _ => routes.MultipleDisposalsTriageController.countryOfResidence(),
         _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
       )
-      Ok(assetTypeForNonUkResidentsPage(form, backLink, state.isRight))
+      Ok(
+        assetTypeForNonUkResidentsPage(
+          form,
+          backLink,
+          state.isRight,
+          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+        )
+      )
     }
   }
 
@@ -465,7 +496,8 @@ class MultipleDisposalsTriageController @Inject() (
                 assetTypeForNonUkResidentsPage(
                   formWithErrors,
                   backLink,
-                  state.isRight
+                  state.isRight,
+                  state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
                 )
               )
             }, { assetTypes =>
@@ -650,7 +682,13 @@ class MultipleDisposalsTriageController @Inject() (
           val completeAnswers = CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, t, d)
           updateStateAndThen(
             updateState(state, completeAnswers, identity),
-            Ok(checkYourAnswersPage(completeAnswers, state.isRight))
+            Ok(
+              checkYourAnswersPage(
+                completeAnswers,
+                state.isRight,
+                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+              )
+            )
           )
 
         case IncompleteMultipleDisposalsTriageAnswers(
@@ -667,11 +705,23 @@ class MultipleDisposalsTriageController @Inject() (
           val completeAnswers = CompleteMultipleDisposalsTriageAnswers(i, n, c, a, t, d)
           updateStateAndThen(
             updateState(state, completeAnswers, identity),
-            Ok(checkYourAnswersPage(completeAnswers, state.isRight))
+            Ok(
+              checkYourAnswersPage(
+                completeAnswers,
+                state.isRight,
+                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+              )
+            )
           )
 
         case c: CompleteMultipleDisposalsTriageAnswers =>
-          Ok(checkYourAnswersPage(c, state.isRight))
+          Ok(
+            checkYourAnswersPage(
+              c,
+              state.isRight,
+              state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+            )
+          )
       }
     }
   }
