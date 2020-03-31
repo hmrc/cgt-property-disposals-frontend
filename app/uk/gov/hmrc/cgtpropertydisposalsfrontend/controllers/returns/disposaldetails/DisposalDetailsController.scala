@@ -234,7 +234,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWasDisposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, _, draftReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalMethodAndShareOfProperty(draftReturn, answers) {
           case (disposalMethod, shareOfProperty) =>
             displayPage(answers)(
@@ -243,7 +243,8 @@ class DisposalDetailsController @Inject() (
                 c => disposalPriceForm.fill(c.disposalPrice.inPounds())
               )
             )(
-              page = disposalPricePage(_, _, disposalMethod, shareOfProperty)
+              page =
+                disposalPricePage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
             )(
               requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
               redirectToIfNoRequiredPreviousAnswer =
@@ -261,7 +262,8 @@ class DisposalDetailsController @Inject() (
             submitBehaviour(fillingOutReturn, draftReturn, answers)(
               form = disposalPriceForm
             )(
-              page = disposalPricePage(_, _, disposalMethod, shareOfProperty)
+              page =
+                disposalPricePage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
             )(
               requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
               redirectToIfNoRequiredPreviousAnswer =
@@ -294,7 +296,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWereDisposalFees(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, _, draftReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalMethodAndShareOfProperty(draftReturn, answers) {
           case (disposalMethod, shareOfProperty) =>
             displayPage(answers)(
@@ -303,7 +305,8 @@ class DisposalDetailsController @Inject() (
                 c => disposalFeesForm.fill(c.disposalFees.inPounds())
               )
             )(
-              page = disposalFeesPage(_, _, disposalMethod, shareOfProperty)
+              page =
+                disposalFeesPage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
             )(
               requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
               redirectToIfNoRequiredPreviousAnswer =
@@ -321,7 +324,8 @@ class DisposalDetailsController @Inject() (
             submitBehaviour(fillingOutReturn, draftReturn, answers)(
               form = disposalFeesForm
             )(
-              page = disposalFeesPage(_, _, disposalMethod, shareOfProperty)
+              page =
+                disposalFeesPage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
             )(
               requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
               redirectToIfNoRequiredPreviousAnswer =
