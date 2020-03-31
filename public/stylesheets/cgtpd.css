@@ -620,16 +620,18 @@ details dl.govuk-check-your-answers {
     margin-bottom: 30px;
 }
 
-.sum-total > .cya-question,
-.sum-total > .cya-change {
+.govuk-check-your-answers.cya-questions-long .sum-total > .cya-question,
+.govuk-check-your-answers.cya-questions-long .sum-total > .cya-change {
     font-weight: bold;
     font-size: 16px;
+    max-width: 50%;
 }
 
-.sum-part > .cya-question,
-.sum-part > .cya-change {
+.govuk-check-your-answers.cya-questions-long .sum-part > .cya-question,
+.govuk-check-your-answers.cya-questions-long .sum-part > .cya-change {
     font-weight: normal;
     font-size: 16px;
+    max-width: 50%;
 }
 
 .column-three-quarters {
@@ -642,6 +644,11 @@ details dl.govuk-check-your-answers {
     .column-three-quarters {
         width: 75%;
         float: left;
+    }
+    .govuk-check-your-answers.cya-questions-long .sum-part > .cya-question,
+    .govuk-check-your-answers.cya-questions-long .sum-total > .cya-question {
+        width: 75%;
+        max-width: 75%;
     }
 }
 

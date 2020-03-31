@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -41,8 +42,10 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[BigDecimal], backLink: Call, rebaseCutOffDate: LocalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, rebaseCutOffDate: LocalDate, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "rebaseAcquisitionPrice" }
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @rebaseCutOffDateDisplayString = @{LocalDateUtils.govDisplayFormat(rebaseCutOffDate)}
 @title = @{messages(s"$key.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -67,7 +70,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             labelAsHeading = true,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
-            helpText = Some(Html(messages(s"$key.helpText"))),
+            helpText = Some(Html(messages(s"$key$userKey.helpText"))),
             aspect = "left",
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds")
@@ -75,11 +78,11 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
         @details(messages(s"$key.dropdown.header"),
         Html(s"""|
-        |<p> ${messages(s"$key.dropdown.p1", LocalDateUtils.govDisplayFormat(rebaseCutOffDate))} </p>
-        |<p> ${messages(s"$key.dropdown.p2")} </p>
+        |<p> ${messages(s"$key$userKey.dropdown.p1", LocalDateUtils.govDisplayFormat(rebaseCutOffDate))} </p>
+        |<p> ${messages(s"$key$userKey.dropdown.p2")} </p>
         |<p> ${messages(s"$key.dropdown.p3")} </p>
         |<p> ${Html(messages(s"$key.dropdown.p4", appConfig.marketValue))} </p>
-        |<p> ${messages(s"$key.dropdown.p5")} </p>
+        |<p> ${messages(s"$key$userKey.dropdown.p5")} </p>
         |""".stripMargin ))
 
         @submitButton(messages("button.saveAndContinue"))
