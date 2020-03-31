@@ -23,13 +23,14 @@ import akka.util.ByteString
 import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.string._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
 import play.api.data.Form
-import play.api.data.Forms.{mapping, of}
+import play.api.data.Forms.{mapping, of, _}
 import play.api.http.Writeable
 import play.api.libs.Files
 import play.api.mvc._
@@ -53,6 +54,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.expired_supporting_evidence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{uploadsupportingdocs => pages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -72,10 +74,9 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   doYouWantToUploadSupportingEvidencePage: pages.do_you_want_to_upload_supporting_evidence,
   uploadSupportingEvidencePage: pages.upload_supporting_evidence,
   uploadSupportingEvidenceUpscanCheckPage: pages.upload_supporting_evidence_upscan_check,
-  deleteSupportingEvidencePage: pages.delete_supporting_evidence,
-  changeSupportingEvidencePage: pages.change_support_evidence,
-  checkYourAnswersPage: pages.check_your_answers,
-  changeOrDeletePage: pages.change_or_delete_supporting_document //FIXME: remove this
+  changeSupportingEvidencePage: pages.change_upload_supporting_evidence,
+  expiredSupportingEvidencePage: expired_supporting_evidence,
+  checkYourAnswersPage: pages.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -202,9 +203,132 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
       }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def doYouWantToUploadSupportingDocumentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withUploadSupportingDocumentsAnswers(request) { (_, _, _, fillingOutReturn, answers) =>
+      withUploadSupportingDocumentsAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
+        doYouWantToUploadSupportingDocumentsForm.bindFromRequest.fold(
+          errors =>
+            BadRequest(
+              doYouWantToUploadSupportingEvidencePage(errors, controllers.returns.routes.TaskListController.taskList())
+            ),
+          success =>
+            if (success) {
+
+              val updatedAnswers: UploadSupportingDocumentAnswers = answers match {
+                case IncompleteUploadSupportingDocumentAnswers(a, b) =>
+                  IncompleteUploadSupportingDocumentAnswers(a, List.empty)
+                case CompleteUploadSupportingDocumentAnswers(a, b) =>
+                  IncompleteUploadSupportingDocumentAnswers(Some(a), List.empty)
+              }
+              val newDraftReturn = fillingOutReturn.draftReturn match {
+                case s @ DraftSingleDisposalReturn(
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _
+                    ) =>
+                  s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                case m @ DraftMultipleDisposalsReturn(
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _
+                    ) =>
+                  m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+              }
+
+              val result = for {
+                _ <- returnsService
+                      .storeDraftReturn(
+                        newDraftReturn,
+                        fillingOutReturn.subscribedDetails.cgtReference,
+                        fillingOutReturn.agentReferenceNumber
+                      )
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                      )
+                    )
+              } yield ()
+
+              result.fold({ e =>
+                logger.warn("Could not update session", e)
+                errorHandler.errorResult()
+              }, _ => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()))
+
+            } else {
+              //User selects No - in this case we want to
+              //TOOD: delete all supporting evidence from session data
+              //TOOD: delete all supporting evidence from draftReturn
+              //TOOD: delete all supporting evidence from upscan db
+
+              val result = for {
+                _ <- upscanService.removeAllFiles(DraftReturnId(draftReturnId.toString))
+                updatedAnswers: UploadSupportingDocumentAnswers = answers match {
+                  case IncompleteUploadSupportingDocumentAnswers(a, b) =>
+                    IncompleteUploadSupportingDocumentAnswers(Some(false), List.empty)
+                  case CompleteUploadSupportingDocumentAnswers(a, b) =>
+                    CompleteUploadSupportingDocumentAnswers(false, List.empty)
+                }
+                newDraftReturn = fillingOutReturn.draftReturn match {
+                  case s @ DraftSingleDisposalReturn(
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _
+                      ) =>
+                    s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                  case m @ DraftMultipleDisposalsReturn(
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _
+                      ) =>
+                    m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                }
+
+                _ <- returnsService
+                      .storeDraftReturn(
+                        newDraftReturn,
+                        fillingOutReturn.subscribedDetails.cgtReference,
+                        fillingOutReturn.agentReferenceNumber
+                      )
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                      )
+                    )
+              } yield ()
+
+              result.fold({ e =>
+                logger.warn("Could not update session", e)
+                errorHandler.errorResult()
+              }, _ => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()))
+
+            }
+        )
+
         commonSubmitBehaviour(fillingOutReturn, fillingOutReturn.draftReturn, answers)(
           form = doYouWantToUploadSupportingDocumentsForm
         )(page = { (form, backLink) =>
@@ -217,43 +341,85 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
           redirectToIfNoRequiredPreviousAnswer = routes.UploadSupportingDocumentsController.checkYourAnswers()
         )(
           updateAnswers = (doYouWantToUploadSupportingDocumentsAnswer, draftReturn) => {
-            draftReturn match {
-              case s @ DraftSingleDisposalReturn(
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _
-                  ) =>
-                s.copy(uploadSupportingDocuments = Some(
-                  IncompleteUploadSupportingDocumentAnswers(
-                    Some(doYouWantToUploadSupportingDocumentsAnswer),
-                    List.empty
+            if (doYouWantToUploadSupportingDocumentsAnswer) {
+              draftReturn match {
+                case s @ DraftSingleDisposalReturn(
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _
+                    ) =>
+                  s.copy(uploadSupportingDocuments = Some(
+                    IncompleteUploadSupportingDocumentAnswers(
+                      Some(doYouWantToUploadSupportingDocumentsAnswer),
+                      List.empty
+                    )
+                  ) //FIXME: list should be passed in
                   )
-                ) //FIXME: list should be passed in
-                )
-              case m @ DraftMultipleDisposalsReturn(
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _
-                  ) =>
-                m.copy(uploadSupportingDocuments = Some(
-                  IncompleteUploadSupportingDocumentAnswers(
-                    Some(doYouWantToUploadSupportingDocumentsAnswer),
-                    List.empty
+                case m @ DraftMultipleDisposalsReturn(
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _
+                    ) =>
+                  m.copy(uploadSupportingDocuments = Some(
+                    IncompleteUploadSupportingDocumentAnswers(
+                      Some(doYouWantToUploadSupportingDocumentsAnswer),
+                      List.empty
+                    )
+                  ) //FIXME: list should be passed in
                   )
-                ) //FIXME: list should be passed in
-                )
+              }
+            } else { // Selects no
+
+              draftReturn match {
+                case s @ DraftSingleDisposalReturn(
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _
+                    ) =>
+                  s.copy(uploadSupportingDocuments = Some(
+                    IncompleteUploadSupportingDocumentAnswers(
+                      Some(doYouWantToUploadSupportingDocumentsAnswer),
+                      List.empty
+                    )
+                  ) //FIXME: list should be passed in
+                  )
+                case m @ DraftMultipleDisposalsReturn(
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _
+                    ) =>
+                  m.copy(uploadSupportingDocuments = Some(
+                    IncompleteUploadSupportingDocumentAnswers(
+                      Some(doYouWantToUploadSupportingDocumentsAnswer),
+                      List.empty
+                    )
+                  ) //FIXME: list should be passed in
+                  )
+              }
             }
           }
         )
@@ -328,7 +494,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
             case IncompleteUploadSupportingDocumentAnswers(a, b) =>
               IncompleteUploadSupportingDocumentAnswers(a, b :+ SupportingDocuments(reference, ""))
             case CompleteUploadSupportingDocumentAnswers(a, b) =>
-              CompleteUploadSupportingDocumentAnswers(a, b :+ SupportingDocuments(reference, ""))
+              IncompleteUploadSupportingDocumentAnswers(Some(a), b :+ SupportingDocuments(reference, ""))
           }
           newDraftReturn = fillingOutReturn.draftReturn match {
             case s @ DraftSingleDisposalReturn(
@@ -384,12 +550,36 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   def uploadSupportingEvidenceVirusCheck(reference: String) = authenticatedActionWithSessionData.async {
     implicit request =>
       withUploadSupportingDocumentsAnswers(request) { (draftReturnId, cgtRef, _, fillingOutReturn, answers) =>
-        Ok(uploadSupportingEvidenceUpscanCheckPage(UpscanInitiateReference(reference), READY)) //FIXME: make sure correct status is pumped in for this file by looking at DB
+        //TODO: go to the database and ge tthe status of this uploaded file using the reference and draft if and pass it into here
+        val result = for {
+          fd <- upscanService
+                 .getUpscanFileDescriptor(DraftReturnId(draftReturnId.toString), UpscanInitiateReference(reference))
+        } yield (fd)
+
+        result.fold(
+          error => {
+            logger.warn(s"failed to upload file with error: $error")
+            errorHandler.errorResult(None)
+          },
+          ref =>
+            ref match {
+              case Some(value) =>
+                if (value.status === UPLOADED | value.status === FAILED) {
+                  Ok(uploadSupportingEvidenceUpscanCheckPage(UpscanInitiateReference(reference), value.status))
+                } else {
+                  Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
+                }
+              //FIXME: make sure correct status is pumped in for this file by looking at DB
+              case None => BadRequest("Could not find reference") //FIXME change to error page
+            }
+          // TODO: need to update the session store with new answers based on this uploaded file (just reference )
+        )
       }
   }
 
-  def uploadSupportingEvidenceVirusCheckSubmit() = authenticatedActionWithSessionData.async { implicit request =>
-    Ok("")
+  def uploadSupportingEvidenceVirusCheckSubmit(reference: String) = authenticatedActionWithSessionData.async {
+    implicit request =>
+      Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheck(reference))
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
@@ -410,18 +600,124 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
     Right(prepared)
   }
 
-  def changeSupportingEvidence(id: String) = authenticatedActionWithSessionData.async { implicit request =>
-    Ok(
-      changeOrDeletePage(
-        Some(SupportingDocuments("1", "filename")),
-        routes.UploadSupportingDocumentsController.checkYourAnswers()
-      )
-    )
+  //TODO: the id is the id of the file that needs to be replaced
+  def changeSupportingEvidence(deleteId: String) = authenticatedActionWithSessionData.async { implicit request =>
+    withUploadSupportingDocumentsAnswers(request) { (draftReturnId, cgtRef, _, fillingOutReturn, answers) =>
+      upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
+        case Left(error) =>
+          logger.warn(s"could not initiate upscan due to $error")
+          error.value match {
+            case Right(MaxFileUploadsReached2) => //FIXME: fix this constant name
+              Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()) //TODO: this is not working - it is letting add more than 4
+          }
+        case Right(upscanInitiateResponse) =>
+          upscanInitiateResponse match {
+            case FailedToGetUpscanSnapshot => errorHandler.errorResult(None) //FIXME : this cann't happen remove this
+            case UpscanInitiateSuccess(reference) =>
+              Ok(changeSupportingEvidencePage(reference, deleteId)) //FIXME: backlink???
+          }
+      }
+
+    //        commonDisplayBehaviour(answers)(
+    //          form = _.fold(
+    //            _.doYouWantToUploadSupportingDocuments
+    //              .fold(uploadSupportingDocumentForm)(uploadSupportingDocumentForm.fill), //TODO: this needs to change as it is a form upload
+    //            c => uploadSupportingDocumentForm.fill(c.doYouWantToUploadSupportingDocuments)
+    //          )
+    //        )(
+    //          page = uploadSupportingEvidencePage(_, _, "")
+    //        )(
+    //          requiredPreviousAnswer =
+    //            _.fold(_.doYouWantToUploadSupportingDocuments, c => Some(c.doYouWantToUploadSupportingDocuments)),
+    //          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList() //TODO: do I really want to go here??
+    //        )
+    }
   }
 
-  def changeSupportingEvidenceSubmit() = authenticatedActionWithSessionData.async { implicit request =>
-    Ok("submitted change")
-  }
+  //TODO: is going to take two parameters, one is the id that represents the file to be deleted from upscan db and hte other is the file that needs to be inserted
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  def changeSupportingEvidenceSubmit(ref: String, del: String) =
+    authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
+      withUploadSupportingDocumentsAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
+        val multipart: MultipartFormData[Files.TemporaryFile] = request.body
+        val result = for {
+          reference <- EitherT.fromOption(
+                        multipart.dataParts.get("reference").flatMap(_.headOption),
+                        Error("missing upscan file descriptor id")
+                      )
+          maybeUpscanFileDescriptor <- upscanService
+                                        .getUpscanFileDescriptor(
+                                          DraftReturnId(draftReturnId.toString), //TODO: make sure this is used downstream
+                                          UpscanInitiateReference(reference)
+                                        )
+          upscanFileDescriptor <- EitherT.fromOption(
+                                   maybeUpscanFileDescriptor,
+                                   Error("failed to retrieve upscan file descriptor details")
+                                 )
+          prepared <- EitherT.fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
+          _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+          _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+          //TODO: update session store as well here - need to add file name and upscan reference
+          updatedAnswers: UploadSupportingDocumentAnswers = answers match {
+            case IncompleteUploadSupportingDocumentAnswers(a, b) => {
+              val removeOldDoc = b.filterNot(c => c.reference === del)
+              IncompleteUploadSupportingDocumentAnswers(a, removeOldDoc :+ SupportingDocuments(reference, ""))
+            }
+            case CompleteUploadSupportingDocumentAnswers(a, b) => {
+              val removeOldDoc = b.filterNot(c => c.reference === del)
+              IncompleteUploadSupportingDocumentAnswers(Some(a), removeOldDoc :+ SupportingDocuments(reference, ""))
+            }
+          }
+          newDraftReturn = fillingOutReturn.draftReturn match {
+            case s @ DraftSingleDisposalReturn(
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _
+                ) =>
+              s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+            case m @ DraftMultipleDisposalsReturn(
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _
+                ) =>
+              m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+          }
+          _ <- returnsService
+                .storeDraftReturn(
+                  newDraftReturn,
+                  fillingOutReturn.subscribedDetails.cgtReference,
+                  fillingOutReturn.agentReferenceNumber
+                )
+          _ <- EitherT(
+                updateSession(sessionStore, request)(
+                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                )
+              )
+          _ <- upscanService.removeFile(DraftReturnId(draftReturnId.toString), UpscanInitiateReference(del))
+        } yield (reference)
+
+        result.fold(
+          error => {
+            logger.warn(s"failed to upload file with error: $error")
+            errorHandler.errorResult(None)
+          },
+          ref => Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheck(ref))
+          // TODO: need to update the session store with new answers based on this uploaded file (just reference )
+        )
+      }
+    }
 
   def deleteSupportingEvidence(id: String) = authenticatedActionWithSessionData.async { implicit request =>
     withUploadSupportingDocumentsAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
@@ -493,8 +789,9 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withUploadSupportingDocumentsAnswers(request) { (_, _, _, fillingOutReturn, answers) =>
       (answers, fillingOutReturn.draftReturn) match {
-        case (c: UploadSupportingDocumentAnswers, s: DraftSingleDisposalReturn) =>
+        case (c: UploadSupportingDocumentAnswers, s: DraftSingleDisposalReturn) => {
           checkYourAnswersHandleCalculated(c, fillingOutReturn, s)
+        }
 
         case (c: UploadSupportingDocumentAnswers, s: DraftMultipleDisposalsReturn) => //TODO: fix - collapse into one
           checkYourAnswersHandleCalculated(c, fillingOutReturn, s)
@@ -506,12 +803,65 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
     }
   }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withUploadSupportingDocumentsAnswers(request) {
-      case _ =>
-        Redirect(controllers.returns.routes.TaskListController.taskList()) //TODO: update status here
+  def checkYourAnswersSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withUploadSupportingDocumentsAnswers(request) { (_, _, _, fillingOutReturn, answers) =>
+        //TODO: update datatbase with CompleteStatus
+
+        val updatedAnswers: UploadSupportingDocumentAnswers = answers match {
+          case IncompleteUploadSupportingDocumentAnswers(Some(a), b) =>
+            CompleteUploadSupportingDocumentAnswers(a, b)
+          case CompleteUploadSupportingDocumentAnswers(a, b) =>
+            CompleteUploadSupportingDocumentAnswers(a, b)
+        }
+        val newDraftReturn = fillingOutReturn.draftReturn match {
+          case s @ DraftSingleDisposalReturn(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _
+              ) =>
+            s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+          case m @ DraftMultipleDisposalsReturn(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _
+              ) =>
+            m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+        }
+
+        val result = for {
+
+          _ <- returnsService
+                .storeDraftReturn(
+                  newDraftReturn,
+                  fillingOutReturn.subscribedDetails.cgtReference,
+                  fillingOutReturn.agentReferenceNumber
+                )
+          _ <- EitherT(
+                updateSession(sessionStore, request)(
+                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                )
+              )
+        } yield ()
+
+        result.fold({ e =>
+          logger.warn("Could not update session", e)
+          errorHandler.errorResult()
+        }, _ => Redirect(controllers.returns.routes.TaskListController.taskList()))
+      }
     }
-  }
 
   //TODO: need to keep track of number of files uploaded so far and so they cannot get to the page where they can upload more - they have to go to the CYA page
   private def checkYourAnswersHandleCalculated(
@@ -527,11 +877,58 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
         if (a) {
           list match {
             case Nil => Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidence())
-            case ::(head, tl) =>
-              Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(a, list)))
+            case ::(head, tl) => {
+              val ul = for {
+                l <- upscanService.getAll(DraftReturnId(draftReturn.id.toString))
+              } yield (l)
+
+              // Expired
+              ul.fold(
+                e => InternalServerError("some thing went wrong get all the files"),
+                s => {
+                  val (expired, nonexpired) = s.partition(p => p.timestamp.plusDays(7).isBefore(LocalDateTime.now))
+                  val expiredList = expired.map(e =>
+                    SupportingDocuments(
+                      e.fileDescriptor.reference,
+                      e.fileDescriptor.uploadRequest.fields.getOrElse("fileName", "could not get filename")
+                    )
+                  )
+
+                  if (!expiredList.isEmpty) {
+                    Ok(expiredSupportingEvidencePage(expiredList))
+                  } else {
+                    Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(a, list)))
+                  }
+                }
+              )
+
+            }
           }
         } else {
-          Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(a, list)))
+          //TODO: for this draft id we need to go and grab all the files in the upscan store to see which have expired
+          val ul = for {
+            l <- upscanService.getAll(DraftReturnId(draftReturn.id.toString))
+          } yield (l)
+
+          ul.fold(
+            e => InternalServerError("some thing went wrong get all the files"),
+            s => {
+              val (expired, nonexpired) = s.partition(p => p.timestamp.plusDays(7).isBefore(LocalDateTime.now))
+              val expiredList = expired.map(e =>
+                SupportingDocuments(
+                  e.fileDescriptor.reference,
+                  e.fileDescriptor.uploadRequest.fields.getOrElse("fileName", "could not get filename")
+                )
+              )
+
+              if (!expiredList.isEmpty) {
+                Ok(expiredSupportingEvidencePage(expiredList))
+              } else {
+                Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(a, list)))
+              }
+            }
+          )
+
         }
       case IncompleteUploadSupportingDocumentAnswers(Some(false), _) =>
         val completeAnswers = CompleteUploadSupportingDocumentAnswers(false, List.empty)
@@ -583,8 +980,32 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
           errorHandler.errorResult()
         }, _ => Ok(checkYourAnswersPage(completeAnswers)))
 
-      case c @ CompleteUploadSupportingDocumentAnswers(_, _) =>
-        Ok(checkYourAnswersPage(c))
+      case c @ CompleteUploadSupportingDocumentAnswers(a, list) => {
+
+        val ul = for {
+          l <- upscanService.getAll(DraftReturnId(draftReturn.id.toString))
+        } yield (l)
+
+        ul.fold(
+          e => InternalServerError("some thing went wrong get all the files"),
+          s => {
+            val (expired, nonexpired) = s.partition(p => p.timestamp.plusDays(7).isBefore(LocalDateTime.now))
+            val expiredList = expired.map(e =>
+              SupportingDocuments(
+                e.fileDescriptor.reference,
+                e.fileDescriptor.uploadRequest.fields.getOrElse("fileName", "could not get filename")
+              )
+            )
+
+            if (!expiredList.isEmpty) {
+              Ok(expiredSupportingEvidencePage(expiredList))
+            } else {
+              Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(a, list)))
+            }
+          }
+        )
+
+      }
     }
 
 }
@@ -595,6 +1016,13 @@ object UploadSupportingDocumentsController {
     Form(
       mapping(
         "do-you-want-to-upload-supporting-documents" -> of(BooleanFormatter.formatter)
+      )(identity)(Some(_))
+    )
+
+  val scanCheckForm: Form[String] =
+    Form(
+      mapping(
+        "reference" -> nonEmptyText
       )(identity)(Some(_))
     )
 

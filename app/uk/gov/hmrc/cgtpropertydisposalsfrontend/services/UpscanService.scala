@@ -59,6 +59,10 @@ trait UpscanService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
+  def getAll(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[UpscanFileDescriptor]]
+
 }
 
 @Singleton
@@ -140,5 +144,10 @@ class UpscanServiceImpl @Inject() (
 
   override def removeAllFiles(draftReturnId: DraftReturnId)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
     upscanConnector.removeAllFiles(draftReturnId)
+
+  override def getAll(
+    draftReturnId: DraftReturnId
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[UpscanFileDescriptor]] =
+    upscanConnector.getAll(draftReturnId)
 
 }

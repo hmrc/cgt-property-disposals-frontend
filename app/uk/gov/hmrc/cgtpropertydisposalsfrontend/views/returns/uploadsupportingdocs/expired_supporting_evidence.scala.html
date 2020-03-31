@@ -1,0 +1,64 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.CompleteUploadSupportingDocumentAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.SupportingDocuments
+
+@this(
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_evidence_summary,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+)
+
+@(expired : List[SupportingDocuments])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+
+    @key = @{"upload-supporting-documents.check-your-answers"}
+
+    @title = @{messages(s"$key.title")}
+
+    @mainTemplate(title = title, userType = request.userType) {
+
+    <h1>Expired</h1>
+        @pageHeading(title, Some(messages(s"$key.caption")))
+
+        @cyaSection() {
+
+            @for((document, fileIndex) <- expired.zipWithIndex) {
+
+                <div>
+                    <dt class="cya-question" id="question">
+                        Supporting evidence file @{fileIndex + 1}
+                    </dt>
+                    <dd class="cya-answer" id="answer">
+                        @document.fileName
+                    </dd>
+                    <dd class="cya-change"><a href=@routes.UploadSupportingDocumentsController.changeSupportingEvidence(document.reference).url>Change<span class="visuallyhidden">"change"</span></a></dd>
+                    <dd class="cya-change"><a href=@routes.UploadSupportingDocumentsController.deleteSupportingEvidence(document.reference).url>Delete<span class="visuallyhidden">"delete"</span></a></dd>
+                </div>
+
+            }
+
+        }
+
+    }

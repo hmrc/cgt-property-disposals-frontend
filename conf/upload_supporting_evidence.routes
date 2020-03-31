@@ -5,10 +5,10 @@ GET    /supporting-evidence/upload-supporting-evidence                      uk.g
 POST   /supporting-evidence/upload-supporting-evidence                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.uploadSupportingEvidenceSubmit()
 
 GET    /supporting-evidence/upload-supporting-evidence-virus-check/:id          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheck(id : String)
-POST   /supporting-evidence/upload-supporting-evidence-virus-check          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheckSubmit()
+POST   /supporting-evidence/upload-supporting-evidence-virus-check          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheckSubmit(id : String)
 
 GET    /supporting-documents/change-supporting-evidence/:id                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.changeSupportingEvidence(id : String)
-POST   /supporting-documents/change-supporting-evidence                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.changeSupportingEvidenceSubmit()
+POST   /supporting-documents/change-supporting-evidence/:id/:id2                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.changeSupportingEvidenceSubmit(id : String, id2: String)
 
 GET    /supporting-documents/delete-supporting-evidence/:id                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.deleteSupportingEvidence(id: String)
 POST   /supporting-documents/delete-supporting-evidence                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.deleteSupportingEvidenceSubmit()

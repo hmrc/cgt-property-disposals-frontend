@@ -85,6 +85,9 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
+  def getAll(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[UpscanFileDescriptor]]
 }
 @Singleton
 class UpscanConnectorImpl @Inject() (
@@ -155,7 +158,7 @@ class UpscanConnectorImpl @Inject() (
   override def removeAllFiles(
     draftReturnId: DraftReturnId
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/draft-return-id/${draftReturnId.value}"
+    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/delete-all-files/${draftReturnId.value}"
     EitherT[Future, Error, Unit](
       http
         .get(url)
@@ -220,6 +223,31 @@ class UpscanConnectorImpl @Inject() (
         .map { httpResponse =>
           httpResponse.status match {
             case Status.OK => Right(Json.fromJson[UpscanFileDescriptor](httpResponse.json).asOpt)
+            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
+              Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
+          }
+        }
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+  }
+
+  //TODO: BE needs to change now because we can have multiple draft returns and each draft return can have multiple files for a cgt ref
+  override def getAll(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[UpscanFileDescriptor]] = {
+    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/all/${draftReturnId.value}" //FIXME: this has to add the drft id and then the BE needs to change to use it
+    EitherT[Future, Error, List[UpscanFileDescriptor]](
+      http
+        .get(url)
+        .map { httpResponse =>
+          httpResponse.status match {
+            case Status.OK =>
+              Right(Json.fromJson[List[UpscanFileDescriptor]](httpResponse.json).asOpt match {
+                case Some(value) => value
+                case None        => List() //FIXME is there a better way
+              })
             case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
               Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
           }

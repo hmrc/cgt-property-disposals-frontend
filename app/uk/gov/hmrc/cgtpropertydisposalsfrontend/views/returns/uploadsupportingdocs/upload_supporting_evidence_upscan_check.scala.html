@@ -101,8 +101,7 @@
             }
         }
 
-        @formWrapper(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheckSubmit(), 'novalidate -> "novalidate") {
-
+        @formWrapper(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheckSubmit(reference.value), 'novalidate -> "novalidate") {
             @if(status === UPLOADED) {
                 @submitButton("Check status and continue")
             }else if (status === READY) {
