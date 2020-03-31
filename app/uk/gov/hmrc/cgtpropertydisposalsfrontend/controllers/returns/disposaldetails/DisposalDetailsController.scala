@@ -178,14 +178,14 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, _, _, answers) =>
+      case (_, fillingOutReturn, _, answers) =>
         displayPage(answers)(
           form = _.fold(
             _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
             c => shareOfPropertyForm.fill(c.shareOfProperty)
           )
         )(
-          page = howMuchDidYouOwnPage(_, _)
+          page = howMuchDidYouOwnPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
         )(
           requiredPreviousAnswer               = _ => Some(()),
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -199,7 +199,7 @@ class DisposalDetailsController @Inject() (
         submitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = shareOfPropertyForm
         )(
-          page = howMuchDidYouOwnPage(_, _)
+          page = howMuchDidYouOwnPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
         )(
           requiredPreviousAnswer               = _ => Some(()),
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -384,13 +384,16 @@ class DisposalDetailsController @Inject() (
                       )
                 } yield ()
 
-                result.fold({ e =>
-                  logger.warn("Could not update session", e)
-                  errorHandler.errorResult
-                }, _ => Ok(checkYouAnswers(completeAnswers, disposalMethod)))
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult
+                  },
+                  _ => Ok(checkYouAnswers(completeAnswers, disposalMethod, fillingOutReturn.subscribedDetails.isATrust))
+                )
 
               case answers: CompleteDisposalDetailsAnswers =>
-                Ok(checkYouAnswers(answers, disposalMethod))
+                Ok(checkYouAnswers(answers, disposalMethod, fillingOutReturn.subscribedDetails.isATrust))
             }
 
         }

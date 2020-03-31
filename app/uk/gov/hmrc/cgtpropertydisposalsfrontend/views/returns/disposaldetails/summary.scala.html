@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -27,14 +28,18 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
 @formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
 @disposalPriceTitle =@{messages(s"disposalPrice.${disposalMethod.toString}.title")}
 @disposalFeesTitle = @{messages(s"disposalFees.${disposalMethod.toString}.title")}
 
 @cyaSection() {
   @cyaRow(
-    messages("shareOfProperty.title"),
+    messages(s"shareOfProperty$userKey.title"),
     Html(formatPercentage(answers.shareOfProperty.percentageValue)),
     Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url)),
       "propertyShare"

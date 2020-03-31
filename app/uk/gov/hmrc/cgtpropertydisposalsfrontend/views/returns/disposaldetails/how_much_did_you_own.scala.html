@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -33,10 +34,15 @@
   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[ShareOfProperty], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[ShareOfProperty], backLink: Call, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
+
 @key = @{ "shareOfProperty" }
 @percentageShareKey = @{"percentageShare"}
-@title = @{messages(s"$key.title")}
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @options = @{List(
   RadioOption(
@@ -91,9 +97,10 @@
         fieldId = key,
         label = pageHeading(title),
         selected = selectedIndex,
-          error = form.error(key),
+        error = form.error(key),
         hasErrors = hasErrors,
-        options = options
+        options = options,
+        customErrorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}")
       )
 
       @submitButton(messages("button.saveAndContinue"))

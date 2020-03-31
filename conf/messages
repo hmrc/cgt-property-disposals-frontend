@@ -770,11 +770,17 @@ returns.property-address.cyaChange.property-address=the address of the property
 
 returns.disposal-details.caption=Sale or disposal details
 
+shareOfProperty.title=How much of the property did you own?
 shareOfProperty.agent.title=How much of the property did your client own?
 shareOfProperty.trust.title=How much of the property did the trust own?
-
 shareOfProperty.error.required=Select how much of the property you owned
+shareOfProperty.agent.error.required=Select how much of the property your client owned
+shareOfProperty.trust.error.required=Select how much of the property the trust owned
+
 shareOfProperty.error.invalid=Select how much of the property you owned
+shareOfProperty.agent.error.invalid=Select how much of the property your client owned
+shareOfProperty.trust.error.invalid=Select how much of the property the trust owned
+
 returns.shareOfProperty.Full=100%
 returns.shareOfProperty.Half=50%
 returns.shareOfProperty.Other=Other share
