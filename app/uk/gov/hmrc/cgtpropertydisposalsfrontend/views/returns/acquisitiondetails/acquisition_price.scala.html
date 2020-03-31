@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -34,13 +35,16 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[BigDecimal], backLink: Call, acquisitionMethod: AcquisitionMethod, acquisitionDate: AcquisitionDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, acquisitionMethod: AcquisitionMethod, acquisitionDate: AcquisitionDate, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "acquisitionPrice" }
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @titleWithHelpTextAndContext = @{acquisitionMethod match {
-  case AcquisitionMethod.Bought => (messages(s"${key}Bought.title"), Html(messages(s"${key}Bought.helpText")), "acquisitionPriceBought")
-  case _ => (messages(s"${key}NotBought.title", LocalDateUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought.helpText")), "acquisitionPriceNotBought")
+  case AcquisitionMethod.Bought => (messages(s"${key}Bought$userKey.title"), Html(messages(s"${key}Bought$userKey.helpText")), s"acquisitionPriceBought$userKey")
+  case _ => (messages(s"${key}NotBought$userKey.title", LocalDateUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought$userKey.helpText")), s"acquisitionPriceNotBought$userKey")
 }}
 
 @mainTemplate(title = titleWithHelpTextAndContext._1, userType = request.userType, hasErrors = hasErrors) {

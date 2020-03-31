@@ -885,7 +885,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         "the session has a draft return" in {
           val subscribed = sample[Subscribed].copy(
             subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
-            sentReturns       = List.empty
+            sentReturns       = List.empty,
+            draftReturns      = List(sample[DraftSingleDisposalReturn])
           )
 
           inSequence {
@@ -902,7 +903,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         "there is a submitted return" in {
           val subscribed = sample[Subscribed].copy(
             subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
-            draftReturns      = List.empty
+            draftReturns      = List.empty,
+            sentReturns       = List(sample[ReturnSummary])
           )
 
           inSequence {
@@ -918,7 +920,11 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
         "there is submitted and draft returns" in {
           val subscribed =
-            sample[Subscribed].copy(subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])))
+            sample[Subscribed].copy(
+              subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
+              sentReturns       = List(sample[ReturnSummary]),
+              draftReturns      = List(sample[DraftSingleDisposalReturn])
+            )
 
           inSequence {
             mockAuthWithNoRetrievals()

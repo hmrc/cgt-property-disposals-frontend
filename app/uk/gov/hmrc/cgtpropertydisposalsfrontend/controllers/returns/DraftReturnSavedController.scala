@@ -33,20 +33,20 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ConfirmDraftReturnController @Inject() (
+class DraftReturnSavedController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   val returnsService: ReturnsService,
   cc: MessagesControllerComponents,
-  confirmationDraftReturnPage: views.html.returns.confirmation_of_draft_return
+  returnSavedPage: views.html.returns.return_saved
 )(implicit val ec: ExecutionContext, viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging {
 
-  def confirmDraftReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+  def draftReturnSaved(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(FillingOutReturn(subscribedDetails, _, agentReferenceNumber, draftReturn)) => {
         val draftReturnWithLastUpdated = draftReturn.fold(
@@ -64,7 +64,7 @@ class ConfirmDraftReturnController @Inject() (
             )
             errorHandler.errorResult()
           },
-          _ => Ok(confirmationDraftReturnPage(draftReturnWithLastUpdated))
+          _ => Ok(returnSavedPage(draftReturnWithLastUpdated, subscribedDetails.isATrust))
         )
       }
       case _ =>
