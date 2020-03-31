@@ -39,8 +39,18 @@
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
 
+@disposalMethodKey = @{ disposalMethod match {
+    case DisposalMethod.Gifted => ".Gifted"
+    case _      => ".SoldOther"
+}}
+
+@disposalMethodErrorKey = @{ disposalMethod match {
+    case DisposalMethod.Gifted => "Gifted."
+    case _      => "SoldOther."
+}}
+
 @key = @{ "disposalPrice" }
-@title = @{messages(if (isAgent || isATrust) s"$key$userKey.title" else s"$key.${disposalMethod.toString}.title")}
+@title = @{ messages(s"$key$userKey$disposalMethodKey.title") }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
@@ -61,13 +71,13 @@
         hasErrors = form.error(key).nonEmpty,
         label = Html(title),
         labelAsHeading = true,
-        helpText = Some(Html(messages(s"$key$userKey.helpText"))),
+        helpText = Some(Html(messages(s"$key$userKey$disposalMethodKey.helpText"))),
         autoComplete = AutoCompleteType.On,
         inputClass = Some("small"),
         aspect = "left",
         unit = "£",
         assistiveText = messages("unit-input.assistive.pounds"),
-        customErrorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}")
+        customErrorKey = form.error(key).map(e => s"$userErrorPrefix$disposalMethodErrorKey${e.message}")
       )
 
       @submitButton(messages("button.saveAndContinue"))
