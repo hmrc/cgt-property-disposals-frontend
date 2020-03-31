@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
+import java.time.LocalDate
 import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
@@ -43,8 +45,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatell
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
@@ -485,22 +492,117 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
       )
 
-      "display the page" in {
-        val justSubmittedReturn = sample[JustSubmittedReturn]
+      "confirmation of submission is correct" in {
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithJourney(justSubmittedReturn))
-        }
+        val noTaxDueRefLine             = "Return reference number form bundle id"
+        val taxDueRefLine               = "Payment reference number charge ref"
+        val submissionLine              = "Return sent to HMRC temp - do not know where submission date is"
+        val addressLine                 = "Property address 123 fake street, abc123"
+        val returnReferenceWithBundleId = "Return reference number form bundle id"
+        val taxDueDateLine              = "Tax due by 2020-01-01"
 
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("confirmationOfSubmission.title"), { doc =>
-            doc.select("#content > article > div > p > a").attr("href") shouldBe viewConfig.selfAssessmentUrl
-          }
+        val scenarios = Seq(
+          (
+            "user with no tax due",
+            Some(UserType.Individual),
+            AmountInPence(0),
+            "",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine)
+          ),
+          (
+            "user with tax due",
+            Some(UserType.Individual),
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine)
+          ),
+          (
+            "agent with no tax due",
+            Some(UserType.Agent),
+            AmountInPence(0),
+            "Client: ",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine)
+          ),
+          (
+            "agent with tax due",
+            Some(UserType.Agent),
+            AmountInPence(10000),
+            "Client: ",
+            taxDueRefLine,
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine)
+          ),
+          (
+            "organisation with no tax due",
+            Some(UserType.Organisation),
+            AmountInPence(0),
+            "Trust: ",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine)
+          ),
+          (
+            "organisation with tax due",
+            Some(UserType.Organisation),
+            AmountInPence(10000),
+            "Trust: ",
+            taxDueRefLine,
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine)
+          )
         )
-      }
 
+        scenarios.foreach {
+          case (description, userType, taxOwed, namePrefix, reference, expectedTable) => {
+            withClue(description) {
+              val address = sample[UkAddress].copy(
+                line1    = "123 fake street",
+                line2    = None,
+                town     = None,
+                county   = None,
+                postcode = Postcode("abc123")
+              )
+              val date = LocalDate.of(2020, 1, 1)
+              val a = sample[SubmitReturnResponse].copy(
+                formBundleId = "form bundle id",
+                charge = Some(
+                  sample[ReturnCharge].copy(amount = taxOwed, chargeReference = "charge ref", dueDate = date)
+                )
+              )
+              val subscribe = sample[SubscribedDetails].copy(name = Right(IndividualName("John", "Doe")))
+              val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+                submissionResponse = a,
+                subscribedDetails  = subscribe,
+                completeReturn     = sample[CompleteSingleDisposalReturn].copy(propertyAddress = address)
+              )
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(sessionWithJourney(justSubmittedReturn).copy(userType = userType))
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("confirmationOfSubmission.title"), { doc =>
+                  doc.select("#user-details-name").text()         shouldBe namePrefix + "John Doe"
+                  doc.select("#ref-id").text()                    shouldBe reference
+                  doc.select("#return-details-table > tr").size() shouldBe expectedTable.size
+
+                  expectedTable.zipWithIndex.foreach {
+                    case (el, i) => {
+                      val index = i + 1
+                      doc
+                        .select(s"#return-details-table > tr:nth-child($index)")
+                        .text() shouldBe el
+                    }
+                  }
+                  doc.select("#content > article > div > p > a").attr("href") shouldBe viewConfig.selfAssessmentUrl
+                }
+              )
+            }
+          }
+        }
+      }
     }
 
     "handling requests to pay a return" must {

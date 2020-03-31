@@ -193,7 +193,11 @@ class ViewReturnControllerSpec
               .text() shouldBe messageFromMessageKey(
               "viewReturn.title"
             )
-            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
+              document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
+            } else {
+              document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            }
             document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
             )
