@@ -95,10 +95,7 @@
         <tr class="charge">
             <td> <strong class="bold"> Return sent to HMRC </strong> <br/> </td>
             <td>
-                @{justSubmittedReturn.completeReturn match {
-                    case c: CompleteMultipleDisposalsReturn => "temp - do not know where submission date is"
-                    case c: CompleteSingleDisposalReturn => "temp - do not know where submission date is"
-                }}
+                @LocalDateUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)
             </td>
         </tr>
 
@@ -124,12 +121,10 @@
             {justSubmittedReturn.submissionResponse.charge.map { charge =>
                 <tr class = "charge">
                     <td> <strong class="bold">Tax due by</strong> <br/>
-                    </td> <td>{charge.dueDate}</td>
+                    </td> <td>{LocalDateUtils.govDisplayFormat(charge.dueDate)}</td>
                 </tr>
             }}
         }}
-
-
 
         </tbody>
     </table>
