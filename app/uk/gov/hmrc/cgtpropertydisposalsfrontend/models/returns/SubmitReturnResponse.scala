@@ -33,7 +33,6 @@ object SubmitReturnResponse {
   final case class ReturnCharge(
     chargeReference: String,
     amount: AmountInPence,
-    processingDate: LocalDate,
     dueDate: LocalDate
   )
 

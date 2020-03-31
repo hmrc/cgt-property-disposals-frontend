@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 import java.util.UUID
 
 import cats.data.EitherT
@@ -495,13 +495,22 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val noTaxDueRefLine             = "Return reference number form bundle id"
         val taxDueRefLine               = "Payment reference number charge ref"
-        val submissionLine              = "Return sent to HMRC temp - do not know where submission date is"
+        val submissionLine              = "Return sent to HMRC 2 February 2020"
         val addressLine                 = "Property address 123 fake street, abc123"
         val returnReferenceWithBundleId = "Return reference number form bundle id"
-        val taxDueDateLine              = "Tax due by 2020-01-01"
+        val taxDueDateLine              = "Tax due by 1 January 2020"
+
+        sealed case class TestScenario(
+          description: String,
+          userType: Option[UserType],
+          taxOwed: AmountInPence,
+          prefix: String,
+          submissionLine: String,
+          tableLines: List[String]
+        )
 
         val scenarios = Seq(
-          (
+          TestScenario(
             "user with no tax due",
             Some(UserType.Individual),
             AmountInPence(0),
@@ -509,7 +518,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             noTaxDueRefLine,
             List(submissionLine, addressLine)
           ),
-          (
+          TestScenario(
             "user with tax due",
             Some(UserType.Individual),
             AmountInPence(10000),
@@ -517,7 +526,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine)
           ),
-          (
+          TestScenario(
             "agent with no tax due",
             Some(UserType.Agent),
             AmountInPence(0),
@@ -525,7 +534,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             noTaxDueRefLine,
             List(submissionLine, addressLine)
           ),
-          (
+          TestScenario(
             "agent with tax due",
             Some(UserType.Agent),
             AmountInPence(10000),
@@ -533,7 +542,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine)
           ),
-          (
+          TestScenario(
             "organisation with no tax due",
             Some(UserType.Organisation),
             AmountInPence(0),
@@ -541,7 +550,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             noTaxDueRefLine,
             List(submissionLine, addressLine)
           ),
-          (
+          TestScenario(
             "organisation with tax due",
             Some(UserType.Organisation),
             AmountInPence(10000),
@@ -552,7 +561,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         scenarios.foreach {
-          case (description, userType, taxOwed, namePrefix, reference, expectedTable) => {
+          case TestScenario(description, userType, taxOwed, namePrefix, reference, expectedTable) => {
             withClue(description) {
               val address = sample[UkAddress].copy(
                 line1    = "123 fake street",
@@ -561,16 +570,22 @@ class CheckAllAnswersAndSubmitControllerSpec
                 county   = None,
                 postcode = Postcode("abc123")
               )
-              val date = LocalDate.of(2020, 1, 1)
-              val a = sample[SubmitReturnResponse].copy(
-                formBundleId = "form bundle id",
+              val processingDate = LocalDate.of(2020, 2, 2)
+              val dueDate        = LocalDate.of(2020, 1, 1)
+              val returnResponse = sample[SubmitReturnResponse].copy(
+                formBundleId   = "form bundle id",
+                processingDate = LocalDateTime.of(processingDate, LocalTime.of(1, 1)),
                 charge = Some(
-                  sample[ReturnCharge].copy(amount = taxOwed, chargeReference = "charge ref", dueDate = date)
+                  sample[ReturnCharge].copy(
+                    amount          = taxOwed,
+                    chargeReference = "charge ref",
+                    dueDate         = dueDate
+                  )
                 )
               )
               val subscribe = sample[SubscribedDetails].copy(name = Right(IndividualName("John", "Doe")))
               val justSubmittedReturn = sample[JustSubmittedReturn].copy(
-                submissionResponse = a,
+                submissionResponse = returnResponse,
                 subscribedDetails  = subscribe,
                 completeReturn     = sample[CompleteSingleDisposalReturn].copy(propertyAddress = address)
               )
