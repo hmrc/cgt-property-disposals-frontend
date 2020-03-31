@@ -69,7 +69,7 @@ class UpscanServiceImpl @Inject() (
 
   private def hasReachedMaxFileUpload(upscanSnapshot: UpscanSnapshot): Either[Error, Unit] =
     if (upscanSnapshot.fileUploadCount >= maxUploads) {
-      Left(Error("maximum number of file uploads has been exceeded"))
+      Left(Error(MaxFileUploadsReached2))
     } else {
       Right(())
     }

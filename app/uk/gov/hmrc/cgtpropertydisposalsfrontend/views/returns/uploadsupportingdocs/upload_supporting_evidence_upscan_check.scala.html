@@ -1,0 +1,116 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import cats.instances.string._
+@import cats.syntax.eq._
+@import helper._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.{routes => upscanRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateReference
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus
+@this(
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+)
+
+@(reference : UpscanInitiateReference, status : UpscanFileDescriptorStatus)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
+    @hasFileFailedScan = @{
+        status match {
+            case READY => false
+            case FAILED => true
+            case UPLOADED => true
+        }
+    }
+
+    @fileScanStatus = @{
+        status match {
+        case READY => "Passed"
+        case FAILED => "Failed"
+        case UPLOADED => "Scan in progress"
+        }
+    }
+
+    @key = @{"upload-supporting-documents.check-upscan-status"}
+    @title = @{messages(s"$key.title")}
+
+    @mainTemplate(title = title, userType = request.userType, hasErrors = None) {
+
+        @if(status === UPLOADED){
+            @pageHeading(title, Some(messages(s"$key.caption")), Some(messages(s"$key.in-progress.help-text")))
+        }else if (status === READY){
+            @pageHeading(title, Some(messages(s"$key.caption")), None)
+        }else{
+            @pageHeading(title, Some(messages(s"$key.caption")), Some(messages(s"$key.failed.help-text")))
+        }
+
+        @cyaSection() {
+
+            @if(status === UPLOADED){
+                @cyaRow(
+                    "file name",
+                    Html(fileScanStatus),
+                    None,
+                    "supporting-evidence-file-scan-status"
+                )
+            }else if (status === READY){
+                @cyaRow(
+                    "file name",
+                    Html(fileScanStatus),
+                    None,
+                    "supporting-evidence-file-scan-status"
+                )
+            }else if (status === FAILED){
+                @cyaRow(
+                    "file name",
+                    Html(fileScanStatus),
+                    Some(cyaChange(
+                    messages("upload-supporting-documents.check-upscan-status.failed.cya-change"),
+                    routes.UploadSupportingDocumentsController.uploadSupportingEvidence().url,
+                    Some(messages("upload-supporting-documents.check-upscan-status.failed.cya-change")))
+                    ),
+                    "supporting-evidence-file-scan-status"
+                )
+            }
+        }
+
+        @formWrapper(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheckSubmit(), 'novalidate -> "novalidate") {
+
+            @if(status === UPLOADED) {
+                @submitButton("Check status and continue")
+            }else if (status === READY) {
+                @submitButton("Save and continue")
+            }
+
+        }
+
+        @returnToSummaryLink(displayReturnToSummaryLink = true)
+
+    }

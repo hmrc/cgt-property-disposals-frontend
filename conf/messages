@@ -1500,3 +1500,9 @@ upload-supporting-documents.check-your-answers.cya-change=Change
 upload-supporting-documents.change-or-delete.title=Change or delete a file
 upload-supporting-documents.change-or-delete.caption=Supporting evidence
 upload-supporting-documents.change-or-delete.help-text=The file can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
+
+upload-supporting-documents.check-upscan-status.title=Supporting Evidence File Upload Status
+upload-supporting-documents.check-upscan-status.caption=Supporting evidence
+upload-supporting-documents.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
+upload-supporting-documents.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
+upload-supporting-documents.check-upscan-status.failed.cya-change=Upload another file

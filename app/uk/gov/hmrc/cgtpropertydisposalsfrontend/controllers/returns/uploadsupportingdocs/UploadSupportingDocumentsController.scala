@@ -26,13 +26,16 @@ import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import configs.Configs
+import configs.syntax._
 import play.api.Configuration
 import play.api.data.Form
-import play.api.data.Forms.{mapping, of, _}
+import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
+import play.api.libs.Files
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController._
@@ -41,7 +44,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.{CompleteUploadSupportingDocumentAnswers, IncompleteUploadSupportingDocumentAnswers, SupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocumentAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.{FAILED, READY, UPLOADED}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.{FailedToGetUpscanSnapshot, MaximumFileUploadReached, UpscanInitiateSuccess}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
@@ -50,12 +55,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{uploadsupportingdocs => pages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import configs.Configs
-import configs.syntax._
-import play.api.libs.Files
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.UPLOADED
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -72,6 +71,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   val configuration: Configuration,
   doYouWantToUploadSupportingEvidencePage: pages.do_you_want_to_upload_supporting_evidence,
   uploadSupportingEvidencePage: pages.upload_supporting_evidence,
+  uploadSupportingEvidenceUpscanCheckPage: pages.upload_supporting_evidence_upscan_check,
   deleteSupportingEvidencePage: pages.delete_supporting_evidence,
   changeSupportingEvidencePage: pages.change_support_evidence,
   checkYourAnswersPage: pages.check_your_answers,
@@ -267,11 +267,13 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
       upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
         case Left(error) =>
           logger.warn(s"could not initiate upscan due to $error")
-          errorHandler.errorResult(None)
+          error.value match {
+            case Right(MaxFileUploadsReached2) => //FIXME: fix this constant name
+              Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()) //TODO: this is not working - it is letting add more than 4
+          }
         case Right(upscanInitiateResponse) =>
           upscanInitiateResponse match {
-            case FailedToGetUpscanSnapshot        => errorHandler.errorResult(None)
-            case MaximumFileUploadReached         => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
+            case FailedToGetUpscanSnapshot        => errorHandler.errorResult(None) //FIXME : this cann't happen remove this
             case UpscanInitiateSuccess(reference) => Ok(uploadSupportingEvidencePage(reference)) //FIXME: backlink???
           }
       }
@@ -302,7 +304,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   def uploadSupportingEvidenceSubmit(): Action[MultipartFormData[Files.TemporaryFile]] =
     authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
-      withUploadSupportingDocumentsAnswers(request) { (draftReturnId, _, _, _, _) =>
+      withUploadSupportingDocumentsAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
         val multipart: MultipartFormData[Files.TemporaryFile] = request.body
         val result = for {
           reference <- EitherT.fromOption(
@@ -321,22 +323,74 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
           prepared <- EitherT.fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
           _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
           _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
-        //TODO: update session store as well here - need to add file name and upscan reference
+          //TODO: update session store as well here - need to add file name and upscan reference
+          updatedAnswers: UploadSupportingDocumentAnswers = answers match {
+            case IncompleteUploadSupportingDocumentAnswers(a, b) =>
+              IncompleteUploadSupportingDocumentAnswers(a, b :+ SupportingDocuments(reference, ""))
+            case CompleteUploadSupportingDocumentAnswers(a, b) =>
+              CompleteUploadSupportingDocumentAnswers(a, b :+ SupportingDocuments(reference, ""))
+          }
+          newDraftReturn = fillingOutReturn.draftReturn match {
+            case s @ DraftSingleDisposalReturn(
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _
+                ) =>
+              s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+            case m @ DraftMultipleDisposalsReturn(
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _,
+                  _
+                ) =>
+              m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+          }
+          _ <- returnsService
+                .storeDraftReturn(
+                  newDraftReturn,
+                  fillingOutReturn.subscribedDetails.cgtReference,
+                  fillingOutReturn.agentReferenceNumber
+                )
+          _ <- EitherT(
+                updateSession(sessionStore, request)(
+                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                )
+              )
 
-        } yield ()
+        } yield (reference)
 
         result.fold(
           error => {
             logger.warn(s"failed to upload file with error: $error")
             errorHandler.errorResult(None)
           },
-          _ => {
-
-            Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
-          } // TODO: need to update the session store with new answers based on this uploaded file (just reference )
+          ref => Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheck(ref))
+          // TODO: need to update the session store with new answers based on this uploaded file (just reference )
         )
       }
     }
+
+  def uploadSupportingEvidenceVirusCheck(reference: String) = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withUploadSupportingDocumentsAnswers(request) { (draftReturnId, cgtRef, _, fillingOutReturn, answers) =>
+        Ok(uploadSupportingEvidenceUpscanCheckPage(UpscanInitiateReference(reference), FAILED)) //FIXME: make sure correct status is pumped in for this file by looking at DB
+      }
+  }
+
+  def uploadSupportingEvidenceVirusCheckSubmit() = authenticatedActionWithSessionData.async { implicit request =>
+    Ok("")
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   private def handleGetFileDescriptorResult(
@@ -356,7 +410,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
     Right(prepared)
   }
 
-  def changeSupportingEvidence() = authenticatedActionWithSessionData.async { implicit request =>
+  def changeSupportingEvidence(id: String) = authenticatedActionWithSessionData.async { implicit request =>
     Ok(
       changeOrDeletePage(
         Some(SupportingDocuments("1", "filename")),
@@ -369,7 +423,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
     Ok("submitted change")
   }
 
-  def deleteSupportingEvidence() = authenticatedActionWithSessionData.async { implicit request =>
+  def deleteSupportingEvidence(id: String) = authenticatedActionWithSessionData.async { implicit request =>
     Ok(
       changeOrDeletePage(
         Some(SupportingDocuments("1", "filename")),
@@ -401,7 +455,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withUploadSupportingDocumentsAnswers(request) {
       case _ =>
-        Redirect(controllers.returns.routes.TaskListController.taskList())
+        Redirect(controllers.returns.routes.TaskListController.taskList()) //TODO: update status here
     }
   }
 
@@ -415,10 +469,16 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
       //FIXME: what should be passed in as list or what do I do with the lists?
       case IncompleteUploadSupportingDocumentAnswers(None, _) => // TODO: change name to IncompleteUploadSupportingEvidenceAnswers
         Redirect(routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocuments())
-      case IncompleteUploadSupportingDocumentAnswers(Some(true), List.empty) =>
-        Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidence())
-      case IncompleteUploadSupportingDocumentAnswers(Some(true), _) =>
-        Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(true, List(SupportingDocuments("2", "f1"))))) //TODO: remove this
+      case IncompleteUploadSupportingDocumentAnswers(Some(a), list) =>
+        if (a) {
+          list match {
+            case Nil => Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidence())
+            case ::(head, tl) =>
+              Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(a, list)))
+          }
+        } else {
+          Ok(checkYourAnswersPage(CompleteUploadSupportingDocumentAnswers(a, list)))
+        }
       case IncompleteUploadSupportingDocumentAnswers(Some(false), _) =>
         val completeAnswers = CompleteUploadSupportingDocumentAnswers(false, List.empty)
         val newDraftReturn =
@@ -451,11 +511,12 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
 
         //TODO: here you need to check if they select "No" to do you want to upload - if so then we delete all the uploaded files from the upscan repo
         val result = for {
-          _ <- returnsService.storeDraftReturn(
-                newDraftReturn,
-                fillingOutReturn.subscribedDetails.cgtReference,
-                fillingOutReturn.agentReferenceNumber
-              )
+          _ <- returnsService
+                .storeDraftReturn( // TODO: we don't need to do this?? we just need to update the filloutreturn structure with the new draftreturn
+                  newDraftReturn,
+                  fillingOutReturn.subscribedDetails.cgtReference,
+                  fillingOutReturn.agentReferenceNumber
+                )
           _ <- EitherT(
                 updateSession(sessionStore, request)(
                   _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))

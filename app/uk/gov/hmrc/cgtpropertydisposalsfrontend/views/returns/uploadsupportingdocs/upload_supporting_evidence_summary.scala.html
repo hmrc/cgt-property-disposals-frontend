@@ -27,9 +27,6 @@
 
 @(answers: CompleteUploadSupportingDocumentAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-    @deleteUrl=@{routes.UploadSupportingDocumentsController.changeSupportingEvidence().url}
-    @changeUrl=@{routes.UploadSupportingDocumentsController.deleteSupportingEvidence().url}
-
     @key = @{"upload-supporting-documents.check-your-answers"}
 
     @title = @{messages(s"$key.title")}
@@ -59,8 +56,8 @@
                 <dd class="cya-answer" id="answer">
                     @document.fileName
                 </dd>
-                <dd class="cya-change"><a href=@changeUrl>Change<span class="visuallyhidden">"change"</span></a></dd>
-                <dd class="cya-change"><a href=@deleteUrl>Delete<span class="visuallyhidden">"delete"</span></a></dd>
+                <dd class="cya-change"><a href=@routes.UploadSupportingDocumentsController.changeSupportingEvidence(document.reference).url>Change<span class="visuallyhidden">"change"</span></a></dd>
+                <dd class="cya-change"><a href=@routes.UploadSupportingDocumentsController.deleteSupportingEvidence(document.reference).url>Delete<span class="visuallyhidden">"delete"</span></a></dd>
             </div>
 
         }

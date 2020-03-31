@@ -55,7 +55,7 @@
                 @cyaRow(
                     "Selected file",
                     Html(document.fold("No file name")(d => d.fileName)),
-                    Some(cyaChange(messages(s"$key.cya-delete"), routes.UploadSupportingDocumentsController.deleteSupportingEvidence().url)),
+                    Some(cyaChange(messages(s"$key.cya-delete"), routes.UploadSupportingDocumentsController.deleteSupportingEvidence("").url)),
                     "change-or-delete-value"
                 )
 

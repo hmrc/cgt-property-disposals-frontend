@@ -39,7 +39,9 @@
 
         @summary(answers)
 
-        <a href=@routes.UploadSupportingDocumentsController.uploadSupportingEvidence().url>Add another file</span></a>
+        @if(answers.documents.size < viewConfig.maxUploads){
+            <a href=@routes.UploadSupportingDocumentsController.uploadSupportingEvidence().url>Add another file</span></a>
+        }
 
         <br>
 
