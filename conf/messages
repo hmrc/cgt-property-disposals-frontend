@@ -1154,11 +1154,10 @@ exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous ye
 
 ytdLiability.caption=Tax amount owed
 
-estimatedIncome.title=What is your estimated income liable for UK tax in this tax year?
-estimatedIncome.helpText=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off
-estimatedIncome.details.summary=How to estimate your income
-estimatedIncome.details.p1=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off.
-estimatedIncome.details.p2=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
+estimatedIncome.title=What do you believe your gross income will be in this tax year?
+estimatedIncome.helpText=The amount should be your total income liable to UK income tax for the tax year {0} to {1}. It's your gross income before any deductions, like tax or National Insurance.
+estimatedIncome.details.summary=What should not be included
+estimatedIncome.details.p1=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.error.required=Enter your estimated income liable for UK tax in this tax year
 estimatedIncome.error.invalid=Estimated income must only include numbers, for example 160,000 or 23,040.50
 estimatedIncome.error.tooSmall=Estimated income must be a number between 0 and 50,000,000,000.00
@@ -1166,7 +1165,7 @@ estimatedIncome.error.tooLarge=Estimated income must be a number between 0 and 5
 estimatedIncome.error.tooManyDecimals=Estimated income must be 2 decimal places or less, for example 23,040.50 or 76,000
 
 personalAllowance.title=What is your Personal Allowance for tax year {0} to {1}?
-personalAllowance.helpText=	We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}. Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
+personalAllowance.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}. <br/> <br/>Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
 personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.error.invalid=Personal Allowance amount must only include numbers, for example 12,500 or 207.50
@@ -1176,7 +1175,7 @@ personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 deci
 
 hasEstimatedDetails.title=Have any of the details in this return been estimated?
 hasEstimatedDetails.helpText=If you estimated any amounts, you’ll need to provide the final amounts to HMRC later. For example, the property’s value.
-hasEstimatedDetails.agent.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
+hasEstimatedDetails.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
 hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
