@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -33,12 +34,15 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Either[(String, BigDecimal), Unit]], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[Either[(String, BigDecimal), Unit]], backLink: Call, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 @key = @{"otherReliefs"}
 @nameKey = @{"otherReliefsName"}
 @valueKey = @{"otherReliefsAmount"}
-@title = @{messages(s"$key.title", "")}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@title = @{messages(s"$key$userKey.title", "")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@userKeyOnly = @{if(form.error(key).nonEmpty) userKey else ""}
 
 @options = @{
     List(
@@ -65,14 +69,14 @@
                         unitInput(
                             fieldId = valueKey,
                             value = form.data.getOrElse(valueKey, ""),
-                            label = Html(messages(s"$valueKey.label", "")),
+                            label = Html(messages(s"$valueKey.label")),
                             formError = form.error(valueKey),
                             hasErrors = form.error(valueKey).nonEmpty,
                             autoComplete = AutoCompleteType.On,
                             inputClass = Some("small"),
                             aspect = "left",
                             unit = "£",
-                            assistiveText = "do not enter the pound sign"
+                            assistiveText = messages("unit-input.assistive.pounds")
                         )
                     }
                     |""".stripMargin
@@ -100,7 +104,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, None, userKeyOnly)
     }
 
     @caption(messages("reliefDetails.caption"))
@@ -113,7 +117,8 @@
             error = form.error(key),
             hasErrors = hasErrors,
             options = options,
-            helpText = Some(Html(messages(s"$key.helpText", "")))
+            helpText = Some(Html(messages(s"$key$userKey.helpText", ""))),
+            customErrorKey = Some(s"$key$userKey")
         )
         <p>
             <a href="@{appConfig.reliefsInfo}" target="_blank">
