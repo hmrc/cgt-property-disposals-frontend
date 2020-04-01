@@ -713,7 +713,8 @@ class AcquisitionDetailsController @Inject() (
                 c,
                 rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasAUkResident),
                 wasAUkResident,
-                rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident, assetType, c.acquisitionDate.value)
+                rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident, assetType, c.acquisitionDate.value),
+                fillingOutReturn.subscribedDetails.isATrust
               )
             )
 
@@ -774,7 +775,8 @@ class AcquisitionDetailsController @Inject() (
                     rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasAUkResident),
                     wasAUkResident,
                     rebasingEligibilityUtil
-                      .isEligibleForRebase(wasAUkResident, assetType, completeAnswers.acquisitionDate.value)
+                      .isEligibleForRebase(wasAUkResident, assetType, completeAnswers.acquisitionDate.value),
+                    fillingOutReturn.subscribedDetails.isATrust
                   )
                 )
             )
