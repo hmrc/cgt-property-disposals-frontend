@@ -149,7 +149,9 @@ class CheckAllAnswersAndSubmitController @Inject() (
   }
 
   def confirmationOfSubmission(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withJustSubmittedReturn(request)(j => Ok(confirmationOfSubmissionPage(j)))
+    withJustSubmittedReturn(request) { j =>
+      Ok(confirmationOfSubmissionPage(j))
+    }
   }
 
   def payReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>

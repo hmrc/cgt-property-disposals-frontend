@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 
 final case class SubmitReturnResponse(
   formBundleId: String,
+  processingDate: LocalDateTime,
   charge: Option[ReturnCharge]
 )
 

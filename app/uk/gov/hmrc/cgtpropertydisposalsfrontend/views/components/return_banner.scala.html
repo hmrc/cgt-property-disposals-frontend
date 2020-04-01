@@ -16,21 +16,36 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 
 @this()
 
-@(heading: String, taxOwed: AmountInPence, reference: String)(implicit messages: Messages)
+@(heading: String, returnSummary: ReturnSummary, subscribedDetails: SubscribedDetails, userType: Option[UserType])(implicit messages: Messages)
+
+@taxOwed = @{returnSummary.mainReturnChargeAmount.withFloorZero}
+@name = @{subscribedDetails.name.fold(_.value, e => e.firstName + " " + e.lastName)}
+@reference = @{if(taxOwed.isPositive) subscribedDetails.cgtReference.value else returnSummary.submissionId}
+@key = @{"viewReturn"}
 
 <div class="govuk-box-highlight govuk-box-highlight--status">
-  <h1 class="heading-xlarge">@heading</h1>
+    <p id="user-details-name">
+        @{userType match {
+            case Some(UserType.Organisation) => messages(s"$key.organisationNameLine", name)
+            case Some(UserType.Agent) => messages(s"$key.agentNameLine", name)
+            case _ => name
+        }}
+    </p>
+    <h1 class="heading-xlarge">@heading</h1>
   <p>
-    @messages("viewReturn.heading.taxOwed")
+    @messages(s"$key.heading.taxOwed")
     <span class="heading-xlarge" id="heading-tax-owed">
       @{MoneyUtils.formatAmountOfMoneyWithPoundSign(taxOwed.inPounds())}
     </span>
   </p>
   <p>
-    @messages("viewReturn.heading.reference")
+    @messages(if(taxOwed.isPositive) s"$key.heading.payment.reference" else s"$key.heading.reference")
     <span class="heading-xlarge" id="heading-reference">
       @reference
     </span>

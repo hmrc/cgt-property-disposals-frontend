@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime, LocalTime}
 import java.util.UUID
 
 import cats.data.EitherT
@@ -246,7 +246,8 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           val response =
             SubmitReturnResponse(
               "bundleId",
-              Some(ReturnCharge("charge", AmountInPence(123L), LocalDate.of(2000, 1, 2)))
+              LocalDateTime.of(2000, 1, 1, 1, 1),
+              Some(ReturnCharge("charge", AmountInPence(123L), LocalDate.of(2000, 1, 1)))
             )
 
           mockSubmitReturn(submitReturnRequest)(
@@ -256,10 +257,11 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
                 Some(Json.parse("""
                 |{
                 |  "formBundleId": "bundleId",
+                |  "processingDate": "2000-01-01T01:01",
                 |  "charge" : {
                 |    "chargeReference": "charge",
                 |    "amount": 123,
-                |    "dueDate": "2000-01-02"
+                |    "dueDate": "2000-01-01"
                 |  }
                 |}
                 |""".stripMargin))
@@ -271,10 +273,19 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         }
 
         "the http call came back with a 200 and the JSON is valid and does not contain a charge " in {
-          val response = SubmitReturnResponse("bundleId", None)
+          val response =
+            SubmitReturnResponse("bundleId", LocalDateTime.of(LocalDate.of(2000, 1, 1), LocalTime.of(1, 1)), None)
 
           mockSubmitReturn(submitReturnRequest)(
-            Right(HttpResponse(OK, Some(Json.parse("""{ "formBundleId": "bundleId"}"""))))
+            Right(
+              HttpResponse(
+                OK,
+                Some(Json.parse("""{
+                |  "formBundleId": "bundleId",
+                |  "processingDate": "2000-01-01T01:01"
+                |}""".stripMargin))
+              )
+            )
           )
 
           await(service.submitReturn(submitReturnRequest).value) shouldBe Right(response)

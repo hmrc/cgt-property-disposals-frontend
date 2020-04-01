@@ -1027,9 +1027,11 @@ class DisposalDetailsControllerSpec
           )
         }
 
-        amountOfMoneyErrorScenarios("disposalFees").foreach { scenario =>
-          withClue(s"For $scenario: ") {
-            test(scenario.formData: _*)(scenario.expectedErrorMessageKey)
+        "the amount is submitted is invalid" in {
+          amountOfMoneyErrorScenarios("disposalFees").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              test(scenario.formData: _*)(scenario.expectedErrorMessageKey)
+            }
           }
         }
 
