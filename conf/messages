@@ -1260,8 +1260,12 @@ checkAllAnswers.declaration.p2=You may have to pay financial penalties and face 
 
 confirmationOfSubmission.title=Return sent
 confirmationOfSubmission.taxOwed=Tax owed
-confirmationOfSubmission.returnReference=Return reference
+confirmationOfSubmission.returnReference=Return reference number
+confirmationOfSubmission.paymentReference=Payment reference number
+confirmationOfSubmission.propertyAddress=Property address
 confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>
+confirmationOfSubmission.sentToHmrc=Return sent to HMRC
+confirmationOfSubmission.taxDue=Tax due by
 confirmationOfSubmission.printPage=Print or save this page as a PDF
 confirmationOfSubmission.whatNext=What you need to do next
 confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may get a penalty if your payment is late.
@@ -1269,10 +1273,13 @@ confirmationOfSubmission.howToPay=You can pay online or by bank transfer. You’
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
 confirmationOfSubmission.returnToAccount=Go to your <a href="{0}">Capital Gains Tax on UK property account</a>.
+confirmationOfSubmission.organisationNameLine=Trust: {0}
+confirmationOfSubmission.agentNameLine=Client: {0}
 
-viewReturn.title=Your return
+viewReturn.title=View return
 viewReturn.heading.taxOwed=Tax owed for return
 viewReturn.heading.reference=Return reference number
+viewReturn.heading.payment.reference=Payment reference number
 viewReturn.printLink=Print or save this page for your records
 viewReturn.charges.heading=Payments
 viewReturn.charges.description=Description
@@ -1317,6 +1324,8 @@ viewReturn.charge.paymentMethod.PaymentNotExpected=payment received
 viewReturn.charge.paymentMethod.Reallocation=payment received
 viewReturn.charge.paymentMethod.RepaymentInterestAllocated=payment received
 viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
+viewReturn.organisationNameLine=Trust: {0}
+viewReturn.agentNameLine=Client: {0}
 
 viewReturn.summaryHeading=Your return
 
@@ -1577,3 +1586,4 @@ subsequentReturnExit.outside-uk-telephone.title=Outside UK:
 subsequentReturnExit.getHelp=Get help
 subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
 subsequentReturnExit.helpWithCallCharges=Find out about call charges
+

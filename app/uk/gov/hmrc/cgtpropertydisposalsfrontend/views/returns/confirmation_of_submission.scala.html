@@ -21,6 +21,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => accountRoutes}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,6 +31,7 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey,
+        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
@@ -35,20 +39,34 @@
 
 @key=@{"confirmationOfSubmission"}
 @title = @{ messages(s"$key.title") }
+@name = @{justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName())}
+@amountOwed = @{justSubmittedReturn.submissionResponse.charge.map(_.amount.inPounds()).getOrElse(BigDecimal(0))}
+@chargeReference = @{justSubmittedReturn.submissionResponse.charge.map { charge => charge.chargeReference }}
 
 @mainTemplate(title = title, userType = request.userType) {
 
- <div class="govuk-box-highlight">
-  <h1 class="heading-xlarge">@title</h1>
+<div class="govuk-box-highlight">
+     <p id="user-details-name">
+     @{request.userType match {
+         case Some(UserType.Organisation) => messages(s"$key.organisationNameLine", name)
+         case Some(UserType.Agent) => messages(s"$key.agentNameLine", name)
+         case _ => name
+     }}
+     </p>
+     <h1 class="heading-xlarge">@title</h1>
   <span class="heading-large" style="font-weight: normal;">
     @messages(s"$key.taxOwed")
     <strong style="display:block; font-weight: bold;">
-     @{{formatAmountOfMoneyWithPoundSign(justSubmittedReturn.submissionResponse.charge.map(_.amount.inPounds()).getOrElse(BigDecimal(0)))}}
+     @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
     </strong>
   </span>
   <span class="heading-large" style="font-weight: normal;">
-   @messages(s"$key.returnReference")
-   <strong style="display:block; font-weight: bold;">@{{justSubmittedReturn.submissionResponse.formBundleId}}</strong>
+      <div id="ref-id">
+       @{if(amountOwed.equals(BigDecimal(0))) messages(s"$key.returnReference") else messages(s"$key.paymentReference")}
+   <strong style="display:block; font-weight: bold;">
+       @{if(amountOwed.equals(BigDecimal(0))) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
+       </strong>
+      </div>
   </span>
  </div>
 
@@ -59,6 +77,47 @@
   <p>
    <a href="JavaScript: window.print();">@messages(s"$key.printPage")</a>
   </p>
+
+    <table class="borders payment-table">
+        <tbody id="return-details-table">
+
+
+        <tr class="charge">
+            <td> <strong class="bold">@messages(s"$key.sentToHmrc")</strong> <br/> </td>
+            <td>
+                @LocalDateUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)
+            </td>
+        </tr>
+
+        @{if(!amountOwed.equals(BigDecimal(0))) {
+        <tr class="charge">
+            <td> <strong class="bold"> {messages(s"$key.returnReference")} </strong> <br/> </td>
+            <td> {justSubmittedReturn.submissionResponse.formBundleId} </td>
+        </tr>
+        }}
+
+
+        <tr class="charge">
+            <td> <strong class="bold">@messages(s"$key.propertyAddress")</strong> <br/> </td>
+            <td>
+                @{justSubmittedReturn.completeReturn match {
+                    case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
+                    case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
+                }}
+            </td>
+        </tr>
+
+        @{if(!amountOwed.equals(BigDecimal(0))) {
+            {justSubmittedReturn.submissionResponse.charge.map { charge =>
+                <tr class = "charge">
+                    <td> <strong class="bold">{messages(s"$key.taxDue")}</strong> <br/>
+                    </td> <td>{LocalDateUtils.govDisplayFormat(charge.dueDate)}</td>
+                </tr>
+            }}
+        }}
+
+        </tbody>
+    </table>
 
   @justSubmittedReturn.submissionResponse.charge.map { charge =>
    <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>

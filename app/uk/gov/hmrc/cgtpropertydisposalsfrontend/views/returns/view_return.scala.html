@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, ReturnSummary}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteSingleDisposalReturn, CompleteMultipleDisposalsReturn}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -41,13 +42,13 @@
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
 )
 
-@(completeReturn: CompleteReturn, returnSummary: ReturnSummary, rebasingEligibilityUtil: RebasingEligibilityUtil, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(completeReturn: CompleteReturn, returnSummary: ReturnSummary, rebasingEligibilityUtil: RebasingEligibilityUtil, subscribedDetails: SubscribedDetails)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("viewReturn.title")}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, returnSummary.mainReturnChargeAmount.withFloorZero, returnSummary.submissionId)
+  @returnHeading(title, returnSummary, subscribedDetails, request.userType)
 
   <p class="js-enabled">
    <a href="JavaScript: window.print()">
@@ -59,7 +60,7 @@
     @returnCharges(messages("viewReturn.charges.heading"), returnSummary)
   }
 
-  <h2 class="heading-large">
+<h2 class="heading-large">
     @messages("viewReturn.summaryHeading")
   </h2>
 
@@ -68,7 +69,7 @@
   @completeReturn match {
       case s: CompleteSingleDisposalReturn => {
           <h2>@messages("task-list.triage.link")</h2>
-          @singleDisposalTriageSummary(s.triageAnswers, isATrust)
+          @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
           @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
@@ -88,7 +89,7 @@
           @reliefDetailsSummary(s.reliefDetails)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-          @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust)
+          @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @s.yearToDateLiabilityAnswers.fold(
@@ -102,10 +103,10 @@
           @multipleDisposalsTriageSummary(m.triageAnswers)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
-          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust)
+          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-          @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, isATrust)
+          @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers)
