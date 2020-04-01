@@ -972,27 +972,22 @@ acquisitionFees.trust.details.p2=To work out the trust’s gain or loss, you mus
 acquisitionFees.details.p3=This process is called rebasing.
 acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
 
-acquisitionFees.error.required=Select yes if you have extra costs
+acquisitionFees.error.required=Select yes if there are additional costs
 acquisitionFeesValue.label=Amount of additional costs
-acquisitionFeesValue.error.required=Enter how much you paid in additional costs when you got the property
-acquisitionFeesValue.error.invalid=Additional costs must only include numbers, for example 1,480 or 900.50
-acquisitionFeesValue.error.tooSmall=Additional costs must more than 0
-acquisitionFeesValue.error.tooLarge=Additional costs must be 50,000,000,000.00 or less
-acquisitionFeesValue.error.tooManyDecimals=Additional costs must be 2 decimal places or less, for example 1,480 or 900.50
-
-
+acquisitionFeesValue.error.required=Enter how much was paid in additional costs
+acquisitionFeesValue.error.invalid=Additional costs must be an amount of money, like 1,480 or 900.50
+acquisitionFeesValue.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
+acquisitionFeesValue.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
+acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 1,480 or 900.50
 
 acquisitionDetails.cya.title=Check your answers
-acquisitionDetails.cyaLabel.rebased=Property value rebased
-acquisitionDetails.cyaLabel.rebasedValue=What was the market value of the property on {0}?
-acquisitionDetails.cyaLabel.improvementCostsValue=Amount of improvement costs
-acquisitionDetails.cyaLabel.acquisitionFeesValue=Amount of buying costs
-acquisitionDetails.cyaChange.acquisitionMethod=your acquisition method
-acquisitionDetails.cyaChange.acquisitionDate=your acquisition date
-acquisitionDetails.cyaChange.acquisitionPrice=your acquisition price
-acquisitionDetails.cyaChange.rebasedAcquisitionPrice=your rebased acquisition price
-acquisitionDetails.cyaChange.improvementCosts=your improvements costs
-acquisitionDetails.cyaChange.acquisitionFees=your acquisition fees
+acquisitionDetails.cyaChange.acquisitionMethod=acquisition method
+acquisitionDetails.cyaChange.acquisitionDate=acquisition date
+acquisitionDetails.cyaChange.acquisitionPrice=acquisition price
+acquisitionDetails.cyaChange.rebasedAcquisitionPrice=rebased acquisition price
+acquisitionDetails.cyaChange.improvementCosts=improvements costs
+acquisitionDetails.cyaChange.acquisitionFees=acquisition fees
+acquisitionDetails.rebased.cyaChange.acquisitionFees=rebasing fees
 acquisitionDetails.cyaChange.shouldUseRebase=whether you are using the rebased value in your calculation
 
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?

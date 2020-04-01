@@ -116,8 +116,8 @@
             content = Html(
               s"""
                 | <p>${messages(s"$key$userKey.details.p1", LocalDateUtils.govDisplayFormat(rebaseCutOffDate))}</p>
-                | <p>${messages(s"$key$userKey.details.p2")}</p>
-                | <p>${messages(s"$key${if(!wasUkResident)".non-resident"}.details.p3", appConfig.nonResidentsRebasingUrl)}</p>
+                | <p>${messages(s"$key.details.p2")}</p>
+                | <p>${messages(s"$key${if(!wasUkResident) ".non-resident" else ""}.details.p3", appConfig.nonResidentsRebasingUrl)}</p>
                 |""".stripMargin
             )
           )
