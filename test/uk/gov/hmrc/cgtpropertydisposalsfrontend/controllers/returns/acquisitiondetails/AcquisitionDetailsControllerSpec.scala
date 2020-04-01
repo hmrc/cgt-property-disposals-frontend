@@ -953,8 +953,8 @@ class AcquisitionDetailsControllerSpec
             Some(acquisitionDate),
             None,
             None,
-            Some(answers.improvementCosts),
-            Some(answers.acquisitionFees),
+            None,
+            None,
             None
           )
 
@@ -1047,8 +1047,8 @@ class AcquisitionDetailsControllerSpec
             Some(AcquisitionDate(date)),
             None,
             None,
-            Some(oldAnswers.improvementCosts),
-            Some(oldAnswers.acquisitionFees),
+            None,
+            None,
             None
           )
 
