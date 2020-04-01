@@ -75,7 +75,7 @@
           @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
 
           <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
-          @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, isATrust)
+          @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
           @acquisitionDetailsSummary(s.acquisitionDetails,
