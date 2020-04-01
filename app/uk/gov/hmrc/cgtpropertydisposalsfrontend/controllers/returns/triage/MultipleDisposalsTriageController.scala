@@ -81,7 +81,6 @@ class MultipleDisposalsTriageController @Inject() (
     with SessionUpdates {
 
   def guidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    println(request.userType)
     withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
       val backLink = answers.fold(
         _ => routes.CommonTriageQuestionsController.howManyProperties(),

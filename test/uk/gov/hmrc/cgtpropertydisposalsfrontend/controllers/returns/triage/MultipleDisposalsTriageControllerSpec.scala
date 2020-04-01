@@ -38,7 +38,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{IdKey, TagAttributePairAndValue, TrustAgentOrNormalDisplay}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{SelectorAndValue, TagAttributePairAndValue, TrustAgentOrIndividualDisplay}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, triage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
@@ -72,9 +72,9 @@ class MultipleDisposalsTriageControllerSpec
 
   val mockUUIDGenerator = mock[UUIDGenerator]
 
-  val trustDisplay  = TrustAgentOrNormalDisplay(UserType.Organisation, Left(sample[TrustName]))
-  val agentDisplay  = TrustAgentOrNormalDisplay(UserType.Agent, Right(sample[IndividualName]))
-  val normalDisplay = TrustAgentOrNormalDisplay(UserType.Individual, Right(sample[IndividualName]))
+  val trustDisplay      = TrustAgentOrIndividualDisplay(UserType.Organisation, Left(sample[TrustName]))
+  val agentDisplay      = TrustAgentOrIndividualDisplay(UserType.Agent, Right(sample[IndividualName]))
+  val individualDisplay = TrustAgentOrIndividualDisplay(UserType.Individual, Right(sample[IndividualName]))
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -174,7 +174,7 @@ class MultipleDisposalsTriageControllerSpec
           session: SessionData,
           expectedBackLink: Call,
           expectReturnToSummaryLink: Boolean,
-          displayType: TrustAgentOrNormalDisplay
+          displayType: TrustAgentOrIndividualDisplay
         ): Unit =
           testPageIsDisplayed(
             performAction,
@@ -185,8 +185,8 @@ class MultipleDisposalsTriageControllerSpec
             "button.continue",
             expectReturnToSummaryLink,
             List(
-              IdKey(
-                "body",
+              SelectorAndValue(
+                "#wrapper > div:eq(1) > article > details > div > p:eq(2)",
                 messageFromMessageKey(
                   s"multiple-disposals.guidance.details${displayType.getSubKey}.link",
                   viewConfig.tranferringOwnershipHelp
@@ -204,12 +204,12 @@ class MultipleDisposalsTriageControllerSpec
               )._1,
               triage.routes.CommonTriageQuestionsController.howManyProperties(),
               expectReturnToSummaryLink = false,
-              normalDisplay
+              individualDisplay
             )
           }
 
           "the section is complete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -218,7 +218,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithStartingNewDraftReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers],
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
                   expectReturnToSummaryLink = false,
@@ -238,12 +238,12 @@ class MultipleDisposalsTriageControllerSpec
               )._1,
               triage.routes.CommonTriageQuestionsController.howManyProperties(),
               expectReturnToSummaryLink = true,
-              normalDisplay
+              individualDisplay
             )
           }
 
           "the section is complete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -251,7 +251,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithFillingOutReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers],
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
                   expectReturnToSummaryLink = true,
@@ -640,7 +640,7 @@ class MultipleDisposalsTriageControllerSpec
           expectedBackLink: Call,
           expectedButtonMessageKey: String,
           expectReturnToSummaryLink: Boolean,
-          displayType: TrustAgentOrNormalDisplay = normalDisplay
+          displayType: TrustAgentOrIndividualDisplay = individualDisplay
         ): Unit =
           testPageIsDisplayed(
             performAction,
@@ -651,8 +651,8 @@ class MultipleDisposalsTriageControllerSpec
             expectedButtonMessageKey,
             expectReturnToSummaryLink,
             List(
-              IdKey(
-                "#content > article > form",
+              SelectorAndValue(
+                "#wrapper > div:eq(1) > article > form > p",
                 messageFromMessageKey(
                   s"multipleDisposalsWereYouAUKResident${displayType.getSubKey}.link",
                   viewConfig.workOurYouResidenceStatusUrl
@@ -664,7 +664,7 @@ class MultipleDisposalsTriageControllerSpec
         "the user has not started a new draft return and" when {
 
           "the journey is incomplete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -672,7 +672,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithStartingNewDraftReturn(
                     IncompleteMultipleDisposalsTriageAnswers.empty,
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.howManyDisposals(),
                   "button.continue",
@@ -683,7 +683,7 @@ class MultipleDisposalsTriageControllerSpec
             }
           }
           "the journey is complete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -691,7 +691,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithStartingNewDraftReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers],
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
                   "button.continue",
@@ -716,7 +716,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           "the journey is complete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -724,7 +724,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithFillingOutReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers],
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
                   "button.saveAndContinue",
@@ -897,7 +897,7 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+          List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
             withClue(
               s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
             ) {
@@ -908,7 +908,7 @@ class MultipleDisposalsTriageControllerSpec
               val session = sessionDataWithStartingNewDraftReturn(
                 answers,
                 displayType.name,
-                displayType.userType == UserType.Agent
+                displayType.userType === UserType.Agent
               )._1.copy(userType = Some(displayType.userType))
 
               inSequence {
@@ -1732,7 +1732,7 @@ class MultipleDisposalsTriageControllerSpec
           expectedBackLink: Call,
           expectedButtonMessageKey: String,
           expectReturnToSummaryLink: Boolean,
-          displayType: TrustAgentOrNormalDisplay = normalDisplay
+          displayType: TrustAgentOrIndividualDisplay = individualDisplay
         ): Unit =
           testPageIsDisplayed(
             performAction,
@@ -1743,12 +1743,12 @@ class MultipleDisposalsTriageControllerSpec
             expectedButtonMessageKey,
             expectReturnToSummaryLink,
             List(
-              IdKey(
+              SelectorAndValue(
                 "#countryCode-form-hint",
                 messageFromMessageKey(s"multipleDisposalsCountryOfResidence${displayType.getSubKey}.helpText")
               ),
-              IdKey(
-                "#content > article > form",
+              SelectorAndValue(
+                "#wrapper > div:eq(1) > article > form > p",
                 messageFromMessageKey(
                   s"triage.enterCountry${displayType.getSubKey}.link",
                   viewConfig.workOurYouResidenceStatusUrl
@@ -1765,7 +1765,7 @@ class MultipleDisposalsTriageControllerSpec
         "the user has not started a new draft return and" when {
 
           "the journey is incomplete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -1773,7 +1773,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithStartingNewDraftReturn(
                     incompleteAnswers,
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
                   "button.continue",
@@ -1785,7 +1785,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           "the journey is complete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -1793,7 +1793,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithStartingNewDraftReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers],
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
                   "button.continue",
@@ -2130,7 +2130,7 @@ class MultipleDisposalsTriageControllerSpec
           expectedBackLink: Call,
           expectedButtonMessageKey: String,
           expectReturnToSummaryLink: Boolean,
-          displayType: TrustAgentOrNormalDisplay = normalDisplay
+          displayType: TrustAgentOrIndividualDisplay = individualDisplay
         ): Unit =
           testPageIsDisplayed(
             performAction,
@@ -2141,8 +2141,8 @@ class MultipleDisposalsTriageControllerSpec
             expectedButtonMessageKey,
             expectReturnToSummaryLink,
             List(
-              IdKey(
-                "#multipleDisposalsAssetTypeForNonUkResidents",
+              SelectorAndValue(
+                "#content > article > form > div > #multipleDisposalsAssetTypeForNonUkResidents > div:eq(4) > span",
                 messageFromMessageKey(
                   s"multipleDisposalsAssetTypeForNonUkResidents.MixedUse${displayType.getSubKey}.helpText"
                 )
@@ -2153,9 +2153,9 @@ class MultipleDisposalsTriageControllerSpec
                 "label",
                 "for",
                 "multipleDisposalsAssetTypeForNonUkResidents-3",
-                messageFromMessageKey(
+                s"Residential Non-residential Mixed use ${messageFromMessageKey(
                   s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey}.IndirectDisposal"
-                )
+                )}"
               )
             )
           )
@@ -2163,7 +2163,7 @@ class MultipleDisposalsTriageControllerSpec
         "the user has not started a new draft return and" when {
 
           "the journey is incomplete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -2171,7 +2171,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithStartingNewDraftReturn(
                     IncompleteMultipleDisposalsTriageAnswers.empty,
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.countryOfResidence(),
                   "button.continue",
@@ -2183,7 +2183,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           "the journey is complete" in {
-            List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+            List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
               withClue(
                 s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
               ) {
@@ -2191,7 +2191,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithStartingNewDraftReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers],
                     displayType.name,
-                    displayType.userType == UserType.Agent
+                    displayType.userType === UserType.Agent
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
                   "button.continue",
@@ -2455,7 +2455,7 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          List(trustDisplay, agentDisplay, normalDisplay).foreach { displayType: TrustAgentOrNormalDisplay =>
+          List(trustDisplay, agentDisplay, individualDisplay).foreach { displayType: TrustAgentOrIndividualDisplay =>
             withClue(
               s"For user type ${displayType.userType} with ${displayType.name.fold[String](_ => "Trust Name", _ => "Individual Name")} "
             ) {
@@ -2469,7 +2469,7 @@ class MultipleDisposalsTriageControllerSpec
               val session = sessionDataWithStartingNewDraftReturn(
                 answers,
                 displayType.name,
-                displayType.userType == UserType.Agent
+                displayType.userType === UserType.Agent
               )._1.copy(userType = Some(displayType.userType))
 
               inSequence {
@@ -3360,7 +3360,7 @@ class MultipleDisposalsTriageControllerSpec
     expectedBackLink: Call,
     expectedButtonMessageKey: String,
     expectReturnToSummaryLink: Boolean,
-    expectedAdditionalIdKeyValues: List[IdKey]                               = Nil,
+    expectedAdditionalIdKeyValues: List[SelectorAndValue]                    = Nil,
     expectedAdditionalNameAttributeKeyValues: List[TagAttributePairAndValue] = Nil
   ): Unit = {
     inSequence {
@@ -3371,7 +3371,7 @@ class MultipleDisposalsTriageControllerSpec
     checkPageIsDisplayed(
       performAction(),
       messageFromMessageKey(expectedPageTitleMessageKey), { doc =>
-        println(doc.body().html())
+        println(doc.body())
         doc.select("#back").attr("href") shouldBe expectedBackLink.url
         doc
           .select("#content > article > form")
@@ -3381,17 +3381,17 @@ class MultipleDisposalsTriageControllerSpec
           if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link")
           else ""
         )
-        expectedAdditionalIdKeyValues.map(a => doc.select(a.id).html() should include(a.value))
+        expectedAdditionalIdKeyValues.map(a => doc.select(a.selector).html() should be(a.value))
         expectedAdditionalNameAttributeKeyValues.map(v =>
-          doc.select(s"${v.tagName}").attr(v.attributeName, v.attributeValue).text() should include(v.value)
-        );
+          doc.select(v.tagName).attr(v.attributeName, v.attributeValue).text() shouldBe (v.value)
+        )
       }
     )
   }
 }
 
 object MultipleDisposalsTriageControllerSpec extends Matchers {
-  final case class IdKey(id: String, value: String)
+  final case class SelectorAndValue(selector: String, value: String)
   final case class TagAttributePairAndValue(
     tagName: String,
     attributeName: String,
@@ -3399,7 +3399,7 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     value: String
   )
 
-  final case class TrustAgentOrNormalDisplay(userType: UserType, name: Either[TrustName, IndividualName]) {
+  final case class TrustAgentOrIndividualDisplay(userType: UserType, name: Either[TrustName, IndividualName]) {
     def getSubKey: String = (userType, name) match {
       case (UserType.Agent, _)     => ".agent"
       case (_, Left(TrustName(_))) => ".trust"
