@@ -238,6 +238,13 @@ class ViewReturnControllerSpec
               "viewReturn.title"
             )
 
+            val expectedName = viewingReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName)
+            val actualName   = document.select("#user-details-name").text()
+            userType match {
+              case Some(UserType.Agent) => actualName shouldBe s"Client: $expectedName"
+              case _                    => actualName shouldBe expectedName
+            }
+
             if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
               document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
             } else {

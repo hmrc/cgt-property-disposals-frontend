@@ -1215,6 +1215,8 @@ viewReturn.charge.paymentMethod.PaymentNotExpected=payment received
 viewReturn.charge.paymentMethod.Reallocation=payment received
 viewReturn.charge.paymentMethod.RepaymentInterestAllocated=payment received
 viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
+viewReturn.organisationNameLine=Trust: {0}
+viewReturn.agentNameLine=Client: {0}
 
 viewReturn.summaryHeading=Your return
 
