@@ -1034,9 +1034,17 @@ privateResidentsRelief.error.required=Select yes if you are entitled to Private 
 privateResidentsRelief.agent.error.required=Select yes if your client is entitled to claim Private Residence Relief
 privateResidentsRelief.trust.error.required=Select yes if the trust is entitled to claim Private Residence Relief
 privateResidentsReliefValue.error.required=Enter the amount of Private Residence Relief, like 108 or 2,940.54
+privateResidentsReliefValue.agent.error.required=Enter the amount of Private Residence Relief your client is entitled to
+privateResidentsReliefValue.trust.error.required=Enter the amount of Private Residence Relief the trust is entitled to
 privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.agent.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.trust.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.agent.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.trust.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
+privateResidentsReliefValue.agent.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
+privateResidentsReliefValue.trust.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 
 lettingsRelief.title=Are you entitled to claim Letting Relief?
 lettingsRelief.agent.title=Is your client entitled to claim Letting Relief?

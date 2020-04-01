@@ -41,7 +41,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@customErrorKey = @{if(form.error(valueKey).nonEmpty) valueKey else s"$key$userKey"}
+@customErrorKey = @{if(form.error(valueKey).nonEmpty) s"$valueKey$userKey" else s"$key$userKey"}
 
 @options = @{List(
    RadioOption(
@@ -56,7 +56,8 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
      inputClass = Some("small"),
      aspect = "left",
      unit = "£",
-     assistiveText = messages("unit-input.assistive.pounds")
+     assistiveText = messages("unit-input.assistive.pounds"),
+     customErrorKey = Some(customErrorKey)
     )),
     optionHelpText = None
    ),
