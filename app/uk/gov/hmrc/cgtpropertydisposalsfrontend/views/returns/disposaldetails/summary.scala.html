@@ -33,13 +33,19 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 
+@disposalMethodKey = @{ disposalMethod match {
+    case DisposalMethod.Gifted => ".Gifted"
+    case _      => ".SoldOther"
+}}
+
 @formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
-@disposalPriceTitle =@{messages(s"disposalPrice.${disposalMethod.toString}.title")}
-@disposalFeesTitle = @{messages(s"disposalFees.${disposalMethod.toString}.title")}
+@shareOfPropertyTitle = @{messages(s"shareOfProperty$userKey.title")}
+@disposalPriceTitle   = @{messages(s"disposalPrice$userKey$disposalMethodKey.title")}
+@disposalFeesTitle    = @{messages(s"disposalFees$userKey.title")}
 
 @cyaSection() {
   @cyaRow(
-    messages(s"shareOfProperty$userKey.title"),
+    shareOfPropertyTitle,
     Html(formatPercentage(answers.shareOfProperty.percentageValue)),
     Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url)),
       "propertyShare"
