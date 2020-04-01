@@ -3,7 +3,7 @@ service.signOut=Sign out
 hmrc_branding=HM Revenue & Customs
 exitSurvey.linkText=Tell us how we can improve this service (takes 1 minute)
 
-label.beta=Private Beta
+label.beta=Beta
 
 button.startNow=Start now
 button.continue=Continue
@@ -564,8 +564,8 @@ triage.enterCountry.helpText=It’s usually the day you and the new owner swappe
 triage.enterCountry.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.trust.helpText=It’s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
+triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
@@ -1080,42 +1080,62 @@ shouldUseRebase.error.required=Select whether you are using the rebased valued i
 reliefDetails.caption=Reliefs
 
 privateResidentsRelief.title=Are you entitled to claim Private Residence Relief?
+privateResidentsRelief.agent.title=Is your client entitled to claim Private Residence Relief?
+privateResidentsRelief.trust.title=Is the trust entitled to claim Private Residence Relief?
 privateResidentsRelief.helpText=You might qualify for this relief if the property had been your main home at some point.
+privateResidentsRelief.agent.helpText=Your client might qualify for this relief if the property had been their main home at some point.
+privateResidentsRelief.trust.helpText=The trust might qualify for this relief if the property had been the main home of one of its beneficiaries at some point.
 privateResidentsReliefValue.label=Amount of Private Residence Relief you are entitled to
+privateResidentsReliefValue.agent.label=Amount of Private Residence Relief your client is entitled to
+privateResidentsReliefValue.trust.label=Amount of Private Residence Relief the trust is entitled to
 privateResidentsRelief.furtherInfoLink=Find out about Private Residence Relief (opens in a new window)
 
 privateResidentsRelief.error.required=Select yes if you are entitled to Private Residence Relief
-privateResidentsReliefValue.error.required=Enter an amount of Private Residence Relief, like 108 or 2,940.54
-privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be more than than 0, or select no
-privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be 50,000,000,000.00 or less
-privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be a number, like 108 or 2,940.54
+privateResidentsRelief.agent.error.required=Select yes if your client is entitled to claim Private Residence Relief
+privateResidentsRelief.trust.error.required=Select yes if the trust is entitled to claim Private Residence Relief
+privateResidentsReliefValue.error.required=Enter the amount of Private Residence Relief, like 108 or 2,940.54
+privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 
 lettingsRelief.title=Are you entitled to claim Letting Relief?
+lettingsRelief.agent.title=Is your client entitled to claim Letting Relief?
+lettingsRelief.trust.title=Is the trust entitled to claim Letting Relief?
 lettingsRelief.helpText=You might be able to claim this relief if the property was your main home and you also let it out for a time.
+lettingsRelief.agent.helpText=Your client might be able to claim this relief if the property was their main home and they also let it out for a time.
+lettingsRelief.trust.helpText=The trust might be able to claim this relief if the property was their main home and it also let it out for a time.
 lettingsReliefValue.label=Amount of Letting Relief
 
 lettingsRelief.error.required=Select yes if you are claiming Letting Relief
+lettingsRelief.agent.error.required=Select yes if your client is claiming Letting Relief
+lettingsRelief.trust.error.required=Select yes if the trust is claiming Letting Relief
 lettingsReliefValue.error.required=Enter an amount of Letting Relief, like 108 or 2,940.54
-lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be more than than 0, or select no
-lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be 50,000,000,000.00 or less
-lettingsReliefValue.error.invalid=Amount of Letting Relief must be a number, like 108 or 2,940.54
+lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be an amount of money between 1 and {0}
+lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be an amount of money between 1 and {0}
+lettingsReliefValue.error.invalid=Amount of Letting Relief must be an amount of money, like 108 or 2,940.54
 lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new window)
-lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be {0} or less
-lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than private residence relief
+lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be an amount of money between 1 and {0}
+lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than the Private Residence Relief
 otherReliefs.title=Do you want to claim any other reliefs?
+otherReliefs.agent.title=Does your client want to claim any other reliefs?
+otherReliefs.trust.title=Does the trust want to claim any other reliefs?
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
+otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
+otherReliefs.trust.helpText=You will need to tell us what other reliefs the trust is claiming and what the total amount of these is.
 otherReliefsName.label=Names of the other reliefs you are claiming
 otherReliefsAmount.label=Total amount of other reliefs you are claiming
 otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new window)
 
 otherReliefs.error.required=Select yes if you are claiming other reliefs
-otherReliefsName.error.required=Enter the names of the other reliefs you are claiming
+otherReliefs.agent.error.required=Select yes if your client is claiming other reliefs
+otherReliefs.trust.error.required=Select yes if the trust is claiming other reliefs
+otherReliefsName.error.required=Enter the names of the other reliefs
 otherReliefsName.error.tooLong=The names of the other reliefs you are claiming must be 105 characters or less
 otherReliefsName.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 otherReliefsAmount.error.required=Enter the total amount of the other reliefs, like 108 or 2,940.54
-otherReliefsAmount.error.tooSmall=Amount of other reliefs must be more than than 0, or select no
-otherReliefsAmount.error.tooLarge=Amount of other reliefs must be 50,000,000,000.00 or less
-otherReliefsAmount.error.invalid=Amount of other reliefs must be a number, like 108 or 2,940.54
+otherReliefsAmount.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
+otherReliefsAmount.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
+otherReliefsAmount.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 
 reliefDetails.cya.title=Check your answers
 reliefDetails.cyaLabel.privateResidentsRelief=Entitled to Private Residence Relief?
@@ -1210,7 +1230,7 @@ exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous ye
 ytdLiability.caption=Tax amount owed
 
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
-estimatedIncome.helpText=The amount should be your total income liable to UK income tax for the tax year {0} to {1}. It's your gross income before any deductions, like tax or National Insurance.
+estimatedIncome.helpText=The amount should be your total income liable to UK income tax for the tax year {0} to {1}. It‘s your gross income before any deductions, like tax or National Insurance.
 estimatedIncome.details.summary=What should not be included
 estimatedIncome.details.p1=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.error.required=Enter your estimated income liable for UK tax in this tax year
@@ -1390,6 +1410,8 @@ viewReturn.agentNameLine=Client: {0}
 viewReturn.summaryHeading=Your return
 
 multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
+multiple-disposals.guidance.agent.title=Your client sold or disposed of 2 or more properties
+multiple-disposals.guidance.trust.title=The trust sold or disposed of 2 or more properties
 multiple-disposals.guidance.p1=You can report all property sales (or ‘disposals’) in the same return. You can only do this if they all had:
 multiple-disposals.guidance.li1=the same ‘completion’ date
 multiple-disposals.guidance.li2=contract ‘exchange’ dates on or after 6 April 2020
@@ -1400,6 +1422,8 @@ multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and �
 multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property.
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multiple-disposals.guidance.details.agent.link=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day your client got the money from the sale or disposal and the new owner got the keys.
+multiple-disposals.guidance.details.trust.link=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day the trust got the money from the sale or disposal and the new owner got the keys.
 
 returns.list.title=Sent returns
 returns.list.ref=Return ref:
@@ -1432,9 +1456,19 @@ multipleDisposalsNumberOfProperties.error.tooSmall=Number of disposals must be 2
 multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 999 or less
 
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.trust.title=Was the trust a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
 
+multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.agent.error.required=Select yes if your client was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.agent.error.boolean=Select yes if your client was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.trust.error.required=Select yes if the trust was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.trust.error.boolean=Select yes if the trust was a UK resident on all of the contract exchange dates
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
+multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 
 multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
 multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
@@ -1447,7 +1481,11 @@ multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of 
 multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
 
 multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
-multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+multipleDisposalsCountryOfResidence.agent.title=What country was your client a resident of when they exchanged contracts?
+multipleDisposalsCountryOfResidence.trust.title=What country was the trust a resident of when they exchanged contracts?
+multipleDisposalsCountryOfResidence.helpText=It‘s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+multipleDisposalsCountryOfResidence.agent.helpText=It‘s usually the day your client and the new owner swapped contracts and they paid a deposit.
+multipleDisposalsCountryOfResidence.trust.helpText=It‘s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
@@ -1475,7 +1513,7 @@ initialGainOrLoss.details.li3=3. Then subtract any money you spent on making imp
 initialGainOrLoss.details.li4=4. Then subtract any money you spent on selling the property, such as on legal fees or for estate agents.
 initialGainOrLoss.details.li5=5. This will give you the amount of the initial gain or loss.
 initialGainOrLoss.details.example.title=Example
-initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent’s fees. This gave you an initial gain of £10,000.
+initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent‘s fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
 initialGainOrLoss.summary.hint=Click on the link to change your answers
 initialGainOrLoss.cya.hint=whether you made an initial gain, a loss, or no gain or loss
@@ -1502,16 +1540,26 @@ multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">excha
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
 
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.trust.title=What types of property or assets did the trust dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.helpText=Select all that apply.
 multipleDisposalsAssetTypeForNonUkResidents.Residential=Residential
 multipleDisposalsAssetTypeForNonUkResidents.Residential.helpText=Includes houses, flats, or other dwellings, including their gardens or grounds.
 multipleDisposalsAssetTypeForNonUkResidents.NonResidential=Non-residential
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse=Mixed use
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse.helpText=Part of the property was residential while you owned it.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.agent.helpText=Part of the property was residential and part was non-residential while your client owned it
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.trust.helpText=Part of the property was residential and part was non-residential while the trust owned it
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
+multipleDisposalsAssetTypeForNonUkResidents.agent.IndirectDisposal=Company shares - your client made an indirect disposal
+multipleDisposalsAssetTypeForNonUkResidents.trust.IndirectDisposal=Company shares - the trust made an indirect disposal
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 multipleDisposalsAssetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+multipleDisposalsAssetTypeForNonUkResidents.agent.error.required=Select the types of property or assets your client disposed of
+multipleDisposalsAssetTypeForNonUkResidents.trust.error.required=Select the types of property or assets the trust disposed of
+multipleDisposalsAssetTypeForNonUkResidents.agent.error.invalid=Select the types of property or assets your client disposed of
+multipleDisposalsAssetTypeForNonUkResidents.trust.error.invalid=Select the types of property or assets the trust disposed of
 
 multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
 multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
