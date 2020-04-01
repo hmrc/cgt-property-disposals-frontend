@@ -1032,7 +1032,7 @@ class SingleDisposalsTriageControllerSpec
           testFormError(performAction, "disposalDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
 
         "the date is invalid" in {
-          dateErrorScenarios("disposalDate").foreach { scenario =>
+          dateErrorScenarios("disposalDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
               val formData = List(
                 "disposalDate-day"   -> scenario.dayInput,
@@ -1335,7 +1335,7 @@ class SingleDisposalsTriageControllerSpec
           testFormError(performAction, "completionDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
 
         "the date is invalid" in {
-          dateErrorScenarios("completionDate").foreach { scenario =>
+          dateErrorScenarios("completionDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
               val formData = List(
                 "completionDate-day"   -> scenario.dayInput,

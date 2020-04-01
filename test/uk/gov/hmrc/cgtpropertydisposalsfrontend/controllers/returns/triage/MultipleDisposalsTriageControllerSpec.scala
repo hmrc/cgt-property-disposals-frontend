@@ -2479,7 +2479,8 @@ class MultipleDisposalsTriageControllerSpec
         "the date entered is invalid" in {
           DateErrorScenarios
             .dateErrorScenarios(
-              "multipleDisposalsCompletionDate"
+              "multipleDisposalsCompletionDate",
+              ""
             )
             .foreach { scenario =>
               withClue(s"For date error scenario $scenario: ") {
