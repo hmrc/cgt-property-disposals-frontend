@@ -41,7 +41,7 @@ import scala.concurrent.Future
 trait UpscanService {
   def initiate(draftReturnId: DraftReturnId, cgtReference: CgtReference, timestamp: LocalDateTime)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, UpscanInitiateResponse]
+  ): EitherT[Future, Error, UpscanInitiateSuccess]
 
   def getUpscanFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
@@ -81,7 +81,7 @@ class UpscanServiceImpl @Inject() (
 
   private def hasReachedMaxFileUpload(upscanSnapshot: UpscanSnapshot): Either[Error, Unit] =
     if (upscanSnapshot.fileUploadCount >= maxUploads) {
-      Left(Error(MaxFileUploadsReached2))
+      Left(Error(MaxUploads))
     } else {
       Right(())
     }
@@ -107,7 +107,7 @@ class UpscanServiceImpl @Inject() (
     draftReturnId: DraftReturnId,
     cgtReference: CgtReference,
     timestamp: LocalDateTime
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanInitiateResponse] =
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanInitiateSuccess] =
     for {
       snapshot     <- upscanConnector.getUpscanSnapshot(draftReturnId)
       _            <- EitherT.fromEither(hasReachedMaxFileUpload(snapshot))

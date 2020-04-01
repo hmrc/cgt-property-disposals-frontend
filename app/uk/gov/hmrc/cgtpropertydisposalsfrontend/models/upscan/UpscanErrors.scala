@@ -17,4 +17,4 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
 sealed trait UpscanErrors extends Exception
-case object MaxFileUploadsReached2 extends UpscanErrors
+case object MaxUploads extends UpscanErrors
