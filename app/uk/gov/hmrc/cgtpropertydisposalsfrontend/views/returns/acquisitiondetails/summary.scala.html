@@ -75,7 +75,7 @@
   )
 }
 
-@if(canRebase && answers.shouldUseRebase) {
+@if(canRebase) {
   @answers.rebasedAcquisitionPrice.map{ rebasedValue =>
     @cyaRow(
       messages("rebaseAcquisitionPrice.title", LocalDateUtils.govShortDisplayFormat(cutoffDate)),
