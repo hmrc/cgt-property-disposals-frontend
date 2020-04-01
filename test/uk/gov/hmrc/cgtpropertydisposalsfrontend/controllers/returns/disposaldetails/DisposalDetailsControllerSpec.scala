@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{disposalMetho
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
@@ -108,6 +108,60 @@ class DisposalDetailsControllerSpec
     disposalMethod: DisposalMethod
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithDisposalDetailsAnswers(Some(answers), disposalMethod)
+
+  def fillingOutReturnForIndividual(
+    disposalMethod: DisposalMethod,
+    subscribedDetails: SubscribedDetails
+  ): (FillingOutReturn, DraftSingleDisposalReturn) = {
+    val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
+      disposalMethod = disposalMethod
+    )
+
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(
+      triageAnswers = answers
+    )
+    sample[FillingOutReturn].copy(draftReturn = draftReturn, subscribedDetails = subscribedDetails) -> draftReturn
+  }
+
+  def sessionWithDisposalDetailsAnswers(
+    answers: Option[DisposalDetailsAnswers],
+    disposalMethod: DisposalMethod,
+    subscribedDetails: SubscribedDetails
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+    val (journey, draftReturn) = fillingOutReturnForIndividual(disposalMethod, subscribedDetails)
+    val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
+    val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
+    (
+      SessionData.empty.copy(journeyStatus = Some(updatedJourney)),
+      updatedJourney,
+      updatedDraftReturn
+    )
+
+  }
+
+  def sessionWithDisposalDetailsAnswersForIndividual(
+    answers: DisposalDetailsAnswers,
+    disposalMethod: DisposalMethod
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+
+    val subscribedDetails = sample[SubscribedDetails].copy(
+      name = Right(sample[IndividualName])
+    )
+
+    sessionWithDisposalDetailsAnswers(Some(answers), disposalMethod, subscribedDetails)
+  }
+
+  def sessionWithDisposalDetailsAnswersForTrust(
+    answers: DisposalDetailsAnswers,
+    disposalMethod: DisposalMethod
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+
+    val subscribedDetails = sample[SubscribedDetails].copy(
+      name = Left(sample[TrustName])
+    )
+
+    sessionWithDisposalDetailsAnswers(Some(answers), disposalMethod, subscribedDetails)
+  }
 
   "DisposalDetailsController" when {
 
@@ -1219,20 +1273,41 @@ class DisposalDetailsControllerSpec
 
       "redirect to the how much did you own page" when {
 
-        "there are no disposal details answers in session" in {
+        "there are no disposal details answers in session for an individual" in {
+          val subscribedDetails = sample[SubscribedDetails].copy(
+            name = Right(sample[IndividualName])
+          )
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)._1)
+            mockGetSession(
+              sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold, subscribedDetails)._1
+            )
           }
 
           checkIsRedirect(performAction(), routes.DisposalDetailsController.howMuchDidYouOwn())
         }
 
-        "there are disposal details in session but no answer for the property share question" in {
+        "there are no disposal details answers in session for an Trust" in {
+          val subscribedDetails = sample[SubscribedDetails].copy(
+            name = Left(sample[TrustName])
+          )
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithDisposalDetailsAnswers(
+              sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold, subscribedDetails)._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.DisposalDetailsController.howMuchDidYouOwn())
+        }
+
+        "there are disposal details in session but no answer for the property share question for an individual" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDisposalDetailsAnswersForIndividual(
                 allQuestionsAnswered.copy(shareOfProperty = None),
                 DisposalMethod.Sold
               )._1
@@ -1240,7 +1315,20 @@ class DisposalDetailsControllerSpec
           }
 
           checkIsRedirect(performAction(), routes.DisposalDetailsController.howMuchDidYouOwn())
+        }
 
+        "there are disposal details in session but no answer for the property share question for trust" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDisposalDetailsAnswersForTrust(
+                allQuestionsAnswered.copy(shareOfProperty = None),
+                DisposalMethod.Sold
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.DisposalDetailsController.howMuchDidYouOwn())
         }
 
       }
@@ -1432,15 +1520,91 @@ class DisposalDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      "redirect to the task list page" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithDisposalDetailsAnswers(sample[CompleteDisposalDetailsAnswers], DisposalMethod.Sold)._1
-          )
+      "redirect to the task list page" when {
+
+        "usertype is individual and disposalmethod is sold" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDisposalDetailsAnswersForIndividual(
+                sample[CompleteDisposalDetailsAnswers],
+                DisposalMethod.Sold
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
         }
 
-        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        "usertype is individual and disposalmethod is gifted" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDisposalDetailsAnswersForIndividual(
+                sample[CompleteDisposalDetailsAnswers],
+                DisposalMethod.Gifted
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+        "usertype is individual and disposalmethod is other" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDisposalDetailsAnswersForIndividual(
+                sample[CompleteDisposalDetailsAnswers],
+                DisposalMethod.Other
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+        "usertype is trust and disposalmethod is sold" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDisposalDetailsAnswersForTrust(
+                sample[CompleteDisposalDetailsAnswers],
+                DisposalMethod.Sold
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+        "usertype is trust and disposalmethod is gifted" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDisposalDetailsAnswersForTrust(
+                sample[CompleteDisposalDetailsAnswers],
+                DisposalMethod.Gifted
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+        "usertype is trust and disposalmethod is other" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDisposalDetailsAnswersForTrust(
+                sample[CompleteDisposalDetailsAnswers],
+                DisposalMethod.Other
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
       }
 
     }
