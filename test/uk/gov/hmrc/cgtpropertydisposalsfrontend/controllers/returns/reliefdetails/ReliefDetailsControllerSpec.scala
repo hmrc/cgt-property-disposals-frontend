@@ -942,7 +942,7 @@ class ReliefDetailsControllerSpec
           reliefDetailsAnswers       = Some(currentAnswers),
           exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
           yearToDateLiabilityAnswers = Some(sample[YearToDateLiabilityAnswers]),
-          uploadSupportingDocuments  = Some(sample[UploadSupportingDocumentAnswers])
+          uploadSupportingDocuments  = Some(sample[UploadSupportingEvidenceAnswers])
         )
         val currentJourney = sample[FillingOutReturn].copy(draftReturn = currentDraftReturn)
 

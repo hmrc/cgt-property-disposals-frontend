@@ -17,8 +17,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.CompleteUploadSupportingDocumentAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.SupportingDocuments
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.SupportingEvidence
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -31,15 +31,14 @@
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(expired : List[SupportingDocuments])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(expired : List[SupportingEvidence])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-    @key = @{"upload-supporting-documents.check-your-answers"}
+    @key = @{"upload-supporting-evidence.expired"}
 
     @title = @{messages(s"$key.title")}
 
     @mainTemplate(title = title, userType = request.userType) {
 
-    <h1>Expired</h1>
         @pageHeading(title, Some(messages(s"$key.caption")))
 
         @cyaSection() {

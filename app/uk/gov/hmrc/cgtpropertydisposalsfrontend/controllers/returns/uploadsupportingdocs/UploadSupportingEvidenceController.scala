@@ -43,8 +43,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsuppor
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.{CompleteUploadSupportingDocumentAnswers, IncompleteUploadSupportingDocumentAnswers, SupportingDocuments}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocumentAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.{CompleteUploadSupportingEvidenceAnswers, IncompleteUploadSupportingEvidenceAnswers, SupportingEvidence}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingEvidenceAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.{FAILED, UPLOADED}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInitiateSuccess
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference, _}
@@ -99,7 +99,7 @@ class UploadSupportingEvidenceController @Inject() (
       CgtReference,
       SessionData,
       FillingOutReturn,
-      UploadSupportingDocumentAnswers
+      UploadSupportingEvidenceAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
@@ -107,22 +107,22 @@ class UploadSupportingEvidenceController @Inject() (
         d match {
           case DraftSingleDisposalReturn(i, _, _, _, _, _, _, _, _, maybeSupportingDocumentsAnswers, _) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
-              f(i, c.cgtReference, s, r, IncompleteUploadSupportingDocumentAnswers.empty)
+              f(i, c.cgtReference, s, r, IncompleteUploadSupportingEvidenceAnswers.empty)
             )(f(i, c.cgtReference, s, r, _))
           case DraftMultipleDisposalsReturn(i, _, _, _, _, maybeSupportingDocumentsAnswers, _) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
-              f(i, c.cgtReference, s, r, IncompleteUploadSupportingDocumentAnswers.empty)
+              f(i, c.cgtReference, s, r, IncompleteUploadSupportingEvidenceAnswers.empty)
             )(f(i, c.cgtReference, s, r, _))
         }
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def commonDisplayBehaviour[A, P: Writeable, R](
-    currentAnswers: UploadSupportingDocumentAnswers
-  )(form: UploadSupportingDocumentAnswers => Form[A])(
+    currentAnswers: UploadSupportingEvidenceAnswers
+  )(form: UploadSupportingEvidenceAnswers => Form[A])(
     page: (Form[A], Call) => P
   )(
-    requiredPreviousAnswer: UploadSupportingDocumentAnswers => Option[R],
+    requiredPreviousAnswer: UploadSupportingEvidenceAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
@@ -140,9 +140,9 @@ class UploadSupportingEvidenceController @Inject() (
       withUploadSupportingEvidenceAnswers(request) { (_, _, _, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
-            _.doYouWantToUploadSupportingDocuments
+            _.doYouWantToUploadSupportingEvidence
               .fold(doYouWantToUploadSupportingDocumentsForm)(doYouWantToUploadSupportingDocumentsForm.fill),
-            c => doYouWantToUploadSupportingDocumentsForm.fill(c.doYouWantToUploadSupportingDocuments)
+            c => doYouWantToUploadSupportingDocumentsForm.fill(c.doYouWantToUploadSupportingEvidence)
           )
         )(
           page = doYouWantToUploadSupportingEvidencePage(_, _)
@@ -167,37 +167,37 @@ class UploadSupportingEvidenceController @Inject() (
           newDoYouWantToUploadSupportingEvidenceAnswer =>
             if (newDoYouWantToUploadSupportingEvidenceAnswer) {
               val updatedAnswers = answers match {
-                case IncompleteUploadSupportingDocumentAnswers(None, supportingEvidences) =>
-                  IncompleteUploadSupportingDocumentAnswers(
+                case IncompleteUploadSupportingEvidenceAnswers(None, supportingEvidences) =>
+                  IncompleteUploadSupportingEvidenceAnswers(
                     Some(newDoYouWantToUploadSupportingEvidenceAnswer),
                     supportingEvidences
                   )
-                case IncompleteUploadSupportingDocumentAnswers(
+                case IncompleteUploadSupportingEvidenceAnswers(
                     Some(oldDoYouWantToUploadSupportingEvidenceAnswer),
                     supportingEvidences
                     ) =>
                   if (newDoYouWantToUploadSupportingEvidenceAnswer =!= oldDoYouWantToUploadSupportingEvidenceAnswer) {
-                    IncompleteUploadSupportingDocumentAnswers(
+                    IncompleteUploadSupportingEvidenceAnswers(
                       Some(newDoYouWantToUploadSupportingEvidenceAnswer),
                       List.empty
                     )
                   } else {
-                    IncompleteUploadSupportingDocumentAnswers(
+                    IncompleteUploadSupportingEvidenceAnswers(
                       Some(newDoYouWantToUploadSupportingEvidenceAnswer),
                       supportingEvidences
                     )
                   }
-                case CompleteUploadSupportingDocumentAnswers(
+                case CompleteUploadSupportingEvidenceAnswers(
                     oldDoYouWantToUploadSupportingEvidenceAnswer,
                     supportingEvidences
                     ) =>
                   if (newDoYouWantToUploadSupportingEvidenceAnswer =!= oldDoYouWantToUploadSupportingEvidenceAnswer) {
-                    IncompleteUploadSupportingDocumentAnswers(
+                    IncompleteUploadSupportingEvidenceAnswers(
                       Some(newDoYouWantToUploadSupportingEvidenceAnswer),
                       List.empty
                     )
                   } else {
-                    IncompleteUploadSupportingDocumentAnswers(
+                    IncompleteUploadSupportingEvidenceAnswers(
                       Some(newDoYouWantToUploadSupportingEvidenceAnswer),
                       supportingEvidences
                     )
@@ -253,11 +253,11 @@ class UploadSupportingEvidenceController @Inject() (
             } else {
               val result = for {
                 _ <- upscanService.removeAllFiles(DraftReturnId(draftReturnId.toString))
-                updatedAnswers: UploadSupportingDocumentAnswers = answers match {
-                  case IncompleteUploadSupportingDocumentAnswers(_, _) =>
-                    IncompleteUploadSupportingDocumentAnswers(Some(false), List.empty)
-                  case CompleteUploadSupportingDocumentAnswers(_, _) =>
-                    CompleteUploadSupportingDocumentAnswers(doYouWantToUploadSupportingDocuments = false, List.empty)
+                updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
+                  case IncompleteUploadSupportingEvidenceAnswers(_, _) =>
+                    IncompleteUploadSupportingEvidenceAnswers(Some(false), List.empty)
+                  case CompleteUploadSupportingEvidenceAnswers(_, _) =>
+                    CompleteUploadSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty)
                 }
                 newDraftReturn = fillingOutReturn.draftReturn match {
                   case s @ DraftSingleDisposalReturn(
@@ -349,22 +349,22 @@ class UploadSupportingEvidenceController @Inject() (
           prepared <- EitherT.fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
           _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
           _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
-          updatedAnswers: UploadSupportingDocumentAnswers = answers match {
-            case IncompleteUploadSupportingDocumentAnswers(
+          updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
+            case IncompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
                 supportingEvidences
                 ) =>
-              IncompleteUploadSupportingDocumentAnswers(
+              IncompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
-                supportingEvidences :+ SupportingDocuments(reference, "")
+                supportingEvidences :+ SupportingEvidence(reference, "")
               )
-            case CompleteUploadSupportingDocumentAnswers(
+            case CompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
                 supportingEvidences
                 ) =>
-              IncompleteUploadSupportingDocumentAnswers(
+              IncompleteUploadSupportingEvidenceAnswers(
                 Some(doYouWantToUploadSupportingEvidenceAnswer),
-                supportingEvidences :+ SupportingDocuments(reference, "")
+                supportingEvidences :+ SupportingEvidence(reference, "")
               )
           }
           newDraftReturn = fillingOutReturn.draftReturn match {
@@ -513,25 +513,25 @@ class UploadSupportingEvidenceController @Inject() (
           _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
           _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
 
-          updatedAnswers: UploadSupportingDocumentAnswers = answers match {
-            case IncompleteUploadSupportingDocumentAnswers(
+          updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
+            case IncompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
                 supportingEvidences
                 ) => {
               val removeOldDoc = supportingEvidences.filterNot(c => c.reference === del)
-              IncompleteUploadSupportingDocumentAnswers(
+              IncompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
-                removeOldDoc :+ SupportingDocuments(reference, "")
+                removeOldDoc :+ SupportingEvidence(reference, "")
               )
             }
-            case CompleteUploadSupportingDocumentAnswers(
+            case CompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
                 supportingEvidences
                 ) => {
               val removeOldDoc = supportingEvidences.filterNot(c => c.reference === del)
-              IncompleteUploadSupportingDocumentAnswers(
+              IncompleteUploadSupportingEvidenceAnswers(
                 Some(doYouWantToUploadSupportingEvidenceAnswer),
-                removeOldDoc :+ SupportingDocuments(reference, "")
+                removeOldDoc :+ SupportingEvidence(reference, "")
               )
             }
           }
@@ -591,19 +591,19 @@ class UploadSupportingEvidenceController @Inject() (
         val result = for {
           _ <- upscanService.removeFile(DraftReturnId(draftReturnId.toString), UpscanInitiateReference(id))
           updatedAnswers = answers match {
-            case IncompleteUploadSupportingDocumentAnswers(
+            case IncompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
                 supportingEvidences
                 ) =>
-              IncompleteUploadSupportingDocumentAnswers(
+              IncompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
                 supportingEvidences.filterNot(c => c.reference == id)
               )
-            case CompleteUploadSupportingDocumentAnswers(
+            case CompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
                 supportingEvidences
                 ) =>
-              CompleteUploadSupportingDocumentAnswers(
+              CompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
                 supportingEvidences.filterNot(c => c.reference == id)
               )
@@ -658,10 +658,10 @@ class UploadSupportingEvidenceController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withUploadSupportingEvidenceAnswers(request) { (_, _, _, fillingOutReturn, answers) =>
       (answers, fillingOutReturn.draftReturn) match {
-        case (c: UploadSupportingDocumentAnswers, s: DraftSingleDisposalReturn) => {
+        case (c: UploadSupportingEvidenceAnswers, s: DraftSingleDisposalReturn) => {
           checkYourAnswersHandler(c, fillingOutReturn, s)
         }
-        case (c: UploadSupportingDocumentAnswers, s: DraftMultipleDisposalsReturn) =>
+        case (c: UploadSupportingEvidenceAnswers, s: DraftMultipleDisposalsReturn) =>
           checkYourAnswersHandler(c, fillingOutReturn, s)
         case _ =>
           logger.warn("error processing check your answers")
@@ -673,19 +673,19 @@ class UploadSupportingEvidenceController @Inject() (
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, _, _, fillingOutReturn, answers) =>
-        val updatedAnswers: UploadSupportingDocumentAnswers = answers match {
-          case IncompleteUploadSupportingDocumentAnswers(None, _) =>
-            CompleteUploadSupportingDocumentAnswers(doYouWantToUploadSupportingDocuments = false, List.empty) // shut the compiler up - this can never happen actually
-          case IncompleteUploadSupportingDocumentAnswers(
+        val updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
+          case IncompleteUploadSupportingEvidenceAnswers(None, _) =>
+            CompleteUploadSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty) // shut the compiler up - this can never happen actually
+          case IncompleteUploadSupportingEvidenceAnswers(
               Some(doYouWantToUploadSupportingDocumentAnswer),
               supportingDocuments
               ) =>
-            CompleteUploadSupportingDocumentAnswers(doYouWantToUploadSupportingDocumentAnswer, supportingDocuments)
-          case CompleteUploadSupportingDocumentAnswers(
+            CompleteUploadSupportingEvidenceAnswers(doYouWantToUploadSupportingDocumentAnswer, supportingDocuments)
+          case CompleteUploadSupportingEvidenceAnswers(
               doYouWantToUploadSupportingDocumentAnswer,
               supportingDocuments
               ) =>
-            CompleteUploadSupportingDocumentAnswers(doYouWantToUploadSupportingDocumentAnswer, supportingDocuments)
+            CompleteUploadSupportingEvidenceAnswers(doYouWantToUploadSupportingDocumentAnswer, supportingDocuments)
         }
         val newDraftReturn = fillingOutReturn.draftReturn match {
           case s @ DraftSingleDisposalReturn(
@@ -737,14 +737,14 @@ class UploadSupportingEvidenceController @Inject() (
     }
 
   private def checkYourAnswersHandler(
-    answers: UploadSupportingDocumentAnswers,
+    answers: UploadSupportingEvidenceAnswers,
     fillingOutReturn: FillingOutReturn,
     draftReturn: DraftReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case IncompleteUploadSupportingDocumentAnswers(None, _) => // TODO: change name to IncompleteUploadSupportingEvidenceAnswers
+      case IncompleteUploadSupportingEvidenceAnswers(None, _) => // TODO: change name to IncompleteUploadSupportingEvidenceAnswers
         Redirect(routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments())
-      case IncompleteUploadSupportingDocumentAnswers(Some(doYouWantToUploadSupportingEvidence), supportingEvidences) =>
+      case IncompleteUploadSupportingEvidenceAnswers(Some(doYouWantToUploadSupportingEvidence), supportingEvidences) =>
         if (doYouWantToUploadSupportingEvidence) {
           supportingEvidences match {
             case Nil => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidence())
@@ -761,7 +761,7 @@ class UploadSupportingEvidenceController @Inject() (
                   } else {
                     Ok(
                       checkYourAnswersPage(
-                        CompleteUploadSupportingDocumentAnswers(
+                        CompleteUploadSupportingEvidenceAnswers(
                           doYouWantToUploadSupportingEvidence,
                           supportingEvidences
                         )
@@ -785,7 +785,7 @@ class UploadSupportingEvidenceController @Inject() (
               } else {
                 Ok(
                   checkYourAnswersPage(
-                    CompleteUploadSupportingDocumentAnswers(doYouWantToUploadSupportingEvidence, supportingEvidences)
+                    CompleteUploadSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence, supportingEvidences)
                   )
                 )
               }
@@ -793,7 +793,7 @@ class UploadSupportingEvidenceController @Inject() (
           )
         }
 
-      case CompleteUploadSupportingDocumentAnswers(doYouWantToUploadSupportingEvidenceAnswer, supportingEvidences) =>
+      case CompleteUploadSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidenceAnswer, supportingEvidences) =>
         val uploadedSupportingDocuments = for {
           documents <- upscanService.getAll(DraftReturnId(draftReturn.id.toString))
         } yield documents
@@ -807,7 +807,7 @@ class UploadSupportingEvidenceController @Inject() (
             } else {
               Ok(
                 checkYourAnswersPage(
-                  CompleteUploadSupportingDocumentAnswers(
+                  CompleteUploadSupportingEvidenceAnswers(
                     doYouWantToUploadSupportingEvidenceAnswer,
                     supportingEvidences
                   )
@@ -818,10 +818,10 @@ class UploadSupportingEvidenceController @Inject() (
         )
     }
 
-  private def findExpiredSupportingEvidence(fd: List[UpscanFileDescriptor]): List[SupportingDocuments] = {
+  private def findExpiredSupportingEvidence(fd: List[UpscanFileDescriptor]): List[SupportingEvidence] = {
     val (expired, _) = fd.partition(p => p.timestamp.plusDays(upscanStoreExpiry).isBefore(LocalDateTime.now))
     expired.map(e =>
-      SupportingDocuments(
+      SupportingEvidence(
         e.fileDescriptor.reference,
         e.fileDescriptor.uploadRequest.fields.getOrElse("fileName", "could not get filename")
       )
@@ -834,7 +834,7 @@ object UploadSupportingEvidenceController {
   val doYouWantToUploadSupportingDocumentsForm: Form[Boolean] =
     Form(
       mapping(
-        "do-you-want-to-upload-supporting-documents" -> of(BooleanFormatter.formatter)
+        "do-you-want-to-upload-supporting-evidence" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 }

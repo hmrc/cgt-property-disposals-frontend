@@ -34,7 +34,7 @@
 
 @(reference : UpscanInitiateReference, deleteId : String)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-    @key = @{"upload-supporting-documents.supporting-evidence"}
+    @key = @{"upload-supporting-evidence.supporting-evidence"}
     @title = @{messages(s"$key.title")}
 
     @mainTemplate(title = title, userType = request.userType, hasErrors = None) {

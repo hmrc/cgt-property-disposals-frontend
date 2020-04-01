@@ -977,7 +977,7 @@ class TaskListControllerSpec
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
             yearToDateLiabilityAnswers    = Some(sample[CalculatedYTDAnswers]),
-            uploadSupportingDocuments     = Some(sample[UploadSupportingDocumentAnswers])
+            uploadSupportingDocuments     = Some(sample[UploadSupportingEvidenceAnswers])
           )
 
           testStateOfSection(

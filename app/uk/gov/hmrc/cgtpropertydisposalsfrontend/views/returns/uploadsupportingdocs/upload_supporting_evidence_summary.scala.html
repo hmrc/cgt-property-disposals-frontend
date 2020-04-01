@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocumentAnswers.CompleteUploadSupportingDocumentAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -25,14 +25,14 @@
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(answers: CompleteUploadSupportingDocumentAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteUploadSupportingEvidenceAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-    @key = @{"upload-supporting-documents.check-your-answers"}
+    @key = @{"upload-supporting-evidence.check-your-answers"}
 
     @title = @{messages(s"$key.title")}
 
     @hasSupportingDocs = @{
-        answers.doYouWantToUploadSupportingDocuments match {
+        answers.doYouWantToUploadSupportingEvidence match {
             case true => "Yes"
             case false => "No"
         }
@@ -41,13 +41,13 @@
     @cyaSection() {
 
         @cyaRow(
-            messages("upload-supporting-documents.check-your-answers.do-you-want-to-upload-documents"),
+            messages("upload-supporting-evidence.check-your-answers.do-you-want-to-upload-documents"),
             Html(hasSupportingDocs),
-            Some(cyaChange(messages("upload-supporting-documents.check-your-answers.cya-change"), routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments().url)),
+            Some(cyaChange(messages("upload-supporting-evidence.check-your-answers.cya-change"), routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments().url)),
             "do-you-want-to-upload-supporting-evidence-value"
         )
 
-        @for((document, fileIndex) <- answers.documents.zipWithIndex) {
+        @for((document, fileIndex) <- answers.evidences.zipWithIndex) {
 
             <div>
                 <dt class="cya-question" id="question">

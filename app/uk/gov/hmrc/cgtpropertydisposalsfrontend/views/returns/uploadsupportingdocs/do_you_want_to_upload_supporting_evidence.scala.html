@@ -32,7 +32,7 @@
 
 @(form: Form[Boolean], backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-    @key = @{"do-you-want-to-upload-supporting-documents"}
+    @key = @{"do-you-want-to-upload-supporting-evidence"}
     @title = @{messages(s"$key.title")}
     @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
