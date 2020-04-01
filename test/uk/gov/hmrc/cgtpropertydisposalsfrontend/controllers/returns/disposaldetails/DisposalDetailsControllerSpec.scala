@@ -36,6 +36,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{disposalMetho
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, ShareOfProperty}
@@ -73,12 +75,17 @@ class DisposalDetailsControllerSpec
     )
 
   def fillingOutReturn(disposalMethod: DisposalMethod): (FillingOutReturn, DraftSingleDisposalReturn) = {
-    val draftReturn = sample[DraftSingleDisposalReturn].copy(triageAnswers =
-      sample[CompleteSingleDisposalTriageAnswers].copy(
-        disposalMethod = disposalMethod
-      )
+    val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
+      disposalMethod = disposalMethod
     )
-    sample[FillingOutReturn].copy(draftReturn = draftReturn) -> draftReturn
+    val subscribedDetails = sample[SubscribedDetails].copy(
+      name = Right(sample[IndividualName])
+    )
+
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(
+      triageAnswers = answers
+    )
+    sample[FillingOutReturn].copy(draftReturn = draftReturn, subscribedDetails = subscribedDetails) -> draftReturn
   }
 
   def sessionWithDisposalDetailsAnswers(
@@ -463,15 +470,15 @@ class DisposalDetailsControllerSpec
         IncompleteDisposalDetailsAnswers.empty.copy(shareOfProperty = Some(ShareOfProperty.Full))
 
       val disposalPriceTitleScenarios = List(
-        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalPrice.Sold.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalPrice.Sold.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalPrice.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalPrice.SoldOther.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalPrice.SoldOther.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalPrice.SoldOther.title"),
         (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalPrice.Gifted.title"),
         (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalPrice.Gifted.title"),
         (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalPrice.Gifted.title"),
-        (DisposalMethod.Other, ShareOfProperty.Full, "disposalPrice.Other.title"),
-        (DisposalMethod.Other, ShareOfProperty.Half, "disposalPrice.Other.title"),
-        (DisposalMethod.Other, ShareOfProperty.Other(1), "disposalPrice.Other.title")
+        (DisposalMethod.Other, ShareOfProperty.Full, "disposalPrice.SoldOther.title"),
+        (DisposalMethod.Other, ShareOfProperty.Half, "disposalPrice.SoldOther.title"),
+        (DisposalMethod.Other, ShareOfProperty.Other(1), "disposalPrice.SoldOther.title")
       )
 
       behave like redirectToStartBehaviour(performAction)
@@ -603,7 +610,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("disposalPrice.Sold.title"), { doc =>
+            messageFromMessageKey("disposalPrice.SoldOther.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -837,15 +844,15 @@ class DisposalDetailsControllerSpec
         .copy(shareOfProperty = Some(ShareOfProperty.Full), disposalPrice = Some(AmountInPence.fromPounds(2d)))
 
       val disposalFeesTitleScenarios = List(
-        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalFees.Sold.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalFees.Sold.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalFees.Sold.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalFees.Gifted.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalFees.Gifted.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalFees.Gifted.title"),
-        (DisposalMethod.Other, ShareOfProperty.Full, "disposalFees.Other.title"),
-        (DisposalMethod.Other, ShareOfProperty.Half, "disposalFees.Other.title"),
-        (DisposalMethod.Other, ShareOfProperty.Other(1), "disposalFees.Other.title")
+        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalFees.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalFees.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalFees.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalFees.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalFees.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalFees.title"),
+        (DisposalMethod.Other, ShareOfProperty.Full, "disposalFees.title"),
+        (DisposalMethod.Other, ShareOfProperty.Half, "disposalFees.title"),
+        (DisposalMethod.Other, ShareOfProperty.Other(1), "disposalFees.title")
       )
 
       behave like redirectToStartBehaviour(performAction)
@@ -1018,7 +1025,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("disposalFees.Sold.title"), { doc =>
+            messageFromMessageKey("disposalFees.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -1027,9 +1034,11 @@ class DisposalDetailsControllerSpec
           )
         }
 
-        amountOfMoneyErrorScenarios("disposalFees").foreach { scenario =>
-          withClue(s"For $scenario: ") {
-            test(scenario.formData: _*)(scenario.expectedErrorMessageKey)
+        "the amount is submitted is invalid" in {
+          amountOfMoneyErrorScenarios("disposalFees").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              test(scenario.formData: _*)(scenario.expectedErrorMessageKey)
+            }
           }
         }
 
@@ -1435,6 +1444,7 @@ class DisposalDetailsControllerSpec
       }
 
     }
+
   }
 
   def noDisposalMethodBehaviour(performAction: () => Future[Result]): Unit =
@@ -1512,6 +1522,12 @@ object DisposalDetailsControllerSpec extends Matchers {
   def expectedTitles(
     completeAnswers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod
-  ): (String, String) =
-    (s"disposalPrice.${disposalMethod.toString}.title", s"disposalFees.${disposalMethod.toString}.title")
+  ): (String, String) = {
+    val disposalMethodKey = disposalMethod match {
+      case DisposalMethod.Gifted => ".Gifted"
+      case _                     => ".SoldOther"
+    }
+
+    (s"disposalPrice$disposalMethodKey.title", s"disposalFees.title")
+  }
 }

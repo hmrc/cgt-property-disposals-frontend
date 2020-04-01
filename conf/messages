@@ -859,12 +859,13 @@ disposalFees.trust.error.invalid=How much the trust paid for additional disposal
 disposalFees.error.tooSmall=How much you paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.agent.error.tooSmall=How much your client paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.trust.error.tooSmall=How much the trust paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
-disposSelling costs must have 2 decimal places or less, for example 33.33alFees.error.tooLarge=How much you paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.error.tooLarge=How much you paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.agent.error.tooLarge=How much your client paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.trust.error.tooLarge=How much the trust paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.error.tooManyDecimals=How much you paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.agent.error.tooManyDecimals=How much your client paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.trust.error.tooManyDecimals=How much the trust paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
 
 returns.disposal-details.cya.title=Check your answers
 
