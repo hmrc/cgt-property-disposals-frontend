@@ -27,6 +27,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
@@ -337,38 +338,102 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-          testFormError(data: _*)(expectedErrorMessageKey)("acquisitionMethod.title")(
+        def test(userType: UserType, data: (String, String)*)(expectedErrorMessageKey: String): Unit =
+          testFormError(userType, data: _*)(expectedErrorMessageKey)(
+            s"acquisitionMethod${userMessageKey(userType)}.title"
+          )(
             performAction
           )
 
-        "nothing is submitted" in {
-          test()("acquisitionMethod.error.required")
+        "individual submits nothing" in {
+          test(Individual)("acquisitionMethod.error.required")
         }
 
-        "an unknown value is submitted" in {
-          test("acquisitionMethod" -> "4")("acquisitionMethod.error.required")
+        "trust submits nothing" in {
+          test(Organisation)("acquisitionMethod.trust.error.required")
+        }
+
+        "agent submits nothing" in {
+          test(Agent)("acquisitionMethod.agent.error.required")
+        }
+
+        "individual submits an unknown value" in {
+          test(Individual, "acquisitionMethod" -> "4")("acquisitionMethod.error.required")
+        }
+
+        "trust submits an unknown value" in {
+          test(Organisation, "acquisitionMethod" -> "4")("acquisitionMethod.trust.error.required")
+        }
+
+        "agent submits an unknown value" in {
+          test(Agent, "acquisitionMethod" -> "4")("acquisitionMethod.agent.error.required")
         }
 
         "other is selected with a value" that {
 
-          "that doesn't exist" in {
-            test("acquisitionMethod" -> "3")("otherAcquisitionMethod.error.required")
+          "individual enters acquisition method that doesn't exist" in {
+            test(Individual, "acquisitionMethod" -> "3")("otherAcquisitionMethod.error.required")
           }
 
-          "that is empty" in {
-            test("acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "")("otherAcquisitionMethod.error.required")
+          "trust enters acquisition method that doesn't exist" in {
+            test(Organisation, "acquisitionMethod" -> "3")("otherAcquisitionMethod.trust.error.required")
           }
 
-          "contains invalid characters" in {
-            test("acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "1,234")(
+          "agent enters acquisition method that doesn't exist" in {
+            test(Agent, "acquisitionMethod" -> "3")("otherAcquisitionMethod.agent.error.required")
+          }
+
+          "individual enters acquisition method that is empty" in {
+            test(Individual, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "")(
+              "otherAcquisitionMethod.error.required"
+            )
+          }
+
+          "trust enters acquisition method that is empty" in {
+            test(Organisation, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "")(
+              "otherAcquisitionMethod.trust.error.required"
+            )
+          }
+
+          "agent enters acquisition method that is empty" in {
+            test(Agent, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "")(
+              "otherAcquisitionMethod.agent.error.required"
+            )
+          }
+
+          "individual enters acquisition method that contains invalid characters" in {
+            test(Individual, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "1,234")(
               "otherAcquisitionMethod.error.invalid"
             )
           }
 
-          "is too long" in {
-            test("acquisitionMethod" -> "3", "otherAcquisitionMethod" -> ("a" * 36))(
+          "trust enters acquisition method that contains invalid characters" in {
+            test(Organisation, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "1,234")(
+              "otherAcquisitionMethod.trust.error.invalid"
+            )
+          }
+
+          "agent enters acquisition method that contains invalid characters" in {
+            test(Agent, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "1,234")(
+              "otherAcquisitionMethod.agent.error.invalid"
+            )
+          }
+
+          "individual enters acquisition method that is too long" in {
+            test(Individual, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> ("a" * 36))(
               "otherAcquisitionMethod.error.tooLong"
+            )
+          }
+
+          "trust enters acquisition method that is too long" in {
+            test(Organisation, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> ("a" * 36))(
+              "otherAcquisitionMethod.trust.error.tooLong"
+            )
+          }
+
+          "agent enters acquisition method that is too long" in {
+            test(Agent, "acquisitionMethod" -> "3", "otherAcquisitionMethod" -> ("a" * 36))(
+              "otherAcquisitionMethod.agent.error.tooLong"
             )
           }
 
@@ -600,7 +665,7 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        "the acquisition details section has not yet been completed" in {
+        "an individual has not yet completed the acquisition details section" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -626,7 +691,59 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        "the acquisition details section has been completed" in {
+        "a trust has not yet completed the acquisition details section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionMethod = Some(AcquisitionMethod.Bought)
+                ),
+                sample[AssetType],
+                sample[Boolean],
+                UserType.Organisation
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionDate.trust.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionMethod().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionDateSubmit()
+                .url
+            }
+          )
+        }
+
+        "an agent has not yet completed the acquisition details section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionMethod = Some(AcquisitionMethod.Bought)
+                ),
+                sample[AssetType],
+                sample[Boolean],
+                UserType.Agent
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionDate.agent.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionMethod().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionDateSubmit()
+                .url
+            }
+          )
+        }
+
+        "an individual has already completed the acquisition details section" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -642,6 +759,54 @@ class AcquisitionDetailsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("acquisitionDate.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionDateSubmit()
+                .url
+            }
+          )
+        }
+
+        "a trust has already completed the acquisition details section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers],
+                sample[AssetType],
+                sample[Boolean],
+                UserType.Organisation
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionDate.trust.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionDateSubmit()
+                .url
+            }
+          )
+        }
+
+        "an agent has already completed the acquisition details section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers],
+                sample[AssetType],
+                sample[Boolean],
+                UserType.Agent
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionDate.agent.title"), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
                 .acquisitionDateSubmit()
@@ -693,20 +858,20 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error" when {
 
-        def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(expectedErrorKey)("acquisitionDate.title")(
+        def test(userType: UserType, data: (String, String)*)(expectedErrorKey: String): Unit =
+          testFormError(userType, data: _*)(expectedErrorKey)(s"acquisitionDate${userMessageKey(userType)}.title")(
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers],
               sample[AssetType],
               sample[Boolean],
-              UserType.Individual,
+              userType,
               disposalDate
             )._1
           )
 
-        "the date is invalid" in {
-          dateErrorScenarios("acquisitionDate").foreach {
+        "individual enters date that is invalid" in {
+          dateErrorScenarios("acquisitionDate", userMessageKey(Individual)).foreach {
             case d @ DateErrorScenario(dayString, monthString, yearString, expectedErrorKey) =>
               withClue(s"For $d: ") {
                 val formData =
@@ -716,15 +881,59 @@ class AcquisitionDetailsControllerSpec
                     "acquisitionDate-year"  -> yearString
                   ).collect { case (id, Some(input)) => id -> input }
 
-                test(formData: _*)(expectedErrorKey)
+                test(Individual, formData: _*)(expectedErrorKey)
               }
           }
         }
 
-        "the date is after the disposal date" in {
+        "trust enters date that is invalid" in {
+          dateErrorScenarios("acquisitionDate", userMessageKey(Organisation)).foreach {
+            case d @ DateErrorScenario(dayString, monthString, yearString, expectedErrorKey) =>
+              withClue(s"For $d: ") {
+                val formData =
+                  List(
+                    "acquisitionDate-day"   -> dayString,
+                    "acquisitionDate-month" -> monthString,
+                    "acquisitionDate-year"  -> yearString
+                  ).collect { case (id, Some(input)) => id -> input }
+
+                test(Organisation, formData: _*)(expectedErrorKey)
+              }
+          }
+        }
+
+        "agent enters date that is invalid" in {
+          dateErrorScenarios("acquisitionDate", userMessageKey(Agent)).foreach {
+            case d @ DateErrorScenario(dayString, monthString, yearString, expectedErrorKey) =>
+              withClue(s"For $d: ") {
+                val formData =
+                  List(
+                    "acquisitionDate-day"   -> dayString,
+                    "acquisitionDate-month" -> monthString,
+                    "acquisitionDate-year"  -> yearString
+                  ).collect { case (id, Some(input)) => id -> input }
+
+                test(Agent, formData: _*)(expectedErrorKey)
+              }
+          }
+        }
+
+        "individual enters date that is after the disposal date" in {
           val tomorrow = disposalDate.value.plusDays(1L)
 
-          test(formData(tomorrow): _*)("acquisitionDate.error.tooFarInFuture")
+          test(Individual, formData(tomorrow): _*)("acquisitionDate.error.tooFarInFuture")
+        }
+
+        "trust enters date that is after the disposal date" in {
+          val tomorrow = disposalDate.value.plusDays(1L)
+
+          test(Organisation, formData(tomorrow): _*)("acquisitionDate.trust.error.tooFarInFuture")
+        }
+
+        "agent enters date that is after the disposal date" in {
+          val tomorrow = disposalDate.value.plusDays(1L)
+
+          test(Agent, formData(tomorrow): _*)("acquisitionDate.agent.error.tooFarInFuture")
         }
 
       }
@@ -868,47 +1077,58 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        "the acquisition details section has not yet been completed" in {
-          forAll { acquisitionMethod: AcquisitionMethod =>
-            val acquisitionDate = sample[AcquisitionDate]
-            val answers = sample[IncompleteAcquisitionDetailsAnswers].copy(
-              acquisitionMethod = Some(acquisitionMethod),
-              acquisitionDate   = Some(acquisitionDate)
-            )
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithState(
-                  answers,
-                  sample[AssetType],
-                  sample[Boolean],
-                  UserType.Individual
-                )._1
-              )
-            }
-
-            val pricePageTitle = acquisitionMethod match {
-              case AcquisitionMethod.Bought => messageFromMessageKey("acquisitionPriceBought.title")
-              case _ =>
-                messageFromMessageKey(
-                  "acquisitionPriceNotBought.title",
-                  LocalDateUtils.govDisplayFormat(acquisitionDate.value)
-                )
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              pricePageTitle, { doc =>
-                doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionDate().url
-                doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
-                  .acquisitionPriceSubmit()
-                  .url
-              }
+        def incompleteSection(userType: UserType): Unit = forAll { acquisitionMethod: AcquisitionMethod =>
+          val acquisitionDate = sample[AcquisitionDate]
+          val answers = sample[IncompleteAcquisitionDetailsAnswers].copy(
+            acquisitionMethod = Some(acquisitionMethod),
+            acquisitionDate   = Some(acquisitionDate)
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                answers,
+                sample[AssetType],
+                sample[Boolean],
+                userType
+              )._1
             )
           }
+
+          val pricePageTitle = acquisitionMethod match {
+            case AcquisitionMethod.Bought =>
+              messageFromMessageKey(s"acquisitionPriceBought${userMessageKey(userType)}.title")
+            case _ =>
+              messageFromMessageKey(
+                s"acquisitionPriceNotBought${userMessageKey(userType)}.title",
+                LocalDateUtils.govDisplayFormat(acquisitionDate.value)
+              )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            pricePageTitle, { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionDate().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionPriceSubmit()
+                .url
+            }
+          )
         }
 
-        "the acquisition details section has been completed" in {
+        "an individual has not yet completed the acquisition details section" in {
+          incompleteSection(Individual)
+        }
+
+        "a trust has not yet completed the acquisition details section" in {
+          incompleteSection(Organisation)
+        }
+
+        "an agent has not yet completed the acquisition details section" in {
+          incompleteSection(Agent)
+        }
+
+        def sectionCompleted(userType: UserType): Unit = {
           val answers = sample[CompleteAcquisitionDetailsAnswers]
           inSequence {
             mockAuthWithNoRetrievals()
@@ -917,16 +1137,17 @@ class AcquisitionDetailsControllerSpec
                 answers,
                 sample[AssetType],
                 sample[Boolean],
-                UserType.Individual
+                userType
               )._1
             )
           }
 
           val pricePageTitle = answers.acquisitionMethod match {
-            case AcquisitionMethod.Bought => messageFromMessageKey("acquisitionPriceBought.title")
+            case AcquisitionMethod.Bought =>
+              messageFromMessageKey(s"acquisitionPriceBought${userMessageKey(userType)}.title")
             case _ =>
               messageFromMessageKey(
-                "acquisitionPriceNotBought.title",
+                s"acquisitionPriceNotBought${userMessageKey(userType)}.title",
                 LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
               )
           }
@@ -940,6 +1161,18 @@ class AcquisitionDetailsControllerSpec
                 .url
             }
           )
+        }
+
+        "an individual has already completed the acquisition details section" in {
+          sectionCompleted(Individual)
+        }
+
+        "a trust has already completed the acquisition details section" in {
+          sectionCompleted(Organisation)
+        }
+
+        "an agent has already completed the acquisition details section" in {
+          sectionCompleted(Agent)
         }
       }
 
@@ -958,48 +1191,62 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error" when {
 
-        "the data is invalid" in {
+        def invalidPrice(userType: UserType): Unit =
           forAll { answers: CompleteAcquisitionDetailsAnswers =>
             val scenarioSession = sessionWithState(
               answers,
               sample[AssetType],
               sample[Boolean],
-              UserType.Individual
+              userType
             )._1
 
             val contextKey = answers.acquisitionMethod match {
-              case AcquisitionMethod.Bought => "acquisitionPriceBought"
-              case _                        => "acquisitionPriceNotBought"
+              case AcquisitionMethod.Bought => s"acquisitionPriceBought${userMessageKey(userType)}"
+              case _                        => s"acquisitionPriceNotBought${userMessageKey(userType)}"
             }
 
-            amountOfMoneyErrorScenarios("acquisitionPrice", errorContext = Some(contextKey)).foreach { scenario =>
-              withClue(s"For $scenario: ") {
-                testFormError(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
-                  s"$contextKey.title",
-                  LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
-                )(
-                  performAction,
-                  scenarioSession
-                )
+            amountOfMoneyErrorScenarios(s"acquisitionPrice${userMessageKey(userType)}", errorContext = Some(contextKey))
+              .foreach { scenario =>
+                withClue(s"For $scenario: ") {
+                  testFormError(userType, scenario.formData: _*)(scenario.expectedErrorMessageKey)(
+                    s"$contextKey.title",
+                    LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
+                  )(
+                    performAction,
+                    scenarioSession
+                  )
+                }
               }
-            }
           }
+
+//        Todo broken
+
+        "an individual provides an invalid data" in {
+          invalidPrice(Individual)
         }
 
-        "the amount of money is zero" in {
+        "a trust provides an invalid data" in {
+          invalidPrice(Organisation)
+        }
+
+        "an agent provides an invalid data" in {
+          invalidPrice(Agent)
+        }
+
+        def amountZero(userType: UserType): Unit =
           forAll { answers: CompleteAcquisitionDetailsAnswers =>
             val scenarioSession = sessionWithState(
               answers,
               sample[AssetType],
               sample[Boolean],
-              UserType.Individual
+              userType
             )._1
 
             val contextKey = answers.acquisitionMethod match {
-              case AcquisitionMethod.Bought => "acquisitionPriceBought"
-              case _                        => "acquisitionPriceNotBought"
+              case AcquisitionMethod.Bought => s"acquisitionPriceBought${userMessageKey(userType)}"
+              case _                        => s"acquisitionPriceNotBought${userMessageKey(userType)}"
             }
-            testFormError("acquisitionPrice" -> "0")(
+            testFormError(userType, "acquisitionPrice" -> "0")(
               s"$contextKey.error.tooSmall"
             )(
               s"$contextKey.title",
@@ -1009,6 +1256,17 @@ class AcquisitionDetailsControllerSpec
               scenarioSession
             )
           }
+
+        "an individual enters zero for amount" in {
+          amountZero(Individual)
+        }
+
+        "a trust enters zero for amount" in {
+          amountZero(Organisation)
+        }
+
+        "an agent enters zero for amount" in {
+          amountZero(Agent)
         }
 
       }
@@ -1225,7 +1483,7 @@ class AcquisitionDetailsControllerSpec
 
         }
 
-        "the rebase acquisition details section has not yet been completed for uk resident" in {
+        def incompleteSectionUkResident(userType: UserType): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1237,7 +1495,7 @@ class AcquisitionDetailsControllerSpec
                 ),
                 AssetType.Residential,
                 true,
-                UserType.Individual
+                userType
               )._1
             )
           }
@@ -1252,11 +1510,26 @@ class AcquisitionDetailsControllerSpec
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
+              doc.select("#rebaseAcquisitionPrice-form-hint").text() shouldBe messageFromMessageKey(
+                s"rebaseAcquisitionPrice${userMessageKey(userType)}.helpText"
+              )
             }
           )
         }
 
-        "the acquisition details section has not yet been completed for non uk non resident" in {
+        "an individual has not yet completed the rebase acquisition details section for uk resident" in {
+          incompleteSectionUkResident(Individual)
+        }
+
+        "a trust has not yet completed the rebase acquisition details section for uk resident" in {
+          incompleteSectionUkResident(Organisation)
+        }
+
+        "an Agent has not yet completed the rebase acquisition details section for uk resident" in {
+          incompleteSectionUkResident(Agent)
+        }
+
+        def incompleteSectionNonUKResident(userType: UserType): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1267,7 +1540,7 @@ class AcquisitionDetailsControllerSpec
                 ),
                 AssetType.Residential,
                 false,
-                UserType.Individual
+                userType
               )._1
             )
           }
@@ -1282,11 +1555,26 @@ class AcquisitionDetailsControllerSpec
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
+              doc.select("#rebaseAcquisitionPrice-form-hint").text() shouldBe messageFromMessageKey(
+                s"rebaseAcquisitionPrice${userMessageKey(userType)}.helpText"
+              )
             }
           )
         }
 
-        "the acquisition details section has been completed" in {
+        "an individual has not yet completed the rebase acquisition details section for non-uk resident" in {
+          incompleteSectionNonUKResident(Individual)
+        }
+
+        "a trust has not yet completed the rebase acquisition details section for non-uk resident" in {
+          incompleteSectionNonUKResident(Organisation)
+        }
+
+        "an Agent has not yet completed the rebase acquisition details section for non-uk resident" in {
+          incompleteSectionNonUKResident(Agent)
+        }
+
+        def sectionCompleted(userType: UserType): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1294,7 +1582,7 @@ class AcquisitionDetailsControllerSpec
                 sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
                 AssetType.Residential,
                 true,
-                UserType.Individual
+                userType
               )._1
             )
           }
@@ -1313,7 +1601,19 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        "the amount in the session is non-zero" in {
+        "an individual has already completed the acquisition details section" in {
+          sectionCompleted(Individual)
+        }
+
+        "a trust has already completed the acquisition details section" in {
+          sectionCompleted(Organisation)
+        }
+
+        "an agent has already completed the acquisition details section" in {
+          sectionCompleted(Agent)
+        }
+
+        def amountNonZero(userType: UserType): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1324,7 +1624,7 @@ class AcquisitionDetailsControllerSpec
                 ),
                 AssetType.Residential,
                 true,
-                UserType.Individual
+                userType
               )._1
             )
           }
@@ -1338,6 +1638,18 @@ class AcquisitionDetailsControllerSpec
               doc.select("#rebaseAcquisitionPrice").attr("value") shouldBe "0.01"
             }
           )
+        }
+
+        "the amount in the session is non-zero for individual" in {
+          amountNonZero(Individual)
+        }
+
+        "the amount in the session is non-zero for trust" in {
+          amountNonZero(Organisation)
+        }
+
+        "the amount in the session is non-zero for agent" in {
+          amountNonZero(Agent)
         }
 
       }
@@ -1633,7 +1945,7 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        "the user meets the rebasing criteria and their acquisition details journey is incomplete" in {
+        def incompleteSection(userType: UserType): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1644,14 +1956,14 @@ class AcquisitionDetailsControllerSpec
                 ),
                 AssetType.Residential,
                 true,
-                UserType.Individual
+                userType
               )._1
             )
           }
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("improvementCosts.title"), { doc =>
+            messageFromMessageKey(s"improvementCosts${userMessageKey(userType)}.title"), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPrice()
                 .url
@@ -1660,6 +1972,18 @@ class AcquisitionDetailsControllerSpec
                 .url
             }
           )
+        }
+
+        "an individual meets the rebasing criteria and their acquisition details journey is incomplete" in {
+          incompleteSection(Individual)
+        }
+
+        "a trust meets the rebasing criteria and their acquisition details journey is incomplete" in {
+          incompleteSection(Organisation)
+        }
+
+        "an agent meets the rebasing criteria and their acquisition details journey is incomplete" in {
+          incompleteSection(Agent)
         }
 
         "the user does not meet the rebasing criteria and their acquisition details journey is incomplete" in {
@@ -1872,15 +2196,15 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error" when {
 
-        def test(data: (String, String)*)(expectedErrorKey: String) =
-          testFormError(data: _*)(expectedErrorKey)("improvementCosts.title")(performAction)
+        def test(userType: UserType, data: (String, String)*)(expectedErrorKey: String) =
+          testFormError(userType, data: _*)(expectedErrorKey)("improvementCosts.title")(performAction)
 
         "no option has been selected" in {
-          test()("improvementCosts.error.required")
+          test(Individual)("improvementCosts.error.required")
         }
 
         "the option selected is not valid" in {
-          test("improvementCosts" -> "2")("improvementCosts.error.invalid")
+          test(Individual, "improvementCosts" -> "2")("improvementCosts.error.invalid")
         }
 
         "the amount of money is invalid" in {
@@ -1888,13 +2212,13 @@ class AcquisitionDetailsControllerSpec
             withClue(s"For $scenario: ") {
               val data =
                 ("improvementCosts" -> "0") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+              test(Individual, data: _*)(scenario.expectedErrorMessageKey)
             }
           }
         }
 
         "the amount of money is zero" in {
-          test("improvementCosts" -> "0", "improvementCostsValue" -> "0")(
+          test(Individual, "improvementCosts" -> "0", "improvementCostsValue" -> "0")(
             "improvementCostsValue.error.tooSmall"
           )
         }
@@ -2276,15 +2600,15 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error" when {
 
-        def test(data: (String, String)*)(expectedErrorKey: String) =
-          testFormError(data: _*)(expectedErrorKey)("acquisitionFees.title")(performAction)
+        def test(userType: UserType, data: (String, String)*)(expectedErrorKey: String) =
+          testFormError(userType, data: _*)(expectedErrorKey)("acquisitionFees.title")(performAction)
 
         "no option has been selected" in {
-          test()("acquisitionFees.error.required")
+          test(Individual)("acquisitionFees.error.required")
         }
 
         "the option selected is not valid" in {
-          test("acquisitionFees" -> "2")("acquisitionFees.error.invalid")
+          test(Individual, "acquisitionFees" -> "2")("acquisitionFees.error.invalid")
         }
 
         "the amount of money is invalid" in {
@@ -2292,13 +2616,13 @@ class AcquisitionDetailsControllerSpec
             withClue(s"For $scenario: ") {
               val data =
                 ("acquisitionFees" -> "0") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+              test(Individual, data: _*)(scenario.expectedErrorMessageKey)
             }
           }
         }
 
         "the amount of money is zero" in {
-          test("acquisitionFees" -> "0", "acquisitionFeesValue" -> "0")(
+          test(Individual, "acquisitionFees" -> "0", "acquisitionFeesValue" -> "0")(
             "acquisitionFeesValue.error.tooSmall"
           )
         }
@@ -2534,8 +2858,8 @@ class AcquisitionDetailsControllerSpec
       "show a form error for non residential non uk" when {
         val date: String = LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
 
-        def test(data: (String, String)*)(expectedErrorKey: String) =
-          testFormError(data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
+        def test(userType: UserType, data: (String, String)*)(expectedErrorKey: String) =
+          testFormError(userType, data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers]
@@ -2548,15 +2872,15 @@ class AcquisitionDetailsControllerSpec
           )
 
         "no option has been selected" in {
-          test()("shouldUseRebase.error.required")
+          test(Individual)("shouldUseRebase.error.required")
         }
       }
 
       "show a form error for residential non uk" when {
         val date: String = LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
 
-        def test(data: (String, String)*)(expectedErrorKey: String) =
-          testFormError(data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
+        def test(userType: UserType, data: (String, String)*)(expectedErrorKey: String) =
+          testFormError(userType, data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers]
@@ -2569,7 +2893,7 @@ class AcquisitionDetailsControllerSpec
           )
 
         "no option has been selected" in {
-          test()("shouldUseRebase.error.required")
+          test(Individual)("shouldUseRebase.error.required")
         }
       }
     }
@@ -3117,6 +3441,7 @@ class AcquisitionDetailsControllerSpec
   }
 
   def testFormError(
+    userType: UserType,
     data: (String, String)*
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
@@ -3127,7 +3452,7 @@ class AcquisitionDetailsControllerSpec
       ),
       sample[AssetType],
       sample[Boolean],
-      UserType.Individual
+      userType
     )._1
   ): Unit = {
     inSequence {
@@ -3138,6 +3463,8 @@ class AcquisitionDetailsControllerSpec
     checkPageIsDisplayed(
       performAction(data),
       messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
+        println("Actual: " + doc.select("#error-summary-display > ul > li > a").text())
+        println("Expected: " + messageFromMessageKey(expectedErrorMessageKey))
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
