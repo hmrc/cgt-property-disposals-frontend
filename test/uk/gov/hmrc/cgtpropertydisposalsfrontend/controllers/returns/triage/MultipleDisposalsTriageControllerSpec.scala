@@ -3371,7 +3371,6 @@ class MultipleDisposalsTriageControllerSpec
     checkPageIsDisplayed(
       performAction(),
       messageFromMessageKey(expectedPageTitleMessageKey), { doc =>
-        println(doc.body())
         doc.select("#back").attr("href") shouldBe expectedBackLink.url
         doc
           .select("#content > article > form")
