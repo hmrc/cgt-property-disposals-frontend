@@ -40,12 +40,12 @@
         @summary(answers)
 
         @if(answers.documents.size < viewConfig.maxUploads){
-            <a href=@routes.UploadSupportingDocumentsController.uploadSupportingEvidence().url>Add another file</span></a>
+            <a href=@routes.UploadSupportingEvidenceController.uploadSupportingEvidence().url>Add another file</span></a>
         }
 
         <br>
 
-        @formWrapper(routes.UploadSupportingDocumentsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+        @formWrapper(routes.UploadSupportingEvidenceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
 
             @submitButton(messages("button.confirmAndContinue"))
 

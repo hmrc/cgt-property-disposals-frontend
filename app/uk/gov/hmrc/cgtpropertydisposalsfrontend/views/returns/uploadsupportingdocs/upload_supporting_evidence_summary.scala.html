@@ -43,7 +43,7 @@
         @cyaRow(
             messages("upload-supporting-documents.check-your-answers.do-you-want-to-upload-documents"),
             Html(hasSupportingDocs),
-            Some(cyaChange(messages("upload-supporting-documents.check-your-answers.cya-change"), routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocuments().url)),
+            Some(cyaChange(messages("upload-supporting-documents.check-your-answers.cya-change"), routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments().url)),
             "do-you-want-to-upload-supporting-evidence-value"
         )
 
@@ -56,8 +56,8 @@
                 <dd class="cya-answer" id="answer">
                     @document.fileName
                 </dd>
-                <dd class="cya-change"><a href=@routes.UploadSupportingDocumentsController.changeSupportingEvidence(document.reference).url>Change<span class="visuallyhidden">"change"</span></a></dd>
-                <dd class="cya-change"><a href=@routes.UploadSupportingDocumentsController.deleteSupportingEvidence(document.reference).url>Delete<span class="visuallyhidden">"delete"</span></a></dd>
+                <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(document.reference).url>Change<span class="visuallyhidden">"change"</span></a></dd>
+                <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(document.reference).url>Delete<span class="visuallyhidden">"delete"</span></a></dd>
             </div>
 
         }

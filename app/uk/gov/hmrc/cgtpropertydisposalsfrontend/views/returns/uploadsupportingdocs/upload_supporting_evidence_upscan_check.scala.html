@@ -92,7 +92,7 @@
                     Html(fileScanStatus),
                     Some(cyaChange(
                     messages("upload-supporting-documents.check-upscan-status.failed.cya-change"),
-                    routes.UploadSupportingDocumentsController.uploadSupportingEvidence().url,
+                    routes.UploadSupportingEvidenceController.uploadSupportingEvidence().url,
                     Some(messages("upload-supporting-documents.check-upscan-status.failed.cya-change")))
                     ),
                     "supporting-evidence-file-scan-status"
@@ -100,7 +100,7 @@
             }
         }
 
-        @formWrapper(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheckSubmit(reference.value), 'novalidate -> "novalidate") {
+        @formWrapper(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(reference.value), 'novalidate -> "novalidate") {
             @if(status === UPLOADED) {
                 @submitButton("Check status and continue")
             }else if (status === READY) {

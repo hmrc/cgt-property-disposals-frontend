@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingEvidenceController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -61,7 +61,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to UploadSupportingEvidenceController
+class UploadSupportingEvidenceController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
@@ -127,7 +127,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       val backLink = currentAnswers.fold(
         _ => redirectToIfNoRequiredPreviousAnswer,
-        _ => routes.UploadSupportingDocumentsController.checkYourAnswers()
+        _ => routes.UploadSupportingEvidenceController.checkYourAnswers()
       )
       Ok(page(form(currentAnswers), backLink))
     } else {
@@ -175,7 +175,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
                   logger.warn("Could not update draft return", e)
                   errorHandler.errorResult()
                 },
-                _ => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
+                _ => Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
               )
           }
         )
@@ -265,7 +265,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
               result.fold({ e =>
                 logger.warn("Could not update session", e)
                 errorHandler.errorResult()
-              }, _ => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()))
+              }, _ => Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers()))
 
             } else {
               //User selects No - in this case we want to
@@ -324,7 +324,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
               result.fold({ e =>
                 logger.warn("Could not update session", e)
                 errorHandler.errorResult()
-              }, _ => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()))
+              }, _ => Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers()))
 
             }
         )
@@ -338,7 +338,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
           requiredPreviousAnswer = { _ =>
             Some(())
           },
-          redirectToIfNoRequiredPreviousAnswer = routes.UploadSupportingDocumentsController.checkYourAnswers()
+          redirectToIfNoRequiredPreviousAnswer = routes.UploadSupportingEvidenceController.checkYourAnswers()
         )(
           updateAnswers = (doYouWantToUploadSupportingDocumentsAnswer, draftReturn) => {
             if (doYouWantToUploadSupportingDocumentsAnswer) {
@@ -435,7 +435,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
           logger.warn(s"could not initiate upscan due to $error")
           error.value match {
             case Right(MaxFileUploadsReached2) => //FIXME: fix this constant name
-              Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()) //TODO: this is not working - it is letting add more than 4
+              Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers()) //TODO: this is not working - it is letting add more than 4
           }
         case Right(upscanInitiateResponse) =>
           upscanInitiateResponse match {
@@ -541,7 +541,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
             logger.warn(s"failed to upload file with error: $error")
             errorHandler.errorResult(None)
           },
-          ref => Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheck(ref))
+          ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
           // TODO: need to update the session store with new answers based on this uploaded file (just reference )
         )
       }
@@ -567,7 +567,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
                 if (value.status === UPLOADED | value.status === FAILED) {
                   Ok(uploadSupportingEvidenceUpscanCheckPage(UpscanInitiateReference(reference), value.status))
                 } else {
-                  Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
+                  Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
                 }
               //FIXME: make sure correct status is pumped in for this file by looking at DB
               case None => BadRequest("Could not find reference") //FIXME change to error page
@@ -579,7 +579,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
 
   def uploadSupportingEvidenceVirusCheckSubmit(reference: String) = authenticatedActionWithSessionData.async {
     implicit request =>
-      Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheck(reference))
+      Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(reference))
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
@@ -608,7 +608,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
           logger.warn(s"could not initiate upscan due to $error")
           error.value match {
             case Right(MaxFileUploadsReached2) => //FIXME: fix this constant name
-              Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()) //TODO: this is not working - it is letting add more than 4
+              Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers()) //TODO: this is not working - it is letting add more than 4
           }
         case Right(upscanInitiateResponse) =>
           upscanInitiateResponse match {
@@ -713,7 +713,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
             logger.warn(s"failed to upload file with error: $error")
             errorHandler.errorResult(None)
           },
-          ref => Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidenceVirusCheck(ref))
+          ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
           // TODO: need to update the session store with new answers based on this uploaded file (just reference )
         )
       }
@@ -776,7 +776,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
       result.fold({ e =>
         logger.warn("Could not update session", e)
         errorHandler.errorResult()
-      }, _ => Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers()))
+      }, _ => Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers()))
     }
   }
 
@@ -872,11 +872,11 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
     answers match {
       //FIXME: what should be passed in as list or what do I do with the lists?
       case IncompleteUploadSupportingDocumentAnswers(None, _) => // TODO: change name to IncompleteUploadSupportingEvidenceAnswers
-        Redirect(routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocuments())
+        Redirect(routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments())
       case IncompleteUploadSupportingDocumentAnswers(Some(a), list) =>
         if (a) {
           list match {
-            case Nil => Redirect(routes.UploadSupportingDocumentsController.uploadSupportingEvidence())
+            case Nil => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidence())
             case ::(head, tl) => {
               val ul = for {
                 l <- upscanService.getAll(DraftReturnId(draftReturn.id.toString))
@@ -1010,7 +1010,7 @@ class UploadSupportingDocumentsController @Inject() ( //FIXME : change name to U
 
 }
 
-object UploadSupportingDocumentsController {
+object UploadSupportingEvidenceController {
 
   val doYouWantToUploadSupportingDocumentsForm: Form[Boolean] =
     Form(

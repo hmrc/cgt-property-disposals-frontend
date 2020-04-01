@@ -46,7 +46,7 @@
 
         @caption(messages(s"$key.caption"))
 
-        @formWrapper(routes.UploadSupportingDocumentsController.doYouWantToUploadSupportingDocumentsSubmit(), 'novalidate -> "novalidate") {
+        @formWrapper(routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocumentsSubmit(), 'novalidate -> "novalidate") {
 
             @yesNo(
                 fieldId = key,
