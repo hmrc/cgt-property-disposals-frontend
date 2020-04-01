@@ -51,7 +51,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingD
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse, UpscanInitiateReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
 object Generators
@@ -142,6 +142,10 @@ trait IdGen { this: GenUtils =>
   implicit val sapNumberGen: Gen[SapNumber] = gen[SapNumber]
 
   implicit val arnGen: Gen[AgentReferenceNumber] = gen[AgentReferenceNumber]
+
+  implicit val draftReturnIdGen: Gen[DraftReturnId] = gen[DraftReturnId]
+
+  implicit val upscanInitiateReference: Gen[UpscanInitiateReference] = gen[UpscanInitiateReference]
 
 }
 

@@ -19,13 +19,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 
-sealed trait UploadSupportingDocumentAnswers extends Product with Serializable //FIXME: change name to upload supporting evidence answer
+sealed trait UploadSupportingDocumentAnswers extends Product with Serializable
 
 object UploadSupportingDocumentAnswers {
 
   final case class SupportingDocuments(
     reference: String,
-    fileName: String //FIXME do we need this? if not then we don't need this data structure  as we can use UpscanInitiateReference
+    fileName: String
   )
 
   object SupportingDocuments {

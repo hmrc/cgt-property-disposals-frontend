@@ -133,7 +133,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.exemptionsAndLossesDetails),
           Some(completeReturn.yearToDateLiabilityAnswers.merge),
           completeReturn.initialGainOrLoss,
-          None,
+          Some(completeReturn.uploadSupportingDocumentAnswers),
           LocalDateUtils.today()
         )
 
@@ -287,7 +287,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         Some(completeReturn.exemptionsAndLossesDetails),
         Some(completeReturn.yearToDateLiabilityAnswers.merge),
         completeReturn.initialGainOrLoss,
-        None,
+        Some(completeReturn.uploadSupportingDocumentAnswers),
         LocalDateUtils.today()
       )
 
