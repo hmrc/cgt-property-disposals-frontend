@@ -24,6 +24,7 @@ import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
+import cats.instances.boolean._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import configs.Configs
@@ -153,30 +154,29 @@ class UploadSupportingEvidenceController @Inject() (
         .bindFromRequest()
         .fold(
           formWithErrors =>
-            BadRequest(page(formWithErrors, controllers.returns.routes.TaskListController.taskList())), { //TODO: fix the back link here
-            value =>
-              val newDraftReturn = updateAnswers(value, currentDraftReturn)
-              val result = for {
-                _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
-                    else
-                      returnsService.storeDraftReturn(
-                        newDraftReturn,
-                        currentFillingOutReturn.subscribedDetails.cgtReference,
-                        currentFillingOutReturn.agentReferenceNumber
-                      )
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
-                      )
+            BadRequest(page(formWithErrors, controllers.returns.routes.TaskListController.taskList())), { value =>
+            val newDraftReturn = updateAnswers(value, currentDraftReturn)
+            val result = for {
+              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
+                  else
+                    returnsService.storeDraftReturn(
+                      newDraftReturn,
+                      currentFillingOutReturn.subscribedDetails.cgtReference,
+                      currentFillingOutReturn.agentReferenceNumber
                     )
-              } yield ()
-              result.fold(
-                { e =>
-                  logger.warn("Could not update draft return", e)
-                  errorHandler.errorResult()
-                },
-                _ => Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
-              )
+              _ <- EitherT(
+                    updateSession(sessionStore, request)(
+                      _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
+                    )
+                  )
+            } yield ()
+            result.fold(
+              { e =>
+                logger.warn("Could not update draft return", e)
+                errorHandler.errorResult()
+              },
+              _ => Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
+            )
           }
         )
     } else {
@@ -212,15 +212,34 @@ class UploadSupportingEvidenceController @Inject() (
             BadRequest(
               doYouWantToUploadSupportingEvidencePage(errors, controllers.returns.routes.TaskListController.taskList())
             ),
-          success =>
-            if (success) {
-
-              val updatedAnswers: UploadSupportingDocumentAnswers = answers match {
-                case IncompleteUploadSupportingDocumentAnswers(a, b) =>
-                  IncompleteUploadSupportingDocumentAnswers(a, List.empty)
-                case CompleteUploadSupportingDocumentAnswers(a, b) =>
-                  IncompleteUploadSupportingDocumentAnswers(Some(a), List.empty)
+          doYouWantToUploadSupportingEvidencePageAnswer =>
+            if (doYouWantToUploadSupportingEvidencePageAnswer) {
+              val updatedAnswers = answers match {
+                case IncompleteUploadSupportingDocumentAnswers(None, b) => {
+                  IncompleteUploadSupportingDocumentAnswers(Some(doYouWantToUploadSupportingEvidencePageAnswer), b)
+                }
+                case IncompleteUploadSupportingDocumentAnswers(Some(a), b) => {
+                  if (doYouWantToUploadSupportingEvidencePageAnswer =!= a) {
+                    IncompleteUploadSupportingDocumentAnswers(
+                      Some(doYouWantToUploadSupportingEvidencePageAnswer),
+                      List.empty
+                    )
+                  } else {
+                    IncompleteUploadSupportingDocumentAnswers(Some(doYouWantToUploadSupportingEvidencePageAnswer), b)
+                  }
+                }
+                case CompleteUploadSupportingDocumentAnswers(a, b) => {
+                  if (doYouWantToUploadSupportingEvidencePageAnswer =!= a) {
+                    IncompleteUploadSupportingDocumentAnswers(
+                      Some(doYouWantToUploadSupportingEvidencePageAnswer),
+                      List.empty
+                    )
+                  } else {
+                    IncompleteUploadSupportingDocumentAnswers(Some(doYouWantToUploadSupportingEvidencePageAnswer), b)
+                  }
+                }
               }
+
               val newDraftReturn = fillingOutReturn.draftReturn match {
                 case s @ DraftSingleDisposalReturn(
                       _,
@@ -268,17 +287,12 @@ class UploadSupportingEvidenceController @Inject() (
               }, _ => Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers()))
 
             } else {
-              //User selects No - in this case we want to
-              //TOOD: delete all supporting evidence from session data
-              //TOOD: delete all supporting evidence from draftReturn
-              //TOOD: delete all supporting evidence from upscan db
-
               val result = for {
                 _ <- upscanService.removeAllFiles(DraftReturnId(draftReturnId.toString))
                 updatedAnswers: UploadSupportingDocumentAnswers = answers match {
-                  case IncompleteUploadSupportingDocumentAnswers(a, b) =>
+                  case IncompleteUploadSupportingDocumentAnswers(_, _) =>
                     IncompleteUploadSupportingDocumentAnswers(Some(false), List.empty)
-                  case CompleteUploadSupportingDocumentAnswers(a, b) =>
+                  case CompleteUploadSupportingDocumentAnswers(_, _) =>
                     CompleteUploadSupportingDocumentAnswers(false, List.empty)
                 }
                 newDraftReturn = fillingOutReturn.draftReturn match {
@@ -328,101 +342,100 @@ class UploadSupportingEvidenceController @Inject() (
 
             }
         )
-
-        commonSubmitBehaviour(fillingOutReturn, fillingOutReturn.draftReturn, answers)(
-          form = doYouWantToUploadSupportingDocumentsForm
-        )(page = { (form, backLink) =>
-          val updatedForm = form
-          doYouWantToUploadSupportingEvidencePage(updatedForm, backLink)
-        })(
-          requiredPreviousAnswer = { _ =>
-            Some(())
-          },
-          redirectToIfNoRequiredPreviousAnswer = routes.UploadSupportingEvidenceController.checkYourAnswers()
-        )(
-          updateAnswers = (doYouWantToUploadSupportingDocumentsAnswer, draftReturn) => {
-            if (doYouWantToUploadSupportingDocumentsAnswer) {
-              draftReturn match {
-                case s @ DraftSingleDisposalReturn(
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _
-                    ) =>
-                  s.copy(uploadSupportingDocuments = Some(
-                    IncompleteUploadSupportingDocumentAnswers(
-                      Some(doYouWantToUploadSupportingDocumentsAnswer),
-                      List.empty
-                    )
-                  ) //FIXME: list should be passed in
-                  )
-                case m @ DraftMultipleDisposalsReturn(
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _
-                    ) =>
-                  m.copy(uploadSupportingDocuments = Some(
-                    IncompleteUploadSupportingDocumentAnswers(
-                      Some(doYouWantToUploadSupportingDocumentsAnswer),
-                      List.empty
-                    )
-                  ) //FIXME: list should be passed in
-                  )
-              }
-            } else { // Selects no
-
-              draftReturn match {
-                case s @ DraftSingleDisposalReturn(
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _
-                    ) =>
-                  s.copy(uploadSupportingDocuments = Some(
-                    IncompleteUploadSupportingDocumentAnswers(
-                      Some(doYouWantToUploadSupportingDocumentsAnswer),
-                      List.empty
-                    )
-                  ) //FIXME: list should be passed in
-                  )
-                case m @ DraftMultipleDisposalsReturn(
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _
-                    ) =>
-                  m.copy(uploadSupportingDocuments = Some(
-                    IncompleteUploadSupportingDocumentAnswers(
-                      Some(doYouWantToUploadSupportingDocumentsAnswer),
-                      List.empty
-                    )
-                  ) //FIXME: list should be passed in
-                  )
-              }
-            }
-          }
-        )
+//        commonSubmitBehaviour(fillingOutReturn, fillingOutReturn.draftReturn, answers)(
+//          form = doYouWantToUploadSupportingDocumentsForm
+//        )(page = { (form, backLink) =>
+//          val updatedForm = form
+//          doYouWantToUploadSupportingEvidencePage(updatedForm, backLink)
+//        })(
+//          requiredPreviousAnswer = { _ =>
+//            Some(())
+//          },
+//          redirectToIfNoRequiredPreviousAnswer = routes.UploadSupportingEvidenceController.checkYourAnswers()
+//        )(
+//          updateAnswers = (doYouWantToUploadSupportingDocumentsAnswer, draftReturn) => {
+//            if (doYouWantToUploadSupportingDocumentsAnswer) {
+//              draftReturn match {
+//                case s @ DraftSingleDisposalReturn(
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _
+//                    ) =>
+//                  s.copy(uploadSupportingDocuments = Some(
+//                    IncompleteUploadSupportingDocumentAnswers(
+//                      Some(doYouWantToUploadSupportingDocumentsAnswer),
+//                      List.empty
+//                    )
+//                  ) //FIXME: list should be passed in
+//                  )
+//                case m @ DraftMultipleDisposalsReturn(
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _
+//                    ) =>
+//                  m.copy(uploadSupportingDocuments = Some(
+//                    IncompleteUploadSupportingDocumentAnswers(
+//                      Some(doYouWantToUploadSupportingDocumentsAnswer),
+//                      List.empty
+//                    )
+//                  ) //FIXME: list should be passed in
+//                  )
+//              }
+//            } else { // Selects no
+//
+//              draftReturn match {
+//                case s @ DraftSingleDisposalReturn(
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _
+//                    ) =>
+//                  s.copy(uploadSupportingDocuments = Some(
+//                    IncompleteUploadSupportingDocumentAnswers(
+//                      Some(doYouWantToUploadSupportingDocumentsAnswer),
+//                      List.empty
+//                    )
+//                  ) //FIXME: list should be passed in
+//                  )
+//                case m @ DraftMultipleDisposalsReturn(
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _,
+//                      _
+//                    ) =>
+//                  m.copy(uploadSupportingDocuments = Some(
+//                    IncompleteUploadSupportingDocumentAnswers(
+//                      Some(doYouWantToUploadSupportingDocumentsAnswer),
+//                      List.empty
+//                    )
+//                  ) //FIXME: list should be passed in
+//                  )
+//              }
+//            }
+//          }
+//        )
       }
   }
 
@@ -560,18 +573,16 @@ class UploadSupportingEvidenceController @Inject() (
           error => {
             logger.warn(s"failed to upload file with error: $error")
             errorHandler.errorResult(None)
-          },
-          ref =>
-            ref match {
-              case Some(value) =>
-                if (value.status === UPLOADED | value.status === FAILED) {
-                  Ok(uploadSupportingEvidenceUpscanCheckPage(UpscanInitiateReference(reference), value.status))
-                } else {
-                  Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
-                }
-              //FIXME: make sure correct status is pumped in for this file by looking at DB
-              case None => BadRequest("Could not find reference") //FIXME change to error page
-            }
+          }, {
+            case Some(value) =>
+              if (value.status === UPLOADED | value.status === FAILED) {
+                Ok(uploadSupportingEvidenceUpscanCheckPage(UpscanInitiateReference(reference), value.status))
+              } else {
+                Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
+              }
+            //FIXME: make sure correct status is pumped in for this file by looking at DB
+            case None => BadRequest("Could not find reference") //FIXME change to error page
+          }
           // TODO: need to update the session store with new answers based on this uploaded file (just reference )
         )
       }

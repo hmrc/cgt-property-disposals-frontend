@@ -1472,7 +1472,7 @@ subsequentReturnExit.getHelp=Get help
 subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
 subsequentReturnExit.helpWithCallCharges=Find out about call charges
 
-do-you-want-to-upload-supporting-documents.title=Do you want to upload any supporting docs?
+do-you-want-to-upload-supporting-documents.title=Do you want to upload any supporting evidence?
 do-you-want-to-upload-supporting-documents.error.required=Select yes if you want to upload any supporting documents
 do-you-want-to-upload-supporting-documents.error.boolean=Select yes if you want to upload any supporting documents
 do-you-want-to-upload-supporting-documents.caption=Supporting evidence
