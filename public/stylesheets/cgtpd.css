@@ -382,6 +382,10 @@ details {
     .app-task-list__section {
         font-family: sans-serif;
     }
+
+    a:link:after, a:visited:after {
+        content: "";
+    }
 }
 
 @media (min-width: 40.0625em) {
