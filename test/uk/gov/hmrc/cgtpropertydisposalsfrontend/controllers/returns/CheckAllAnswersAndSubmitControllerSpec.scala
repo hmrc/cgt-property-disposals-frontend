@@ -48,9 +48,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
@@ -502,66 +501,73 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         sealed case class TestScenario(
           description: String,
-          userType: Option[UserType],
+          userType: UserType,
           taxOwed: AmountInPence,
           prefix: String,
           submissionLine: String,
-          tableLines: List[String]
+          tableLines: List[String],
+          name: Either[TrustName, IndividualName]
         )
 
         val scenarios = Seq(
           TestScenario(
             "user with no tax due",
-            Some(UserType.Individual),
+            UserType.Individual,
             AmountInPence(0),
             "",
             noTaxDueRefLine,
-            List(submissionLine, addressLine)
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe"))
           ),
           TestScenario(
             "user with tax due",
-            Some(UserType.Individual),
+            UserType.Individual,
             AmountInPence(10000),
             "",
             taxDueRefLine,
-            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine)
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            Right(IndividualName("John", "Doe"))
           ),
           TestScenario(
-            "agent with no tax due",
-            Some(UserType.Agent),
+            "agent for individual with no tax due",
+            UserType.Agent,
             AmountInPence(0),
             "Client: ",
             noTaxDueRefLine,
-            List(submissionLine, addressLine)
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe"))
           ),
           TestScenario(
-            "agent with tax due",
-            Some(UserType.Agent),
+            "agent for individual with tax due",
+            UserType.Agent,
             AmountInPence(10000),
             "Client: ",
             taxDueRefLine,
-            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine)
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            Right(IndividualName("John", "Doe"))
           ),
           TestScenario(
-            "organisation with no tax due",
-            Some(UserType.Organisation),
+            "organisation representing individual with no tax due",
+            UserType.Organisation,
             AmountInPence(0),
             "Trust: ",
             noTaxDueRefLine,
-            List(submissionLine, addressLine)
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe"))
           ),
           TestScenario(
-            "organisation with tax due",
-            Some(UserType.Organisation),
+            "organisation representing individual with tax due",
+            UserType.Organisation,
             AmountInPence(10000),
             "Trust: ",
             taxDueRefLine,
-            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine)
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            Right(IndividualName("John", "Doe"))
           )
         )
 
         scenarios.foreach {
-          case TestScenario(description, userType, taxOwed, namePrefix, reference, expectedTable) => {
+          case TestScenario(description, userType, taxOwed, namePrefix, reference, expectedTable, name) => {
             withClue(description) {
               val address = sample[UkAddress].copy(
                 line1    = "123 fake street",
@@ -583,16 +589,16 @@ class CheckAllAnswersAndSubmitControllerSpec
                   )
                 )
               )
-              val subscribe = sample[SubscribedDetails].copy(name = Right(IndividualName("John", "Doe")))
               val justSubmittedReturn = sample[JustSubmittedReturn].copy(
-                submissionResponse = returnResponse,
-                subscribedDetails  = subscribe,
-                completeReturn     = sample[CompleteSingleDisposalReturn].copy(propertyAddress = address)
+                submissionResponse   = returnResponse,
+                subscribedDetails    = sample[SubscribedDetails].copy(name = name),
+                completeReturn       = sample[CompleteSingleDisposalReturn].copy(propertyAddress = address),
+                agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None
               )
 
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(sessionWithJourney(justSubmittedReturn).copy(userType = userType))
+                mockGetSession(sessionWithJourney(justSubmittedReturn).copy(userType = Some(userType)))
               }
 
               checkPageIsDisplayed(

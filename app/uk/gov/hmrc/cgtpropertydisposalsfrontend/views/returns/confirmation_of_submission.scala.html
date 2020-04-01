@@ -39,7 +39,7 @@
 
 @key=@{"confirmationOfSubmission"}
 @title = @{ messages(s"$key.title") }
-@name = @{justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.firstName + " " + e.lastName)}
+@name = @{justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName())}
 @amountOwed = @{justSubmittedReturn.submissionResponse.charge.map(_.amount.inPounds()).getOrElse(BigDecimal(0))}
 @chargeReference = @{justSubmittedReturn.submissionResponse.charge.map { charge => charge.chargeReference }}
 
@@ -48,8 +48,8 @@
 <div class="govuk-box-highlight">
      <p id="user-details-name">
      @{request.userType match {
-         case Some(UserType.Organisation) => "Trust: " + name
-         case Some(UserType.Agent) => "Client: " + name
+         case Some(UserType.Organisation) => messages(s"$key.organisationNameLine", name)
+         case Some(UserType.Agent) => messages(s"$key.agentNameLine", name)
          case _ => name
      }}
      </p>
@@ -62,19 +62,9 @@
   </span>
   <span class="heading-large" style="font-weight: normal;">
       <div id="ref-id">
-       @{if(amountOwed.equals(BigDecimal(0))) {
-               messages(s"$key.returnReference")
-           } else {
-                "Payment reference number"
-           }
-       }
+       @{if(amountOwed.equals(BigDecimal(0))) messages(s"$key.returnReference") else messages(s"$key.paymentReference")}
    <strong style="display:block; font-weight: bold;">
-       @{if(amountOwed.equals(BigDecimal(0))) {
-           justSubmittedReturn.submissionResponse.formBundleId
-           } else {
-               chargeReference
-           }
-       }
+       @{if(amountOwed.equals(BigDecimal(0))) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
        </strong>
       </div>
   </span>
@@ -93,7 +83,7 @@
 
 
         <tr class="charge">
-            <td> <strong class="bold"> Return sent to HMRC </strong> <br/> </td>
+            <td> <strong class="bold">@messages(s"$key.sentToHmrc")</strong> <br/> </td>
             <td>
                 @LocalDateUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)
             </td>
@@ -101,14 +91,14 @@
 
         @{if(!amountOwed.equals(BigDecimal(0))) {
         <tr class="charge">
-            <td> <strong class="bold">Return reference number</strong> <br/> </td>
+            <td> <strong class="bold"> {messages(s"$key.returnReference")} </strong> <br/> </td>
             <td> {justSubmittedReturn.submissionResponse.formBundleId} </td>
         </tr>
         }}
 
 
         <tr class="charge">
-            <td> <strong class="bold">Property address</strong> <br/> </td>
+            <td> <strong class="bold">@messages(s"$key.propertyAddress")</strong> <br/> </td>
             <td>
                 @{justSubmittedReturn.completeReturn match {
                     case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
@@ -120,7 +110,7 @@
         @{if(!amountOwed.equals(BigDecimal(0))) {
             {justSubmittedReturn.submissionResponse.charge.map { charge =>
                 <tr class = "charge">
-                    <td> <strong class="bold">Tax due by</strong> <br/>
+                    <td> <strong class="bold">{messages(s"$key.taxDue")}</strong> <br/>
                     </td> <td>{LocalDateUtils.govDisplayFormat(charge.dueDate)}</td>
                 </tr>
             }}
