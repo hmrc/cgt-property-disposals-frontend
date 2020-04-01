@@ -1205,7 +1205,7 @@ class AcquisitionDetailsControllerSpec
               case _                        => s"acquisitionPriceNotBought${userMessageKey(userType)}"
             }
 
-            amountOfMoneyErrorScenarios(s"acquisitionPrice${userMessageKey(userType)}", errorContext = Some(contextKey))
+            amountOfMoneyErrorScenarios(s"acquisitionPrice", errorContext = Some(contextKey))
               .foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   testFormError(userType, scenario.formData: _*)(scenario.expectedErrorMessageKey)(
@@ -1218,8 +1218,6 @@ class AcquisitionDetailsControllerSpec
                 }
               }
           }
-
-//        Todo broken
 
         "an individual provides an invalid data" in {
           invalidPrice(Individual)
