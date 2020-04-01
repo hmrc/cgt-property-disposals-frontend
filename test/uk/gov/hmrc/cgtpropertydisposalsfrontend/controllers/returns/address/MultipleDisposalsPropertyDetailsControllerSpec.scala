@@ -1331,7 +1331,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the date entered is invalid" in {
           DateErrorScenarios
-            .dateErrorScenarios(key)
+            .dateErrorScenarios(key, "")
             .foreach { scenario =>
               withClue(s"For date error scenario $scenario: ") {
                 val data = List(

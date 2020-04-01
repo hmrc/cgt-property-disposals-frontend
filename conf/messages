@@ -3,7 +3,7 @@ service.signOut=Sign out
 hmrc_branding=HM Revenue & Customs
 exitSurvey.linkText=Tell us how we can improve this service (takes 1 minute)
 
-label.beta=Private Beta
+label.beta=Beta
 
 button.startNow=Start now
 button.continue=Continue
@@ -565,8 +565,8 @@ triage.enterCountry.helpText=It’s usually the day you and the new owner swappe
 triage.enterCountry.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.trust.helpText=It’s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
+triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
@@ -813,99 +813,206 @@ acquisitionDetails.caption=Purchase or acquisition details
 
 
 acquisitionMethod.title=How did you get the property?
+acquisitionMethod.agent.title=How did your client acquire the property?
+acquisitionMethod.trust.title=How did the trust acquire the property?
 returns.acquisitionMethod.Bought=Bought it
 returns.acquisitionMethod.Inherited=Inherited it
 returns.acquisitionMethod.Gifted=Got it as a gift
 returns.acquisitionMethod.Other=Other
 returns.otherAcquisitionMethod.label=How you got the property
+returns.otherAcquisitionMethod.agent.label=How your client acquired the property
+returns.otherAcquisitionMethod.trust.label=How the trust acquired the property
 
 acquisitionMethod.error.required=Select how you got the property
+acquisitionMethod.agent.error.required=Select how your client acquired the property
+acquisitionMethod.trust.error.required=Select how the trust acquired the property
 acquisitionMethod.error.invalid=Select how you got the property
+acquisitionMethod.agent.error.invalid=Select how your client acquired the property
+acquisitionMethod.trust.error.invalid=Select how the trust acquired the property
 otherAcquisitionMethod.error.required=Enter how you got the property
+otherAcquisitionMethod.agent.error.required=Enter how your client acquired the property
+otherAcquisitionMethod.trust.error.required=Enter how the trust acquired the property
 otherAcquisitionMethod.error.invalid=How you got the property must only include letters a to z, spaces and numbers
+otherAcquisitionMethod.agent.error.invalid=How your client acquired the property must only include letters a to z, spaces and numbers
+otherAcquisitionMethod.trust.error.invalid=How the trust acquired the property must only include letters a to z, spaces and numbers
 otherAcquisitionMethod.error.tooLong=How you got the property must be 35 characters or less
+otherAcquisitionMethod.agent.error.tooLong=How your client acquired the property must be 35 characters or less
+otherAcquisitionMethod.trust.error.tooLong=How the trust acquired the property must be 35 characters or less
 
 
 acquisitionDate.title=What date did you get the property?
+acquisitionDate.agent.title=What date did your client acquire the property?
+acquisitionDate.trust.title=What date did the trust acquire the property?
 acquisitionDate.helpText=This is the date the property was transferred into your name. For example, 21 5 2004
+acquisitionDate.agent.helpText=This is the date the property was transferred into your client’s name. For example, 21 5 2004
+acquisitionDate.trust.helpText=This is the date the property was transferred into the trust’s name. For example, 21 5 2004
 acquisitionDate.error.required=Enter the date you got the property
-acquisitionDate.error.invalid=Enter a real date you got the property
-acquisitionDate.error.tooFarInFuture=Date you got the property must be before you sold the property
-acquisitionDate-day.error.required=Date you got the property must include a day
-acquisitionDate-month.error.required=Date you got the property must include a month
-acquisitionDate-year.error.required=Date you got the property must include a year
-acquisitionDate-day.error.invalid=Enter a real date for when you got the property
-acquisitionDate-month.error.invalid=Enter a real date for when you got the property
-acquisitionDate-year.error.invalid=Enter a real date for when you got the property
-acquisitionDate-month.error.monthAndYearRequired=Date you got the property must include a month and a year
-acquisitionDate-day.error.dayAndYearRequired=Date you got the property must include a day and a year
-acquisitionDate-day.error.dayAndMonthRequired=Date you got the property must include a day and a month
+acquisitionDate.agent.error.required=Enter the date your client acquired the property
+acquisitionDate.trust.error.required=Enter the date the trust acquired the property
+acquisitionDate.error.invalid=The date you got the property must be a real date
+acquisitionDate.agent.error.invalid=The date your client acquired the property must be a real date
+acquisitionDate.trust.error.invalid=The date the trust acquired the property must be a real date
+acquisitionDate.error.tooFarInFuture=The date you got the property must be before you disposed of the property
+acquisitionDate.agent.error.tooFarInFuture=The date your client acquired the property must be before they disposed of the property
+acquisitionDate.trust.error.tooFarInFuture=The date the trust acquired the property must be before it disposed of the property
+acquisitionDate-day.error.required=The date you got the property must include a day
+acquisitionDate-day.agent.error.required=The date your client acquired the property must include a day
+acquisitionDate-day.trust.error.required=The date the trust acquired the property must include a day
+acquisitionDate-month.error.required=The date you got the property must include a month
+acquisitionDate-month.agent.error.required=The date your client acquired the property must include a month
+acquisitionDate-month.trust.error.required=The date the trust acquired the property must include a month
+acquisitionDate-year.error.required=The date you got the property must include a year
+acquisitionDate-year.agent.error.required=The date your client acquired the property must include a year
+acquisitionDate-year.trust.error.required=The date the trust acquired the property must include a year
+acquisitionDate-day.error.invalid=The date you got the property must be a real date
+acquisitionDate-day.agent.error.invalid=The date your client acquired the property must be a real date
+acquisitionDate-day.trust.error.invalid=The date the trust acquired the property must be a real date
+acquisitionDate-month.error.invalid=The date you got the property must be a real date
+acquisitionDate-month.agent.error.invalid=The date your client acquired the property must be a real date
+acquisitionDate-month.trust.error.invalid=The date the trust acquired the property must be a real date
+acquisitionDate-year.error.invalid=The date you got the property must be a real date
+acquisitionDate-year.agent.error.invalid=The date your client acquired the property must be a real date
+acquisitionDate-year.trust.error.invalid=The date the trust acquired the property must be a real date
+acquisitionDate-month.error.monthAndYearRequired=The date you got the property must include a month and a year
+acquisitionDate-month.agent.error.monthAndYearRequired=The date your client acquired the property must include a month and a year
+acquisitionDate-month.trust.error.monthAndYearRequired=The date the trust acquired the property must include a month and a year
+acquisitionDate-day.error.dayAndYearRequired=The date you got the property must include a day and a year
+acquisitionDate-day.agent.error.dayAndYearRequired=The date your client acquired the property must include a day and a year
+acquisitionDate-day.trust.error.dayAndYearRequired=The date the trust acquired the property must include a day and a year
+acquisitionDate-day.error.dayAndMonthRequired=The date you got the property must include a day and a month
+acquisitionDate-day.agent.error.dayAndMonthRequired=The date your client acquired the property must include a day and a month
+acquisitionDate-day.trust.error.dayAndMonthRequired=The date the trust acquired the property must include a day and a month
 
 acquisitionPriceBought.title=How much did you pay for the property?
+acquisitionPriceBought.agent.title=How much did your client pay for the property?
+acquisitionPriceBought.trust.title=How much did the trust pay for the property?
 acquisitionPriceNotBought.title=What was the market value of the property on {0}?
+acquisitionPriceNotBought.agent.title=What was the market value of the property on {0}?
+acquisitionPriceNotBought.trust.title=What was the market value of the property on {0}?
 acquisitionPriceBought.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
+acquisitionPriceBought.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your client’s share.
+acquisitionPriceBought.trust.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the trust’s share.
 acquisitionPriceNotBought.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your share.
+acquisitionPriceNotBought.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your client’s share.
+acquisitionPriceNotBought.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the  trust’s share.
 acquisitionPriceBought.error.required=Enter how much you paid for your share of the property
+acquisitionPriceBought.agent.error.required=Enter how much your client paid for the property
+acquisitionPriceBought.trust.error.required=Enter how much the trust paid for the property
 acquisitionPriceNotBought.error.required=Enter the market value of the property on the date you got it
-acquisitionPriceBought.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
-acquisitionPriceNotBought.error.invalid=The market value must be an amount of money, for example 160,000 or 23,040.50
-acquisitionPriceBought.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
-acquisitionPriceNotBought.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000.00
-acquisitionPriceBought.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
-acquisitionPriceNotBought.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000.00
-acquisitionPriceBought.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
-acquisitionPriceNotBought.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, for example 160,000 or 23,040.50
+acquisitionPriceNotBought.agent.error.required=Enter the market value of the property when it was acquired
+acquisitionPriceNotBought.trust.error.required=Enter the market value of the property when it was acquired
+acquisitionPriceBought.error.invalid=How much you paid for the property must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceBought.agent.error.invalid=How much your client paid for the property must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceBought.trust.error.invalid=How much the trust paid for the property must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceNotBought.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceNotBought.agent.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceNotBought.trust.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceBought.error.tooSmall=How much you paid for the property must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.agent.error.tooSmall=How much your client paid for the property must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.trust.error.tooSmall=How much the trust paid for the property must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.agent.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.trust.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.error.tooLarge=How much you paid for the property must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.agent.error.tooLarge=How much your client paid for the property must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.trust.error.tooLarge=How much the trust paid for the property must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.agent.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.trust.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.error.tooManyDecimals=How much you paid for the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+acquisitionPriceBought.agent.error.tooManyDecimals=How much your client paid for the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+acquisitionPriceBought.trust.error.tooManyDecimals=How much the trust paid for the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+acquisitionPriceNotBought.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+acquisitionPriceNotBought.agent.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+acquisitionPriceNotBought.trust.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 improvementCosts.title=Do you want to claim any improvement costs?
+improvementCosts.agent.title=Were there any improvement costs?
+improvementCosts.trust.title=Were there any improvement costs?
 improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance. 
+improvementCosts.rebased.helpText=You can only claim costs that added value to the property after {0} (date you rebased). If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.agent.helpText=Your client can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.agent.rebased.helpText=Your client can only claim for their share of any costs that added value to the property after {0} (date they rebased). They cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.trust.helpText=The trust can only claim for its share of any costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.trust.rebased.helpText=The trust can only claim for its share of any costs that added value to the property after {0} (date it rebased). It cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.error.required=Select yes if you want to claim any improvement costs
+improvementCosts.agent.error.required=Select yes if there were improvement costs
+improvementCosts.trust.error.required=Select yes if there were improvement costs
 improvementCosts.error.invalid=Select yes if you want to claim any improvement costs
-improvementCostsValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
-improvementCostsValue.error.tooSmall=The amount of money must be a number between £1 and £50,000,000,000.00
-improvementCostsValue.error.tooLarge=The amount of money must be a number between £1 and £50,000,000,000.00
-improvementCostsValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
-improvementCostsValue.error.required=Enter how much you paid for improvements of your share of the property
+improvementCosts.agent.error.invalid=Select yes if there were improvement costs
+improvementCosts.trust.error.invalid=Select yes if there were improvement costs
+improvementCostsValue.error.invalid=The amount spent on improvements must be an amount of money, like 160,000 or 23,040.50
+improvementCostsValue.error.tooSmall=The amount spent on improvements must be an amount of money between 1 and 50,000,000,000
+improvementCostsValue.error.tooLarge=The amount spent on improvements must be an amount of money between 1 and 50,000,000,000
+improvementCostsValue.error.tooManyDecimals=The amount spent on improvements must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+improvementCostsValue.error.required=Enter the amount spent on improvements
 improvementCostsValue.label=Amount spent on improvements
 improvementCosts.details.summary=What are improvements?
-improvementCosts.details.p1=Improvement include adding an extension or replacing a basic kitchen with a luxury one.
+improvementCosts.details.p1=Improvements include adding an extension or replacing a basic kitchen with a luxury one.
 
 acquisitionFees.title=Do you want to claim any additional costs you paid when you got the property?
+acquisitionFees.rebased.title=Do you want to claim any additional costs you paid when you rebased the property?
+acquisitionFees.agent.title=Were there any additional acquisition costs?
+acquisitionFees.agent.rebased.title=Were there any additional rebasing costs?
+acquisitionFees.trust.title=Were there any additional acquisition costs?
+acquisitionFees.trust.rebased.title=Were there any additional rebasing costs?
 acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
-acquisitionFees.error.required=Select yes if you have extra costs
+acquisitionFees.rebased.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share. You cannot claim for any additional costs you paid for when you got the property.
+acquisitionFees.agent.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
+acquisitionFees.agent.rebased.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share. Your client cannot claim for any additional costs they paid for when they acquired the property.
+acquisitionFees.trust.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share.
+acquisitionFees.trust.rebased.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share. The trust cannot claim for any additional costs it paid for when it acquired the property.
+acquisitionFees.allowableCostsLinkText=	<a href="{0}" target="_blank">Find out about additional allowable costs (opens in a new window)</a>
+acquisitionFees.details.header=What is rebasing?
+acquisitionFees.details.p1=You owned the property on or before {0}.
+acquisitionFees.agent.details.p1=Your client owned the property on or before {0}.
+acquisitionFees.trust.details.p1=The trust owned the property on or before {0}.
+acquisitionFees.details.p2=This means when you work out your Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.agent.details.p2=To work out your client’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.trust.details.p2=To work out the trust’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.details.p3=This process is called rebasing.
+acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
+
+acquisitionFees.error.required=Select yes if there are additional costs
 acquisitionFeesValue.label=Amount of additional costs
-acquisitionFeesValue.error.required=Enter how much you paid in additional costs when you got the property
-acquisitionFeesValue.error.invalid=Additional costs must only include numbers, for example 1,480 or 900.50
-acquisitionFeesValue.error.tooSmall=Additional costs must more than 0
-acquisitionFeesValue.error.tooLarge=Additional costs must be 50,000,000,000.00 or less
-acquisitionFeesValue.error.tooManyDecimals=Additional costs must be 2 decimal places or less, for example 1,480 or 900.50
+acquisitionFeesValue.error.required=Enter how much was paid in additional costs
+acquisitionFeesValue.error.invalid=Additional costs must be an amount of money, like 1,480 or 900.50
+acquisitionFeesValue.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
+acquisitionFeesValue.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
+acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 1,480 or 900.50
 
 acquisitionDetails.cya.title=Check your answers
-acquisitionDetails.cyaLabel.rebased=Property value rebased
-acquisitionDetails.cyaLabel.rebasedValue=What was the market value of the property on {0}?
-acquisitionDetails.cyaLabel.improvementCostsValue=Amount of improvement costs
-acquisitionDetails.cyaLabel.acquisitionFeesValue=Amount of buying costs
-acquisitionDetails.cyaChange.acquisitionMethod=your acquisition method
-acquisitionDetails.cyaChange.acquisitionDate=your acquisition date
-acquisitionDetails.cyaChange.acquisitionPrice=your acquisition price
-acquisitionDetails.cyaChange.rebasedAcquisitionPrice=your rebased acquisition price
-acquisitionDetails.cyaChange.improvementCosts=your improvements costs
-acquisitionDetails.cyaChange.acquisitionFees=your acquisition fees
+acquisitionDetails.cyaChange.acquisitionMethod=acquisition method
+acquisitionDetails.cyaChange.acquisitionDate=acquisition date
+acquisitionDetails.cyaChange.acquisitionPrice=acquisition price
+acquisitionDetails.cyaChange.rebasedAcquisitionPrice=rebased acquisition price
+acquisitionDetails.cyaChange.improvementCosts=improvements costs
+acquisitionDetails.cyaChange.acquisitionFees=acquisition fees
+acquisitionDetails.rebased.cyaChange.acquisitionFees=rebasing fees
 acquisitionDetails.cyaChange.shouldUseRebase=whether you are using the rebased value in your calculation
 
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
 rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
+rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
+rebaseAcquisitionPrice.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of the trust’s share.
 rebaseAcquisitionPrice.label=Property’s market value on {0}
 rebaseAcquisitionPrice.error.required=Enter the property’s market value on {0}
-rebaseAcquisitionPrice.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
-rebaseAcquisitionPrice.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
-rebaseAcquisitionPrice.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
-rebaseAcquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+rebaseAcquisitionPrice.error.invalid=The property’s market value must be an amount of money, like 160,000 or 23,040.50
+rebaseAcquisitionPrice.error.tooSmall=The property’s market value must be an amount of money between 1 and 50,000,000,000
+rebaseAcquisitionPrice.error.tooLarge=The property’s market value must be an amount of money between 1 and 50,000,000,000
+rebaseAcquisitionPrice.error.tooManyDecimals=The property’s market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 rebaseAcquisitionPrice.dropdown.header=Why you need to enter this amount
 rebaseAcquisitionPrice.dropdown.p1=You owned the property on or before {0}.
-rebaseAcquisitionPrice.dropdown.p2=This means when you work out your gain or loss. You must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount
+rebaseAcquisitionPrice.agent.dropdown.p1=Your client owned the property on or before {0}.
+rebaseAcquisitionPrice.trust.dropdown.p1=The trust owned the property on or before {0}.
+rebaseAcquisitionPrice.dropdown.p2=This means when you work out your gain or loss. You must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+rebaseAcquisitionPrice.agent.dropdown.p2=To work out your client’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+rebaseAcquisitionPrice.trust.dropdown.p2=To work out the trust’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.dropdown.p3=This process is called rebasing.
 rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.
 rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check a property’s market value. This means you should enter an estimate now and if you need to amend the amount do it later using this service. Or if you already complete a Self Assessment tax return you can provide the correct market value in your next Self Assessment.
+rebaseAcquisitionPrice.agent.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so your client can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
+rebaseAcquisitionPrice.trust.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so the trust can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 
 shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
 shouldUseRebase.helpText=You can use the rebased value or the actual cost of the property in your workings out. The amount you use could mean your gain or loss is lower.
@@ -914,42 +1021,62 @@ shouldUseRebase.error.required=Select whether you are using the rebased valued i
 reliefDetails.caption=Reliefs
 
 privateResidentsRelief.title=Are you entitled to claim Private Residence Relief?
+privateResidentsRelief.agent.title=Is your client entitled to claim Private Residence Relief?
+privateResidentsRelief.trust.title=Is the trust entitled to claim Private Residence Relief?
 privateResidentsRelief.helpText=You might qualify for this relief if the property had been your main home at some point.
+privateResidentsRelief.agent.helpText=Your client might qualify for this relief if the property had been their main home at some point.
+privateResidentsRelief.trust.helpText=The trust might qualify for this relief if the property had been the main home of one of its beneficiaries at some point.
 privateResidentsReliefValue.label=Amount of Private Residence Relief you are entitled to
+privateResidentsReliefValue.agent.label=Amount of Private Residence Relief your client is entitled to
+privateResidentsReliefValue.trust.label=Amount of Private Residence Relief the trust is entitled to
 privateResidentsRelief.furtherInfoLink=Find out about Private Residence Relief (opens in a new window)
 
 privateResidentsRelief.error.required=Select yes if you are entitled to Private Residence Relief
-privateResidentsReliefValue.error.required=Enter an amount of Private Residence Relief, like 108 or 2,940.54
-privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be more than than 0, or select no
-privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be 50,000,000,000.00 or less
-privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be a number, like 108 or 2,940.54
+privateResidentsRelief.agent.error.required=Select yes if your client is entitled to claim Private Residence Relief
+privateResidentsRelief.trust.error.required=Select yes if the trust is entitled to claim Private Residence Relief
+privateResidentsReliefValue.error.required=Enter the amount of Private Residence Relief, like 108 or 2,940.54
+privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 
 lettingsRelief.title=Are you entitled to claim Letting Relief?
+lettingsRelief.agent.title=Is your client entitled to claim Letting Relief?
+lettingsRelief.trust.title=Is the trust entitled to claim Letting Relief?
 lettingsRelief.helpText=You might be able to claim this relief if the property was your main home and you also let it out for a time.
+lettingsRelief.agent.helpText=Your client might be able to claim this relief if the property was their main home and they also let it out for a time.
+lettingsRelief.trust.helpText=The trust might be able to claim this relief if the property was their main home and it also let it out for a time.
 lettingsReliefValue.label=Amount of Letting Relief
 
 lettingsRelief.error.required=Select yes if you are claiming Letting Relief
+lettingsRelief.agent.error.required=Select yes if your client is claiming Letting Relief
+lettingsRelief.trust.error.required=Select yes if the trust is claiming Letting Relief
 lettingsReliefValue.error.required=Enter an amount of Letting Relief, like 108 or 2,940.54
-lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be more than than 0, or select no
-lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be 50,000,000,000.00 or less
-lettingsReliefValue.error.invalid=Amount of Letting Relief must be a number, like 108 or 2,940.54
+lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be an amount of money between 1 and {0}
+lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be an amount of money between 1 and {0}
+lettingsReliefValue.error.invalid=Amount of Letting Relief must be an amount of money, like 108 or 2,940.54
 lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new window)
-lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be {0} or less
-lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than private residence relief
+lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be an amount of money between 1 and {0}
+lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than the Private Residence Relief
 otherReliefs.title=Do you want to claim any other reliefs?
+otherReliefs.agent.title=Does your client want to claim any other reliefs?
+otherReliefs.trust.title=Does the trust want to claim any other reliefs?
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
+otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
+otherReliefs.trust.helpText=You will need to tell us what other reliefs the trust is claiming and what the total amount of these is.
 otherReliefsName.label=Names of the other reliefs you are claiming
 otherReliefsAmount.label=Total amount of other reliefs you are claiming
 otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new window)
 
 otherReliefs.error.required=Select yes if you are claiming other reliefs
-otherReliefsName.error.required=Enter the names of the other reliefs you are claiming
+otherReliefs.agent.error.required=Select yes if your client is claiming other reliefs
+otherReliefs.trust.error.required=Select yes if the trust is claiming other reliefs
+otherReliefsName.error.required=Enter the names of the other reliefs
 otherReliefsName.error.tooLong=The names of the other reliefs you are claiming must be 105 characters or less
 otherReliefsName.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 otherReliefsAmount.error.required=Enter the total amount of the other reliefs, like 108 or 2,940.54
-otherReliefsAmount.error.tooSmall=Amount of other reliefs must be more than than 0, or select no
-otherReliefsAmount.error.tooLarge=Amount of other reliefs must be 50,000,000,000.00 or less
-otherReliefsAmount.error.invalid=Amount of other reliefs must be a number, like 108 or 2,940.54
+otherReliefsAmount.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
+otherReliefsAmount.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
+otherReliefsAmount.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 
 reliefDetails.cya.title=Check your answers
 reliefDetails.cyaLabel.privateResidentsRelief=Entitled to Private Residence Relief?
@@ -1043,11 +1170,10 @@ exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous ye
 
 ytdLiability.caption=Tax amount owed
 
-estimatedIncome.title=What is your estimated income liable for UK tax in this tax year?
-estimatedIncome.helpText=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off
-estimatedIncome.details.summary=How to estimate your income
-estimatedIncome.details.p1=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off.
-estimatedIncome.details.p2=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
+estimatedIncome.title=What do you believe your gross income will be in this tax year?
+estimatedIncome.helpText=The amount should be your total income liable to UK income tax for the tax year {0} to {1}. It‘s your gross income before any deductions, like tax or National Insurance.
+estimatedIncome.details.summary=What should not be included
+estimatedIncome.details.p1=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.error.required=Enter your estimated income liable for UK tax in this tax year
 estimatedIncome.error.invalid=Estimated income must only include numbers, for example 160,000 or 23,040.50
 estimatedIncome.error.tooSmall=Estimated income must be a number between 0 and 50,000,000,000.00
@@ -1055,7 +1181,7 @@ estimatedIncome.error.tooLarge=Estimated income must be a number between 0 and 5
 estimatedIncome.error.tooManyDecimals=Estimated income must be 2 decimal places or less, for example 23,040.50 or 76,000
 
 personalAllowance.title=What is your Personal Allowance for tax year {0} to {1}?
-personalAllowance.helpText=	We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}. Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
+personalAllowance.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}. <br/> <br/>Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
 personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.error.invalid=Personal Allowance amount must only include numbers, for example 12,500 or 207.50
@@ -1063,9 +1189,9 @@ personalAllowance.error.tooSmall=Personal Allowance amount must be a number betw
 personalAllowance.error.tooLarge=Personal Allowance must be {0} or less
 personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 decimal places or less, for example 12,500 or 200.50
 
-hasEstimatedDetails.title=Have any of the details in this return been estimated?
+hasEstimatedDetails.title=Have any of the amounts in this return been estimated?
 hasEstimatedDetails.helpText=If you estimated any amounts, you’ll need to provide the final amounts to HMRC later. For example, the property’s value.
-hasEstimatedDetails.agent.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
+hasEstimatedDetails.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
 hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
@@ -1090,6 +1216,7 @@ calculator.disposalFees=Disposal costs
 calculator.total.disposalAmount=Property disposal amount less costs
 
 calculator.acquisitionPrice=Property acquisition amount
+calculator.acquisitionPrice.rebased=Property acquisition amount (rebased)
 calculator.improvementCosts=Improvement costs
 calculator.acquisitionFees=Acquisition costs
 calculator.total.acquisitionAmount=Property acquisition amount plus costs
@@ -1154,8 +1281,12 @@ checkAllAnswers.declaration.p2=You may have to pay financial penalties and face 
 
 confirmationOfSubmission.title=Return sent
 confirmationOfSubmission.taxOwed=Tax owed
-confirmationOfSubmission.returnReference=Return reference
+confirmationOfSubmission.returnReference=Return reference number
+confirmationOfSubmission.paymentReference=Payment reference number
+confirmationOfSubmission.propertyAddress=Property address
 confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>
+confirmationOfSubmission.sentToHmrc=Return sent to HMRC
+confirmationOfSubmission.taxDue=Tax due by
 confirmationOfSubmission.printPage=Print or save this page as a PDF
 confirmationOfSubmission.whatNext=What you need to do next
 confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may get a penalty if your payment is late.
@@ -1163,10 +1294,13 @@ confirmationOfSubmission.howToPay=You can pay online or by bank transfer. You’
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
 confirmationOfSubmission.returnToAccount=Go to your <a href="{0}">Capital Gains Tax on UK property account</a>.
+confirmationOfSubmission.organisationNameLine=Trust: {0}
+confirmationOfSubmission.agentNameLine=Client: {0}
 
-viewReturn.title=Your return
+viewReturn.title=View return
 viewReturn.heading.taxOwed=Tax owed for return
 viewReturn.heading.reference=Return reference number
+viewReturn.heading.payment.reference=Payment reference number
 viewReturn.printLink=Print or save this page for your records
 viewReturn.charges.heading=Payments
 viewReturn.charges.description=Description
@@ -1211,10 +1345,14 @@ viewReturn.charge.paymentMethod.PaymentNotExpected=payment received
 viewReturn.charge.paymentMethod.Reallocation=payment received
 viewReturn.charge.paymentMethod.RepaymentInterestAllocated=payment received
 viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
+viewReturn.organisationNameLine=Trust: {0}
+viewReturn.agentNameLine=Client: {0}
 
 viewReturn.summaryHeading=Your return
 
 multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
+multiple-disposals.guidance.agent.title=Your client sold or disposed of 2 or more properties
+multiple-disposals.guidance.trust.title=The trust sold or disposed of 2 or more properties
 multiple-disposals.guidance.p1=You can report all property sales (or ‘disposals’) in the same return. You can only do this if they all had:
 multiple-disposals.guidance.li1=the same ‘completion’ date
 multiple-disposals.guidance.li2=contract ‘exchange’ dates on or after 6 April 2020
@@ -1225,6 +1363,8 @@ multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and �
 multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property.
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multiple-disposals.guidance.details.agent.link=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day your client got the money from the sale or disposal and the new owner got the keys.
+multiple-disposals.guidance.details.trust.link=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day the trust got the money from the sale or disposal and the new owner got the keys.
 
 returns.list.title=Sent returns
 returns.list.ref=Return ref:
@@ -1257,9 +1397,19 @@ multipleDisposalsNumberOfProperties.error.tooSmall=Number of disposals must be 2
 multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 999 or less
 
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.trust.title=Was the trust a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
 
+multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.agent.error.required=Select yes if your client was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.agent.error.boolean=Select yes if your client was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.trust.error.required=Select yes if the trust was a UK resident on all of the contract exchange dates
+multipleDisposalsWereYouAUKResident.trust.error.boolean=Select yes if the trust was a UK resident on all of the contract exchange dates
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
+multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 
 multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
 multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
@@ -1272,7 +1422,11 @@ multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of 
 multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
 
 multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
-multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+multipleDisposalsCountryOfResidence.agent.title=What country was your client a resident of when they exchanged contracts?
+multipleDisposalsCountryOfResidence.trust.title=What country was the trust a resident of when they exchanged contracts?
+multipleDisposalsCountryOfResidence.helpText=It‘s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+multipleDisposalsCountryOfResidence.agent.helpText=It‘s usually the day your client and the new owner swapped contracts and they paid a deposit.
+multipleDisposalsCountryOfResidence.trust.helpText=It‘s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
@@ -1300,7 +1454,7 @@ initialGainOrLoss.details.li3=3. Then subtract any money you spent on making imp
 initialGainOrLoss.details.li4=4. Then subtract any money you spent on selling the property, such as on legal fees or for estate agents.
 initialGainOrLoss.details.li5=5. This will give you the amount of the initial gain or loss.
 initialGainOrLoss.details.example.title=Example
-initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent's fees. This gave you an initial gain of £10,000.
+initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent‘s fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
 initialGainOrLoss.summary.hint=Click on the link to change your answers
 initialGainOrLoss.cya.hint=whether you made an initial gain, a loss, or no gain or loss
@@ -1327,16 +1481,26 @@ multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">excha
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
 
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.trust.title=What types of property or assets did the trust dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.helpText=Select all that apply.
 multipleDisposalsAssetTypeForNonUkResidents.Residential=Residential
 multipleDisposalsAssetTypeForNonUkResidents.Residential.helpText=Includes houses, flats, or other dwellings, including their gardens or grounds.
 multipleDisposalsAssetTypeForNonUkResidents.NonResidential=Non-residential
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse=Mixed use
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse.helpText=Part of the property was residential while you owned it.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.agent.helpText=Part of the property was residential and part was non-residential while your client owned it
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.trust.helpText=Part of the property was residential and part was non-residential while the trust owned it
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
+multipleDisposalsAssetTypeForNonUkResidents.agent.IndirectDisposal=Company shares - your client made an indirect disposal
+multipleDisposalsAssetTypeForNonUkResidents.trust.IndirectDisposal=Company shares - the trust made an indirect disposal
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 multipleDisposalsAssetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+multipleDisposalsAssetTypeForNonUkResidents.agent.error.required=Select the types of property or assets your client disposed of
+multipleDisposalsAssetTypeForNonUkResidents.trust.error.required=Select the types of property or assets the trust disposed of
+multipleDisposalsAssetTypeForNonUkResidents.agent.error.invalid=Select the types of property or assets your client disposed of
+multipleDisposalsAssetTypeForNonUkResidents.trust.error.invalid=Select the types of property or assets the trust disposed of
 
 multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
 multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
@@ -1498,3 +1662,4 @@ upload-supporting-evidence.check-upscan-status.caption=Supporting evidence
 upload-supporting-evidence.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
 upload-supporting-evidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
 upload-supporting-evidence.check-upscan-status.failed.cya-change=Upload another file
+

@@ -48,7 +48,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full))
   .settings(scalaVersion := "2.12.10")
   .settings(
-    majorVersion := 1,
+    majorVersion := 2,
     addCompilerPlugin(scalafixSemanticdb),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )

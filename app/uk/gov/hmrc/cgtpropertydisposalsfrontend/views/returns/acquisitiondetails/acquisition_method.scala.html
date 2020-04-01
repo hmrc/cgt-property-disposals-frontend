@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -34,11 +35,15 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[AcquisitionMethod], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[AcquisitionMethod], backLink: Call, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"acquisitionMethod"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
 @otherMethodKey = @{"otherAcquisitionMethod" }
-@title = @{messages("acquisitionMethod.title")}
+@relevantErrorKey = @{if (form.error(otherMethodKey).nonEmpty) otherMethodKey else key }
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @options = @{List(
@@ -61,10 +66,10 @@
         label = messages(s"returns.$key.Other"),
         content = Some(textInput(
             fieldId = otherMethodKey,
-            label = Html(messages(s"returns.$otherMethodKey.label")),
+            label = Html(messages(s"returns.$otherMethodKey$userKey.label")),
             helpText = None,
             labelAsHeading = false,
-            errorKey = form.error(otherMethodKey).map(e => e.message),
+            errorKey = form.error(otherMethodKey).map(e => s"$userErrorPrefix${e.message}"),
             value = form.data.getOrElse(otherMethodKey, ""),
             hasErrors = hasErrors,
             extraContent = None,
@@ -88,7 +93,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$relevantErrorKey$userKey"))
     }
 
     @caption(messages("acquisitionDetails.caption"))
@@ -100,7 +105,8 @@
             selected = selectedIndex,
             error = form.error(key),
             hasErrors = hasErrors,
-            options = options
+            options = options,
+            customErrorKey = Some(s"$key$userKey")
         )
 
         @submitButton(messages("button.saveAndContinue"))

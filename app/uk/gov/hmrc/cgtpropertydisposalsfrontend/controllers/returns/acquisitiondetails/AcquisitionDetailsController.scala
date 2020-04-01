@@ -211,14 +211,14 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionMethod(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, _, _, answers) =>
+      case (_, fillingOutReturn, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.acquisitionMethod.fold(acquisitionMethodForm)(acquisitionMethodForm.fill),
             c => acquisitionMethodForm.fill(c.acquisitionMethod)
           )
         )(
-          page = acquisitionMethodPage(_, _)
+          page = acquisitionMethodPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
         )(
           requiredPreviousAnswer = _ => Some(()).isDefined,
           controllers.returns.routes.TaskListController.taskList()
@@ -235,7 +235,7 @@ class AcquisitionDetailsController @Inject() (
           answers
         )(
           acquisitionMethodForm
-        )(acquisitionMethodPage(_, _))(
+        )(acquisitionMethodPage(_, _, fillingOutReturn.subscribedDetails.isATrust))(
           requiredPreviousAnswer = _ => noAnswersRequired,
           controllers.returns.routes.TaskListController.taskList()
         )(
@@ -259,7 +259,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, _, draftReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
           val form = acquisitionDateForm(disposalDate.value)
 
@@ -269,7 +269,7 @@ class AcquisitionDetailsController @Inject() (
               c => form.fill(c.acquisitionDate)
             )
           )(
-            page = acquisitionDatePage(_, _)
+            page = acquisitionDatePage(_, _, fillingOutReturn.subscribedDetails.isATrust)
           )(
             requiredPreviousAnswer = _.fold(
               _.acquisitionMethod,
@@ -291,7 +291,7 @@ class AcquisitionDetailsController @Inject() (
             answers
           )(
             form = acquisitionDateForm(disposalDate.value)
-          )(acquisitionDatePage(_, _))(
+          )(acquisitionDatePage(_, _, fillingOutReturn.subscribedDetails.isATrust))(
             requiredPreviousAnswer = _.fold(
               _.acquisitionMethod,
               c => Some(c.acquisitionMethod)
@@ -323,7 +323,7 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, _, answers) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, _, answers) =>
       withAcquisitionDate(answers) { acquisitionDate =>
         withAcquisitionMethod(answers) { acquisitionMethod =>
           commonDisplayBehaviour(answers)(
@@ -332,7 +332,13 @@ class AcquisitionDetailsController @Inject() (
               c => acquisitionPriceForm.fill(c.acquisitionPrice.inPounds())
             )
           )(
-            page = acquisitionPricePage(_, _, acquisitionMethod, acquisitionDate)
+            page = acquisitionPricePage(
+              _,
+              _,
+              acquisitionMethod,
+              acquisitionDate,
+              fillingOutReturn.subscribedDetails.isATrust
+            )
           )(
             requiredPreviousAnswer = _.fold(
               _.acquisitionDate,
@@ -355,7 +361,9 @@ class AcquisitionDetailsController @Inject() (
             answers
           )(
             acquisitionPriceForm
-          )(page = acquisitionPricePage(_, _, acquisitionMethod, acquisitionDate))(
+          )(page =
+            acquisitionPricePage(_, _, acquisitionMethod, acquisitionDate, fillingOutReturn.subscribedDetails.isATrust)
+          )(
             requiredPreviousAnswer = _.fold(
               _.acquisitionDate,
               c => Some(c.acquisitionDate)
@@ -380,7 +388,7 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def rebasedAcquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, draftReturn, answers) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           rebasingEligibilityUtil
@@ -399,7 +407,8 @@ class AcquisitionDetailsController @Inject() (
                 page = rebasedAcquisitionPricePage(
                   _,
                   _,
-                  rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+                  rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
+                  fillingOutReturn.subscribedDetails.isATrust
                 )
               )(
                 requiredPreviousAnswer = answers =>
@@ -431,7 +440,7 @@ class AcquisitionDetailsController @Inject() (
                     val p = form.copy(errors = form.errors
                       .map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
                     )
-                    rebasedAcquisitionPricePage(p, backLink, rebaseDate)
+                    rebasedAcquisitionPricePage(p, backLink, rebaseDate, fillingOutReturn.subscribedDetails.isATrust)
                   }
                 )(
                   requiredPreviousAnswer = answers => {
@@ -478,7 +487,7 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def improvementCosts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, draftReturn, answers) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           val rebaseDate = rebasingEligibilityUtil.rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
@@ -488,7 +497,13 @@ class AcquisitionDetailsController @Inject() (
               c => improvementCostsForm.fill(c.improvementCosts.inPounds())
             )
           )(
-            page = improvementCostsPage(_, _)
+            page = improvementCostsPage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+            )
           )(
             requiredPreviousAnswer = { a =>
               if (rebaseDate.isDefined)
@@ -519,7 +534,14 @@ class AcquisitionDetailsController @Inject() (
             answers
           )(
             improvementCostsForm
-          )(page = improvementCostsPage(_, _))(
+          )(page = improvementCostsPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+          )
+          )(
             requiredPreviousAnswer = { answers =>
               if (rebaseDate.isDefined)
                 answers.fold(_.rebasedAcquisitionPrice, _.rebasedAcquisitionPrice).isDefined
@@ -613,52 +635,71 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def acquisitionFees(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, _, answers) =>
-      commonDisplayBehaviour(answers)(
-        form = _.fold(
-          _.acquisitionFees.fold(acquisitionFeesForm)(p => acquisitionFeesForm.fill(p.inPounds)),
-          c => acquisitionFeesForm.fill(c.acquisitionFees.inPounds())
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+        commonDisplayBehaviour(answers)(
+          form = _.fold(
+            _.acquisitionFees.fold(acquisitionFeesForm)(p => acquisitionFeesForm.fill(p.inPounds)),
+            c => acquisitionFeesForm.fill(c.acquisitionFees.inPounds())
+          )
+        )(
+          page = acquisitionFeesPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
+            wasUkResident
+          )
+        )(
+          requiredPreviousAnswer = _.fold(
+            _.improvementCosts,
+            c => Some(c.improvementCosts)
+          ).isDefined,
+          redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
         )
-      )(
-        page = acquisitionFeesPage(_, _)
-      )(
-        requiredPreviousAnswer = _.fold(
-          _.improvementCosts,
-          c => Some(c.improvementCosts)
-        ).isDefined,
-        redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
-      )
+      }
     }
   }
 
   def acquisitionFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      commonSubmitBehaviour(
-        fillingOutReturn,
-        draftReturn,
-        answers
-      )(
-        acquisitionFeesForm
-      )(page = acquisitionFeesPage(_, _))(
-        requiredPreviousAnswer = _.fold(
-          _.improvementCosts,
-          c => Some(c.improvementCosts)
-        ).isDefined,
-        redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
-      )(
-        updateState = { (p, answers, draftReturn) =>
-          if (answers.fold(_.acquisitionFees, c => Some(c.acquisitionFees)).map(_.inPounds()).contains(p))
-            draftReturn
-          else {
-            val newAnswers = answers.fold(
-              _.copy(acquisitionFees = Some(AmountInPence.fromPounds(p))),
-              _.copy(acquisitionFees = AmountInPence.fromPounds(p))
-            )
+      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+        commonSubmitBehaviour(
+          fillingOutReturn,
+          draftReturn,
+          answers
+        )(
+          acquisitionFeesForm
+        )(page = acquisitionFeesPage(
+          _,
+          _,
+          fillingOutReturn.subscribedDetails.isATrust,
+          answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+          rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
+          wasUkResident
+        )
+        )(
+          requiredPreviousAnswer = _.fold(
+            _.improvementCosts,
+            c => Some(c.improvementCosts)
+          ).isDefined,
+          redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
+        )(
+          updateState = { (p, answers, draftReturn) =>
+            if (answers.fold(_.acquisitionFees, c => Some(c.acquisitionFees)).map(_.inPounds()).contains(p))
+              draftReturn
+            else {
+              val newAnswers = answers.fold(
+                _.copy(acquisitionFees = Some(AmountInPence.fromPounds(p))),
+                _.copy(acquisitionFees = AmountInPence.fromPounds(p))
+              )
 
-            commonUpdateDraftReturn(draftReturn, newAnswers)
+              commonUpdateDraftReturn(draftReturn, newAnswers)
+            }
           }
-        }
-      )
+        )
+      }
     }
   }
 
@@ -672,7 +713,8 @@ class AcquisitionDetailsController @Inject() (
                 c,
                 rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasAUkResident),
                 wasAUkResident,
-                rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident, assetType, c.acquisitionDate.value)
+                rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident, assetType, c.acquisitionDate.value),
+                fillingOutReturn.subscribedDetails.isATrust
               )
             )
 
@@ -733,7 +775,8 @@ class AcquisitionDetailsController @Inject() (
                     rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasAUkResident),
                     wasAUkResident,
                     rebasingEligibilityUtil
-                      .isEligibleForRebase(wasAUkResident, assetType, completeAnswers.acquisitionDate.value)
+                      .isEligibleForRebase(wasAUkResident, assetType, completeAnswers.acquisitionDate.value),
+                    fillingOutReturn.subscribedDetails.isATrust
                   )
                 )
             )

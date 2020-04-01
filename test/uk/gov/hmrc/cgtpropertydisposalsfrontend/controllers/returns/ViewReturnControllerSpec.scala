@@ -193,7 +193,11 @@ class ViewReturnControllerSpec
               .text() shouldBe messageFromMessageKey(
               "viewReturn.title"
             )
-            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
+              document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
+            } else {
+              document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            }
             document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
             )
@@ -233,7 +237,19 @@ class ViewReturnControllerSpec
               .text() shouldBe messageFromMessageKey(
               "viewReturn.title"
             )
-            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+
+            val expectedName = viewingReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName)
+            val actualName   = document.select("#user-details-name").text()
+            userType match {
+              case Some(UserType.Agent) => actualName shouldBe s"Client: $expectedName"
+              case _                    => actualName shouldBe expectedName
+            }
+
+            if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
+              document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
+            } else {
+              document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            }
             document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
             )
