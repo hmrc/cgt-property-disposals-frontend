@@ -37,7 +37,6 @@
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
 
 @key = @{ "disposalFees" }
 @title = @{messages(s"$key$userKey.title")}
@@ -48,7 +47,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$key$userKey"))
     }
 
     @caption(messages("returns.disposal-details.caption"))
@@ -67,7 +66,7 @@
             aspect = "left",
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}")
+            customErrorKey = Some(s"$key$userKey")
         )
 
         @submitButton(messages("button.saveAndContinue"))

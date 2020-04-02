@@ -38,12 +38,12 @@
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
 
 @key = @{ "shareOfProperty" }
 @percentageShareKey = @{"percentageShare"}
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
 @options = @{List(
   RadioOption(
     label = messages(s"returns.$key.Full"),
@@ -68,7 +68,8 @@
       inputClass = Some("small"),
       aspect = "right",
       unit = "%",
-      assistiveText = messages("unit-input.assistive.percent")
+      assistiveText = messages("unit-input.assistive.percent"),
+      customErrorKey = Some(s"$key$userKey")
     )),
     optionHelpText = None
   )
@@ -100,7 +101,7 @@
         error = form.error(key),
         hasErrors = hasErrors,
         options = options,
-        customErrorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}")
+        customErrorKey = Some(s"$key$userKey")
       )
 
       @submitButton(messages("button.saveAndContinue"))

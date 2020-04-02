@@ -37,7 +37,6 @@
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
 
 @disposalMethodKey = @{ disposalMethod match {
     case DisposalMethod.Gifted => ".Gifted"
@@ -59,6 +58,7 @@
 
     @if(hasErrors) {
         @errorSummary(form)
+        @errorSummary(form, Some(s"$key$userKey$disposalMethodKey"))
     }
 
     @caption(messages("returns.disposal-details.caption"))
@@ -77,7 +77,7 @@
         aspect = "left",
         unit = "£",
         assistiveText = messages("unit-input.assistive.pounds"),
-        customErrorKey = form.error(key).map(e => s"$userErrorPrefix$disposalMethodErrorKey${e.message}")
+        customErrorKey = Some(s"$key$userKey$disposalMethodKey")
       )
 
       @submitButton(messages("button.saveAndContinue"))
