@@ -1666,8 +1666,12 @@ do-you-want-to-upload-supporting-evidence.help-text=Up to 4 documents can be upl
 
 upload-supporting-evidence.check-your-answers.title=Check your answers
 upload-supporting-evidence.check-your-answers.caption=Supporting evidence
+upload-supporting-evidence.check-your-answers.file-label=Supporting evidence file {0}
 upload-supporting-evidence.check-your-answers.do-you-want-to-upload-documents=Do you want to upload any supporting evidence?
 upload-supporting-evidence.check-your-answers.cya-change=Change
+upload-supporting-evidence.check-your-answers.assistive=the file named {0}
+upload-supporting-evidence.check-your-answers.cya-delete=Delete
+upload-supporting-evidence.check-your-answers.add-another-file=Add another file
 
 upload-supporting-evidence.expired.title=Your Uploaded Supporting Evidence Has Expired
 upload-supporting-evidence.expired.caption=Supporting evidence

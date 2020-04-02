@@ -40,10 +40,10 @@
         @summary(answers)
 
         @if(answers.evidences.size < viewConfig.maxUploads & answers.doYouWantToUploadSupportingEvidence){
-            <a href=@routes.UploadSupportingEvidenceController.uploadSupportingEvidence().url>Add another file</span></a>
+          <p class="add-another-file">
+            <a href=@routes.UploadSupportingEvidenceController.uploadSupportingEvidence().url>@messages(s"$key.add-another-file")</a>
+          </p>
         }
-
-        <br>
 
         @formWrapper(routes.UploadSupportingEvidenceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
 
