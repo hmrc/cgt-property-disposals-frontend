@@ -26,12 +26,17 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 class LandingPageController @Inject() (
   cc: MessagesControllerComponents,
   landing_page: views.html.landing_page,
+  agents_landing_page: views.html.agents_landing_page,
   sign_in_page: views.html.sign_in
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
   def landingPage(): Action[AnyContent] = Action { implicit request =>
     Ok(landing_page())
+  }
+
+  def agentsLandingPage(): Action[AnyContent] = Action { implicit request =>
+    Ok(agents_landing_page())
   }
 
   def signInPage(): Action[AnyContent] = Action { implicit request =>

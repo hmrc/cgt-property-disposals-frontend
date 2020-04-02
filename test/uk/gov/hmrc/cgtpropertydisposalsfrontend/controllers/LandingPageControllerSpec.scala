@@ -28,8 +28,26 @@ class LandingPageControllerSpec extends ControllerSpec {
 
     "display the landing page" in {
       implicit val messagesApi: MessagesApi = controller.messagesApi
+      val result                            = controller.landingPage()(FakeRequest())
       contentAsString(controller.landingPage()(FakeRequest())) should include(
         messageFromMessageKey("landingPage.title")
+      )
+
+      checkPageIsDisplayed(
+        result,
+        messageFromMessageKey("landingPage.title"),
+        doc => doc.select(".button").attr("href") shouldBe s"${routes.StartController.start()}"
+      )
+    }
+
+    "display the agents landing page" in {
+      implicit val messagesApi: MessagesApi = controller.messagesApi
+      val result                            = controller.agentsLandingPage()(FakeRequest())
+
+      checkPageIsDisplayed(
+        result,
+        messageFromMessageKey("agentsLandingPage.title"),
+        doc => doc.select(".button").attr("href") shouldBe s"${viewConfig.agentsSignInUrl}"
       )
     }
 
