@@ -494,10 +494,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val noTaxDueRefLine             = "Return reference number form bundle id"
         val taxDueRefLine               = "Payment reference number charge ref"
-        val submissionLine              = "Return sent to HMRC 2 February 2020"
-        val addressLine                 = "Property address 123 fake street, abc123"
-        val returnReferenceWithBundleId = "Return reference number form bundle id"
-        val taxDueDateLine              = "Tax due by 1 January 2020"
+        val submissionLine              = ("sent-date-table", "Return sent to HMRC", "2 February 2020")
+        val addressLine                 = ("property-address-table", "Property address", "123 fake street, abc123")
+        val returnReferenceWithBundleId = ("return-reference-table", "Return reference number", "form bundle id")
+        val taxDueDateLine              = ("tax-due-date-table", "Tax due by", "1 January 2020")
 
         sealed case class TestScenario(
           description: String,
@@ -505,7 +505,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           taxOwed: AmountInPence,
           prefix: String,
           submissionLine: String,
-          tableLines: List[String],
+          tableLines: List[(String, String, String)],
           name: Either[TrustName, IndividualName]
         )
 
@@ -604,18 +604,14 @@ class CheckAllAnswersAndSubmitControllerSpec
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey("confirmationOfSubmission.title"), { doc =>
-                  doc.select("#user-details-name").text()         shouldBe namePrefix + "John Doe"
-                  doc.select("#ref-id").text()                    shouldBe reference
-                  doc.select("#return-details-table > tr").size() shouldBe expectedTable.size
+                  doc.select("#user-details-name").text() shouldBe namePrefix + "John Doe"
+                  doc.select("#ref-id").text()            shouldBe reference
 
-                  expectedTable.zipWithIndex.foreach {
-                    case (el, i) => {
-                      val index = i + 1
-                      doc
-                        .select(s"#return-details-table > tr:nth-child($index)")
-                        .text() shouldBe el
-                    }
+                  expectedTable.map { tableDetails =>
+                    doc.select(s"#${tableDetails._1}-question").text() shouldBe tableDetails._2
+                    doc.select(s"#${tableDetails._1}-answer").text()   shouldBe tableDetails._3
                   }
+
                   doc.select("#content > article > div > p > a").attr("href") shouldBe viewConfig.selfAssessmentUrl
                 }
               )

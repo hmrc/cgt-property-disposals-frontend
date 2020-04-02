@@ -205,8 +205,8 @@ class ViewReturnControllerSpec
             document.select("#date-sent-table-answer").text() shouldBe LocalDateUtils.govDisplayFormat(
               sentReturn.submissionDate
             )
-            document.select("#property-address-table-question").text()          shouldBe "Property address"
-            document.select("#property-address-table-answer").text()            shouldBe "123 fake street, abc123"
+            document.select("#property-address-table-question").text() shouldBe "Property address"
+            document.select("#property-address-table-answer").text()   shouldBe "123 fake street, abc123"
             document.select("#return-reference-table-question").text() shouldBe "Return reference number"
             document.select("#return-reference-table-answer").text()   shouldBe sentReturn.submissionId
 
