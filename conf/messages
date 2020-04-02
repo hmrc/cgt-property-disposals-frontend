@@ -1694,4 +1694,4 @@ upload-supporting-evidence.check-upscan-status.failed.cya-change=Upload another 
 upload-supporting-evidence.check-upscan-status.passed=Passed
 upload-supporting-evidence.check-upscan-status.failed=Failed
 upload-supporting-evidence.check-upscan-status.uploaded=Scan in progress
-
+upload-supporting-evidence.check-upscan-status.button.checkAgain=Check status and continue
