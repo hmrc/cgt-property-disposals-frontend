@@ -79,7 +79,7 @@
   @errorIdWithMessageKey.map { case (id, key) =>
     @errorInline(id, messages(s"$fieldId.$key"))
   }
-  <input type="hidden" name="reference" value="@ref" />
+  <input type="hidden" name="reference" value="@{ref.getOrElse("")}" />
   <input
   class="@inputClasses"
   id="@fieldId"
