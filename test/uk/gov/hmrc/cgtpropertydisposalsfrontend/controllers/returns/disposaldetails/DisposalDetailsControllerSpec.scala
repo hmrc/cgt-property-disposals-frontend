@@ -1664,6 +1664,7 @@ class DisposalDetailsControllerSpec
         )
       }
     }
+
 }
 
 object DisposalDetailsControllerSpec extends Matchers {

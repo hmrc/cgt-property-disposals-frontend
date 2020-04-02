@@ -69,7 +69,7 @@
       aspect = "right",
       unit = "%",
       assistiveText = messages("unit-input.assistive.percent"),
-      customErrorKey = Some(s"$key$userKey")
+      customErrorKey = Some(s"$percentageShareKey$userKey")
     )),
     optionHelpText = None
   )
@@ -82,12 +82,12 @@
     })
   }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, None, s"$userKey")
     }
 
     @caption(messages("returns.disposal-details.caption"))
