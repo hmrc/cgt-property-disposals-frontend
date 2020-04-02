@@ -9,5 +9,6 @@ GET /sign-out-and-register-for-gg                                           uk.g
 GET /sign-out-and-log-in                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
 GET /exit/we-signed-you-out                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
 GET /keep-alive                                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
+GET /accessibility-statement                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AccessibilityStatementController.accessibilityStatement()
 
 GET  /assets/*file                                                          controllers.Assets.at(path="/public", file)
