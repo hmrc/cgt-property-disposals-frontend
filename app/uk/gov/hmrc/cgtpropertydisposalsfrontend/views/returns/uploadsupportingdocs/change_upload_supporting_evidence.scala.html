@@ -34,15 +34,15 @@
     fileInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.file_input
 )
 
-@(reference : UpscanInitiateReference, deleteId : String)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(reference : UpscanInitiateReference, deleteId : String, backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
     @key = @{"upload-supporting-evidence.supporting-evidence"}
     @field = @{"file"}
     @title = @{messages(s"$key.title")}
 
-
     @mainTemplate(title = title, userType = request.userType, hasErrors = false) {
 
+        @backLinkComponent(backLink)
         @caption(messages(s"$key.caption"))
 
         @formWrapper(action = routes.UploadSupportingEvidenceController.changeSupportingEvidenceSubmit(reference.value ,deleteId), 'enctype -> "multipart/form-data") {

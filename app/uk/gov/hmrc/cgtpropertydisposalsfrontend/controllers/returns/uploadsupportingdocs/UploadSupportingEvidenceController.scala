@@ -319,7 +319,13 @@ class UploadSupportingEvidenceController @Inject() (
           }
         case Right(upscanInitiateResponse) =>
           upscanInitiateResponse match {
-            case UpscanInitiateSuccess(reference) => Ok(uploadSupportingEvidencePage(reference)) //FIXME: backlink???
+            case UpscanInitiateSuccess(reference) =>
+              Ok(
+                uploadSupportingEvidencePage(
+                  reference,
+                  routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments()
+                )
+              ) 
           }
       }
     }
@@ -331,6 +337,10 @@ class UploadSupportingEvidenceController @Inject() (
       withUploadSupportingEvidenceAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
         val multipart: MultipartFormData[Files.TemporaryFile] = request.body
         val result = for {
+          filename <- EitherT.fromOption(
+                       multipart.files.headOption.map(f => f.filename),
+                       Error("missing file name")
+                     )
           reference <- EitherT.fromOption(
                         multipart.dataParts.get("reference").flatMap(_.headOption),
                         Error("missing upscan file descriptor id")
@@ -354,7 +364,7 @@ class UploadSupportingEvidenceController @Inject() (
                 ) =>
               IncompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
-                supportingEvidences :+ SupportingEvidence(reference, "")
+                supportingEvidences :+ SupportingEvidence(reference, filename)
               )
             case CompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
@@ -362,7 +372,7 @@ class UploadSupportingEvidenceController @Inject() (
                 ) =>
               IncompleteUploadSupportingEvidenceAnswers(
                 Some(doYouWantToUploadSupportingEvidenceAnswer),
-                supportingEvidences :+ SupportingEvidence(reference, "")
+                supportingEvidences :+ SupportingEvidence(reference, filename)
               )
           }
           newDraftReturn = fillingOutReturn.draftReturn match {
@@ -468,7 +478,6 @@ class UploadSupportingEvidenceController @Inject() (
     Right(prepared)
   }
 
-  //TODO: the id is the id of the file that needs to be replaced
   def changeSupportingEvidence(deleteId: String) = authenticatedActionWithSessionData.async { implicit request =>
     withUploadSupportingEvidenceAnswers(request) { (draftReturnId, cgtRef, _, fillingOutReturn, answers) =>
       upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
@@ -482,7 +491,13 @@ class UploadSupportingEvidenceController @Inject() (
         case Right(upscanInitiateResponse) =>
           upscanInitiateResponse match {
             case UpscanInitiateSuccess(reference) =>
-              Ok(changeSupportingEvidencePage(reference, deleteId)) //FIXME: backlink???
+              Ok(
+                changeSupportingEvidencePage(
+                  reference,
+                  deleteId,
+                  routes.UploadSupportingEvidenceController.checkYourAnswers()
+                )
+              )
           }
       }
     }
@@ -494,6 +509,10 @@ class UploadSupportingEvidenceController @Inject() (
       withUploadSupportingEvidenceAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
         val multipart: MultipartFormData[Files.TemporaryFile] = request.body
         val result = for {
+          filename <- EitherT.fromOption(
+                       multipart.files.headOption.map(f => f.filename),
+                       Error("missing file name")
+                     )
           reference <- EitherT.fromOption(
                         multipart.dataParts.get("reference").flatMap(_.headOption),
                         Error("missing upscan file descriptor id")
@@ -519,7 +538,7 @@ class UploadSupportingEvidenceController @Inject() (
               val removeOldDoc = supportingEvidences.filterNot(c => c.reference === del)
               IncompleteUploadSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidenceAnswer,
-                removeOldDoc :+ SupportingEvidence(reference, "")
+                removeOldDoc :+ SupportingEvidence(reference, filename)
               )
             }
             case CompleteUploadSupportingEvidenceAnswers(
@@ -529,7 +548,7 @@ class UploadSupportingEvidenceController @Inject() (
               val removeOldDoc = supportingEvidences.filterNot(c => c.reference === del)
               IncompleteUploadSupportingEvidenceAnswers(
                 Some(doYouWantToUploadSupportingEvidenceAnswer),
-                removeOldDoc :+ SupportingEvidence(reference, "")
+                removeOldDoc :+ SupportingEvidence(reference, filename)
               )
             }
           }
