@@ -1685,9 +1685,13 @@ upload-supporting-evidence.supporting-evidence.caption=Supporting evidence
 upload-supporting-evidence.supporting-evidence.error.required=Upload a file to support your return
 upload-supporting-evidence.supporting-evidence.help-text=The file can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
 
-upload-supporting-evidence.check-upscan-status.title=Supporting Evidence File Upload Status
+upload-supporting-evidence.check-upscan-status.title=Supporting evidence file upload status
 upload-supporting-evidence.check-upscan-status.caption=Supporting evidence
 upload-supporting-evidence.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
 upload-supporting-evidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
+upload-supporting-evidence.check-upscan-status.passed.help-text=Your supporting evidence file has been successfully saved and scanned. We will save it for 7 days or until you submit your return when it will be attached to your submission.
 upload-supporting-evidence.check-upscan-status.failed.cya-change=Upload another file
+upload-supporting-evidence.check-upscan-status.passed=Passed
+upload-supporting-evidence.check-upscan-status.failed=Failed
+upload-supporting-evidence.check-upscan-status.uploaded=Scan in progress
 

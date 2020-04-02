@@ -48,66 +48,45 @@
             case UPLOADED => true
         }
     }
-
+    @key = @{"upload-supporting-evidence.check-upscan-status"}
+    @cyaKey = @{"upload-supporting-evidence.check-your-answers"}
+    @title = @{messages(s"$key.title")}
     @fileScanStatus = @{
         status match {
-        case READY => "Passed"
-        case FAILED => "Failed"
-        case UPLOADED => "Scan in progress"
+        case READY => messages(s"$key.passed") -> messages(s"$key.passed.help-text") -> false -> Some(messages("button.saveAndContinue"))
+        case FAILED => messages(s"$key.failed") -> messages(s"$key.failed.help-text") -> true -> None
+        case UPLOADED => messages(s"$key.uploaded") -> messages(s"$key.in-progress.help-text") -> false -> Some(messages(s"$key.button.checkAgain"))
         }
     }
 
-    @key = @{"upload-supporting-documents.check-upscan-status"}
-    @title = @{messages(s"$key.title")}
-
     @mainTemplate(title = title, userType = request.userType, hasErrors = None) {
-
-        @if(status === UPLOADED){
-            @pageHeading(title, Some(messages(s"$key.caption")), Some(messages(s"$key.in-progress.help-text")))
-        }else if (status === READY){
-            @pageHeading(title, Some(messages(s"$key.caption")), None)
-        }else{
-            @pageHeading(title, Some(messages(s"$key.caption")), Some(messages(s"$key.failed.help-text")))
-        }
+        @caption(messages(s"$cyaKey.caption"))
+        @pageHeading(title)
+        <p>
+            @fileScanStatus._1._1._2
+        </p>
 
         @cyaSection() {
 
-            @if(status === UPLOADED){
                 @cyaRow(
-                    "file name",
-                    Html(fileScanStatus),
-                    None,
+                    "name of file",
+                    Html(fileScanStatus._1._1._1),
+                    if(fileScanStatus._1._2) {
+                        Some(cyaChange(
+                            messages(s"$cyaKey.cya-change"),
+                            routes.UploadSupportingEvidenceController.uploadSupportingEvidence().url,
+                            Some(messages(s"$cyaKey.assistive"))
+                        ))
+                    } else None,
                     "supporting-evidence-file-scan-status"
                 )
-            }else if (status === READY){
-                @cyaRow(
-                    "file name",
-                    Html(fileScanStatus),
-                    None,
-                    "supporting-evidence-file-scan-status"
-                )
-            }else if (status === FAILED){
-                @cyaRow(
-                    "file name",
-                    Html(fileScanStatus),
-                    Some(cyaChange(
-                    messages("upload-supporting-documents.check-upscan-status.failed.cya-change"),
-                    routes.UploadSupportingEvidenceController.uploadSupportingEvidence().url,
-                    Some(messages("upload-supporting-documents.check-upscan-status.failed.cya-change")))
-                    ),
-                    "supporting-evidence-file-scan-status"
-                )
-            }
         }
 
-        @formWrapper(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(reference.value), 'novalidate -> "novalidate") {
-            @if(status === UPLOADED) {
-                @submitButton("Check status and continue")
-            }else if (status === READY) {
-                @submitButton("Save and continue")
-            }
-
-        }
+        @fileScanStatus._2.map(f =>
+          formWrapper(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(reference.value), 'novalidate -> "novalidate") {
+            submitButton(f)
+          }
+        )
 
         @returnToSummaryLink(displayReturnToSummaryLink = true)
 
