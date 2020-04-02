@@ -220,6 +220,8 @@ class DisposalDetailsController @Inject() (
                     .unset(_.acquisitionPrice)
                     .unset(_.rebasedAcquisitionPrice)
                     .unset(_.shouldUseRebase)
+                    .unset(_.improvementCosts)
+                    .unset(_.acquisitionFees)
                 ),
                 initialGainOrLoss    = None,
                 reliefDetailsAnswers = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),

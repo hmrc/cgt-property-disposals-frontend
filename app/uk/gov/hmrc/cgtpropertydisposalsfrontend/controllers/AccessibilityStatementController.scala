@@ -16,25 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.accessibility_statement
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-@Singleton
-class LandingPageController @Inject() (
+class AccessibilityStatementController @Inject() (
   cc: MessagesControllerComponents,
-  landing_page: views.html.landing_page,
-  agents_landing_page: views.html.agents_landing_page,
-  sign_in_page: views.html.sign_in
+  accessibilityStatementPage: accessibility_statement
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
-  def landingPage(): Action[AnyContent] = Action(implicit request => Ok(landing_page()))
-
-  def agentsLandingPage(): Action[AnyContent] = Action(implicit request => Ok(agents_landing_page()))
-
-  def signInPage(): Action[AnyContent] = Action(implicit request => Ok(sign_in_page()))
+  def accessibilityStatement(): Action[AnyContent] = Action(implicit request => Ok(accessibilityStatementPage()))
 
 }

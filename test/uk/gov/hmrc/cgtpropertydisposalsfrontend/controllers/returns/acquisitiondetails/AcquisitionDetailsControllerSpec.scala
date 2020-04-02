@@ -955,8 +955,8 @@ class AcquisitionDetailsControllerSpec
             Some(acquisitionDate),
             None,
             None,
-            Some(answers.improvementCosts),
-            Some(answers.acquisitionFees),
+            None,
+            None,
             None
           )
 
@@ -1049,8 +1049,8 @@ class AcquisitionDetailsControllerSpec
             Some(AcquisitionDate(date)),
             None,
             None,
-            Some(oldAnswers.improvementCosts),
-            Some(oldAnswers.acquisitionFees),
+            None,
+            None,
             None
           )
 
@@ -3459,8 +3459,6 @@ class AcquisitionDetailsControllerSpec
     checkPageIsDisplayed(
       performAction(data),
       messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
-        println("Actual: " + doc.select("#error-summary-display > ul > li > a").text())
-        println("Expected: " + messageFromMessageKey(expectedErrorMessageKey))
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*

@@ -382,6 +382,8 @@ class SingleDisposalsTriageController @Inject() (
           .unset(_.acquisitionPrice)
           .unset(_.rebasedAcquisitionPrice)
           .unset(_.shouldUseRebase)
+          .unset(_.improvementCosts)
+          .unset(_.acquisitionFees)
       ),
       initialGainOrLoss          = None,
       reliefDetailsAnswers       = currentDraftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),

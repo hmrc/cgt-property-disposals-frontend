@@ -311,6 +311,8 @@ class AcquisitionDetailsController @Inject() (
                     .unset(_.acquisitionPrice)
                     .unset(_.rebasedAcquisitionPrice)
                     .unset(_.shouldUseRebase)
+                    .unset(_.improvementCosts)
+                    .unset(_.acquisitionFees)
                     .copy(acquisitionDate = Some(d))
 
                   commonUpdateDraftReturn(draftReturn, newAnswers)

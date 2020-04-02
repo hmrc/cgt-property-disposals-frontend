@@ -32,6 +32,8 @@
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey,
         addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
@@ -78,46 +80,41 @@
    <a href="JavaScript: window.print();">@messages(s"$key.printPage")</a>
   </p>
 
-    <table class="borders payment-table">
-        <tbody id="return-details-table">
-
-
-        <tr class="charge">
-            <td> <strong class="bold">@messages(s"$key.sentToHmrc")</strong> <br/> </td>
-            <td>
-                @LocalDateUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)
-            </td>
-        </tr>
-
+    @cyaSection() {
+        @cyaRow(
+            messages(s"$key.sentToHmrc"),
+            Html(LocalDateUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)),
+            None,
+            "sent-date-table"
+        )
+        @if(!amountOwed.equals(BigDecimal(0))) {
+            @cyaRow(
+                messages(s"$key.returnReference"),
+                Html(justSubmittedReturn.submissionResponse.formBundleId),
+                None,
+                "return-reference-table"
+            )
+        }
+        @cyaRow(
+            messages(s"$key.propertyAddress"),
+            justSubmittedReturn.completeReturn match {
+                case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
+                case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
+            },
+            None,
+            "property-address-table"
+        )
         @{if(!amountOwed.equals(BigDecimal(0))) {
-        <tr class="charge">
-            <td> <strong class="bold"> {messages(s"$key.returnReference")} </strong> <br/> </td>
-            <td> {justSubmittedReturn.submissionResponse.formBundleId} </td>
-        </tr>
-        }}
-
-
-        <tr class="charge">
-            <td> <strong class="bold">@messages(s"$key.propertyAddress")</strong> <br/> </td>
-            <td>
-                @{justSubmittedReturn.completeReturn match {
-                    case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
-                    case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
-                }}
-            </td>
-        </tr>
-
-        @{if(!amountOwed.equals(BigDecimal(0))) {
-            {justSubmittedReturn.submissionResponse.charge.map { charge =>
-                <tr class = "charge">
-                    <td> <strong class="bold">{messages(s"$key.taxDue")}</strong> <br/>
-                    </td> <td>{LocalDateUtils.govDisplayFormat(charge.dueDate)}</td>
-                </tr>
+            justSubmittedReturn.submissionResponse.charge.map { charge =>
+                cyaRow(
+                    messages(s"$key.taxDue"),
+                    Html(LocalDateUtils.govDisplayFormat(charge.dueDate)),
+                    None,
+                    "tax-due-date-table"
+                )
             }}
-        }}
-
-        </tbody>
-    </table>
+        }
+    }
 
   @justSubmittedReturn.submissionResponse.charge.map { charge =>
    <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
