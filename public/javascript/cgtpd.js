@@ -140,18 +140,17 @@
     var form = document.querySelector('form');
     form.addEventListener('submit', sendSelectionsToGA(form, radioElements, checkBoxElements))
   }
-  var $submitButton = $('input[type=submit], button[type=submit]');
 
   function handleFileUploadError (input, msg) {
     $('.file-upload-error').remove();
-    $submitButton.removeAttr('disabled');
     var errorEl = '<span class="error-message file-upload-error" role="alert">' + msg + '</span>';
     $(errorEl).insertBefore($(input))
-    return false;
+    window.setTimeout(function () {
+      document.querySelector('button[type="submit"]').removeAttribute('disabled')
+    }, 400);
   }
 
-  function validateFile(file, form, singleFileUpload) {
-    $submitButton.attr('disabled', true);
+  function validateFile(file, form, singleFileUpload, submitForm) {
     if (!file) {
       return handleFileUploadError(singleFileUpload, "Select a file to upload")
     }
@@ -165,14 +164,15 @@
     if (file.size > (5242880)) {
       return handleFileUploadError(singleFileUpload, "The file must be less than 5MB in size");
     }
-
-    form.submit();
+    if (submitForm) {
+      form.submit();
+    }
   }
 
   function validateFileUpload(form, singleFileUpload) {
     return function (e)  {
       e.preventDefault();
-      validateFile(e.target.files[0], form, singleFileUpload)
+      validateFile(e.target.files[0], form, singleFileUpload, false)
     }
   }
 
@@ -180,7 +180,7 @@
     return function(e)  {
       e.preventDefault();
       var file = singleFileUpload.files[0];
-      validateFile(file, form, singleFileUpload);
+      validateFile(file, form, singleFileUpload, true);
     }
   }
 
