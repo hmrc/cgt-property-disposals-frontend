@@ -83,10 +83,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val governmentGatewayUserIdAndPassword             = getString("external-url.government-gateway-user-id-and-password")
   val contactHmrc                                    = getString("external-url.contact-hmrc")
   val reportClientCgtOnUkPropertyDisposals           = getString("external-url.report-client-cgt-on-uk-property-disposals")
-  val trustRegistered                                = getString("external-url.trust-registered")
-  val nonResidentReportAndPayCgtOnUkPropertyOrLandForm = getString(
-    "external-url.non-resident-report-and-pay-cgt-on-uk-property-or-land-form"
-  )
+
   val personalRepresentative             = getString("external-url.personal-representative")
   val whoNeedsToReportCgtOnUkProperty    = getString("external-url.who-needs-to-report-cgt-on-uk-property")
   val howToAskForAuthorisation           = getString("external-url.how-to-ask-for-authorisation")

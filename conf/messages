@@ -106,7 +106,7 @@ agentsLandingPage.contents.list1.ordered6=<a href="{0}">Ways your client can pay
 agentsLandingPage.report.h3=Who needs to report Capital Gains Tax on UK property
 agentsLandingPage.report.uk-residents.h4=UK residents
 agentsLandingPage.report.uk-residents.p1=For UK residential property disposals made from 6 April 2020, UK residents have 30 days after the property's completion date to report and pay Capital Gains Tax on the disposals.
-agentsLandingPage.report.uk-residents.p2=<a href={0}>Check if your client needs to report and pay Capital Gains Tax on UK property</a>
+agentsLandingPage.report.uk-residents.p2=<a href="{0}">Check if your client needs to report and pay Capital Gains Tax on UK property</a>
 agentsLandingPage.report.uk-residents.p3=For UK residential property disposals made from 6 April 2020, UK residents must report their Capital Gains Tax online. You can do this for your clients through their Capital Gains Tax on UK property account.
 agentsLandingPage.report.uk-residents.p4=If your client is a resident who is an individual or a trust, you can use this service to:
 
