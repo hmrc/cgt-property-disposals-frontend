@@ -122,9 +122,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithValidJourney)
-          mockUpdateName.foreach { f =>
-            f(validJourney, updateName(name, validJourney), Right(()))
-          }
+          mockUpdateName.foreach(f => f(validJourney, updateName(name, validJourney), Right(())))
           mockStoreSession(updatedSession)(Right(()))
         }
 
@@ -136,9 +134,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithValidJourney)
-          mockUpdateName.foreach { f =>
-            f(validJourney, updateName(name, validJourney), Right(()))
-          }
+          mockUpdateName.foreach(f => f(validJourney, updateName(name, validJourney), Right(())))
 
           mockStoreSession(updatedSession)(Right(()))
         }
@@ -167,9 +163,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithValidJourney)
-          mockUpdateName.foreach { f =>
-            f(validJourney, updateName(name, validJourney), Right(()))
-          }
+          mockUpdateName.foreach(f => f(validJourney, updateName(name, validJourney), Right(())))
           mockStoreSession(updatedSession)(Left(Error("")))
         }
 

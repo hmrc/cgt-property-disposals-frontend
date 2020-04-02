@@ -109,8 +109,9 @@ class ReliefDetailsControllerSpec
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       reliefDetailsAnswers = reliefDetailsAnswers,
-      triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(disposalDate = sample[DisposalDate]
-        .copy(taxYear = sample[TaxYear].copy(maxLettingsReliefAmount = maxLettingsReliefValue))
+      triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(disposalDate =
+        sample[DisposalDate]
+          .copy(taxYear = sample[TaxYear].copy(maxLettingsReliefAmount = maxLettingsReliefValue))
       )
     )
 
@@ -144,8 +145,9 @@ class ReliefDetailsControllerSpec
     val draftReturn = singleDisposalDraftReturn.copy(
       reliefDetailsAnswers      = reliefDetailsAnswers,
       exemptionAndLossesAnswers = exemptionAndLossesAnswers,
-      triageAnswers = completeSingleDisposalTriageAnswers.copy(disposalDate = disposalDate
-        .copy(taxYear = taxYear.copy(maxLettingsReliefAmount = maxLettingsReliefValue))
+      triageAnswers = completeSingleDisposalTriageAnswers.copy(disposalDate =
+        disposalDate
+          .copy(taxYear = taxYear.copy(maxLettingsReliefAmount = maxLettingsReliefValue))
       )
     )
 
@@ -208,9 +210,8 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"privateResidentsRelief.title"), { doc =>
-              doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-            }
+            messageFromMessageKey(s"privateResidentsRelief.title"),
+            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
           )
         }
 
@@ -226,9 +227,11 @@ class ReliefDetailsControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("privateResidentsRelief.title"), { doc =>
-            doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-          })
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("privateResidentsRelief.title"),
+            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
+          )
         }
 
       }
@@ -269,9 +272,8 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"privateResidentsRelief.agent.title"), { doc =>
-              doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-            }
+            messageFromMessageKey(s"privateResidentsRelief.agent.title"),
+            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
           )
         }
 
@@ -289,9 +291,8 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("privateResidentsRelief.agent.title"), { doc =>
-              doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-            }
+            messageFromMessageKey("privateResidentsRelief.agent.title"),
+            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
           )
         }
 
@@ -333,9 +334,8 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"privateResidentsRelief.trust.title"), { doc =>
-              doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-            }
+            messageFromMessageKey(s"privateResidentsRelief.trust.title"),
+            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
           )
         }
 
@@ -353,9 +353,8 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("privateResidentsRelief.trust.title"), { doc =>
-              doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-            }
+            messageFromMessageKey("privateResidentsRelief.trust.title"),
+            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
           )
         }
 
@@ -391,11 +390,11 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("privateResidentsRelief.title"), { doc =>
+            messageFromMessageKey("privateResidentsRelief.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -622,9 +621,11 @@ class ReliefDetailsControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("lettingsRelief.title"), { doc =>
-            doc.select("#lettingsReliefValue").attr("value") shouldBe "12.34"
-          })
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("lettingsRelief.title"),
+            doc => doc.select("#lettingsReliefValue").attr("value") shouldBe "12.34"
+          )
         }
 
         "the user has answered the question before but has " +
@@ -642,9 +643,11 @@ class ReliefDetailsControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("lettingsRelief.title"), { doc =>
-            doc.select("#lettingsReliefValue").attr("value") shouldBe "12.34"
-          })
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("lettingsRelief.title"),
+            doc => doc.select("#lettingsReliefValue").attr("value") shouldBe "12.34"
+          )
         }
 
       }
@@ -703,11 +706,11 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("lettingsRelief.title"), { doc =>
+            messageFromMessageKey("lettingsRelief.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -727,11 +730,11 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("lettingsRelief.title"), { doc =>
+            messageFromMessageKey("lettingsRelief.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -796,11 +799,12 @@ class ReliefDetailsControllerSpec
               Right(())
             )
             mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  draftReturn = newDraftReturn
+              session.copy(journeyStatus =
+                Some(
+                  journey.copy(
+                    draftReturn = newDraftReturn
+                  )
                 )
-              )
               )
             )(Left(Error("")))
           }
@@ -988,9 +992,11 @@ class ReliefDetailsControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("otherReliefs.title"), { doc =>
-            doc.select("#otherReliefsAmount").attr("value") shouldBe "13.34"
-          })
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("otherReliefs.title"),
+            doc => doc.select("#otherReliefsAmount").attr("value") shouldBe "13.34"
+          )
 
         }
 
@@ -1011,9 +1017,11 @@ class ReliefDetailsControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("otherReliefs.title"), { doc =>
-            doc.select("#otherReliefsAmount").attr("value") shouldBe "13.34"
-          })
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("otherReliefs.title"),
+            doc => doc.select("#otherReliefsAmount").attr("value") shouldBe "13.34"
+          )
 
         }
       }
@@ -1046,11 +1054,11 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("otherReliefs.title"), { doc =>
+            messageFromMessageKey("otherReliefs.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -1081,7 +1089,8 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("otherReliefs.title"), { doc =>
+            messageFromMessageKey("otherReliefs.title"),
+            doc =>
               expectedErrorMessageKey.toList match {
                 case Nil =>
                 case errorKey :: Nil =>
@@ -1096,8 +1105,7 @@ class ReliefDetailsControllerSpec
                   expectedErrorMessageKey
                     .map(messageFromMessageKey(_))
                     .foreach(message => errors should contain(message))
-              }
-            },
+              },
             BAD_REQUEST
           )
         }
@@ -1191,11 +1199,12 @@ class ReliefDetailsControllerSpec
               Right(())
             )
             mockStoreSession(
-              currentSession.copy(journeyStatus = Some(
-                currentJourney.copy(
-                  draftReturn = newDraftReturn
+              currentSession.copy(journeyStatus =
+                Some(
+                  currentJourney.copy(
+                    draftReturn = newDraftReturn
+                  )
                 )
-              )
               )
             )(Left(Error("")))
           }
@@ -1558,9 +1567,10 @@ class ReliefDetailsControllerSpec
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(
-                  journey.copy(draftReturn = draftReturn.copy(
-                    reliefDetailsAnswers = Some(completeAnswers)
-                  )
+                  journey.copy(draftReturn =
+                    draftReturn.copy(
+                      reliefDetailsAnswers = Some(completeAnswers)
+                    )
                   )
                 )
               )
@@ -1593,11 +1603,11 @@ class ReliefDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("reliefDetails.cya.title"), { doc =>
+            messageFromMessageKey("reliefDetails.cya.title"),
+            doc =>
               doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
                 .checkYourAnswersSubmit()
                 .url
-            }
           )
         }
 

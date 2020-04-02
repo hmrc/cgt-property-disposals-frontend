@@ -85,10 +85,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
   override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
     case a: UkAddress =>
-      journey.copy(draftReturn = draftReturn.copy(examplePropertyDetailsAnswers = Some(
-        incompleteAnswers.copy(address = Some(a), disposalDate = None)
-      )
-      )
+      journey.copy(draftReturn =
+        draftReturn.copy(examplePropertyDetailsAnswers =
+          Some(
+            incompleteAnswers.copy(address = Some(a), disposalDate = None)
+          )
+        )
       )
     case _: NonUkAddress => journey
   }
@@ -501,11 +503,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("hasValidPostcode.multipleDisposals.title"), { doc =>
+            messageFromMessageKey("hasValidPostcode.multipleDisposals.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 "hasValidPostcode.multipleDisposals.error.required"
-              )
-            },
+              ),
             BAD_REQUEST
           )
 
@@ -1056,11 +1058,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"multipleDisposalsDisposalDate${messageKey(userType)}.title"), { doc =>
+            messageFromMessageKey(s"multipleDisposalsDisposalDate${messageKey(userType)}.title"),
+            doc =>
               doc.select("#multipleDisposalsDisposalDate-form-hint").text() shouldBe messageFromMessageKey(
                 s"multipleDisposalsDisposalDate${messageKey(userType)}.helpText"
               )
-            }
           )
         }
 
@@ -1319,12 +1321,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(formData: _*),
-            messageFromMessageKey(s"$key.title"), { doc =>
+            messageFromMessageKey(s"$key.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
                 args: _*
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -1762,11 +1764,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data: _*),
-            messageFromMessageKey(s"$key.title"), { doc =>
+            messageFromMessageKey(s"$key.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -2131,11 +2133,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data: _*),
-            messageFromMessageKey(s"$key.title"), { doc =>
+            messageFromMessageKey(s"$key.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -2278,16 +2280,17 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              SessionData.empty.copy(journeyStatus = Some(
-                sample[FillingOutReturn].copy(
-                  draftReturn = currentDraftReturn.copy(
-                    examplePropertyDetailsAnswers = None
-                  ),
-                  subscribedDetails = sample[SubscribedDetails].copy(
-                    name = Right(sample[IndividualName])
+              SessionData.empty.copy(journeyStatus =
+                Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = currentDraftReturn.copy(
+                      examplePropertyDetailsAnswers = None
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
                   )
                 )
-              )
               )
             )
           }
@@ -2302,16 +2305,17 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              SessionData.empty.copy(journeyStatus = Some(
-                sample[FillingOutReturn].copy(
-                  draftReturn = currentDraftReturn.copy(
-                    examplePropertyDetailsAnswers = Some(allQuestionsAnswered.copy(address = None))
-                  ),
-                  subscribedDetails = sample[SubscribedDetails].copy(
-                    name = Right(sample[IndividualName])
+              SessionData.empty.copy(journeyStatus =
+                Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = currentDraftReturn.copy(
+                      examplePropertyDetailsAnswers = Some(allQuestionsAnswered.copy(address = None))
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
                   )
                 )
-              )
               )
             )
           }
@@ -2326,18 +2330,19 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              SessionData.empty.copy(journeyStatus = Some(
-                sample[FillingOutReturn].copy(
-                  draftReturn = currentDraftReturn.copy(
-                    examplePropertyDetailsAnswers = Some(
-                      allQuestionsAnswered.copy(disposalDate = None)
+              SessionData.empty.copy(journeyStatus =
+                Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = currentDraftReturn.copy(
+                      examplePropertyDetailsAnswers = Some(
+                        allQuestionsAnswered.copy(disposalDate = None)
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
-                  ),
-                  subscribedDetails = sample[SubscribedDetails].copy(
-                    name = Right(sample[IndividualName])
                   )
                 )
-              )
               )
             )
           }
@@ -2356,18 +2361,19 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              SessionData.empty.copy(journeyStatus = Some(
-                sample[FillingOutReturn].copy(
-                  draftReturn = currentDraftReturn.copy(
-                    examplePropertyDetailsAnswers = Some(
-                      allQuestionsAnswered.copy(disposalPrice = None)
+              SessionData.empty.copy(journeyStatus =
+                Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = currentDraftReturn.copy(
+                      examplePropertyDetailsAnswers = Some(
+                        allQuestionsAnswered.copy(disposalPrice = None)
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
-                  ),
-                  subscribedDetails = sample[SubscribedDetails].copy(
-                    name = Right(sample[IndividualName])
                   )
                 )
-              )
               )
             )
           }
@@ -2386,18 +2392,19 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              SessionData.empty.copy(journeyStatus = Some(
-                sample[FillingOutReturn].copy(
-                  draftReturn = currentDraftReturn.copy(
-                    examplePropertyDetailsAnswers = Some(
-                      allQuestionsAnswered.copy(acquisitionPrice = None)
+              SessionData.empty.copy(journeyStatus =
+                Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = currentDraftReturn.copy(
+                      examplePropertyDetailsAnswers = Some(
+                        allQuestionsAnswered.copy(acquisitionPrice = None)
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
-                  ),
-                  subscribedDetails = sample[SubscribedDetails].copy(
-                    name = Right(sample[IndividualName])
                   )
                 )
-              )
               )
             )
           }

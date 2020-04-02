@@ -948,9 +948,8 @@ class HomePageControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(expectedPageTitleMessageKey), { doc =>
-              doc.select("#back").attr("href") shouldBe expectedBackLink.url
-            }
+            messageFromMessageKey(expectedPageTitleMessageKey),
+            doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
           )
         }
 

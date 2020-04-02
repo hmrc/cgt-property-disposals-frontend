@@ -390,16 +390,17 @@ class MultipleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Right(
-                    IncompleteSingleDisposalTriageAnswers.empty.copy(
-                      individualUserType         = Some(Self),
-                      hasConfirmedSingleDisposal = true
+              session.copy(journeyStatus =
+                Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Right(
+                      IncompleteSingleDisposalTriageAnswers.empty.copy(
+                        individualUserType         = Some(Self),
+                        hasConfirmedSingleDisposal = true
+                      )
                     )
                   )
                 )
-              )
               )
             )(Right(()))
           }
@@ -427,11 +428,12 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(5)))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(5)))
+                    )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -455,9 +457,10 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(newReturnTriageAnswers = Left(newAnswers))
-                )
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(newReturnTriageAnswers = Left(newAnswers))
+                  )
                 )
               )(Right(()))
             }
@@ -776,11 +779,12 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(true)))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(true)))
+                    )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -797,11 +801,12 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(false)))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(false)))
+                    )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -825,18 +830,19 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        wasAUKResident               = Some(false),
-                        countryOfResidence           = None,
-                        wereAllPropertiesResidential = None,
-                        assetTypes                   = None
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          wasAUKResident               = Some(false),
+                          countryOfResidence           = None,
+                          wereAllPropertiesResidential = None,
+                          assetTypes                   = None
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -918,11 +924,11 @@ class MultipleDisposalsTriageControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key${displayType.getSubKey}.title"), { doc =>
+                messageFromMessageKey(s"$key${displayType.getSubKey}.title"),
+                doc =>
                   doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                     s"$key${displayType.getSubKey}.error.required"
-                  )
-                },
+                  ),
                 BAD_REQUEST
               )
             }
@@ -1084,16 +1090,17 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        wereAllPropertiesResidential = Some(true),
-                        assetTypes                   = Some(List(AssetType.Residential))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          wereAllPropertiesResidential = Some(true),
+                          assetTypes                   = Some(List(AssetType.Residential))
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -1110,16 +1117,17 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        wereAllPropertiesResidential = Some(false),
-                        assetTypes                   = Some(List(AssetType.NonResidential))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          wereAllPropertiesResidential = Some(false),
+                          assetTypes                   = Some(List(AssetType.NonResidential))
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -1143,16 +1151,17 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        wereAllPropertiesResidential = Some(false),
-                        assetTypes                   = Some(List(AssetType.NonResidential))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          wereAllPropertiesResidential = Some(false),
+                          assetTypes                   = Some(List(AssetType.NonResidential))
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -1253,11 +1262,11 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"$key.title"), { doc =>
+            messageFromMessageKey(s"$key.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 s"$key.error.required"
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -1445,16 +1454,17 @@ class MultipleDisposalsTriageControllerSpec
               mockGetSession(session)
               mockGetTaxYear(today)(Right(Some(taxYear)))
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        taxYearAfter6April2020 = Some(true),
-                        taxYear                = Some(taxYear)
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          taxYearAfter6April2020 = Some(true),
+                          taxYear                = Some(taxYear)
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -1470,16 +1480,17 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        taxYearAfter6April2020 = Some(false),
-                        taxYear                = None
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          taxYearAfter6April2020 = Some(false),
+                          taxYear                = None
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -1510,17 +1521,18 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        taxYearAfter6April2020 = Some(false),
-                        taxYear                = None,
-                        completionDate         = None
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          taxYearAfter6April2020 = Some(false),
+                          taxYear                = None,
+                          completionDate         = None
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -1887,15 +1899,16 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        countryOfResidence = Some(country)
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          countryOfResidence = Some(country)
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -1924,15 +1937,16 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        countryOfResidence = Some(newCountry)
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          countryOfResidence = Some(newCountry)
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -2267,15 +2281,16 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        assetTypes = Some(List(AssetType.Residential))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          assetTypes = Some(List(AssetType.Residential))
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -2293,15 +2308,16 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        assetTypes = Some(List(AssetType.MixedUse))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          assetTypes = Some(List(AssetType.MixedUse))
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -2319,15 +2335,16 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        assetTypes = Some(List(AssetType.Residential, AssetType.MixedUse))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          assetTypes = Some(List(AssetType.Residential, AssetType.MixedUse))
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -2354,15 +2371,16 @@ class MultipleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    newReturnTriageAnswers = Left(
-                      answers.copy(
-                        assetTypes = Some(List(AssetType.NonResidential))
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      newReturnTriageAnswers = Left(
+                        answers.copy(
+                          assetTypes = Some(List(AssetType.NonResidential))
+                        )
                       )
                     )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -2658,11 +2676,11 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(formData: _*),
-            messageFromMessageKey("multipleDisposalsCompletionDate.title"), { doc =>
+            messageFromMessageKey("multipleDisposalsCompletionDate.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }

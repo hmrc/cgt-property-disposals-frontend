@@ -420,13 +420,13 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("submitReturnError.title"), { doc =>
+              messageFromMessageKey("submitReturnError.title"),
+              doc =>
                 doc
                   .select("#content > article > form")
                   .attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                   .submissionErrorSubmit()
                   .url
-              }
             )
           }
 

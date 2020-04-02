@@ -598,9 +598,10 @@ class RegistrationControllerSpec
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty
-                .copy(journeyStatus = Some(
-                  Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty, List.empty)
-                )
+                .copy(journeyStatus =
+                  Some(
+                    Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty, List.empty)
+                  )
                 )
             )(Left(Error("")))
           }
@@ -621,9 +622,10 @@ class RegistrationControllerSpec
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty
-                .copy(journeyStatus = Some(
-                  Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty, List.empty)
-                )
+                .copy(journeyStatus =
+                  Some(
+                    Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty, List.empty)
+                  )
                 )
             )(Right(()))
           }

@@ -149,9 +149,8 @@ class TaskListControllerSpec
 
         checkPageIsDisplayed(
           performAction(),
-          messageFromMessageKey("service.title"), { doc =>
-            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
-          }
+          messageFromMessageKey("service.title"),
+          doc => doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
         )
       }
 
@@ -822,9 +821,8 @@ class TaskListControllerSpec
 
         checkPageIsDisplayed(
           performAction(),
-          messageFromMessageKey("service.title"), { doc =>
-            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
-          }
+          messageFromMessageKey("service.title"),
+          doc => doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
         )
       }
 

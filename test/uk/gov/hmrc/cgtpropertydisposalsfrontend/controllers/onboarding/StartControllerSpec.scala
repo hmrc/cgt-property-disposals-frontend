@@ -325,7 +325,8 @@ class StartControllerSpec
                 mockGetSession(SessionData.empty)
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus = Some(SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)),
+                    journeyStatus =
+                      Some(SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
                         onboardingRoutes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
