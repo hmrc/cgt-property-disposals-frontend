@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -26,6 +27,7 @@
 
 @key = @{ "accessibilityStatement" }
 @title = @{messages(s"$key.title")}
+@availableAtLocation = @{ s"tax.service.gov.uk${routes.LandingPageController.landingPage().url}" }
 
 @mainTemplate(title = title, userType = None, withSignOutLink = false) {
 
@@ -34,7 +36,7 @@
  @pageHeading(title)
  <p>@messages(s"$key.p1")</p>
  <p>@Html(messages(s"$key.p2", viewConfig.govUkAccessibilityStatementUrl))</p>
- <p>@messages(s"$key.p3")</p>
+ <p>@messages(s"$key.p3", availableAtLocation)</p>
 
  <h2 class="heading-medium">@messages(s"$key.usingThisService.title")</h2>
  <p>@messages(s"$key.usingThisService.p1")</p>
