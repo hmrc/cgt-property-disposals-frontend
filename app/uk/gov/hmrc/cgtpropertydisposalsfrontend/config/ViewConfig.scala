@@ -80,6 +80,23 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val equalityCommissionForNorthenIrelandUrl: String = getString("external-url.equality-commission-for-northen-ireland")
   val digitalAccessibilityCentretUrl: String         = getString("external-url.digital-accessibility-centre")
   val reportAccessibilityProblemUrl: String          = s"${getString("external-url.report-accessibility-problem")}?service=cgtpd"
+  val governmentGatewayUserIdAndPassword             = getString("external-url.government-gateway-user-id-and-password")
+  val contactHmrc                                    = getString("external-url.contact-hmrc")
+  val reportClientCgtOnUkPropertyDisposals           = getString("external-url.report-client-cgt-on-uk-property-disposals")
+  val trustRegistered                                = getString("external-url.trust-registered")
+  val nonResidentReportAndPayCgtOnUkPropertyOrLandForm = getString(
+    "external-url.non-resident-report-and-pay-cgt-on-uk-property-or-land-form"
+  )
+  val personalRepresentative             = getString("external-url.personal-representative")
+  val whoNeedsToReportCgtOnUkProperty    = getString("external-url.who-needs-to-report-cgt-on-uk-property")
+  val howToAskForAuthorisation           = getString("external-url.how-to-ask-for-authorisation")
+  val howToManageYourClientsAccount      = getString("external-url.how-to-manage-your-clients-account")
+  val sendACgtOnUkPropertyReturn         = getString("external-url.send-a-cgt-on-uk-property-return")
+  val whatYouWillNeedToCompleteTheReturn = getString("external-url.what-you-will-need-to-complete-the-return")
+  val waysYourClientCanPay               = getString("external-url.ways-your-client-can-pay")
+  val createCgtOnUkPropertyAccount       = getString("external-url.create-cgt-on-uk-property-account")
+  val calculateCgt                       = getString("external-url.calculate-cgt")
+  val payYourTax                         = getString("external-url.pay-your-tax")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"

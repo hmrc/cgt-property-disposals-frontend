@@ -53,27 +53,127 @@ landingPage.createAccount.bullet2=update your contact details in your Capital Ga
 landingPage.createAccount.p2=If you do not have a Government Gateway user ID, you can create one.
 
 landingPage.howTo.h2=How to report and pay the tax
-landingPage.warning=From 6 April 2020, you will have 30 days after the property completion date to report and pay Capital Gains Tax on your UK property sales or disposals.
-landingPage.howTo.p1=From 6 April 2020, you will be able to use this service to:
-landingPage.howTo.list1.bullet1=report and pay any Capital Gains Tax due on UK property sales or disposals made from 6 April 2020
-landingPage.howTo.list1.bullet2=view and amend your Capital Gains Tax on UK property returns made from 6 April 2020
-landingPage.howTo.p2=If you’re a non-resident, you’ll also be able to use this service from 6 April 2020 to report the sale or disposal and pay the tax on:
-landingPage.howTo.list2.bullet1=the sale or disposal of residential and non-residential UK property or land
-landingPage.howTo.list2.bullet2=indirect disposals
-landingPage.startButton=Create account or sign in
-landingPage.beforeYouStart.h2=Before you start
-landingPage.beforeYouStart.p1=You’ll need a Government Gateway user ID and password to use this service. If you do not have a Government Gateway user ID, you can create one.
-landingPage.beforeYouStart.p2=To sign in, enter the same Government Gateway user ID and password you used to create your Capital Gains Tax on UK property account.
-landingPage.beforeYouStart.p3=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
-landingPage.ifAgent.h2=If you’re an agent
-landingPage.ifAgent.p1=Go to your <a href="{0}">agent services account</a> to access this service. If you do not already have one, you can <a href="{1}">apply for an agent services account</a>.
-landingPage.ifTrust.h2=If you’re representing a trust
-landingPage.ifTrust.p1=The trust will need to be <a href="{0}">registered</a>. You will need the trust’s Self Assessment Unique Taxpayer Reference.
+landingPage.warning=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
+landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property account before you can report and pay the tax using this service.
+landingPage.howTo.p2=If you’re a resident or representing a trust, you can use this service to:
+landingPage.howTo.list1.bullet1=report the disposal of UK residential property or land made from 6 April 2020
+landingPage.howTo.list1.bullet2=pay any tax you might owe for that disposal
+landingPage.howTo.list1.bullet3=view and amend your previous and current returns
 
+landingPage.howTo.p3=If you’re a non-resident you must use this service to report sales or disposals from 6 April 2020 of:
+landingPage.howTo.list2.bullet1=residential UK property or land
+landingPage.howTo.list2.bullet2=non-residential UK property or land
+landingPage.howTo.p4=If you’re a non-resident, you must report all sales or disposals of UK property, even if you have no tax to pay or have made a loss.
+landingPage.startButton=Start
+landingPage.beforeYouStart.h2=Before you start
+landingPage.beforeYouStart.p1=To use this service, you’ll need a <a href="{0}">Government Gateway user ID and password</a>. If you do not have a user ID, you can create one.
+landingPage.beforeYouStart.p2=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
+landingPage.beforeYouStart.p3=Get the following information ready:
+landingPage.beforeYouStart.list1.bullet1=property address and postcode
+landingPage.beforeYouStart.list1.bullet2=date you got the property
+landingPage.beforeYouStart.list1.bullet3=date you exchanged contracts when you were selling or disposing of the property
+landingPage.beforeYouStart.list1.bullet4=date you stopped being the property’s owner (completion date)
+landingPage.beforeYouStart.list1.bullet5=value of the property when you got it
+landingPage.beforeYouStart.list1.bullet6=value of the property when you sold or disposed of it
+landingPage.beforeYouStart.list1.bullet7=costs of buying, selling or making improvements to the property
+landingPage.beforeYouStart.list1.bullet8=details of any tax reliefs, allowances or exemptions you’re entitled to claim
+landingPage.beforeYouStart.list1.bullet9=property type, if you’re a non-resident
+
+landingPage.ifAgent.h2=If you’re an agent
+landingPage.ifAgent.p1=Find out how to <a href="{0}">report your client’s Capital Gains Tax on UK property disposals</a>.
+landingPage.ifTrust.h2=If you’re representing a trust
+landingPage.ifTrust.p1=The trust must be  <a href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
+landingPage.reportingDisposals.h2=If you’re reporting indirect disposals or disposals of mixed use property
+landingPage.reportingDisposals.p1=Use the <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
+landingPage.capasitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
+landingPage.capasitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
+landingPage.capasitorOrPersonalRepresentative.p2=<a href="{0}">Contact HMRC</a> and ask for a paper version of the return to be posted to you.
 landingPage.sidebar.title=Related content
-landingPage.sidebar.1=Capital Gains Tax
-landingPage.sidebar.2=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
-landingPage.sidebar.3=More
+landingPage.sidebar.1=Calculate Capital Gains Tax
+landingPage.sidebar.2=Capital Gains Tax
+landingPage.sidebar.3=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
+landingPage.sidebar.4=Pay your tax
+
+agentsLandingPage.title=Manage your client’s Capital Gains Tax on UK property account
+agentsLandingPage.intro.p1=Find out how to ask your client to authorise you to manage their Capital Gains Tax on UK property account.
+agentsLandingPage.contents.h4=Contents
+agentsLandingPage.contents.list1.ordered1=<a href="{0}">Who needs to report Capital Gains Tax on UK property</a>
+agentsLandingPage.contents.list1.ordered2=<a href="{0}">How to ask for authorisation</a>
+agentsLandingPage.contents.list1.ordered3=<a href="{0}">How to manage your client’s account</a>
+agentsLandingPage.contents.list1.ordered4=<a href="{0}">Send a Capital Gains Tax on UK property return</a>
+agentsLandingPage.contents.list1.ordered5=<a href="{0}">What you’ll need to complete the return</a>
+agentsLandingPage.contents.list1.ordered6=<a href="{0}">Ways your client can pay</a>
+agentsLandingPage.report.h3=Who needs to report Capital Gains Tax on UK property
+agentsLandingPage.report.uk-residents.h4=UK residents
+agentsLandingPage.report.uk-residents.p1=For UK residential property disposals made from 6 April 2020, UK residents have 30 days after the property's completion date to report and pay Capital Gains Tax on the disposals.
+agentsLandingPage.report.uk-residents.p2=<a href={0}>Check if your client needs to report and pay Capital Gains Tax on UK property</a>
+agentsLandingPage.report.uk-residents.p3=For UK residential property disposals made from 6 April 2020, UK residents must report their Capital Gains Tax online. You can do this for your clients through their Capital Gains Tax on UK property account.
+agentsLandingPage.report.uk-residents.p4=If your client is a resident who is an individual or a trust, you can use this service to:
+
+agentsLandingPage.report.uk-residents.list1.bullet1=report your client’s UK residential property disposals made from 6 April 2020
+agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay any tax they might owe for that disposal
+agentsLandingPage.report.uk-residents.list1.bullet3=view and amend your client’s previous and current returns
+agentsLandingPage.report.what-residents-cannot-do.h4=What residents cannot do
+agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use the online service for your client to report UK property disposals for someone who has died - you’ll need to <a href="{0}">contact HMRC.</a>
+agentsLandingPage.report.non-residents.h4=Non-residents
+agentsLandingPage.report.non-residents.p1=Non-residents must report all sales or disposals of UK property within 30 days of the completion date, even if they have no tax to pay or have made a loss.
+agentsLandingPage.report.non-residents.p2=If your client is a non-resident use this service to report their UK property disposals of:
+agentsLandingPage.report.non-residents.list1.bullet1=residential UK property or land made from 6 April 2020
+agentsLandingPage.report.non-residents.list1.bullet2=non-residential UK property or land made from 6 April 2020
+agentsLandingPage.report.what-non-residents-cannot-do.h4=What non-residents cannot do
+agentsLandingPage.report.what-non-residents-cannot-do.p1=You cannot use your client’s online account to report:
+agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet1=disposals of mixed-use property (part of the property was residential and part was non-residential during the period of ownership) - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
+agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet2=indirect disposals of UK property - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
+agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3=UK property disposals for someone who has died - <a href="{0}">contact HMRC</a>
+agentsLandingPage.how-to-ask-for-authorisation.h3=How to ask for authorisation
+agentsLandingPage.how-to-ask-for-authorisation.p1=Ask your client to:
+agentsLandingPage.how-to-ask-for-authorisation.list1.bullet1=create a Government Gateway user ID if they do not have one
+agentsLandingPage.how-to-ask-for-authorisation.list1.bullet2=use their Government Gateway user ID and password to sign in and <a href = "{0}">create a Capital Gains Tax on UK property account</a>
+agentsLandingPage.how-to-ask-for-authorisation.list1.bullet3=give you their account number
+agentsLandingPage.how-to-ask-for-authorisation.list1.bullet4=give you their UK postcode or country of residence - these details must match their Capital Gains Tax on UK property account details
+agentsLandingPage.how-to-ask-for-authorisation.p2=You’ll need an <a href="{0}">agent services account</a> – this is different from your HMRC online services for agents account.
+agentsLandingPage.how-to-ask-for-authorisation.p3=Sign in to your agent services account then select ‘ask a client to authorise you’.
+agentsLandingPage.how-to-ask-for-authorisation.p4=Enter your client’s details. You'll then get a link to share with your client. Send your client an email asking them to go to the link to authorise you. The link will expire 14 days after it was created.
+agentsLandingPage.how-to-ask-for-authorisation.p5=Tell your client they’ll need the Government Gateway user ID and password they use for their personal tax affairs (if they’re an individual) or the trust name (if they’re a trust). If they do not have a user ID, they can create one when they go to your link.
+agentsLandingPage.how-to-ask-for-authorisation.p6=When your client selects the link in the email you sent them, you’ll then be able to manage their Capital Gains Tax on UK property account and returns.
+agentsLandingPage.how-to-ask-for-authorisation.p7=You'll get an email after your client accepts or rejects your request, or if the link has expired after 14 days.
+agentsLandingPage.how-to-ask-for-authorisation.p8=Track your authorisation requests from your agent services account.
+agentsLandingPage.how-to-ask-for-authorisation.p9=You’ll need to ask for authorisation, even if your client has already authorised you to manage their Self Assessment or other tax matters.
+agentsLandingPage.how-to-ask-for-authorisation.p10=Online services may be slow during busy times.
+agentsLandingPage.sign-in-button=Sign in
+agentsLandingPage.sidebar.title=Related content
+agentsLandingPage.sidebar.1=Create an agent services account
+
+agentsLandingPage.how-to-manage-your-clients-account.h3=How to manage your client’s account
+agentsLandingPage.how-to-manage-your-clients-account.p1=After you’ve been authorised, you’ll need to:
+agentsLandingPage.how-to-manage-your-clients-account.list1.bullet1=sign in to your agent services account
+agentsLandingPage.how-to-manage-your-clients-account.list1.bullet2=select ‘report and pay a client's Capital Gains Tax on UK property’
+agentsLandingPage.how-to-manage-your-clients-account.list1.bullet3=enter your client’s Capital Gains Tax on UK property account number
+agentsLandingPage.how-to-manage-your-clients-account.list1.bullet4=enter your client’s UK postcode or country of residence - these details must match their Capital Gains Tax on UK property account details
+agentsLandingPage.how-to-manage-your-clients-account.p2=Go to ‘manage account’ at the top of your client’s Capital Gains Tax on UK property account to update the contact details for the account.
+
+agentsLandingPage.send-a-cgt-on-uk-property-return.h3=Send a Capital Gains Tax on UK property return
+agentsLandingPage.send-a-cgt-on-uk-property-return.p1=Start a new return from your client’s Capital Gains Tax on UK property ‘account home’.
+agentsLandingPage.send-a-cgt-on-uk-property-return.p2=The return will be saved in your client’s account home for 30 days from the last day it was saved.
+agentsLandingPage.send-a-cgt-on-uk-property-return.p3=If your client disposed of more than one property from 6 April 2020 with the same completion date, you can use this service to report the Capital Gains Tax for all those properties. The properties must also have exchange dates in the same tax year.
+
+agentsLandingPage.what-you-will-need-to-complete-the-return.h3=What you’ll need to complete the return
+agentsLandingPage.what-you-will-need-to-complete-the-return.p1=You need these details about your client’s disposal:
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet1=address and postcode
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet2=date they got the property
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet3=date they exchanged contracts when selling or disposing of the property
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet4=date they stopped being the property's owner (completion date)
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet5=value of property when they got it
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet6=value of property when they disposed of it
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet7=costs of buying, selling or making improvements to the property
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet8=details of any tax reliefs, allowances or exemptions they’re entitled to claim
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet9=property type, if they’re a non-resident
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet10=property value on 31 March 1982 (known as ‘rebasing’) if they were a UK resident at the time of the disposal and owned the property on or before 31 March 1982
+agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet11=<a href="{0}">property value on 5 April 2019 (known as ‘rebasing’)</a> if they were a non-resident at the time of the disposal and owned the property on or before 5 April 2019
+agentsLandingPage.what-you-will-need-to-complete-the-return.p2=You may be asked to upload a document showing how the Capital Gains Tax due was worked out.
+
+agentsLandingPage.ways-your-client-can-pay.h3=Ways your client can pay
+agentsLandingPage.ways-your-client-can-pay.p1=Your client can pay by bank transfer, debit card or corporate credit card from their account. They will need to provide their payment reference number. They can find it in their Capital Gains Tax on UK property account.
 
 signInPage.title=Sign in to report and pay Capital Gains Tax on UK property
 signInPage.list1.bullet5=view and amend your previous and current Capital Gains Tax on UK property returns

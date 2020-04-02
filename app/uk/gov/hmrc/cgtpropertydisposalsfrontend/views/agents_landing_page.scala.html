@@ -1,0 +1,149 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        warningMessage: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+)
+
+@()(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
+
+@title = @{
+    messages("agentsLandingPage.title")
+}
+
+@sidebarContent = {
+    <div class="sidebar">
+        <nav class="govuk-related-items ">
+            <h2 class="heading-medium" id="subsection-title">
+            @messages("agentsLandingPage.sidebar.title")
+            </h2>
+            <ul class="section__ul--link-list sidebar__list">
+                <li class="sidebar__list-item">
+                    <a href="@{
+                        appConfig.createAgentsAccountUrl
+                    }">@messages("agentsLandingPage.sidebar.1")</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}
+
+@mainTemplate(title = title, userType = None, withSignOutLink = false, sidebar = Some(sidebarContent)) {
+
+    <h1 class="heading-xlarge">@title</h1>
+
+    <p>@Html(messages("agentsLandingPage.intro.p1"))</p>
+
+    <h3 class="heading-medium">@messages("agentsLandingPage.contents.h4")</h3>
+
+    <ol class="list list-number">
+        <li>@Html(messages("agentsLandingPage.contents.list1.ordered1", appConfig.whoNeedsToReportCgtOnUkProperty))</li>
+        <li>@Html(messages("agentsLandingPage.contents.list1.ordered2", appConfig.howToAskForAuthorisation ))</li>
+        <li>@Html(messages("agentsLandingPage.contents.list1.ordered3", appConfig.howToManageYourClientsAccount))</li>
+        <li>@Html(messages("agentsLandingPage.contents.list1.ordered4", appConfig.sendACgtOnUkPropertyReturn))</li>
+        <li>@Html(messages("agentsLandingPage.contents.list1.ordered5", appConfig.whatYouWillNeedToCompleteTheReturn))</li>
+        <li>@Html(messages("agentsLandingPage.contents.list1.ordered6", appConfig.waysYourClientCanPay))</li>
+    </ol>
+
+    <h3 class="heading-medium">@messages("agentsLandingPage.report.h3")</h3>
+    <h4 class="sub-heading">@messages("agentsLandingPage.report.uk-residents.h4")</h4>
+    <p>@messages("agentsLandingPage.report.uk-residents.p1")</p>
+    <p>@Html(messages("agentsLandingPage.report.uk-residents.p2", appConfig.cgtUrl))</p>
+    <p>@messages("agentsLandingPage.report.uk-residents.p3")</p>
+    <p>@messages("agentsLandingPage.report.uk-residents.p4")</p>
+
+    <ul class="list-bullet">
+        <li>@messages("agentsLandingPage.report.uk-residents.list1.bullet1")</li>
+        <li>@messages("agentsLandingPage.report.uk-residents.list1.bullet2")</li>
+        <li>@messages("agentsLandingPage.report.uk-residents.list1.bullet3")</li>
+    </ul>
+    <h4 class="sub-heading">@messages("agentsLandingPage.report.what-residents-cannot-do.h4")</h4>
+    <p>@Html(messages("agentsLandingPage.report.what-residents-cannot-do.p1", appConfig.contactHmrc))</p>
+    <h4 class="sub-heading">@messages("agentsLandingPage.report.non-residents.h4")</h4>
+    <p>@messages("agentsLandingPage.report.non-residents.p1")</p>
+    <p>@messages("agentsLandingPage.report.non-residents.p2")</p>
+
+    <ul class="list-bullet">
+        <li>@messages("agentsLandingPage.report.non-residents.list1.bullet1")</li>
+        <li>@messages("agentsLandingPage.report.non-residents.list1.bullet2")</li>
+    </ul>
+    <h4 class="sub-heading">@messages("agentsLandingPage.report.what-non-residents-cannot-do.h4")</h4>
+    <p>@messages("agentsLandingPage.report.what-non-residents-cannot-do.p1")</p>
+    <ul class="list-bullet">
+        <li>@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet1", appConfig.nrcgtReturn))</li>
+        <li>@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet2", appConfig.nrcgtReturn))</li>
+        <li>@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3", appConfig.contactHmrc))</li>
+    </ul>
+    <h3 class="sub-heading">@messages("agentsLandingPage.how-to-ask-for-authorisation.h3")</h3>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p1")</p>
+    <ul class="list-bullet">
+        <li>@messages("agentsLandingPage.how-to-ask-for-authorisation.list1.bullet1")</li>
+        <li>@Html(messages("agentsLandingPage.how-to-ask-for-authorisation.list1.bullet2", appConfig.createCgtOnUkPropertyAccount))</li>
+        <li>@messages("agentsLandingPage.how-to-ask-for-authorisation.list1.bullet3")</li>
+        <li>@messages("agentsLandingPage.how-to-ask-for-authorisation.list1.bullet4")</li>
+    </ul>
+    <p>@Html(messages("agentsLandingPage.how-to-ask-for-authorisation.p2", appConfig.createAgentsAccountUrl))</p>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p3")</p>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p4")</p>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p5")</p>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p6")</p>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p7")</p>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p8")</p>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p9")</p>
+    <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p10")</p>
+
+    <p>
+        <a href="@{
+            appConfig.agentsSignInUrl
+        }" role="button" draggable="false" class="button button-start">@messages("agentsLandingPage.sign-in-button")</a>
+    </p>
+
+    <h3 class="sub-heading">@messages("agentsLandingPage.how-to-manage-your-clients-account.h3")</h3>
+    <p>@messages("agentsLandingPage.how-to-manage-your-clients-account.p1")</p>
+    <ul class="list-bullet">
+        <li>@messages("agentsLandingPage.how-to-manage-your-clients-account.list1.bullet1")</li>
+        <li>@messages("agentsLandingPage.how-to-manage-your-clients-account.list1.bullet2")</li>
+        <li>@messages("agentsLandingPage.how-to-manage-your-clients-account.list1.bullet3")</li>
+        <li>@messages("agentsLandingPage.how-to-manage-your-clients-account.list1.bullet4")</li>
+    </ul>
+    <p>@messages("agentsLandingPage.how-to-manage-your-clients-account.p2")</p>
+    <h3 class="sub-heading">@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.h3")</h3>
+    <p>@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.p1")</p>
+    <p>@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.p2")</p>
+    <p>@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.p3")</p>
+    <h3 class="sub-heading">@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.h3")</h3>
+    <p>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.p1")</p>
+    <ul class="list-bullet">
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet1")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet2")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet3")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet4")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet5")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet6")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet7")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet8")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet9")</li>
+        <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet10")</li>
+        <li>@Html(messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet11", appConfig.nonResidentsRebasingUrl))</li>
+    </ul>
+    <p>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.p2")</p>
+    <h3 class="sub-heading">@messages("agentsLandingPage.ways-your-client-can-pay.h3")</h3>
+    <p>@messages("agentsLandingPage.ways-your-client-can-pay.p1")</p>
+}
