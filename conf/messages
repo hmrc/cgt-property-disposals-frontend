@@ -1667,7 +1667,7 @@ accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement
 accessibilityStatement.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
 accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href="{0}">accessibility statement</a> for the main GOV.UK website.
-accessibilityStatement.p3=This page only contains information about the Report and pay Capital Gains Tax on UK property service, available at tax.service.gov.uk.
+accessibilityStatement.p3=This page only contains information about the Report and pay Capital Gains Tax on UK property service, available at {0}.
 accessibilityStatement.usingThisService.title=Using this service
 accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view and amend your previous and current returns.
 accessibilityStatement.usingThisService.p2=This service is run by HM Revenue and Customs (HMRC).
