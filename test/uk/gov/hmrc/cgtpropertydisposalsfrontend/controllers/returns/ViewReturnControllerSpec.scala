@@ -201,11 +201,14 @@ class ViewReturnControllerSpec
             val result   = performAction()
             val document = Jsoup.parse(contentAsString(result))
 
-            document.select("#date-sent").text() shouldBe "Return sent to HMRC " + LocalDateUtils.govDisplayFormat(
+            document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
+            document.select("#date-sent-table-answer").text() shouldBe LocalDateUtils.govDisplayFormat(
               sentReturn.submissionDate
             )
-            document.select("#property-address").text() shouldBe "Property address 123 fake street, abc123"
-            document.select("#return-reference").text() shouldBe "Return reference number " + sentReturn.submissionId
+            document.select("#property-address-table-question").text()          shouldBe "Property address"
+            document.select("#property-address-table-answer").text()            shouldBe "123 fake street, abc123"
+            document.select("#return-reference-table-question").text() shouldBe "Return reference number"
+            document.select("#return-reference-table-answer").text()   shouldBe sentReturn.submissionId
 
             document
               .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
@@ -255,12 +258,19 @@ class ViewReturnControllerSpec
             val result   = performAction()
             val document = Jsoup.parse(contentAsString(result))
 
-            document.select("#date-sent").text() shouldBe "Return sent to HMRC " + LocalDateUtils.govDisplayFormat(
+            document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
+            document.select("#date-sent-table-answer").text() shouldBe LocalDateUtils.govDisplayFormat(
               sentReturn.submissionDate
             )
             val address = generateAddressLineForMultipleDisposals(completeMultipleDisposalsReturn)
-            document.select("#property-address").text() shouldBe s"Property address $address"
-            document.select("#return-reference").text() shouldBe "Return reference number " + sentReturn.submissionId
+            document.select("#property-address-table-question").text() shouldBe "Property address"
+            document.select("#property-address-table-answer").text()   shouldBe address
+            document
+              .select("#return-reference-table-question")
+              .text() shouldBe "Return reference number"
+            document
+              .select("#return-reference-table-answer")
+              .text() shouldBe sentReturn.submissionId
 
             document
               .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")

@@ -38,6 +38,8 @@
         addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
         examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary,
         calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
         nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary,
         acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
         disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
@@ -61,33 +63,36 @@
     @messages(s"$key.printLink")
    </a>
   </p>
-  <table class="borders payment-table">
-      <tbody id="return-details-table">
-          <tr class="charge" id="date-sent">
-              <td> <strong class="bold">@messages(s"$key.sentToHmrc")</strong> <br/> </td>
-              <td> @LocalDateUtils.govDisplayFormat(returnSummary.submissionDate) </td>
-          </tr>
-          @{if(amountOwed.isPositive) {
-              <tr class="charge" id="return-reference">
-                  <td> <strong class="bold"> {messages(s"$key.returnReference")} </strong> <br/> </td>
-                  <td> {returnSummary.submissionId} </td>
-              </tr>
-          }}
-          <tr class="charge" id="property-address">
-              <td> <strong class="bold">@messages(s"$key.propertyAddress")</strong> <br/> </td>
-              <td>
-                  @{completeReturn match {
-                      case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
-                      case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
-                  }}
-              </td>
-          </tr>
-      </tbody>
-  </table>
 
-  @if(returnSummary.charges.nonEmpty) {
-    @returnCharges(messages(s"$key.charges.heading"), returnSummary)
-  }
+    @cyaSection() {
+        @cyaRow(
+            messages(s"$key.sentToHmrc"),
+            Html(LocalDateUtils.govDisplayFormat(returnSummary.submissionDate)),
+            None,
+            "date-sent-table"
+        )
+        @{if(amountOwed.isPositive) {
+            cyaRow(
+                messages(s"$key.returnReference"),
+                Html(returnSummary.submissionId),
+                None,
+                "return-reference-table"
+            )
+        }}
+        @cyaRow(
+            messages(s"$key.propertyAddress"),
+            completeReturn match {
+                case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
+                case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
+            },
+            None,
+            "property-address-table"
+        )
+    }
+
+    @if(returnSummary.charges.nonEmpty) {
+       @returnCharges(messages(s"$key.charges.heading"), returnSummary)
+    }
 
     <h2 class="heading-large">
         @messages(s"$key.summaryHeading")
