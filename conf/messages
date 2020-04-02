@@ -1374,6 +1374,10 @@ viewReturn.charge.paymentMethod.RepaymentInterestAllocated=payment received
 viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
 viewReturn.organisationNameLine=Trust: {0}
 viewReturn.agentNameLine=Client: {0}
+viewReturn.sentToHmrc=Return sent to HMRC
+viewReturn.returnReference=Return reference number
+viewReturn.propertyAddress=Property address
+
 
 viewReturn.summaryHeading=Your return
 
