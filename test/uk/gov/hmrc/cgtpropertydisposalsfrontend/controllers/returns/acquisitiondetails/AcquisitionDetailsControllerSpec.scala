@@ -3461,8 +3461,6 @@ class AcquisitionDetailsControllerSpec
     checkPageIsDisplayed(
       performAction(data),
       messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
-        println("Actual: " + doc.select("#error-summary-display > ul > li > a").text())
-        println("Expected: " + messageFromMessageKey(expectedErrorMessageKey))
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
