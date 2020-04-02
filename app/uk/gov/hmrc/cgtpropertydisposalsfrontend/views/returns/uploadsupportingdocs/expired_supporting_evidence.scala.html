@@ -28,32 +28,39 @@
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_evidence_summary,
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
     cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(expired : List[SupportingEvidence])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
     @key = @{"upload-supporting-evidence.expired"}
-
+    @cyaKey = @{"upload-supporting-evidence.check-your-answers"}
     @title = @{messages(s"$key.title")}
 
     @mainTemplate(title = title, userType = request.userType) {
 
-        @pageHeading(title, Some(messages(s"$key.caption")))
+        @caption(messages(s"$key.caption"))
 
-        @cyaSection() {
+        @pageHeading(title)
+
+        <p>
+          @messages(s"$key.p1")
+        </p>
+
+        @cyaSection(None, Some("cya-questions-short")) {
 
             @for((document, fileIndex) <- expired.zipWithIndex) {
 
                 <div>
-                    <dt class="cya-question" id="question">
-                        Supporting evidence file @{fileIndex + 1}
+                    <dt class="cya-question" id="question-@{fileIndex}">
+                        @messages(s"$key.label")
                     </dt>
-                    <dd class="cya-answer" id="answer">
+                    <dd class="cya-answer" id="answer-@{fileIndex}">
                         @document.fileName
                     </dd>
-                    <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(document.reference).url>Change<span class="visuallyhidden">"change"</span></a></dd>
-                    <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(document.reference).url>Delete<span class="visuallyhidden">"delete"</span></a></dd>
+                    <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(document.reference).url>@messages(s"$cyaKey.cya-change")<span class="visuallyhidden"> @messages(s"$cyaKey.assistive", document.fileName)</span></a></dd>
+                    <dd class="cya-change cya-extra-action"><a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$cyaKey.cya-delete")<span class="visuallyhidden"> @messages(s"$cyaKey.assistive", document.fileName)</span></a></dd>
                 </div>
 
             }
