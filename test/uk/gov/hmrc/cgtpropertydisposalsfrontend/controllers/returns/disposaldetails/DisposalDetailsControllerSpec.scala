@@ -650,8 +650,17 @@ class DisposalDetailsControllerSpec
       behave like noPropertyShareBehaviour(() => performAction(Seq.empty))
 
       "show a form error" when {
+        val key = "disposalPrice"
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+        def disposalMethodErrorKey(disposalMethod: DisposalMethod): String = disposalMethod match {
+          case DisposalMethod.Gifted => ".Gifted"
+          case _                     => ".SoldOther"
+        }
+
+        def test(data: (String, String)*)(expectedErrorMessageKey: String, disposalMethod: DisposalMethod) = {
+
+          val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -659,14 +668,14 @@ class DisposalDetailsControllerSpec
                 sample[CompleteDisposalDetailsAnswers].copy(
                   shareOfProperty = ShareOfProperty.Full
                 ),
-                DisposalMethod.Sold
+                disposalMethod
               )._1
             )
           }
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("disposalPrice.SoldOther.title"), { doc =>
+            messageFromMessageKey(s"$key$disposalMethodKey.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -676,9 +685,13 @@ class DisposalDetailsControllerSpec
         }
 
         "the data is invalid" in {
-          amountOfMoneyErrorScenarios("disposalPrice").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              test(scenario.formData: _*)(scenario.expectedErrorMessageKey)
+          for (disposalMethod <- List(DisposalMethod.Gifted, DisposalMethod.Sold, DisposalMethod.Other)) {
+            val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
+
+            amountOfMoneyErrorScenarios(key = key, errorContext = Some(s"$key$disposalMethodKey")).foreach { scenario =>
+              withClue(s"For $scenario: ") {
+                test(scenario.formData: _*)(scenario.expectedErrorMessageKey, disposalMethod)
+              }
             }
           }
         }
