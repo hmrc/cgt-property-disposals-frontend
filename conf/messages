@@ -1131,18 +1131,24 @@ otherReliefs.helpText=You will need to tell us what other reliefs you are claimi
 otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
 otherReliefs.trust.helpText=You will need to tell us what other reliefs the trust is claiming and what the total amount of these is.
 otherReliefsName.label=Names of the other reliefs you are claiming
+otherReliefsName.agent.label=Names of the other reliefs your client is claiming
+otherReliefsName.trust.label=Names of the other reliefs the trust is claiming
 otherReliefsAmount.label=Total amount of other reliefs you are claiming
+otherReliefsAmount.agent.label=Total amount of other reliefs your client is claiming
+otherReliefsAmount.trust.label=Total amount of other reliefs the trust is claiming
 otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new window)
+otherReliefs.agent.furtherInfoLink=Find out about reliefs your client might qualify for (opens in a new window)
+otherReliefs.trust.furtherInfoLink=Find out about reliefs the trust might qualify for (opens in a new window)
 
 otherReliefs.error.required=Select yes if you are claiming other reliefs
 otherReliefs.agent.error.required=Select yes if your client is claiming other reliefs
 otherReliefs.trust.error.required=Select yes if the trust is claiming other reliefs
-otherReliefsName.error.required=Enter the names of the other reliefs you are claiming
-otherReliefsName.agent.error.required=Enter the names of the other reliefs your client is claiming
-otherReliefsName.trust.error.required=Enter the names of the other reliefs the trust is claiming
+otherReliefsName.error.required=Enter the names of all other reliefs you are claiming
+otherReliefsName.agent.error.required=Enter the names of all other reliefs your client is claiming
+otherReliefsName.trust.error.required=Enter the names of all other reliefs the trust is claiming
 otherReliefsName.error.tooLong=The names of the other reliefs you are claiming must be 105 characters or less
-otherReliefsName.agent.error.tooLong=The names of the other reliefs you are claiming must be 105 characters or less
-otherReliefsName.trust.error.tooLong=The names of the other reliefs you are claiming must be 105 characters or less
+otherReliefsName.agent.error.tooLong=The names of the other reliefs your client is claiming must be 105 characters or less
+otherReliefsName.trust.error.tooLong=The names of the other reliefs the trust is claiming must be 105 characters or less
 otherReliefsName.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 otherReliefsName.agent.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 otherReliefsName.trust.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
@@ -1716,4 +1722,36 @@ subsequentReturnExit.outside-uk-telephone.title=Outside UK:
 subsequentReturnExit.getHelp=Get help
 subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
 subsequentReturnExit.helpWithCallCharges=Find out about call charges
+
+accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
+accessibilityStatement.title=Accessibility statement
+accessibilityStatement.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
+accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href="{0}">accessibility statement</a> for the main GOV.UK website.
+accessibilityStatement.p3=This page only contains information about the Report and pay Capital Gains Tax on UK property service, available at tax.service.gov.uk.
+accessibilityStatement.usingThisService.title=Using this service
+accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view and amend your previous and current returns.
+accessibilityStatement.usingThisService.p2=This service is run by HM Revenue and Customs (HMRC).
+accessibilityStatement.usingThisService.p3=We want as many people as possible to be able to use this service. This means you should be able to:
+accessibilityStatement.usingThisService.li1=change colours, contrast levels and fonts
+accessibilityStatement.usingThisService.li2=zoom in up to 300% without the text spilling off the screen
+accessibilityStatement.usingThisService.li3=get from the start of the service to the end using just a keyboard
+accessibilityStatement.usingThisService.li4=get from the start of the service to the end using speech recognition software
+accessibilityStatement.usingThisService.li5=listen to the service using a screen reader (including the most recent versions of JAWS, NVDA and VoiceOver)
+accessibilityStatement.usingThisService.p4=We have also made the text in the service as simple as possible to understand.
+accessibilityStatement.usingThisService.p5=<a href="{0}">AbilityNet</a> has advice on making your device easier to use if you have a disability.
+accessibilityStatement.howAccessible.title=How accessible this service is
+accessibilityStatement.howAccessible.p1=HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
+accessibilityStatement.howAccessible.p2=This service is partially compliant with the <a href="{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. We cannot be certain that it is fully compliant. It will be fully tested by June 2020.
+accessibilityStatement.reportingProblems.title=Reporting accessibility problems with this service
+accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="{0}" target="_blank">accessibility problem (opens in a new window or tab)</a>.
+accessibilityStatement.notHappy.title=What to do if you are not happy with how we respond to your complaint
+accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href="{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the  <a href="{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
+accessibilityStatement.contactingUs.title=Contacting us by phone or getting a visit from us in person
+accessibilityStatement.contactingUs.p1=We provide a text relay service if you are deaf, hearing impaired or have a speech impediment.
+accessibilityStatement.contactingUs.p2=We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service.
+accessibilityStatement.contactingUs.p3=Find out how to <a href="{0}">contact us</a>.
+accessibilityStatement.howWeTested.title=How we tested this service
+accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019  and checked for compliance with WCAG 2.1 AA. It  was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
+accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 6 April 2020.
+
 
