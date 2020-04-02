@@ -42,9 +42,9 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 @helpText = @{messages(s"$key.helpText")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @title = @{messages(s"$key.title")}
 
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)

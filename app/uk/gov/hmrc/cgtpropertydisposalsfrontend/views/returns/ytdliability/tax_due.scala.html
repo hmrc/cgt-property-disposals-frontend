@@ -82,6 +82,14 @@
 
     <p>@messages(s"$key.p1")</p>
 
+    <p>@messages(s"$key.p2")</p>
+
+    <p class="js-enabled">
+      <a href="JavaScript: window.print();">
+        @messages(s"$key.printLink")
+      </a>
+    </p>
+
     <ul class="calc-rows with-bottom-margin">
       <li>
         @calcRow(calculatedTax.initialGainOrLoss.amount, messages(s"$key.initialGainOrLoss"), showGainType = true)
@@ -116,7 +124,13 @@
             label = Html(messages("taxDue.title")),
             labelClass = Some("govuk-label--m"),
             labelAsHeading = false,
-            helpText = Some(Html(messages("taxDue.helpText", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())))),
+            extraContent = Some(Html(
+              s"""
+                | <p>${messages("taxDue.helpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds()))}</p>
+                | <p>${messages(s"$key.helpText.p2")}</p>
+                | ${if(isATrust) "<p>" + messages(s"$key.helpText.p3") + "</p>" else ""}
+                |""".stripMargin
+            )),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
@@ -125,6 +139,10 @@
         )
 
         @submitButton(messages("button.saveAndContinue"))
+    }
+
+    @if(isATrust) {
+      @details(messages(s"$key.trustDetails.label"), Html(messages(s"$key.trustDetails.content", viewConfig.trustsForVulnerable)))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

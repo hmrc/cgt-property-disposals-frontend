@@ -56,6 +56,16 @@
   }
 }
 
+@higherRateDisplay = @{
+  taxDueAtHigherRate match {
+    case Some(t) => s"${t.taxRate}%"
+    case _ => ""
+  }
+}
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKeyWithoutTrust = @{if (isAgent) ".agent" else ""}
+
 @if(calculatedTax.initialGainOrLoss.amount.isNegative |
   calculatedTax.initialGainOrLoss.amount.isZero |
   calculatedTax.taxableGainOrNetLoss.isZero |
@@ -70,12 +80,12 @@
   @if(isATrust) {
     <p>
       <em>
-        @messages("calculator.trustRateInfo.p1")
+        @messages("calculator.trustRateInfo.p1", higherRateDisplay)
       </em>
     </p>
     <p>
       <em>
-      @messages("calculator.trustRateInfo.p2")
+      @messages(s"calculator$userKeyWithoutTrust.trustRateInfo.p2")
       </em>
     </p>
   } else {
@@ -107,7 +117,7 @@
 
         <p>
           <em>
-          @messages("calculator.incomeAboveThreshold", MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.inPounds()))
+          @messages(s"calculator$userKeyWithoutTrust.incomeAboveThreshold", MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.inPounds()))
           </em>
         </p>
 

@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -38,14 +39,17 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate, wasUkResident: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 @key = @{ "personalAllowance" }
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else ""}
+@nrKey = @{if(wasUkResident) "" else ".non-resident"}
 @taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
 @personalAllowance = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.personalAllowance.inPounds())}
 @higherIncomePersonalAllowanceThreshold = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.higherIncomePersonalAllowanceThreshold.inPounds())}
 
-@title = @{messages(s"$key.title", taxYearStartYear, taxYearEndYear)}
+@title = @{messages(s"$key$userKey.title", taxYearStartYear, taxYearEndYear)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
@@ -66,7 +70,7 @@
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText", taxYearStartYear, taxYearEndYear, personalAllowance, higherIncomePersonalAllowanceThreshold))),
+            helpText = Some(Html(messages(s"$key$userKey$nrKey.helpText", taxYearStartYear, taxYearEndYear, personalAllowance, higherIncomePersonalAllowanceThreshold))),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",

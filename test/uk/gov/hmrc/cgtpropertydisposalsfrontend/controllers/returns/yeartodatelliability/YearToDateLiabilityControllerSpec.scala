@@ -38,14 +38,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorS
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
@@ -86,6 +89,24 @@ class YearToDateLiabilityControllerSpec
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
+  def userMessageKey(userType: UserType): String = userType match {
+    case UserType.Individual   => ""
+    case UserType.Organisation => ".trust"
+    case UserType.Agent        => ".agent"
+  }
+
+  def multipleMessageKey(isMultiple: Boolean): String = if (isMultiple) ".multiple" else ""
+
+  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
+    case UserType.Agent => Some(sample[AgentReferenceNumber])
+    case _              => None
+  }
+
+  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
+    case UserType.Organisation => Left(sample[TrustName])
+    case _                     => Right(sample[IndividualName])
+  }
+
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
       performAction, {
@@ -96,51 +117,83 @@ class YearToDateLiabilityControllerSpec
 
   def sessionWithSingleDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
-    disposalDate: Option[DisposalDate],
-    reliefDetailsAnswers: Option[ReliefDetailsAnswers] = Some(sample[CompleteReliefDetailsAnswers])
+    disposalDate: Option[DisposalDate] = Some(sample[DisposalDate]),
+    userType: UserType,
+    wasUkResident: Boolean,
+    reliefDetailsAnswers: Option[ReliefDetailsAnswers] = Some(
+      sample[CompleteReliefDetailsAnswers].copy(otherReliefs = None)
+    )
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
-      triageAnswers              = sample[IncompleteSingleDisposalTriageAnswers].copy(disposalDate = disposalDate),
+      triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
+        individualUserType         = Some(IndividualUserType.Self),
+        hasConfirmedSingleDisposal = true,
+        disposalMethod             = Some(sample[DisposalMethod]),
+        assetType                  = Some(AssetType.Residential),
+        wasAUKResident             = Some(wasUkResident),
+        countryOfResidence         = if (wasUkResident) Some(Country.uk) else Some(sample[Country]),
+        disposalDate               = disposalDate
+      ),
       reliefDetailsAnswers       = reliefDetailsAnswers,
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
-    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
-    val fillingOutReturnWithTrust =
-      journey.copy(subscribedDetails = journey.subscribedDetails.copy(name = Right(sample[IndividualName])))
+    val journey = sample[FillingOutReturn].copy(
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      subscribedDetails = sample[SubscribedDetails].copy(
+        name = setNameForUserType(userType)
+      ),
+      draftReturn = draftReturn
+    )
     (
-      SessionData.empty.copy(journeyStatus = Some(fillingOutReturnWithTrust)),
-      fillingOutReturnWithTrust,
+      SessionData.empty.copy(
+        userType      = Some(userType),
+        journeyStatus = Some(journey)
+      ),
+      journey,
       draftReturn
     )
   }
 
   def sessionWithSingleDisposalState(
     ytdLiabilityAnswers: YearToDateLiabilityAnswers,
-    disposalDate: DisposalDate
+    disposalDate: DisposalDate,
+    userType: UserType,
+    wasUkResident: Boolean
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
-    sessionWithSingleDisposalState(Some(ytdLiabilityAnswers), Some(disposalDate))
+    sessionWithSingleDisposalState(Some(ytdLiabilityAnswers), Some(disposalDate), userType, wasUkResident)
 
   def sessionWithMultipleDisposalsState(
-    ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+    ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+    userType: UserType,
+    wasUkResident: Boolean
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+        countryOfResidence = if (wasUkResident) Country.uk else sample[Country]
+      ),
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
     val journey = sample[FillingOutReturn].copy(
-      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-      draftReturn       = draftReturn
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+      draftReturn          = draftReturn
     )
     (
-      SessionData.empty.copy(journeyStatus = Some(journey)),
+      SessionData.empty.copy(
+        userType      = Some(userType),
+        journeyStatus = Some(journey)
+      ),
       journey,
       draftReturn
     )
   }
 
   def sessionWithMultipleDisposalsState(
-    ytdLiabilityAnswers: YearToDateLiabilityAnswers
+    ytdLiabilityAnswers: YearToDateLiabilityAnswers,
+    userType: UserType,
+    wasUkResident: Boolean
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) =
-    sessionWithMultipleDisposalsState(Some(ytdLiabilityAnswers))
+    sessionWithMultipleDisposalsState(Some(ytdLiabilityAnswers), userType, wasUkResident)
 
   def singleDispsaslDraftReturnWithCompleteJourneys(
     yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
@@ -191,7 +244,7 @@ class YearToDateLiabilityControllerSpec
 
       "display the page" when {
 
-        "the user has not answered the question before" in {
+        "an individual user has not answered the question before" in {
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -199,6 +252,8 @@ class YearToDateLiabilityControllerSpec
               sessionWithSingleDisposalState(
                 None,
                 Some(sample[DisposalDate]),
+                UserType.Individual,
+                wasUkResident = true,
                 Some(completeReliefDetailsAnswersWithNoOtherReliefs)
               )._1
             )
@@ -218,7 +273,36 @@ class YearToDateLiabilityControllerSpec
 
         }
 
-        "the user has answered the question before but has " +
+        "an agent user has not answered the question before" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                None,
+                Some(sample[DisposalDate]),
+                UserType.Agent,
+                wasUkResident = true,
+                Some(completeReliefDetailsAnswersWithNoOtherReliefs)
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("estimatedIncome.agent.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.YearToDateLiabilityController
+                .estimatedIncomeSubmit()
+                .url
+            }
+          )
+
+        }
+
+        "an individual has answered the question before but has " +
           "not completed the section" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -227,7 +311,9 @@ class YearToDateLiabilityControllerSpec
                 IncompleteCalculatedYTDAnswers.empty.copy(
                   estimatedIncome = Some(AmountInPence.fromPounds(12.34))
                 ),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -247,7 +333,9 @@ class YearToDateLiabilityControllerSpec
               sessionWithSingleDisposalState(
                 sample[CompleteCalculatedYTDAnswers]
                   .copy(estimatedIncome = AmountInPence.fromPounds(12.34)),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -275,17 +363,15 @@ class YearToDateLiabilityControllerSpec
           val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
             None,
             Some(sample[DisposalDate]),
+            UserType.Organisation,
+            wasUkResident = true,
             Some(completeReliefDetailsAnswersWithNoOtherReliefs)
-          )
-
-          val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
-            fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
           )
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              session.copy(journeyStatus = Some(fillingOutReturnWithTrust))
+              session
             )
           }
 
@@ -372,7 +458,14 @@ class YearToDateLiabilityControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithSingleDisposalState(answers, sample[DisposalDate])._1)
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                answers,
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
+              )._1
+            )
           }
 
           checkIsRedirect(
@@ -389,7 +482,14 @@ class YearToDateLiabilityControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithSingleDisposalState(answers, sample[DisposalDate])._1)
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                answers,
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
+              )._1
+            )
           }
 
           checkIsRedirect(
@@ -424,7 +524,9 @@ class YearToDateLiabilityControllerSpec
                 sample[CompleteCalculatedYTDAnswers].copy(
                   estimatedIncome = AmountInPence.zero
                 ),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -432,22 +534,18 @@ class YearToDateLiabilityControllerSpec
           checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
         }
         "the user is a Trust" in {
-          val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
+          val (session, _, _) = sessionWithSingleDisposalState(
             sample[CompleteCalculatedYTDAnswers].copy(
               estimatedIncome = AmountInPence(100)
             ),
-            sample[DisposalDate]
-          )
-
-          val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
-            fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
+            sample[DisposalDate],
+            UserType.Organisation,
+            wasUkResident = true
           )
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              session.copy(journeyStatus = Some(fillingOutReturnWithTrust))
-            )
+            mockGetSession(session)
           }
 
           checkIsRedirect(
@@ -472,7 +570,9 @@ class YearToDateLiabilityControllerSpec
                     estimatedIncome   = Some(AmountInPence.fromPounds(12.34)),
                     personalAllowance = None
                   ),
-                  sample[DisposalDate].copy(taxYear = taxYear2020)
+                  sample[DisposalDate].copy(taxYear = taxYear2020),
+                  UserType.Individual,
+                  wasUkResident = true
                 )._1
               )
             }
@@ -506,7 +606,9 @@ class YearToDateLiabilityControllerSpec
                     estimatedIncome   = AmountInPence(1L),
                     personalAllowance = Some(AmountInPence(1234L))
                   ),
-                  disposalDate
+                  disposalDate,
+                  UserType.Individual,
+                  wasUkResident = true
                 )._1
               )
             }
@@ -576,7 +678,9 @@ class YearToDateLiabilityControllerSpec
                 sample[CompleteCalculatedYTDAnswers].copy(
                   estimatedIncome = AmountInPence.zero
                 ),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -598,7 +702,9 @@ class YearToDateLiabilityControllerSpec
             IncompleteCalculatedYTDAnswers.empty.copy(
               estimatedIncome = Some(AmountInPence(1L))
             ),
-            disposalDate
+            disposalDate,
+            UserType.Individual,
+            wasUkResident = true
           )._1
           val args = Map(
             "personalAllowance.error.tooSmall" -> List(
@@ -692,7 +798,14 @@ class YearToDateLiabilityControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithSingleDisposalState(answers, disposalDate)._1)
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                answers,
+                disposalDate,
+                UserType.Individual,
+                wasUkResident = true
+              )._1
+            )
           }
 
           checkIsRedirect(
@@ -709,7 +822,14 @@ class YearToDateLiabilityControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithSingleDisposalState(answers, disposalDate)._1)
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                answers,
+                disposalDate,
+                UserType.Individual,
+                wasUkResident = true
+              )._1
+            )
           }
 
           checkIsRedirect(
@@ -743,7 +863,9 @@ class YearToDateLiabilityControllerSpec
                   IncompleteCalculatedYTDAnswers.empty.copy(
                     estimatedIncome = Some(AmountInPence(1L))
                   ),
-                  sample[DisposalDate]
+                  sample[DisposalDate],
+                  UserType.Individual,
+                  wasUkResident = true
                 )._1
               )
             }
@@ -764,7 +886,9 @@ class YearToDateLiabilityControllerSpec
               mockGetSession(
                 sessionWithSingleDisposalState(
                   answers,
-                  sample[DisposalDate]
+                  sample[DisposalDate],
+                  UserType.Individual,
+                  wasUkResident = true
                 )._1
               )
             }
@@ -837,9 +961,9 @@ class YearToDateLiabilityControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionWithMultipleDisposalsState(
-                  (
-                    IncompleteNonCalculatedYTDAnswers.empty
-                  )
+                  IncompleteNonCalculatedYTDAnswers.empty,
+                  UserType.Individual,
+                  wasUkResident = true
                 )._1
               )
             }
@@ -880,7 +1004,9 @@ class YearToDateLiabilityControllerSpec
               sessionWithMultipleDisposalsState(
                 IncompleteNonCalculatedYTDAnswers.empty.copy(
                   taxableGainOrLoss = Some(AmountInPence.zero)
-                )
+                ),
+                UserType.Individual,
+                wasUkResident = true
               )._1,
               routes.YearToDateLiabilityController.taxableGainOrLoss()
             )
@@ -891,9 +1017,14 @@ class YearToDateLiabilityControllerSpec
               hasEstimatedDetails = true
             )
             test(
-              sessionWithMultipleDisposalsState(answers)._1,
-              routes.YearToDateLiabilityController.checkYourAnswers(),
-              doc => doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
+              sessionWithMultipleDisposalsState(
+                answers,
+                UserType.Individual,
+                wasUkResident = true
+              )._1,
+              routes.YearToDateLiabilityController.checkYourAnswers(), { doc =>
+                doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
+              }
             )
           }
 
@@ -910,7 +1041,11 @@ class YearToDateLiabilityControllerSpec
             backLink: Call,
             extraChecks: Document => Unit = _ => ()
           ): Unit = {
-            val (session, fillingOutReturn, _) = sessionWithMultipleDisposalsState(answers)
+            val (session, fillingOutReturn, _) = sessionWithMultipleDisposalsState(
+              answers,
+              UserType.Organisation,
+              wasUkResident = true
+            )
             val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
               fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
             )
@@ -1000,7 +1135,9 @@ class YearToDateLiabilityControllerSpec
                   IncompleteCalculatedYTDAnswers.empty.copy(
                     estimatedIncome = Some(AmountInPence(1L))
                   ),
-                  sample[DisposalDate]
+                  sample[DisposalDate],
+                  UserType.Individual,
+                  wasUkResident = true
                 )._1
               )
             }
@@ -1016,7 +1153,12 @@ class YearToDateLiabilityControllerSpec
             personalAllowance = Some(AmountInPence(2L))
           )
 
-          val currentSession = sessionWithSingleDisposalState(answers, sample[DisposalDate])._1
+          val currentSession = sessionWithSingleDisposalState(
+            answers,
+            sample[DisposalDate],
+            UserType.Individual,
+            wasUkResident = true
+          )._1
 
           def test(data: (String, String)*)(expectedErrorMessageKey: String) =
             testFormError(data: _*)(expectedErrorMessageKey)("hasEstimatedDetails.title")(performAction, currentSession)
@@ -1092,7 +1234,9 @@ class YearToDateLiabilityControllerSpec
                 personalAllowance   = Some(AmountInPence(2L)),
                 hasEstimatedDetails = Some(true)
               ),
-              sample[DisposalDate]
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
             )._1
 
             inSequence {
@@ -1116,7 +1260,9 @@ class YearToDateLiabilityControllerSpec
                 sample[AmountInPence],
                 Some(sample[String])
               ),
-              sample[DisposalDate]
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
             )._1
 
             inSequence {
@@ -1140,7 +1286,11 @@ class YearToDateLiabilityControllerSpec
             taxableGainOrLoss = Some(AmountInPence.zero)
           )
 
-          val draftReturn = sessionWithMultipleDisposalsState(answers)._3
+          val draftReturn = sessionWithMultipleDisposalsState(
+            answers,
+            UserType.Individual,
+            wasUkResident = true
+          )._3
           val updatedDraftReturn =
             draftReturn.copy(yearToDateLiabilityAnswers = Some(answers.copy(hasEstimatedDetails = Some(false))))
 
@@ -1155,7 +1305,11 @@ class YearToDateLiabilityControllerSpec
           val answers = sample[CompleteNonCalculatedYTDAnswers].copy(
             hasEstimatedDetails = false
           )
-          val currentSession = sessionWithMultipleDisposalsState(answers)._1
+          val currentSession = sessionWithMultipleDisposalsState(
+            answers,
+            UserType.Individual,
+            wasUkResident = true
+          )._1
 
           def test(data: (String, String)*)(expectedErrorMessageKey: String) =
             testFormError(data: _*)(expectedErrorMessageKey)("hasEstimatedDetails.title")(performAction, currentSession)
@@ -1180,7 +1334,11 @@ class YearToDateLiabilityControllerSpec
                   taxableGainOrLoss = Some(AmountInPence(1L))
                 )
 
-              val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(answers)
+              val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
+                answers,
+                UserType.Individual,
+                wasUkResident = true
+              )
               val updatedDraftReturn =
                 draftReturn.copy(yearToDateLiabilityAnswers = Some(answers.copy(hasEstimatedDetails = Some(true))))
               val updatedSession = session.copy(
@@ -1219,6 +1377,8 @@ class YearToDateLiabilityControllerSpec
               val (session, journey, draftReturn) = sessionWithSingleDisposalState(
                 Some(answers),
                 Some(sample[DisposalDate]),
+                UserType.Individual,
+                wasUkResident = true,
                 Some(
                   sample[CompleteReliefDetailsAnswers]
                     .copy(otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs]))
@@ -1260,7 +1420,11 @@ class YearToDateLiabilityControllerSpec
                 hasEstimatedDetails = Some(false)
               )
 
-            val session = sessionWithMultipleDisposalsState(answers)._1
+            val session = sessionWithMultipleDisposalsState(
+              answers,
+              UserType.Individual,
+              wasUkResident = true
+            )._1
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1334,7 +1498,9 @@ class YearToDateLiabilityControllerSpec
                 IncompleteCalculatedYTDAnswers.empty.copy(
                   estimatedIncome = Some(AmountInPence(1L))
                 ),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -1583,7 +1749,9 @@ class YearToDateLiabilityControllerSpec
                 IncompleteCalculatedYTDAnswers.empty.copy(
                   estimatedIncome = Some(AmountInPence(1L))
                 ),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -1600,7 +1768,9 @@ class YearToDateLiabilityControllerSpec
                   estimatedIncome   = Some(AmountInPence(1L)),
                   personalAllowance = Some(AmountInPence.zero)
                 ),
-                sample[DisposalDate]
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -1771,7 +1941,14 @@ class YearToDateLiabilityControllerSpec
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithSingleDisposalState(answers, sample[DisposalDate])._1)
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                answers,
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
+              )._1
+            )
           }
 
           checkIsRedirect(performAction(), expectedRedirect)
@@ -1782,14 +1959,16 @@ class YearToDateLiabilityControllerSpec
           expectedRedirect: Call
         ): Unit = {
 
-          val (sessionData, fillingOutReturn, _) = sessionWithSingleDisposalState(answers, sample[DisposalDate])
-          val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
-            fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
+          val (sessionData, fillingOutReturn, _) = sessionWithSingleDisposalState(
+            answers,
+            sample[DisposalDate],
+            UserType.Organisation,
+            wasUkResident = true
           )
-          val sessionDataWithTrust = sessionData.copy(journeyStatus = Some(fillingOutReturnWithTrust))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithTrust)
+            mockGetSession(sessionData)
           }
 
           checkIsRedirect(performAction(), expectedRedirect)
@@ -1903,7 +2082,14 @@ class YearToDateLiabilityControllerSpec
             forAll { completeAnswers: CompleteCalculatedYTDAnswers =>
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(sessionWithSingleDisposalState(completeAnswers, sample[DisposalDate])._1)
+                mockGetSession(
+                  sessionWithSingleDisposalState(
+                    completeAnswers,
+                    sample[DisposalDate],
+                    UserType.Individual,
+                    wasUkResident = true
+                  )._1
+                )
               }
 
               checkPageIsDisplayed(
@@ -1916,7 +2102,12 @@ class YearToDateLiabilityControllerSpec
 
           "the section has just been completed and all updates are successful" in {
             val (session, journey, draftReturn) =
-              sessionWithSingleDisposalState(allQuestionAnswered, sample[DisposalDate])
+              sessionWithSingleDisposalState(
+                allQuestionAnswered,
+                sample[DisposalDate],
+                UserType.Individual,
+                wasUkResident = true
+              )
             val updatedDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
             val updatedSession = session.copy(journeyStatus =
               Some(
@@ -1959,17 +2150,25 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.taxDue)
         )
 
-        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(allQuestionAnswered)
-        val updatedDraftReturn              = draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
-        val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
-        val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
+        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
+          allQuestionAnswered,
+          UserType.Individual,
+          wasUkResident = true
+        )
+        val updatedDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
+        val updatedJourney     = journey.copy(draftReturn                    = updatedDraftReturn)
+        val updatedSession     = session.copy(journeyStatus                  = Some(updatedJourney))
 
         def testRedirectWhenIncompleteAnswers(
           answers: IncompleteNonCalculatedYTDAnswers,
           expectedRedirect: Call
         ): Unit = {
 
-          val (sessionData, fillingOutReturn, _) = sessionWithMultipleDisposalsState(answers)
+          val (sessionData, fillingOutReturn, _) = sessionWithMultipleDisposalsState(
+            answers,
+            UserType.Individual,
+            wasUkResident = true
+          )
           val fillingOutReturnWithIndividual = fillingOutReturn.copy(subscribedDetails =
             fillingOutReturn.subscribedDetails.copy(name = Right(sample[IndividualName]))
           )
@@ -1987,14 +2186,15 @@ class YearToDateLiabilityControllerSpec
           expectedRedirect: Call
         ): Unit = {
 
-          val (sessionData, fillingOutReturn, _) = sessionWithMultipleDisposalsState(answers)
-          val fillingOutReturnWithTrust = fillingOutReturn.copy(subscribedDetails =
-            fillingOutReturn.subscribedDetails.copy(name = Left(sample[TrustName]))
+          val (sessionData, fillingOutReturn, _) = sessionWithMultipleDisposalsState(
+            answers,
+            UserType.Organisation,
+            wasUkResident = true
           )
-          val sessionDataWithTrust = sessionData.copy(journeyStatus = Some(fillingOutReturnWithTrust))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithTrust)
+            mockGetSession(sessionData)
           }
 
           checkIsRedirect(performAction(), expectedRedirect)
@@ -2184,7 +2384,12 @@ class YearToDateLiabilityControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            sessionWithSingleDisposalState(sample[CompleteCalculatedYTDAnswers], sample[DisposalDate])._1
+            sessionWithSingleDisposalState(
+              sample[CompleteCalculatedYTDAnswers],
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
+            )._1
           )
         }
 
@@ -2206,6 +2411,7 @@ class YearToDateLiabilityControllerSpec
         def test(
           session: SessionData,
           expectedBackLink: Call,
+          expectedTitle: String,
           testPage: Document => Unit = _ => ()
         ): Unit = {
           inSequence {
@@ -2216,7 +2422,7 @@ class YearToDateLiabilityControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "taxableGainOrLoss.title"
+              expectedTitle
             ), { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
@@ -2231,8 +2437,13 @@ class YearToDateLiabilityControllerSpec
 
         "the user has not started this section yet and they are on a multiple disposals journey" in {
           test(
-            sessionWithMultipleDisposalsState(None)._1,
-            returns.routes.TaskListController.taskList()
+            sessionWithMultipleDisposalsState(
+              None,
+              UserType.Individual,
+              wasUkResident = true
+            )._1,
+            returns.routes.TaskListController.taskList(),
+            "taxableGainOrLoss.multiple.title"
           )
         }
 
@@ -2242,26 +2453,31 @@ class YearToDateLiabilityControllerSpec
             sessionWithSingleDisposalState(
               None,
               Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
               Some(
                 sample[CompleteReliefDetailsAnswers].copy(
                   otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs])
                 )
               )
             )._1,
-            returns.routes.TaskListController.taskList()
+            returns.routes.TaskListController.taskList(),
+            "taxableGainOrLoss.title"
           )
         }
 
         "the user has already started this uncalculated section but have not completed it yet" in {
           test(
             sessionWithMultipleDisposalsState(
-              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss =
-                Some(
-                  AmountInPence(-100L)
-                )
+              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(
+                AmountInPence(-100L)
               )
+              ),
+              UserType.Individual,
+              wasUkResident = true
             )._1,
-            returns.routes.TaskListController.taskList(), { doc =>
+            returns.routes.TaskListController.taskList(),
+            "taxableGainOrLoss.multiple.title", { doc =>
               doc.select("#taxableGainOrLoss-1").attr("checked") shouldBe "checked"
               doc.select("#netLoss").attr("value")               shouldBe "1"
             }
@@ -2271,10 +2487,14 @@ class YearToDateLiabilityControllerSpec
         "the user has completed this uncalculated section" in {
           test(
             sessionWithMultipleDisposalsState(
-              sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(0L))
+              sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(0L)),
+              UserType.Individual,
+              wasUkResident = true
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            doc => doc.select("#taxableGainOrLoss-2").attr("checked") shouldBe "checked"
+            "taxableGainOrLoss.multiple.title", { doc =>
+              doc.select("#taxableGainOrLoss-2").attr("checked") shouldBe "checked"
+            }
           )
 
         }
@@ -2293,7 +2513,11 @@ class YearToDateLiabilityControllerSpec
       behave like redirectWhenNotNonCalculatedJourneyBehaviour(() => performAction())
 
       {
-        val (_, _, draftReturn) = sessionWithMultipleDisposalsState(None)
+        val (_, _, draftReturn) = sessionWithMultipleDisposalsState(
+          None,
+          UserType.Individual,
+          wasUkResident = true
+        )
 
         behave like unsuccessfulUpdateBehaviour(
           draftReturn,
@@ -2314,15 +2538,19 @@ class YearToDateLiabilityControllerSpec
 
       "show a form error" when {
 
-        val currentSession = sessionWithMultipleDisposalsState(None)._1
+        val currentSession = sessionWithMultipleDisposalsState(
+          None,
+          UserType.Individual,
+          wasUkResident = true
+        )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
           testFormError(data: _*)(
             expectedErrorKey
-          )("taxableGainOrLoss.title")(performAction, currentSession)
+          )("taxableGainOrLoss.multiple.title")(performAction, currentSession)
 
         "no option is selected" in {
-          test()("taxableGainOrLoss.error.required")
+          test()("taxableGainOrLoss.multiple.error.required")
         }
 
         "the amount of gain is invalid" in {
@@ -2338,7 +2566,7 @@ class YearToDateLiabilityControllerSpec
           test(
             "taxableGainOrLoss" -> "0",
             "taxableGain"       -> "0"
-          )("taxableGain.error.tooSmall")
+          )("taxableGain.multiple.error.tooSmall")
         }
 
         "the amount of loss is invalid" in {
@@ -2354,7 +2582,7 @@ class YearToDateLiabilityControllerSpec
           test(
             "taxableGainOrLoss" -> "1",
             "netLoss"           -> "0"
-          )("netLoss.error.tooSmall")
+          )("netLoss.multiple.error.tooSmall")
         }
 
       }
@@ -2415,7 +2643,9 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithMultipleDisposalsState(
-                sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence.zero)
+                sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence.zero),
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -2444,7 +2674,11 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithMultipleDisposalsState(IncompleteNonCalculatedYTDAnswers.empty)._1
+              sessionWithMultipleDisposalsState(
+                IncompleteNonCalculatedYTDAnswers.empty,
+                UserType.Individual,
+                wasUkResident = true
+              )._1
             )
           }
 
@@ -2484,7 +2718,9 @@ class YearToDateLiabilityControllerSpec
         "the user has not answered this question before" in {
           test(
             sessionWithMultipleDisposalsState(
-              IncompleteNonCalculatedYTDAnswers.empty.copy(hasEstimatedDetails = Some(true))
+              IncompleteNonCalculatedYTDAnswers.empty.copy(hasEstimatedDetails = Some(true)),
+              UserType.Individual,
+              wasUkResident = true
             )._1,
             routes.YearToDateLiabilityController.hasEstimatedDetails()
           )
@@ -2495,6 +2731,8 @@ class YearToDateLiabilityControllerSpec
             sessionWithSingleDisposalState(
               Some(sample[CompleteNonCalculatedYTDAnswers]),
               Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
               Some(
                 sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs]))
               )
@@ -2521,7 +2759,11 @@ class YearToDateLiabilityControllerSpec
             hasEstimatedDetails = Some(true)
           )
 
-        val (_, _, draftReturn) = sessionWithMultipleDisposalsState(answers)
+        val (_, _, draftReturn) = sessionWithMultipleDisposalsState(
+          answers,
+          UserType.Individual,
+          wasUkResident = true
+        )
 
         behave like unsuccessfulUpdateBehaviour(
           draftReturn,
@@ -2540,7 +2782,9 @@ class YearToDateLiabilityControllerSpec
       "show a form error" when {
 
         val currentSession = sessionWithMultipleDisposalsState(
-          sample[CompleteNonCalculatedYTDAnswers]
+          sample[CompleteNonCalculatedYTDAnswers],
+          UserType.Individual,
+          wasUkResident = true
         )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
@@ -2603,7 +2847,9 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithMultipleDisposalsState(
-                sample[CompleteNonCalculatedYTDAnswers].copy(taxDue = AmountInPence.zero)
+                sample[CompleteNonCalculatedYTDAnswers].copy(taxDue = AmountInPence.zero),
+                UserType.Individual,
+                wasUkResident = true
               )._1
             )
           }
@@ -2627,7 +2873,12 @@ class YearToDateLiabilityControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            sessionWithSingleDisposalState(Some(sample[CompleteCalculatedYTDAnswers]), None)._1
+            sessionWithSingleDisposalState(
+              Some(sample[CompleteCalculatedYTDAnswers]),
+              None,
+              UserType.Individual,
+              wasUkResident = true
+            )._1
           )
         }
 
@@ -2647,7 +2898,9 @@ class YearToDateLiabilityControllerSpec
                 personalAllowance   = Some(sample[AmountInPence]),
                 hasEstimatedDetails = Some(sample[Boolean])
               ),
-              sample[DisposalDate]
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
             )._1
           )
         }
@@ -2742,7 +2995,9 @@ class YearToDateLiabilityControllerSpec
           mockGetSession(
             sessionWithSingleDisposalState(
               sample[CompleteCalculatedYTDAnswers],
-              sample[DisposalDate]
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
             )._1
           )
         }
@@ -2758,6 +3013,8 @@ class YearToDateLiabilityControllerSpec
             sessionWithSingleDisposalState(
               None,
               Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
               Some(sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)))
             )._1
           )
@@ -2779,7 +3036,9 @@ class YearToDateLiabilityControllerSpec
           mockGetSession(
             sessionWithSingleDisposalState(
               sample[CompleteNonCalculatedYTDAnswers],
-              sample[DisposalDate]
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
             )._1
           )
         }
@@ -2795,6 +3054,8 @@ class YearToDateLiabilityControllerSpec
             sessionWithSingleDisposalState(
               Some(sample[CompleteNonCalculatedYTDAnswers]),
               Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
               Some(
                 sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs]))
               )
@@ -2809,7 +3070,11 @@ class YearToDateLiabilityControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            sessionWithMultipleDisposalsState(None)._1
+            sessionWithMultipleDisposalsState(
+              None,
+              UserType.Individual,
+              wasUkResident = true
+            )._1
           )
         }
 
@@ -2825,7 +3090,9 @@ class YearToDateLiabilityControllerSpec
   ): Unit = {
     val (_, _, draftReturn) = sessionWithSingleDisposalState(
       currentAnswers,
-      sample[DisposalDate].copy(taxYear = sample[TaxYear].copy(personalAllowance = AmountInPence(Long.MaxValue)))
+      sample[DisposalDate].copy(taxYear = sample[TaxYear].copy(personalAllowance = AmountInPence(Long.MaxValue))),
+      UserType.Individual,
+      wasUkResident = true
     )
     unsuccessfulUpdateBehaviour(
       draftReturn,
@@ -2894,7 +3161,9 @@ class YearToDateLiabilityControllerSpec
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithSingleDisposalState(
       sample[CompleteCalculatedYTDAnswers],
-      sample[DisposalDate]
+      sample[DisposalDate],
+      UserType.Individual,
+      wasUkResident = true
     )._1
   ): Unit = {
     inSequence {
@@ -2961,7 +3230,11 @@ class YearToDateLiabilityControllerSpec
     oldAnswers: Option[YearToDateLiabilityAnswers],
     newAnswers: YearToDateLiabilityAnswers
   ): Unit = {
-    val draftReturn    = sessionWithMultipleDisposalsState(oldAnswers)._3
+    val draftReturn = sessionWithMultipleDisposalsState(
+      oldAnswers,
+      UserType.Individual,
+      wasUkResident = true
+    )._3
     val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
     testSuccessfulUpdatesAfterSubmit(result, draftReturn, newDraftReturn)
   }
@@ -2971,7 +3244,11 @@ class YearToDateLiabilityControllerSpec
     oldAnswers: YearToDateLiabilityAnswers,
     newAnswers: YearToDateLiabilityAnswers
   ): Unit = {
-    val draftReturn    = sessionWithMultipleDisposalsState(oldAnswers)._3
+    val draftReturn = sessionWithMultipleDisposalsState(
+      oldAnswers,
+      UserType.Individual,
+      wasUkResident = true
+    )._3
     val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
     testSuccessfulUpdatesAfterSubmit(result, draftReturn, newDraftReturn)
   }
@@ -3005,7 +3282,14 @@ class YearToDateLiabilityControllerSpec
       "there is no answer to the tax due question" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithSingleDisposalState(answers, sample[DisposalDate])._1)
+          mockGetSession(
+            sessionWithSingleDisposalState(
+              answers,
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
+            )._1
+          )
         }
 
         checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
@@ -3016,7 +3300,9 @@ class YearToDateLiabilityControllerSpec
           mockGetSession(
             sessionWithSingleDisposalState(
               answers.copy(taxDue = Some(calculatedTaxDue.amountOfTaxDue)),
-              sample[DisposalDate]
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
             )._1
           )
         }
@@ -3030,7 +3316,9 @@ class YearToDateLiabilityControllerSpec
           mockGetSession(
             sessionWithSingleDisposalState(
               answers.copy(hasEstimatedDetails = None),
-              sample[DisposalDate]
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
             )._1
           )
         }
