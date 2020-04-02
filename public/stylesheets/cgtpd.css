@@ -760,6 +760,10 @@ h1 > .sub-heading {
         content: "Allocations"!important;
     }
 
+    .cya-change.cya-extra-action {
+        position: relative;
+    }
+
 }
 
 .add-another-file {
@@ -769,3 +773,4 @@ h1 > .sub-heading {
 .cya-extra-action {
     padding-left: 1em;
 }
+

@@ -57,7 +57,7 @@
                     @document.fileName
                 </dd>
                 <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(document.reference).url>@messages(s"$key.cya-change")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
-                <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$key.cya-delete")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
+                <dd class="cya-change cya-extra-action"><a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$key.cya-delete")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
             </div>
 
         }
