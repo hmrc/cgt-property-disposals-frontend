@@ -96,7 +96,8 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
             formWithError =>
               BadRequest(
                 doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())
-              ), { isReportingForTrust =>
+              ),
+            isReportingForTrust =>
               updateSession(sessionStore, request)(
                 _.copy(
                   journeyStatus = Some(
@@ -121,7 +122,6 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     Redirect(routes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax())
                   }
               }
-            }
           )
       }
   }
@@ -160,7 +160,8 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   formWithError,
                   routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()
                 )
-              ), { hasTrn =>
+              ),
+            hasTrn =>
               updateSession(sessionStore, request)(
                 _.copy(journeyStatus = Some(determiningIfOrganisationIsTrust.copy(hasTrn = Some(hasTrn))))
               ).map {
@@ -176,7 +177,6 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     Redirect(routes.DeterminingIfOrganisationIsTrustController.registerYourTrust())
                   }
               }
-            }
           )
       } else {
         Redirect(controllers.routes.StartController.start())
@@ -192,14 +192,14 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
           bprNameMatchService
             .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](determiningIfOrganisationIsTrust.ggCredId)
             .fold(
-              handleNameMatchError, { _ =>
+              handleNameMatchError,
+              _ =>
                 Ok(
                   enterTrnAndNamePage(
                     enterTrnAndNameForm,
                     routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
                   )
                 )
-              }
             )
         case _ => Redirect(controllers.routes.StartController.start())
       }
@@ -223,14 +223,14 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     NameMatchError[TrustNameMatchDetails],
                     (BusinessPartnerRecord, Option[CgtReference])
                   ]](
-                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), { trustNameMatchDetails =>
+                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))),
+                    trustNameMatchDetails =>
                       attemptNameMatchAndUpdateSession(
                         trustNameMatchDetails,
                         determiningIfOrganisationIsTrust.ggCredId,
                         determiningIfOrganisationIsTrust.ggEmail,
                         unsuccessfulAttempts
                       )
-                    }
                   )
               }
             } yield bprWithCgtReference
@@ -307,13 +307,12 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                               }
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(
-                bprWithCgtReference._2.fold[JourneyStatus](
-                  SubscriptionStatus.SubscriptionMissingData(bprWithCgtReference._1, None, ggCredId, ggEmail)
-                ) { cgtRef =>
-                  AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtRef))
-                }
-              )
+              _.copy(journeyStatus =
+                Some(
+                  bprWithCgtReference._2.fold[JourneyStatus](
+                    SubscriptionStatus.SubscriptionMissingData(bprWithCgtReference._1, None, ggCredId, ggEmail)
+                  )(cgtRef => AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtRef)))
+                )
               )
             )
           ).leftMap[NameMatchError[TrustNameMatchDetails]](NameMatchError.BackendError)
@@ -364,9 +363,7 @@ object DeterminingIfOrganisationIsTrustController {
         "trustName" -> TrustName.mapping
       ) {
         case (trn, trustName) => TrustNameMatchDetails(TrustName(trustName), TRN(trn))
-      } { trustNameMatchDetails =>
-        Some((trustNameMatchDetails.trn.value, trustNameMatchDetails.name.value))
-      }
+      }(trustNameMatchDetails => Some((trustNameMatchDetails.trn.value, trustNameMatchDetails.name.value)))
     )
 
   implicit class TRNAndTrustNameFormOps(private val form: Form[TrustNameMatchDetails]) extends AnyVal {

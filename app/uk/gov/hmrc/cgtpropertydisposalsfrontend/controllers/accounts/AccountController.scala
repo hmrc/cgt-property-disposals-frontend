@@ -50,14 +50,10 @@ class AccountController @Inject() (
 
   def manageYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { (_, subscribed) =>
-        Ok(manageYourDetailsPage(subscribed.subscribedDetails))
-      }
+      withSubscribedUser(request)((_, subscribed) => Ok(manageYourDetailsPage(subscribed.subscribedDetails)))
   }
 
-  def signedOut(): Action[AnyContent] = Action { implicit request =>
-    Ok(signedOutPage())
-  }
+  def signedOut(): Action[AnyContent] = Action(implicit request => Ok(signedOutPage()))
 
   def contactNameUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) {

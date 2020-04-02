@@ -66,29 +66,28 @@
             @fileScanStatus._1._1._2
         </p>
 
-  <dl class="govuk-check-your-answers cya-questions-long">
-
-        <div>
-            <dt class="cya-question" id="status-filename">
-              name of file
-            </dt>
-            <dd class="cya-answer">
-            @fileScanStatus._1._1._1
-            </dd>
-            @if(fileScanStatus._1._2) {
-              <dd class="cya-change">
-                <a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(reference.value).url>
-                  @messages(s"$cyaKey.cya-change") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
-                </a>
-              </dd>
-              <dd class="cya-change">
-                <a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(reference.value).url>
-                  @messages(s"$cyaKey.cya-delete") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
-                </a>
-              </dd>
-            }
-        </div>
-  </dl>
+          <dl class="govuk-check-your-answers cya-questions-long">
+                <div>
+                    <dt class="cya-question" id="status-filename">
+                      name of file
+                    </dt>
+                    <dd class="cya-answer">
+                    @fileScanStatus._1._1._1
+                    </dd>
+                    @if(fileScanStatus._1._2) {
+                      <dd class="cya-change">
+                        <a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(reference.value).url>
+                          @messages(s"$cyaKey.cya-change") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
+                        </a>
+                      </dd>
+                      <dd class="cya-change">
+                        <a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(reference.value).url>
+                          @messages(s"$cyaKey.cya-delete") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
+                        </a>
+                      </dd>
+                    }
+                </div>
+          </dl>
 
         @fileScanStatus._2.map(f =>
           formWrapper(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(reference.value), 'novalidate -> "novalidate") {

@@ -187,10 +187,11 @@ class ExemptionAndLossesController @Inject() (
       withDisposalDate(draftReturn) { disposalDate =>
         commonDisplayBehaviour(
           answers
-        )(form = _.fold(
-          _.inYearLosses.fold(inYearLossesForm)(l => inYearLossesForm.fill(l.inPounds())),
-          c => inYearLossesForm.fill(c.inYearLosses.inPounds())
-        )
+        )(form =
+          _.fold(
+            _.inYearLosses.fold(inYearLossesForm)(l => inYearLossesForm.fill(l.inPounds())),
+            c => inYearLossesForm.fill(c.inYearLosses.inPounds())
+          )
         )(
           page = inYearLossesPage(_, _, disposalDate)
         )(
@@ -228,10 +229,11 @@ class ExemptionAndLossesController @Inject() (
     withFillingOutReturnAndAnswers(request) { (_, _, _, answers) =>
       commonDisplayBehaviour(
         answers
-      )(form = _.fold(
-        _.previousYearsLosses.fold(previousYearsLossesForm)(l => previousYearsLossesForm.fill(l.inPounds())),
-        c => previousYearsLossesForm.fill(c.previousYearsLosses.inPounds())
-      )
+      )(form =
+        _.fold(
+          _.previousYearsLosses.fold(previousYearsLossesForm)(l => previousYearsLossesForm.fill(l.inPounds())),
+          c => previousYearsLossesForm.fill(c.previousYearsLosses.inPounds())
+        )
       )(
         page = previousYearsLossesPage(_, _)
       )(
@@ -300,15 +302,17 @@ class ExemptionAndLossesController @Inject() (
           answers
         )(form = annualExemptAmountForm(disposalDate.taxYear.annualExemptAmountGeneral))(
           page = { (form, backlink) =>
-            val updatedForm = form.copy(errors = form.errors.map(
-              _.copy(args = Seq(
-                MoneyUtils
-                  .formatAmountOfMoneyWithoutPoundSign(
-                    disposalDate.taxYear.annualExemptAmountGeneral.inPounds()
+            val updatedForm = form.copy(errors =
+              form.errors.map(
+                _.copy(args =
+                  Seq(
+                    MoneyUtils
+                      .formatAmountOfMoneyWithoutPoundSign(
+                        disposalDate.taxYear.annualExemptAmountGeneral.inPounds()
+                      )
                   )
+                )
               )
-              )
-            )
             )
             annualExemptAmountPage(updatedForm, backlink, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
           }
@@ -360,9 +364,10 @@ class ExemptionAndLossesController @Inject() (
                   )
               _ <- EitherT(
                     updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(
-                        fillingOutReturn.copy(draftReturn = newDraftReturn)
-                      )
+                      _.copy(journeyStatus =
+                        Some(
+                          fillingOutReturn.copy(draftReturn = newDraftReturn)
+                        )
                       )
                     )
                   )

@@ -87,10 +87,10 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     .timedOut()
     .url
   val ggSignOut: String = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.start().url
-  val accountSignOutUrl
-    : String = signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
-    .signedOut()
-    .url
+  val accountSignOutUrl: String =
+    signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
+      .signedOut()
+      .url
   val gaUserTypeDimension: String = getString("google-analytics.user-type-dimension")
   val hmrcTelephone: String       = getString("telephone-numbers.hmrc-helpline")
   val outsideUkPhone: String      = getString("telephone-numbers.outside-uk")

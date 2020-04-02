@@ -147,9 +147,7 @@ class UploadSupportingEvidenceController @Inject() (
         )(
           page = doYouWantToUploadSupportingEvidencePage(_, _)
         )(
-          requiredPreviousAnswer = { _ =>
-            Some(())
-          },
+          requiredPreviousAnswer               = { _ => Some(()) },
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
         )
       }
@@ -675,7 +673,10 @@ class UploadSupportingEvidenceController @Inject() (
       withUploadSupportingEvidenceAnswers(request) { (_, _, _, fillingOutReturn, answers) =>
         val updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
           case IncompleteUploadSupportingEvidenceAnswers(None, _) =>
-            CompleteUploadSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty) // shut the compiler up - this can never happen actually
+            CompleteUploadSupportingEvidenceAnswers(
+              doYouWantToUploadSupportingEvidence = false,
+              List.empty
+            ) // shut the compiler up - this can never happen actually
           case IncompleteUploadSupportingEvidenceAnswers(
               Some(doYouWantToUploadSupportingDocumentAnswer),
               supportingDocuments
@@ -736,13 +737,14 @@ class UploadSupportingEvidenceController @Inject() (
       }
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Any"))
   private def checkYourAnswersHandler(
     answers: UploadSupportingEvidenceAnswers,
     fillingOutReturn: FillingOutReturn,
     draftReturn: DraftReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case IncompleteUploadSupportingEvidenceAnswers(None, _) => // TODO: change name to IncompleteUploadSupportingEvidenceAnswers
+      case IncompleteUploadSupportingEvidenceAnswers(None, _) =>
         Redirect(routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments())
       case IncompleteUploadSupportingEvidenceAnswers(Some(doYouWantToUploadSupportingEvidence), supportingEvidences) =>
         if (doYouWantToUploadSupportingEvidence) {
@@ -803,6 +805,78 @@ class UploadSupportingEvidenceController @Inject() (
           se => {
             val expiredSupportingEvidence = findExpiredSupportingEvidence(se)
             if (expiredSupportingEvidence.nonEmpty) {
+
+              val updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
+                case IncompleteUploadSupportingEvidenceAnswers(None, _) =>
+                  IncompleteUploadSupportingEvidenceAnswers(
+                    doYouWantToUploadSupportingEvidence = Some(false),
+                    List.empty
+                  ) // shut the compiler up - this can never happen actually
+                case IncompleteUploadSupportingEvidenceAnswers(
+                    Some(doYouWantToUploadSupportingDocumentAnswer),
+                    supportingDocuments
+                    ) =>
+                  IncompleteUploadSupportingEvidenceAnswers(
+                    Some(doYouWantToUploadSupportingDocumentAnswer),
+                    supportingDocuments
+                  )
+                case CompleteUploadSupportingEvidenceAnswers(
+                    doYouWantToUploadSupportingDocumentAnswer,
+                    supportingDocuments
+                    ) =>
+                  IncompleteUploadSupportingEvidenceAnswers(
+                    Some(doYouWantToUploadSupportingDocumentAnswer),
+                    supportingDocuments
+                  )
+              }
+
+              val newDraftReturn = fillingOutReturn.draftReturn match {
+                case s @ DraftSingleDisposalReturn(
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _
+                    ) =>
+                  s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                case m @ DraftMultipleDisposalsReturn(
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _,
+                      _
+                    ) =>
+                  m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+              }
+
+              val result = for {
+
+                _ <- returnsService
+                      .storeDraftReturn(
+                        newDraftReturn,
+                        fillingOutReturn.subscribedDetails.cgtReference,
+                        fillingOutReturn.agentReferenceNumber
+                      )
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                      )
+                    )
+              } yield ()
+
+              result.fold({ e =>
+                logger.warn("Could not update session", e)
+                errorHandler.errorResult()
+              }, _ => ())
+
               Ok(expiredSupportingEvidencePage(expiredSupportingEvidence))
             } else {
               Ok(
@@ -823,7 +897,7 @@ class UploadSupportingEvidenceController @Inject() (
     expired.map(e =>
       SupportingEvidence(
         e.fileDescriptor.reference,
-        e.fileDescriptor.uploadRequest.fields.getOrElse("fileName", "could not get filename")
+        e.fileDescriptor.uploadRequest.fields.getOrElse("fileName", "error retrieving file name")
       )
     )
   }

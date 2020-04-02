@@ -127,15 +127,14 @@ class MultipleDisposalsTriageController @Inject() (
             BadRequest(
               howManyPropertiesPage(formWithErrors, backLink, state.isRight)
             )
-          }, { numberOfProperties =>
+          },
+          numberOfProperties =>
             if (answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties)).contains(numberOfProperties)) {
               Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
             } else {
               val (newState, redirectTo) = updateNumberOfPropertiesWithRedirect(numberOfProperties, answers, state)
               updateStateAndThen(newState, Redirect(redirectTo))
             }
-
-          }
         )
     }
   }
@@ -214,7 +213,8 @@ class MultipleDisposalsTriageController @Inject() (
                 state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
               )
             )
-          }, { wereUKResident =>
+          },
+          wereUKResident =>
             if (answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())).contains(wereUKResident)) {
               Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
             } else {
@@ -240,7 +240,6 @@ class MultipleDisposalsTriageController @Inject() (
               )
               updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
             }
-          }
         )
     }
   }
@@ -278,7 +277,8 @@ class MultipleDisposalsTriageController @Inject() (
                   state.isRight
                 )
               )
-            }, { wereAllPropertiesResidential =>
+            },
+            wereAllPropertiesResidential =>
               if (answers
                     .fold(_.wereAllPropertiesResidential, c => Some(isResidentialAssetType(c.assetTypes)))
                     .contains(wereAllPropertiesResidential)) {
@@ -295,7 +295,6 @@ class MultipleDisposalsTriageController @Inject() (
                 val newState = updateState(state, updatedAnswers, identity)
                 updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
               }
-            }
           )
       }
   }
@@ -346,7 +345,8 @@ class MultipleDisposalsTriageController @Inject() (
                 state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
               )
             )
-          }, { countryOfResidence =>
+          },
+          countryOfResidence =>
             if (answers
                   .fold(_.countryOfResidence, c => Some(c.countryOfResidence))
                   .contains(countryOfResidence)) {
@@ -371,8 +371,6 @@ class MultipleDisposalsTriageController @Inject() (
               )
               updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
             }
-
-          }
         )
     }
   }
@@ -413,7 +411,8 @@ class MultipleDisposalsTriageController @Inject() (
                   state.isRight
                 )
               )
-            }, { taxYearAfter6April2020 =>
+            },
+            taxYearAfter6April2020 =>
               if (answers.fold(_.taxYearAfter6April2020, _ => Some(true)).contains(taxYearAfter6April2020)) {
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               } else {
@@ -456,7 +455,6 @@ class MultipleDisposalsTriageController @Inject() (
                 )
 
               }
-            }
           )
       }
   }
@@ -499,7 +497,8 @@ class MultipleDisposalsTriageController @Inject() (
                   state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
                 )
               )
-            }, { assetTypes =>
+            },
+            assetTypes =>
               if (answers.fold(_.assetTypes, c => Some(c.assetTypes)).contains(assetTypes)) {
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               } else {
@@ -526,7 +525,6 @@ class MultipleDisposalsTriageController @Inject() (
                 )
                 updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
               }
-            }
           )
       }
   }
@@ -561,7 +559,8 @@ class MultipleDisposalsTriageController @Inject() (
                 state.isRight
               )
             )
-          }, { completionDate =>
+          },
+          completionDate =>
             if (answers.fold(_.completionDate, c => Some(c.completionDate)).contains(completionDate)) {
               Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
             } else {
@@ -584,7 +583,6 @@ class MultipleDisposalsTriageController @Inject() (
               updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
 
             }
-          }
         )
     }
   }

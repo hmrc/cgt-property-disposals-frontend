@@ -142,13 +142,12 @@ class UpscanConnectorImpl @Inject() (
     draftReturnId: DraftReturnId,
     upscanInitiateReference: UpscanInitiateReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
+    val url =
+      baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
     EitherT[Future, Error, Unit](
       http
         .get(url)
-        .map { _ =>
-          Right(())
-        }
+        .map(_ => Right(()))
         .recover {
           case NonFatal(e) => Left(Error(e))
         }
@@ -162,9 +161,7 @@ class UpscanConnectorImpl @Inject() (
     EitherT[Future, Error, Unit](
       http
         .get(url)
-        .map { _ =>
-          Right(())
-        }
+        .map(_ => Right(()))
         .recover {
           case NonFatal(e) => Left(Error(e))
         }
@@ -215,7 +212,8 @@ class UpscanConnectorImpl @Inject() (
   override def getFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-fd/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
+    val url =
+      baseUrl + s"/cgt-property-disposals/upscan-fd/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
 
     EitherT[Future, Error, Option[UpscanFileDescriptor]](
       http
