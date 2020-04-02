@@ -30,7 +30,7 @@ import configs.Configs
 import configs.syntax._
 import play.api.Configuration
 import play.api.data.Form
-import play.api.data.Forms.{mapping, of}
+import play.api.data.Forms.{mapping, nonEmptyText, of}
 import play.api.http.Writeable
 import play.api.libs.Files
 import play.api.mvc._
@@ -322,10 +322,11 @@ class UploadSupportingEvidenceController @Inject() (
             case UpscanInitiateSuccess(reference) =>
               Ok(
                 uploadSupportingEvidencePage(
+                  uploadEvidenceForm,
                   reference,
                   routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments()
                 )
-              ) 
+              )
           }
       }
     }
@@ -334,94 +335,126 @@ class UploadSupportingEvidenceController @Inject() (
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   def uploadSupportingEvidenceSubmit(): Action[MultipartFormData[Files.TemporaryFile]] =
     authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
+      val multipart: MultipartFormData[Files.TemporaryFile] = request.body
       withUploadSupportingEvidenceAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
-        val multipart: MultipartFormData[Files.TemporaryFile] = request.body
-        val result = for {
-          filename <- EitherT.fromOption(
-                       multipart.files.headOption.map(f => f.filename),
-                       Error("missing file name")
-                     )
-          reference <- EitherT.fromOption(
-                        multipart.dataParts.get("reference").flatMap(_.headOption),
-                        Error("missing upscan file descriptor id")
+        multipart
+          .file("file")
+          .map(supportingEvidence =>
+            if (supportingEvidence.filename === "") {
+              multipart.asFormUrlEncoded.get("reference") match {
+                case Some(reference) => {
+                  Future.successful(
+                    BadRequest(
+                      uploadSupportingEvidencePage(
+                        uploadEvidenceForm.bindFromRequest(request.body.asFormUrlEncoded),
+                        UpscanInitiateReference(
+                          reference.headOption.getOrElse("upscan reference not found")
+                        ),
+                        routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments()
                       )
-          maybeUpscanFileDescriptor <- upscanService
-                                        .getUpscanFileDescriptor(
-                                          DraftReturnId(draftReturnId.toString),
-                                          UpscanInitiateReference(reference)
-                                        )
-          upscanFileDescriptor <- EitherT.fromOption(
-                                   maybeUpscanFileDescriptor,
-                                   Error("failed to retrieve upscan file descriptor details")
-                                 )
-          prepared <- EitherT.fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
-          _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
-          _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
-          updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
-            case IncompleteUploadSupportingEvidenceAnswers(
-                doYouWantToUploadSupportingEvidenceAnswer,
-                supportingEvidences
-                ) =>
-              IncompleteUploadSupportingEvidenceAnswers(
-                doYouWantToUploadSupportingEvidenceAnswer,
-                supportingEvidences :+ SupportingEvidence(reference, filename)
-              )
-            case CompleteUploadSupportingEvidenceAnswers(
-                doYouWantToUploadSupportingEvidenceAnswer,
-                supportingEvidences
-                ) =>
-              IncompleteUploadSupportingEvidenceAnswers(
-                Some(doYouWantToUploadSupportingEvidenceAnswer),
-                supportingEvidences :+ SupportingEvidence(reference, filename)
-              )
-          }
-          newDraftReturn = fillingOutReturn.draftReturn match {
-            case s @ DraftSingleDisposalReturn(
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _
-                ) =>
-              s.copy(uploadSupportingDocuments = Some(updatedAnswers))
-            case m @ DraftMultipleDisposalsReturn(
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _
-                ) =>
-              m.copy(uploadSupportingDocuments = Some(updatedAnswers))
-          }
-          _ <- returnsService
-                .storeDraftReturn(
-                  newDraftReturn,
-                  fillingOutReturn.subscribedDetails.cgtReference,
-                  fillingOutReturn.agentReferenceNumber
-                )
-          _ <- EitherT(
-                updateSession(sessionStore, request)(
-                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-                )
-              )
+                    )
+                  )
+                }
+                case None => Future.successful(errorHandler.errorResult(None))
+              }
+            } else {
+              val result = for {
+                reference <- EitherT.fromOption(
+                              multipart.dataParts.get("reference").flatMap(_.headOption),
+                              Error("missing upscan file descriptor id")
+                            )
+                maybeUpscanFileDescriptor <- upscanService
+                                              .getUpscanFileDescriptor(
+                                                DraftReturnId(draftReturnId.toString),
+                                                UpscanInitiateReference(reference)
+                                              )
+                                              .leftMap(e => Error("error1"))
+                upscanFileDescriptor <- EitherT
+                                         .fromOption(
+                                           maybeUpscanFileDescriptor,
+                                           Error("failed to retrieve upscan file descriptor details")
+                                         )
+                                         .leftMap(e => Error("error 2"))
+                prepared <- EitherT
+                             .fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
+                             .leftMap(e => Error("error 3"))
+                _ <- upscanConnector
+                      .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+                      .leftMap(e => Error("error 4"))
+                _ <- upscanConnector
+                      .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+                      .leftMap(e => Error("error 5"))
+                updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
+                  case IncompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidenceAnswer,
+                      supportingEvidences
+                      ) =>
+                    IncompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidenceAnswer,
+                      supportingEvidences :+ SupportingEvidence(reference, supportingEvidence.filename)
+                    )
+                  case CompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidenceAnswer,
+                      supportingEvidences
+                      ) =>
+                    IncompleteUploadSupportingEvidenceAnswers(
+                      Some(doYouWantToUploadSupportingEvidenceAnswer),
+                      supportingEvidences :+ SupportingEvidence(reference, supportingEvidence.filename)
+                    )
+                }
+                newDraftReturn = fillingOutReturn.draftReturn match {
+                  case s @ DraftSingleDisposalReturn(
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _
+                      ) =>
+                    s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                  case m @ DraftMultipleDisposalsReturn(
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _
+                      ) =>
+                    m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                }
+                _ <- returnsService
+                      .storeDraftReturn(
+                        newDraftReturn,
+                        fillingOutReturn.subscribedDetails.cgtReference,
+                        fillingOutReturn.agentReferenceNumber
+                      )
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                      )
+                    )
 
-        } yield (reference)
+              } yield reference
 
-        result.fold(
-          error => {
-            logger.warn(s"failed to upload file with error: $error")
-            errorHandler.errorResult(None)
-          },
-          ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
-        )
+              result.fold(
+                error => {
+                  logger.warn(s"failed to upload file with error: $error")
+                  errorHandler.errorResult(None)
+                },
+                ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
+              )
+            }
+          )
+          .getOrElse {
+            logger.warn("missing file key")
+            Future.successful(errorHandler.errorResult(None))
+          }
       }
     }
 
@@ -493,6 +526,7 @@ class UploadSupportingEvidenceController @Inject() (
             case UpscanInitiateSuccess(reference) =>
               Ok(
                 changeSupportingEvidencePage(
+                  uploadEvidenceForm,
                   reference,
                   deleteId,
                   routes.UploadSupportingEvidenceController.checkYourAnswers()
@@ -506,99 +540,133 @@ class UploadSupportingEvidenceController @Inject() (
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   def changeSupportingEvidenceSubmit(ref: String, del: String): Action[MultipartFormData[Files.TemporaryFile]] =
     authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
+      val multipart: MultipartFormData[Files.TemporaryFile] = request.body
       withUploadSupportingEvidenceAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
-        val multipart: MultipartFormData[Files.TemporaryFile] = request.body
-        val result = for {
-          filename <- EitherT.fromOption(
-                       multipart.files.headOption.map(f => f.filename),
-                       Error("missing file name")
-                     )
-          reference <- EitherT.fromOption(
-                        multipart.dataParts.get("reference").flatMap(_.headOption),
-                        Error("missing upscan file descriptor id")
+        multipart
+          .file("file")
+          .map(supportingEvidence =>
+            if (supportingEvidence.filename === "") {
+              multipart.asFormUrlEncoded.get("reference") match {
+                case Some(reference) => {
+                  Future.successful(
+                    BadRequest(
+                      changeSupportingEvidencePage(
+                        uploadEvidenceForm.bindFromRequest(request.body.asFormUrlEncoded),
+                        UpscanInitiateReference(
+                          reference.headOption.getOrElse("upscan reference not found")
+                        ),
+                        del,
+                        routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments()
                       )
-          maybeUpscanFileDescriptor <- upscanService
-                                        .getUpscanFileDescriptor(
-                                          DraftReturnId(draftReturnId.toString),
-                                          UpscanInitiateReference(reference)
-                                        )
-          upscanFileDescriptor <- EitherT.fromOption(
-                                   maybeUpscanFileDescriptor,
-                                   Error("failed to retrieve upscan file descriptor details")
-                                 )
-          prepared <- EitherT.fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
-          _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
-          _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+                    )
+                  )
+                }
+                case None => Future.successful(errorHandler.errorResult(None))
+              }
+            } else {
+              val result = for {
+                reference <- EitherT.fromOption(
+                              multipart.dataParts.get("reference").flatMap(_.headOption),
+                              Error("missing upscan file descriptor id")
+                            )
+                maybeUpscanFileDescriptor <- upscanService
+                                              .getUpscanFileDescriptor(
+                                                DraftReturnId(draftReturnId.toString),
+                                                UpscanInitiateReference(reference)
+                                              )
+                                              .leftMap(e => Error("error1"))
+                upscanFileDescriptor <- EitherT
+                                         .fromOption(
+                                           maybeUpscanFileDescriptor,
+                                           Error("failed to retrieve upscan file descriptor details")
+                                         )
+                                         .leftMap(e => Error("error 2"))
+                prepared <- EitherT
+                             .fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
+                             .leftMap(e => Error("error 3"))
+                _ <- upscanConnector
+                      .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+                      .leftMap(e => Error("error 4"))
+                _ <- upscanConnector
+                      .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+                      .leftMap(e => Error("error 5"))
 
-          updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
-            case IncompleteUploadSupportingEvidenceAnswers(
-                doYouWantToUploadSupportingEvidenceAnswer,
-                supportingEvidences
-                ) => {
-              val removeOldDoc = supportingEvidences.filterNot(c => c.reference === del)
-              IncompleteUploadSupportingEvidenceAnswers(
-                doYouWantToUploadSupportingEvidenceAnswer,
-                removeOldDoc :+ SupportingEvidence(reference, filename)
+                updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
+                  case IncompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidenceAnswer,
+                      supportingEvidences
+                      ) => {
+                    val removeOldDoc = supportingEvidences.filterNot(c => c.reference === del)
+                    IncompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidenceAnswer,
+                      removeOldDoc :+ SupportingEvidence(reference, supportingEvidence.filename)
+                    )
+                  }
+                  case CompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidenceAnswer,
+                      supportingEvidences
+                      ) => {
+                    val removeOldDoc = supportingEvidences.filterNot(c => c.reference === del)
+                    IncompleteUploadSupportingEvidenceAnswers(
+                      Some(doYouWantToUploadSupportingEvidenceAnswer),
+                      removeOldDoc :+ SupportingEvidence(reference, supportingEvidence.filename)
+                    )
+                  }
+                }
+
+                newDraftReturn = fillingOutReturn.draftReturn match {
+                  case s @ DraftSingleDisposalReturn(
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _
+                      ) =>
+                    s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                  case m @ DraftMultipleDisposalsReturn(
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _
+                      ) =>
+                    m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                }
+                _ <- returnsService
+                      .storeDraftReturn(
+                        newDraftReturn,
+                        fillingOutReturn.subscribedDetails.cgtReference,
+                        fillingOutReturn.agentReferenceNumber
+                      )
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                      )
+                    )
+
+              } yield reference
+
+              result.fold(
+                error => {
+                  logger.warn(s"failed to upload file with error: $error")
+                  errorHandler.errorResult(None)
+                },
+                ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
               )
             }
-            case CompleteUploadSupportingEvidenceAnswers(
-                doYouWantToUploadSupportingEvidenceAnswer,
-                supportingEvidences
-                ) => {
-              val removeOldDoc = supportingEvidences.filterNot(c => c.reference === del)
-              IncompleteUploadSupportingEvidenceAnswers(
-                Some(doYouWantToUploadSupportingEvidenceAnswer),
-                removeOldDoc :+ SupportingEvidence(reference, filename)
-              )
-            }
+          )
+          .getOrElse {
+            logger.warn("missing file key")
+            Future.successful(errorHandler.errorResult(None))
           }
-          newDraftReturn = fillingOutReturn.draftReturn match {
-            case s @ DraftSingleDisposalReturn(
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _
-                ) =>
-              s.copy(uploadSupportingDocuments = Some(updatedAnswers))
-            case m @ DraftMultipleDisposalsReturn(
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _,
-                  _
-                ) =>
-              m.copy(uploadSupportingDocuments = Some(updatedAnswers))
-          }
-          _ <- returnsService
-                .storeDraftReturn(
-                  newDraftReturn,
-                  fillingOutReturn.subscribedDetails.cgtReference,
-                  fillingOutReturn.agentReferenceNumber
-                )
-          _ <- EitherT(
-                updateSession(sessionStore, request)(
-                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-                )
-              )
-          _ <- upscanService.removeFile(DraftReturnId(draftReturnId.toString), UpscanInitiateReference(del))
-        } yield (reference)
-
-        result.fold(
-          error => {
-            logger.warn(s"failed to upload file with error: $error")
-            errorHandler.errorResult(None)
-          },
-          ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
-        )
       }
     }
 
@@ -930,4 +998,15 @@ object UploadSupportingEvidenceController {
         "do-you-want-to-upload-supporting-evidence" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
+
+  final case class FileUpload(filename: String, upscanReference: String)
+
+  val uploadEvidenceForm: Form[FileUpload] =
+    Form(
+      mapping(
+        "file"      -> nonEmptyText,
+        "reference" -> nonEmptyText
+      )(FileUpload.apply)(FileUpload.unapply)
+    )
+
 }

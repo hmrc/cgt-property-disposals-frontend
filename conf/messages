@@ -1680,10 +1680,13 @@ upload-supporting-evidence.expired.do-you-want-to-upload-documents=Do you want t
 upload-supporting-evidence.expired.label=Supporting evidence file
 upload-supporting-evidence.expired.cya-change=Change
 
+
 upload-supporting-evidence.supporting-evidence.title=Upload a document with your supporting evidence
 upload-supporting-evidence.supporting-evidence.caption=Supporting evidence
 upload-supporting-evidence.supporting-evidence.error.required=Upload a file containing your supporting evidence
 upload-supporting-evidence.supporting-evidence.help-text=The file can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
+file.error.required=Select a file containing your supporting evidence
+
 
 upload-supporting-evidence.check-upscan-status.title=Supporting evidence file upload status
 upload-supporting-evidence.check-upscan-status.caption=Supporting evidence
