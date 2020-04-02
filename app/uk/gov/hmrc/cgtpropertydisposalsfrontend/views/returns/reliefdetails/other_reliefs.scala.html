@@ -54,7 +54,7 @@
                     |${
                         textInput(
                             fieldId = nameKey,
-                            label = Html(messages(s"$nameKey.label")),
+                            label = Html(messages(s"$nameKey$userKey.label")),
                             helpText = None,
                             labelAsHeading = false,
                             errorKey = form.error(nameKey).map(e => s"$userErrorKey${e.message}"),
@@ -69,7 +69,7 @@
                         unitInput(
                             fieldId = valueKey,
                             value = form.data.getOrElse(valueKey, ""),
-                            label = Html(messages(s"$valueKey.label")),
+                            label = Html(messages(s"$valueKey$userKey.label")),
                             formError = form.error(valueKey),
                             hasErrors = form.error(valueKey).nonEmpty,
                             autoComplete = AutoCompleteType.On,
@@ -123,7 +123,7 @@
         )
         <p>
             <a href="@{appConfig.reliefsInfo}" target="_blank">
-                @messages("otherReliefs.furtherInfoLink")
+                @messages(s"$key$userKey.furtherInfoLink")
             </a>
         </p>
         @submitButton(messages("button.saveAndContinue"))
