@@ -40,7 +40,8 @@
         disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
         reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
-        initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary
+        initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
 @(completeReturn: CompleteReturn, rebasingEligibilityUtil: RebasingEligibilityUtil, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -116,15 +117,9 @@
   @submitButton(messages("button.acceptAndSend"))
  }
 
- <p class="js-enabled">
-  <a href="JavaScript: window.print()">
-  @messages("viewReturn.printLink")
-  </a>
- </p>
+ @printLink(messages("viewReturn.printLink"))
 
-  <a href="@{routes.DraftReturnSavedController.draftReturnSaved().url}">@messages("task-list.save-and-come-back.link")</a>
-
-
+ <a href="@{routes.DraftReturnSavedController.draftReturnSaved().url}">@messages("task-list.save-and-come-back.link")</a>
 
 }
 

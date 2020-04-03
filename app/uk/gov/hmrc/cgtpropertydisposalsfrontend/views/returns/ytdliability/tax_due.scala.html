@@ -48,7 +48,8 @@
         gainAfterLossesWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_after_losses_workings,
         taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
         taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
 @(form: Form[BigDecimal],
@@ -84,11 +85,7 @@
 
     <p>@messages(s"$key.p2")</p>
 
-    <p class="js-enabled">
-      <a href="JavaScript: window.print();">
-        @messages(s"$key.printLink")
-      </a>
-    </p>
+    @printLink(messages(s"$key.printLink"))
 
     <ul class="calc-rows with-bottom-margin">
       <li>
