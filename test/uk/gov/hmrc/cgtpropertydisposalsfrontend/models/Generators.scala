@@ -326,7 +326,7 @@ trait FileUploadGen { this: GenUtils =>
 
 trait DisposalMethodGen { this: GenUtils =>
 
-  implicit val disposalMethod: Gen[DisposalMethod] =
+  implicit val disposalMethodGen: Gen[DisposalMethod] =
     gen[DisposalMethod]
 
 }
