@@ -306,30 +306,31 @@ class UploadSupportingEvidenceController @Inject() (
       }
   }
 
-  def uploadSupportingEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withUploadSupportingEvidenceAnswers(request) { (draftReturnId, cgtRef, _, _, _) =>
-      upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
-        case Left(error) =>
-          error.value match {
-            case Left(_) => errorHandler.errorResult()
-            case Right(MaxUploads) =>
-              Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
-            case Right(_) => errorHandler.errorResult()
-          }
-        case Right(upscanInitiateResponse) =>
-          upscanInitiateResponse match {
-            case UpscanInitiateSuccess(reference) =>
-              Ok(
-                uploadSupportingEvidencePage(
-                  uploadEvidenceForm,
-                  reference,
-                  routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments()
+  def uploadSupportingEvidence(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withUploadSupportingEvidenceAnswers(request) { (draftReturnId, cgtRef, _, _, _) =>
+        upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
+          case Left(error) =>
+            error.value match {
+              case Left(_) => errorHandler.errorResult()
+              case Right(MaxUploads) =>
+                Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
+              case Right(_) => errorHandler.errorResult()
+            }
+          case Right(upscanInitiateResponse) =>
+            upscanInitiateResponse match {
+              case UpscanInitiateSuccess(reference) =>
+                Ok(
+                  uploadSupportingEvidencePage(
+                    uploadEvidenceForm,
+                    reference,
+                    routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments()
+                  )
                 )
-              )
-          }
+            }
+        }
       }
     }
-  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   def uploadSupportingEvidenceSubmit(): Action[MultipartFormData[Files.TemporaryFile]] =

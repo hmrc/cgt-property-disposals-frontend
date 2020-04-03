@@ -123,7 +123,7 @@
           )
 
           <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
-          @reliefDetailsSummary(s.reliefDetails)
+          @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
           @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust)

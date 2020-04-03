@@ -74,7 +74,7 @@
       )
 
      <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
-     @reliefDetailsSummary(s.reliefDetails)
+     @reliefDetailsSummary(s.reliefDetails, isATrust)
 
      @s.initialGainOrLoss.map{ initialGainOrLoss =>
       <h2 class="heading-medium">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
