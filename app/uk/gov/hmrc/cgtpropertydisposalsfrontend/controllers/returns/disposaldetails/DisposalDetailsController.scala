@@ -475,7 +475,7 @@ object DisposalDetailsController {
   val disposalFeesForm: Form[BigDecimal] =
     Form(
       formMapping(
-        "disposalFees" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))
+        "disposalFees" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
