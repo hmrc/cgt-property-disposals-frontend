@@ -872,45 +872,105 @@ returns.property-address.cyaLabel.acquisition-price=What was the acquisition amo
 returns.property-address.cyaChange.property-address=the address of the property
 
 returns.disposal-details.caption=Sale or disposal details
+
 shareOfProperty.title=How much of the property did you own?
+shareOfProperty.agent.title=How much of the property did your client own?
+shareOfProperty.trust.title=How much of the property did the trust own?
 shareOfProperty.error.required=Select how much of the property you owned
-shareOfProperty.error.invalid=Select how much of the property you owned
+shareOfProperty.agent.error.required=Select how much of the property your client owned
+shareOfProperty.trust.error.required=Select how much of the property the trust owned
+
 returns.shareOfProperty.Full=100%
 returns.shareOfProperty.Half=50%
 returns.shareOfProperty.Other=Other share
 percentageShare.label=Percentage you owned
 percentageShare.error.required=Enter how much of the property you owned as a percentage
+percentageShare.agent.error.required=Enter how much of the property your client owned as a percentage
+percentageShare.trust.error.required=Enter how much of the property the trust owned as a percentage
 percentageShare.error.invalid=The percentage of the property you owned must be a number
+percentageShare.agent.error.invalid=The percentage of the property your client owned must be a number
+percentageShare.trust.error.invalid=The percentage of the property the trust owned must be a number
 percentageShare.error.tooLarge=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.agent.error.tooLarge=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.trust.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.agent.error.tooSmall=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.trust.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
+percentageShare.agent.error.tooManyDecimals=The percentage of the property your client owned must have 2 decimal places or less, for example 33.33
+percentageShare.trust.error.tooManyDecimals=The percentage of the property the trust owned must have 2 decimal places or less, for example 33.33
 
-disposalPrice.Sold.title=How much did you get when you sold or disposed of the property?
+
+disposalPrice.SoldOther.title=How much did you get when you sold or disposed of the property?
+disposalPrice.agent.SoldOther.title=How much did your client get when they sold or disposed of the property?
+disposalPrice.trust.SoldOther.title=How much did the trust get when it sold or disposed of the property?
 disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
-disposalPrice.Other.title=How much did you get when you sold or disposed of the property?
-disposalPrice.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
-disposalPrice.error.required=Enter how much you sold or disposed of the property for
-disposalPrice.error.invalid=How much you sold your the property for must a number, like 160,000 or 11,200.45
-disposalPrice.error.tooSmall=How much you sold the property for must be more than 0
-disposalPrice.error.tooLarge=How much you sold the property for must be 50,000,000,000.00 or less
-disposalPrice.error.tooManyDecimals=How much you sold the property for must have 2 decimal places or less, for example 33.33
+disposalPrice.agent.Gifted.title=What was the market value of the property when your client gave it away?
+disposalPrice.trust.Gifted.title=What was the market value of the property when the trust gave it away?
+disposalPrice.SoldOther.helpText=If you owned part of the property, only enter the amount you got for your share. You'll be able to enter any additional costs later.
+disposalPrice.agent.SoldOther.helpText=If your client owned part of the property, only enter the amount they got for their share. You'll be able to enter any additional costs later.
+disposalPrice.trust.SoldOther.helpText=If the trust owned part of the property, only enter the amount it got for its share. You'll be able to enter any additional costs later.
+disposalPrice.Gifted.helpText=If you owned part of the property, only enter your share of the market value. You'll be able to enter any additional costs later.
+disposalPrice.agent.Gifted.helpText=If your client owned part of the property, only enter their share of the market value. You'll be able to enter any additional costs later.
+disposalPrice.trust.Gifted.helpText=If the trust owned part of the property, only enter the amount it got for its share. You'll be able to enter any additional costs later.
+disposalPrice.SoldOther.error.required=Enter how much you sold or disposed of the property for
+disposalPrice.agent.SoldOther.error.required=Enter how much your client sold or disposed of the property for
+disposalPrice.trust.SoldOther.error.required=Enter how much the trust sold or disposed of the property for
+disposalPrice.Gifted.error.required=Enter the market value when you gave it away
+disposalPrice.agent.Gifted.error.required=Enter the market value when your client gave it away
+disposalPrice.trust.Gifted.error.required=Enter the market value when the trust gave it away
+disposalPrice.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 11,200.45
+disposalPrice.agent.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 11,200.45
+disposalPrice.trust.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 11,200.45
+disposalPrice.SoldOther.error.invalid=How much you sold the property for must an amount of money, like 160,000 or 11,200.45
+disposalPrice.agent.SoldOther.error.invalid=How much your client sold the property for must an amount of money, like 160,000 or 11,200.45
+disposalPrice.trust.SoldOther.error.invalid=How much the trust sold the property for must an amount of money, like 160,000 or 11,200.45
+disposalPrice.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.SoldOther.error.tooSmall=How much you sold the property for must an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.SoldOther.error.tooSmall=How much your client sold the property for must an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.SoldOther.error.tooSmall=How much the trust sold the property for must an amount of money between 1 and 50,000,000,000
+disposalPrice.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.SoldOther.error.tooLarge=How much you sold the property for must an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.SoldOther.error.tooLarge=How much your client sold the property for must an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.SoldOther.error.tooLarge=How much the trust sold the property for must an amount of money between 1 and 50,000,000,000
+disposalPrice.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 11,200.45
+disposalPrice.agent.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 11,200.45
+disposalPrice.trust.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 11,200.45
+disposalPrice.SoldOther.error.tooManyDecimals=How much you sold the property for must an amount of money with pence as 2 decimal places or less, like 160,000 or 11,200.45
+disposalPrice.agent.SoldOther.error.tooManyDecimals=How much your client sold the property for must an amount of money with pence as 2 decimal places or less, like 160,000 or 11,200.45
+disposalPrice.trust.SoldOther.error.tooManyDecimals=How much the trust sold the property for must an amount of money with pence as 2 decimal places or less, like 160,000 or 11,200.45
 
-disposalFees.Sold.title=What were your additional costs when you sold or disposed of the property?
-disposalFees.Gifted.title=What were your additional costs when you sold or disposed of the property?
-disposalFees.Other.title=What were your additional costs when you sold or disposed of the property?
+
+disposalFees.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.agent.title=What were your client’s additional disposal costs?
+disposalFees.trust.title=What were the trust’s additional disposal costs?
 disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor. If you shared these costs, you can only claim your share.
+disposalFees.agent.helpText=For example, the amount your client paid to an estate agent or solicitor. If your client shared these costs, they can only claim their share.
+disposalFees.trust.helpText=For example, the amount the trust paid to an estate agent or solicitor. If the trust shared these costs, it can only claim its share.
 disposalFees.error.required=Enter the amount of additional costs when you sold or disposed of the property
-disposalFees.error.invalid=Your share of the additional costs must be an amount of money, like 1,500 or 7,300.50
-disposalFees.error.tooSmall=Selling costs must be 0 or more
-disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less
-disposalFees.error.tooManyDecimals= Selling costs must have 2 decimal places or less, for example 33.33
+disposalFees.agent.error.required=Enter your client’s additional disposal costs
+disposalFees.trust.error.required=Enter the trust’s additional disposal costs
+disposalFees.error.invalid=How much you paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.agent.error.invalid=How much your client paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.trust.error.invalid=How much the trust paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.error.tooSmall=How much you paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.agent.error.tooSmall=How much your client paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.trust.error.tooSmall=How much the trust paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.error.tooLarge=How much you paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.agent.error.tooLarge=How much your client paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.trust.error.tooLarge=How much the trust paid for the additional disposal costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.error.tooManyDecimals=How much you paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.agent.error.tooManyDecimals=How much your client paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.trust.error.tooManyDecimals=How much the trust paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
 
 returns.disposal-details.cya.title=Check your answers
 
-
 acquisitionDetails.caption=Purchase or acquisition details
-
-
 
 acquisitionMethod.title=How did you get the property?
 acquisitionMethod.agent.title=How did your client acquire the property?
