@@ -153,7 +153,6 @@ class UploadSupportingEvidenceController @Inject() (
       }
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def doYouWantToUploadSupportingDocumentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
