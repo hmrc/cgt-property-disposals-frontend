@@ -25,7 +25,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import cats.syntax.eq._
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -41,7 +43,11 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate, isTrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-@key = @{ if(isTrust) "annualExemptAmount.trust" else "annualExemptAmount.individual" }
+@key = @{request.userType match {
+    case Some(UserType.Agent) => "annualExemptAmount.agent"
+    case Some(UserType.Organisation) => "annualExemptAmount.trust"
+    case _ => "annualExemptAmount.individual"
+}}
 @baseKey = @{ "annualExemptAmount" }
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -44,6 +45,16 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @key = @{ "inYearLosses" }
 @valueKey = @{ "inYearLossesValue" }
 @taxYear = @{disposalDate.taxYear}
+@contentKey = @{request.userType match {
+    case Some(UserType.Organisation) => s"$key.trust"
+    case Some(UserType.Agent) => s"$key.agent"
+    case _ => s"$key.individual"
+}}
+@contentValueKey = @{request.userType match {
+    case Some(UserType.Organisation) => s"$valueKey.trust"
+    case Some(UserType.Agent) => s"$valueKey.agent"
+    case _ => s"$valueKey.individual"
+}}
 @title = @{messages(
   "inYearLosses.title",
   taxYear.startDateInclusive.getYear.toString,
@@ -56,7 +67,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
         content = Some(unitInput(
             fieldId = valueKey,
             value = form.data.getOrElse(valueKey, ""),
-            label = Html(messages(s"$valueKey.label")),
+            label = Html(messages(s"$contentValueKey.label")),
             formError = form.error(valueKey),
             hasErrors = form.error(valueKey).nonEmpty,
             autoComplete = AutoCompleteType.On,
@@ -87,7 +98,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(contentKey))
     }
 
     @caption(messages("exemptionAndLosses.caption"))
@@ -102,12 +113,12 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             options = options,
             helpText = Some(Html(
                 messages(
-                    s"$key.helpText",
+                    s"$contentKey.helpText",
                     LocalDateUtils.govDisplayFormat(disposalDate.value)
                 )
             ))
         )
-        <p>@Html(messages(s"$key.link", appConfig.cgtLossesUrl))</p>
+        <p>@Html(messages(s"$contentKey.link", appConfig.cgtLossesUrl))</p>
 
         @submitButton(messages("button.saveAndContinue"))
     }

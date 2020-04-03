@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -39,9 +39,21 @@
         details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[BigDecimal], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, wasAUkResident: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "previousYearsLosses" }
 @valueKey = @{ "previousYearsLossesValue" }
+@contentKey = @{request.userType match {
+    case Some(UserType.Agent) => "previousYearsLosses.agent"
+    case Some(UserType.Organisation) => "previousYearsLosses.trust"
+    case _ => "previousYearsLosses.individual"
+}}
+@contentValueKey = @{request.userType match {
+    case Some(UserType.Agent) => "previousYearsLossesValue.agent"
+    case Some(UserType.Organisation) => "previousYearsLossesValue.trust"
+    case _ => "previousYearsLossesValue.individual"
+}}
+@residentSpecificKey = @{ if(wasAUkResident) s"$contentKey.uk" else s"$contentKey.nonUk" }
+
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -51,7 +63,7 @@
         content = Some(unitInput(
             fieldId = valueKey,
             value = form.data.getOrElse(valueKey, ""),
-            label = Html(messages(s"$valueKey.label")),
+            label = Html(messages(s"$contentValueKey.label")),
             formError = form.error(valueKey),
             hasErrors = form.error(valueKey).nonEmpty,
             autoComplete = AutoCompleteType.On,
@@ -82,7 +94,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(contentKey))
     }
 
     @caption(messages("exemptionAndLosses.caption"))
@@ -95,10 +107,10 @@
             error = form.error(key),
             hasErrors = hasErrors,
             options = options,
-            helpText = Some(Html(messages(s"$key.helpText")))
+            helpText = Some(Html(messages(s"$residentSpecificKey.helpText")))
         )
 
-        <p>@Html(messages(s"$key.link", appConfig.cgtLossesUrl))</p>
+        <p>@Html(messages(s"$key.link", if(wasAUkResident) appConfig.cgtLossesUrl else appConfig.cgtLossesUrlNonUk))</p>
 
         @submitButton(messages("button.saveAndContinue"))
     }
