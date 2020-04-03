@@ -147,9 +147,7 @@ class UploadSupportingEvidenceController @Inject() (
         )(
           page = doYouWantToUploadSupportingEvidencePage(_, _)
         )(
-          requiredPreviousAnswer = { _ =>
-            Some(())
-          },
+          requiredPreviousAnswer               = { _ => Some(()) },
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
         )
       }
@@ -370,22 +368,17 @@ class UploadSupportingEvidenceController @Inject() (
                                                 DraftReturnId(draftReturnId.toString),
                                                 UpscanInitiateReference(reference)
                                               )
-                                              .leftMap(e => Error("error1"))
                 upscanFileDescriptor <- EitherT
                                          .fromOption(
                                            maybeUpscanFileDescriptor,
                                            Error("failed to retrieve upscan file descriptor details")
                                          )
-                                         .leftMap(e => Error("error 2"))
                 prepared <- EitherT
                              .fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
-                             .leftMap(e => Error("error 3"))
                 _ <- upscanConnector
                       .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
-                      .leftMap(e => Error("error 4"))
                 _ <- upscanConnector
                       .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
-                      .leftMap(e => Error("error 5"))
                 updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
                   case IncompleteUploadSupportingEvidenceAnswers(
                       doYouWantToUploadSupportingEvidenceAnswer,
@@ -576,22 +569,17 @@ class UploadSupportingEvidenceController @Inject() (
                                                 DraftReturnId(draftReturnId.toString),
                                                 UpscanInitiateReference(reference)
                                               )
-                                              .leftMap(e => Error("error1"))
                 upscanFileDescriptor <- EitherT
                                          .fromOption(
                                            maybeUpscanFileDescriptor,
                                            Error("failed to retrieve upscan file descriptor details")
                                          )
-                                         .leftMap(e => Error("error 2"))
                 prepared <- EitherT
                              .fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
-                             .leftMap(e => Error("error 3"))
                 _ <- upscanConnector
                       .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
-                      .leftMap(e => Error("error 4"))
                 _ <- upscanConnector
                       .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
-                      .leftMap(e => Error("error 5"))
 
                 updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
                   case IncompleteUploadSupportingEvidenceAnswers(
