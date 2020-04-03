@@ -267,14 +267,15 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
           buildWsResponse(500)
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
-            mockPostMultiPartForm(s3Url, parts)(Some(httpResponse))
+            mockPostMultiPartForm(s3Url, parts, 0)(Some(httpResponse))
             await(
               connector
                 .upload(
                   s3Url,
                   MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
                     Source[ByteString, _]
-                  ]
+                  ],
+                  0
                 )
                 .value
             ) shouldBe Left(
@@ -289,14 +290,15 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
           buildWsResponse(204)
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
-            mockPostMultiPartForm(s3Url, parts)(Some(httpResponse))
+            mockPostMultiPartForm(s3Url, parts, 0)(Some(httpResponse))
             await(
               connector
                 .upload(
                   s3Url,
                   MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
                     Source[ByteString, _]
-                  ]
+                  ],
+                  0
                 )
                 .value
             ) shouldBe Right(())

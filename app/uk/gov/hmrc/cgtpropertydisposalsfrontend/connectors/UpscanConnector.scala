@@ -15,7 +15,9 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
+import java.nio.file.Files.readAllBytes
 
+import play.api.http.HeaderNames.CONTENT_LENGTH
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import cats.data.EitherT
@@ -69,7 +71,7 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]]
 
-  def upload(href: String, form: MultipartFormData[Source[ByteString, _]])(
+  def upload(href: String, form: MultipartFormData[Source[ByteString, _]], filesize: Int)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
@@ -273,7 +275,7 @@ class UpscanConnectorImpl @Inject() (
     )
   }
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-  override def upload(href: String, form: MultipartFormData[Source[ByteString, _]])(
+  override def upload(href: String, form: MultipartFormData[Source[ByteString, _]], filesize: Int)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] = {
 
@@ -285,6 +287,7 @@ class UpscanConnectorImpl @Inject() (
     EitherT[Future, Error, Unit](
       wsClient
         .url(href)
+        .withHttpHeaders(CONTENT_LENGTH -> filesize.toString)
         .post(parts)
         .map { response =>
           response.status match {

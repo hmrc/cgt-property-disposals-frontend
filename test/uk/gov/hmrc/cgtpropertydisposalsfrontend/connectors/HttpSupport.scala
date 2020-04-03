@@ -42,10 +42,20 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
   private val emptyMap = Map.empty[String, String]
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-  def mockPostMultiPartForm[A](url: String, parts: Source[MultipartFormData.Part[Source[ByteString, _]], _])(
+  def mockPostMultiPartForm[A](
+    url: String,
+    parts: Source[MultipartFormData.Part[Source[ByteString, _]], _],
+    filesize: Int
+  )(
     response: Option[WSResponse]
   ): Unit = {
     (mockWsClient.url(_: String)).expects(url).returning(mockWsRequest)
+    (mockWsRequest
+      .withHttpHeaders(_: (String, String)))
+      .expects(*)
+      .returning(
+        this.mockWsRequest
+      )
     (mockWsRequest
       .post(_: Source[MultipartFormData.Part[Source[ByteString, _]], _]))
       .expects(*)
