@@ -20,6 +20,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -27,9 +28,14 @@ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(backLink: Call, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
-@title = @{messages("disposalDateMixedUseOrIndirect.title")}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
+@key = @{"disposalDateMixedUseOrIndirect"}
+
+@title = @{messages(s"$key$userKey.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -37,17 +43,17 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 
 @pageHeading(title)
 <p>
- @messages("disposalDateMixedUseOrIndirect.p1")
-</p>
-<ul class="bullets">
- <li>@messages("disposalDateMixedUseOrIndirect.p1.reason1")</li>
- <li>@messages("disposalDateMixedUseOrIndirect.p1.reason2")</li>
-</ul>
-<h2>@messages("disposalDateMixedUseOrIndirect.h2")</h2>
-<p>
- @Html(messages("disposalDateMixedUseOrIndirect.p2", appConfig.nrcgtReturn))
+ @messages(s"$key$userKey.p1.reason1")
 </p>
 <p>
- @messages("disposalDateMixedUseOrIndirect.p3")
+ @messages(s"$key$userKey.p1.reason2")
+</p>
+
+<h2>@messages(s"$key$userKey.h2")</h2>
+<p>
+ @Html(messages(s"$key$userKey.p2", appConfig.nrcgtReturn))
+</p>
+<p>
+ @messages(s"$key$userKey.p3")
 </p>
 }

@@ -908,12 +908,12 @@ disposalPrice.trust.SoldOther.title=How much did the trust get when it sold or d
 disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
 disposalPrice.agent.Gifted.title=What was the market value of the property when your client gave it away?
 disposalPrice.trust.Gifted.title=What was the market value of the property when the trust gave it away?
-disposalPrice.SoldOther.helpText=If you owned part of the property, only enter the amount you got for your share. You'll be able to enter any additional costs later.
-disposalPrice.agent.SoldOther.helpText=If your client owned part of the property, only enter the amount they got for their share. You'll be able to enter any additional costs later.
-disposalPrice.trust.SoldOther.helpText=If the trust owned part of the property, only enter the amount it got for its share. You'll be able to enter any additional costs later.
-disposalPrice.Gifted.helpText=If you owned part of the property, only enter your share of the market value. You'll be able to enter any additional costs later.
-disposalPrice.agent.Gifted.helpText=If your client owned part of the property, only enter their share of the market value. You'll be able to enter any additional costs later.
-disposalPrice.trust.Gifted.helpText=If the trust owned part of the property, only enter the amount it got for its share. You'll be able to enter any additional costs later.
+disposalPrice.SoldOther.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
+disposalPrice.agent.SoldOther.helpText=If your client owned part of the property, only enter the amount they got for their share. You’ll be able to enter any additional costs later.
+disposalPrice.trust.SoldOther.helpText=If the trust owned part of the property, only enter the amount it got for its share. You’ll be able to enter any additional costs later.
+disposalPrice.Gifted.helpText=If you owned part of the property, only enter your share of the market value. You’ll be able to enter any additional costs later.
+disposalPrice.agent.Gifted.helpText=If your client owned part of the property, only enter their share of the market value. You’ll be able to enter any additional costs later.
+disposalPrice.trust.Gifted.helpText=If the trust owned part of the property, only enter the amount it got for its share. You’ll be able to enter any additional costs later.
 disposalPrice.SoldOther.error.required=Enter how much you sold or disposed of the property for
 disposalPrice.agent.SoldOther.error.required=Enter how much your client sold or disposed of the property for
 disposalPrice.trust.SoldOther.error.required=Enter how much the trust sold or disposed of the property for
@@ -1622,12 +1622,23 @@ multipleDisposalsCountryOfResidence.agent.helpText=It‘s usually the day your c
 multipleDisposalsCountryOfResidence.trust.helpText=It‘s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 
 disposalDateMixedUseOrIndirect.title=You cannot use this service
-disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
-disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use’ UK property
-disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
+disposalDateMixedUseOrIndirect.agent.title=You cannot use this service
+disposalDateMixedUseOrIndirect.trust.title=You cannot use this service
+disposalDateMixedUseOrIndirect.p1.reason1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
+disposalDateMixedUseOrIndirect.agent.p1.reason1=This is because when your client sold or disposed of the property, they exchanged contracts before 6 April 2020.
+disposalDateMixedUseOrIndirect.trust.p1.reason1=This is because when the trust sold or disposed of the property, it exchanged contracts before 6 April 2020.
+disposalDateMixedUseOrIndirect.p1.reason2=If you made an indirect disposal and sold shares not property, it’s because you sold the shares before 6 April 2020.
+disposalDateMixedUseOrIndirect.agent.p1.reason2=If they made an indirect disposal and sold shares not property, it’s because they sold the shares before 6 April 2020.
+disposalDateMixedUseOrIndirect.trust.p1.reason2=If the trust made an indirect disposal and sold shares not property, it’s because it sold the shares before 6 April 2020.
 disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
+disposalDateMixedUseOrIndirect.agent.h2=What you’ll need to do next
+disposalDateMixedUseOrIndirect.trust.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
-disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.
+disposalDateMixedUseOrIndirect.agent.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateMixedUseOrIndirect.trust.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may get a penalty if your payment is late.
+disposalDateMixedUseOrIndirect.agent.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. Your client may get a penalty if your payment is late.
+disposalDateMixedUseOrIndirect.trust.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may get a penalty if your payment is late.
 
 
 initialGainOrLoss.title=Did you make an initial gain or loss?
