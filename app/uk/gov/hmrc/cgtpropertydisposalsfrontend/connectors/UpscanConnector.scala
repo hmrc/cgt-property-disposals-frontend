@@ -15,10 +15,6 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import java.nio.file.Files.readAllBytes
-import play.api.http.HeaderNames.CONTENT_LENGTH
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import cats.data.EitherT
@@ -26,11 +22,10 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
-import play.api.http.HeaderNames.{CONTENT_LENGTH, USER_AGENT}
+import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT}
 import play.api.libs.json.{JsError, JsSuccess, Json, OFormat}
-import play.api.libs.ws.{BodyWritable, InMemoryBody, WSClient}
+import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
-import play.core.formatters.Multipart
 import play.mvc.Http.Status
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
@@ -41,8 +36,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.concurrent.duration.{Duration, SECONDS}
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 final case class UpscanInitiateRequest(
@@ -282,21 +276,6 @@ class UpscanConnectorImpl @Inject() (
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] = {
 
-    implicit val actorSystem       = ActorSystem()
-    implicit val actorMaterializer = ActorMaterializer()
-
-    implicit val multipartBodyWriter: BodyWritable[Source[MultipartFormData.Part[Source[ByteString, _]], _]] = {
-      val boundary    = Multipart.randomBoundary()
-      val contentType = s"multipart/form-data; boundary=$boundary"
-      BodyWritable(
-        body => {
-          val byteString = Multipart.transform(body, boundary).runFold(ByteString.empty)(_ ++ _)
-          InMemoryBody(Await.result(byteString, Duration(90, SECONDS)))
-        },
-        contentType
-      )
-    }
-
     val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] = Source.apply(form.dataParts.flatMap {
       case (key, values) =>
         values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
@@ -305,7 +284,10 @@ class UpscanConnectorImpl @Inject() (
     EitherT[Future, Error, Unit](
       wsClient
         .url(href)
-        .withHttpHeaders(CONTENT_LENGTH -> filesize.toString)
+        .withHttpHeaders(
+          CONTENT_LENGTH -> filesize.toString,
+          CONTENT_TYPE   -> "multipart/form-data; boundary=---WebKitFormBoundary7MA4YWxkTrZu0gW"
+        )
         .post(parts)
         .map { response =>
           response.status match {

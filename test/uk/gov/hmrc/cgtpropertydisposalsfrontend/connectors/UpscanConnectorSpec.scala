@@ -85,9 +85,6 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
     )
   )
 
-  implicit val actorSystem       = ActorSystem()
-  implicit val actorMaterializer = ActorMaterializer()
-
   val connector =
     new UpscanConnectorImpl(mockHttp, mockWsClient, config, new ServicesConfig(config, new RunMode(config, Mode.Test)))
 
