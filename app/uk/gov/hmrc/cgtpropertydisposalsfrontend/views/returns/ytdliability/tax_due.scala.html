@@ -48,7 +48,8 @@
         gainAfterLossesWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_after_losses_workings,
         taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
         taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
 @(form: Form[BigDecimal],
@@ -81,6 +82,10 @@
     @pageHeading(messages(s"$key.title"), Some(messages("ytdLiability.caption")))
 
     <p>@messages(s"$key.p1")</p>
+
+    <p>@messages(s"$key.p2")</p>
+
+    @printLink(messages(s"$key.printLink"))
 
     <ul class="calc-rows with-bottom-margin">
       <li>
@@ -116,7 +121,13 @@
             label = Html(messages("taxDue.title")),
             labelClass = Some("govuk-label--m"),
             labelAsHeading = false,
-            helpText = Some(Html(messages("taxDue.helpText", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())))),
+            extraContent = Some(Html(
+              s"""
+                | <p>${messages("taxDue.helpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds()))}</p>
+                | <p>${messages(s"$key.helpText.p2")}</p>
+                | ${if(isATrust) "<p>" + messages(s"$key.helpText.p3") + "</p>" else ""}
+                |""".stripMargin
+            )),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
@@ -125,6 +136,10 @@
         )
 
         @submitButton(messages("button.saveAndContinue"))
+    }
+
+    @if(isATrust) {
+      @details(messages(s"$key.trustDetails.label"), Html(messages(s"$key.trustDetails.content", viewConfig.trustsForVulnerable)))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
