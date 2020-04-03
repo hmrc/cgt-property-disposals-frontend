@@ -928,11 +928,6 @@ class YearToDateLiabilityController @Inject() (
     val multiPartFormData = request.body
     val upscanReference   = multiPartFormData.dataParts.get("reference").flatMap(_.headOption)
     val mandatoryEvidence = multiPartFormData.file("file")
-    val mandatoryEvidenceFileSize: Int =
-      multiPartFormData
-        .file("file")
-        .map(mandatoryEvidence => readAllBytes(mandatoryEvidence.ref.path).size)
-        .getOrElse(0)
 
     (upscanReference, mandatoryEvidence) match {
       case (None, Some(_)) =>
@@ -980,7 +975,7 @@ class YearToDateLiabilityController @Inject() (
                   currentDraftReturn,
                   UpscanInitiateReference(upscanReference),
                   multiPartFormData,
-                  mandatoryEvidenceFileSize
+                  readAllBytes(file.ref).size
                 )
             _ <- returnsService.storeDraftReturn(
                   newDraftReturn,
