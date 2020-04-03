@@ -813,7 +813,6 @@ class UploadSupportingEvidenceController @Inject() (
       }
     }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   private def checkYourAnswersHandler(
     answers: UploadSupportingEvidenceAnswers,
     fillingOutReturn: FillingOutReturn,
