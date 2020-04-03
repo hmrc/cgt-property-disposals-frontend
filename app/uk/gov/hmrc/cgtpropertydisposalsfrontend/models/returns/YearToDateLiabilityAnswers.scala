@@ -37,12 +37,13 @@ object YearToDateLiabilityAnswers {
     final case class IncompleteNonCalculatedYTDAnswers(
       taxableGainOrLoss: Option[AmountInPence],
       hasEstimatedDetails: Option[Boolean],
-      taxDue: Option[AmountInPence]
+      taxDue: Option[AmountInPence],
+      mandatoryEvidence: Option[MandatoryEvidence]
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
       val empty: IncompleteNonCalculatedYTDAnswers =
-        IncompleteNonCalculatedYTDAnswers(None, None, None)
+        IncompleteNonCalculatedYTDAnswers(None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteNonCalculatedYTDAnswers
@@ -50,14 +51,16 @@ object YearToDateLiabilityAnswers {
         IncompleteNonCalculatedYTDAnswers(
           Some(c.taxableGainOrLoss),
           Some(c.hasEstimatedDetails),
-          Some(c.taxDue)
+          Some(c.taxDue),
+          Some(c.mandatoryEvidence)
         )
     }
 
     final case class CompleteNonCalculatedYTDAnswers(
       taxableGainOrLoss: AmountInPence,
       hasEstimatedDetails: Boolean,
-      taxDue: AmountInPence
+      taxDue: AmountInPence,
+      mandatoryEvidence: MandatoryEvidence
     ) extends NonCalculatedYTDAnswers
 
     implicit class NonCalculatedYTDLiabilityAnswersOps(private val a: NonCalculatedYTDAnswers) extends AnyVal {
@@ -89,7 +92,7 @@ object YearToDateLiabilityAnswers {
       hasEstimatedDetails: Option[Boolean],
       calculatedTaxDue: Option[CalculatedTaxDue],
       taxDue: Option[AmountInPence],
-      mandatoryEvidence: Option[String]
+      mandatoryEvidence: Option[MandatoryEvidence]
     ) extends CalculatedYTDAnswers
 
     object IncompleteCalculatedYTDAnswers {
@@ -116,7 +119,7 @@ object YearToDateLiabilityAnswers {
       hasEstimatedDetails: Boolean,
       calculatedTaxDue: CalculatedTaxDue,
       taxDue: AmountInPence,
-      mandatoryEvidence: Option[String]
+      mandatoryEvidence: Option[MandatoryEvidence]
     ) extends CalculatedYTDAnswers
 
     implicit class CalculatedYTDLiabilityAnswersOps(private val a: CalculatedYTDAnswers) extends AnyVal {

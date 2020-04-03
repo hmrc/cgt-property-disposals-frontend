@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability
 
+import java.time.LocalDateTime
+
+import akka.stream.scaladsl.{FileIO, Source}
+import akka.util.ByteString
 import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
@@ -26,16 +30,20 @@ import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText, of}
 import play.api.http.Writeable
+import play.api.libs.Files
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingEvidenceController.FileUpload
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
@@ -45,12 +53,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, FormUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.UPLOADED
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{ytdliability => pages}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -63,6 +75,8 @@ class YearToDateLiabilityController @Inject() (
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
   cgtCalculationService: CgtCalculationService,
+  upscanService: UpscanService,
+  upscanConnector: UpscanConnector,
   cc: MessagesControllerComponents,
   val config: Configuration,
   estimatedIncomePage: pages.estimated_income,
@@ -79,6 +93,8 @@ class YearToDateLiabilityController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
+
+  private val maxFileSize: Int = config.get[Int]("microservice.services.upscan-initiate.max-file-size")
 
   private def withFillingOutReturnAndYTDLiabilityAnswers(
     request: RequestWithSessionData[_]
@@ -662,6 +678,7 @@ class YearToDateLiabilityController @Inject() (
       } else {
         val newAnswers = nonCalculatedAnswers
           .unset(_.taxDue)
+          .unset(_.mandatoryEvidence)
           .copy(hasEstimatedDetails = Some(hasEstimated))
 
         draftReturn.fold(
@@ -827,23 +844,41 @@ class YearToDateLiabilityController @Inject() (
 
   def uploadMandatoryEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      def commonDisposalMandatoryEvidence(backLink: Call): Future[Result] =
+        upscanService
+          .initiate(
+            DraftReturnId(fillingOutReturn.draftReturn.id.toString),
+            fillingOutReturn.subscribedDetails.cgtReference,
+            LocalDateTime.now()
+          )
+          .fold(
+            { e =>
+              logger.warn("Could not initiate upscan", e)
+              errorHandler.errorResult()
+            },
+            success => Ok(mandatoryEvidencePage(mandatoryEvidenceForm, success.upscanInitiateReference, backLink))
+          )
+
       (answers, fillingOutReturn.draftReturn) match {
         case (calculatedAnswers: CalculatedYTDAnswers, _: DraftSingleDisposalReturn) =>
           withTaxDueAndCalculatedTaxDue(calculatedAnswers) { (taxDue, calculatedTaxDue) =>
             if (calculatedTaxDue.amountOfTaxDue === taxDue) {
               Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
             } else {
-              val form = calculatedAnswers
-                .fold(_.mandatoryEvidence, _.mandatoryEvidence)
-                .fold(mandatoryEvidenceForm)(mandatoryEvidenceForm.fill)
               val backLink = calculatedAnswers.fold(
                 _ => routes.YearToDateLiabilityController.taxDue(),
                 _ => routes.YearToDateLiabilityController.checkYourAnswers()
               )
-
-              Ok(mandatoryEvidencePage(form, backLink))
+              commonDisposalMandatoryEvidence(backLink)
             }
           }
+
+        case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, _) =>
+          val backLink = nonCalculatedYTDAnswers.fold(
+            _ => routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
+            _ => routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+          commonDisposalMandatoryEvidence(backLink)
 
         case _ =>
           Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -852,8 +887,8 @@ class YearToDateLiabilityController @Inject() (
     }
   }
 
-  def uploadMandatoryEvidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def uploadMandatoryEvidenceSubmit(): Action[MultipartFormData[Files.TemporaryFile]] =
+    authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
@@ -865,51 +900,140 @@ class YearToDateLiabilityController @Inject() (
                   _ => routes.YearToDateLiabilityController.taxDue(),
                   _ => routes.YearToDateLiabilityController.checkYourAnswers()
                 )
-                mandatoryEvidenceForm
-                  .bindFromRequest()
-                  .fold(
-                    formWithErrors => BadRequest(mandatoryEvidencePage(formWithErrors, backLink)), { s =>
-                      val updatedDraftReturn = draftReturn.copy(
-                        yearToDateLiabilityAnswers = Some(
-                          calculatedAnswers.fold(
-                            _.copy(mandatoryEvidence = Some(s)),
-                            _.copy(mandatoryEvidence = Some(s))
-                          )
-                        )
-                      )
-
-                      val result =
-                        for {
-                          _ <- returnsService.storeDraftReturn(
-                                updatedDraftReturn,
-                                fillingOutReturn.subscribedDetails.cgtReference,
-                                fillingOutReturn.agentReferenceNumber
-                              )
-                          _ <- EitherT(
-                                updateSession(sessionStore, request)(
-                                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
-                                )
-                              )
-                        } yield ()
-
-                      result.fold(
-                        { e =>
-                          logger.warn("Could not update return", e)
-                          errorHandler.errorResult()
-                        },
-                        _ => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-                      )
-                    }
-                  )
-
+                handleMandatoryEvidenceSubmit(calculatedAnswers, draftReturn, fillingOutReturn, backLink)
               }
             }
+
+          case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, draftReturn) =>
+            val backLink = nonCalculatedYTDAnswers.fold(
+              _ => routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
+              _ => routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+            handleMandatoryEvidenceSubmit(nonCalculatedYTDAnswers, draftReturn, fillingOutReturn, backLink)
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
       }
+    }
+
+  private def handleMandatoryEvidenceSubmit(
+    currentAnswers: YearToDateLiabilityAnswers,
+    currentDraftReturn: DraftReturn,
+    currentJourney: FillingOutReturn,
+    backLink: Call
+  )(implicit request: RequestWithSessionData[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
+    val multiPartFormData = request.body
+    val upscanReference   = multiPartFormData.dataParts.get("reference").flatMap(_.headOption)
+    val mandatoryEvidence = multiPartFormData.file("file")
+
+    (upscanReference, mandatoryEvidence) match {
+      case (None, Some(_)) =>
+        logger.warn("Could not find upscan file descriptor id")
+        errorHandler.errorResult()
+
+      case (Some(_), None) =>
+        logger.warn("Could not find file in form")
+        errorHandler.errorResult()
+
+      case (None, None) =>
+        logger.warn("Could not find upscan file descriptor id or file in form")
+        errorHandler.errorResult()
+
+      case (Some(upscanReference), Some(file)) =>
+        if (file.filename.trim().isEmpty)
+          BadRequest(
+            mandatoryEvidencePage(
+              mandatoryEvidenceForm.bindFromRequest(multiPartFormData.asFormUrlEncoded),
+              UpscanInitiateReference(upscanReference),
+              backLink
+            )
+          )
+        else {
+          val newMandatoryEvidence = MandatoryEvidence(upscanReference, file.filename)
+          val newAnswers = currentAnswers match {
+            case c: CalculatedYTDAnswers =>
+              c.fold(
+                _.copy(mandatoryEvidence = Some(newMandatoryEvidence)),
+                _.copy(mandatoryEvidence = Some(newMandatoryEvidence))
+              )
+            case n: NonCalculatedYTDAnswers =>
+              n.fold(
+                _.copy(mandatoryEvidence = Some(newMandatoryEvidence)),
+                _.copy(mandatoryEvidence = newMandatoryEvidence)
+              )
+          }
+          val newDraftReturn = currentDraftReturn.fold(
+            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+            _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+          )
+
+          val result = for {
+            _ <- uploadFile(currentDraftReturn, UpscanInitiateReference(upscanReference), multiPartFormData)
+            _ <- returnsService.storeDraftReturn(
+                  newDraftReturn,
+                  currentJourney.subscribedDetails.cgtReference,
+                  currentJourney.agentReferenceNumber
+                )
+            _ <- EitherT(
+                  updateSession(sessionStore, request)(
+                    _.copy(journeyStatus = Some(currentJourney.copy(draftReturn = newDraftReturn)))
+                  )
+                )
+          } yield ()
+
+          result.fold(
+            error => {
+              logger.warn(s"failed to upload file with error: $error")
+              errorHandler.errorResult()
+            },
+            _ => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          )
+        }
+    }
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  private def uploadFile(
+    draftReturn: DraftReturn,
+    upscanInitiateReference: UpscanInitiateReference,
+    submittedFile: MultipartFormData[Files.TemporaryFile]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
+    for {
+      maybeUpscanFileDescriptor <- upscanService
+                                    .getUpscanFileDescriptor(
+                                      DraftReturnId(draftReturn.id.toString),
+                                      upscanInitiateReference
+                                    )
+      upscanFileDescriptor <- EitherT
+                               .fromOption(
+                                 maybeUpscanFileDescriptor,
+                                 Error("failed to retrieve upscan file descriptor details")
+                               )
+      prepared <- EitherT.pure[Future, Error](
+                   handleGetFileDescriptorResult(submittedFile, upscanFileDescriptor)
+                 )
+      _ <- upscanConnector
+            .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+      _ <- upscanConnector
+            .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+    } yield ()
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  private def handleGetFileDescriptorResult(
+    multipart: MultipartFormData[Files.TemporaryFile],
+    upscanFileDescriptor: UpscanFileDescriptor
+  ): MultipartFormData[Source[ByteString, Any]] = {
+    val userFile =
+      multipart.files
+        .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
+    multipart
+      .copy(
+        files = userFile,
+        dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
+          .mapValues(fieldValue => Seq(fieldValue))
+      )
   }
 
   def taxableGainOrLoss(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -962,6 +1086,7 @@ class YearToDateLiabilityController @Inject() (
               val newAnswers = nonCalculatedAnswers
                 .unset(_.hasEstimatedDetails)
                 .unset(_.taxDue)
+                .unset(_.mandatoryEvidence)
                 .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
 
               draftReturn.fold(
@@ -1022,11 +1147,7 @@ class YearToDateLiabilityController @Inject() (
               if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue))
                 draftReturn
               else {
-                val newAnswers = nonCalculatedAnswers.fold(
-                  _.copy(taxDue = Some(taxDue)),
-                  _.copy(taxDue = taxDue)
-                )
-
+                val newAnswers = nonCalculatedAnswers.unset(_.mandatoryEvidence).copy(taxDue = Some(taxDue))
                 draftReturn.fold(
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -1061,17 +1182,20 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case IncompleteNonCalculatedYTDAnswers(None, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(None, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxableGainOrLoss())
 
-      case IncompleteNonCalculatedYTDAnswers(_, None, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, None, _, _) =>
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, None) =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, None, _) =>
         Redirect(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue())
 
-      case IncompleteNonCalculatedYTDAnswers(Some(t), Some(e), Some(d)) =>
-        val completeAnswers = CompleteNonCalculatedYTDAnswers(t, e, d)
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, None) =>
+        Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
+
+      case IncompleteNonCalculatedYTDAnswers(Some(t), Some(e), Some(d), Some(m)) =>
+        val completeAnswers = CompleteNonCalculatedYTDAnswers(t, e, d, m)
         val updatedDraftReturn = draftReturn.fold(
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
@@ -1160,7 +1284,7 @@ class YearToDateLiabilityController @Inject() (
     h: Boolean,
     c: CalculatedTaxDue,
     t: AmountInPence,
-    m: Option[String],
+    m: Option[MandatoryEvidence],
     disposalDate: DisposalDate
   )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val completeAnswers = CompleteCalculatedYTDAnswers(e, p, h, c, t, m)
@@ -1236,11 +1360,12 @@ object YearToDateLiabilityController {
       )(identity)(Some(_))
     )
 
-  val mandatoryEvidenceForm: Form[String] =
+  val mandatoryEvidenceForm: Form[FileUpload] =
     Form(
       mapping(
-        "mandatoryEvidence" -> nonEmptyText
-      )(identity)(Some(_))
+        "mandatoryEvidence" -> nonEmptyText,
+        "reference"         -> nonEmptyText
+      )(FileUpload.apply)(FileUpload.unapply)
     )
 
   val taxableGainOrLossForm: Form[BigDecimal] = {

@@ -446,6 +446,8 @@ trait YearToDateLiabilityAnswersGen extends LowerPriorityYearToDateLiabilityAnsw
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
 
+  implicit val mandatoryEvidenceGen: Gen[MandatoryEvidence] = gen[MandatoryEvidence]
+
 }
 
 trait LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>

@@ -60,8 +60,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, UploadSupportingEvidenceAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -953,7 +953,7 @@ class TaskListControllerSpec
             triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
-            yearToDateLiabilityAnswers    = Some(sample[CalculatedYTDAnswers]),
+            yearToDateLiabilityAnswers    = Some(sample[CompleteCalculatedYTDAnswers]),
             uploadSupportingDocuments     = Some(sample[UploadSupportingEvidenceAnswers])
           )
 

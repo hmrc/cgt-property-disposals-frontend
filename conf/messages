@@ -1451,8 +1451,8 @@ calculator.total.amountDueAtHigherRate=Amount of tax due at the higher rate
 calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
-mandatoryEvidence.title=Add a document showing how you worked out the tax
-mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) showing how you worked out the Capital Gains Tax. For example, a spreadsheet or PDF.
+mandatoryEvidence.title=Upload a document showing how the Capital gains Tax due was worked out
+mandatoryEvidence.helpText=Files can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 7 days.
 
 ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
