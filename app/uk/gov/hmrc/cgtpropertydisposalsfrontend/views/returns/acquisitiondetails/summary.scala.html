@@ -14,10 +14,12 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import cats.instances.long._
 @import cats.syntax.eq._
 @import java.time.LocalDate
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
@@ -39,7 +41,7 @@
         isUk: Boolean,
         canRebase: Boolean,
         isATrust: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @rebasingKey = @{if(canRebase && answers.shouldUseRebase) ".rebased" else ""}

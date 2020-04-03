@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 sealed trait UpscanInitiateResponse
 
 object UpscanInitiateResponse {
-  case object MaximumFileUploadReached extends UpscanInitiateResponse
-  case object FailedToGetUpscanSnapshot extends UpscanInitiateResponse
-  final case class UpscanInititateResponseStored(value: String) extends UpscanInitiateResponse
+  final case class UpscanInitiateSuccess(upscanInitiateReference: UpscanInitiateReference)
+      extends UpscanInitiateResponse
 }

@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
+import java.time.LocalDateTime
+
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Singleton}
@@ -25,9 +27,9 @@ import javax.inject.Inject
 import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.READY_TO_UPLOAD
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInititateResponseStored
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInitiateSuccess
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,17 +39,29 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[UpscanServiceImpl])
 trait UpscanService {
-  def initiate(cgtReference: CgtReference)(
+  def initiate(draftReturnId: DraftReturnId, cgtReference: CgtReference, timestamp: LocalDateTime)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, UpscanInitiateResponse]
+  ): EitherT[Future, Error, UpscanInitiateSuccess]
 
-  def getUpscanFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
+  def getUpscanFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]]
 
   def updateUpscanFileDescriptorStatus(upscanFileDescriptor: UpscanFileDescriptor)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
+
+  def removeFile(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
+  def removeAllFiles(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
+  def getAll(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[UpscanFileDescriptor]]
 
 }
 
@@ -67,47 +81,73 @@ class UpscanServiceImpl @Inject() (
 
   private def hasReachedMaxFileUpload(upscanSnapshot: UpscanSnapshot): Either[Error, Unit] =
     if (upscanSnapshot.fileUploadCount >= maxUploads) {
-      Left(Error("maximum number of file uploads has been exceeded"))
+      Left(Error(MaxUploads))
     } else {
       Right(())
     }
 
   private def augmentUpscanInitiateResponse(
+    draftReturnId: DraftReturnId,
     cgtReference: CgtReference,
-    upscanInitiateRawResponse: UpscanInitiateRawResponse
+    upscanInitiateRawResponse: UpscanInitiateRawResponse,
+    timestamp: LocalDateTime
   ): Either[Error, UpscanFileDescriptor] =
     Right(
       UpscanFileDescriptor(
-        key            = upscanInitiateRawResponse.reference,
-        cgtReference   = cgtReference,
-        fileDescriptor = FileDescriptor(upscanInitiateRawResponse.reference, upscanInitiateRawResponse.uploadRequest),
-        status         = READY_TO_UPLOAD
+        upscanInitiateReference = UpscanInitiateReference(upscanInitiateRawResponse.reference),
+        draftReturnId           = draftReturnId,
+        cgtReference            = cgtReference,
+        fileDescriptor          = FileDescriptor(upscanInitiateRawResponse.reference, upscanInitiateRawResponse.uploadRequest),
+        timestamp               = timestamp,
+        status                  = READY_TO_UPLOAD
       )
     )
 
   override def initiate(
-    cgtReference: CgtReference //FIXME: should the draft return id
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanInitiateResponse] =
+    draftReturnId: DraftReturnId,
+    cgtReference: CgtReference,
+    timestamp: LocalDateTime
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanInitiateSuccess] =
     for {
-      snapshot     <- upscanConnector.getUpscanSnapshot(cgtReference)
+      snapshot     <- upscanConnector.getUpscanSnapshot(draftReturnId)
       _            <- EitherT.fromEither(hasReachedMaxFileUpload(snapshot))
-      httpResponse <- upscanConnector.initiate(cgtReference)
+      httpResponse <- upscanConnector.initiate(draftReturnId)
       upscanInitiateRawResponse <- EitherT.fromOption(
                                     httpResponse.json.validate[UpscanInitiateRawResponse].asOpt,
                                     Error("could not parse upscan initiate response")
                                   )
-      upscanFileDescriptor <- EitherT.fromEither(augmentUpscanInitiateResponse(cgtReference, upscanInitiateRawResponse))
-      _                    <- upscanConnector.saveUpscanFileDescriptors(upscanFileDescriptor)
-    } yield UpscanInititateResponseStored(upscanFileDescriptor.fileDescriptor.reference)
+      upscanFileDescriptor <- EitherT.fromEither(
+                               augmentUpscanInitiateResponse(
+                                 draftReturnId,
+                                 cgtReference,
+                                 upscanInitiateRawResponse,
+                                 timestamp
+                               )
+                             )
+      _ <- upscanConnector.saveUpscanFileDescriptors(upscanFileDescriptor)
+    } yield UpscanInitiateSuccess(UpscanInitiateReference(upscanFileDescriptor.fileDescriptor.reference))
 
-  override def getUpscanFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
+  override def getUpscanFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]] =
-    upscanConnector.getFileDescriptor(cgtReference, upscanInitiateReference)
+    upscanConnector.getFileDescriptor(draftReturnId, upscanInitiateReference)
 
   override def updateUpscanFileDescriptorStatus(upscanFileDescriptor: UpscanFileDescriptor)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] =
     upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor)
+
+  override def removeFile(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] =
+    upscanConnector.removeFile(draftReturnId, upscanInitiateReference)
+
+  override def removeAllFiles(draftReturnId: DraftReturnId)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
+    upscanConnector.removeAllFiles(draftReturnId)
+
+  override def getAll(
+    draftReturnId: DraftReturnId
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[UpscanFileDescriptor]] =
+    upscanConnector.getAll(draftReturnId)
 
 }

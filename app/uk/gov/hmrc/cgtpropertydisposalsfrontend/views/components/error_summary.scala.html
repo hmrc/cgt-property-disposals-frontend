@@ -14,7 +14,9 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
 @import play.api.data.Form
+
 @this()
 
 @(form: Form[_], customErrorKey: Option[String] = None, userKeyOnly: String = "")(implicit messages: Messages)

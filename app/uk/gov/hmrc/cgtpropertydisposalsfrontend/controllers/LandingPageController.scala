@@ -31,16 +31,10 @@ class LandingPageController @Inject() (
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
-  def landingPage(): Action[AnyContent] = Action { implicit request =>
-    Ok(landing_page())
-  }
+  def landingPage(): Action[AnyContent] = Action(implicit request => Ok(landing_page()))
 
-  def agentsLandingPage(): Action[AnyContent] = Action { implicit request =>
-    Ok(agents_landing_page())
-  }
+  def agentsLandingPage(): Action[AnyContent] = Action(implicit request => Ok(agents_landing_page()))
 
-  def signInPage(): Action[AnyContent] = Action { implicit request =>
-    Ok(sign_in_page())
-  }
+  def signInPage(): Action[AnyContent] = Action(implicit request => Ok(sign_in_page()))
 
 }

@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
@@ -26,7 +28,7 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@()(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"submitReturnError"}
 @title = @{messages(s"$key.title")}

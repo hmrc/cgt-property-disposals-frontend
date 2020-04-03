@@ -159,10 +159,12 @@ class YearToDateLiabilityController @Inject() (
                       updateSession(sessionStore, request)(
                         _.copy(
                           journeyStatus = Some(
-                            fillingOutReturn.copy(draftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(
-                              incomplete.copy(calculatedTaxDue = Some(calculatedTaxDue))
-                            )
-                            )
+                            fillingOutReturn.copy(draftReturn =
+                              draftReturn.copy(yearToDateLiabilityAnswers =
+                                Some(
+                                  incomplete.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                                )
+                              )
                             )
                           )
                         )
@@ -392,9 +394,7 @@ class YearToDateLiabilityController @Inject() (
             commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
               form = estimatedIncomeForm
             )(
-              page = { (form, backLink) =>
-                estimatedIncomePage(form, backLink, disposalDate)
-              }
+              page = { (form, backLink) => estimatedIncomePage(form, backLink, disposalDate) }
             )(
               requiredPreviousAnswer               = _ => Some(()),
               redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -721,19 +721,20 @@ class YearToDateLiabilityController @Inject() (
                 _.taxDue.fold(taxDueForm)(t => taxDueForm.fill(t.inPounds())),
                 c => taxDueForm.fill(c.taxDue.inPounds())
               )
-            )(page = taxDuePage(
-              _,
-              _,
-              triage,
-              disposalDetails,
-              acquisitionDetails,
-              reliefDetails,
-              exemptionsAndLossesDetails,
-              estimatedIncome,
-              personalAllowance,
-              calculatedTaxDue,
-              fillingOutReturn.subscribedDetails.isATrust
-            )
+            )(page =
+              taxDuePage(
+                _,
+                _,
+                triage,
+                disposalDetails,
+                acquisitionDetails,
+                reliefDetails,
+                exemptionsAndLossesDetails,
+                estimatedIncome,
+                personalAllowance,
+                calculatedTaxDue,
+                fillingOutReturn.subscribedDetails.isATrust
+              )
             )(
               _.fold(
                 _.hasEstimatedDetails,
@@ -790,19 +791,20 @@ class YearToDateLiabilityController @Inject() (
           ) { calculatedTaxDue =>
             commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
               form = taxDueForm
-            )(page = taxDuePage(
-              _,
-              _,
-              triage,
-              disposalDetails,
-              acquisitionDetails,
-              reliefDetails,
-              exemptionsAndLossesDetails,
-              estimatedIncome,
-              personalAllowance,
-              calculatedTaxDue,
-              fillingOutReturn.subscribedDetails.isATrust
-            )
+            )(page =
+              taxDuePage(
+                _,
+                _,
+                triage,
+                disposalDetails,
+                acquisitionDetails,
+                reliefDetails,
+                exemptionsAndLossesDetails,
+                estimatedIncome,
+                personalAllowance,
+                calculatedTaxDue,
+                fillingOutReturn.subscribedDetails.isATrust
+              )
             )(
               _.fold(
                 _.hasEstimatedDetails,
@@ -919,10 +921,11 @@ class YearToDateLiabilityController @Inject() (
         case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
           commonDisplayBehaviour(
             nonCalculatedAnswers
-          )(form = _.fold(
-            _.taxableGainOrLoss.fold(taxableGainOrLossForm)(a => taxableGainOrLossForm.fill(a.inPounds())),
-            c => taxableGainOrLossForm.fill(c.taxableGainOrLoss.inPounds())
-          )
+          )(form =
+            _.fold(
+              _.taxableGainOrLoss.fold(taxableGainOrLossForm)(a => taxableGainOrLossForm.fill(a.inPounds())),
+              c => taxableGainOrLossForm.fill(c.taxableGainOrLoss.inPounds())
+            )
           )(
             page = taxableGainOrLossPage(_, _)
           )(
@@ -980,10 +983,11 @@ class YearToDateLiabilityController @Inject() (
         case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
           commonDisplayBehaviour(
             nonCalculatedAnswers
-          )(form = _.fold(
-            _.taxDue.fold(nonCalculatedTaxDueForm)(a => nonCalculatedTaxDueForm.fill(a.inPounds())),
-            c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
-          )
+          )(form =
+            _.fold(
+              _.taxDue.fold(nonCalculatedTaxDueForm)(a => nonCalculatedTaxDueForm.fill(a.inPounds())),
+              c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
+            )
           )(
             page = nonCalculatedEnterTaxDuePage(_, _)
           )(
@@ -1037,9 +1041,7 @@ class YearToDateLiabilityController @Inject() (
     withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
       (answers, fillingOutReturn.draftReturn) match {
         case (c: CalculatedYTDAnswers, s: DraftSingleDisposalReturn) =>
-          withDisposalDate(s) { disposalDate =>
-            checkYourAnswersHandleCalculated(c, fillingOutReturn, s, disposalDate)
-          }
+          withDisposalDate(s)(disposalDate => checkYourAnswersHandleCalculated(c, fillingOutReturn, s, disposalDate))
 
         case (n: NonCalculatedYTDAnswers, d) =>
           checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d)

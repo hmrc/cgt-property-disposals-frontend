@@ -1064,15 +1064,16 @@ class AgentAccessControllerSpec
             mockGetDraftReturns(ukClientDetails.cgtReference, returnsList)(Right(draftReturns))
             mockStoreSession(
               SessionData.empty
-                .copy(journeyStatus = Some(
-                  Subscribed(
-                    ukClientDetails,
-                    agentGGCredId,
-                    Some(agentReferenceNumber),
-                    draftReturns,
-                    returnsList
+                .copy(journeyStatus =
+                  Some(
+                    Subscribed(
+                      ukClientDetails,
+                      agentGGCredId,
+                      Some(agentReferenceNumber),
+                      draftReturns,
+                      returnsList
+                    )
                   )
-                )
                 )
             )(Left(Error("")))
           }

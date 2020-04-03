@@ -29,7 +29,7 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
 import play.mvc.Http.Status
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan => _, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -53,11 +53,11 @@ final object UpscanInitiateRequest {
 @ImplementedBy(classOf[UpscanConnectorImpl])
 trait UpscanConnector {
 
-  def getUpscanSnapshot(cgtReference: CgtReference)(
+  def getUpscanSnapshot(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, UpscanSnapshot]
 
-  def initiate(cgtReference: CgtReference)(
+  def initiate(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -65,7 +65,7 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
-  def getFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
+  def getFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]]
 
@@ -77,6 +77,17 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
+  def removeFile(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
+  def removeAllFiles(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
+  def getAll(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[UpscanFileDescriptor]]
 }
 @Singleton
 class UpscanConnectorImpl @Inject() (
@@ -109,9 +120,9 @@ class UpscanConnectorImpl @Inject() (
   private val maxFileSize: Long = getUpscanInitiateConfig[Long]("max-file-size")
 
   override def getUpscanSnapshot(
-    cgtReference: CgtReference
+    draftReturnId: DraftReturnId
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanSnapshot] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-snapshot-info/cgt-reference/${cgtReference.value}"
+    val url = baseUrl + s"/cgt-property-disposals/upscan-snapshot-info/draft-return-id/${draftReturnId.value}"
     EitherT[Future, Error, UpscanSnapshot](
       http
         .get(url)
@@ -127,11 +138,41 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
-  override def initiate(cgtReference: CgtReference)(
+  override def removeFile(
+    draftReturnId: DraftReturnId,
+    upscanInitiateReference: UpscanInitiateReference
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
+    val url =
+      baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
+    EitherT[Future, Error, Unit](
+      http
+        .get(url)
+        .map(_ => Right(()))
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+  }
+
+  override def removeAllFiles(
+    draftReturnId: DraftReturnId
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
+    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/delete-all-files/${draftReturnId.value}"
+    EitherT[Future, Error, Unit](
+      http
+        .get(url)
+        .map(_ => Right(()))
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+  }
+
+  override def initiate(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val payload = UpscanInitiateRequest(
-      baseUrl + s"/cgt-property-disposals/upscan-call-back/cgt-reference/${cgtReference.value}",
+      baseUrl + s"/cgt-property-disposals/upscan-call-back/draft-return-id/${draftReturnId.value}",
       minFileSize,
       maxFileSize
     )
@@ -168,16 +209,42 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
-  override def getFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
+  override def getFileDescriptor(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/${upscanInitiateReference.value}"
+    val url =
+      baseUrl + s"/cgt-property-disposals/upscan-fd/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
+
     EitherT[Future, Error, Option[UpscanFileDescriptor]](
       http
         .get(url)
         .map { httpResponse =>
           httpResponse.status match {
             case Status.OK => Right(Json.fromJson[UpscanFileDescriptor](httpResponse.json).asOpt)
+            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
+              Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
+          }
+        }
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+  }
+
+  override def getAll(draftReturnId: DraftReturnId)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[UpscanFileDescriptor]] = {
+    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/all/${draftReturnId.value}"
+    EitherT[Future, Error, List[UpscanFileDescriptor]](
+      http
+        .get(url)
+        .map { httpResponse =>
+          httpResponse.status match {
+            case Status.OK =>
+              Right(Json.fromJson[List[UpscanFileDescriptor]](httpResponse.json).asOpt match {
+                case Some(fd) => fd
+                case None     => List()
+              })
             case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
               Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
           }

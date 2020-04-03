@@ -14,10 +14,11 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import cats.instances.long._
 @import cats.syntax.eq._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
@@ -29,7 +30,7 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate, isATrust: Boolean)(implicit messages: Messages)
 
 @cyaSection() {
   @if(answers.inYearLosses.value === 0L) {

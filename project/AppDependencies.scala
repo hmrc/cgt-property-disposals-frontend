@@ -14,7 +14,8 @@ object AppDependencies {
     "com.github.kxbmap"          %% "configs"                  % "0.4.4",
     "org.julienrf"               %% "play-json-derived-codecs" % "7.0.0",
     "com.github.julien-truffaut" %% "monocle-core"             % "2.0.0",
-    "com.github.julien-truffaut" %% "monocle-macro"            % "2.0.0"
+    "com.github.julien-truffaut" %% "monocle-macro"            % "2.0.0",
+    "com.github.ghik"            % "silencer-lib"              % "1.6.0" % Provided cross CrossVersion.full
   )
 
   val test = Seq(

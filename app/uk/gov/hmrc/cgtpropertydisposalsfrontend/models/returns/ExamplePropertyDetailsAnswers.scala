@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import com.github.ghik.silencer.silent
 import julienrf.json.derived
 import monocle.Lens
 import monocle.macros.Lenses
@@ -80,7 +81,7 @@ object ExamplePropertyDetailsAnswers {
 
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  @silent
   implicit val format: OFormat[ExamplePropertyDetailsAnswers] = {
     implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
     derived.oformat()

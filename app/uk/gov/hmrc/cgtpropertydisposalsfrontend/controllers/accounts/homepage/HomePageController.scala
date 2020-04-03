@@ -66,9 +66,7 @@ class HomePageController @Inject() (
   // homepage for after private beta: includes functionality to do with returns
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser { (_, subscribed) =>
-        Ok(homePage(subscribed))
-      }(withUplift = true)
+      withSubscribedUser((_, subscribed) => Ok(homePage(subscribed)))(withUplift = true)
   }
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>

@@ -14,11 +14,12 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import cats.instances.long._
 @import cats.syntax.eq._
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption
@@ -30,7 +31,7 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: CompleteReliefDetailsAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteReliefDetailsAnswers)(implicit messages: Messages)
 
 @cyaSection() {
   @if(answers.privateResidentsRelief.value === 0L) {

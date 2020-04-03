@@ -14,17 +14,14 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import play.api.i18n.Messages
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{Residential, NonResidential}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus._
 
 @this(
         calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum,
@@ -38,17 +35,12 @@
         taxYear: TaxYear,
         assetType: AssetType,
         isATrust: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit messages: Messages)
 
 @taxableIncome = @{ calculatedTax match {
   case _: CalculatedTaxDue.NonGainCalculatedTaxDue => None
   case g: CalculatedTaxDue.GainCalculatedTaxDue => Some(g.taxableIncome)
 }}
-
-@rates = @{ assetType match {
-  case Residential => (taxYear.cgtRateLowerBandResidential, taxYear.cgtRateHigherBandResidential)
-  case _ => (taxYear.cgtRateLowerBandNonResidential, taxYear.cgtRateHigherBandNonResidential)
-} }
 
 @taxDueAtLowerRate = @{
   calculatedTax match {

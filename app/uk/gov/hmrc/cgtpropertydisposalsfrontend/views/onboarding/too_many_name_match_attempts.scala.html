@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.api.mvc.Call
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
@@ -23,7 +26,7 @@
   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("enterSaUtr.tooManyAttempts.title")}
 

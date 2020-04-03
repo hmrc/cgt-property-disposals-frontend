@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-@this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
-)
-
-@()(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
-
-@mainTemplate(title = "Upscan Success Page", userType = None) {
-    <h1>File Has Been Successfully Uploaded</h1>
-}
+sealed trait UpscanErrors extends Exception
+case object MaxUploads extends UpscanErrors

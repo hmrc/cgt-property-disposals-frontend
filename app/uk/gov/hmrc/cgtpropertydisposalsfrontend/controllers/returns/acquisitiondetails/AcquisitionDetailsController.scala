@@ -439,8 +439,9 @@ class AcquisitionDetailsController @Inject() (
                   form = rebasedAcquisitionPriceForm
                 )(
                   page = { (form, backLink) =>
-                    val p = form.copy(errors = form.errors
-                      .map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
+                    val p = form.copy(errors =
+                      form.errors
+                        .map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
                     )
                     rebasedAcquisitionPricePage(p, backLink, rebaseDate, fillingOutReturn.subscribedDetails.isATrust)
                   }
@@ -536,13 +537,14 @@ class AcquisitionDetailsController @Inject() (
             answers
           )(
             improvementCostsForm
-          )(page = improvementCostsPage(
-            _,
-            _,
-            fillingOutReturn.subscribedDetails.isATrust,
-            answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
-          )
+          )(page =
+            improvementCostsPage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+            )
           )(
             requiredPreviousAnswer = { answers =>
               if (rebaseDate.isDefined)
@@ -608,11 +610,12 @@ class AcquisitionDetailsController @Inject() (
                 answers
               )(
                 shouldUseRebaseForm
-              )(page = shouldUseRebasePage(
-                _,
-                _,
-                rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
-              )
+              )(page =
+                shouldUseRebasePage(
+                  _,
+                  _,
+                  rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+                )
               )(
                 requiredPreviousAnswer               = _ => noAnswersRequired,
                 redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.shouldUseRebase()
@@ -673,14 +676,15 @@ class AcquisitionDetailsController @Inject() (
           answers
         )(
           acquisitionFeesForm
-        )(page = acquisitionFeesPage(
-          _,
-          _,
-          fillingOutReturn.subscribedDetails.isATrust,
-          answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-          rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
-          wasUkResident
-        )
+        )(page =
+          acquisitionFeesPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
+            wasUkResident
+          )
         )(
           requiredPreviousAnswer = _.fold(
             _.improvementCosts,
@@ -787,7 +791,7 @@ class AcquisitionDetailsController @Inject() (
     }
   }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { _ =>
     Redirect(controllers.returns.routes.TaskListController.taskList())
   }
 

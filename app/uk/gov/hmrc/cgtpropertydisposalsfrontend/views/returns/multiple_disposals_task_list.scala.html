@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
@@ -65,8 +67,10 @@ messages("service.title")
     }
 }
 
+@uploadSupportingDocsState = @{draftReturn.uploadSupportingDocuments.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
+
 @checkAndSendReturnState = @{
-    (examplePropertyDetailsState, exemptionsAndLossesState, ytdLiabilityState, ytdLiabilityState) match {
+    (examplePropertyDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
         case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
             TaskListStatus.ToDo
 
@@ -132,6 +136,10 @@ messages("service.title")
 
                 <li id="enterCgtLiability" class="app-task-list__item">
                 @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityController.checkYourAnswers().url, ytdLiabilityState)
+                </li>
+
+                <li id="uploadSupportingDocs" class="app-task-list__item">
+                @taskLink(messages("task-list.upload-supporting-docs.link"), returns.uploadsupportingdocs.routes.UploadSupportingEvidenceController.checkYourAnswers().url, uploadSupportingDocsState)
                 </li>
 
                 <li id="checkAndSendReturn" class="app-task-list__item">

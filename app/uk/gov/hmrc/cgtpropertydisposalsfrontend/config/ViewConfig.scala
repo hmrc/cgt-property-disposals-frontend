@@ -24,6 +24,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
 
   private def getString(key: String): String = servicesConfig.getString(key)
+  private def getInt(key: String): Int       = servicesConfig.getInt(key)
 
   private val companyAuthUrl: String       = getString("company-auth-frontend.url")
   private val signOutUri: String           = getString("sign-out.uri")
@@ -101,12 +102,13 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     .timedOut()
     .url
   val ggSignOut: String = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.start().url
-  val accountSignOutUrl
-    : String = signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
-    .signedOut()
-    .url
+  val accountSignOutUrl: String =
+    signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
+      .signedOut()
+      .url
   val gaUserTypeDimension: String = getString("google-analytics.user-type-dimension")
   val hmrcTelephone: String       = getString("telephone-numbers.hmrc-helpline")
   val outsideUkPhone: String      = getString("telephone-numbers.outside-uk")
   val agentDedicatedLine: String  = getString("telephone-numbers.agent-dedicated-line")
+  val maxUploads                  = getInt("microservice.services.upscan-initiate.max-uploads")
 }

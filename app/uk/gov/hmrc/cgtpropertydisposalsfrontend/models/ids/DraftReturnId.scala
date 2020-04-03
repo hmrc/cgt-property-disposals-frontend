@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-@this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
-)
+import play.api.libs.json.Json
 
-@()(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
+final case class DraftReturnId(value: String) extends AnyVal
 
-@mainTemplate(title = "Upscan File Limit", userType = None) {
-    <h1>Maximum File Limit Reached</h1>
+object DraftReturnId {
+  implicit val format = Json.format[DraftReturnId]
 }

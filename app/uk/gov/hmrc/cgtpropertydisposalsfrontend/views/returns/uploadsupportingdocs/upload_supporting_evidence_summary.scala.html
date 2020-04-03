@@ -1,0 +1,65 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
+
+@this(
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+)
+
+@(answers: CompleteUploadSupportingEvidenceAnswers)(implicit messages: Messages)
+
+    @key = @{"upload-supporting-evidence.check-your-answers"}
+
+=
+    @hasSupportingDocs = @{
+        answers.doYouWantToUploadSupportingEvidence match {
+            case true => messages("generic.yes")
+            case false => messages("generic.no")
+        }
+    }
+
+    @cyaSection(None, Some("cya-questions-short")) {
+
+        @cyaRow(
+            messages("upload-supporting-evidence.check-your-answers.do-you-want-to-upload-documents"),
+            Html(hasSupportingDocs),
+            Some(cyaChange(messages("upload-supporting-evidence.check-your-answers.cya-change"), routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments().url)),
+            "do-you-want-to-upload-supporting-evidence-value"
+        )
+
+        @for((document, fileIndex) <- answers.evidences.zipWithIndex) {
+
+            <div>
+                <dt class="cya-question" id="question-@{fileIndex}">
+                    @messages(s"$key.file-label", {fileIndex + 1})
+                </dt>
+                <dd class="cya-answer" id="answer-@{fileIndex}">
+                    @document.fileName
+                </dd>
+                <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(document.reference).url>@messages(s"$key.cya-change")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
+                <dd class="cya-change cya-extra-action"><a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$key.cya-delete")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
+            </div>
+
+        }
+
+    }

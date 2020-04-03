@@ -45,9 +45,7 @@ object BusinessPartnerRecordNameMatchDetails {
       Json.format[TrustNameWithTrnAuditDetails]
 
     OFormat(
-      Reads { json =>
-        individualFormat.reads(json).orElse(trustFormat.reads(json))
-      },
+      Reads(json => individualFormat.reads(json).orElse(trustFormat.reads(json))),
       OWrites[BusinessPartnerRecordNameMatchDetails] {
         case i: IndividualNameWithSaUtrAuditDetails => individualFormat.writes(i)
         case t: TrustNameWithTrnAuditDetails        => trustFormat.writes(t)
