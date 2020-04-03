@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails
 
 import org.jsoup.nodes.Document
+import org.scalacheck.Gen
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, MessagesApi}
@@ -32,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec.{expectedTitles, validateDisposalDetailsCheckYourAnswersPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{disposalMethod, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
@@ -141,6 +142,11 @@ class DisposalDetailsControllerSpec
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithDisposalDetailsAnswers(Some(answers), disposalMethod, userType)
 
+  val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
+    case UserType.Agent | UserType.Organisation | UserType.Individual => true
+    case _                                                            => false
+  }
+
   "DisposalDetailsController" when {
 
     "handling requests to display the how much did you own page" must {
@@ -152,7 +158,7 @@ class DisposalDetailsControllerSpec
       "display the page" when {
 
         "the user has not answered the question before" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDisposalDetailsAnswers(None, disposalMethod, userType)._1)
@@ -165,7 +171,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "not completed the disposal detail section" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -187,7 +193,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "completed the disposal detail section" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -266,21 +272,21 @@ class DisposalDetailsControllerSpec
         }
 
         "nothing is submitted" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val userMsgKey = userMessageKey(userType)
             test()(s"shareOfProperty$userMsgKey.error.required")(disposalMethod, userType)
           }
         }
 
         "other is selected but no percentage is submitted" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val userMsgKey = userMessageKey(userType)
             test("shareOfProperty" -> "2")(s"percentageShare$userMsgKey.error.required")(disposalMethod, userType)
           }
         }
 
         "the number is less than zero" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val userMsgKey = userMessageKey(userType)
             test("shareOfProperty" -> "2", "percentageShare" -> "-1")(s"percentageShare$userMsgKey.error.tooSmall")(
               disposalMethod,
@@ -290,7 +296,7 @@ class DisposalDetailsControllerSpec
         }
 
         "the number is greater than 100" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val userMsgKey = userMessageKey(userType)
             test("shareOfProperty" -> "2", "percentageShare" -> "101")(s"percentageShare$userMsgKey.error.tooLarge")(
               disposalMethod,
@@ -300,7 +306,7 @@ class DisposalDetailsControllerSpec
         }
 
         "the number has more than two decimal places" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val userMsgKey = userMessageKey(userType)
             test("shareOfProperty" -> "2", "percentageShare" -> "1.234")(
               s"percentageShare$userMsgKey.error.tooManyDecimals"
@@ -309,14 +315,14 @@ class DisposalDetailsControllerSpec
         }
 
         "the submitted value for shareOfProperty is not an integer" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val userMsgKey = userMessageKey(userType)
             test("shareOfProperty" -> "abc")(s"shareOfProperty$userMsgKey.error.invalid")(disposalMethod, userType)
           }
         }
 
         "the submitted value for shareOfProperty is an integer but is not recognised" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val userMsgKey = userMessageKey(userType)
             test("shareOfProperty" -> "3")(s"shareOfProperty$userMsgKey.error.invalid")(disposalMethod, userType)
           }
@@ -327,7 +333,7 @@ class DisposalDetailsControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers = sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Half)
             val (session, journey, draftReturn) =
               sessionWithDisposalDetailsAnswers(currentAnswers, disposalMethod, userType)
@@ -352,7 +358,7 @@ class DisposalDetailsControllerSpec
         }
 
         "there is an error updating the session data" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers = sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Half)
             val (session, journey, draftReturn) =
               sessionWithDisposalDetailsAnswers(currentAnswers, disposalMethod, userType)
@@ -391,7 +397,7 @@ class DisposalDetailsControllerSpec
 
         "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, disposalMethod, userType)
             val (newShare, newShareValue)       = ShareOfProperty.Full -> "0"
             val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
@@ -427,7 +433,7 @@ class DisposalDetailsControllerSpec
 
         "the user has not answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers = sample[IncompleteDisposalDetailsAnswers].copy(shareOfProperty = None)
             val (session, journey, draftReturn) =
               sessionWithDisposalDetailsAnswers(currentAnswers, disposalMethod, userType)
@@ -465,7 +471,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             forAll { c: CompleteDisposalDetailsAnswers =>
               val currentAnswers = c.copy(shareOfProperty = ShareOfProperty.Full)
               val percentage     = 40.23
@@ -508,7 +514,7 @@ class DisposalDetailsControllerSpec
       "not update the draft return or the session data" when {
 
         "the answer given has not changed from a previous one" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers = sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Full)
 
             inSequence {
@@ -525,7 +531,7 @@ class DisposalDetailsControllerSpec
       }
 
       "convert a submitted option of 'Other' with value 100 to the 'Full' option" in {
-        forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+        forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
           val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, disposalMethod, userType)
           val newDraftReturn =
             updateDraftReturn(draftReturn, IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Full), None, None))
@@ -555,7 +561,7 @@ class DisposalDetailsControllerSpec
       }
 
       "convert a submitted option of 'Other' with value 50 to the 'Half' option" in {
-        forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+        forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
           val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, disposalMethod, userType)
           val newDraftReturn =
             updateDraftReturn(draftReturn, IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Half), None, None))
@@ -617,7 +623,7 @@ class DisposalDetailsControllerSpec
       "display the page" when {
 
         "the user has not answered the question before" in {
-          forAll { (userType: UserType) =>
+          forAll(acceptedUserTypeGen) { (userType: UserType) =>
             disposalPriceTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -643,7 +649,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "not completed the disposal details section" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             disposalPriceTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -674,7 +680,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "completed the disposal details section" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             disposalPriceTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -770,7 +776,7 @@ class DisposalDetailsControllerSpec
         }
 
         "the data is invalid" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
             val userKey           = userMessageKey(userType)
 
@@ -787,7 +793,7 @@ class DisposalDetailsControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers =
               sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
             val (session, journey, draftReturn) =
@@ -812,7 +818,7 @@ class DisposalDetailsControllerSpec
         }
 
         "there is an error updating the session data" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers =
               sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
             val (session, journey, draftReturn) =
@@ -850,7 +856,7 @@ class DisposalDetailsControllerSpec
 
         "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val incompleteDisposalDetailsAnswers =
               IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Full), None, None)
             val (session, journey, draftReturn) =
@@ -891,7 +897,7 @@ class DisposalDetailsControllerSpec
 
         "the user has not answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers = sample[IncompleteDisposalDetailsAnswers]
               .copy(shareOfProperty = Some(sample[ShareOfProperty]), disposalPrice = None)
             val (session, journey, draftReturn) =
@@ -974,7 +980,7 @@ class DisposalDetailsControllerSpec
       "not update the draft return or the session data" when {
 
         "the answer given has not changed from a previous one" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers =
               sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
 
@@ -992,7 +998,7 @@ class DisposalDetailsControllerSpec
       }
 
       "accept submitted values with commas" in {
-        forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+        forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
           val currentAnswers =
             sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1000d))
 
@@ -1009,7 +1015,7 @@ class DisposalDetailsControllerSpec
       }
 
       "accept submitted values with pound signs" in {
-        forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+        forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
           val currentAnswers =
             sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
 
@@ -1058,7 +1064,7 @@ class DisposalDetailsControllerSpec
       "redirect to the disposal price page" when {
 
         "the user has not answered that question yet" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -1078,7 +1084,7 @@ class DisposalDetailsControllerSpec
       "display the page" when {
 
         "the user has not answered the question before" in {
-          forAll { (userType: UserType) =>
+          forAll(acceptedUserTypeGen) { (userType: UserType) =>
             disposalFeesTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -1106,7 +1112,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "not completed the disposal detail section" in {
-          forAll { (userType: UserType) =>
+          forAll(acceptedUserTypeGen) { (userType: UserType) =>
             disposalFeesTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -1137,7 +1143,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "completed the disposal detail section" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             disposalFeesTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -1196,7 +1202,7 @@ class DisposalDetailsControllerSpec
       "redirect to the disposal price page" when {
 
         "the user has not answered that question yet" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -1245,7 +1251,7 @@ class DisposalDetailsControllerSpec
         }
 
         "the amount is submitted is invalid" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val userKey = userMessageKey(userType)
 
             amountOfMoneyErrorScenarios(key = "disposalFees", errorContext = Some(s"disposalFees$userKey")).foreach {
@@ -1262,7 +1268,7 @@ class DisposalDetailsControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers =
               sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
             val (session, journey, draftReturn) =
@@ -1293,7 +1299,7 @@ class DisposalDetailsControllerSpec
         }
 
         "there is an error updating the session data" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers =
               sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
             val (session, journey, draftReturn) =
@@ -1332,7 +1338,7 @@ class DisposalDetailsControllerSpec
 
         "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val incompleteDisposalDetailsAnswers =
               IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Full), Some(AmountInPence.fromPounds(1d)), None)
 
@@ -1369,7 +1375,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers =
               sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
             val (session, journey, draftReturn) =
@@ -1409,7 +1415,7 @@ class DisposalDetailsControllerSpec
       "not update the draft return or the session data" when {
 
         "the answer given has not changed from a previous one" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val currentAnswers =
               sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
 
@@ -1428,7 +1434,7 @@ class DisposalDetailsControllerSpec
       }
 
       "accept submitted values with commas" in {
-        forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+        forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
           val currentAnswers =
             sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1000d))
 
@@ -1445,7 +1451,7 @@ class DisposalDetailsControllerSpec
       }
 
       "accept submitted values with pound signs" in {
-        forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+        forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
           val currentAnswers =
             sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
 
@@ -1484,7 +1490,7 @@ class DisposalDetailsControllerSpec
       "redirect to the how much did you own page" when {
 
         "there are no disposal details answers in session" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -1497,7 +1503,7 @@ class DisposalDetailsControllerSpec
         }
 
         "there are disposal details in session but no answer for the property share question" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -1518,7 +1524,7 @@ class DisposalDetailsControllerSpec
       "redirect to the disposal price page" when {
 
         "the user has not answered that question" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -1539,7 +1545,7 @@ class DisposalDetailsControllerSpec
       "redirect to the disposal fees page" when {
 
         "the user has not answered that question" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -1560,7 +1566,7 @@ class DisposalDetailsControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val (session, journey, draftReturn) =
               sessionWithDisposalDetailsAnswers(allQuestionsAnswered, disposalMethod, userType)
 
@@ -1581,7 +1587,7 @@ class DisposalDetailsControllerSpec
         }
 
         "there is an error updating the session" in {
-          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val (session, journey, draftReturn) =
               sessionWithDisposalDetailsAnswers(allQuestionsAnswered, disposalMethod, userType)
 
@@ -1641,7 +1647,7 @@ class DisposalDetailsControllerSpec
           )
 
         "the user has already answered all of the questions" in {
-          forAll {
+          forAll(acceptedUserTypeGen, disposalMethodGen, completeDisposalDetailsAnswersGen) {
             (userType: UserType, disposalMethod: DisposalMethod, completeAnswers: CompleteDisposalDetailsAnswers) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1666,7 +1672,7 @@ class DisposalDetailsControllerSpec
         }
 
         "the user has just answered all of the questions" in {
-          forAll {
+          forAll(acceptedUserTypeGen, disposalMethodGen, completeDisposalDetailsAnswersGen) {
             (userType: UserType, disposalMethod: DisposalMethod, completeAnswers: CompleteDisposalDetailsAnswers) =>
               val incompleteAnswers = IncompleteDisposalDetailsAnswers(
                 Some(completeAnswers.shareOfProperty),
@@ -1723,7 +1729,7 @@ class DisposalDetailsControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       "redirect to the task list page" in {
-        forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+        forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
