@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,6 +29,8 @@
 )
 
 @()(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @key = @{"capacitorsPersonalRepresentativesNotHandled"}
 @title = @{messages(s"$key.title")}
@@ -43,7 +46,9 @@
  </p>
 
  <ul class="list-bullet">
-  <li>@messages(s"$key.cannotUse.bullet1")</li>
+  @if(!isAgent){
+     <li>@messages(s"$key.cannotUse.bullet1")</li>
+  }
   <li>@messages(s"$key.cannotUse.bullet2")</li>
  </ul>
 
@@ -53,7 +58,11 @@
 
  <ul class="list-bullet">
   <li>@messages(s"$key.youNeedTo.bullet1")</li>
-  <li>@messages(s"$key.youNeedTo.bullet2")</li>
+  @if(isAgent){
+    <li>@messages(s"$key.agent.youNeedTo.bullet2")</li>
+  } else {
+    <li>@messages(s"$key.youNeedTo.bullet2")</li>
+  }
  </ul>
 
  <h2 class="heading-medium">
