@@ -152,7 +152,7 @@
 
   function validateFile(file, form, singleFileUpload, submitForm) {
     if (!file) {
-      return handleFileUploadError(singleFileUpload, "Select a file to upload")
+      return handleFileUploadError(singleFileUpload, "Upload a file containing your supporting evidence")
     }
 
     var contentTypes = "application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,text/plain,image/png,image/jpeg";
