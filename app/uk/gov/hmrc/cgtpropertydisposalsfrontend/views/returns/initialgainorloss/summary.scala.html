@@ -14,15 +14,13 @@
  * limitations under the License.
  *@
 
-@import cats.instances.long._
-@import cats.syntax.eq._
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import cats.syntax.order._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AmountInPenceWithSource
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -30,7 +28,7 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: AmountInPence)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: AmountInPence)(implicit messages: Messages)
 
 @initialGainOrLossLabelWithAmount = @{
   Some(answers).map { answer =>

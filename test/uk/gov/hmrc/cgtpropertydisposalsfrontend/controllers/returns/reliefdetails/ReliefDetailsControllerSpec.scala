@@ -85,12 +85,14 @@ class ReliefDetailsControllerSpec
     case UserType.Individual   => ""
     case UserType.Organisation => ".trust"
     case UserType.Agent        => ".agent"
+    case other                 => sys.error(s"User type '$other' not handled")
   }
 
   def userTypeClue(userType: UserType): String = userType match {
     case UserType.Individual   => "an individual"
     case UserType.Organisation => "a trust"
     case UserType.Agent        => "an agent"
+    case other                 => sys.error(s"User type '$other' not handled")
   }
 
   def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
@@ -1037,8 +1039,6 @@ class ReliefDetailsControllerSpec
 
       behave like noLettingsReliefBehaviour(() => performAction(Seq.empty))
 
-      val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
-
       "show a form error for amount" when {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
@@ -1766,7 +1766,7 @@ object ReliefDetailsControllerSpec extends Matchers {
   def validateReliefDetailsCheckYourAnswersPage(
     reliefDetailsAnswers: CompleteReliefDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
 
     if (reliefDetailsAnswers.privateResidentsRelief.isZero) {
       doc.select("#privateResidentsReliefValue-answer").text shouldBe "No"

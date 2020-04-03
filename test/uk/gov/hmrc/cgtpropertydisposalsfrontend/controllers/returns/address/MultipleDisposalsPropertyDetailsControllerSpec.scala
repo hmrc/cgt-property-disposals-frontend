@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -81,6 +81,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     case Individual   => ""
     case Organisation => ".trust"
     case Agent        => ".agent"
+    case other        => sys.error(s"User type '$other' not handled")
   }
 
   override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
@@ -2587,7 +2588,7 @@ object MultipleDisposalsPropertyDetailsControllerSpec extends Matchers {
   def validateExamplePropertyDetailsSummary(
     examplePropertyDetailsAnswers: CompleteExamplePropertyDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
     val ukAddress = examplePropertyDetailsAnswers.address
 
     doc.select("#property-address-answer").text() shouldBe

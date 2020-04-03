@@ -14,8 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import play.api.i18n.Messages
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
@@ -30,7 +30,7 @@
 @(
         exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
         calculatedTax: CalculatedTaxDue
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit messages: Messages)
 
 @glarGainType = @{
   if(calculatedTax.gainOrLossAfterReliefs.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.gainOrLossAfterReliefs.isZero) s" (${messages("generic.gain")})" else ""

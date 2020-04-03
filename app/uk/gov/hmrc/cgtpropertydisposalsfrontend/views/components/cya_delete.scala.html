@@ -14,8 +14,10 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+
 @this()
 
-@(hintText: String, url: String, label: Option[String] = None)(implicit request: Request[_], messages: Messages)
+@(hintText: String, url: String, label: Option[String] = None)(implicit messages: Messages)
 
 <a href="@url">@{label.getOrElse(messages("cya.delete"))}<span class="visuallyhidden"> @hintText</span></a>

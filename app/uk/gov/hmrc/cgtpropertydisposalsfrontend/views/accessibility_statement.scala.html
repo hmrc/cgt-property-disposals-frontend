@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
@@ -23,7 +26,7 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@()(implicit request: Request[_], messages: Messages, viewConfig: ViewConfig)
+@()(implicit messages: Messages, viewConfig: ViewConfig)
 
 @key = @{ "accessibilityStatement" }
 @title = @{messages(s"$key.title")}

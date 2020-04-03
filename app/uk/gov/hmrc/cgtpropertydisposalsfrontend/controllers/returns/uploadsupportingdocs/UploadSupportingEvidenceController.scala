@@ -483,7 +483,7 @@ class UploadSupportingEvidenceController @Inject() (
     }
 
   def uploadSupportingEvidenceVirusCheckSubmit(reference: String): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
+    authenticatedActionWithSessionData.async { _ =>
       Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(reference))
     }
 
@@ -813,7 +813,6 @@ class UploadSupportingEvidenceController @Inject() (
       }
     }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements", "org.wartremover.warts.Any"))
   private def checkYourAnswersHandler(
     answers: UploadSupportingEvidenceAnswers,
     fillingOutReturn: FillingOutReturn,
@@ -882,99 +881,99 @@ class UploadSupportingEvidenceController @Inject() (
           documents <- upscanService.getAll(DraftReturnId(draftReturn.id.toString))
         } yield documents
 
-        uploadedSupportingDocuments.fold(
-          e => {
-            logger.warn(s"could not et all upload supporting evidence :$e")
-            InternalServerError
-          },
-          se => {
-            val expiredSupportingEvidence = findExpiredSupportingEvidence(se)
-            if (expiredSupportingEvidence.nonEmpty) {
+        uploadedSupportingDocuments
+          .biSemiflatMap(
+            e => {
+              logger.warn(s"could not et all upload supporting evidence :$e")
+              InternalServerError
+            },
+            se => {
+              val expiredSupportingEvidence = findExpiredSupportingEvidence(se)
+              if (expiredSupportingEvidence.nonEmpty) {
 
-              val updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
-                case IncompleteUploadSupportingEvidenceAnswers(None, _) =>
-                  IncompleteUploadSupportingEvidenceAnswers(
-                    doYouWantToUploadSupportingEvidence = Some(false),
-                    List.empty
-                  ) // shut the compiler up - this can never happen actually
-                case IncompleteUploadSupportingEvidenceAnswers(
-                    Some(doYouWantToUploadSupportingDocumentAnswer),
-                    supportingDocuments
-                    ) =>
-                  IncompleteUploadSupportingEvidenceAnswers(
-                    Some(doYouWantToUploadSupportingDocumentAnswer),
-                    supportingDocuments
-                  )
-                case CompleteUploadSupportingEvidenceAnswers(
-                    doYouWantToUploadSupportingDocumentAnswer,
-                    supportingDocuments
-                    ) =>
-                  IncompleteUploadSupportingEvidenceAnswers(
-                    Some(doYouWantToUploadSupportingDocumentAnswer),
-                    supportingDocuments
-                  )
-              }
-
-              val newDraftReturn = fillingOutReturn.draftReturn match {
-                case s @ DraftSingleDisposalReturn(
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _
-                    ) =>
-                  s.copy(uploadSupportingDocuments = Some(updatedAnswers))
-                case m @ DraftMultipleDisposalsReturn(
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _,
-                      _
-                    ) =>
-                  m.copy(uploadSupportingDocuments = Some(updatedAnswers))
-              }
-
-              val result = for {
-
-                _ <- returnsService
-                      .storeDraftReturn(
-                        newDraftReturn,
-                        fillingOutReturn.subscribedDetails.cgtReference,
-                        fillingOutReturn.agentReferenceNumber
-                      )
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-                      )
+                val updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
+                  case IncompleteUploadSupportingEvidenceAnswers(None, _) =>
+                    IncompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidence = Some(false),
+                      List.empty
+                    ) // shut the compiler up - this can never happen actually
+                  case IncompleteUploadSupportingEvidenceAnswers(
+                      Some(doYouWantToUploadSupportingDocumentAnswer),
+                      supportingDocuments
+                      ) =>
+                    IncompleteUploadSupportingEvidenceAnswers(
+                      Some(doYouWantToUploadSupportingDocumentAnswer),
+                      supportingDocuments
                     )
-              } yield ()
+                  case CompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingDocumentAnswer,
+                      supportingDocuments
+                      ) =>
+                    IncompleteUploadSupportingEvidenceAnswers(
+                      Some(doYouWantToUploadSupportingDocumentAnswer),
+                      supportingDocuments
+                    )
+                }
 
-              result.fold({ e =>
-                logger.warn("Could not update session", e)
-                errorHandler.errorResult()
-              }, _ => ())
+                val newDraftReturn = fillingOutReturn.draftReturn match {
+                  case s @ DraftSingleDisposalReturn(
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _
+                      ) =>
+                    s.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                  case m @ DraftMultipleDisposalsReturn(
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _,
+                        _
+                      ) =>
+                    m.copy(uploadSupportingDocuments = Some(updatedAnswers))
+                }
 
-              Ok(expiredSupportingEvidencePage(expiredSupportingEvidence))
-            } else {
-              Ok(
-                checkYourAnswersPage(
-                  CompleteUploadSupportingEvidenceAnswers(
-                    doYouWantToUploadSupportingEvidenceAnswer,
-                    supportingEvidences
+                val result = for {
+
+                  _ <- returnsService
+                        .storeDraftReturn(
+                          newDraftReturn,
+                          fillingOutReturn.subscribedDetails.cgtReference,
+                          fillingOutReturn.agentReferenceNumber
+                        )
+                  _ <- EitherT(
+                        updateSession(sessionStore, request)(
+                          _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                        )
+                      )
+                } yield ()
+
+                result.fold({ e =>
+                  logger.warn("Could not update session", e)
+                  errorHandler.errorResult()
+                }, _ => Ok(expiredSupportingEvidencePage(expiredSupportingEvidence)))
+              } else {
+                Ok(
+                  checkYourAnswersPage(
+                    CompleteUploadSupportingEvidenceAnswers(
+                      doYouWantToUploadSupportingEvidenceAnswer,
+                      supportingEvidences
+                    )
                   )
                 )
-              )
+              }
             }
-          }
-        )
+          )
+          .merge
     }
 
   private def findExpiredSupportingEvidence(fd: List[UpscanFileDescriptor]): List[SupportingEvidence] = {

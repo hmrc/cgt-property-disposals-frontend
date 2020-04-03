@@ -14,9 +14,8 @@
  * limitations under the License.
  *@
 
-@import play.api.data.Form
-
-@import cats.syntax.either._
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
@@ -24,8 +23,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails
-@import scala.util.Try
-@import views.html.helper.CSRF
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
@@ -40,7 +37,7 @@
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(details: RegistrationDetails)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(details: RegistrationDetails)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("registration.title")}
 

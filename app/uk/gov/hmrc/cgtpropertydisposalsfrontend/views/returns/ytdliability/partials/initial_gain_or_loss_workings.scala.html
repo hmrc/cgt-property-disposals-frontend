@@ -14,10 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import play.api.i18n.Messages
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
@@ -34,7 +33,7 @@
         disposalDetails: CompleteDisposalDetailsAnswers,
         acquisitionDetails: CompleteAcquisitionDetailsAnswers,
         calculatedTax: CalculatedTaxDue
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit messages: Messages)
 
 @initialGainType = @{
   if(calculatedTax.initialGainOrLoss.amount.isNegative) s" (${messages("generic.loss")})" else if (!calculatedTax.initialGainOrLoss.amount.isZero) s" (${messages("generic.gain")})" else ""

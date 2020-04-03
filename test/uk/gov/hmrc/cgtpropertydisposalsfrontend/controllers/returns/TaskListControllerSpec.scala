@@ -61,7 +61,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, UploadSupportingEvidenceAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -802,27 +802,6 @@ class TaskListControllerSpec
             doc.select(s"li#$sectionLinkId > strong").text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
             extraChecks(doc)
           }
-        )
-      }
-
-      def testSectionNonExistent(draftReturn: DraftMultipleDisposalsReturn)(
-        sectionLinkId: String
-      ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(fillingOutReturn)
-            )
-          )
-        }
-
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("service.title"),
-          doc => doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
         )
       }
 

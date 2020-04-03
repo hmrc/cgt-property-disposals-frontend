@@ -14,7 +14,8 @@
  * limitations under the License.
  *@
 
-@import java.time.LocalDate
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
 
 @this(
   errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
@@ -35,7 +36,6 @@
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) "form-control form-control-error" else "form-control" }
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
-@extraContentKey = @{s"${{fieldId}}-extra-content"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}

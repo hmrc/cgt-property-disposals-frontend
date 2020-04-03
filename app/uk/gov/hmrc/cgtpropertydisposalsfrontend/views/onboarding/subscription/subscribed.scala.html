@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -26,7 +29,7 @@
  exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey
 )
 
-@(accountDetails: SubscribedDetails)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(accountDetails: SubscribedDetails)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @affinity = @{accountDetails.name.fold(_ => "organisation", _ => "individual")}
 

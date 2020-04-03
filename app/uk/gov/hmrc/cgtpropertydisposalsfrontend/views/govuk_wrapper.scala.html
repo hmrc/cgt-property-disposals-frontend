@@ -14,10 +14,14 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import play.twirl.api.HtmlFormat
 @import cats.instances.string._
 @import cats.syntax.eq._
+@import controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
@@ -48,7 +52,7 @@
   serviceInfoContent: Html = HtmlFormat.empty,
   scriptElem: Option[Html] = None,
   withSignOutLink: Boolean = true,
-  withAccount: Boolean)(implicit request: Request[_], messages: Messages)
+  withAccount: Boolean)(implicit messages: Messages)
 
 @head = {
     <script>

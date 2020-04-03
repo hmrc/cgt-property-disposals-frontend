@@ -20,7 +20,7 @@ import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
@@ -90,6 +90,7 @@ class DisposalDetailsControllerSpec
     case UserType.Individual   => ""
     case UserType.Organisation => ".trust"
     case UserType.Agent        => ".agent"
+    case other                 => sys.error(s"User type '$other' not handled")
   }
 
   def fillingOutReturn(
@@ -1832,12 +1833,13 @@ object DisposalDetailsControllerSpec extends Matchers {
     case UserType.Individual   => ""
     case UserType.Organisation => ".trust"
     case UserType.Agent        => ".agent"
+    case other                 => sys.error(s"User type '$other' not handled")
   }
 
   def validateDisposalDetailsCheckYourAnswersPage(
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  ): Unit = {
     doc
       .select("#propertyShare-answer")
       .text()

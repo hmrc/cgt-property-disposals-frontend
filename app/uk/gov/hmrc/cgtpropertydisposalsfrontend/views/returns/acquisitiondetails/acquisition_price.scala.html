@@ -14,6 +14,11 @@
  * limitations under the License.
  *@
 
+@import play.api.data.Form
+@import play.api.i18n.Messages
+@import play.api.mvc.Call
+@import play.twirl.api.Html
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -40,7 +45,6 @@
 @key = @{ "acquisitionPrice" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @titleWithHelpTextAndContext = @{acquisitionMethod match {
   case AcquisitionMethod.Bought => (messages(s"${key}Bought$userKey.title"), Html(messages(s"${key}Bought$userKey.helpText")), s"acquisitionPriceBought$userKey")

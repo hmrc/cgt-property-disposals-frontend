@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -789,7 +789,7 @@ object SingleDisposalPropertyDetailsControllerSpec extends Matchers {
   def validatePropertyAddressPage(
     ukAddress: UkAddress,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit =
+  ): Unit =
     doc.select("#property-address-answer").text() shouldBe
       List(Some(ukAddress.line1), ukAddress.line2, ukAddress.town, ukAddress.county, Some(ukAddress.postcode.value))
         .collect { case Some(s) => s.trim }

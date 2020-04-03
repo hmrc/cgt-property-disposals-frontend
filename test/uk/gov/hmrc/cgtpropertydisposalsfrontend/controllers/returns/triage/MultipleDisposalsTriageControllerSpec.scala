@@ -23,11 +23,9 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
 import cats.syntax.eq._
-import com.google.inject.Inject
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -2130,7 +2128,6 @@ class MultipleDisposalsTriageControllerSpec
     "handling requests to display the asset type for non-uk residents page" must {
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
-      val country                    = Country(countryCode, Some(countryName))
 
       def performAction(): Future[Result] =
         controller.assetTypeForNonUkResidents()(FakeRequest())

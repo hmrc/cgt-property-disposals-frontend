@@ -79,12 +79,14 @@ class AcquisitionDetailsControllerSpec
     case UserType.Individual   => ""
     case UserType.Organisation => ".trust"
     case UserType.Agent        => ".agent"
+    case other                 => sys.error(s"user type '$other' not handled")
   }
 
   def userTypeClue(userType: UserType): String = userType match {
     case UserType.Individual   => "an individual"
     case UserType.Organisation => "a trust"
     case UserType.Agent        => "an agent"
+    case other                 => sys.error(s"user type '$other' not handled")
   }
 
   def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {

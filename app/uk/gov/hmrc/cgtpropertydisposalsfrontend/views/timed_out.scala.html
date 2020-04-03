@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
@@ -23,7 +26,7 @@
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
-@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@()(implicit messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("timed-out.title")}
 

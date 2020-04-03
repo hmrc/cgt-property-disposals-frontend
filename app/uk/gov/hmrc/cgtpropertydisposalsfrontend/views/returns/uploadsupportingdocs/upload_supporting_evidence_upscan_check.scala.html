@@ -14,9 +14,8 @@
  * limitations under the License.
  *@
 
-@import cats.instances.string._
-@import cats.syntax.eq._
-@import helper._
+@import play.api.i18n.Messages
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -41,13 +40,6 @@
 
 @(reference : UpscanInitiateReference, status : UpscanFileDescriptorStatus)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-    @hasFileFailedScan = @{
-        status match {
-            case READY => false
-            case FAILED => true
-            case UPLOADED => true
-        }
-    }
     @key = @{"upload-supporting-evidence.check-upscan-status"}
     @cyaKey = @{"upload-supporting-evidence.check-your-answers"}
     @title = @{messages(s"$key.title")}
@@ -59,7 +51,7 @@
         }
     }
 
-    @mainTemplate(title = title, userType = request.userType, hasErrors = None) {
+    @mainTemplate(title = title, userType = request.userType) {
         @caption(messages(s"$cyaKey.caption"))
         @pageHeading(title)
         <p>

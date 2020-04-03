@@ -14,7 +14,9 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
 @import play.api.mvc.Call
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.routes
@@ -29,7 +31,7 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(clientDetails: SubscribedDetails, backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(clientDetails: SubscribedDetails, backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("agent.confirm-client.title")}
 

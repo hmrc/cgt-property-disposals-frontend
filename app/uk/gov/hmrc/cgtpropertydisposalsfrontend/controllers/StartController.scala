@@ -161,7 +161,7 @@ class StartController @Inject() (
     case _: AgentStatus.AgentSupplyingClientDetails =>
       Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
 
-    case _: StartingNewDraftReturn | _: FillingOutReturn | _: ViewingReturn =>
+    case _: StartingNewDraftReturn | _: FillingOutReturn | _: ViewingReturn | _: SubmitReturnFailed =>
       Redirect(accounts.homepage.routes.HomePageController.homepage())
 
     case _: JustSubmittedReturn =>
