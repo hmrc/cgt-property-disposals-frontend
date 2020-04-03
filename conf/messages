@@ -1829,10 +1829,10 @@ subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additiona
 subsequentReturnExit.helpWithCallCharges=Find out about call charges
 
 do-you-want-to-upload-supporting-evidence.title=Do you want to upload any supporting evidence?
-do-you-want-to-upload-supporting-evidence.error.required=Select yes if you want to upload any supporting documents
-do-you-want-to-upload-supporting-evidence.error.boolean=Select yes if you want to upload any supporting documents
+do-you-want-to-upload-supporting-evidence.error.required=Select yes if you want to upload supporting evidence
+do-you-want-to-upload-supporting-evidence.error.boolean=Select yes if you want to upload supporting evidence
 do-you-want-to-upload-supporting-evidence.caption=Supporting evidence
-do-you-want-to-upload-supporting-evidence.help-text=Up to 4 documents can be uploaded to support your return. For example, spreadsheets with calculations, invoices, receipts or valuations.
+do-you-want-to-upload-supporting-evidence.help-text=Up to 4 documents can be uploaded. For example, spreadsheets with calculations, invoices, receipts or valuations.
 
 upload-supporting-evidence.check-your-answers.title=Check your answers
 upload-supporting-evidence.check-your-answers.caption=Supporting evidence
