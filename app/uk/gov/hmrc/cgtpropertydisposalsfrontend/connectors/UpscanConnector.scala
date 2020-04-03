@@ -17,6 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import java.nio.file.Files.readAllBytes
+import play.api.http.HeaderNames.CONTENT_LENGTH
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import cats.data.EitherT
@@ -303,7 +305,7 @@ class UpscanConnectorImpl @Inject() (
     EitherT[Future, Error, Unit](
       wsClient
         .url(href)
-        .withHttpHeaders(CONTENT_LENGTH -> "0".toString)
+        .withHttpHeaders(CONTENT_LENGTH -> filesize.toString)
         .post(parts)
         .map { response =>
           response.status match {
