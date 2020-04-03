@@ -22,6 +22,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum,
@@ -35,7 +37,7 @@
         taxYear: TaxYear,
         assetType: AssetType,
         isATrust: Boolean
-)(implicit messages: Messages)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @taxableIncome = @{ calculatedTax match {
   case _: CalculatedTaxDue.NonGainCalculatedTaxDue => None

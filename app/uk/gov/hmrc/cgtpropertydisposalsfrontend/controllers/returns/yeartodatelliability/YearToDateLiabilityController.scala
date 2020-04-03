@@ -408,9 +408,7 @@ class YearToDateLiabilityController @Inject() (
               commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
                 form = estimatedIncomeForm
               )(
-                page = { (form, backLink) =>
-                  estimatedIncomePage(form, backLink, disposalDate, wasUkResident)
-                }
+                page = { (form, backLink) => estimatedIncomePage(form, backLink, disposalDate, wasUkResident) }
               )(
                 requiredPreviousAnswer               = _ => Some(()),
                 redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
