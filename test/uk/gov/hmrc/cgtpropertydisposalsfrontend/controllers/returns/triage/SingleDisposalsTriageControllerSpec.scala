@@ -97,12 +97,13 @@ class SingleDisposalsTriageControllerSpec
     )
 
     SessionData.empty
-      .copy(journeyStatus = Some(
-        startingNewDraftReturn.copy(
-          subscribedDetails      = startingNewDraftReturn.subscribedDetails.copy(name = name),
-          newReturnTriageAnswers = Right(singleDisposalTriageAnswers)
+      .copy(journeyStatus =
+        Some(
+          startingNewDraftReturn.copy(
+            subscribedDetails      = startingNewDraftReturn.subscribedDetails.copy(name = name),
+            newReturnTriageAnswers = Right(singleDisposalTriageAnswers)
+          )
         )
-      )
       ) -> startingNewDraftReturn
   }
 
@@ -184,17 +185,15 @@ class SingleDisposalsTriageControllerSpec
       behave like displayCustomContentForAgent(
         performAction
       )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
-        "disposalMethod.agent.title", { doc =>
-          checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
-        }
+        "disposalMethod.agent.title",
+        doc => checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
       )
 
       behave like displayCustomContentForTrusts(
         performAction
       )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
-        "disposalMethod.trust.title", { doc =>
-          checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
-        }
+        "disposalMethod.trust.title",
+        doc => checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
@@ -407,17 +406,15 @@ class SingleDisposalsTriageControllerSpec
       behave like displayCustomContentForAgent(
         performAction
       )(requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk)))(
-        "wereYouAUKResident.agent.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
-        }
+        "wereYouAUKResident.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
       )
 
       behave like displayCustomContentForTrusts(
         performAction
       )(requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk)))(
-        "wereYouAUKResident.trust.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
-        }
+        "wereYouAUKResident.trust.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
@@ -677,17 +674,15 @@ class SingleDisposalsTriageControllerSpec
       behave like displayCustomContentForAgent(
         performAction
       )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
-        "didYouDisposeOfResidentialProperty.agent.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
-        }
+        "didYouDisposeOfResidentialProperty.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
       )
 
       behave like displayCustomContentForTrusts(
         performAction
       )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
-        "didYouDisposeOfResidentialProperty.trust.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
-        }
+        "didYouDisposeOfResidentialProperty.trust.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
@@ -804,9 +799,10 @@ class SingleDisposalsTriageControllerSpec
                 performAction,
                 completeAnswers.copy(assetType = Residential),
                 List("didYouDisposeOfResidentialProperty" -> "false"),
-                _.copy(triageAnswers = IncompleteSingleDisposalTriageAnswers
-                  .fromCompleteAnswers(completeAnswers)
-                  .copy(assetType = Some(NonResidential))
+                _.copy(triageAnswers =
+                  IncompleteSingleDisposalTriageAnswers
+                    .fromCompleteAnswers(completeAnswers)
+                    .copy(assetType = Some(NonResidential))
                 ),
                 checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
               )
@@ -920,17 +916,15 @@ class SingleDisposalsTriageControllerSpec
       behave like displayCustomContentForAgent(
         performAction
       )(requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)))(
-        "disposalDate.agent.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
-        }
+        "disposalDate.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
       )
 
       behave like displayCustomContentForTrusts(
         performAction
       )(requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)))(
-        "disposalDate.trust.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
-        }
+        "disposalDate.trust.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
@@ -970,6 +964,8 @@ class SingleDisposalsTriageControllerSpec
               .unset(_.acquisitionPrice)
               .unset(_.rebasedAcquisitionPrice)
               .unset(_.shouldUseRebase)
+              .unset(_.improvementCosts)
+              .unset(_.acquisitionFees)
           ),
           initialGainOrLoss = None,
           reliefDetailsAnswers = d.reliefDetailsAnswers.map(
@@ -1032,7 +1028,7 @@ class SingleDisposalsTriageControllerSpec
           testFormError(performAction, "disposalDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
 
         "the date is invalid" in {
-          dateErrorScenarios("disposalDate").foreach { scenario =>
+          dateErrorScenarios("disposalDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
               val formData = List(
                 "disposalDate-day"   -> scenario.dayInput,
@@ -1236,17 +1232,15 @@ class SingleDisposalsTriageControllerSpec
       behave like displayCustomContentForAgent(
         performAction
       )(requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))))(
-        "completionDate.agent.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
-        }
+        "completionDate.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
       )
 
       behave like displayCustomContentForTrusts(
         performAction
       )(requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))))(
-        "completionDate.trust.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
-        }
+        "completionDate.trust.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
@@ -1335,7 +1329,7 @@ class SingleDisposalsTriageControllerSpec
           testFormError(performAction, "completionDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
 
         "the date is invalid" in {
-          dateErrorScenarios("completionDate").foreach { scenario =>
+          dateErrorScenarios("completionDate", "").foreach { scenario =>
             withClue(s"For $scenario: ") {
               val formData = List(
                 "completionDate-day"   -> scenario.dayInput,
@@ -1520,25 +1514,22 @@ class SingleDisposalsTriageControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = country))(
-        "triage.enterCountry.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
-        }
+        "triage.enterCountry.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
       )
 
       behave like displayCustomContentForAgent(
         performAction
       )(requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
-        "triage.enterCountry.agent.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
-        }
+        "triage.enterCountry.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
       )
 
       behave like displayCustomContentForTrusts(
         performAction
       )(requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
-        "triage.enterCountry.trust.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
-        }
+        "triage.enterCountry.trust.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
@@ -1771,17 +1762,15 @@ class SingleDisposalsTriageControllerSpec
       behave like displayCustomContentForAgent(
         performAction
       )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
-        "assetTypeForNonUkResidents.agent.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
-        }
+        "assetTypeForNonUkResidents.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
       )
 
       behave like displayCustomContentForTrusts(
         performAction
       )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
-        "assetTypeForNonUkResidents.trust.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
-        }
+        "assetTypeForNonUkResidents.trust.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
       )
 
       def checkContent(doc: Document, backLink: Call): Unit = {
@@ -2161,9 +2150,8 @@ class SingleDisposalsTriageControllerSpec
         ): Unit =
           checkPageIsDisplayed(
             result,
-            messageFromMessageKey(expectedTitleKey), { doc =>
-              validateSingleDisposalTriageCheckYourAnswersPage(completeSingleDisposalTriageAnswers, userType, doc)
-            }
+            messageFromMessageKey(expectedTitleKey),
+            doc => validateSingleDisposalTriageCheckYourAnswersPage(completeSingleDisposalTriageAnswers, userType, doc)
           )
 
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {

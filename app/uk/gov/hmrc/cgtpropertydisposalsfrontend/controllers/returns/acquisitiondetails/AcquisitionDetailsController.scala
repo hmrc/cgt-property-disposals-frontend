@@ -311,6 +311,8 @@ class AcquisitionDetailsController @Inject() (
                     .unset(_.acquisitionPrice)
                     .unset(_.rebasedAcquisitionPrice)
                     .unset(_.shouldUseRebase)
+                    .unset(_.improvementCosts)
+                    .unset(_.acquisitionFees)
                     .copy(acquisitionDate = Some(d))
 
                   commonUpdateDraftReturn(draftReturn, newAnswers)
@@ -437,8 +439,9 @@ class AcquisitionDetailsController @Inject() (
                   form = rebasedAcquisitionPriceForm
                 )(
                   page = { (form, backLink) =>
-                    val p = form.copy(errors = form.errors
-                      .map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
+                    val p = form.copy(errors =
+                      form.errors
+                        .map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
                     )
                     rebasedAcquisitionPricePage(p, backLink, rebaseDate, fillingOutReturn.subscribedDetails.isATrust)
                   }
@@ -534,13 +537,14 @@ class AcquisitionDetailsController @Inject() (
             answers
           )(
             improvementCostsForm
-          )(page = improvementCostsPage(
-            _,
-            _,
-            fillingOutReturn.subscribedDetails.isATrust,
-            answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
-          )
+          )(page =
+            improvementCostsPage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+            )
           )(
             requiredPreviousAnswer = { answers =>
               if (rebaseDate.isDefined)
@@ -606,11 +610,12 @@ class AcquisitionDetailsController @Inject() (
                 answers
               )(
                 shouldUseRebaseForm
-              )(page = shouldUseRebasePage(
-                _,
-                _,
-                rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
-              )
+              )(page =
+                shouldUseRebasePage(
+                  _,
+                  _,
+                  rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+                )
               )(
                 requiredPreviousAnswer               = _ => noAnswersRequired,
                 redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.shouldUseRebase()
@@ -671,14 +676,15 @@ class AcquisitionDetailsController @Inject() (
           answers
         )(
           acquisitionFeesForm
-        )(page = acquisitionFeesPage(
-          _,
-          _,
-          fillingOutReturn.subscribedDetails.isATrust,
-          answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-          rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
-          wasUkResident
-        )
+        )(page =
+          acquisitionFeesPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
+            wasUkResident
+          )
         )(
           requiredPreviousAnswer = _.fold(
             _.improvementCosts,

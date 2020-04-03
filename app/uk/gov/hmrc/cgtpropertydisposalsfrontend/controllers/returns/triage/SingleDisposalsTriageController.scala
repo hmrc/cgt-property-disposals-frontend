@@ -198,17 +198,18 @@ class SingleDisposalsTriageController @Inject() (
           state.bimap(
             _.copy(newReturnTriageAnswers = Right(newAnswers)), {
               case (d, r) =>
-                r.copy(draftReturn = d.copy(
-                  triageAnswers              = newAnswers,
-                  propertyAddress            = None,
-                  disposalDetailsAnswers     = None,
-                  acquisitionDetailsAnswers  = None,
-                  initialGainOrLoss          = None,
-                  reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
-                  exemptionAndLossesAnswers  = None,
-                  yearToDateLiabilityAnswers = None,
-                  uploadSupportingDocuments  = None
-                )
+                r.copy(draftReturn =
+                  d.copy(
+                    triageAnswers              = newAnswers,
+                    propertyAddress            = None,
+                    disposalDetailsAnswers     = None,
+                    acquisitionDetailsAnswers  = None,
+                    initialGainOrLoss          = None,
+                    reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                    exemptionAndLossesAnswers  = None,
+                    yearToDateLiabilityAnswers = None,
+                    uploadSupportingDocuments  = None
+                  )
                 )
             }
           )
@@ -277,12 +278,11 @@ class SingleDisposalsTriageController @Inject() (
 
   private def disposalDateBackLink(triageAnswers: SingleDisposalTriageAnswers): Call =
     triageAnswers.fold(
-      { incomplete =>
+      incomplete =>
         if (incomplete.wasAUKResident.exists(identity))
           routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()
         else
-          routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
-      },
+          routes.SingleDisposalsTriageController.assetTypeForNonUkResidents(),
       _ => routes.SingleDisposalsTriageController.checkYourAnswers()
     )
 
@@ -382,6 +382,8 @@ class SingleDisposalsTriageController @Inject() (
           .unset(_.acquisitionPrice)
           .unset(_.rebasedAcquisitionPrice)
           .unset(_.shouldUseRebase)
+          .unset(_.improvementCosts)
+          .unset(_.acquisitionFees)
       ),
       initialGainOrLoss          = None,
       reliefDetailsAnswers       = currentDraftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
@@ -828,7 +830,8 @@ class SingleDisposalsTriageController @Inject() (
 
                 val result = for {
                   _ <- updatedState.fold(
-                        _ => EitherT.pure(()), { newFillingOutReturn =>
+                        _ => EitherT.pure(()),
+                        newFillingOutReturn =>
                           if (state.exists(_._2.draftReturn === newFillingOutReturn.draftReturn)) EitherT.pure(())
                           else
                             returnsService.storeDraftReturn(
@@ -836,7 +839,6 @@ class SingleDisposalsTriageController @Inject() (
                               newFillingOutReturn.subscribedDetails.cgtReference,
                               newFillingOutReturn.agentReferenceNumber
                             )
-                        }
                       )
                   _ <- EitherT(
                         updateSession(sessionStore, request)(

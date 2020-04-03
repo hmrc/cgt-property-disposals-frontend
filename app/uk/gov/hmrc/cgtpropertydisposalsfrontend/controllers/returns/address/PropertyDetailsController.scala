@@ -197,8 +197,7 @@ class PropertyDetailsController @Inject() (
   }
 
   def multipleDisposalsHasUkPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      commonHasUkPostcodeBehaviour()
+    implicit request => commonHasUkPostcodeBehaviour()
   }
 
   private def commonHasUkPostcodeBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
@@ -220,13 +219,11 @@ class PropertyDetailsController @Inject() (
     }
 
   def singleDisposalHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      commonHasUkPostcodeSubmitBehaviour()
+    implicit request => commonHasUkPostcodeSubmitBehaviour()
   }
 
   def multipleDisposalsHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      commonHasUkPostcodeSubmitBehaviour()
+    implicit request => commonHasUkPostcodeSubmitBehaviour()
   }
 
   private def commonHasUkPostcodeSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
@@ -245,7 +242,8 @@ class PropertyDetailsController @Inject() (
                     hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
                     isSingleDisposal
                   )
-                ), { hasValidPostcode =>
+                ),
+              hasValidPostcode =>
                 Redirect(
                   if (hasValidPostcode)
                     routes.PropertyDetailsController.enterPostcode()
@@ -254,7 +252,6 @@ class PropertyDetailsController @Inject() (
                   else
                     routes.PropertyDetailsController.multipleDisposalsEnterLandUprn()
                 )
-              }
             )
         } else {
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
@@ -267,8 +264,7 @@ class PropertyDetailsController @Inject() (
   }
 
   def multipleDisposalsEnterLandUprn(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      commonEnterLandUprnBehaviour()
+    implicit request => commonEnterLandUprnBehaviour()
   }
 
   private def commonEnterLandUprnBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
@@ -290,13 +286,11 @@ class PropertyDetailsController @Inject() (
     }
 
   def singleDisposalEnterLandUprnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      commonEnterLandUprnSubmitBehaviour()
+    implicit request => commonEnterLandUprnSubmitBehaviour()
   }
 
   def multipleDisposalsEnterLandUprnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      commonEnterLandUprnSubmitBehaviour()
+    implicit request => commonEnterLandUprnSubmitBehaviour()
   }
 
   private def commonEnterLandUprnSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
@@ -505,7 +499,8 @@ class PropertyDetailsController @Inject() (
               formWithErrors =>
                 BadRequest(
                   multipleDisposalsDisposalPricePage(formWithErrors, backLink, r.subscribedDetails.isATrust)
-                ), { disposalPrice =>
+                ),
+              disposalPrice =>
                 if (answers
                       .fold(_.disposalPrice, c => Some(c.disposalPrice))
                       .contains(AmountInPence.fromPounds(disposalPrice))) {
@@ -542,7 +537,6 @@ class PropertyDetailsController @Inject() (
                     _ => Redirect(routes.PropertyDetailsController.checkYourAnswers())
                   )
                 }
-              }
             )
       }
     }
@@ -583,7 +577,8 @@ class PropertyDetailsController @Inject() (
               formWithErrors =>
                 BadRequest(
                   multipleDisposalsAcquisitionPricePage(formWithErrors, backLink, r.subscribedDetails.isATrust)
-                ), { acquisitionPrice =>
+                ),
+              acquisitionPrice =>
                 if (answers
                       .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
                       .contains(AmountInPence.fromPounds(acquisitionPrice))) {
@@ -620,7 +615,6 @@ class PropertyDetailsController @Inject() (
                     _ => Redirect(routes.PropertyDetailsController.checkYourAnswers())
                   )
                 }
-              }
             )
       }
     }
@@ -699,9 +693,7 @@ class PropertyDetailsController @Inject() (
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, _) =>
-      Redirect(returnsRoutes.TaskListController.taskList())
-    }
+    withValidJourney(request)((_, _) => Redirect(returnsRoutes.TaskListController.taskList()))
   }
 
   private def getDisposalDateFrom(taxYear: TaxYear, completionDate: CompletionDate): Form[LocalDate] = {

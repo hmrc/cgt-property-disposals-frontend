@@ -95,9 +95,8 @@ class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnecto
     )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =
     connector.getSubscriptionStatus().subflatMap { response =>
       if (response.status === OK)
-        response.parseJSON[CgtReference]().leftMap(Error(_)).map { cgtReference =>
-          Some(cgtReference)
-        } else if (response.status === NO_CONTENT) Right(None)
+        response.parseJSON[CgtReference]().leftMap(Error(_)).map(cgtReference => Some(cgtReference))
+      else if (response.status === NO_CONTENT) Right(None)
       else
         Left(Error(s"call to get subscription status came back with status ${response.status}"))
     }

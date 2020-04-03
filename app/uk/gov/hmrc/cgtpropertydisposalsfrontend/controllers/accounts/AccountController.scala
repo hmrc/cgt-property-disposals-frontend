@@ -40,7 +40,6 @@ class AccountController @Inject() (
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details,
   homePage: views.html.account.home,
-  privateBetaHomePage: views.html.account.home_private_beta,
   detailUpdatedPage: views.html.account.details_updated,
   signedOutPage: views.html.account.signed_out
 )(implicit viewConfig: ViewConfig)
@@ -51,14 +50,10 @@ class AccountController @Inject() (
 
   def manageYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { (_, subscribed) =>
-        Ok(manageYourDetailsPage(subscribed.subscribedDetails))
-      }
+      withSubscribedUser(request)((_, subscribed) => Ok(manageYourDetailsPage(subscribed.subscribedDetails)))
   }
 
-  def signedOut(): Action[AnyContent] = Action { implicit request =>
-    Ok(signedOutPage())
-  }
+  def signedOut(): Action[AnyContent] = Action(implicit request => Ok(signedOutPage()))
 
   def contactNameUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) {

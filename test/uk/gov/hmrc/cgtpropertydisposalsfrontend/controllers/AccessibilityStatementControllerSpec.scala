@@ -18,27 +18,21 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 
-class EmailWhitelistingControllerSpec extends ControllerSpec {
+class AccessibilityStatementControllerSpec extends ControllerSpec {
 
-  lazy val controller = instanceOf[EmailWhitelistingController]
+  lazy val controller: AccessibilityStatementController = instanceOf[AccessibilityStatementController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  "The EmailWhitelistingController" when {
+  "The AccessibilityStatementController" must {
 
-    "handling requests to display the there's a problem page" must {
-
-      "display the correct content" in {
-        val result = controller.thereIsAProblem()(FakeRequest())
-
-        status(result)          shouldBe FORBIDDEN
-        contentAsString(result) should include(messageFromMessageKey("email-whitelisting.problem.title"))
-      }
-
+    "display the accessibility statement page" in {
+      checkPageIsDisplayed(
+        controller.accessibilityStatement()(FakeRequest()),
+        messageFromMessageKey("accessibilityStatement.title")
+      )
     }
-
   }
 
 }

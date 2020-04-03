@@ -78,9 +78,7 @@ class IvController @Inject() (
     }
   }
 
-  def retry(): Action[AnyContent] = authenticatedActionWithSessionData.async { _ =>
-    redirectToIv
-  }
+  def retry(): Action[AnyContent] = authenticatedActionWithSessionData.async(_ => redirectToIv)
 
   def ivFailureCallback(journeyId: UUID): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
@@ -130,25 +128,17 @@ class IvController @Inject() (
     Ok(failedMatchingPage())
   }
 
-  def getFailedIV: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
-    Ok(failedIvPage())
-  }
+  def getFailedIV: Action[AnyContent] = authenticatedActionWithSessionData(implicit r ⇒ Ok(failedIvPage()))
 
   def getInsufficientEvidence: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
     Ok(insufficientEvidencePage())
   }
 
-  def getLockedOut: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
-    Ok(lockedOutPage())
-  }
+  def getLockedOut: Action[AnyContent] = authenticatedActionWithSessionData(implicit r ⇒ Ok(lockedOutPage()))
 
-  def getUserAborted: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
-    Ok(userAbortedPage())
-  }
+  def getUserAborted: Action[AnyContent] = authenticatedActionWithSessionData(implicit r ⇒ Ok(userAbortedPage()))
 
-  def getTimedOut: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
-    Ok(timeoutPage())
-  }
+  def getTimedOut: Action[AnyContent] = authenticatedActionWithSessionData(implicit r ⇒ Ok(timeoutPage()))
 
   def getTechnicalIssue: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
     Ok(technicalIssuesPage())

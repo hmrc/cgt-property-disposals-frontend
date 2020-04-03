@@ -80,16 +80,12 @@ class AgentAccessController @Inject() (
   private val maxVerifierNameMatchAttempts: Int =
     config.underlying.getInt("agent-verifier-match.max-retries")
 
-  val getDraftAndSentReturns: Boolean = config.underlying.getBoolean("get-draft-and-sent-returns")
-
   private val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
     override def authConnector: AuthConnector = self.authConnector
   }
 
   def enterClientsCgtRef(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withAgentSupplyingClientDetails { _ =>
-      Ok(enterClientsCgtRefPage(cgtReferenceForm))
-    }
+    withAgentSupplyingClientDetails(_ => Ok(enterClientsCgtRefPage(cgtReferenceForm)))
   }
 
   def enterClientsCgtRefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -180,10 +176,7 @@ class AgentAccessController @Inject() (
   }
 
   def tooManyVerifierMatchAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withAgentSupplyingClientDetails { _ =>
-        Ok(tooManyAttemptsPage())
-      }
+    implicit request => withAgentSupplyingClientDetails(_ => Ok(tooManyAttemptsPage()))
   }
 
   def confirmClient(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -204,10 +197,8 @@ class AgentAccessController @Inject() (
         val cgtReference = verifierMatchingDetails.clientDetails.cgtReference
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
-            sentReturns <- if (getDraftAndSentReturns) returnsService.listReturns(cgtReference)
-                          else EitherT.pure(List.empty)
-            draftReturns <- if (getDraftAndSentReturns) returnsService.getDraftReturns(cgtReference, sentReturns)
-                           else EitherT.pure(List.empty)
+            sentReturns  <- returnsService.listReturns(cgtReference)
+            draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(
@@ -283,9 +274,8 @@ class AgentAccessController @Inject() (
           { e =>
             logger.warn("Could not handle submitted cgt reference", e)
             errorHandler.errorResult()
-          }, { clientDetails =>
-            Redirect(enterVerifierCall(clientDetails))
-          }
+          },
+          clientDetails => Redirect(enterVerifierCall(clientDetails))
         )
       }
       .recover {

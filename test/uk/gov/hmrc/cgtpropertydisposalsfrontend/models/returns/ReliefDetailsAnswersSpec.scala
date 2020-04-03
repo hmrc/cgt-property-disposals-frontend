@@ -66,7 +66,7 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
 
       }
 
-      "have a method which unsets values of private residents relief and letting relief" in {
+      "have a method which unsets values of private residence relief and letting relief" in {
         val expectedResult =
           IncompleteReliefDetailsAnswers(
             None,

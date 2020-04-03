@@ -32,7 +32,7 @@
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary
 )
 
-@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("returns.disposal-details.cya.title")}
@@ -41,7 +41,7 @@
 
     @pageHeading(title, Some(messages("returns.disposal-details.caption")))
 
-    @summary(answers, disposalMethod)
+    @summary(answers, disposalMethod, isATrust)
 
     @formWrapper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

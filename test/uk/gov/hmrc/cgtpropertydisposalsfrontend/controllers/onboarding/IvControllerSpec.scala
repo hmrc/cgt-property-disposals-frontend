@@ -145,8 +145,8 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         IvErrorStatus.Incomplete     -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
         IvErrorStatus.FailedMatching -> (() => controllers.onboarding.routes.IvController.getFailedMatching()),
         IvErrorStatus.FailedIV       -> (() => controllers.onboarding.routes.IvController.getFailedIV()),
-        IvErrorStatus.InsufficientEvidence -> (
-          () => controllers.onboarding.routes.IvController.getInsufficientEvidence()
+        IvErrorStatus.InsufficientEvidence -> (() =>
+          controllers.onboarding.routes.IvController.getInsufficientEvidence()
         ),
         IvErrorStatus.LockedOut          -> (() => controllers.onboarding.routes.IvController.getLockedOut()),
         IvErrorStatus.UserAborted        -> (() => controllers.onboarding.routes.IvController.getUserAborted()),

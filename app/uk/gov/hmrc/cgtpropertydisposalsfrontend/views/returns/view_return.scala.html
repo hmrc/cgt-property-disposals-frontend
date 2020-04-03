@@ -15,12 +15,16 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, ReturnSummary}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteSingleDisposalReturn, CompleteMultipleDisposalsReturn}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,6 +33,7 @@
         taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
         returnHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_banner,
         returnCharges: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_charges,
         singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary,
@@ -36,6 +41,8 @@
         addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
         examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary,
         calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
         nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary,
         acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
         disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
@@ -43,54 +50,83 @@
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
 )
 
-@(completeReturn: CompleteReturn, returnSummary: ReturnSummary, rebasingEligibilityUtil: RebasingEligibilityUtil, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(completeReturn: CompleteReturn, returnSummary: ReturnSummary, rebasingEligibilityUtil: RebasingEligibilityUtil, subscribedDetails: SubscribedDetails)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("viewReturn.title")}
+@amountOwed = @{returnSummary.mainReturnChargeAmount}
+
+@key= @{ "viewReturn" }
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, returnSummary.mainReturnChargeAmount.withFloorZero, returnSummary.submissionId)
+  @returnHeading(title, returnSummary, subscribedDetails, request.userType)
 
   <p class="js-enabled">
    <a href="JavaScript: window.print()">
-    @messages("viewReturn.printLink")
+    @messages(s"$key.printLink")
    </a>
   </p>
 
-  @if(returnSummary.charges.nonEmpty) {
-    @returnCharges(messages("viewReturn.charges.heading"), returnSummary)
-  }
+    @cyaSection() {
+        @cyaRow(
+            messages(s"$key.sentToHmrc"),
+            Html(LocalDateUtils.govDisplayFormat(returnSummary.submissionDate)),
+            None,
+            "date-sent-table"
+        )
+        @{if(amountOwed.isPositive) {
+            cyaRow(
+                messages(s"$key.returnReference"),
+                Html(returnSummary.submissionId),
+                None,
+                "return-reference-table"
+            )
+        }}
+        @cyaRow(
+            messages(s"$key.propertyAddress"),
+            completeReturn match {
+                case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
+                case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
+            },
+            None,
+            "property-address-table"
+        )
+    }
 
-  <h2 class="heading-large">
-    @messages("viewReturn.summaryHeading")
-  </h2>
+    @if(returnSummary.charges.nonEmpty) {
+       @returnCharges(messages(s"$key.charges.heading"), returnSummary)
+    }
 
-  <div class="return-summary">
+    <h2 class="heading-large">
+        @messages(s"$key.summaryHeading")
+    </h2>
 
-  @completeReturn match {
-      case s: CompleteSingleDisposalReturn => {
-          <h2>@messages("task-list.triage.link")</h2>
-          @singleDisposalTriageSummary(s.triageAnswers, isATrust)
+    <div class="return-summary">
+
+    @completeReturn match {
+    case s: CompleteSingleDisposalReturn => {
+    <h2>@messages("task-list.triage.link")</h2>
+          @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
           @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
 
           <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
-          @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod)
+          @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
           @acquisitionDetailsSummary(s.acquisitionDetails,
               rebasingEligibilityUtil.getDisplayRebasingCutOffDate(s),
               rebasingEligibilityUtil.isUk(s),
               rebasingEligibilityUtil.isEligibleForRebase(s),
-              isATrust
+              subscribedDetails.isATrust
           )
 
           <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
           @reliefDetailsSummary(s.reliefDetails)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-          @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust)
+          @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @s.yearToDateLiabilityAnswers.fold(
@@ -101,13 +137,13 @@
 
       case m: CompleteMultipleDisposalsReturn => {
           <h2>@messages("task-list.triage.link")</h2>
-          @multipleDisposalsTriageSummary(m.triageAnswers)
+          @multipleDisposalsTriageSummary(m.triageAnswers, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
-          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust)
+          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-          @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, isATrust)
+          @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers)

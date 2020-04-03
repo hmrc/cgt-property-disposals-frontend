@@ -63,7 +63,7 @@
      @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
 
      <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
-     @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod)
+     @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, isATrust)
 
      <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
      @acquisitionDetailsSummary(s.acquisitionDetails,
@@ -94,7 +94,7 @@
 
       case m: CompleteMultipleDisposalsReturn => {
        <h2>@messages("task-list.triage.link")</h2>
-       @multipleDisposalsTriageSummary(m.triageAnswers)
+       @multipleDisposalsTriageSummary(m.triageAnswers, isATrust)
 
        <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
        @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust)

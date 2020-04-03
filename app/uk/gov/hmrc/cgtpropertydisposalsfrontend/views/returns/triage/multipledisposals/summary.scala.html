@@ -37,10 +37,10 @@ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteMultipleDisposalsTriageAnswers)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(answers: CompleteMultipleDisposalsTriageAnswers, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @cyaSection() {
   @answers.individualUserType.map{ individualUserType =>
       @cyaRow(
@@ -58,27 +58,27 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
       "numberOfProperties"
   )
     @cyaRow(
-        messages("multipleDisposalsNumberOfProperties.title"),
+        messages(s"multipleDisposalsCountryOfResidence$userKey.title"),
         Html(answers.numberOfProperties.toString),
         Some(cyaChange(messages("multipleDisposals.triage.cyaChange.numberOfProperties"), routes.MultipleDisposalsTriageController.howManyDisposals().url)),
         "multipleDisposalsNumberOfProperties"
     )
 
   @cyaRow(
-    messages("multipleDisposalsWereYouAUKResident.title"),
+    messages(s"multipleDisposalsWereYouAUKResident$userKey.title"),
     Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
     Some(cyaChange(messages("multipleDisposals.triage.cyaChange.wereYouAUKResident"), routes.MultipleDisposalsTriageController.wereYouAUKResident().url)),
       "wereYouAUKResident"
   )
     @if(!answers.countryOfResidence.isUk()){
         @cyaRow(
-            messages("multipleDisposalsCountryOfResidence.title"),
+            messages(s"multipleDisposalsCountryOfResidence$userKey.title"),
             Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
             Some(cyaChange(messages("multipleDisposals.triage.cyaChange.countryOfResidence"), routes.MultipleDisposalsTriageController.countryOfResidence().url)),
             "countryOfResidence"
         )
         @cyaRow(
-            messages("multipleDisposalsAssetTypeForNonUkResidents.title"),
+            messages(s"multipleDisposalsAssetTypeForNonUkResidents$userKey.title"),
             Html(
                 answers.assetTypes.map(assetType =>
                     messages(s"multipleDisposalsAssetTypeForNonUkResidents.${assetType.toString}")
@@ -89,7 +89,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         )
     } else {
         @cyaRow(
-            messages("multipleDisposalsWereAllPropertiesResidential.title"),
+            messages(s"multipleDisposalsWereAllPropertiesResidential$userKey.title"),
             Html(messages(s"yesNo.${answers.assetTypes === List(AssetType.Residential)}")),
             Some(cyaChange(messages("multipleDisposals.triage.cyaChange.wereAllPropertiesResidential"), routes.MultipleDisposalsTriageController.wereAllPropertiesResidential().url)),
             "wereAllPropertiesResidential"

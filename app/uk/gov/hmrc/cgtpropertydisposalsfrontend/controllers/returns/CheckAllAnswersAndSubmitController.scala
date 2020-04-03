@@ -137,15 +137,11 @@ class CheckAllAnswersAndSubmitController @Inject() (
       .merge
 
   def submissionError(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubmitReturnFailesOrSubscribed(request) { _ =>
-      Ok(submitReturnFailedPage())
-    }
+    withSubmitReturnFailesOrSubscribed(request)(_ => Ok(submitReturnFailedPage()))
   }
 
   def submissionErrorSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubmitReturnFailesOrSubscribed(request) { _ =>
-      Redirect(homepage.routes.HomePageController.homepage())
-    }
+    withSubmitReturnFailesOrSubscribed(request)(_ => Redirect(homepage.routes.HomePageController.homepage()))
   }
 
   def confirmationOfSubmission(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>

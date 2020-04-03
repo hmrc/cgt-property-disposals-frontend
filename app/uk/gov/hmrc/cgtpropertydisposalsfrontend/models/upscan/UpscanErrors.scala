@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.modules
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.inject.{Binding, Module}
-import play.api.{Configuration, Environment}
-import uk.gov.hmrc.auth.otac.OtacAuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.OtacAuthConnectorImpl
-
-class OtacAuthConnectorModule extends Module {
-
-  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
-    Seq(bind[OtacAuthConnector].to[OtacAuthConnectorImpl])
-}
+sealed trait UpscanErrors extends Exception
+case object MaxUploads extends UpscanErrors

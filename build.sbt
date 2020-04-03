@@ -8,6 +8,7 @@ val appName = "cgt-property-disposals-frontend"
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
+addCommandAlias("fix", "all compile:scalafix test:scalafix")
 
 lazy val wartremoverSettings =
   Seq(
@@ -49,7 +50,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(addCompilerPlugin(scalafixSemanticdb))
   .settings(scalaVersion := "2.12.10")
   .settings(
-    majorVersion := 1,
+    majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
   .settings(routesImport := Seq.empty)

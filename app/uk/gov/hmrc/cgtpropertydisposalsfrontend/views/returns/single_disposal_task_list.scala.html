@@ -108,8 +108,8 @@
 }
 
 @checkAndSendReturnState = @{
-    (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState) match {
-        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+    (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
             TaskListStatus.ToDo
 
         case _ =>
@@ -194,7 +194,7 @@
             </li>
 
             <li id="uploadSupportingDocs" class="app-task-list__item">
-                @taskLink(messages("task-list.upload-supporting-docs.link"), returns.uploadsupportingdocs.routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload().url, uploadSupportingDocsState)
+                @taskLink(messages("task-list.upload-supporting-docs.link"), returns.uploadsupportingdocs.routes.UploadSupportingEvidenceController.checkYourAnswers().url, uploadSupportingDocsState)
             </li>
 
             <li id="checkAndSendReturn" class="app-task-list__item">

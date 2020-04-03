@@ -47,11 +47,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse, UpscanInitiateReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
 object Generators
@@ -142,6 +142,10 @@ trait IdGen { this: GenUtils =>
   implicit val sapNumberGen: Gen[SapNumber] = gen[SapNumber]
 
   implicit val arnGen: Gen[AgentReferenceNumber] = gen[AgentReferenceNumber]
+
+  implicit val draftReturnIdGen: Gen[DraftReturnId] = gen[DraftReturnId]
+
+  implicit val upscanInitiateReference: Gen[UpscanInitiateReference] = gen[UpscanInitiateReference]
 
 }
 
@@ -311,8 +315,8 @@ trait LowerPriorityReturnGen { this: GenUtils =>
 }
 
 trait FileUploadGen { this: GenUtils =>
-  implicit val completeUploadSupportingDocuments: Gen[CompleteUploadSupportingDocuments] =
-    gen[CompleteUploadSupportingDocuments]
+  implicit val completeUploadSupportingDocuments: Gen[CompleteUploadSupportingEvidenceAnswers] =
+    gen[CompleteUploadSupportingEvidenceAnswers]
   implicit val uploadRequestGen: Gen[UploadRequest]                         = gen[UploadRequest]
   implicit val fileDescriptorGen: Gen[FileDescriptor]                       = gen[FileDescriptor]
   implicit val upscanFileDescriptorGen: Gen[UpscanFileDescriptor]           = gen[UpscanFileDescriptor]
@@ -322,7 +326,7 @@ trait FileUploadGen { this: GenUtils =>
 
 trait DisposalMethodGen { this: GenUtils =>
 
-  implicit val disposalMethod: Gen[DisposalMethod] =
+  implicit val disposalMethodGen: Gen[DisposalMethod] =
     gen[DisposalMethod]
 
 }

@@ -166,14 +166,14 @@ class InsufficientConfidenceLevelController @Inject() (
           bprNameMatchService
             .getNumberOfUnsuccessfulAttempts[IndividualNameMatchDetails](insufficientConfidenceLevel.ggCredId)
             .fold(
-              handleNameMatchError, { _ =>
+              handleNameMatchError,
+              _ =>
                 Ok(
                   enterSautrAndNamePage(
                     InsufficientConfidenceLevelController.sautrAndNameForm,
                     routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()
                   )
                 )
-              }
             )
 
         case _ =>
@@ -199,15 +199,14 @@ class InsufficientConfidenceLevelController @Inject() (
                     NameMatchError[IndividualNameMatchDetails],
                     (BusinessPartnerRecord, Option[CgtReference])
                   ]](
-                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), {
-                      individualNameMatchDetails =>
-                        attemptNameMatchAndUpdateSession(
-                          individualNameMatchDetails,
-                          insufficientConfidenceLevel.ggCredId,
-                          insufficientConfidenceLevel.ggEmail,
-                          unsuccessfulAttempts
-                        )
-                    }
+                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))),
+                    individualNameMatchDetails =>
+                      attemptNameMatchAndUpdateSession(
+                        individualNameMatchDetails,
+                        insufficientConfidenceLevel.ggCredId,
+                        insufficientConfidenceLevel.ggEmail,
+                        unsuccessfulAttempts
+                      )
                   )
               }
             } yield bprWithCgtReference
@@ -281,11 +280,12 @@ class InsufficientConfidenceLevelController @Inject() (
                               }
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(
-                bprWithCgtReference._2.fold[JourneyStatus](
-                  SubscriptionStatus.SubscriptionMissingData(bprWithCgtReference._1, None, ggCredId, ggEmail)
-                )(cgtReference => AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
-              )
+              _.copy(journeyStatus =
+                Some(
+                  bprWithCgtReference._2.fold[JourneyStatus](
+                    SubscriptionStatus.SubscriptionMissingData(bprWithCgtReference._1, None, ggCredId, ggEmail)
+                  )(cgtReference => AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
+                )
               )
             )
           ).leftMap[NameMatchError[IndividualNameMatchDetails]](NameMatchError.BackendError)

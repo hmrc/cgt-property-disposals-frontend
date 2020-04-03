@@ -156,14 +156,14 @@ class ReliefDetailsController @Inject() (
     }
 
   def privateResidentsRelief(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, _, _, answers) =>
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, _, answers) =>
       commonDisplayBehaviour(answers)(
         form = _.fold(
           _.privateResidentsRelief.fold(privateResidentsReliefForm)(a => privateResidentsReliefForm.fill(a.inPounds())),
           c => privateResidentsReliefForm.fill(c.privateResidentsRelief.inPounds())
         )
       )(
-        page = privateResidentsReliefPage(_, _)
+        page = privateResidentsReliefPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
       )(
         hasRequiredPreviousAnswer = _ => true,
         _ => controllers.returns.routes.TaskListController.taskList()
@@ -178,7 +178,7 @@ class ReliefDetailsController @Inject() (
           form = privateResidentsReliefForm
         )(
           page = { (form, backLink) =>
-            privateResidentsReliefPage(form, backLink)
+            privateResidentsReliefPage(form, backLink, fillingOutReturn.subscribedDetails.isATrust)
           }
         )(
           hasRequiredPreviousAnswer            = _ => true,
@@ -208,7 +208,7 @@ class ReliefDetailsController @Inject() (
   }
 
   def lettingsRelief(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, _, draftReturn, answers) =>
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       withTaxYear(draftReturn) { taxYear =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
@@ -218,7 +218,7 @@ class ReliefDetailsController @Inject() (
             c => lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount).fill(c.lettingsRelief.inPounds())
           )
         )(
-          page = lettingsReliefPage(_, _)
+          page = lettingsReliefPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
         )(
           hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
           redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
@@ -232,7 +232,7 @@ class ReliefDetailsController @Inject() (
       withTaxYear(draftReturn) { taxYear =>
         commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
-        )(page = lettingsReliefPage(_, _))(
+        )(page = lettingsReliefPage(_, _, fillingOutReturn.subscribedDetails.isATrust))(
           hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
           redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
         )(
@@ -265,7 +265,7 @@ class ReliefDetailsController @Inject() (
     )
 
   def otherReliefs(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, _, _, answers) =>
+    withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, _, answers) =>
       commonDisplayBehaviour(answers)(
         form = _.fold(
           _.otherReliefs.fold(otherReliefsForm)(
@@ -283,7 +283,7 @@ class ReliefDetailsController @Inject() (
             )
         )
       )(
-        page = otherReliefsPage(_, _)
+        page = otherReliefsPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
       )(
         hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
         redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
@@ -295,7 +295,7 @@ class ReliefDetailsController @Inject() (
     withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
         form = otherReliefsForm
-      )(page = otherReliefsPage(_, _))(
+      )(page = otherReliefsPage(_, _, fillingOutReturn.subscribedDetails.isATrust))(
         hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
         redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
       )(

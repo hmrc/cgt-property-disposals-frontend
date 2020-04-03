@@ -19,17 +19,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.accessibility_statement
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-class EmailWhitelistingController @Inject() (
+class AccessibilityStatementController @Inject() (
   cc: MessagesControllerComponents,
-  emailWhitelistingProblemPage: views.html.email_whitelisting_problem
+  accessibilityStatementPage: accessibility_statement
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
-  def thereIsAProblem(): Action[AnyContent] = Action { implicit request =>
-    Forbidden(emailWhitelistingProblemPage())
-  }
+  def accessibilityStatement(): Action[AnyContent] = Action(implicit request => Ok(accessibilityStatementPage()))
 
 }

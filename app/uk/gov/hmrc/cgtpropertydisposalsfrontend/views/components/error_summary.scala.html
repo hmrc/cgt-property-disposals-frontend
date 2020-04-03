@@ -19,7 +19,7 @@
 
 @this()
 
-@(form: Form[_], customErrorKey: Option[String] = None)(implicit messages: Messages)
+@(form: Form[_], customErrorKey: Option[String] = None, userKeyOnly: String = "")(implicit messages: Messages)
 
 <div
   class="error-summary"
@@ -47,7 +47,7 @@
       @form.errors.map { error =>
         <li>
           <a href="#@error.key" data-focuses="@error.key">
-            @messages(s"${customErrorKey.getOrElse(error.key)}.${error.message}", error.args: _*)
+            @messages(s"${customErrorKey.getOrElse(error.key)}$userKeyOnly.${error.message}", error.args: _*)
           </a>
         </li>
       }

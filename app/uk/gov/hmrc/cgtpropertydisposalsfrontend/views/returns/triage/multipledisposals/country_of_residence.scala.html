@@ -24,23 +24,26 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
-        submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
+submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[Country], backLink: Call, hasCreatedDraftReturn: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Country], backLink: Call, hasCreatedDraftReturn: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"countryCode"}
-@title = @{messages("multipleDisposalsCountryOfResidence.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@title = @{messages(s"multipleDisposalsCountryOfResidence$userKey.title")}
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
 
@@ -61,11 +64,11 @@
             hasErrors = form.error(key).nonEmpty,
             errorKey = form.error(key).map(e => e.message),
             autoComplete = AutoCompleteType.Country,
-            helpText = Some(Html(messages(s"multipleDisposalsCountryOfResidence.helpText"))),
+            helpText = Some(Html(messages(s"multipleDisposalsCountryOfResidence$userKey.helpText"))),
             labelAsHeading = true
         )
 
-        <p>@Html(messages("triage.enterCountry.link", appConfig.workOurYouResidenceStatusUrl))</p>
+        <p>@Html(messages(s"triage.enterCountry$userKey.link", appConfig.workOurYouResidenceStatusUrl))</p>
         @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
 

@@ -33,7 +33,7 @@ import play.shaded.ahc.org.asynchttpclient.Response
 import play.shaded.ahc.org.asynchttpclient.uri.Uri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference, UpscanSnapshot}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
@@ -88,13 +88,16 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
 
   "UpscanConnectorImpl" when {
 
+    val draftReturnId = sample[DraftReturnId]
+
     "handling requests to get file descriptor status" must {
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val upscanInitiateReference = UpscanInitiateReference("some-upscan-ref")
-      val expectedUrl             = s"http://localhost:7021/cgt-property-disposals/upscan-file-descriptor/some-upscan-ref"
-      val cgtReference            = sample[CgtReference]
-      val upscanFileDescriptor    = sample[UpscanFileDescriptor].copy(cgtReference = cgtReference)
+      val expectedUrl =
+        s"http://localhost:7021/cgt-property-disposals/upscan-fd/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
+      val cgtReference         = sample[CgtReference]
+      val upscanFileDescriptor = sample[UpscanFileDescriptor].copy(cgtReference = cgtReference)
 
       "process unsuccessful calls from backend service" in {
         List(
@@ -103,7 +106,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockGet(expectedUrl, Map.empty)(Some(httpResponse))
-            await(connector.getFileDescriptor(cgtReference, upscanInitiateReference).value).isLeft shouldBe true
+            await(connector.getFileDescriptor(draftReturnId, upscanInitiateReference).value).isLeft shouldBe true
           }
         }
       }
@@ -113,7 +116,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockGet(expectedUrl, Map.empty)(Some(httpResponse))
-            await(connector.getFileDescriptor(cgtReference, upscanInitiateReference).value) shouldBe Right(
+            await(connector.getFileDescriptor(draftReturnId, upscanInitiateReference).value) shouldBe Right(
               Some(upscanFileDescriptor)
             )
           }
@@ -182,9 +185,8 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
     "handling requests to get an upscan snapshot" must {
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val cgtReference = sample[CgtReference]
       val expectedUrl =
-        s"http://localhost:7021/cgt-property-disposals/upscan-snapshot-info/cgt-reference/${cgtReference.value}"
+        s"http://localhost:7021/cgt-property-disposals/upscan-snapshot-info/draft-return-id/${draftReturnId.value}"
 
       "process unsuccessful calls from backend service" in {
         List(
@@ -193,7 +195,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockGet(expectedUrl)(Some(httpResponse))
-            await(connector.getUpscanSnapshot(cgtReference).value).isLeft shouldBe true
+            await(connector.getUpscanSnapshot(draftReturnId).value).isLeft shouldBe true
           }
         }
       }
@@ -203,7 +205,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockGet(expectedUrl)(Some(httpResponse))
-            await(connector.getUpscanSnapshot(cgtReference).value) shouldBe Right(UpscanSnapshot(1))
+            await(connector.getUpscanSnapshot(draftReturnId).value) shouldBe Right(UpscanSnapshot(1))
           }
         }
       }
@@ -213,10 +215,9 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val expectedUrl  = s"http://host:123/upscan/initiate"
-      val cgtReference = sample[CgtReference]
+      val expectedUrl = s"http://host:123/upscan/initiate"
       val callBackUrl =
-        s"http://localhost:7021/cgt-property-disposals/upscan-call-back/cgt-reference/${cgtReference.value}"
+        s"http://localhost:7021/cgt-property-disposals/upscan-call-back/draft-return-id/${draftReturnId.value}"
       val expectedInitiated = UpscanInitiateRequest(callBackUrl, 0, 5242880)
 
       "process unsuccessful post calls from S3" in {
@@ -228,7 +229,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
             mockPost(expectedUrl, Map(USER_AGENT -> "cgt-property-disposals-frontend"), expectedInitiated)(
               Some(httpResponse)
             )
-            await(connector.initiate(cgtReference).value) shouldBe Left(Error("S3 did not return 200 status code"))
+            await(connector.initiate(draftReturnId).value) shouldBe Left(Error("S3 did not return 200 status code"))
           }
         }
       }
@@ -242,7 +243,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
             mockPost(expectedUrl, Map(USER_AGENT -> "cgt-property-disposals-frontend"), expectedInitiated)(
               Some(httpResponse)
             )
-            await(connector.initiate(cgtReference).value) shouldBe Right(httpResponse)
+            await(connector.initiate(draftReturnId).value) shouldBe Right(httpResponse)
           }
         }
       }

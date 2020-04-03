@@ -24,6 +24,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
 
   private def getString(key: String): String = servicesConfig.getString(key)
+  private def getInt(key: String): Int       = servicesConfig.getInt(key)
 
   private val companyAuthUrl: String       = getString("company-auth-frontend.url")
   private val signOutUri: String           = getString("sign-out.uri")
@@ -71,6 +72,21 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val trustsForVulnerable: String              = getString("external-url.trusts-for-vulnerable")
   val trustsAllowableCostsUrl: String          = getString("external-url.trusts-allowable-costs")
   val nonResidentsRebasingUrl: String          = getString("external-url.non-resident-rebasing")
+  val govUkAccessibilityStatementUrl: String   = getString("external-url.gov-uk-accessibility-statement")
+  val abilityNetUrl: String                    = getString("external-url.ability-net")
+  val webContentAccessibilityGuidelinesV21Url: String = getString(
+    "external-url.web-content-accessibility-guidelines-v2-1"
+  )
+  val equalityAndAdvisoryServiceUrl: String          = getString("external-url.equality-advisory-and-support-service")
+  val equalityCommissionForNorthenIrelandUrl: String = getString("external-url.equality-commission-for-northen-ireland")
+  val digitalAccessibilityCentretUrl: String         = getString("external-url.digital-accessibility-centre")
+  val reportAccessibilityProblemUrl: String          = s"${getString("external-url.report-accessibility-problem")}?service=cgtpd"
+  val governmentGatewayUserIdAndPassword             = getString("external-url.government-gateway-user-id-and-password")
+  val contactHmrc                                    = getString("external-url.contact-hmrc")
+
+  val personalRepresentative = getString("external-url.personal-representative")
+  val calculateCgt           = getString("external-url.calculate-cgt")
+  val payYourTax             = getString("external-url.pay-your-tax")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
@@ -86,12 +102,13 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     .timedOut()
     .url
   val ggSignOut: String = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.start().url
-  val accountSignOutUrl
-    : String = signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
-    .signedOut()
-    .url
+  val accountSignOutUrl: String =
+    signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
+      .signedOut()
+      .url
   val gaUserTypeDimension: String = getString("google-analytics.user-type-dimension")
   val hmrcTelephone: String       = getString("telephone-numbers.hmrc-helpline")
   val outsideUkPhone: String      = getString("telephone-numbers.outside-uk")
   val agentDedicatedLine: String  = getString("telephone-numbers.agent-dedicated-line")
+  val maxUploads                  = getInt("microservice.services.upscan-initiate.max-uploads")
 }

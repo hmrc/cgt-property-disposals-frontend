@@ -261,9 +261,8 @@ class ExemptionAndLossesControllerSpec
               "inYearLosses.title",
               disposalDate.taxYear.startDateInclusive.getYear.toString,
               disposalDate.taxYear.endDateExclusive.getYear.toString
-            ), { doc =>
-              doc.select("#inYearLosses-1").attr("checked") shouldBe "checked"
-            }
+            ),
+            doc => doc.select("#inYearLosses-1").attr("checked") shouldBe "checked"
           )
         }
 
@@ -597,9 +596,8 @@ class ExemptionAndLossesControllerSpec
             performAction(),
             messageFromMessageKey(
               "previousYearsLosses.title"
-            ), { doc =>
-              doc.select("#previousYearsLosses-1").attr("checked") shouldBe "checked"
-            }
+            ),
+            doc => doc.select("#previousYearsLosses-1").attr("checked") shouldBe "checked"
           )
         }
 
@@ -1357,11 +1355,11 @@ class ExemptionAndLossesControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("exemptionsAndLosses.cya.title"), { doc =>
+            messageFromMessageKey("exemptionsAndLosses.cya.title"),
+            doc =>
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
                 .checkYourAnswersSubmit()
                 .url
-            }
           )
         }
 

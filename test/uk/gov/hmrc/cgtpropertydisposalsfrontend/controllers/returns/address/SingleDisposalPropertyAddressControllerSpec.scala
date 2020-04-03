@@ -218,9 +218,8 @@ class SingleDisposalPropertyDetailsControllerSpec
       ): Unit =
         checkPageIsDisplayed(
           result,
-          messageFromMessageKey(expectedTitleKey), { doc =>
-            validatePropertyAddressPage(ukAddressDetails, doc)
-          }
+          messageFromMessageKey(expectedTitleKey),
+          doc => validatePropertyAddressPage(ukAddressDetails, doc)
         )
 
       "redirect to the has uk postcode page if there is no address in session and the user " +
@@ -228,16 +227,16 @@ class SingleDisposalPropertyDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            SessionData.empty.copy(journeyStatus = Some(
-              sample[FillingOutReturn].copy(
-                draftReturn =
-                  draftReturn.copy(
+            SessionData.empty.copy(journeyStatus =
+              Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = draftReturn.copy(
                     triageAnswers =
                       sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.NonResidential),
                     propertyAddress = None
                   )
+                )
               )
-            )
             )
           )
         }
@@ -249,14 +248,15 @@ class SingleDisposalPropertyDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            SessionData.empty.copy(journeyStatus = Some(
-              sample[FillingOutReturn].copy(
-                draftReturn = draftReturn.copy(
-                  triageAnswers   = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.Residential),
-                  propertyAddress = None
+            SessionData.empty.copy(journeyStatus =
+              Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = draftReturn.copy(
+                    triageAnswers   = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.Residential),
+                    propertyAddress = None
+                  )
                 )
               )
-            )
             )
           )
         }
@@ -398,11 +398,11 @@ class SingleDisposalPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("hasValidPostcode.singleDisposal.title"), { doc =>
+            messageFromMessageKey("hasValidPostcode.singleDisposal.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 "hasValidPostcode.singleDisposal.error.required"
-              )
-            },
+              ),
             BAD_REQUEST
           )
 

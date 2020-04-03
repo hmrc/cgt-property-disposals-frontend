@@ -147,8 +147,7 @@ class SubscriptionController @Inject() (
   }
 
   def changeGGAccountForSubscription(): Action[AnyContent] = authenticatedActionWithSubscriptionReady {
-    implicit request =>
-      Ok(changeGGAccountPage(routes.SubscriptionController.checkYourDetails()))
+    implicit request => Ok(changeGGAccountPage(routes.SubscriptionController.checkYourDetails()))
   }
 
 }

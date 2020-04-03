@@ -61,7 +61,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, UploadSupportingDocuments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, UploadSupportingEvidenceAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -149,9 +149,8 @@ class TaskListControllerSpec
 
         checkPageIsDisplayed(
           performAction(),
-          messageFromMessageKey("service.title"), { doc =>
-            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
-          }
+          messageFromMessageKey("service.title"),
+          doc => doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
         )
       }
 
@@ -955,7 +954,7 @@ class TaskListControllerSpec
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
             yearToDateLiabilityAnswers    = Some(sample[CalculatedYTDAnswers]),
-            uploadSupportingDocuments     = Some(sample[UploadSupportingDocuments])
+            uploadSupportingDocuments     = Some(sample[UploadSupportingEvidenceAnswers])
           )
 
           testStateOfSection(

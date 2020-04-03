@@ -38,6 +38,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
@@ -45,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -168,6 +170,13 @@ class ViewReturnControllerSpec
           case _                => false
         }
       )
+      val address = sample[UkAddress].copy(
+        line1    = "123 fake street",
+        line2    = None,
+        town     = None,
+        county   = None,
+        postcode = Postcode("abc123")
+      )
 
       "display the page for a single disposal journey" in {
         forAll {
@@ -176,7 +185,10 @@ class ViewReturnControllerSpec
             agentReferenceNumber: Option[AgentReferenceNumber]
           ) =>
             val sampleViewingReturn = sample[ViewingReturn]
-              .copy(completeReturn = completeSingleDisposalReturn, agentReferenceNumber = agentReferenceNumber)
+              .copy(
+                completeReturn       = completeSingleDisposalReturn.copy(propertyAddress = address),
+                agentReferenceNumber = agentReferenceNumber
+              )
             val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
             val userType      = if (agentReferenceNumber.isDefined) Some(UserType.Agent) else None
             inSequence {
@@ -187,12 +199,25 @@ class ViewReturnControllerSpec
             val result   = performAction()
             val document = Jsoup.parse(contentAsString(result))
 
+            document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
+            document.select("#date-sent-table-answer").text() shouldBe LocalDateUtils.govDisplayFormat(
+              sentReturn.submissionDate
+            )
+            document.select("#property-address-table-question").text() shouldBe "Property address"
+            document.select("#property-address-table-answer").text()   shouldBe "123 fake street, abc123"
+            document.select("#return-reference-table-question").text() shouldBe "Return reference number"
+            document.select("#return-reference-table-answer").text()   shouldBe sentReturn.submissionId
+
             document
               .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
               .text() shouldBe messageFromMessageKey(
               "viewReturn.title"
             )
-            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
+              document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
+            } else {
+              document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            }
             document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
             )
@@ -216,7 +241,11 @@ class ViewReturnControllerSpec
             agentReferenceNumber: Option[AgentReferenceNumber]
           ) =>
             val sampleViewingReturn = sample[ViewingReturn]
-              .copy(completeReturn = completeMultipleDisposalsReturn, agentReferenceNumber = agentReferenceNumber)
+              .copy(
+                completeReturn       = completeMultipleDisposalsReturn,
+                agentReferenceNumber = agentReferenceNumber
+              )
+
             val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
             val userType      = if (agentReferenceNumber.isDefined) Some(UserType.Agent) else None
             inSequence {
@@ -227,12 +256,38 @@ class ViewReturnControllerSpec
             val result   = performAction()
             val document = Jsoup.parse(contentAsString(result))
 
+            document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
+            document.select("#date-sent-table-answer").text() shouldBe LocalDateUtils.govDisplayFormat(
+              sentReturn.submissionDate
+            )
+            val address = generateAddressLineForMultipleDisposals(completeMultipleDisposalsReturn)
+            document.select("#property-address-table-question").text() shouldBe "Property address"
+            document.select("#property-address-table-answer").text()   shouldBe address
+            document
+              .select("#return-reference-table-question")
+              .text() shouldBe "Return reference number"
+            document
+              .select("#return-reference-table-answer")
+              .text() shouldBe sentReturn.submissionId
+
             document
               .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
               .text() shouldBe messageFromMessageKey(
               "viewReturn.title"
             )
-            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+
+            val expectedName = viewingReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName)
+            val actualName   = document.select("#user-details-name").text()
+            userType match {
+              case Some(UserType.Agent) => actualName shouldBe s"Client: $expectedName"
+              case _                    => actualName shouldBe expectedName
+            }
+
+            if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
+              document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
+            } else {
+              document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            }
             document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
             )
@@ -246,7 +301,6 @@ class ViewReturnControllerSpec
             )
         }
       }
-
     }
 
     "handling requests to pay a charge" must {
@@ -326,4 +380,15 @@ class ViewReturnControllerSpec
 
   }
 
+  private def generateAddressLineForMultipleDisposals(
+    completeMultipleDisposalsReturn: CompleteMultipleDisposalsReturn
+  ): String =
+    List(
+      Some(completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line1),
+      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line2,
+      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.town,
+      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.county,
+      Some(completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.postcode.value)
+    ).collect { case Some(s) => s.trim }
+      .mkString(", ")
 }

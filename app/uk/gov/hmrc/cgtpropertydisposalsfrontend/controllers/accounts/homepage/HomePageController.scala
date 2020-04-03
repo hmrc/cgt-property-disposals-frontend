@@ -54,7 +54,6 @@ class HomePageController @Inject() (
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details,
   homePage: views.html.account.home,
-  privateBetaHomePage: views.html.account.home_private_beta,
   detailUpdatedPage: views.html.account.details_updated,
   signedOutPage: views.html.account.signed_out,
   subsequentReturnExitPage: views.html.returns.subsequent_return_exit
@@ -67,9 +66,7 @@ class HomePageController @Inject() (
   // homepage for after private beta: includes functionality to do with returns
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser { (_, subscribed) =>
-        Ok(homePage(subscribed))
-      }(withUplift = true)
+      withSubscribedUser((_, subscribed) => Ok(homePage(subscribed)))(withUplift = true)
   }
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>

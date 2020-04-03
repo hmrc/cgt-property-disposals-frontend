@@ -129,6 +129,9 @@
 }
 
 @footerTop = {}
+@footerLinks = @{
+    uiFooterLinks(accessibilityFooterUrl = Some(controllerRoutes.AccessibilityStatementController.accessibilityStatement().url))
+}
 
 @serviceInfo = {
   <div class="service-info">
@@ -158,4 +161,4 @@
 @govTitle = @{serviceNameAndHeading + " - GOV.UK"}
 @pageTitle = @{if(hasErrors) { messages("generic.errorPrefix") + " " + govTitle } else { govTitle }}
 
-@govUkTemplate(Some(pageTitle), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiFooterLinks()), true)(content)
+@govUkTemplate(Some(pageTitle), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(footerLinks), true)(content)

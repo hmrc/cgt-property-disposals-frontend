@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -157,7 +157,7 @@ class YearToDateLiabilityControllerSpec
       Some(sample[CompleteExemptionAndLossesAnswers]),
       yearToDateLiabilityAnswers,
       Some(sample[AmountInPence]),
-      Some(sample[CompleteUploadSupportingDocuments]),
+      Some(sample[CompleteUploadSupportingEvidenceAnswers]),
       LocalDateUtils.today()
     )
 
@@ -232,9 +232,11 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("estimatedIncome.title"), { doc =>
-            doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
-          })
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("estimatedIncome.title"),
+            doc => doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
+          )
         }
 
         "the user has answered the question before but has " +
@@ -890,9 +892,8 @@ class YearToDateLiabilityControllerSpec
             )
             test(
               sessionWithMultipleDisposalsState(answers)._1,
-              routes.YearToDateLiabilityController.checkYourAnswers(), { doc =>
-                doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
-              }
+              routes.YearToDateLiabilityController.checkYourAnswers(),
+              doc => doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
             )
           }
 
@@ -954,9 +955,8 @@ class YearToDateLiabilityControllerSpec
 
             testCompletedWithTrust(
               answers,
-              routes.YearToDateLiabilityController.checkYourAnswers(), { doc =>
-                doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
-              }
+              routes.YearToDateLiabilityController.checkYourAnswers(),
+              doc => doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
             )
           }
 
@@ -1220,8 +1220,8 @@ class YearToDateLiabilityControllerSpec
                 Some(answers),
                 Some(sample[DisposalDate]),
                 Some(
-                  sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs])
-                  )
+                  sample[CompleteReliefDetailsAnswers]
+                    .copy(otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs]))
                 )
               )
               val updatedDraftReturn =
@@ -1414,9 +1414,10 @@ class YearToDateLiabilityControllerSpec
           val draftReturn               = draftReturnWithAnswers(answers)
           val fillingOutReturn =
             sample[FillingOutReturn].copy(draftReturn = draftReturn, subscribedDetails = subscribedDetails)
-          val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn = draftReturn.copy(
-            yearToDateLiabilityAnswers = Some(answers.copy(calculatedTaxDue = Some(calculatedTaxDue)))
-          )
+          val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn =
+            draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(answers.copy(calculatedTaxDue = Some(calculatedTaxDue)))
+            )
           )
 
           inSequence {
@@ -1487,11 +1488,12 @@ class YearToDateLiabilityControllerSpec
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(
-                      fillingOutReturn.copy(draftReturn = draftReturn.copy(
-                        yearToDateLiabilityAnswers = Some(
-                          answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                      fillingOutReturn.copy(draftReturn =
+                        draftReturn.copy(
+                          yearToDateLiabilityAnswers = Some(
+                            answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                          )
                         )
-                      )
                       )
                     )
                   )
@@ -1906,9 +1908,8 @@ class YearToDateLiabilityControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("ytdLiability.cya.title"), { doc =>
-                  validateCalculatedYearToDateLiabilityPage(completeAnswers, doc)
-                }
+                messageFromMessageKey("ytdLiability.cya.title"),
+                doc => validateCalculatedYearToDateLiabilityPage(completeAnswers, doc)
               )
             }
           }
@@ -1917,9 +1918,10 @@ class YearToDateLiabilityControllerSpec
             val (session, journey, draftReturn) =
               sessionWithSingleDisposalState(allQuestionAnswered, sample[DisposalDate])
             val updatedDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
-            val updatedSession = session.copy(journeyStatus = Some(
-              journey.copy(draftReturn = updatedDraftReturn)
-            )
+            val updatedSession = session.copy(journeyStatus =
+              Some(
+                journey.copy(draftReturn = updatedDraftReturn)
+              )
             )
 
             inSequence {
@@ -2050,9 +2052,8 @@ class YearToDateLiabilityControllerSpec
           def testPageIsDisplayed(result: Future[Result]): Unit =
             checkPageIsDisplayed(
               result,
-              messageFromMessageKey("ytdLiability.cya.title"), { doc =>
-                validateNonCalculatedYearToDateLiabilityPage(completeAnswers, doc)
-              }
+              messageFromMessageKey("ytdLiability.cya.title"),
+              doc => validateNonCalculatedYearToDateLiabilityPage(completeAnswers, doc)
             )
 
           "the user has just answered all the questions in the section and all updates are successful" in {
@@ -2254,9 +2255,10 @@ class YearToDateLiabilityControllerSpec
         "the user has already started this uncalculated section but have not completed it yet" in {
           test(
             sessionWithMultipleDisposalsState(
-              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(
-                AmountInPence(-100L)
-              )
+              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss =
+                Some(
+                  AmountInPence(-100L)
+                )
               )
             )._1,
             returns.routes.TaskListController.taskList(), { doc =>
@@ -2271,9 +2273,8 @@ class YearToDateLiabilityControllerSpec
             sessionWithMultipleDisposalsState(
               sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(0L))
             )._1,
-            routes.YearToDateLiabilityController.checkYourAnswers(), { doc =>
-              doc.select("#taxableGainOrLoss-2").attr("checked") shouldBe "checked"
-            }
+            routes.YearToDateLiabilityController.checkYourAnswers(),
+            doc => doc.select("#taxableGainOrLoss-2").attr("checked") shouldBe "checked"
           )
 
         }
@@ -2296,11 +2297,12 @@ class YearToDateLiabilityControllerSpec
 
         behave like unsuccessfulUpdateBehaviour(
           draftReturn,
-          draftReturn.copy(yearToDateLiabilityAnswers = Some(
-            IncompleteNonCalculatedYTDAnswers.empty.copy(
-              taxableGainOrLoss = Some(AmountInPence(101L))
+          draftReturn.copy(yearToDateLiabilityAnswers =
+            Some(
+              IncompleteNonCalculatedYTDAnswers.empty.copy(
+                taxableGainOrLoss = Some(AmountInPence(101L))
+              )
             )
-          )
           ),
           () =>
             performAction(
@@ -2523,9 +2525,10 @@ class YearToDateLiabilityControllerSpec
 
         behave like unsuccessfulUpdateBehaviour(
           draftReturn,
-          draftReturn.copy(yearToDateLiabilityAnswers = Some(
-            answers.copy(taxDue = Some(AmountInPence(100L)))
-          )
+          draftReturn.copy(yearToDateLiabilityAnswers =
+            Some(
+              answers.copy(taxDue = Some(AmountInPence(100L)))
+            )
           ),
           () =>
             performAction(
@@ -2842,9 +2845,10 @@ class YearToDateLiabilityControllerSpec
     )
     val session = SessionData.empty.copy(journeyStatus = Some(journey))
 
-    val updatedSession = SessionData.empty.copy(journeyStatus = Some(
-      journey.copy(draftReturn = updatedDraftReturn)
-    )
+    val updatedSession = SessionData.empty.copy(journeyStatus =
+      Some(
+        journey.copy(draftReturn = updatedDraftReturn)
+      )
     )
 
     "show an error page" when {
