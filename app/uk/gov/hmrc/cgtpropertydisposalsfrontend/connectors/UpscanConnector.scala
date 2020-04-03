@@ -15,9 +15,6 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
-import java.nio.file.Files.readAllBytes
-
-import play.api.http.HeaderNames.CONTENT_LENGTH
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import cats.data.EitherT
@@ -25,7 +22,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
-import play.api.http.HeaderNames.USER_AGENT
+import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT}
 import play.api.libs.json.{JsError, JsSuccess, Json, OFormat}
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
@@ -287,7 +284,10 @@ class UpscanConnectorImpl @Inject() (
     EitherT[Future, Error, Unit](
       wsClient
         .url(href)
-        .withHttpHeaders(CONTENT_LENGTH -> filesize.toString)
+        .withHttpHeaders(
+          CONTENT_LENGTH -> filesize.toString,
+          CONTENT_TYPE   -> "multipart/form-data; boundary=---WebKitFormBoundary7MA4YWxkTrZu0gW"
+        )
         .post(parts)
         .map { response =>
           response.status match {

@@ -1023,9 +1023,8 @@ class YearToDateLiabilityControllerSpec
                 UserType.Individual,
                 wasUkResident = true
               )._1,
-              routes.YearToDateLiabilityController.checkYourAnswers(), { doc =>
-                doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
-              }
+              routes.YearToDateLiabilityController.checkYourAnswers(),
+              doc => doc.select("#hasEstimatedDetails-true").attr("checked") shouldBe "checked"
             )
           }
 
@@ -2511,9 +2510,10 @@ class YearToDateLiabilityControllerSpec
         "the user has already started this uncalculated section but have not completed it yet" in {
           test(
             sessionWithMultipleDisposalsState(
-              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(
-                AmountInPence(-100L)
-              )
+              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss =
+                Some(
+                  AmountInPence(-100L)
+                )
               ),
               UserType.Individual,
               wasUkResident = true
@@ -2534,9 +2534,8 @@ class YearToDateLiabilityControllerSpec
               wasUkResident = true
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "taxableGainOrLoss.multiple.title", { doc =>
-              doc.select("#taxableGainOrLoss-2").attr("checked") shouldBe "checked"
-            }
+            "taxableGainOrLoss.multiple.title",
+            doc => doc.select("#taxableGainOrLoss-2").attr("checked") shouldBe "checked"
           )
 
         }
