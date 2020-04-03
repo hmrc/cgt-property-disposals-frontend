@@ -15,8 +15,16 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs
+import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.util.UUID
+import java.nio.channels
+import java.nio.channels.FileChannel
+import java.nio.file.Files.readAllBytes
+
+import play.api.libs.Files.TemporaryFile
+import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.mvc.{MultipartFormData, Request}
 
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
@@ -59,6 +67,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{uploadsuppor
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @Singleton
 class UploadSupportingEvidenceController @Inject() (
@@ -332,14 +341,17 @@ class UploadSupportingEvidenceController @Inject() (
       }
     }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  @SuppressWarnings(
+    Array("org.wartremover.warts.Var", "org.wartremover.warts.Any", "org.wartremover.warts.NonUnitStatements")
+  )
   def uploadSupportingEvidenceSubmit(): Action[MultipartFormData[Files.TemporaryFile]] =
     authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
       val multipart: MultipartFormData[Files.TemporaryFile] = request.body
       withUploadSupportingEvidenceAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
         multipart
           .file("file")
-          .map(supportingEvidence =>
+          .map { supportingEvidence =>
+            val filesize = readAllBytes(supportingEvidence.ref.path).length
             if (supportingEvidence.filename.trim().isEmpty) {
               multipart.asFormUrlEncoded.get("reference") match {
                 case Some(reference) => {
@@ -376,7 +388,7 @@ class UploadSupportingEvidenceController @Inject() (
                 prepared <- EitherT
                              .fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
                 _ <- upscanConnector
-                      .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+                      .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared, filesize)
                 _ <- upscanConnector
                       .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
                 updatedAnswers: UploadSupportingEvidenceAnswers = answers match {
@@ -445,7 +457,7 @@ class UploadSupportingEvidenceController @Inject() (
                 ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
               )
             }
-          )
+          }
           .getOrElse {
             logger.warn("missing file key")
             Future.successful(errorHandler.errorResult())
@@ -539,7 +551,8 @@ class UploadSupportingEvidenceController @Inject() (
       withUploadSupportingEvidenceAnswers(request) { (draftReturnId, _, _, fillingOutReturn, answers) =>
         multipart
           .file("file")
-          .map(supportingEvidence =>
+          .map { supportingEvidence =>
+            val filesize = readAllBytes(supportingEvidence.ref.path).length
             if (supportingEvidence.filename === "") {
               multipart.asFormUrlEncoded.get("reference") match {
                 case Some(reference) => {
@@ -577,7 +590,7 @@ class UploadSupportingEvidenceController @Inject() (
                 prepared <- EitherT
                              .fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
                 _ <- upscanConnector
-                      .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+                      .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared, filesize)
                 _ <- upscanConnector
                       .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
 
@@ -652,7 +665,8 @@ class UploadSupportingEvidenceController @Inject() (
                 ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
               )
             }
-          )
+
+          }
           .getOrElse {
             logger.warn("missing file key")
             Future.successful(errorHandler.errorResult())

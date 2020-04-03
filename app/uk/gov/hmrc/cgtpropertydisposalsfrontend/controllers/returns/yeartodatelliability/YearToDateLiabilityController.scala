@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability
 
+import java.nio.file.Files.readAllBytes
 import java.time.LocalDateTime
 
 import akka.stream.scaladsl.{FileIO, Source}
@@ -927,6 +928,11 @@ class YearToDateLiabilityController @Inject() (
     val multiPartFormData = request.body
     val upscanReference   = multiPartFormData.dataParts.get("reference").flatMap(_.headOption)
     val mandatoryEvidence = multiPartFormData.file("file")
+    val mandatoryEvidenceFileSize: Int =
+      multiPartFormData
+        .file("file")
+        .map(mandatoryEvidence => readAllBytes(mandatoryEvidence.ref.path).size)
+        .getOrElse(0)
 
     (upscanReference, mandatoryEvidence) match {
       case (None, Some(_)) =>
@@ -970,7 +976,12 @@ class YearToDateLiabilityController @Inject() (
           )
 
           val result = for {
-            _ <- uploadFile(currentDraftReturn, UpscanInitiateReference(upscanReference), multiPartFormData)
+            _ <- uploadFile(
+                  currentDraftReturn,
+                  UpscanInitiateReference(upscanReference),
+                  multiPartFormData,
+                  mandatoryEvidenceFileSize
+                )
             _ <- returnsService.storeDraftReturn(
                   newDraftReturn,
                   currentJourney.subscribedDetails.cgtReference,
@@ -998,7 +1009,8 @@ class YearToDateLiabilityController @Inject() (
   private def uploadFile(
     draftReturn: DraftReturn,
     upscanInitiateReference: UpscanInitiateReference,
-    submittedFile: MultipartFormData[Files.TemporaryFile]
+    submittedFile: MultipartFormData[Files.TemporaryFile],
+    submittedFileSize: Int
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
     for {
       maybeUpscanFileDescriptor <- upscanService
@@ -1015,7 +1027,7 @@ class YearToDateLiabilityController @Inject() (
                    handleGetFileDescriptorResult(submittedFile, upscanFileDescriptor)
                  )
       _ <- upscanConnector
-            .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+            .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared, submittedFileSize)
       _ <- upscanConnector
             .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
     } yield ()
