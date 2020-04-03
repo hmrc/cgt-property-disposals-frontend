@@ -832,7 +832,10 @@ class UploadSupportingEvidenceController @Inject() (
                 documents <- upscanService.getAll(DraftReturnId(draftReturn.id.toString))
               } yield documents
               uploadedSupportingEvidences.fold(
-                e => InternalServerError(s"could not get all uploaded supporting evidence: $e"),
+                e => {
+                  logger.warn(s"could not et all upload supporting evidence :$e")
+                  InternalServerError
+                },
                 s => {
                   val expiredSupportingEvidence = findExpiredSupportingEvidence(s)
                   if (expiredSupportingEvidence.nonEmpty) {
@@ -856,7 +859,10 @@ class UploadSupportingEvidenceController @Inject() (
           } yield documents
 
           uploadedSupportingDocuments.fold(
-            e => InternalServerError(s"could not get all uploaded supporting evidence: $e"),
+            e => {
+              logger.warn(s"could not et all upload supporting evidence :$e")
+              InternalServerError
+            },
             se => {
               val expiredSupportingEvidence = findExpiredSupportingEvidence(se)
               if (expiredSupportingEvidence.nonEmpty) {
@@ -878,7 +884,10 @@ class UploadSupportingEvidenceController @Inject() (
         } yield documents
 
         uploadedSupportingDocuments.fold(
-          e => InternalServerError(s"could not get all uploaded supporting evidence: $e"),
+          e => {
+            logger.warn(s"could not et all upload supporting evidence :$e")
+            InternalServerError
+          },
           se => {
             val expiredSupportingEvidence = findExpiredSupportingEvidence(se)
             if (expiredSupportingEvidence.nonEmpty) {
