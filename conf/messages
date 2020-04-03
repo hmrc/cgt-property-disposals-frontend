@@ -1270,7 +1270,7 @@ reliefDetails.cya.title=Check your answers
 reliefDetails.cyaLabel.privateResidentsRelief=Entitled to Private Residence Relief?
 reliefDetails.cyaLabel.lettingsRelief=Apply Letting Relief?
 reliefDetails.cyaLabel.otherReliefs=Apply other reliefs?
-reliefDetails.cyaChange.privateResidentsReliefValue=if Private Residence Relief is claimed
+reliefDetails.cyaChange.privateResidentsReliefValue==Amount of Private Residence Relief
 reliefDetails.cyaChange.lettingsReliefValue=Amount of Lettings Relief
 reliefDetails.cyaChange.otherReliefsName=Other reliefs names
 reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
