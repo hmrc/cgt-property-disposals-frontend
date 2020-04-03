@@ -15,16 +15,9 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs
-import java.nio.file.Paths
+import java.nio.file.Files.readAllBytes
 import java.time.LocalDateTime
 import java.util.UUID
-import java.nio.channels
-import java.nio.channels.FileChannel
-import java.nio.file.Files.readAllBytes
-
-import play.api.libs.Files.TemporaryFile
-import play.api.libs.json.{JsError, JsSuccess, Json}
-import play.api.mvc.{MultipartFormData, Request}
 
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
@@ -41,7 +34,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText, of}
 import play.api.http.Writeable
 import play.api.libs.Files
-import play.api.mvc._
+import play.api.mvc.{MultipartFormData, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -67,7 +60,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{uploadsuppor
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 @Singleton
 class UploadSupportingEvidenceController @Inject() (
