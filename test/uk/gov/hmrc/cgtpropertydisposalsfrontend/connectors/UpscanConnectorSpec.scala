@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
@@ -82,6 +84,9 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         |""".stripMargin
     )
   )
+
+  implicit val actorSystem       = ActorSystem()
+  implicit val actorMaterializer = ActorMaterializer()
 
   val connector =
     new UpscanConnectorImpl(mockHttp, mockWsClient, config, new ServicesConfig(config, new RunMode(config, Mode.Test)))
