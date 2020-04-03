@@ -46,8 +46,16 @@ class LandingPageControllerSpec extends ControllerSpec {
 
       checkPageIsDisplayed(
         result,
-        messageFromMessageKey("agentsLandingPage.title"),
-        doc => doc.select(".button").attr("href") shouldBe s"${viewConfig.agentsSignInUrl}"
+        messageFromMessageKey("agentsLandingPage.title"), doc => {
+          doc.select(".button").attr("href") shouldBe viewConfig.agentsSignInUrl
+          doc.select("#nonResidentsRebasingUrl > a").attr("href") shouldBe viewConfig.nonResidentsRebasingUrl
+          doc.select("#createAgentsAccountUrl > a").attr("href") shouldBe viewConfig.createAgentsAccountUrl
+          doc.select("#nrcgtReturn-1 > a").attr("href") shouldBe viewConfig.nrcgtReturn
+          doc.select("#nrcgtReturn-2 > a").attr("href") shouldBe viewConfig.nrcgtReturn
+          doc.select("#contact-hmrc-1 > a").attr("href") shouldBe viewConfig.contactHmrc
+          doc.select("#contact-hmrc-2 > a").attr("href") shouldBe viewConfig.contactHmrc
+          doc.select("#cgtUrl > a").attr("href") shouldBe viewConfig.cgtUrl
+        }
       )
     }
 
