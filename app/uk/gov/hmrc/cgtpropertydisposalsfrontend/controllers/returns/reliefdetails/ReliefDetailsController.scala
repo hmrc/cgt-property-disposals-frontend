@@ -362,7 +362,7 @@ class ReliefDetailsController @Inject() (
     withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       answers match {
         case c: CompleteReliefDetailsAnswers =>
-          Ok(checkYouAnswersPage(c))
+          Ok(checkYouAnswersPage(c, fillingOutReturn.subscribedDetails.isATrust))
 
         case IncompleteReliefDetailsAnswers(None, _, _) =>
           Redirect(routes.ReliefDetailsController.privateResidentsRelief())
@@ -410,10 +410,13 @@ class ReliefDetailsController @Inject() (
           )
     } yield ()
 
-    result.fold({ e =>
-      logger.warn("Could not update session", e)
-      errorHandler.errorResult()
-    }, _ => Ok(checkYouAnswersPage(completeAnswers)))
+    result.fold(
+      { e =>
+        logger.warn("Could not update session", e)
+        errorHandler.errorResult()
+      },
+      _ => Ok(checkYouAnswersPage(completeAnswers, fillingOutReturn.subscribedDetails.isATrust))
+    )
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>

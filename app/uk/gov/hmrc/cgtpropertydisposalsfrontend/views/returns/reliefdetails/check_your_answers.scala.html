@@ -30,7 +30,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary
 )
 
-@(answers: CompleteReliefDetailsAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteReliefDetailsAnswers, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("reliefDetails.cya.title")}
 
@@ -38,7 +38,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetai
 
  @pageHeading(title, Some(messages("reliefDetails.caption")))
 
- @summary(answers)
+ @summary(answers, isATrust)
 
  @formWrapper(routes.ReliefDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))
