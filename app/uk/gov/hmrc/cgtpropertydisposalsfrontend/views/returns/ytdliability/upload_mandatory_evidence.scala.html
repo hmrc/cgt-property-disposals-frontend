@@ -22,6 +22,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateReference
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingEvidenceController.FileUpload
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
@@ -32,12 +34,12 @@
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+        fileInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.file_input,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
         details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[String], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form : Form[FileUpload], reference : UpscanInitiateReference, backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "mandatoryEvidence" }
 
 @title = @{messages(s"$key.title")}
@@ -53,19 +55,17 @@
 
     @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityController.uploadMandatoryEvidenceSubmit(), 'novalidate -> "novalidate") {
-        @textInput(
+    @formWrapper(routes.YearToDateLiabilityController.uploadMandatoryEvidenceSubmit(), 'enctype -> "multipart/form-data") {
+        @fileInput(
             fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            hasErrors = form.error(key).nonEmpty,
-            errorKey = form.error(key).map(e => e.message),
+            ref = Some(reference.value),
             label = Html(title),
+            helpText = Some(Html(messages(s"$key.help-text"))),
+            hasErrors = false,
+            errorKey = None,
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText"))),
             autoComplete = AutoCompleteType.On
         )
-
-
         @submitButton(messages("button.saveAndContinue"))
     }
 

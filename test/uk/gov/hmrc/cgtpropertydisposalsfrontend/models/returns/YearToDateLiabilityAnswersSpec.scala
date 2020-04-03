@@ -97,7 +97,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
   "CalculatedYTDAnswers" must {
 
     val personalAllowance = sample[AmountInPence]
-    val mandatoryEvidence = sample[String]
+    val mandatoryEvidence = sample[MandatoryEvidence]
 
     val completeAnswers = sample[CompleteCalculatedYTDAnswers].copy(
       personalAllowance = Some(personalAllowance),
