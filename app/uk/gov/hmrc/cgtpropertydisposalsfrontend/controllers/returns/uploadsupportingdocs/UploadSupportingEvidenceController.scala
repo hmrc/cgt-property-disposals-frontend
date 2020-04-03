@@ -147,7 +147,9 @@ class UploadSupportingEvidenceController @Inject() (
         )(
           page = doYouWantToUploadSupportingEvidencePage(_, _)
         )(
-          requiredPreviousAnswer               = { _ => Some(()) },
+          requiredPreviousAnswer = { _ =>
+            Some(())
+          },
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
         )
       }
@@ -312,10 +314,10 @@ class UploadSupportingEvidenceController @Inject() (
       upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
         case Left(error) =>
           error.value match {
-            case Left(_) => errorHandler.errorResult(None)
+            case Left(_) => errorHandler.errorResult()
             case Right(MaxUploads) =>
               Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
-            case Right(_) => errorHandler.errorResult(None)
+            case Right(_) => errorHandler.errorResult()
           }
         case Right(upscanInitiateResponse) =>
           upscanInitiateResponse match {
@@ -340,7 +342,7 @@ class UploadSupportingEvidenceController @Inject() (
         multipart
           .file("file")
           .map(supportingEvidence =>
-            if (supportingEvidence.filename === "") {
+            if (supportingEvidence.filename.trim().isEmpty) {
               multipart.asFormUrlEncoded.get("reference") match {
                 case Some(reference) => {
                   Future.successful(
@@ -355,7 +357,7 @@ class UploadSupportingEvidenceController @Inject() (
                     )
                   )
                 }
-                case None => Future.successful(errorHandler.errorResult(None))
+                case None => Future.successful(errorHandler.errorResult())
               }
             } else {
               val result = for {
@@ -445,7 +447,7 @@ class UploadSupportingEvidenceController @Inject() (
               result.fold(
                 error => {
                   logger.warn(s"failed to upload file with error: $error")
-                  errorHandler.errorResult(None)
+                  errorHandler.errorResult()
                 },
                 ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
               )
@@ -453,7 +455,7 @@ class UploadSupportingEvidenceController @Inject() (
           )
           .getOrElse {
             logger.warn("missing file key")
-            Future.successful(errorHandler.errorResult(None))
+            Future.successful(errorHandler.errorResult())
           }
       }
     }
@@ -469,7 +471,7 @@ class UploadSupportingEvidenceController @Inject() (
         result.fold(
           error => {
             logger.warn(s"failed to get file descriptor information: $error")
-            errorHandler.errorResult(None)
+            errorHandler.errorResult()
           }, {
             case Some(upscanFileDescriptor) =>
               if (upscanFileDescriptor.status === UPLOADED | upscanFileDescriptor.status === FAILED) {
@@ -482,7 +484,7 @@ class UploadSupportingEvidenceController @Inject() (
               } else {
                 Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
               }
-            case None => errorHandler.errorResult(None)
+            case None => errorHandler.errorResult()
           }
         )
       }
@@ -516,10 +518,10 @@ class UploadSupportingEvidenceController @Inject() (
       upscanService.initiate(DraftReturnId(draftReturnId.toString), cgtRef, LocalDateTime.now()).value.map {
         case Left(error) =>
           error.value match {
-            case Left(_) => errorHandler.errorResult(None)
+            case Left(_) => errorHandler.errorResult()
             case Right(MaxUploads) =>
               Redirect(routes.UploadSupportingEvidenceController.checkYourAnswers())
-            case Right(_) => errorHandler.errorResult(None)
+            case Right(_) => errorHandler.errorResult()
           }
         case Right(upscanInitiateResponse) =>
           upscanInitiateResponse match {
@@ -561,7 +563,7 @@ class UploadSupportingEvidenceController @Inject() (
                     )
                   )
                 }
-                case None => Future.successful(errorHandler.errorResult(None))
+                case None => Future.successful(errorHandler.errorResult())
               }
             } else {
               val result = for {
@@ -657,7 +659,7 @@ class UploadSupportingEvidenceController @Inject() (
               result.fold(
                 error => {
                   logger.warn(s"failed to upload file with error: $error")
-                  errorHandler.errorResult(None)
+                  errorHandler.errorResult()
                 },
                 ref => Redirect(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheck(ref))
               )
@@ -665,7 +667,7 @@ class UploadSupportingEvidenceController @Inject() (
           )
           .getOrElse {
             logger.warn("missing file key")
-            Future.successful(errorHandler.errorResult(None))
+            Future.successful(errorHandler.errorResult())
           }
       }
     }
