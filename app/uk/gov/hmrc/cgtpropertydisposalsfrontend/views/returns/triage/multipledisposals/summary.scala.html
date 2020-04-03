@@ -40,7 +40,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @(answers: CompleteMultipleDisposalsTriageAnswers, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userKey = @{if(isAgent) ".agent" else if(isATrust) ".trust" else ""}
 @cyaSection() {
   @answers.individualUserType.map{ individualUserType =>
       @cyaRow(

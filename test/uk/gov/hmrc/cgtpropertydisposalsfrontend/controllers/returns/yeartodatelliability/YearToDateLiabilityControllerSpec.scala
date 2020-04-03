@@ -1213,6 +1213,7 @@ class YearToDateLiabilityControllerSpec
               val newAnswers = IncompleteNonCalculatedYTDAnswers(
                 Some(answers.taxableGainOrLoss),
                 Some(false),
+                None,
                 None
               )
 
@@ -1950,13 +1951,15 @@ class YearToDateLiabilityControllerSpec
         val completeAnswers = CompleteNonCalculatedYTDAnswers(
           AmountInPence(1L),
           true,
-          AmountInPence(2L)
+          AmountInPence(2L),
+          "file"
         )
 
         val allQuestionAnswered = IncompleteNonCalculatedYTDAnswers(
           Some(completeAnswers.taxableGainOrLoss),
           Some(completeAnswers.hasEstimatedDetails),
-          Some(completeAnswers.taxDue)
+          Some(completeAnswers.taxDue),
+          Some(completeAnswers.mandatoryEvidence)
         )
 
         val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(allQuestionAnswered)
@@ -2047,6 +2050,18 @@ class YearToDateLiabilityControllerSpec
 
         }
 
+        "redirect to the mandatory evidence page" when {
+
+          "that question has not been answered yet" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(mandatoryEvidence = None),
+              routes.YearToDateLiabilityController.uploadMandatoryEvidence()
+            )
+
+          }
+
+        }
+
         "display the page" when {
 
           def testPageIsDisplayed(result: Future[Result]): Unit =
@@ -2094,8 +2109,6 @@ class YearToDateLiabilityControllerSpec
 
       behave like commonUploadMandatoryEvidenceBehaviour(performAction)
 
-      behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(performAction)
-
       "display the page" when {
 
         def test(
@@ -2132,30 +2145,55 @@ class YearToDateLiabilityControllerSpec
           )
         }
 
-        val calculatedTaxDue = sample[GainCalculatedTaxDue].copy(amountOfTaxDue = AmountInPence(100L))
+        "the user is on a calculated journey and" when {
 
-        "the section is incomplete" in {
-          test(
-            IncompleteCalculatedYTDAnswers(
-              Some(AmountInPence.zero),
-              None,
-              Some(true),
-              Some(calculatedTaxDue),
-              Some(AmountInPence(200L)),
-              None
-            ),
-            routes.YearToDateLiabilityController.taxDue()
-          )
+          val calculatedTaxDue = sample[GainCalculatedTaxDue].copy(amountOfTaxDue = AmountInPence(100L))
+
+          "the section is incomplete" in {
+            test(
+              IncompleteCalculatedYTDAnswers(
+                Some(AmountInPence.zero),
+                None,
+                Some(true),
+                Some(calculatedTaxDue),
+                Some(AmountInPence(200L)),
+                None
+              ),
+              routes.YearToDateLiabilityController.taxDue()
+            )
+          }
+
+          "the section is complete" in {
+            test(
+              sample[CompleteCalculatedYTDAnswers].copy(
+                calculatedTaxDue = calculatedTaxDue,
+                taxDue           = AmountInPence(200L)
+              ),
+              routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+          }
         }
 
-        "the section is complete" in {
-          test(
-            sample[CompleteCalculatedYTDAnswers].copy(
-              calculatedTaxDue = calculatedTaxDue,
-              taxDue           = AmountInPence(200L)
-            ),
-            routes.YearToDateLiabilityController.checkYourAnswers()
-          )
+        "the user is on a non-calculated journey and" when {
+
+          "the section is incomplete" in {
+            test(
+              IncompleteNonCalculatedYTDAnswers(
+                Some(AmountInPence.zero),
+                Some(true),
+                Some(AmountInPence(200L)),
+                None
+              ),
+              routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
+            )
+          }
+
+          "the section is complete" in {
+            test(
+              sample[CompleteNonCalculatedYTDAnswers],
+              routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+          }
         }
 
       }
@@ -2169,8 +2207,6 @@ class YearToDateLiabilityControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like commonUploadMandatoryEvidenceBehaviour(performAction)
-
-      behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(performAction)
 
     }
 
@@ -2394,7 +2430,7 @@ class YearToDateLiabilityControllerSpec
             val newAmount = AmountInPence(0L)
             val answers =
               sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(1L))
-            val newAnswers = IncompleteNonCalculatedYTDAnswers(Some(newAmount), None, None)
+            val newAnswers = IncompleteNonCalculatedYTDAnswers(Some(newAmount), None, None, None)
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
                 "taxableGainOrLoss" -> "2"
@@ -2582,13 +2618,18 @@ class YearToDateLiabilityControllerSpec
             val newAmount = AmountInPence(0L)
             val answers =
               sample[CompleteNonCalculatedYTDAnswers].copy(taxDue = AmountInPence(1L))
-
+            val newAnswers = IncompleteNonCalculatedYTDAnswers(
+              Some(answers.taxableGainOrLoss),
+              Some(answers.hasEstimatedDetails),
+              Some(newAmount),
+              None
+            )
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
                 "nonCalculatedTaxDue" -> "0"
               ),
               answers,
-              answers.copy(taxDue = newAmount)
+              newAnswers
             )
           }
 

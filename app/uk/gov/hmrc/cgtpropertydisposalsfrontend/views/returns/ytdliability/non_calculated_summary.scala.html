@@ -72,4 +72,11 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         Some(cyaChange(messages("ytdLiability.cyaChange.nonCalculatedTaxDue"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
         "nonCalculatedTaxDue-value"
     )
+
+    @cyaRow(
+        messages("ytdLiability.cyaLabel.mandatoryEvidence"),
+        Html(answers.mandatoryEvidence),
+        Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+        "mandatoryEvidence-value"
+    )
 }

@@ -37,12 +37,13 @@ object YearToDateLiabilityAnswers {
     final case class IncompleteNonCalculatedYTDAnswers(
       taxableGainOrLoss: Option[AmountInPence],
       hasEstimatedDetails: Option[Boolean],
-      taxDue: Option[AmountInPence]
+      taxDue: Option[AmountInPence],
+      mandatoryEvidence: Option[String]
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
       val empty: IncompleteNonCalculatedYTDAnswers =
-        IncompleteNonCalculatedYTDAnswers(None, None, None)
+        IncompleteNonCalculatedYTDAnswers(None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteNonCalculatedYTDAnswers
@@ -50,14 +51,16 @@ object YearToDateLiabilityAnswers {
         IncompleteNonCalculatedYTDAnswers(
           Some(c.taxableGainOrLoss),
           Some(c.hasEstimatedDetails),
-          Some(c.taxDue)
+          Some(c.taxDue),
+          Some(c.mandatoryEvidence)
         )
     }
 
     final case class CompleteNonCalculatedYTDAnswers(
       taxableGainOrLoss: AmountInPence,
       hasEstimatedDetails: Boolean,
-      taxDue: AmountInPence
+      taxDue: AmountInPence,
+      mandatoryEvidence: String
     ) extends NonCalculatedYTDAnswers
 
     implicit class NonCalculatedYTDLiabilityAnswersOps(private val a: NonCalculatedYTDAnswers) extends AnyVal {

@@ -51,6 +51,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{ytdliability => pages}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -662,6 +663,7 @@ class YearToDateLiabilityController @Inject() (
       } else {
         val newAnswers = nonCalculatedAnswers
           .unset(_.taxDue)
+          .unset(_.mandatoryEvidence)
           .copy(hasEstimatedDetails = Some(hasEstimated))
 
         draftReturn.fold(
@@ -845,6 +847,16 @@ class YearToDateLiabilityController @Inject() (
             }
           }
 
+        case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, _) =>
+          val form = nonCalculatedYTDAnswers
+            .fold(_.mandatoryEvidence, c => Some(c.mandatoryEvidence))
+            .fold(mandatoryEvidenceForm)(mandatoryEvidenceForm.fill)
+          val backLink = nonCalculatedYTDAnswers.fold(
+            _ => routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
+            _ => routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+          Ok(mandatoryEvidencePage(form, backLink))
+
         case _ =>
           Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
@@ -868,48 +880,74 @@ class YearToDateLiabilityController @Inject() (
                 mandatoryEvidenceForm
                   .bindFromRequest()
                   .fold(
-                    formWithErrors => BadRequest(mandatoryEvidencePage(formWithErrors, backLink)), { s =>
-                      val updatedDraftReturn = draftReturn.copy(
-                        yearToDateLiabilityAnswers = Some(
-                          calculatedAnswers.fold(
-                            _.copy(mandatoryEvidence = Some(s)),
-                            _.copy(mandatoryEvidence = Some(s))
-                          )
-                        )
-                      )
-
-                      val result =
-                        for {
-                          _ <- returnsService.storeDraftReturn(
-                                updatedDraftReturn,
-                                fillingOutReturn.subscribedDetails.cgtReference,
-                                fillingOutReturn.agentReferenceNumber
-                              )
-                          _ <- EitherT(
-                                updateSession(sessionStore, request)(
-                                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
-                                )
-                              )
-                        } yield ()
-
-                      result.fold(
-                        { e =>
-                          logger.warn("Could not update return", e)
-                          errorHandler.errorResult()
-                        },
-                        _ => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-                      )
-                    }
+                    formWithErrors => BadRequest(mandatoryEvidencePage(formWithErrors, backLink)),
+                    s => handleNewMandatoryEvidence(calculatedAnswers, draftReturn, fillingOutReturn, s)
                   )
-
               }
             }
+
+          case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, draftReturn) =>
+            val backLink = nonCalculatedYTDAnswers.fold(
+              _ => routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
+              _ => routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+            mandatoryEvidenceForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors => BadRequest(mandatoryEvidencePage(formWithErrors, backLink)),
+                s => handleNewMandatoryEvidence(nonCalculatedYTDAnswers, draftReturn, fillingOutReturn, s)
+              )
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
       }
+  }
+
+  private def handleNewMandatoryEvidence(
+    currentAnswers: YearToDateLiabilityAnswers,
+    currentDraftReturn: DraftReturn,
+    currentJourney: FillingOutReturn,
+    newMandatoryEvidence: String
+  )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): Future[Result] = {
+
+    val newAnswers = currentAnswers match {
+      case c: CalculatedYTDAnswers =>
+        c.fold(
+          _.copy(mandatoryEvidence = Some(newMandatoryEvidence)),
+          _.copy(mandatoryEvidence = Some(newMandatoryEvidence))
+        )
+      case n: NonCalculatedYTDAnswers =>
+        n.fold(_.copy(mandatoryEvidence = Some(newMandatoryEvidence)), _.copy(mandatoryEvidence = newMandatoryEvidence))
+    }
+
+    val updatedDraftReturn = currentDraftReturn.fold(
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+    )
+
+    val result =
+      for {
+        _ <- returnsService.storeDraftReturn(
+              updatedDraftReturn,
+              currentJourney.subscribedDetails.cgtReference,
+              currentJourney.agentReferenceNumber
+            )
+        _ <- EitherT(
+              updateSession(sessionStore, request)(
+                _.copy(journeyStatus = Some(currentJourney.copy(draftReturn = updatedDraftReturn)))
+              )
+            )
+      } yield ()
+
+    result.fold(
+      { e =>
+        logger.warn("Could not update return", e)
+        errorHandler.errorResult()
+      },
+      _ => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+    )
   }
 
   def taxableGainOrLoss(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -962,6 +1000,7 @@ class YearToDateLiabilityController @Inject() (
               val newAnswers = nonCalculatedAnswers
                 .unset(_.hasEstimatedDetails)
                 .unset(_.taxDue)
+                .unset(_.mandatoryEvidence)
                 .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
 
               draftReturn.fold(
@@ -1022,11 +1061,7 @@ class YearToDateLiabilityController @Inject() (
               if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue))
                 draftReturn
               else {
-                val newAnswers = nonCalculatedAnswers.fold(
-                  _.copy(taxDue = Some(taxDue)),
-                  _.copy(taxDue = taxDue)
-                )
-
+                val newAnswers = nonCalculatedAnswers.unset(_.mandatoryEvidence).copy(taxDue = Some(taxDue))
                 draftReturn.fold(
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -1061,17 +1096,20 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case IncompleteNonCalculatedYTDAnswers(None, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(None, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxableGainOrLoss())
 
-      case IncompleteNonCalculatedYTDAnswers(_, None, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, None, _, _) =>
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, None) =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, None, _) =>
         Redirect(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue())
 
-      case IncompleteNonCalculatedYTDAnswers(Some(t), Some(e), Some(d)) =>
-        val completeAnswers = CompleteNonCalculatedYTDAnswers(t, e, d)
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, None) =>
+        Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
+
+      case IncompleteNonCalculatedYTDAnswers(Some(t), Some(e), Some(d), Some(m)) =>
+        val completeAnswers = CompleteNonCalculatedYTDAnswers(t, e, d, m)
         val updatedDraftReturn = draftReturn.fold(
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers))

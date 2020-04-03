@@ -32,7 +32,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         IncompleteNonCalculatedYTDAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteNonCalculatedYTDAnswers(
           Some(completeAnswers.taxableGainOrLoss),
           Some(completeAnswers.hasEstimatedDetails),
-          Some(completeAnswers.taxDue)
+          Some(completeAnswers.taxDue),
+          Some(completeAnswers.mandatoryEvidence)
         )
       }
 
@@ -46,7 +47,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
       IncompleteNonCalculatedYTDAnswers(
         Some(completeAnswers.taxableGainOrLoss),
         Some(completeAnswers.hasEstimatedDetails),
-        Some(completeAnswers.taxDue)
+        Some(completeAnswers.taxDue),
+        Some(completeAnswers.mandatoryEvidence)
       )
 
     "have a method which unsets fields" when {
@@ -55,12 +57,15 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         incompleteAnswers.unset(_.taxableGainOrLoss)   shouldBe incompleteAnswers.copy(taxableGainOrLoss   = None)
         incompleteAnswers.unset(_.hasEstimatedDetails) shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
         incompleteAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue              = None)
+        incompleteAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers.copy(mandatoryEvidence   = None)
       }
 
       "given complete answers" in {
         completeAnswers.unset(_.taxableGainOrLoss)   shouldBe incompleteAnswers.copy(taxableGainOrLoss   = None)
         completeAnswers.unset(_.hasEstimatedDetails) shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
         completeAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue              = None)
+        completeAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers.copy(mandatoryEvidence   = None)
+
       }
 
     }
