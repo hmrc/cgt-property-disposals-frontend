@@ -75,7 +75,8 @@ class InitialGainOrLossController @Inject() (
         initialGainOrLossForm
           .bindFromRequest()
           .fold(
-            formWithErrors => BadRequest(initialGainOrLossesPage(formWithErrors, backLink)), { value =>
+            formWithErrors => BadRequest(initialGainOrLossesPage(formWithErrors, backLink)),
+            value =>
               if (answers.map(_.inPounds()).contains(value))
                 Redirect(routes.InitialGainOrLossController.checkYourAnswers())
               else {
@@ -108,7 +109,6 @@ class InitialGainOrLossController @Inject() (
                   _ => Redirect(routes.InitialGainOrLossController.checkYourAnswers())
                 )
               }
-            }
           )
     }
   }
@@ -169,9 +169,9 @@ object InitialGainOrLossController {
               _ > MoneyUtils.maxAmountOfPounds
             )(_)
           )
-          .leftMap({
+          .leftMap {
             Seq(_)
-          })
+          }
       }
 
     val formatter = ConditionalRadioUtils.formatter("initialGainOrLoss")(

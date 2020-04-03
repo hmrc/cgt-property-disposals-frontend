@@ -138,7 +138,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.exemptionsAndLossesDetails),
           Some(completeReturn.yearToDateLiabilityAnswers.merge),
           completeReturn.initialGainOrLoss,
-          None,
+          Some(completeReturn.uploadSupportingDocumentAnswers),
           LocalDateUtils.today()
         )
 
@@ -292,7 +292,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         Some(completeReturn.exemptionsAndLossesDetails),
         Some(completeReturn.yearToDateLiabilityAnswers.merge),
         completeReturn.initialGainOrLoss,
-        None,
+        Some(completeReturn.uploadSupportingDocumentAnswers),
         LocalDateUtils.today()
       )
 
@@ -420,13 +420,13 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("submitReturnError.title"), { doc =>
+              messageFromMessageKey("submitReturnError.title"),
+              doc =>
                 doc
                   .select("#content > article > form")
                   .attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                   .submissionErrorSubmit()
                   .url
-              }
             )
           }
 

@@ -185,9 +185,11 @@ class DisposalDetailsControllerSpec
               )
             }
             val userMsgKey = userMessageKey(userType)
-            checkPageIsDisplayed(performAction(), messageFromMessageKey(s"shareOfProperty$userMsgKey.title"), { doc =>
-              doc.select("#percentageShare").attr("value") shouldBe "12.34"
-            })
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"shareOfProperty$userMsgKey.title"),
+              doc => doc.select("#percentageShare").attr("value") shouldBe "12.34"
+            )
           }
         }
 
@@ -207,9 +209,11 @@ class DisposalDetailsControllerSpec
               )
             }
             val userMsgKey = userMessageKey(userType)
-            checkPageIsDisplayed(performAction(), messageFromMessageKey(s"shareOfProperty$userMsgKey.title"), { doc =>
-              doc.select("#percentageShare").attr("value") shouldBe "12.34"
-            })
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"shareOfProperty$userMsgKey.title"),
+              doc => doc.select("#percentageShare").attr("value") shouldBe "12.34"
+            )
           }
         }
 
@@ -262,11 +266,11 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"shareOfProperty$userMsgKey.title"), { doc =>
+            messageFromMessageKey(s"shareOfProperty$userMsgKey.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -670,9 +674,11 @@ class DisposalDetailsControllerSpec
                     )
                   }
 
-                  checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey), { doc =>
-                    doc.select("#disposalPrice").attr("value") shouldBe "12.34"
-                  })
+                  checkPageIsDisplayed(
+                    performAction(),
+                    messageFromMessageKey(expectedTitleKey),
+                    doc => doc.select("#disposalPrice").attr("value") shouldBe "12.34"
+                  )
                 }
             }
           }
@@ -701,9 +707,11 @@ class DisposalDetailsControllerSpec
                     )
                   }
 
-                  checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey), { doc =>
-                    doc.select("#disposalPrice").attr("value") shouldBe "12.34"
-                  })
+                  checkPageIsDisplayed(
+                    performAction(),
+                    messageFromMessageKey(expectedTitleKey),
+                    doc => doc.select("#disposalPrice").attr("value") shouldBe "12.34"
+                  )
                 }
             }
           }
@@ -766,11 +774,11 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"$key$userKey$disposalMethodKey.title"), { doc =>
+            messageFromMessageKey(s"$key$userKey$disposalMethodKey.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -837,11 +845,12 @@ class DisposalDetailsControllerSpec
                 Right(())
               )
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    draftReturn = newDraftReturn
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      draftReturn = newDraftReturn
+                    )
                   )
-                )
                 )
               )(Left(Error("")))
             }
@@ -879,11 +888,12 @@ class DisposalDetailsControllerSpec
                 Right(())
               )
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    draftReturn = newDraftReturn
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      draftReturn = newDraftReturn
+                    )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -920,11 +930,12 @@ class DisposalDetailsControllerSpec
                 Right(())
               )
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    draftReturn = newDraftReturn
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      draftReturn = newDraftReturn
+                    )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -960,11 +971,12 @@ class DisposalDetailsControllerSpec
                 Right(())
               )
               mockStoreSession(
-                session.copy(journeyStatus = Some(
-                  journey.copy(
-                    draftReturn = newDraftReturn
+                session.copy(journeyStatus =
+                  Some(
+                    journey.copy(
+                      draftReturn = newDraftReturn
+                    )
                   )
-                )
                 )
               )(Right(()))
             }
@@ -1133,9 +1145,11 @@ class DisposalDetailsControllerSpec
                     )
                   }
 
-                  checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey), { doc =>
-                    doc.select("#disposalFees").attr("value") shouldBe "12.34"
-                  })
+                  checkPageIsDisplayed(
+                    performAction(),
+                    messageFromMessageKey(expectedTitleKey),
+                    doc => doc.select("#disposalFees").attr("value") shouldBe "12.34"
+                  )
                 }
             }
           }
@@ -1164,9 +1178,11 @@ class DisposalDetailsControllerSpec
                     )
                   }
 
-                  checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey), { doc =>
-                    doc.select("#disposalFees").attr("value") shouldBe "12.34"
-                  })
+                  checkPageIsDisplayed(
+                    performAction(),
+                    messageFromMessageKey(expectedTitleKey),
+                    doc => doc.select("#disposalFees").attr("value") shouldBe "12.34"
+                  )
                 }
             }
           }
@@ -1241,11 +1257,11 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"disposalFees$userKey.title"), { doc =>
+            messageFromMessageKey(s"disposalFees$userKey.title"),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -1604,9 +1620,10 @@ class DisposalDetailsControllerSpec
               mockStoreSession(
                 session.copy(
                   journeyStatus = Some(
-                    journey.copy(draftReturn = draftReturn.copy(
-                      disposalDetailsAnswers = Some(completeAnswers)
-                    )
+                    journey.copy(draftReturn =
+                      draftReturn.copy(
+                        disposalDetailsAnswers = Some(completeAnswers)
+                      )
                     )
                   )
                 )
@@ -1698,9 +1715,10 @@ class DisposalDetailsControllerSpec
                 mockStoreSession(
                   session.copy(
                     journeyStatus = Some(
-                      journey.copy(draftReturn = draftReturn.copy(
-                        disposalDetailsAnswers = Some(completeAnswers)
-                      )
+                      journey.copy(draftReturn =
+                        draftReturn.copy(
+                          disposalDetailsAnswers = Some(completeAnswers)
+                        )
                       )
                     )
                   )
@@ -1785,11 +1803,12 @@ class DisposalDetailsControllerSpec
               )
             )
 
-            val sessionData = SessionData.empty.copy(journeyStatus = Some(
-              fillingOutReturn(disposalMethod, userType)._1.copy(
-                draftReturn = draftReturn
+            val sessionData = SessionData.empty.copy(journeyStatus =
+              Some(
+                fillingOutReturn(disposalMethod, userType)._1.copy(
+                  draftReturn = draftReturn
+                )
               )
-            )
             )
 
             inSequence {

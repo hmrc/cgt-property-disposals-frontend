@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
+import java.time.LocalDateTime
+
 import cats.data.EitherT
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
@@ -26,13 +28,14 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.READY_TO_UPLOAD
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInititateResponseStored
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UpscanFileDescriptor, UpscanInitiateRawResponse, UpscanSnapshot}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInitiateSuccess
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
+
 class UpscanServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val config = Configuration(
@@ -59,16 +62,16 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val service = new UpscanServiceImpl(mockConnector, config)
 
-  def mockUpscanInitiate(cgtReference: CgtReference)(response: Either[Error, HttpResponse]) =
+  def mockUpscanInitiate(draftReturnId: DraftReturnId)(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .initiate(_: CgtReference)(_: HeaderCarrier))
-      .expects(cgtReference, *)
+      .initiate(_: DraftReturnId)(_: HeaderCarrier))
+      .expects(draftReturnId, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetUpscanSnapshot(cgtReference: CgtReference)(response: Either[Error, UpscanSnapshot]) =
+  def mockGetUpscanSnapshot(draftReturnId: DraftReturnId)(response: Either[Error, UpscanSnapshot]) =
     (mockConnector
-      .getUpscanSnapshot(_: CgtReference)(_: HeaderCarrier))
-      .expects(cgtReference, *)
+      .getUpscanSnapshot(_: DraftReturnId)(_: HeaderCarrier))
+      .expects(draftReturnId, *)
       .returning(EitherT(Future.successful(response)))
 
   def mockSaveFileDescriptor(upscanFileDescriptor: UpscanFileDescriptor)(response: Either[Error, Unit]) =
@@ -79,57 +82,59 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   "UpscanServiceImpl" when {
 
+    val draftReturnId             = sample[DraftReturnId]
     val cgtReference              = sample[CgtReference]
-    val upscanFileDescriptor      = sample[UpscanFileDescriptor]
+    val upscanFileDescriptor      = sample[UpscanFileDescriptor].copy(draftReturnId = draftReturnId)
     val upscanInitiateRawResponse = sample[UpscanInitiateRawResponse]
+    val ts                        = LocalDateTime.of(2020, 11, 26, 13, 55, 36, 123)
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     "handling request initiate upscan" must {
       "return an error" when {
         "the call to get the upscan snapshot details fails" in {
-          mockGetUpscanSnapshot(cgtReference)(Left(Error("backend service error")))
-          await(service.initiate(cgtReference).value).isLeft shouldBe true
+          mockGetUpscanSnapshot(draftReturnId)(Left(Error("backend service error")))
+          await(service.initiate(draftReturnId, cgtReference, ts).value).isLeft shouldBe true
         }
         "the call to get the upscan initiate fails" in {
           inSequence {
-            mockGetUpscanSnapshot(cgtReference)(Right(UpscanSnapshot(1)))
-            mockUpscanInitiate(cgtReference)(Left(Error("upscan initiate end service error")))
+            mockGetUpscanSnapshot(draftReturnId)(Right(UpscanSnapshot(1)))
+            mockUpscanInitiate(draftReturnId)(Left(Error("upscan initiate end service error")))
           }
-          await(service.initiate(cgtReference).value).isLeft shouldBe true
+          await(service.initiate(draftReturnId, cgtReference, ts).value).isLeft shouldBe true
         }
         "the call to save the upscan descriptor details fails" in {
           inSequence {
-            mockGetUpscanSnapshot(cgtReference)(Right(UpscanSnapshot(1)))
-            mockUpscanInitiate(cgtReference)(
+            mockGetUpscanSnapshot(draftReturnId)(Right(UpscanSnapshot(1)))
+            mockUpscanInitiate(draftReturnId)(
               Right(HttpResponse(200, Some(Json.toJson[UpscanFileDescriptor](upscanFileDescriptor))))
             )
           }
-          await(service.initiate(cgtReference).value).isLeft shouldBe true
+          await(service.initiate(draftReturnId, cgtReference, ts).value).isLeft shouldBe true
         }
       }
 
       "return upscan initiate reference if upscan initiate call is successful" in {
 
         val fd = upscanFileDescriptor.copy(
-          key            = upscanInitiateRawResponse.reference,
-          fileDescriptor = FileDescriptor(upscanInitiateRawResponse.reference, upscanInitiateRawResponse.uploadRequest),
-          cgtReference   = cgtReference,
-          status         = READY_TO_UPLOAD
+          upscanInitiateReference = UpscanInitiateReference(upscanInitiateRawResponse.reference),
+          fileDescriptor          = FileDescriptor(upscanInitiateRawResponse.reference, upscanInitiateRawResponse.uploadRequest),
+          cgtReference            = cgtReference,
+          status                  = READY_TO_UPLOAD,
+          timestamp               = ts
         )
 
         inSequence {
-          mockGetUpscanSnapshot(cgtReference)(Right(UpscanSnapshot(1)))
-          mockUpscanInitiate(cgtReference)(
+          mockGetUpscanSnapshot(draftReturnId)(Right(UpscanSnapshot(1)))
+          mockUpscanInitiate(draftReturnId)(
             Right(HttpResponse(200, Some(Json.toJson[UpscanInitiateRawResponse](upscanInitiateRawResponse))))
           )
-
           mockSaveFileDescriptor(fd)(
             Right(())
           )
         }
-        await(service.initiate(cgtReference).value) shouldBe Right(
-          UpscanInititateResponseStored(fd.fileDescriptor.reference)
+        await(service.initiate(draftReturnId, cgtReference, ts).value) shouldBe Right(
+          UpscanInitiateSuccess(UpscanInitiateReference(fd.fileDescriptor.reference))
         )
       }
     }

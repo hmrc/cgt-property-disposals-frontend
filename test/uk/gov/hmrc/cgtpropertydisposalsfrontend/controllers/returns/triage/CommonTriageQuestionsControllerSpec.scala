@@ -157,14 +157,13 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("who-are-you-reporting-for.title"), { doc =>
+              messageFromMessageKey("who-are-you-reporting-for.title"),
+              doc =>
                 doc
                   .select("#content > article > form")
                   .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresentingSubmit()
                   .url
-
-              }
             )
           }
 
@@ -801,9 +800,11 @@ class CommonTriageQuestionsControllerSpec
 
           checkPageIsDisplayed(
             performAction(formData: _*),
-            messageFromMessageKey("numberOfProperties.title"), { doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(expectedErrorKey)
-            },
+            messageFromMessageKey("numberOfProperties.title"),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(expectedErrorKey),
             BAD_REQUEST
           )
         }
@@ -1387,11 +1388,11 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"), { doc =>
+              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"),
+              doc =>
                 doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
                   .didYouDisposeOfAResidentialProperty()
                   .url
-              }
             )
           }
 
@@ -1416,11 +1417,11 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"), { doc =>
+              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"),
+              doc =>
                 doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
                   .wereAllPropertiesResidential()
                   .url
-              }
             )
           }
         }
@@ -1450,11 +1451,11 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"), { doc =>
+              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"),
+              doc =>
                 doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
                   .assetTypeForNonUkResidents()
                   .url
-              }
             )
           }
 
@@ -1483,11 +1484,11 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"), { doc =>
+              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"),
+              doc =>
                 doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
                   .assetTypeForNonUkResidents()
                   .url
-              }
             )
           }
 
@@ -1611,7 +1612,8 @@ class CommonTriageQuestionsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithFillingOutReturn(
-                sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(IndividualUserType.Capacitor)
+                sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType =
+                  Some(IndividualUserType.Capacitor)
                 )
               )._1
             )
@@ -1619,11 +1621,11 @@ class CommonTriageQuestionsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("capacitorsPersonalRepresentativesNotHandled.title"), { doc =>
+            messageFromMessageKey("capacitorsPersonalRepresentativesNotHandled.title"),
+            doc =>
               doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
                 .url
-            }
           )
         }
 
@@ -1643,11 +1645,11 @@ class CommonTriageQuestionsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("capacitorsPersonalRepresentativesNotHandled.title"), { doc =>
+            messageFromMessageKey("capacitorsPersonalRepresentativesNotHandled.title"),
+            doc =>
               doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
                 .url
-            }
           )
         }
 

@@ -32,33 +32,37 @@
 
 @(form: Form[Boolean], backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"hasSupportingDocsToUpload"}
-@title = @{messages(s"$key.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+    @key = @{"do-you-want-to-upload-supporting-evidence"}
+    @title = @{messages(s"$key.title")}
+    @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+    @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
-@backLinkComponent(backLink)
+        @backLinkComponent(backLink)
 
-@if(hasErrors) {
-@errorSummary(form)
-}
+        @if(hasErrors) {
+            @errorSummary(form)
+        }
 
-@formWrapper(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload(), 'novalidate -> "novalidate") {
+        @caption(messages(s"$key.caption"))
 
-    @yesNo(
-        fieldId = key,
-        label = pageHeading(title),
-        labelAsHeading = true,
-        errorKey = form.error(key).map(e => e.message),
-        hasErrors = hasErrors,
-        selected = form.value,
-        helpText = None,
-        yesContent = None
-        )
-        @submitButton(messages("button.saveAndContinue"))
-    }
+        @formWrapper(routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocumentsSubmit(), 'novalidate -> "novalidate") {
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+            @yesNo(
+                fieldId = key,
+                label = pageHeading(title),
+                labelAsHeading = true,
+                errorKey = form.error(key).map(e => e.message),
+                hasErrors = hasErrors,
+                selected = form.value,
+                helpText = Some(Html(messages(s"$key.help-text"))),
+                yesContent = None
+            )
+
+            @submitButton(messages("button.saveAndContinue"))
+
+        }
+
+        @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

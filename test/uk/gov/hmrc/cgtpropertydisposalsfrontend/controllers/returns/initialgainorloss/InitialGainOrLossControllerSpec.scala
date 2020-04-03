@@ -232,12 +232,12 @@ class InitialGainOrLossControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
+            messageFromMessageKey(pageTitleKey, titleArgs),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
                 errorArgs: _*
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }

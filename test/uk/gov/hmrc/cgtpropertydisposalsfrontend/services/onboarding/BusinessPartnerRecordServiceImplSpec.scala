@@ -65,9 +65,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         }
 
         "the HttpResponse comes back with a status other than 200" in {
-          List(400, 401, 403, 404, 500, 501, 502).foreach { status =>
-            testError(Right(HttpResponse(status)))
-          }
+          List(400, 401, 403, 404, 500, 501, 502).foreach(status => testError(Right(HttpResponse(status))))
         }
 
         "the json body in the http response cannot be parsed" in {

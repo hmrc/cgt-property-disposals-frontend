@@ -39,9 +39,7 @@ object CgtReference {
       else Valid
 
     text
-      .verifying(Constraint { s: String =>
-        validateCgtReference(s.replaceAllLiterally(" ", ""))
-      })
+      .verifying(Constraint { s: String => validateCgtReference(s.replaceAllLiterally(" ", "")) })
       .transform[CgtReference](CgtReference(_), _.value)
   }
 

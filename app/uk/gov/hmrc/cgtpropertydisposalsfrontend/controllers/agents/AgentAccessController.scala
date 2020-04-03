@@ -85,9 +85,7 @@ class AgentAccessController @Inject() (
   }
 
   def enterClientsCgtRef(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withAgentSupplyingClientDetails { _ =>
-      Ok(enterClientsCgtRefPage(cgtReferenceForm))
-    }
+    withAgentSupplyingClientDetails(_ => Ok(enterClientsCgtRefPage(cgtReferenceForm)))
   }
 
   def enterClientsCgtRefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -178,10 +176,7 @@ class AgentAccessController @Inject() (
   }
 
   def tooManyVerifierMatchAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withAgentSupplyingClientDetails { _ =>
-        Ok(tooManyAttemptsPage())
-      }
+    implicit request => withAgentSupplyingClientDetails(_ => Ok(tooManyAttemptsPage()))
   }
 
   def confirmClient(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -279,9 +274,8 @@ class AgentAccessController @Inject() (
           { e =>
             logger.warn("Could not handle submitted cgt reference", e)
             errorHandler.errorResult()
-          }, { clientDetails =>
-            Redirect(enterVerifierCall(clientDetails))
-          }
+          },
+          clientDetails => Redirect(enterVerifierCall(clientDetails))
         )
       }
       .recover {

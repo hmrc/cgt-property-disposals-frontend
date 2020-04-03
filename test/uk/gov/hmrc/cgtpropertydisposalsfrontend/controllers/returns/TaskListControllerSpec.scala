@@ -149,9 +149,8 @@ class TaskListControllerSpec
 
         checkPageIsDisplayed(
           performAction(),
-          messageFromMessageKey("service.title"), { doc =>
-            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
-          }
+          messageFromMessageKey("service.title"),
+          doc => doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
         )
       }
 
@@ -822,9 +821,8 @@ class TaskListControllerSpec
 
         checkPageIsDisplayed(
           performAction(),
-          messageFromMessageKey("service.title"), { doc =>
-            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
-          }
+          messageFromMessageKey("service.title"),
+          doc => doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
         )
       }
 
@@ -977,7 +975,7 @@ class TaskListControllerSpec
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
             yearToDateLiabilityAnswers    = Some(sample[CalculatedYTDAnswers]),
-            uploadSupportingDocuments     = Some(sample[UploadSupportingDocuments])
+            uploadSupportingDocuments     = Some(sample[UploadSupportingEvidenceAnswers])
           )
 
           testStateOfSection(

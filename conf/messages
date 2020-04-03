@@ -36,6 +36,7 @@ yesNo.true=Yes
 yesNo.false=No
 
 cya.change=Change
+cya.delete=Delete
 cya.add=Add
 
 unit-input.assistive.pounds=do not enter the pound sign
@@ -1827,6 +1828,47 @@ subsequentReturnExit.getHelp=Get help
 subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
 subsequentReturnExit.helpWithCallCharges=Find out about call charges
 
+do-you-want-to-upload-supporting-evidence.title=Do you want to upload any supporting evidence?
+do-you-want-to-upload-supporting-evidence.error.required=Select yes if you want to upload any supporting documents
+do-you-want-to-upload-supporting-evidence.error.boolean=Select yes if you want to upload any supporting documents
+do-you-want-to-upload-supporting-evidence.caption=Supporting evidence
+do-you-want-to-upload-supporting-evidence.help-text=Up to 4 documents can be uploaded to support your return. For example, spreadsheets with calculations, invoices, receipts or valuations.
+
+upload-supporting-evidence.check-your-answers.title=Check your answers
+upload-supporting-evidence.check-your-answers.caption=Supporting evidence
+upload-supporting-evidence.check-your-answers.file-label=Supporting evidence file {0}
+upload-supporting-evidence.check-your-answers.do-you-want-to-upload-documents=Do you want to upload any supporting evidence?
+upload-supporting-evidence.check-your-answers.cya-change=Change
+upload-supporting-evidence.check-your-answers.assistive=the file named {0}
+upload-supporting-evidence.check-your-answers.cya-delete=Delete
+upload-supporting-evidence.check-your-answers.add-another-file=Add another file
+
+upload-supporting-evidence.expired.title=Your uploaded supporting evidence has expired
+upload-supporting-evidence.expired.p1=Uploaded files can only be kept for 7 days before they expire. You can either upload these files again or delete them from your return.
+upload-supporting-evidence.expired.caption=Supporting evidence
+upload-supporting-evidence.expired.do-you-want-to-upload-documents=Do you want to upload any supporting evidence?
+upload-supporting-evidence.expired.label=Supporting evidence file
+upload-supporting-evidence.expired.cya-change=Change
+
+
+upload-supporting-evidence.supporting-evidence.title=Upload a document with your supporting evidence
+upload-supporting-evidence.supporting-evidence.caption=Supporting evidence
+upload-supporting-evidence.supporting-evidence.error.required=Upload a file containing your supporting evidence
+upload-supporting-evidence.supporting-evidence.help-text=The file can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
+file.error.required=Select a file containing your supporting evidence
+
+
+upload-supporting-evidence.check-upscan-status.title=Supporting evidence file upload status
+upload-supporting-evidence.check-upscan-status.caption=Supporting evidence
+upload-supporting-evidence.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
+upload-supporting-evidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
+upload-supporting-evidence.check-upscan-status.passed.help-text=Your supporting evidence file has been successfully saved and scanned. We will save it for 7 days or until you submit your return when it will be attached to your submission.
+upload-supporting-evidence.check-upscan-status.failed.cya-change=Upload another file
+upload-supporting-evidence.check-upscan-status.passed=Passed
+upload-supporting-evidence.check-upscan-status.failed=Failed
+upload-supporting-evidence.check-upscan-status.uploaded=Scan in progress
+upload-supporting-evidence.check-upscan-status.button.checkAgain=Check status and continue
+
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement
 accessibilityStatement.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
@@ -1857,5 +1899,4 @@ accessibilityStatement.contactingUs.p3=Find out how to <a href="{0}">contact us<
 accessibilityStatement.howWeTested.title=How we tested this service
 accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019  and checked for compliance with WCAG 2.1 AA. It  was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
 accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 6 April 2020.
-
 

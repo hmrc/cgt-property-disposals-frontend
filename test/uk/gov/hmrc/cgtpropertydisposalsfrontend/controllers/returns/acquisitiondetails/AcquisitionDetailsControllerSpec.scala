@@ -587,12 +587,14 @@ class AcquisitionDetailsControllerSpec
             CompleteAcquisitionDetailsAnswers
           ]
           List(
-            Seq("acquisitionMethod" -> "0") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Bought)
+            Seq("acquisitionMethod" -> "0") -> incompleteAnswers.copy(acquisitionMethod =
+              Some(AcquisitionMethod.Bought)
             ),
             Seq("acquisitionMethod" -> "1") -> incompleteAnswers.copy(acquisitionMethod =
               Some(AcquisitionMethod.Inherited)
             ),
-            Seq("acquisitionMethod" -> "2") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Gifted)
+            Seq("acquisitionMethod" -> "2") -> incompleteAnswers.copy(acquisitionMethod =
+              Some(AcquisitionMethod.Gifted)
             ),
             Seq("acquisitionMethod" -> "3", "otherAcquisitionMethod" -> "other things") -> incompleteAnswers
               .copy(acquisitionMethod = Some(AcquisitionMethod.Other("other things"))),
@@ -1632,9 +1634,8 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               LocalDateUtils.govDisplayFormat(ukResidents)
-            ), { doc =>
-              doc.select("#rebaseAcquisitionPrice").attr("value") shouldBe "0.01"
-            }
+            ),
+            doc => doc.select("#rebaseAcquisitionPrice").attr("value") shouldBe "0.01"
           )
         }
 
@@ -1715,12 +1716,12 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               formattedRebaseDate
-            ), { doc =>
+            ),
+            doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
                 formattedRebaseDate
-              )
-            },
+              ),
             BAD_REQUEST
           )
         }
@@ -2088,9 +2089,8 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "improvementCosts.title"
-            ), { doc =>
-              doc.select("#improvementCosts-1").attr("checked") shouldBe "checked"
-            }
+            ),
+            doc => doc.select("#improvementCosts-1").attr("checked") shouldBe "checked"
           )
         }
 
@@ -2526,9 +2526,8 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "acquisitionFees.title"
-            ), { doc =>
-              doc.select("#acquisitionFees-1").attr("checked") shouldBe "checked"
-            }
+            ),
+            doc => doc.select("#acquisitionFees-1").attr("checked") shouldBe "checked"
           )
         }
 
@@ -3124,11 +3123,11 @@ class AcquisitionDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+            messageFromMessageKey("acquisitionDetails.cya.title"),
+            doc =>
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
                 .checkYourAnswersSubmit()
                 .url
-            }
           )
         }
 
@@ -3298,9 +3297,8 @@ class AcquisitionDetailsControllerSpec
 
                   checkPageIsDisplayed(
                     performAction(),
-                    messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
-                      doc.select("#acquisitionPrice-question").text() shouldBe expectedTitle
-                    }
+                    messageFromMessageKey("acquisitionDetails.cya.title"),
+                    doc => doc.select("#acquisitionPrice-question").text() shouldBe expectedTitle
                   )
                 }
             }

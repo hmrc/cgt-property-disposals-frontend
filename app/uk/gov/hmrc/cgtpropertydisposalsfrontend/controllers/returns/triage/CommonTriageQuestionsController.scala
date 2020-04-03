@@ -181,7 +181,8 @@ class CommonTriageQuestionsController @Inject() (
                 state.isRight,
                 state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
               )
-            ), { numberOfProperties =>
+            ),
+          numberOfProperties =>
             if (getNumberOfProperties(state).contains(numberOfProperties)) {
               Redirect(redirectToCheckYourAnswers(state))
             } else {
@@ -210,8 +211,6 @@ class CommonTriageQuestionsController @Inject() (
                 _ => Redirect(redirectToCheckYourAnswers(updatedState))
               )
             }
-
-          }
         )
     }
   }

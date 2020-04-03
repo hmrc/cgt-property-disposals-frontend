@@ -14,15 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@this()
 
-@this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
-)
+@(hintText: String, url: String, label: Option[String] = None)(implicit request: Request[_], messages: Messages)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
-
-@mainTemplate(title = "Upscan File Limit", userType = None) {
-    <h1>Maximum File Limit Reached</h1>
-}
+<a href="@url">@{label.getOrElse(messages("cya.delete"))}<span class="visuallyhidden"> @hintText</span></a>

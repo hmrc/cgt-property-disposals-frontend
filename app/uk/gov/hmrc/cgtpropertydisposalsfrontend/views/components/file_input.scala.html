@@ -1,0 +1,91 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+
+@this(
+        errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
+)
+
+@(
+        fieldId: String,
+        ref: Option[String],
+        label: Html,
+        autoComplete: AutoCompleteType,
+        hasErrors: Boolean,
+        errorKey: Option[String],
+        helpText: Option[Html] = None,
+        labelAsHeading: Boolean = false,
+        extraContent: Option[Html] = None,
+        inputClass: Option[String] = None,
+        labelClass: Option[String] = None
+)(implicit messages: Messages)
+
+@classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
+
+@classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
+@inputClasses = @{if(hasErrors) {
+  classBuilder(Some("form-control"), Some("form-control-error"), inputClass)
+} else {
+  classBuilder(Some("form-control"), inputClass)
+}}
+
+@hintTextKey = @{s"${{fieldId}}-form-hint"}
+@extraContentKey = @{s"${{fieldId}}-extra-content"}
+@errorId = @{s"${{fieldId}}-inline-error"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
+@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
+@labelClasses = @{classBuilder(Some("form-label"), labelClass)}
+
+@describedByKeys = @{
+  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+
+@fieldLabel = {
+@if(labelAsHeading) {
+  <h1 class="govuk-label-wrapper">
+    <label for="@{fieldId}" class="heading-xlarge">@{label}</label>
+  </h1>
+} else {
+  <label for="@{fieldId}" class="@{labelClasses}">@{label}</label>
+}
+}
+
+<div class="@classes">
+  @fieldLabel
+  @extraContentIdWithContent.map { case (id, text) =>
+  <div id="@id">
+  @text
+  </div>
+  }
+  @hintIdWithHintText.map { case (id, text) =>
+  <span id="@id" class="form-hint">
+  @text
+  </span>
+  }
+  @errorIdWithMessageKey.map { case (id, key) =>
+    @errorInline(id, messages(s"$fieldId.$key"))
+  }
+  <input type="hidden" name="reference" value="@{ref.getOrElse("")}" />
+  <input
+  class="@inputClasses"
+  id="@fieldId"
+  type="file"
+  name="@fieldId"
+  value=""
+  autocomplete="@autoComplete.value"
+    @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+</div>

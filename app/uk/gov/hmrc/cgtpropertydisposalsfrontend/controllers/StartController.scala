@@ -117,13 +117,9 @@ class StartController @Inject() (
     }
   }
 
-  def keepAlive(): Action[AnyContent] = authenticatedActionWithSessionData { _ =>
-    Ok("")
-  }
+  def keepAlive(): Action[AnyContent] = authenticatedActionWithSessionData(_ => Ok(""))
 
-  def timedOut(): Action[AnyContent] = Action { implicit request =>
-    Ok(timedOutPage())
-  }
+  def timedOut(): Action[AnyContent] = Action(implicit request => Ok(timedOutPage()))
 
   private def handleSessionJourneyStatus(
     journeyStatus: JourneyStatus
@@ -423,9 +419,7 @@ class StartController @Inject() (
             userType      = request.authenticatedRequest.userType,
             journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, s.ggCredId))
           )
-        ).map { _ =>
-          Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
-        }
+        ).map(_ => Redirect(onboarding.routes.SubscriptionController.checkYourDetails()))
     )
 
   private def buildIndividualSubscriptionData(individual: Individual)(
