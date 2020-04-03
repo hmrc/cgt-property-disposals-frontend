@@ -1058,30 +1058,27 @@ class DisposalDetailsControllerSpec
       "redirect to the disposal price page" when {
 
         "the user has not answered that question yet" in {
-          List(DisposalMethod.Sold, DisposalMethod.Gifted, DisposalMethod.Other).foreach { disposalMethod =>
-            List[UserType](UserType.Agent, UserType.Individual, UserType.Organisation).foreach { userType: UserType =>
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithDisposalDetailsAnswers(
-                    requiredPreviousAnswers.copy(disposalPrice = None),
-                    disposalMethod,
-                    userType
-                  )._1
-                )
-              }
-
-              checkIsRedirect(performAction(), routes.DisposalDetailsController.whatWasDisposalPrice())
+          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithDisposalDetailsAnswers(
+                  requiredPreviousAnswers.copy(disposalPrice = None),
+                  disposalMethod,
+                  userType
+                )._1
+              )
             }
+
+            checkIsRedirect(performAction(), routes.DisposalDetailsController.whatWasDisposalPrice())
           }
         }
-
       }
 
       "display the page" when {
 
         "the user has not answered the question before" in {
-          List[UserType](UserType.Agent, UserType.Individual, UserType.Organisation).foreach { userType: UserType =>
+          forAll { (userType: UserType) =>
             disposalFeesTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -1109,7 +1106,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "not completed the disposal detail section" in {
-          List[UserType](UserType.Agent, UserType.Individual, UserType.Organisation).foreach { userType: UserType =>
+          forAll { (userType: UserType) =>
             disposalFeesTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -1140,7 +1137,7 @@ class DisposalDetailsControllerSpec
 
         "the user has answered the question before but has " +
           "completed the disposal detail section" in {
-          List[UserType](UserType.Agent, UserType.Individual, UserType.Organisation).foreach { userType: UserType =>
+          forAll { (userType: UserType, disposalMethod: DisposalMethod) =>
             disposalFeesTitleScenarios(userType).foreach {
               case (disposalMethod, share, expectedTitleKey) =>
                 withClue(
@@ -1168,9 +1165,7 @@ class DisposalDetailsControllerSpec
             }
           }
         }
-
       }
-
     }
 
     "handling submitted answers to the what was disposal fees page" must {
