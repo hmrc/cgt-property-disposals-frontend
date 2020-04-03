@@ -1354,6 +1354,43 @@ class DisposalDetailsControllerSpec
       "redirect to the cya page" when {
 
         "the user hasn't ever answered the disposal details question " +
+          "and the draft return and session data has been successfully updated for disposalfees = 0" in {
+          forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
+            val incompleteDisposalDetailsAnswers =
+              IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Full), Some(AmountInPence.fromPounds(1d)), None)
+
+            val (session, journey, draftReturn) =
+              sessionWithDisposalDetailsAnswers(incompleteDisposalDetailsAnswers, disposalMethod, userType)
+
+            val disposalFees = 0d
+            val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
+              disposalFees = Some(AmountInPence.fromPounds(disposalFees))
+            )
+            val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
+              )
+              mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(
+                Right(())
+              )
+            }
+
+            checkIsRedirect(
+              performAction(Seq("disposalFees" -> disposalFees.toString)),
+              controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+            )
+          }
+        }
+
+        "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
           forAll(acceptedUserTypeGen, disposalMethodGen) { (userType: UserType, disposalMethod: DisposalMethod) =>
             val incompleteDisposalDetailsAnswers =
