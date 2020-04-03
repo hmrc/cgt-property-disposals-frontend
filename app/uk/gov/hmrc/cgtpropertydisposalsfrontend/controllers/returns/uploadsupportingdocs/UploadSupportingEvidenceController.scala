@@ -467,7 +467,7 @@ class UploadSupportingEvidenceController @Inject() (
             errorHandler.errorResult()
           }, {
             case Some(upscanFileDescriptor) =>
-              if (upscanFileDescriptor.status === UPLOADED | upscanFileDescriptor.status === FAILED) {
+              if (upscanFileDescriptor.status === UPLOADED || upscanFileDescriptor.status === FAILED) {
                 Ok(
                   uploadSupportingEvidenceUpscanCheckPage(
                     UpscanInitiateReference(reference),
