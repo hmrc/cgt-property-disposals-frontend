@@ -41,7 +41,7 @@
 
 @(form : Form[FileUpload], reference : UpscanInitiateReference, backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "mandatoryEvidence" }
-
+@fieldId = @{ "file" }
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -57,10 +57,10 @@
 
     @formWrapper(routes.YearToDateLiabilityController.uploadMandatoryEvidenceSubmit(), 'enctype -> "multipart/form-data") {
         @fileInput(
-            fieldId = key,
+            fieldId = fieldId,
             ref = Some(reference.value),
             label = Html(title),
-            helpText = Some(Html(messages(s"$key.help-text"))),
+            helpText = Some(Html(messages(s"$key.helpText"))),
             hasErrors = false,
             errorKey = None,
             labelAsHeading = true,

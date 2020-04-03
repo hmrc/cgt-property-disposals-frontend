@@ -926,7 +926,7 @@ class YearToDateLiabilityController @Inject() (
   )(implicit request: RequestWithSessionData[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
     val multiPartFormData = request.body
     val upscanReference   = multiPartFormData.dataParts.get("reference").flatMap(_.headOption)
-    val mandatoryEvidence = multiPartFormData.file("mandatoryEvidence")
+    val mandatoryEvidence = multiPartFormData.file("file")
 
     (upscanReference, mandatoryEvidence) match {
       case (None, Some(_)) =>
@@ -1363,8 +1363,8 @@ object YearToDateLiabilityController {
   val mandatoryEvidenceForm: Form[FileUpload] =
     Form(
       mapping(
-        "file"      -> nonEmptyText,
-        "reference" -> nonEmptyText
+        "mandatoryEvidence" -> nonEmptyText,
+        "reference"         -> nonEmptyText
       )(FileUpload.apply)(FileUpload.unapply)
     )
 
