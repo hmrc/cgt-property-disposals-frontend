@@ -609,12 +609,13 @@ capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet2=someone who has di
 capacitorsPersonalRepresentativesNotHandled.youNeedTo=You’ll need to:
 capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet1=contact HMRC and ask for a paper version of the return to be posted to you
 capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet2=provide your National Insurance number or Self Assessment Unique Taxpayer Reference if you have one
+capacitorsPersonalRepresentativesNotHandled.agent.youNeedTo.bullet2=provide your client’s National Insurance number or Self Assessment Unique Taxpayer Reference if they have one
 capacitorsPersonalRepresentativesNotHandled.phoneHeading=Phone
 capacitorsPersonalRepresentativesNotHandled.phoneHmrc=Telephone:
 capacitorsPersonalRepresentativesNotHandled.phoneOutsideUk=Outside UK:
 capacitorsPersonalRepresentativesNotHandled.phoneAgent=Agent Dedicated Line:
 capacitorsPersonalRepresentativesNotHandled.openingTimes=Opening times:
-capacitorsPersonalRepresentativesNotHandled.openingTimes.monToFri=10am to 8pm, Monday to Friday
+capacitorsPersonalRepresentativesNotHandled.openingTimes.monToFri=Monday to Friday: 8am to 4pm
 capacitorsPersonalRepresentativesNotHandled.openingTimes.saturday=8am to 4pm, Saturday
 capacitorsPersonalRepresentativesNotHandled.openingTimes.sunBankHols=Closed Sundays and bank holidays
 capacitorsPersonalRepresentativesNotHandled.getHelp=Get help <a href="{0}">dealing with HMRC if you have additional needs</a>.
@@ -1730,12 +1731,23 @@ multipleDisposalsCountryOfResidence.agent.helpText=It‘s usually the day your c
 multipleDisposalsCountryOfResidence.trust.helpText=It‘s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 
 disposalDateMixedUseOrIndirect.title=You cannot use this service
-disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
-disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use’ UK property
-disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
+disposalDateMixedUseOrIndirect.agent.title=You cannot use this service
+disposalDateMixedUseOrIndirect.trust.title=You cannot use this service
+disposalDateMixedUseOrIndirect.p1.reason1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
+disposalDateMixedUseOrIndirect.agent.p1.reason1=This is because when your client sold or disposed of the property, they exchanged contracts before 6 April 2020.
+disposalDateMixedUseOrIndirect.trust.p1.reason1=This is because when the trust sold or disposed of the property, it exchanged contracts before 6 April 2020.
+disposalDateMixedUseOrIndirect.p1.reason2=If you made an indirect disposal and sold shares not property, it’s because you sold the shares before 6 April 2020.
+disposalDateMixedUseOrIndirect.agent.p1.reason2=If they made an indirect disposal and sold shares not property, it’s because they sold the shares before 6 April 2020.
+disposalDateMixedUseOrIndirect.trust.p1.reason2=If the trust made an indirect disposal and sold shares not property, it’s because it sold the shares before 6 April 2020.
 disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
+disposalDateMixedUseOrIndirect.agent.h2=What you’ll need to do next
+disposalDateMixedUseOrIndirect.trust.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
-disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.
+disposalDateMixedUseOrIndirect.agent.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateMixedUseOrIndirect.trust.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may get a penalty if your payment is late.
+disposalDateMixedUseOrIndirect.agent.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. Your client may get a penalty if your payment is late.
+disposalDateMixedUseOrIndirect.trust.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may get a penalty if your payment is late.
 
 
 initialGainOrLoss.title=Did you make an initial gain or loss?

@@ -66,21 +66,47 @@ class CommonTriageQuestionsControllerSpec
     case _                                               => false
   }
 
+  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
+    case UserType.Organisation => Left(sample[TrustName])
+    case _                     => Right(sample[IndividualName])
+  }
+
+  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
+    case UserType.Agent => Some(sample[AgentReferenceNumber])
+    case _              => None
+  }
+
+  def userMessageKey(userType: UserType): String = userType match {
+    case UserType.Individual   => ""
+    case UserType.Organisation => ".trust"
+    case UserType.Agent        => ".agent"
+    case other                 => sys.error(s"User type '$other' not handled")
+  }
+
   def sessionDataWithStartingNewDraftReturn(
     triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
-    name: Either[TrustName, IndividualName]
+    name: Either[TrustName, IndividualName],
+    userType: UserType = UserType.Individual
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn =
       sample[StartingNewDraftReturn].copy(
         subscribedDetails      = sample[SubscribedDetails].copy(name = name),
-        newReturnTriageAnswers = triageAnswers
+        newReturnTriageAnswers = triageAnswers,
+        agentReferenceNumber   = setAgentReferenceNumber(userType)
       )
-    SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
+
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(startingNewDraftReturn),
+      userType      = Some(userType)
+    )
+
+    sessionData -> startingNewDraftReturn
   }
 
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
-    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    userType: UserType                      = UserType.Individual
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers
@@ -89,8 +115,9 @@ class CommonTriageQuestionsControllerSpec
       draftReturn       = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name)
     )
+
     (
-      SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)),
+      SessionData.empty.copy(journeyStatus = Some(fillingOutReturn), userType = Some(userType)),
       fillingOutReturn,
       draftReturn
     )
@@ -822,7 +849,7 @@ class CommonTriageQuestionsControllerSpec
 
       "show an error page" when {
 
-        "there is an error updating a draft return" ignore {
+        "there is an error updating a draft return" in {
           val formData = "numberOfProperties" -> "0"
           val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
             IncompleteMultipleDisposalsTriageAnswers.empty.copy(
@@ -1469,6 +1496,40 @@ class CommonTriageQuestionsControllerSpec
 
         }
 
+        "the trust is on a single disposal journey and" when {
+
+          def test(assetType: AssetType): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(sample[CompleteSingleDisposalTriageAnswers].copy(assetType = assetType)),
+                  Left(sample[TrustName]),
+                  UserType.Organisation
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateMixedUseOrIndirect.trust.title"),
+              doc =>
+                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                  .assetTypeForNonUkResidents()
+                  .url
+            )
+          }
+
+          "the asset type is mixed use" in {
+            test(AssetType.MixedUse)
+          }
+
+          "the asset type is indirect disposal" in {
+            test(AssetType.IndirectDisposal)
+          }
+
+        }
+
         "the user is on a multiple disposals journey and" when {
 
           def test(assetType: AssetType): Unit = {
@@ -1485,6 +1546,40 @@ class CommonTriageQuestionsControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("disposalDateMixedUseOrIndirect.title"),
+              doc =>
+                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .assetTypeForNonUkResidents()
+                  .url
+            )
+          }
+
+          "the asset type is mixed use" in {
+            test(AssetType.MixedUse)
+          }
+
+          "the asset type is indirect disposal" in {
+            test(AssetType.IndirectDisposal)
+          }
+
+        }
+
+        "the trust is on a multiple disposals journey and" when {
+
+          def test(assetType: AssetType): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(assetType))),
+                  Left(sample[TrustName]),
+                  UserType.Organisation
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateMixedUseOrIndirect.trust.title"),
               doc =>
                 doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
                   .assetTypeForNonUkResidents()
