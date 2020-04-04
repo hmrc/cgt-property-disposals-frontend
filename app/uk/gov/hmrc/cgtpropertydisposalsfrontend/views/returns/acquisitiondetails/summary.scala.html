@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -48,9 +48,9 @@
 @acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
     case AcquisitionMethod.Bought => (messages("returns.acquisitionMethod.Bought"), messages(s"acquisitionPriceBought$userKey.title"))
-    case AcquisitionMethod.Inherited => (messages("returns.acquisitionMethod.Inherited"), messages(s"acquisitionPriceNotBought$userKey.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
-    case AcquisitionMethod.Gifted => (messages("returns.acquisitionMethod.Gifted"), messages(s"acquisitionPriceNotBought$userKey.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
-    case AcquisitionMethod.Other(value) => (value, messages(s"acquisitionPriceNotBought$userKey.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
+    case AcquisitionMethod.Inherited => (messages("returns.acquisitionMethod.Inherited"), messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(answers.acquisitionDate.value)))
+    case AcquisitionMethod.Gifted => (messages("returns.acquisitionMethod.Gifted"), messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(answers.acquisitionDate.value)))
+    case AcquisitionMethod.Other(value) => (value, messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(answers.acquisitionDate.value)))
   }
 }
 
@@ -63,7 +63,7 @@
   )
   @cyaRow(
     messages(s"acquisitionDate$userKey.title"),
-    Html(LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)),
+    Html(TimeUtils.govDisplayFormat(answers.acquisitionDate.value)),
     Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionDate"), routes.AcquisitionDetailsController.acquisitionDate().url)),
     "acquisitionDate"
   )
@@ -80,7 +80,7 @@
 @if(canRebase) {
   @answers.rebasedAcquisitionPrice.map{ rebasedValue =>
     @cyaRow(
-      messages("rebaseAcquisitionPrice.title", LocalDateUtils.govShortDisplayFormat(cutoffDate)),
+      messages("rebaseAcquisitionPrice.title", TimeUtils.govShortDisplayFormat(cutoffDate)),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(rebasedValue.inPounds())),
       Some(cyaChange(messages("acquisitionDetails.cyaChange.rebasedAcquisitionPrice"), routes.AcquisitionDetailsController.rebasedAcquisitionPrice().url)),
       "rebasedAcquisitionPrice-value"
@@ -90,7 +90,7 @@
 
 @if(!isUk && canRebase) {
     @cyaRow(
-      messages("shouldUseRebase.title", LocalDateUtils.govShortDisplayFormat(cutoffDate)),
+      messages("shouldUseRebase.title", TimeUtils.govShortDisplayFormat(cutoffDate)),
       Html(messages(if(answers.shouldUseRebase) "generic.yes" else "generic.no")),
       Some(cyaChange(messages("acquisitionDetails.cyaChange.shouldUseRebase"), routes.AcquisitionDetailsController.shouldUseRebase().url)),
       "shouldRebase"

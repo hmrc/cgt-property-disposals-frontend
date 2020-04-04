@@ -29,7 +29,7 @@
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_evidence_summary
 )
 
-@(answers: CompleteUploadSupportingEvidenceAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteUploadSupportingEvidenceAnswers, maxUploads: Int)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
     @key = @{"upload-supporting-evidence.check-your-answers"}
 
@@ -41,7 +41,7 @@
 
         @summary(answers)
 
-        @if(answers.evidences.size < viewConfig.maxUploads & answers.doYouWantToUploadSupportingEvidence){
+        @if(answers.evidences.size < maxUploads && answers.doYouWantToUploadSupportingEvidence){
           <p class="add-another-file">
             <a href=@routes.UploadSupportingEvidenceController.uploadSupportingEvidence().url>@messages(s"$key.add-another-file")</a>
           </p>

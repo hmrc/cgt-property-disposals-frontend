@@ -38,12 +38,13 @@ object YearToDateLiabilityAnswers {
       taxableGainOrLoss: Option[AmountInPence],
       hasEstimatedDetails: Option[Boolean],
       taxDue: Option[AmountInPence],
-      mandatoryEvidence: Option[MandatoryEvidence]
+      mandatoryEvidence: Option[MandatoryEvidence],
+      expiredEvidence: Option[MandatoryEvidence]
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
       val empty: IncompleteNonCalculatedYTDAnswers =
-        IncompleteNonCalculatedYTDAnswers(None, None, None, None)
+        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteNonCalculatedYTDAnswers
@@ -52,7 +53,8 @@ object YearToDateLiabilityAnswers {
           Some(c.taxableGainOrLoss),
           Some(c.hasEstimatedDetails),
           Some(c.taxDue),
-          Some(c.mandatoryEvidence)
+          Some(c.mandatoryEvidence),
+          None
         )
     }
 
@@ -92,12 +94,13 @@ object YearToDateLiabilityAnswers {
       hasEstimatedDetails: Option[Boolean],
       calculatedTaxDue: Option[CalculatedTaxDue],
       taxDue: Option[AmountInPence],
-      mandatoryEvidence: Option[MandatoryEvidence]
+      mandatoryEvidence: Option[MandatoryEvidence],
+      expiredEvidence: Option[MandatoryEvidence]
     ) extends CalculatedYTDAnswers
 
     object IncompleteCalculatedYTDAnswers {
       val empty: IncompleteCalculatedYTDAnswers =
-        IncompleteCalculatedYTDAnswers(None, None, None, None, None, None)
+        IncompleteCalculatedYTDAnswers(None, None, None, None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteCalculatedYTDAnswers
@@ -108,7 +111,8 @@ object YearToDateLiabilityAnswers {
           Some(c.hasEstimatedDetails),
           Some(c.calculatedTaxDue),
           Some(c.taxDue),
-          c.mandatoryEvidence
+          c.mandatoryEvidence,
+          None
         )
 
     }
@@ -153,6 +157,7 @@ object YearToDateLiabilityAnswers {
               .unset(_.calculatedTaxDue)
               .unset(_.taxDue)
               .unset(_.mandatoryEvidence)
+              .unset(_.expiredEvidence)
           )
         case _: NonCalculatedYTDAnswers => None
       }

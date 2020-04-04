@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import cats.syntax.order._
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 final case class TaxYear(
@@ -42,7 +42,7 @@ final case class TaxYear(
 object TaxYear {
 
   def thisTaxYearStartDate(): LocalDate = {
-    val today = LocalDateUtils.today()
+    val today = TimeUtils.today()
     val startYear =
       if (today > LocalDate.of(today.getYear, 4, 6))
         today.getYear

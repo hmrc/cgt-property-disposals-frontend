@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import java.time.LocalDateTime
+
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 
@@ -25,7 +27,8 @@ object UploadSupportingEvidenceAnswers {
 
   final case class SupportingEvidence(
     reference: String,
-    fileName: String
+    fileName: String,
+    createdOn: LocalDateTime
   )
 
   object SupportingEvidence {
@@ -34,12 +37,13 @@ object UploadSupportingEvidenceAnswers {
 
   final case class IncompleteUploadSupportingEvidenceAnswers(
     doYouWantToUploadSupportingEvidence: Option[Boolean],
-    evidences: List[SupportingEvidence]
+    evidences: List[SupportingEvidence],
+    expiredEvidences: List[SupportingEvidence]
   ) extends UploadSupportingEvidenceAnswers
 
   object IncompleteUploadSupportingEvidenceAnswers {
     val empty: IncompleteUploadSupportingEvidenceAnswers =
-      IncompleteUploadSupportingEvidenceAnswers(None, List.empty)
+      IncompleteUploadSupportingEvidenceAnswers(None, List.empty, List.empty)
   }
 
   final case class CompleteUploadSupportingEvidenceAnswers(

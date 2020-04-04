@@ -34,7 +34,7 @@ import play.shaded.ahc.org.asynchttpclient.uri.Uri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference, UpscanSnapshot}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -177,35 +177,6 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
           withClue(s"For http response [${httpResponse.toString}]") {
             mockPost(expectedUrl, Map.empty, upscanFileDescriptor)(Some(httpResponse))
             await(connector.saveUpscanFileDescriptors(upscanFileDescriptor).value) shouldBe Right(())
-          }
-        }
-      }
-    }
-
-    "handling requests to get an upscan snapshot" must {
-      implicit val hc: HeaderCarrier = HeaderCarrier()
-
-      val expectedUrl =
-        s"http://localhost:7021/cgt-property-disposals/upscan-snapshot-info/draft-return-id/${draftReturnId.value}"
-
-      "process unsuccessful calls from backend service" in {
-        List(
-          HttpResponse(400),
-          HttpResponse(500, Some(JsString("error")))
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockGet(expectedUrl)(Some(httpResponse))
-            await(connector.getUpscanSnapshot(draftReturnId).value).isLeft shouldBe true
-          }
-        }
-      }
-      "process successful calls from backend service" in {
-        List(
-          HttpResponse(200, Some(Json.toJson[UpscanSnapshot](UpscanSnapshot(1))))
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockGet(expectedUrl)(Some(httpResponse))
-            await(connector.getUpscanSnapshot(draftReturnId).value) shouldBe Right(UpscanSnapshot(1))
           }
         }
       }

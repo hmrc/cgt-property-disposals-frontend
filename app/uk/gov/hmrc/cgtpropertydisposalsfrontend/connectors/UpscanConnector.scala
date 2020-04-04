@@ -23,7 +23,7 @@ import configs.Configs
 import configs.syntax._
 import play.api.Configuration
 import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT}
-import play.api.libs.json.{JsError, JsSuccess, Json, OFormat}
+import play.api.libs.json.{Json, OFormat}
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
 import play.mvc.Http.Status
@@ -52,10 +52,6 @@ final object UpscanInitiateRequest {
 @ImplementedBy(classOf[UpscanConnectorImpl])
 trait UpscanConnector {
 
-  def getUpscanSnapshot(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, UpscanSnapshot]
-
   def initiate(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
@@ -76,18 +72,8 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
-  def removeFile(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit]
-
-  def removeAllFiles(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit]
-
-  def getAll(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, List[UpscanFileDescriptor]]
 }
+
 @Singleton
 class UpscanConnectorImpl @Inject() (
   http: HttpClient,
@@ -117,55 +103,6 @@ class UpscanConnectorImpl @Inject() (
 
   private val minFileSize: Int  = getUpscanInitiateConfig[Int]("min-file-size")
   private val maxFileSize: Long = getUpscanInitiateConfig[Long]("max-file-size")
-
-  override def getUpscanSnapshot(
-    draftReturnId: DraftReturnId
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanSnapshot] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-snapshot-info/draft-return-id/${draftReturnId.value}"
-    EitherT[Future, Error, UpscanSnapshot](
-      http
-        .get(url)
-        .map { httpResponse =>
-          Json.fromJson[UpscanSnapshot](httpResponse.json) match {
-            case JsSuccess(upscanSnapshot, _) => Right(upscanSnapshot)
-            case JsError(errors)              => Left(Error(s"failed to get upscan snapshot: $errors"))
-          }
-        }
-        .recover {
-          case NonFatal(e) => Left(Error(e))
-        }
-    )
-  }
-
-  override def removeFile(
-    draftReturnId: DraftReturnId,
-    upscanInitiateReference: UpscanInitiateReference
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
-    val url =
-      baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
-    EitherT[Future, Error, Unit](
-      http
-        .get(url)
-        .map(_ => Right(()))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
-        }
-    )
-  }
-
-  override def removeAllFiles(
-    draftReturnId: DraftReturnId
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/delete-all-files/${draftReturnId.value}"
-    EitherT[Future, Error, Unit](
-      http
-        .get(url)
-        .map(_ => Right(()))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
-        }
-    )
-  }
 
   override def initiate(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
@@ -220,30 +157,6 @@ class UpscanConnectorImpl @Inject() (
         .map { httpResponse =>
           httpResponse.status match {
             case Status.OK => Right(Json.fromJson[UpscanFileDescriptor](httpResponse.json).asOpt)
-            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
-              Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
-          }
-        }
-        .recover {
-          case NonFatal(e) => Left(Error(e))
-        }
-    )
-  }
-
-  override def getAll(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, List[UpscanFileDescriptor]] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/all/${draftReturnId.value}"
-    EitherT[Future, Error, List[UpscanFileDescriptor]](
-      http
-        .get(url)
-        .map { httpResponse =>
-          httpResponse.status match {
-            case Status.OK =>
-              Right(Json.fromJson[List[UpscanFileDescriptor]](httpResponse.json).asOpt match {
-                case Some(fd) => fd
-                case None     => List()
-              })
             case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
               Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
           }

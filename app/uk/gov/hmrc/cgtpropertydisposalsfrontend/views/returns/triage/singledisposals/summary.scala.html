@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -90,13 +90,13 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     }
   @cyaRow(
     messages(if (isAgent) "disposalDate.agent.title" else "disposalDate.title"),
-    Html(LocalDateUtils.govDisplayFormat(answers.disposalDate.value)),
+    Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
     Some(cyaChange(messages("triage.cyaChange.disposalDate"), routes.SingleDisposalsTriageController.whenWasDisposalDate().url)),
       "disposalDate"
   )
   @cyaRow(
     messages(if (isAgent) "completionDate.agent.title" else "completionDate.title"),
-    Html(LocalDateUtils.govDisplayFormat(answers.completionDate.value)),
+    Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
     Some(cyaChange(messages("triage.cyaChange.completionDate"), routes.SingleDisposalsTriageController.whenWasCompletionDate().url)),
       "completionDate"
   )

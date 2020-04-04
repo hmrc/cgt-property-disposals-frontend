@@ -47,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.collection.JavaConverters._
@@ -1349,7 +1349,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "the date entered is too far in future" in {
-          testFormError(formData(LocalDateUtils.today().plusYears(2L)))(
+          testFormError(formData(TimeUtils.today().plusYears(2L)))(
             s"$key.error.tooFarInFuture"
           )
         }
@@ -1474,7 +1474,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
             val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
               disposalDate = disposalDate.copy(
-                value = LocalDateUtils.today().minusDays(10L)
+                value = TimeUtils.today().minusDays(10L)
               )
             )
 

@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => accountRoutes}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
@@ -86,7 +86,7 @@
     @cyaSection() {
         @cyaRow(
             messages(s"$key.sentToHmrc"),
-            Html(LocalDateUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)),
+            Html(TimeUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.processingDate.toLocalDate)),
             None,
             "sent-date-table"
         )
@@ -111,7 +111,7 @@
             justSubmittedReturn.submissionResponse.charge.map { charge =>
                 cyaRow(
                     messages(s"$key.taxDue"),
-                    Html(LocalDateUtils.govDisplayFormat(charge.dueDate)),
+                    Html(TimeUtils.govDisplayFormat(charge.dueDate)),
                     None,
                     "tax-due-date-table"
                 )
@@ -122,7 +122,7 @@
   @justSubmittedReturn.submissionResponse.charge.map { charge =>
    <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
 
-   @warning(messages(s"$key.warning", LocalDateUtils.govDisplayFormat(charge.dueDate)))
+   @warning(messages(s"$key.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
 
    <p>
    @Html(messages(s"$key.howToPay", charge.chargeReference))

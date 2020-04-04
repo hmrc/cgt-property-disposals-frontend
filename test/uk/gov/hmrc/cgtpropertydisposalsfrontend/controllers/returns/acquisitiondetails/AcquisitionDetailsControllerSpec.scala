@@ -1105,7 +1105,7 @@ class AcquisitionDetailsControllerSpec
             case _ =>
               messageFromMessageKey(
                 s"acquisitionPriceNotBought${userMessageKey(userType)}.title",
-                LocalDateUtils.govDisplayFormat(acquisitionDate.value)
+                TimeUtils.govDisplayFormat(acquisitionDate.value)
               )
           }
 
@@ -1152,7 +1152,7 @@ class AcquisitionDetailsControllerSpec
             case _ =>
               messageFromMessageKey(
                 s"acquisitionPriceNotBought${userMessageKey(userType)}.title",
-                LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
+                TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
               )
           }
 
@@ -1214,7 +1214,7 @@ class AcquisitionDetailsControllerSpec
                 withClue(s"For $scenario: ") {
                   testFormError(userType, scenario.formData: _*)(scenario.expectedErrorMessageKey)(
                     s"$contextKey.title",
-                    LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
+                    TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
                   )(
                     performAction,
                     scenarioSession
@@ -1252,7 +1252,7 @@ class AcquisitionDetailsControllerSpec
               s"$contextKey.error.tooSmall"
             )(
               s"$contextKey.title",
-              LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
+              TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
             )(
               performAction,
               scenarioSession
@@ -1506,7 +1506,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionDate().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1551,7 +1551,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
+              TimeUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1593,7 +1593,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1635,7 +1635,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(ukResidents)
             ),
             doc => doc.select("#rebaseAcquisitionPrice").attr("value") shouldBe "0.01"
           )
@@ -1712,7 +1712,7 @@ class AcquisitionDetailsControllerSpec
             )
           }
 
-          val formattedRebaseDate = LocalDateUtils.govDisplayFormat(ukResidents)
+          val formattedRebaseDate = TimeUtils.govDisplayFormat(ukResidents)
           checkPageIsDisplayed(
             performAction(data: _*),
             messageFromMessageKey(
@@ -2787,7 +2787,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "shouldUseRebase.title",
-              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
+              TimeUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
             )
           )
 
@@ -2812,7 +2812,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "shouldUseRebase.title",
-              LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
+              TimeUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
             )
           )
 
@@ -2855,7 +2855,7 @@ class AcquisitionDetailsControllerSpec
         controller.shouldUseRebaseSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
       "show a form error for non residential non uk" when {
-        val date: String = LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
+        val date: String = TimeUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
 
         def test(userType: UserType, data: (String, String)*)(expectedErrorKey: String) =
           testFormError(userType, data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
@@ -2876,7 +2876,7 @@ class AcquisitionDetailsControllerSpec
       }
 
       "show a form error for residential non uk" when {
-        val date: String = LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
+        val date: String = TimeUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
 
         def test(userType: UserType, data: (String, String)*)(expectedErrorKey: String) =
           testFormError(userType, data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
@@ -3269,15 +3269,15 @@ class AcquisitionDetailsControllerSpec
               (AcquisitionMethod.Bought, messages("acquisitionPriceBought.title")),
               (
                 AcquisitionMethod.Inherited,
-                messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(date))
+                messages("acquisitionPriceNotBought.title", TimeUtils.govDisplayFormat(date))
               ),
               (
                 AcquisitionMethod.Gifted,
-                messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(date))
+                messages("acquisitionPriceNotBought.title", TimeUtils.govDisplayFormat(date))
               ),
               (
                 AcquisitionMethod.Other("test"),
-                messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(date))
+                messages("acquisitionPriceNotBought.title", TimeUtils.govDisplayFormat(date))
               )
             ).foreach {
               case (method, expectedTitle) =>

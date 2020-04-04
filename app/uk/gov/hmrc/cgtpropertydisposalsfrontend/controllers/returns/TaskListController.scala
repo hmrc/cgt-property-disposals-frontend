@@ -16,17 +16,34 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
+import java.time.LocalDateTime
+
+import cats.data.{EitherT, NonEmptyList}
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
+import configs.syntax._
+import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => baseRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.{IncompleteUploadSupportingEvidenceAnswers, SupportingEvidence}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.IncompleteNonCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TaskListController @Inject() (
@@ -34,27 +51,141 @@ class TaskListController @Inject() (
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
+  configuration: Configuration,
+  returnsService: ReturnsService,
   cc: MessagesControllerComponents,
   singleDisposalTaskListPage: views.html.returns.single_disposal_task_list,
   multipleDisposalsTaskListPage: views.html.returns.multiple_disposals_task_list
-)(implicit viewConfig: ViewConfig)
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
+    with SessionUpdates
     with Logging {
 
-  def taskList(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn)) =>
-        Ok(singleDisposalTaskListPage(s))
+  private val upscanStoreExpirySeconds: Long =
+    configuration.underlying
+      .get[FiniteDuration]("microservice.services.upscan-initiate.upscan-store-expiry-time")
+      .value
+      .toSeconds
 
-      case Some(FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn)) =>
-        Ok(multipleDisposalsTaskListPage(m))
+  def taskList(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(f @ FillingOutReturn(_, _, _, draftReturn)) =>
+        handleExpiredFiles(draftReturn, f).fold(
+          { e =>
+            logger.warn("Could not handle expired files", e)
+            errorHandler.errorResult()
+          },
+          _.fold(
+            m => Ok(multipleDisposalsTaskListPage(m)),
+            s => Ok(singleDisposalTaskListPage(s))
+          )
+        )
 
       case _ =>
         Redirect(baseRoutes.StartController.start())
 
     }
 
+  }
+
+  private def handleExpiredFiles(
+    draftReturn: DraftReturn,
+    journey: FillingOutReturn
+  )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): EitherT[Future, Error, DraftReturn] = {
+    val updatedUploadSupportingEvidenceAnswers = getExpiredSupportingEvidence(draftReturn).map {
+      case (expired, answers) =>
+        val incompleteAnswers =
+          answers.fold(
+            identity,
+            c =>
+              IncompleteUploadSupportingEvidenceAnswers(
+                Some(c.doYouWantToUploadSupportingEvidence),
+                c.evidences,
+                List.empty
+              )
+          )
+        incompleteAnswers.copy(
+          evidences        = incompleteAnswers.evidences.diff(expired.toList),
+          expiredEvidences = expired.toList ::: incompleteAnswers.expiredEvidences
+        )
+    }
+
+    val updatedYearToDateAnswers = getExpiredMandatoryEvidence(draftReturn).map {
+      case (expired, answers) =>
+        answers match {
+          case c: CalculatedYTDAnswers    => c.unset(_.mandatoryEvidence).copy(expiredEvidence = Some(expired))
+          case n: NonCalculatedYTDAnswers => n.unset(_.mandatoryEvidence).copy(expiredEvidence = Some(expired))
+        }
+    }
+
+    if (updatedUploadSupportingEvidenceAnswers.isEmpty && updatedYearToDateAnswers.isEmpty)
+      EitherT.pure[Future, Error](draftReturn)
+    else {
+      val updatedDraftReturn = draftReturn.fold(
+        m =>
+          m.copy(
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(m.yearToDateLiabilityAnswers)(Some(_)),
+            uploadSupportingDocuments =
+              updatedUploadSupportingEvidenceAnswers.fold(m.uploadSupportingDocuments)(Some(_))
+          ),
+        s =>
+          s.copy(
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(s.yearToDateLiabilityAnswers)(Some(_)),
+            uploadSupportingDocuments =
+              updatedUploadSupportingEvidenceAnswers.fold(s.uploadSupportingDocuments)(Some(_))
+          )
+      )
+
+      for {
+        _ <- returnsService.storeDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )
+        _ <- EitherT(
+              updateSession(sessionStore, request)(
+                _.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+              )
+            )
+      } yield updatedDraftReturn
+    }
+
+  }
+
+  private def getExpiredSupportingEvidence(
+    draftReturn: DraftReturn
+  ): Option[(NonEmptyList[SupportingEvidence], UploadSupportingEvidenceAnswers)] =
+    draftReturn
+      .fold(_.uploadSupportingDocuments, _.uploadSupportingDocuments)
+      .flatMap { answers =>
+        val supportingEvidence = answers.fold(_.evidences, _.evidences)
+        supportingEvidence.filter(f => fileHasExpired(f.createdOn)) match {
+          case h :: t => Some(NonEmptyList(h, t) -> answers)
+          case Nil    => None
+        }
+      }
+
+  private def getExpiredMandatoryEvidence(
+    draftReturn: DraftReturn
+  ): Option[(MandatoryEvidence, YearToDateLiabilityAnswers)] =
+    draftReturn
+      .fold(_.yearToDateLiabilityAnswers, _.yearToDateLiabilityAnswers)
+      .flatMap { answers =>
+        val mandatoryEvidence = answers match {
+          case c: CalculatedYTDAnswers    => c.fold(_.mandatoryEvidence, _.mandatoryEvidence)
+          case n: NonCalculatedYTDAnswers => n.fold(_.mandatoryEvidence, c => Some(c.mandatoryEvidence))
+        }
+
+        mandatoryEvidence
+          .filter(m => fileHasExpired(m.createdOn))
+          .map(_ -> answers)
+      }
+
+  private def fileHasExpired(createdOnTimestamp: LocalDateTime): Boolean = {
+    val p = createdOnTimestamp.plusSeconds(upscanStoreExpirySeconds)
+    println(s"Got p=$p,  now ${TimeUtils.now()}\n\n")
+    p.isBefore(TimeUtils.now())
   }
 
 }

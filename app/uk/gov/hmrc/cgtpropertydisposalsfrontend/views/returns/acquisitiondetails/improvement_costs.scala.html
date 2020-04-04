@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import java.time.LocalDate
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -106,7 +106,7 @@
             error = form.error(key),
             hasErrors = hasErrors,
             options = options,
-            helpText = Some(Html(messages(s"$key$userKey$rebasingKey.helpText", LocalDateUtils.govDisplayFormat(rebaseCutOffDate))))
+            helpText = Some(Html(messages(s"$key$userKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate))))
         )
         @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1")))
 

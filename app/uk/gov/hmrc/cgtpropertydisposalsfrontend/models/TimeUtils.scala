@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.{Clock, LocalDate}
-import java.time.format.{DateTimeFormatter}
+import java.time.{Clock, LocalDate, LocalDateTime}
+import java.time.format.DateTimeFormatter
 
 import cats.Order
 import cats.syntax.either._
@@ -28,7 +28,7 @@ import play.api.i18n.Messages
 
 import scala.util.Try
 
-object LocalDateUtils {
+object TimeUtils {
 
   implicit val configs: Configs[LocalDate] = Configs.fromTry {
     case (config, key) =>
@@ -38,6 +38,8 @@ object LocalDateUtils {
   val clock: Clock = Clock.systemUTC()
 
   def today(): LocalDate = LocalDate.now(clock)
+
+  def now(): LocalDateTime = LocalDateTime.now(clock)
 
   def dateFormatter(
     maximumDateInclusive: Option[LocalDate],

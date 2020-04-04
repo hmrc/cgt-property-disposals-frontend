@@ -19,7 +19,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Charge
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this()
@@ -37,7 +37,7 @@
       </span>
     </td>
     <td>
-      @{LocalDateUtils.govShortDisplayFormat(charge.dueDate)}
+      @{TimeUtils.govShortDisplayFormat(charge.dueDate)}
     </td>
     <td>
       @{MoneyUtils.formatAmountOfMoneyWithPoundSign(charge.amount.inPounds())}
@@ -68,7 +68,7 @@
               </strong>
               {messages(s"viewReturn.charge.paymentMethod.${payment.method.toString}")}
               {messages("generic.on")}
-              {LocalDateUtils.govShortDisplayFormat(payment.clearingDate)}
+              {TimeUtils.govShortDisplayFormat(payment.clearingDate)}
             </li>
           }}
         </ul>

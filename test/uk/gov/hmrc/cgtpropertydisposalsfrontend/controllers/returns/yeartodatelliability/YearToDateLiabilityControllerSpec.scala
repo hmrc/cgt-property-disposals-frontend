@@ -56,7 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingE
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -94,6 +94,7 @@ class YearToDateLiabilityControllerSpec
     case UserType.Individual   => ""
     case UserType.Organisation => ".trust"
     case UserType.Agent        => ".agent"
+    case other                 => sys.error(s"User type '$other' not handled")
   }
 
   def multipleMessageKey(isMultiple: Boolean): String = if (isMultiple) ".multiple" else ""
@@ -212,7 +213,7 @@ class YearToDateLiabilityControllerSpec
       yearToDateLiabilityAnswers,
       Some(sample[AmountInPence]),
       Some(sample[CompleteUploadSupportingEvidenceAnswers]),
-      LocalDateUtils.today()
+      TimeUtils.today()
     )
 
   def mockCalculationService(
@@ -361,7 +362,7 @@ class YearToDateLiabilityControllerSpec
 
       "redirect the page" when {
         "the user is a Trust" in {
-          val (session, fillingOutReturn, draftReturn) = sessionWithSingleDisposalState(
+          val (session, fillingOutReturn, _) = sessionWithSingleDisposalState(
             None,
             Some(sample[DisposalDate]),
             UserType.Organisation,
@@ -1209,6 +1210,7 @@ class YearToDateLiabilityControllerSpec
                   hasEstimatedDetails = Some(true),
                   None,
                   None,
+                  None,
                   None
                 )
 
@@ -1371,6 +1373,7 @@ class YearToDateLiabilityControllerSpec
               val newAnswers = IncompleteNonCalculatedYTDAnswers(
                 Some(answers.taxableGainOrLoss),
                 Some(false),
+                None,
                 None,
                 None
               )
@@ -1640,6 +1643,7 @@ class YearToDateLiabilityControllerSpec
             Some(true),
             None,
             None,
+            None,
             None
           )
 
@@ -1676,6 +1680,7 @@ class YearToDateLiabilityControllerSpec
             None,
             Some(true),
             Some(sample[CalculatedTaxDue]),
+            None,
             None,
             None
           )
@@ -1721,7 +1726,8 @@ class YearToDateLiabilityControllerSpec
           calculatedTaxDue    = Some(sample[CalculatedTaxDue]),
           personalAllowance   = None,
           hasEstimatedDetails = Some(true),
-          mandatoryEvidence   = None
+          mandatoryEvidence   = None,
+          expiredEvidence     = None
         )
         val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
           Some(oldAnswers),
@@ -1785,7 +1791,8 @@ class YearToDateLiabilityControllerSpec
             hasEstimatedDetails = Some(true),
             calculatedTaxDue    = None,
             personalAllowance   = None,
-            mandatoryEvidence   = None
+            mandatoryEvidence   = None,
+            expiredEvidence     = None
           )
           val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
             Some(answers),
@@ -1850,7 +1857,8 @@ class YearToDateLiabilityControllerSpec
               Some(true),
               Some(sample[CalculatedTaxDue]),
               Some(AmountInPence(123L)),
-              Some(sample[MandatoryEvidence])
+              Some(sample[MandatoryEvidence]),
+              None
             )
             val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
               Some(answers),
@@ -1896,6 +1904,7 @@ class YearToDateLiabilityControllerSpec
                   Some(answers.hasEstimatedDetails),
                   Some(answers.calculatedTaxDue),
                   Some(AmountInPence(123456L)),
+                  None,
                   None
                 )
               )
@@ -1933,7 +1942,8 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.calculatedTaxDue),
           Some(completeAnswers.taxDue),
-          completeAnswers.mandatoryEvidence
+          completeAnswers.mandatoryEvidence,
+          None
         )
 
         def testRedirectWhenIncompleteAnswers(
@@ -2150,7 +2160,8 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.taxableGainOrLoss),
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue),
-          Some(completeAnswers.mandatoryEvidence)
+          Some(completeAnswers.mandatoryEvidence),
+          None
         )
 
         val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
@@ -2357,6 +2368,7 @@ class YearToDateLiabilityControllerSpec
                 Some(true),
                 Some(calculatedTaxDue),
                 Some(AmountInPence(200L)),
+                None,
                 None
               ),
               routes.YearToDateLiabilityController.taxDue()
@@ -2382,6 +2394,7 @@ class YearToDateLiabilityControllerSpec
                 Some(AmountInPence.zero),
                 Some(true),
                 Some(AmountInPence(200L)),
+                None,
                 None
               ),
               routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
@@ -2663,7 +2676,7 @@ class YearToDateLiabilityControllerSpec
             val newAmount = AmountInPence(0L)
             val answers =
               sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(1L))
-            val newAnswers = IncompleteNonCalculatedYTDAnswers(Some(newAmount), None, None, None)
+            val newAnswers = IncompleteNonCalculatedYTDAnswers(Some(newAmount), None, None, None, None)
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
                 "taxableGainOrLoss" -> "2"
@@ -2871,6 +2884,7 @@ class YearToDateLiabilityControllerSpec
               Some(answers.taxableGainOrLoss),
               Some(answers.hasEstimatedDetails),
               Some(newAmount),
+              None,
               None
             )
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(

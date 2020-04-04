@@ -50,7 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -486,7 +486,7 @@ class MultipleDisposalsTriageControllerSpec
               exemptionAndLossesAnswers     = None,
               yearToDateLiabilityAnswers    = None,
               uploadSupportingDocuments     = None,
-              lastUpdatedDate               = LocalDateUtils.today()
+              lastUpdatedDate               = TimeUtils.today()
             )
             val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
@@ -585,7 +585,7 @@ class MultipleDisposalsTriageControllerSpec
           exemptionAndLossesAnswers     = None,
           yearToDateLiabilityAnswers    = None,
           uploadSupportingDocuments     = None,
-          lastUpdatedDate               = LocalDateUtils.today()
+          lastUpdatedDate               = TimeUtils.today()
         )
         val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
@@ -1709,7 +1709,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1)
-            mockGetTaxYear(LocalDateUtils.today())(Right(None))
+            mockGetTaxYear(TimeUtils.today())(Right(None))
           }
 
           checkIsTechnicalErrorPage(performAction(key -> "0"))
@@ -1719,7 +1719,7 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1)
-            mockGetTaxYear(LocalDateUtils.today())(Left(Error("")))
+            mockGetTaxYear(TimeUtils.today())(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(key -> "0"))
@@ -2702,7 +2702,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "the date entered is later than today" in {
-          testFormError(formData(LocalDateUtils.today().plusDays(1L)))(
+          testFormError(formData(TimeUtils.today().plusDays(1L)))(
             "multipleDisposalsCompletionDate.error.tooFarInFuture"
           )
         }
@@ -2712,11 +2712,11 @@ class MultipleDisposalsTriageControllerSpec
 
         "there is an error updating the draft return" in {
           val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-            completionDate = CompletionDate(LocalDateUtils.today().minusDays(1L))
+            completionDate = CompletionDate(TimeUtils.today().minusDays(1L))
           )
           val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
 
-          val updatedAnswers     = answers.copy(completionDate = CompletionDate(LocalDateUtils.today()))
+          val updatedAnswers     = answers.copy(completionDate = CompletionDate(TimeUtils.today()))
           val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
 
           inSequence {
@@ -2731,12 +2731,12 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(LocalDateUtils.today()): _*))
+          checkIsTechnicalErrorPage(performAction(formData(TimeUtils.today()): _*))
         }
 
         "there is an error updating the session" in {
           val answers =
-            sample[CompleteMultipleDisposalsTriageAnswers].copy(completionDate = CompletionDate(LocalDateUtils.today()))
+            sample[CompleteMultipleDisposalsTriageAnswers].copy(completionDate = CompletionDate(TimeUtils.today()))
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
           val newCompletionDate = CompletionDate(answers.completionDate.value.minusDays(1L))
@@ -2762,7 +2762,7 @@ class MultipleDisposalsTriageControllerSpec
             val answers            = IncompleteMultipleDisposalsTriageAnswers.empty
             val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-            val newCompletionDate = CompletionDate(LocalDateUtils.today())
+            val newCompletionDate = CompletionDate(TimeUtils.today())
             val updatedJourney =
               journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = Some(newCompletionDate))))
 
@@ -2780,7 +2780,7 @@ class MultipleDisposalsTriageControllerSpec
 
           "the user has already answered the question" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-              val answers            = c.copy(completionDate = CompletionDate(LocalDateUtils.today()))
+              val answers            = c.copy(completionDate = CompletionDate(TimeUtils.today()))
               val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
               val newCompletionDate = CompletionDate(answers.completionDate.value.minusDays(1L))
@@ -2806,11 +2806,11 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-              completionDate = CompletionDate(LocalDateUtils.today().minusDays(1L))
+              completionDate = CompletionDate(TimeUtils.today().minusDays(1L))
             )
             val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
 
-            val updatedAnswers     = answers.copy(completionDate = CompletionDate(LocalDateUtils.today()))
+            val updatedAnswers     = answers.copy(completionDate = CompletionDate(TimeUtils.today()))
             val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
             val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
@@ -2828,7 +2828,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(formData(LocalDateUtils.today()): _*),
+              performAction(formData(TimeUtils.today()): _*),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -2842,7 +2842,7 @@ class MultipleDisposalsTriageControllerSpec
         "the date submitted is the same as one that already exists in session" in {
           val answers =
             sample[CompleteMultipleDisposalsTriageAnswers]
-              .copy(completionDate = CompletionDate(LocalDateUtils.today()))
+              .copy(completionDate = CompletionDate(TimeUtils.today()))
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
           inSequence {
@@ -3457,7 +3457,7 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     doc
       .select("#taxYear-answer")
       .text()                                   shouldBe s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"
-    doc.select("#completionDate-answer").text() shouldBe LocalDateUtils.govDisplayFormat(answers.completionDate.value)
+    doc.select("#completionDate-answer").text() shouldBe TimeUtils.govDisplayFormat(answers.completionDate.value)
   }
 
 }

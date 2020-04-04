@@ -46,7 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{Indire
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -980,6 +980,7 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.calculatedTaxDue)
                   .unset(_.taxDue)
                   .unset(_.mandatoryEvidence)
+                  .unset(_.expiredEvidence)
               )
           },
           uploadSupportingDocuments = None
@@ -1295,6 +1296,7 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.calculatedTaxDue)
                   .unset(_.taxDue)
                   .unset(_.mandatoryEvidence)
+                  .unset(_.expiredEvidence)
               )
           }
         )
@@ -1806,6 +1808,7 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.calculatedTaxDue)
                   .unset(_.taxDue)
                   .unset(_.mandatoryEvidence)
+                  .unset(_.expiredEvidence)
               )
 
             case _: NonCalculatedYTDAnswers =>
@@ -2270,7 +2273,7 @@ class SingleDisposalsTriageControllerSpec
           None,
           None,
           None,
-          LocalDateUtils.today()
+          TimeUtils.today()
         )
       )
 

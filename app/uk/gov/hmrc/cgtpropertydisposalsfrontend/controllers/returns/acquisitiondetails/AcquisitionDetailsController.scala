@@ -441,7 +441,7 @@ class AcquisitionDetailsController @Inject() (
                   page = { (form, backLink) =>
                     val p = form.copy(errors =
                       form.errors
-                        .map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
+                        .map(_.copy(args = Seq(TimeUtils.govDisplayFormat(rebaseDate))))
                     )
                     rebasedAcquisitionPricePage(p, backLink, rebaseDate, fillingOutReturn.subscribedDetails.isATrust)
                   }
@@ -855,7 +855,7 @@ object AcquisitionDetailsController {
   def acquisitionDateForm(today: LocalDate): Form[AcquisitionDate] = Form(
     mapping(
       "" -> of(
-        LocalDateUtils.dateFormatter(
+        TimeUtils.dateFormatter(
           Some(today),
           None,
           "acquisitionDate-day",

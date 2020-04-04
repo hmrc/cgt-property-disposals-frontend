@@ -33,7 +33,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
           Some(completeAnswers.taxableGainOrLoss),
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue),
-          Some(completeAnswers.mandatoryEvidence)
+          Some(completeAnswers.mandatoryEvidence),
+          None
         )
       }
 
@@ -48,7 +49,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         Some(completeAnswers.taxableGainOrLoss),
         Some(completeAnswers.hasEstimatedDetails),
         Some(completeAnswers.taxDue),
-        Some(completeAnswers.mandatoryEvidence)
+        Some(completeAnswers.mandatoryEvidence),
+        None
       )
 
     "have a method which unsets fields" when {
@@ -87,7 +89,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.calculatedTaxDue),
           Some(completeAnswers.taxDue),
-          completeAnswers.mandatoryEvidence
+          completeAnswers.mandatoryEvidence,
+          None
         )
       }
 
@@ -111,7 +114,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         Some(completeAnswers.hasEstimatedDetails),
         Some(completeAnswers.calculatedTaxDue),
         Some(completeAnswers.taxDue),
-        Some(mandatoryEvidence)
+        Some(mandatoryEvidence),
+        None
       )
 
     "have a method which unsets fields" when {
@@ -141,6 +145,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         IncompleteCalculatedYTDAnswers(
           Some(completeAnswers.estimatedIncome),
           Some(personalAllowance),
+          None,
           None,
           None,
           None,

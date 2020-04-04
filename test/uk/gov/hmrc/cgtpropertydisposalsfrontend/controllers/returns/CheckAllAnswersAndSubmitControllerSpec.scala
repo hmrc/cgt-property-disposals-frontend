@@ -61,7 +61,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -139,7 +139,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers.merge),
           completeReturn.initialGainOrLoss,
           Some(completeReturn.uploadSupportingDocumentAnswers),
-          LocalDateUtils.today()
+          TimeUtils.today()
         )
 
         val completeFillingOutReturn = sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
@@ -213,7 +213,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.exemptionAndLossesAnswers),
           Some(completeReturn.yearToDateLiabilityAnswers),
           None,
-          LocalDateUtils.today()
+          TimeUtils.today()
         )
 
         val completeFillingOutReturn = sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
@@ -293,7 +293,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         Some(completeReturn.yearToDateLiabilityAnswers.merge),
         completeReturn.initialGainOrLoss,
         Some(completeReturn.uploadSupportingDocumentAnswers),
-        LocalDateUtils.today()
+        TimeUtils.today()
       )
 
       val completeFillingOutReturn = sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
