@@ -42,7 +42,8 @@ object CompleteReturn {
     triageAnswers: CompleteMultipleDisposalsTriageAnswers,
     examplePropertyDetailsAnswers: CompleteExamplePropertyDetailsAnswers,
     exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
-    yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers
+    yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
+    uploadSupportingDocumentAnswers: CompleteUploadSupportingEvidenceAnswers
   ) extends CompleteReturn
 
   object CompleteMultipleDisposalsReturn {
@@ -55,10 +56,10 @@ object CompleteReturn {
             Some(p: CompleteExamplePropertyDetailsAnswers),
             Some(e: CompleteExemptionAndLossesAnswers),
             Some(y: CompleteNonCalculatedYTDAnswers),
-            _,
+            Some(u: CompleteUploadSupportingEvidenceAnswers),
             _
             ) =>
-          Some(CompleteMultipleDisposalsReturn(t, p, e, y))
+          Some(CompleteMultipleDisposalsReturn(t, p, e, y, u))
 
         case _ =>
           None

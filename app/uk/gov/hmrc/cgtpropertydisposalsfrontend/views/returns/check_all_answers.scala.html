@@ -41,6 +41,7 @@
         reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
         initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary,
+        uploadSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_evidence_summary,
         printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
@@ -91,6 +92,9 @@
       calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate)
      )
 
+     <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+     @uploadSummary(s.uploadSupportingDocumentAnswers)
+
     }
 
       case m: CompleteMultipleDisposalsReturn => {
@@ -105,7 +109,12 @@
 
        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
        @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers)
+
+       <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+        @uploadSummary(m.uploadSupportingDocumentAnswers)
       }
+
+
 
   }
 

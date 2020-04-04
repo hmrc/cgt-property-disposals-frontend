@@ -15,8 +15,6 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import cats.data.EitherT
@@ -26,9 +24,8 @@ import configs.syntax._
 import play.api.Configuration
 import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.json.{Json, OFormat}
-import play.api.libs.ws.{BodyWritable, InMemoryBody, WSClient}
+import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
-import play.core.formatters.Multipart
 import play.mvc.Http.Status
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
@@ -39,9 +36,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.collection.immutable
-import scala.concurrent.duration.{Duration, SECONDS}
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 final case class UpscanInitiateRequest(
@@ -189,35 +184,21 @@ class UpscanConnectorImpl @Inject() (
         .recover { case e => Left(Error(e)) }
     )
   }
+
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   override def upload(href: String, form: MultipartFormData[Source[ByteString, _]], filesize: Int)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] = {
 
-    implicit val actorSystem       = ActorSystem()
-    implicit val actorMaterializer = ActorMaterializer()
-
-    val parts: immutable.Iterable[MultipartFormData.Part[Source[ByteString, _]]] = form.dataParts.flatMap {
+    val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] = Source.apply(form.dataParts.flatMap {
       case (key, values) =>
         values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
-    } ++ form.files
-
-    implicit val multipartBodyWriter: BodyWritable[Source[MultipartFormData.Part[Source[ByteString, _]], _]] = {
-      val boundary    = Multipart.randomBoundary()
-      val contentType = s"multipart/form-data; boundary=$boundary"
-      BodyWritable(
-        body => {
-          val byteString = Multipart.transform(body, boundary).runFold(ByteString.empty)(_ ++ _)
-          InMemoryBody(Await.result(byteString, Duration(90, SECONDS)))
-        },
-        contentType
-      )
-    }
+    } ++ form.files)
 
     EitherT[Future, Error, Unit](
       wsClient
-        .url(url)
-        .post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](Source(parts))(multipartBodyWriter)
+        .url(href)
+        .post(parts)
         .map { response =>
           response.status match {
             case 204 => Right(())

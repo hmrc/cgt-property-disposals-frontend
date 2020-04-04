@@ -212,7 +212,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.examplePropertyDetailsAnswers),
           Some(completeReturn.exemptionAndLossesAnswers),
           Some(completeReturn.yearToDateLiabilityAnswers),
-          None,
+          Some(completeReturn.uploadSupportingDocumentAnswers),
           TimeUtils.today()
         )
 
