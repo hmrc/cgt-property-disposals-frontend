@@ -98,6 +98,24 @@ class ExemptionAndLossesController @Inject() (
     }
   }
 
+  private def withWasAUkResident(draftReturn: DraftReturn)(f: Boolean => Future[Result]): Future[Result] = {
+    val wasUk = draftReturn.fold(
+      _.triageAnswers.fold(
+        _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+        c => Some(c.countryOfResidence.isUk())
+      ),
+      _.triageAnswers.fold(
+        _.wasAUKResident,
+        c => Some(c.countryOfResidence.isUk())
+      )
+    )
+
+    wasUk match {
+      case Some(d) => f(d)
+      case None    => Redirect(controllers.returns.routes.TaskListController.taskList())
+    }
+  }
+
   private def commonDisplayBehaviour[A, P: Writeable, R](
     currentAnswers: ExemptionAndLossesAnswers
   )(form: ExemptionAndLossesAnswers => Form[A])(
@@ -185,19 +203,21 @@ class ExemptionAndLossesController @Inject() (
   def inYearLosses(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) { (_, _, draftReturn, answers) =>
       withDisposalDate(draftReturn) { disposalDate =>
-        commonDisplayBehaviour(
-          answers
-        )(form =
-          _.fold(
-            _.inYearLosses.fold(inYearLossesForm)(l => inYearLossesForm.fill(l.inPounds())),
-            c => inYearLossesForm.fill(c.inYearLosses.inPounds())
+        withWasAUkResident(draftReturn) { wasAUkResident =>
+          commonDisplayBehaviour(
+            answers
+          )(form =
+            _.fold(
+              _.inYearLosses.fold(inYearLossesForm)(l => inYearLossesForm.fill(l.inPounds())),
+              c => inYearLossesForm.fill(c.inYearLosses.inPounds())
+            )
+          )(
+            page = inYearLossesPage(_, _, disposalDate)
+          )(
+            _ => Some(()),
+            controllers.returns.routes.TaskListController.taskList()
           )
-        )(
-          page = inYearLossesPage(_, _, disposalDate)
-        )(
-          _ => Some(()),
-          controllers.returns.routes.TaskListController.taskList()
-        )
+        }
       }
     }
   }
@@ -205,66 +225,72 @@ class ExemptionAndLossesController @Inject() (
   def inYearLossesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       withDisposalDate(draftReturn) { disposalDate =>
-        commonSubmitBehaviour(
-          fillingOutReturn,
-          draftReturn,
-          answers
-        )(form = inYearLossesForm)(
-          page = inYearLossesPage(_, _, disposalDate)
-        )(
-          _ => Some(()),
-          controllers.returns.routes.TaskListController.taskList()
-        ) { (inYearLosses, answers) =>
-          answers.fold(
-            _.copy(inYearLosses = Some(AmountInPence.fromPounds(inYearLosses))),
-            _.copy(inYearLosses = AmountInPence.fromPounds(inYearLosses))
-          )
+        withWasAUkResident(draftReturn) { wasAUkResident =>
+          commonSubmitBehaviour(
+            fillingOutReturn,
+            draftReturn,
+            answers
+          )(form = inYearLossesForm)(
+            page = inYearLossesPage(_, _, disposalDate)
+          )(
+            _ => Some(()),
+            controllers.returns.routes.TaskListController.taskList()
+          ) { (inYearLosses, answers) =>
+            answers.fold(
+              _.copy(inYearLosses = Some(AmountInPence.fromPounds(inYearLosses))),
+              _.copy(inYearLosses = AmountInPence.fromPounds(inYearLosses))
+            )
 
+          }
         }
       }
     }
   }
 
   def previousYearsLosses(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _, _, answers) =>
-      commonDisplayBehaviour(
-        answers
-      )(form =
-        _.fold(
-          _.previousYearsLosses.fold(previousYearsLossesForm)(l => previousYearsLossesForm.fill(l.inPounds())),
-          c => previousYearsLossesForm.fill(c.previousYearsLosses.inPounds())
+    withFillingOutReturnAndAnswers(request) { (_, _, draftReturn, answers) =>
+      withWasAUkResident(draftReturn) { wasAukResident =>
+        commonDisplayBehaviour(
+          answers
+        )(form =
+          _.fold(
+            _.previousYearsLosses.fold(previousYearsLossesForm)(l => previousYearsLossesForm.fill(l.inPounds())),
+            c => previousYearsLossesForm.fill(c.previousYearsLosses.inPounds())
+          )
+        )(
+          page = previousYearsLossesPage(_, _, wasAukResident)
+        )(
+          requiredPreviousAnswer = _.fold(
+            _.inYearLosses,
+            c => Some(c.inYearLosses)
+          ),
+          redirectToIfNoRequiredPreviousAnswer = routes.ExemptionAndLossesController.inYearLosses()
         )
-      )(
-        page = previousYearsLossesPage(_, _)
-      )(
-        requiredPreviousAnswer = _.fold(
-          _.inYearLosses,
-          c => Some(c.inYearLosses)
-        ),
-        redirectToIfNoRequiredPreviousAnswer = routes.ExemptionAndLossesController.inYearLosses()
-      )
+      }
     }
   }
 
   def previousYearsLossesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      commonSubmitBehaviour(
-        fillingOutReturn,
-        draftReturn,
-        answers
-      )(form = previousYearsLossesForm)(
-        page = previousYearsLossesPage(_, _)
-      )(
-        requiredPreviousAnswer = _.fold(
-          _.inYearLosses,
-          c => Some(c.inYearLosses)
-        ),
-        redirectToIfNoRequiredPreviousAnswer = routes.ExemptionAndLossesController.inYearLosses()
-      ) { (previousYearLosses, answers) =>
-        answers.fold(
-          _.copy(previousYearsLosses = Some(AmountInPence.fromPounds(previousYearLosses))),
-          _.copy(previousYearsLosses = AmountInPence.fromPounds(previousYearLosses))
-        )
+      withWasAUkResident(draftReturn) { wasAUkResident =>
+        commonSubmitBehaviour(
+          fillingOutReturn,
+          draftReturn,
+          answers
+        )(form = previousYearsLossesForm)(
+          page = previousYearsLossesPage(_, _, wasAUkResident)
+        )(
+          requiredPreviousAnswer = _.fold(
+            _.inYearLosses,
+            c => Some(c.inYearLosses)
+          ),
+          redirectToIfNoRequiredPreviousAnswer = routes.ExemptionAndLossesController.inYearLosses()
+        ) { (previousYearLosses, answers) =>
+          answers.fold(
+            _.copy(previousYearsLosses = Some(AmountInPence.fromPounds(previousYearLosses))),
+            _.copy(previousYearsLosses = AmountInPence.fromPounds(previousYearLosses))
+          )
+        }
       }
     }
   }

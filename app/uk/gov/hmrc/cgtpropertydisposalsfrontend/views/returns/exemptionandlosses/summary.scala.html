@@ -20,9 +20,11 @@
 @import cats.instances.long._
 @import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -30,7 +32,13 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate, isATrust: Boolean)(implicit messages: Messages)
+@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate, isATrust: Boolean)(implicit messages: Messages, request: RequestWithSessionData[_])
+
+@previousYearUserValueKey = @{request.userType match {
+    case Some(UserType.Organisation) => { "previousYearsLossesValue.trust" }
+    case Some(UserType.Agent) => { "previousYearsLossesValue.agent" }
+    case _ => { "previousYearsLossesValue.individual" }
+}}
 
 @cyaSection() {
   @if(answers.inYearLosses.value === 0L) {
@@ -56,7 +64,7 @@
       "inYearLosses"
     )
     @cyaRow(
-      messages("inYearLossesValue.label"),
+      messages(s"$previousYearUserValueKey.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.inYearLosses.inPounds())),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLossesValue"), routes.ExemptionAndLossesController.inYearLosses().url)),
       "inYearLossesValue"
@@ -78,7 +86,7 @@
       "previousYearsLosses"
     )
     @cyaRow(
-      messages("previousYearsLossesValue.label"),
+      messages(s"$previousYearUserValueKey.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.previousYearsLosses.inPounds())),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLossesValue"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
       "previousYearsLossesValue"
