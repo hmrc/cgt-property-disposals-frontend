@@ -128,7 +128,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeReturn = sample[CompleteSingleDisposalReturn]
         val hasAttachments =
-          completeReturn.uploadSupportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
+          completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
 
         val completeDraftReturn = DraftSingleDisposalReturn(
           UUID.randomUUID(),
@@ -285,7 +285,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       val completeReturn = sample[CompleteSingleDisposalReturn]
       val hasAttachments =
-        completeReturn.uploadSupportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
+        completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
 
       val completeDraftReturn = DraftSingleDisposalReturn(
         UUID.randomUUID(),
