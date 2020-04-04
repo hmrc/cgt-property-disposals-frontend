@@ -21,9 +21,9 @@ import java.time.LocalDateTime
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 
-sealed trait UploadSupportingEvidenceAnswers extends Product with Serializable
+sealed trait SupportingEvidenceAnswers extends Product with Serializable
 
-object UploadSupportingEvidenceAnswers {
+object SupportingEvidenceAnswers {
 
   final case class SupportingEvidence(
     reference: String,
@@ -35,35 +35,35 @@ object UploadSupportingEvidenceAnswers {
     implicit val format: OFormat[SupportingEvidence] = Json.format
   }
 
-  final case class IncompleteUploadSupportingEvidenceAnswers(
+  final case class IncompleteSupportingEvidenceAnswers(
     doYouWantToUploadSupportingEvidence: Option[Boolean],
     evidences: List[SupportingEvidence],
     expiredEvidences: List[SupportingEvidence]
-  ) extends UploadSupportingEvidenceAnswers
+  ) extends SupportingEvidenceAnswers
 
-  object IncompleteUploadSupportingEvidenceAnswers {
-    val empty: IncompleteUploadSupportingEvidenceAnswers =
-      IncompleteUploadSupportingEvidenceAnswers(None, List.empty, List.empty)
+  object IncompleteSupportingEvidenceAnswers {
+    val empty: IncompleteSupportingEvidenceAnswers =
+      IncompleteSupportingEvidenceAnswers(None, List.empty, List.empty)
   }
 
-  final case class CompleteUploadSupportingEvidenceAnswers(
+  final case class CompleteSupportingEvidenceAnswers(
     doYouWantToUploadSupportingEvidence: Boolean,
     evidences: List[SupportingEvidence]
-  ) extends UploadSupportingEvidenceAnswers
+  ) extends SupportingEvidenceAnswers
 
-  implicit class UploadSupportingDocumentsOps(private val a: UploadSupportingEvidenceAnswers) extends AnyVal {
+  implicit class UploadSupportingDocumentsOps(private val a: SupportingEvidenceAnswers) extends AnyVal {
 
     def fold[A](
-      ifIncomplete: IncompleteUploadSupportingEvidenceAnswers => A,
-      ifComplete: CompleteUploadSupportingEvidenceAnswers => A
+      ifIncomplete: IncompleteSupportingEvidenceAnswers => A,
+      ifComplete: CompleteSupportingEvidenceAnswers => A
     ): A = a match {
-      case i: IncompleteUploadSupportingEvidenceAnswers => ifIncomplete(i)
-      case c: CompleteUploadSupportingEvidenceAnswers   => ifComplete(c)
+      case i: IncompleteSupportingEvidenceAnswers => ifIncomplete(i)
+      case c: CompleteSupportingEvidenceAnswers   => ifComplete(c)
     }
 
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[UploadSupportingEvidenceAnswers] = derived.oformat()
+  implicit val format: OFormat[SupportingEvidenceAnswers] = derived.oformat()
 
 }

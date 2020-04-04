@@ -408,7 +408,7 @@ class CommonTriageQuestionsController @Inject() (
                 triageAnswers                 = updateMultipleDisposalAnswers(m.triageAnswers),
                 examplePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers    = None,
-                uploadSupportingDocuments     = None
+                supportingEvidenceAnswers     = None
               ),
             s =>
               s.copy(
@@ -419,7 +419,7 @@ class CommonTriageQuestionsController @Inject() (
                 reliefDetailsAnswers       = s.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss          = None,
-                uploadSupportingDocuments  = None
+                supportingEvidenceAnswers  = None
               )
           )
         )

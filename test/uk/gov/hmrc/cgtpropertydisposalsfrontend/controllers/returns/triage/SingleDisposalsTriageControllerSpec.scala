@@ -223,7 +223,7 @@ class SingleDisposalsTriageControllerSpec
           reliefDetailsAnswers       = None,
           exemptionAndLossesAnswers  = None,
           yearToDateLiabilityAnswers = None,
-          uploadSupportingDocuments  = None
+          supportingEvidenceAnswers  = None
         )
 
       val requiredPreviousAnswers =
@@ -304,7 +304,7 @@ class SingleDisposalsTriageControllerSpec
               reliefDetailsAnswers       = None,
               exemptionAndLossesAnswers  = None,
               yearToDateLiabilityAnswers = None,
-              uploadSupportingDocuments  = None
+              supportingEvidenceAnswers  = None
             )
 
           "the section is complete" in {
@@ -335,7 +335,7 @@ class SingleDisposalsTriageControllerSpec
                   reliefDetailsAnswers       = None,
                   exemptionAndLossesAnswers  = None,
                   yearToDateLiabilityAnswers = None,
-                  uploadSupportingDocuments  = None
+                  supportingEvidenceAnswers  = None
                 ),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
@@ -446,7 +446,7 @@ class SingleDisposalsTriageControllerSpec
           ),
           exemptionAndLossesAnswers  = None,
           yearToDateLiabilityAnswers = None,
-          uploadSupportingDocuments  = None
+          supportingEvidenceAnswers  = None
         )
 
       val requiredPreviousAnswers =
@@ -983,7 +983,7 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.expiredEvidence)
               )
           },
-          uploadSupportingDocuments = None
+          supportingEvidenceAnswers = None
         )
 
       val tomorrow = today.plusDays(1L)
@@ -1814,7 +1814,7 @@ class SingleDisposalsTriageControllerSpec
             case _: NonCalculatedYTDAnswers =>
               None
           },
-          uploadSupportingDocuments = None
+          supportingEvidenceAnswers = None
         )
 
       val requiredPreviousAnswers =

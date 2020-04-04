@@ -28,9 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.{IncompleteUploadSupportingEvidenceAnswers, SupportingEvidence}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.IncompleteNonCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TimeUtils}
@@ -99,7 +97,7 @@ class TaskListController @Inject() (
           answers.fold(
             identity,
             c =>
-              IncompleteUploadSupportingEvidenceAnswers(
+              IncompleteSupportingEvidenceAnswers(
                 Some(c.doYouWantToUploadSupportingEvidence),
                 c.evidences,
                 List.empty
@@ -126,14 +124,14 @@ class TaskListController @Inject() (
         m =>
           m.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(m.yearToDateLiabilityAnswers)(Some(_)),
-            uploadSupportingDocuments =
-              updatedUploadSupportingEvidenceAnswers.fold(m.uploadSupportingDocuments)(Some(_))
+            supportingEvidenceAnswers =
+              updatedUploadSupportingEvidenceAnswers.fold(m.supportingEvidenceAnswers)(Some(_))
           ),
         s =>
           s.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(s.yearToDateLiabilityAnswers)(Some(_)),
-            uploadSupportingDocuments =
-              updatedUploadSupportingEvidenceAnswers.fold(s.uploadSupportingDocuments)(Some(_))
+            supportingEvidenceAnswers =
+              updatedUploadSupportingEvidenceAnswers.fold(s.supportingEvidenceAnswers)(Some(_))
           )
       )
 
@@ -155,9 +153,9 @@ class TaskListController @Inject() (
 
   private def getExpiredSupportingEvidence(
     draftReturn: DraftReturn
-  ): Option[(NonEmptyList[SupportingEvidence], UploadSupportingEvidenceAnswers)] =
+  ): Option[(NonEmptyList[SupportingEvidence], SupportingEvidenceAnswers)] =
     draftReturn
-      .fold(_.uploadSupportingDocuments, _.uploadSupportingDocuments)
+      .fold(_.supportingEvidenceAnswers, _.supportingEvidenceAnswers)
       .flatMap { answers =>
         val supportingEvidence = answers.fold(_.evidences, _.evidences)
         supportingEvidence.filter(f => fileHasExpired(f.createdOn)) match {

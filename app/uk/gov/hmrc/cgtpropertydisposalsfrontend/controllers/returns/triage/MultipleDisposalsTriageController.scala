@@ -235,7 +235,7 @@ class MultipleDisposalsTriageController @Inject() (
                         .unset(_.acquisitionPrice)
                     ),
                     yearToDateLiabilityAnswers = None,
-                    uploadSupportingDocuments  = None
+                    supportingEvidenceAnswers  = None
                   )
               )
               updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
@@ -520,7 +520,7 @@ class MultipleDisposalsTriageController @Inject() (
                     d.copy(
                       examplePropertyDetailsAnswers = None,
                       yearToDateLiabilityAnswers    = None,
-                      uploadSupportingDocuments     = None
+                      supportingEvidenceAnswers     = None
                     )
                 )
                 updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))

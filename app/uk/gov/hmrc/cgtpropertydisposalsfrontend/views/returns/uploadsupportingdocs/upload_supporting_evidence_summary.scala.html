@@ -17,8 +17,8 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -26,7 +26,7 @@
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(answers: CompleteUploadSupportingEvidenceAnswers)(implicit messages: Messages)
+@(answers: CompleteSupportingEvidenceAnswers)(implicit messages: Messages)
 
     @key = @{"upload-supporting-evidence.check-your-answers"}
 
@@ -42,7 +42,7 @@
         @cyaRow(
             messages("upload-supporting-evidence.check-your-answers.do-you-want-to-upload-documents"),
             Html(hasSupportingDocs),
-            Some(cyaChange(messages("upload-supporting-evidence.check-your-answers.cya-change"), routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocuments().url)),
+            Some(cyaChange(messages("upload-supporting-evidence.check-your-answers.cya-change"), routes.SupportingEvidenceController.doYouWantToUploadSupportingDocuments().url)),
             "do-you-want-to-upload-supporting-evidence-value"
         )
 
@@ -55,8 +55,8 @@
                 <dd class="cya-answer" id="answer-@{fileIndex}">
                     @document.fileName
                 </dd>
-                <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(document.reference).url>@messages(s"$key.cya-change")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
-                <dd class="cya-change cya-extra-action"><a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$key.cya-delete")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
+                <dd class="cya-change"><a href=@routes.SupportingEvidenceController.changeSupportingEvidence(document.reference).url>@messages(s"$key.cya-change")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
+                <dd class="cya-change cya-extra-action"><a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$key.cya-delete")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
             </div>
 
         }

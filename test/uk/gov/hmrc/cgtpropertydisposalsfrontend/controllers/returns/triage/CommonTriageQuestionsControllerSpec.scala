@@ -392,7 +392,7 @@ class CommonTriageQuestionsControllerSpec
             ),
             yearToDateLiabilityAnswers = None,
             initialGainOrLoss          = None,
-            uploadSupportingDocuments  = None
+            supportingEvidenceAnswers  = None
           )
         )
 
@@ -552,7 +552,7 @@ class CommonTriageQuestionsControllerSpec
                   ),
                   yearToDateLiabilityAnswers = None,
                   initialGainOrLoss          = None,
-                  uploadSupportingDocuments  = None
+                  supportingEvidenceAnswers  = None
                 ),
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
@@ -591,7 +591,7 @@ class CommonTriageQuestionsControllerSpec
                   ),
                   yearToDateLiabilityAnswers = None,
                   initialGainOrLoss          = None,
-                  uploadSupportingDocuments  = None
+                  supportingEvidenceAnswers  = None
                 ),
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
@@ -624,7 +624,7 @@ class CommonTriageQuestionsControllerSpec
                   triageAnswers                 = newAnswers,
                   examplePropertyDetailsAnswers = None,
                   yearToDateLiabilityAnswers    = None,
-                  uploadSupportingDocuments     = None
+                  supportingEvidenceAnswers     = None
                 ),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )

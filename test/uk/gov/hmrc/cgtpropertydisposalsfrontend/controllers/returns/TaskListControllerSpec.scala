@@ -84,7 +84,7 @@ class TaskListControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def removeEvidence(u: UploadSupportingEvidenceAnswers): UploadSupportingEvidenceAnswers =
+  def removeEvidence(u: SupportingEvidenceAnswers): SupportingEvidenceAnswers =
     u.fold(
       _.copy(evidences = List.empty),
       _.copy(evidences = List.empty)
@@ -125,7 +125,7 @@ class TaskListControllerSpec
       ): Unit = {
         val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
           draftReturn.copy(
-            uploadSupportingDocuments  = draftReturn.uploadSupportingDocuments.map(removeEvidence),
+            supportingEvidenceAnswers  = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
             yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
           )
         )
@@ -162,7 +162,7 @@ class TaskListControllerSpec
       ): Unit = {
         val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
           draftReturn.copy(
-            uploadSupportingDocuments  = draftReturn.uploadSupportingDocuments.map(removeEvidence),
+            supportingEvidenceAnswers  = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
             yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
           )
         )
@@ -772,7 +772,7 @@ class TaskListControllerSpec
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(draftReturn =
                     sample[DraftSingleDisposalReturn].copy(
-                      uploadSupportingDocuments  = None,
+                      supportingEvidenceAnswers  = None,
                       yearToDateLiabilityAnswers = None
                     )
                   )
@@ -814,7 +814,7 @@ class TaskListControllerSpec
       ): Unit = {
         val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
           draftReturn.copy(
-            uploadSupportingDocuments  = draftReturn.uploadSupportingDocuments.map(removeEvidence),
+            supportingEvidenceAnswers  = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
             yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
           )
         )
@@ -995,7 +995,7 @@ class TaskListControllerSpec
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
             yearToDateLiabilityAnswers    = Some(sample[CompleteCalculatedYTDAnswers]),
-            uploadSupportingDocuments     = Some(sample[UploadSupportingEvidenceAnswers])
+            supportingEvidenceAnswers     = Some(sample[SupportingEvidenceAnswers])
           )
 
           testStateOfSection(

@@ -142,7 +142,7 @@ class SingleDisposalsTriageController @Inject() (
                       reliefDetailsAnswers       = None,
                       exemptionAndLossesAnswers  = None,
                       yearToDateLiabilityAnswers = None,
-                      uploadSupportingDocuments  = None
+                      supportingEvidenceAnswers  = None
                     )
                   )
               }
@@ -208,7 +208,7 @@ class SingleDisposalsTriageController @Inject() (
                     reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                     exemptionAndLossesAnswers  = None,
                     yearToDateLiabilityAnswers = None,
-                    uploadSupportingDocuments  = None
+                    supportingEvidenceAnswers  = None
                   )
                 )
             }
@@ -388,7 +388,7 @@ class SingleDisposalsTriageController @Inject() (
       initialGainOrLoss          = None,
       reliefDetailsAnswers       = currentDraftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
       yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
-      uploadSupportingDocuments  = None
+      supportingEvidenceAnswers  = None
     )
 
   private def updateDisposalDate(
@@ -607,7 +607,7 @@ class SingleDisposalsTriageController @Inject() (
                       initialGainOrLoss          = None,
                       reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
-                      uploadSupportingDocuments  = None
+                      supportingEvidenceAnswers  = None
                     )
                   )
               }

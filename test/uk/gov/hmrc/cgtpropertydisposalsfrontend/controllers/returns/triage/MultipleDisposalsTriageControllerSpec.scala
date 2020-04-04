@@ -485,7 +485,7 @@ class MultipleDisposalsTriageControllerSpec
               examplePropertyDetailsAnswers = None,
               exemptionAndLossesAnswers     = None,
               yearToDateLiabilityAnswers    = None,
-              uploadSupportingDocuments     = None,
+              supportingEvidenceAnswers     = None,
               lastUpdatedDate               = TimeUtils.today()
             )
             val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
@@ -584,7 +584,7 @@ class MultipleDisposalsTriageControllerSpec
           examplePropertyDetailsAnswers = None,
           exemptionAndLossesAnswers     = None,
           yearToDateLiabilityAnswers    = None,
-          uploadSupportingDocuments     = None,
+          supportingEvidenceAnswers     = None,
           lastUpdatedDate               = TimeUtils.today()
         )
         val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
@@ -755,7 +755,7 @@ class MultipleDisposalsTriageControllerSpec
               .unset(_.acquisitionPrice)
           ),
           yearToDateLiabilityAnswers = None,
-          uploadSupportingDocuments  = None
+          supportingEvidenceAnswers  = None
         )
 
       val key = "multipleDisposalsWereYouAUKResident"
@@ -2250,7 +2250,7 @@ class MultipleDisposalsTriageControllerSpec
           triageAnswers                 = newAnswers,
           examplePropertyDetailsAnswers = None,
           yearToDateLiabilityAnswers    = None,
-          uploadSupportingDocuments     = None
+          supportingEvidenceAnswers     = None
         )
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
