@@ -1234,6 +1234,9 @@ class YearToDateLiabilityController @Inject() (
         case IncompleteNonCalculatedYTDAnswers(_, _, _, _, Some(expired)) =>
           Ok(expiredMandatoryEvidencePage(expired))
 
+        case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, Some(expired)) =>
+          Ok(expiredMandatoryEvidencePage(expired))
+
         case _ =>
           Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
       }
