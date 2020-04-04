@@ -901,19 +901,18 @@ percentageShare.error.tooManyDecimals=The percentage of the property you owned m
 percentageShare.agent.error.tooManyDecimals=The percentage of the property your client owned must have 2 decimal places or less, for example 33.33
 percentageShare.trust.error.tooManyDecimals=The percentage of the property the trust owned must have 2 decimal places or less, for example 33.33
 
-
 disposalPrice.SoldOther.title=How much did you get when you sold or disposed of the property?
 disposalPrice.agent.SoldOther.title=How much did your client get when they sold or disposed of the property?
-disposalPrice.trust.SoldOther.title=How much did the trust get when it sold or disposed of the property?
+disposalPrice.trust.SoldOther.title=How much did the trust get when they sold or disposed of the property?
 disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
 disposalPrice.agent.Gifted.title=What was the market value of the property when your client gave it away?
 disposalPrice.trust.Gifted.title=What was the market value of the property when the trust gave it away?
 disposalPrice.SoldOther.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
 disposalPrice.agent.SoldOther.helpText=If the property was shared, only enter the amount your client got for their share. You’ll be able to enter any additional costs later.
-disposalPrice.trust.SoldOther.helpText=If the trust owned part of the property, only enter the amount it got for its share. You’ll be able to enter any additional costs later.
+disposalPrice.trust.SoldOther.helpText=If the property was shared, only enter the amount the trust got for its share. You’ll be able to enter any additional costs later.
 disposalPrice.Gifted.helpText=If you owned part of the property, only enter your share of the market value. You’ll be able to enter any additional costs later.
-disposalPrice.agent.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your client's share.
-disposalPrice.trust.Gifted.helpText=If the trust owned part of the property, only enter the amount it got for its share. You’ll be able to enter any additional costs later.
+disposalPrice.agent.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your client’s share.
+disposalPrice.trust.Gifted.helpText=If the property was shared, only enter the amount the trust got for its share. You’ll be able to enter any additional costs later.
 disposalPrice.SoldOther.error.required=Enter how much you sold or disposed of the property for
 disposalPrice.agent.SoldOther.error.required=Enter how much your client sold or disposed of the property for
 disposalPrice.trust.SoldOther.error.required=Enter how much the trust sold or disposed of the property for
