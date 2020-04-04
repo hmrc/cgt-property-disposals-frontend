@@ -981,6 +981,7 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.taxDue)
                   .unset(_.mandatoryEvidence)
                   .unset(_.expiredEvidence)
+                  .unset(_.upscanSuccessful)
               )
           },
           supportingEvidenceAnswers = None
@@ -1297,6 +1298,7 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.taxDue)
                   .unset(_.mandatoryEvidence)
                   .unset(_.expiredEvidence)
+                  .unset(_.upscanSuccessful)
               )
           }
         )
@@ -1809,6 +1811,7 @@ class SingleDisposalsTriageControllerSpec
                   .unset(_.taxDue)
                   .unset(_.mandatoryEvidence)
                   .unset(_.expiredEvidence)
+                  .unset(_.upscanSuccessful)
               )
 
             case _: NonCalculatedYTDAnswers =>

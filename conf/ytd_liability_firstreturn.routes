@@ -19,6 +19,10 @@ POST /tax-amount/overall-gain                         uk.gov.hmrc.cgtpropertydis
 GET  /tax-amount/own-calculation-enter-cgt-due        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
 POST /tax-amount/own-calculation-enter-cgt-due        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()
 
+
+GET  /tax-amount/scanning-file                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.scanningMandatoryEvidence()
+POST /tax-amount/scanning-file                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.scanningMandatoryEvidenceSubmit()
+
 GET  /tax-amount/evidence-expired                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.mandatoryEvidenceExpired()
 
 GET    /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.checkYourAnswers()

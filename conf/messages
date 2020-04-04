@@ -2121,3 +2121,11 @@ accessibilityStatement.howWeTested.title=How we tested this service
 accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019  and checked for compliance with WCAG 2.1 AA. It  was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
 accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 6 April 2020.
 
+mandatoryEvidence.check-upscan-status.title=Supporting evidence file upload status
+mandatoryEvidence.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
+mandatoryEvidence.check-upscan-status.in-progress=Scan in progress
+mandatoryEvidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
+mandatoryEvidence.check-upscan-status.failed=Failed
+mandatoryEvidence.check-upscan-status.cya-change=Upload another file
+mandatoryEvidence.check-upscan-status.cya-assistive=Upload another file
+mandatoryEvidence.check-upscan-status.button=Check status and continue

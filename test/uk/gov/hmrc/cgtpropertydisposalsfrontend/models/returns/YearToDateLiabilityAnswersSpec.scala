@@ -34,6 +34,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue),
           Some(completeAnswers.mandatoryEvidence),
+          None,
           None
         )
       }
@@ -50,6 +51,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         Some(completeAnswers.hasEstimatedDetails),
         Some(completeAnswers.taxDue),
         Some(completeAnswers.mandatoryEvidence),
+        None,
         None
       )
 
@@ -90,6 +92,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
           Some(completeAnswers.calculatedTaxDue),
           Some(completeAnswers.taxDue),
           completeAnswers.mandatoryEvidence,
+          None,
           None
         )
       }
@@ -115,6 +118,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         Some(completeAnswers.calculatedTaxDue),
         Some(completeAnswers.taxDue),
         Some(mandatoryEvidence),
+        None,
         None
       )
 
@@ -145,6 +149,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         IncompleteCalculatedYTDAnswers(
           Some(completeAnswers.estimatedIncome),
           Some(personalAllowance),
+          None,
           None,
           None,
           None,
