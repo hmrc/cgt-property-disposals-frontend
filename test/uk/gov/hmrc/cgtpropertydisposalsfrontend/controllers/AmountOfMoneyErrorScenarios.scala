@@ -44,7 +44,11 @@ object AmountOfMoneyErrorScenarios {
         Some((maximumAmountInclusive + 1).toString),
         s"${errorContext.getOrElse(key)}.error.tooLarge"
       ),
-      AmountOfMoneyErrorScenario(key, Some("1.234"), s"${errorContext.getOrElse(key)}.error.tooManyDecimals"),
+      AmountOfMoneyErrorScenario(
+        key,
+        Some("1.234"),
+        s"${errorContext.getOrElse(key)}.error.tooManyDecimals"
+      ),
       AmountOfMoneyErrorScenario(key, Some("abc"), s"${errorContext.getOrElse(key)}.error.invalid")
     )
 

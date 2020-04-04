@@ -60,6 +60,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val residentialPropertyDefinitionUrl: String = getString("external-url.residential-property-definition")
   val tranferringOwnershipHelp: String         = getString("external-url.transferring-ownership-help")
   val cgtLossesUrl: String                     = getString("external-url.cgt-losses")
+  val cgtLossesUrlNonUk: String                = getString("external-url.cgt-losses-non-uk")
   val annualExemptAmountUrl: String            = getString("external-url.annual-exempt-amount")
   val personalAllowanceUrl: String             = getString("external-url.personal-allowance")
   val selfAssessmentUrl: String                = getString("external-url.sign-in-to-self-assessment")
