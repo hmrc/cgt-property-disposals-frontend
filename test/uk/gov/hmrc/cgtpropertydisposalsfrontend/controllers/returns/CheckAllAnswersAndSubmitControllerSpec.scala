@@ -309,12 +309,12 @@ class CheckAllAnswersAndSubmitControllerSpec
         completeFillingOutReturn.subscribedDetails,
         completeFillingOutReturn.ggCredId,
         completeFillingOutReturn.agentReferenceNumber,
-        completeReturn,
+        completeReturn.copy(hasAttachments = hasAttachments),
         submitReturnResponse
       )
 
       val submitReturnRequest = SubmitReturnRequest(
-        completeReturn,
+        completeReturn.copy(hasAttachments = hasAttachments),
         completeFillingOutReturn.draftReturn.id,
         completeFillingOutReturn.subscribedDetails,
         completeFillingOutReturn.agentReferenceNumber
