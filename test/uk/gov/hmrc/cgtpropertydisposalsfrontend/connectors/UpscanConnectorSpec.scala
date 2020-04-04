@@ -53,7 +53,6 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         |        host = host
         |        port = 123
         |        max-uploads = 5
-        |        min-file-size = 0
         |        max-file-size = 5242880
         |        upscan-store.expiry-time = 7 days
         |    }
@@ -178,7 +177,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
       val expectedUrl = s"http://host:123/upscan/initiate"
       val callBackUrl =
         s"http://localhost:7021/cgt-property-disposals/upscan-call-back/draft-return-id/${draftReturnId.value}"
-      val expectedInitiated = UpscanInitiateRequest(callBackUrl, 0, 5242880)
+      val expectedInitiated = UpscanInitiateRequest(callBackUrl, 5242880)
 
       "process unsuccessful post calls from S3" in {
         List(

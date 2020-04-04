@@ -45,11 +45,10 @@ import scala.util.control.NonFatal
 
 final case class UpscanInitiateRequest(
   callbackUrl: String,
-  minimumFileSize: Int,
   maximumFileSize: Long
 )
 
-final object UpscanInitiateRequest {
+object UpscanInitiateRequest {
   implicit val format: OFormat[UpscanInitiateRequest] = Json.format[UpscanInitiateRequest]
 }
 
@@ -95,7 +94,7 @@ class UpscanConnectorImpl @Inject() (
       .get[A](s"microservice.services.upscan-initiate.$key")
       .value
 
-  private val url: String = {
+  private val upscanInitiateUrl: String = {
     val protocol = getUpscanInitiateConfig[String]("protocol")
     val host     = getUpscanInitiateConfig[String]("host")
     val port     = getUpscanInitiateConfig[String]("port")
@@ -106,7 +105,6 @@ class UpscanConnectorImpl @Inject() (
 
   val selfBaseUrl: String = config.underlying.get[String]("self.url").value
 
-  private val minFileSize: Int  = getUpscanInitiateConfig[Int]("min-file-size")
   private val maxFileSize: Long = getUpscanInitiateConfig[Long]("max-file-size")
 
   override def initiate(draftReturnId: DraftReturnId)(
@@ -114,12 +112,11 @@ class UpscanConnectorImpl @Inject() (
   ): EitherT[Future, Error, HttpResponse] = {
     val payload = UpscanInitiateRequest(
       baseUrl + s"/cgt-property-disposals/upscan-call-back/draft-return-id/${draftReturnId.value}",
-      minFileSize,
       maxFileSize
     )
     EitherT[Future, Error, HttpResponse](
       http
-        .post[UpscanInitiateRequest](url, payload, Map(USER_AGENT -> "cgt-property-disposals-frontend"))
+        .post[UpscanInitiateRequest](upscanInitiateUrl, payload, Map(USER_AGENT -> "cgt-property-disposals-frontend"))
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {
             Left(Error("S3 did not return 200 status code"))
