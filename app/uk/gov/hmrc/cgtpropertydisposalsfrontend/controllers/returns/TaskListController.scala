@@ -112,8 +112,10 @@ class TaskListController @Inject() (
     val updatedYearToDateAnswers = getExpiredMandatoryEvidence(draftReturn).map {
       case (expired, answers) =>
         answers match {
-          case c: CalculatedYTDAnswers    => c.unset(_.mandatoryEvidence).copy(expiredEvidence = Some(expired))
-          case n: NonCalculatedYTDAnswers => n.unset(_.mandatoryEvidence).copy(expiredEvidence = Some(expired))
+          case c: CalculatedYTDAnswers =>
+            c.unset(_.mandatoryEvidence).unset(_.upscanSuccessful).copy(expiredEvidence = Some(expired))
+          case n: NonCalculatedYTDAnswers =>
+            n.unset(_.mandatoryEvidence).unset(_.upscanSuccessful).copy(expiredEvidence = Some(expired))
         }
     }
 

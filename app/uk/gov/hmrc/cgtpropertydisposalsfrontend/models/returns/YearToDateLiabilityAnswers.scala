@@ -39,12 +39,13 @@ object YearToDateLiabilityAnswers {
       hasEstimatedDetails: Option[Boolean],
       taxDue: Option[AmountInPence],
       mandatoryEvidence: Option[MandatoryEvidence],
-      expiredEvidence: Option[MandatoryEvidence]
+      expiredEvidence: Option[MandatoryEvidence],
+      upscanSuccessful: Option[Boolean]
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
       val empty: IncompleteNonCalculatedYTDAnswers =
-        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None)
+        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteNonCalculatedYTDAnswers
@@ -54,6 +55,7 @@ object YearToDateLiabilityAnswers {
           Some(c.hasEstimatedDetails),
           Some(c.taxDue),
           Some(c.mandatoryEvidence),
+          None,
           None
         )
     }
@@ -95,12 +97,13 @@ object YearToDateLiabilityAnswers {
       calculatedTaxDue: Option[CalculatedTaxDue],
       taxDue: Option[AmountInPence],
       mandatoryEvidence: Option[MandatoryEvidence],
-      expiredEvidence: Option[MandatoryEvidence]
+      expiredEvidence: Option[MandatoryEvidence],
+      upscanSuccessful: Option[Boolean]
     ) extends CalculatedYTDAnswers
 
     object IncompleteCalculatedYTDAnswers {
       val empty: IncompleteCalculatedYTDAnswers =
-        IncompleteCalculatedYTDAnswers(None, None, None, None, None, None, None)
+        IncompleteCalculatedYTDAnswers(None, None, None, None, None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteCalculatedYTDAnswers
@@ -112,6 +115,7 @@ object YearToDateLiabilityAnswers {
           Some(c.calculatedTaxDue),
           Some(c.taxDue),
           c.mandatoryEvidence,
+          None,
           None
         )
 
@@ -158,6 +162,7 @@ object YearToDateLiabilityAnswers {
               .unset(_.taxDue)
               .unset(_.mandatoryEvidence)
               .unset(_.expiredEvidence)
+              .unset(_.upscanSuccessful)
           )
         case _: NonCalculatedYTDAnswers => None
       }

@@ -1211,6 +1211,7 @@ class YearToDateLiabilityControllerSpec
                   None,
                   None,
                   None,
+                  None,
                   None
                 )
 
@@ -1373,6 +1374,7 @@ class YearToDateLiabilityControllerSpec
               val newAnswers = IncompleteNonCalculatedYTDAnswers(
                 Some(answers.taxableGainOrLoss),
                 Some(false),
+                None,
                 None,
                 None,
                 None
@@ -1644,6 +1646,7 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             None,
+            None,
             None
           )
 
@@ -1680,6 +1683,7 @@ class YearToDateLiabilityControllerSpec
             None,
             Some(true),
             Some(sample[CalculatedTaxDue]),
+            None,
             None,
             None,
             None
@@ -1727,7 +1731,8 @@ class YearToDateLiabilityControllerSpec
           personalAllowance   = None,
           hasEstimatedDetails = Some(true),
           mandatoryEvidence   = None,
-          expiredEvidence     = None
+          expiredEvidence     = None,
+          upscanSuccessful    = None
         )
         val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
           Some(oldAnswers),
@@ -1858,6 +1863,7 @@ class YearToDateLiabilityControllerSpec
               Some(sample[CalculatedTaxDue]),
               Some(AmountInPence(123L)),
               Some(sample[MandatoryEvidence]),
+              None,
               None
             )
             val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
@@ -1905,6 +1911,7 @@ class YearToDateLiabilityControllerSpec
                   Some(answers.calculatedTaxDue),
                   Some(AmountInPence(123456L)),
                   None,
+                  None,
                   None
                 )
               )
@@ -1943,7 +1950,8 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.calculatedTaxDue),
           Some(completeAnswers.taxDue),
           completeAnswers.mandatoryEvidence,
-          None
+          None,
+          Some(true)
         )
 
         def testRedirectWhenIncompleteAnswers(
@@ -2087,6 +2095,42 @@ class YearToDateLiabilityControllerSpec
           }
         }
 
+        "redirect to the file expired page" when {
+
+          "there is an expired file" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(
+                expiredEvidence = Some(sample[MandatoryEvidence])
+              ),
+              routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
+            )
+
+          }
+
+        }
+
+        "redirect to the file scanning page" when {
+
+          "there is an a file in session but there is no upscan result yet file" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(
+                upscanSuccessful = None
+              ),
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )
+          }
+
+          "there is an a file in session and there is an unsuccssul upscan result" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(
+                upscanSuccessful = Some(false)
+              ),
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )
+          }
+
+        }
+
         "show the page" when {
 
           "the section is complete" in {
@@ -2161,7 +2205,8 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue),
           Some(completeAnswers.mandatoryEvidence),
-          None
+          None,
+          Some(true)
         )
 
         val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
@@ -2273,6 +2318,42 @@ class YearToDateLiabilityControllerSpec
 
         }
 
+        "redirect to the file expired page" when {
+
+          "there is an expired file" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(
+                expiredEvidence = Some(sample[MandatoryEvidence])
+              ),
+              routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
+            )
+
+          }
+
+        }
+
+        "redirect to the file scanning page" when {
+
+          "there is an a file in session but there is no upscan result yet file" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(
+                upscanSuccessful = None
+              ),
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )
+          }
+
+          "there is an a file in session and there is an unsuccssul upscan result" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(
+                upscanSuccessful = Some(false)
+              ),
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )
+          }
+
+        }
+
         "display the page" when {
 
           def testPageIsDisplayed(result: Future[Result]): Unit =
@@ -2369,6 +2450,7 @@ class YearToDateLiabilityControllerSpec
                 Some(calculatedTaxDue),
                 Some(AmountInPence(200L)),
                 None,
+                None,
                 None
               ),
               routes.YearToDateLiabilityController.taxDue()
@@ -2394,6 +2476,7 @@ class YearToDateLiabilityControllerSpec
                 Some(AmountInPence.zero),
                 Some(true),
                 Some(AmountInPence(200L)),
+                None,
                 None,
                 None
               ),
@@ -2676,7 +2759,7 @@ class YearToDateLiabilityControllerSpec
             val newAmount = AmountInPence(0L)
             val answers =
               sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(1L))
-            val newAnswers = IncompleteNonCalculatedYTDAnswers(Some(newAmount), None, None, None, None)
+            val newAnswers = IncompleteNonCalculatedYTDAnswers(Some(newAmount), None, None, None, None, None)
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
                 "taxableGainOrLoss" -> "2"
@@ -2884,6 +2967,7 @@ class YearToDateLiabilityControllerSpec
               Some(answers.taxableGainOrLoss),
               Some(answers.hasEstimatedDetails),
               Some(newAmount),
+              None,
               None,
               None
             )

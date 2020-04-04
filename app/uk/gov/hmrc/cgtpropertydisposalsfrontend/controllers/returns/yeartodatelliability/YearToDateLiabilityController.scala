@@ -53,7 +53,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.UPLOADED
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -88,7 +88,8 @@ class YearToDateLiabilityController @Inject() (
   taxableGainOrLossPage: pages.taxable_gain_or_loss,
   nonCalculatedEnterTaxDuePage: pages.non_calculated_enter_tax_due,
   nonCalculatedCheckYourAnswersPage: pages.non_calculated_check_your_answers,
-  expiredMandatoryEvidencePage: pages.expired_mandatory_evidence
+  expiredMandatoryEvidencePage: pages.expired_mandatory_evidence,
+  mandatoryEvidenceCheckUpscanPage: pages.mandatory_evidence_upscan_check
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -446,6 +447,7 @@ class YearToDateLiabilityController @Inject() (
                         .unset(_.taxDue)
                         .unset(_.mandatoryEvidence)
                         .unset(_.expiredEvidence)
+                        .unset(_.upscanSuccessful)
                         .copy(estimatedIncome = Some(AmountInPence.fromPounds(i)))
 
                     draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -525,6 +527,7 @@ class YearToDateLiabilityController @Inject() (
                         .unset(_.taxDue)
                         .unset(_.mandatoryEvidence)
                         .unset(_.expiredEvidence)
+                        .unset(_.upscanSuccessful)
                         .copy(personalAllowance = Some(AmountInPence.fromPounds(p)))
 
                       draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -670,6 +673,7 @@ class YearToDateLiabilityController @Inject() (
           .unset(_.calculatedTaxDue)
           .unset(_.taxDue)
           .unset(_.mandatoryEvidence)
+          .unset(_.upscanSuccessful)
           .copy(hasEstimatedDetails = Some(hasEstimated))
 
         draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -700,6 +704,7 @@ class YearToDateLiabilityController @Inject() (
           .unset(_.taxDue)
           .unset(_.mandatoryEvidence)
           .unset(_.expiredEvidence)
+          .unset(_.upscanSuccessful)
           .copy(hasEstimatedDetails = Some(hasEstimated))
 
         draftReturn.fold(
@@ -858,6 +863,7 @@ class YearToDateLiabilityController @Inject() (
                   calculatedAnswers
                     .unset(_.mandatoryEvidence)
                     .unset(_.expiredEvidence)
+                    .unset(_.upscanSuccessful)
                     .copy(taxDue = Some(taxDue))
                 draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers))
               }
@@ -1014,16 +1020,11 @@ class YearToDateLiabilityController @Inject() (
     val newMandatoryEvidence = MandatoryEvidence(upscanReference, filename, fileDescriptor.timestamp)
     val newAnswers = currentAnswers match {
       case c: CalculatedYTDAnswers =>
-        c.fold(
-          _.copy(mandatoryEvidence = Some(newMandatoryEvidence), expiredEvidence = None),
-          _.copy(mandatoryEvidence = Some(newMandatoryEvidence))
-        )
+        c.unset(_.expiredEvidence).unset(_.upscanSuccessful).copy(mandatoryEvidence = Some(newMandatoryEvidence))
       case n: NonCalculatedYTDAnswers =>
-        n.fold(
-          _.copy(mandatoryEvidence = Some(newMandatoryEvidence), expiredEvidence = None),
-          _.copy(mandatoryEvidence = newMandatoryEvidence)
-        )
+        n.unset(_.expiredEvidence).unset(_.upscanSuccessful).copy(mandatoryEvidence = Some(newMandatoryEvidence))
     }
+
     val newDraftReturn = currentDraftReturn.fold(
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -1067,7 +1068,7 @@ class YearToDateLiabilityController @Inject() (
       _ <- upscanConnector
             .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared, submittedFileSize)
       _ <- upscanConnector
-            .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+            .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UpscanFileDescriptorStatus.UPLOADED))
     } yield upscanFileDescriptor
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
@@ -1154,6 +1155,7 @@ class YearToDateLiabilityController @Inject() (
                 .unset(_.taxDue)
                 .unset(_.mandatoryEvidence)
                 .unset(_.expiredEvidence)
+                .unset(_.upscanSuccessful)
                 .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
 
               draftReturn.fold(
@@ -1217,6 +1219,7 @@ class YearToDateLiabilityController @Inject() (
                 val newAnswers = nonCalculatedAnswers
                   .unset(_.mandatoryEvidence)
                   .unset(_.expiredEvidence)
+                  .unset(_.upscanSuccessful)
                   .copy(taxDue = Some(taxDue))
                 draftReturn.fold(
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
@@ -1231,16 +1234,113 @@ class YearToDateLiabilityController @Inject() (
   def mandatoryEvidenceExpired(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, _, answers) =>
       answers match {
-        case IncompleteNonCalculatedYTDAnswers(_, _, _, _, Some(expired)) =>
+        case IncompleteNonCalculatedYTDAnswers(_, _, _, _, Some(expired), _) =>
           Ok(expiredMandatoryEvidencePage(expired))
 
-        case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, Some(expired)) =>
+        case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, Some(expired), _) =>
           Ok(expiredMandatoryEvidencePage(expired))
 
         case _ =>
           Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
       }
     }
+  }
+
+  def scanningMandatoryEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      def checkAndHandleUpscanStatus(
+        mandatoryEvidence: MandatoryEvidence,
+        answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
+      ): Future[Result] = {
+        val result = for {
+          maybeFileDescriptor <- upscanService
+                                  .getUpscanFileDescriptor(
+                                    DraftReturnId(fillingOutReturn.draftReturn.id.toString),
+                                    UpscanInitiateReference(mandatoryEvidence.reference)
+                                  )
+          fileDescriptor <- EitherT.fromOption[Future](
+                             maybeFileDescriptor,
+                             Error(
+                               s"Could not find file descriptor for mandatory evidence with reference ${mandatoryEvidence.reference}"
+                             )
+                           )
+          _ <- fileDescriptor.status match {
+                case UpscanFileDescriptorStatus.READY =>
+                  storeUpscanSuccessOrFailure(upscanSuccess = true, answers, fillingOutReturn)
+                case UpscanFileDescriptorStatus.FAILED =>
+                  storeUpscanSuccessOrFailure(upscanSuccess = false, answers, fillingOutReturn)
+                case _ => EitherT.pure[Future, Error](())
+              }
+        } yield fileDescriptor.status
+
+        result.fold(
+          { e =>
+            logger.warn("Error while trying to get and handle an upscan status", e)
+            errorHandler.errorResult()
+          },
+          upscanStatus =>
+            if (upscanStatus === UpscanFileDescriptorStatus.FAILED)
+              Ok(mandatoryEvidenceCheckUpscanPage(mandatoryEvidence, hasFailed = true))
+            else if (upscanStatus === UpscanFileDescriptorStatus.UPLOADED)
+              Ok(mandatoryEvidenceCheckUpscanPage(mandatoryEvidence, hasFailed = false))
+            else
+              Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        )
+      }
+
+      answers match {
+        case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, Some(mandatoryEvidence), _, None) =>
+          checkAndHandleUpscanStatus(mandatoryEvidence, Left(n))
+
+        case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, Some(mandatoryEvidence), _, None) =>
+          checkAndHandleUpscanStatus(mandatoryEvidence, Right(c))
+
+        case IncompleteNonCalculatedYTDAnswers(_, _, _, Some(mandatoryEvidence), _, Some(false)) =>
+          Ok(mandatoryEvidenceCheckUpscanPage(mandatoryEvidence, hasFailed = true))
+
+        case IncompleteCalculatedYTDAnswers(_, _, _, _, _, Some(mandatoryEvidence), _, Some(false)) =>
+          Ok(mandatoryEvidenceCheckUpscanPage(mandatoryEvidence, hasFailed = true))
+
+        case _ =>
+          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+      }
+    }
+  }
+
+  def scanningMandatoryEvidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { _ =>
+    Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
+  }
+
+  private def storeUpscanSuccessOrFailure(
+    upscanSuccess: Boolean,
+    answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
+    fillingOutReturn: FillingOutReturn
+  )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
+    val newAnswers = answers.fold(
+      _.copy(upscanSuccessful = Some(upscanSuccess)),
+      _.copy(upscanSuccessful = Some(upscanSuccess))
+    )
+    val newDraftReturn = fillingOutReturn.draftReturn.fold(
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+    )
+
+    for {
+      _ <- returnsService.storeDraftReturn(
+            newDraftReturn,
+            fillingOutReturn.subscribedDetails.cgtReference,
+            fillingOutReturn.agentReferenceNumber
+          )
+      _ <- EitherT(
+            updateSession(sessionStore, request)(
+              _.copy(journeyStatus =
+                Some(
+                  fillingOutReturn.copy(draftReturn = newDraftReturn)
+                )
+              )
+            )
+          )
+    } yield ()
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -1267,22 +1367,26 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, expiredEvidence) if expiredEvidence.nonEmpty =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, expiredEvidence, _) if expiredEvidence.nonEmpty =>
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
 
-      case IncompleteNonCalculatedYTDAnswers(None, _, _, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, Some(mandatoryEvidence), _, upscanSuccess)
+          if !upscanSuccess.contains(true) =>
+        Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
+
+      case IncompleteNonCalculatedYTDAnswers(None, _, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxableGainOrLoss())
 
-      case IncompleteNonCalculatedYTDAnswers(_, None, _, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, None, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, None, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, None, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue())
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, _, None, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, None, _, _) =>
         Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
 
-      case IncompleteNonCalculatedYTDAnswers(Some(t), Some(e), Some(d), Some(m), _) =>
+      case IncompleteNonCalculatedYTDAnswers(Some(t), Some(e), Some(d), Some(m), _, _) =>
         val completeAnswers = CompleteNonCalculatedYTDAnswers(t, e, d, m)
         val updatedDraftReturn = draftReturn.fold(
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
@@ -1323,23 +1427,27 @@ class YearToDateLiabilityController @Inject() (
       case c: CompleteCalculatedYTDAnswers =>
         Ok(calculatedCheckYouAnswersPage(c, disposalDate))
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, expiredEvidence) if expiredEvidence.nonEmpty =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, expiredEvidence, _) if expiredEvidence.nonEmpty =>
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
 
-      case IncompleteCalculatedYTDAnswers(None, _, _, _, _, _, _) if !isATrust(fillingOutReturn) =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, Some(mandatoryEvidence), _, upscanSuccess)
+          if !upscanSuccess.contains(true) =>
+        Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
+
+      case IncompleteCalculatedYTDAnswers(None, _, _, _, _, _, _, _) if !isATrust(fillingOutReturn) =>
         Redirect(routes.YearToDateLiabilityController.estimatedIncome())
 
-      case IncompleteCalculatedYTDAnswers(Some(p), None, _, _, _, _, _)
+      case IncompleteCalculatedYTDAnswers(Some(p), None, _, _, _, _, _, _)
           if !isATrust(fillingOutReturn) && p.value > 0L =>
         Redirect(routes.YearToDateLiabilityController.personalAllowance())
 
-      case IncompleteCalculatedYTDAnswers(_, _, None, _, _, _, _) =>
+      case IncompleteCalculatedYTDAnswers(_, _, None, _, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, None, _, _, _) =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, None, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxDue())
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, _, None, _, _) =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, _, None, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxDue())
 
       case IncompleteCalculatedYTDAnswers(
@@ -1349,11 +1457,12 @@ class YearToDateLiabilityController @Inject() (
           Some(calculatedTaxDue),
           Some(taxDue),
           None,
+          _,
           _
           ) if calculatedTaxDue.amountOfTaxDue =!= taxDue =>
         Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
 
-      case IncompleteCalculatedYTDAnswers(_, _, Some(h), Some(c), Some(t), m, _) if isATrust(fillingOutReturn) =>
+      case IncompleteCalculatedYTDAnswers(_, _, Some(h), Some(c), Some(t), m, _, _) if isATrust(fillingOutReturn) =>
         fromIncompleteToCompleteCalculatedYTDAnswers(
           fillingOutReturn,
           draftReturn,
@@ -1365,7 +1474,7 @@ class YearToDateLiabilityController @Inject() (
           m,
           disposalDate
         )
-      case IncompleteCalculatedYTDAnswers(Some(e), p, Some(h), Some(c), Some(t), m, _) =>
+      case IncompleteCalculatedYTDAnswers(Some(e), p, Some(h), Some(c), Some(t), m, _, _) =>
         fromIncompleteToCompleteCalculatedYTDAnswers(fillingOutReturn, draftReturn, e, p, h, c, t, m, disposalDate)
     }
 
