@@ -16,18 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, Materializer}
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.json.{JsString, Json}
-import play.api.libs.ws.ahc.AhcWSResponse
-import play.api.libs.ws.ahc.cache.{CacheableHttpResponseBodyPart, CacheableHttpResponseHeaders, CacheableHttpResponseStatus}
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
-import play.shaded.ahc.io.netty.handler.codec.http.DefaultHttpHeaders
-import play.shaded.ahc.org.asynchttpclient.Response
-import play.shaded.ahc.org.asynchttpclient.uri.Uri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
@@ -35,10 +32,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescrip
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
+class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with HttpSupport with BeforeAndAfterAll {
 
   val config = Configuration(
     ConfigFactory.parseString(
@@ -63,6 +62,15 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         |""".stripMargin
     )
   )
+
+  implicit val system: ActorSystem = ActorSystem()
+
+  implicit val mat: Materializer = ActorMaterializer()
+
+  override def afterAll(): Unit = {
+    Await.result(system.terminate(), 10.seconds)
+    super.afterAll()
+  }
 
   val connector =
     new UpscanConnectorImpl(mockHttp, mockWsClient, config, new ServicesConfig(config, new RunMode(config, Mode.Test)))
