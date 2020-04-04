@@ -15,8 +15,7 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import cats.data.EitherT
@@ -100,7 +99,8 @@ class UpscanConnectorImpl @Inject() (
   config: Configuration,
   servicesConfig: ServicesConfig
 )(
-  implicit ec: ExecutionContext
+  implicit ec: ExecutionContext,
+  mat: Materializer
 ) extends UpscanConnector
     with Logging {
 
@@ -281,9 +281,6 @@ class UpscanConnectorImpl @Inject() (
   override def upload(href: String, form: MultipartFormData[Source[ByteString, _]], filesize: Int)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] = {
-
-    implicit val actorSystem       = ActorSystem()
-    implicit val actorMaterializer = ActorMaterializer()
 
     val parts: immutable.Iterable[MultipartFormData.Part[Source[ByteString, _]]] = form.dataParts.flatMap {
       case (key, values) =>
