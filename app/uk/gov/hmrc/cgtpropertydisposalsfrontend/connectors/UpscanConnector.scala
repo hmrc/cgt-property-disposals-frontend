@@ -15,7 +15,6 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
@@ -25,7 +24,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
-import play.api.http.HeaderNames.USER_AGENT
+import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT}
 import play.api.libs.json.{JsError, JsSuccess, Json, OFormat}
 import play.api.libs.ws.{BodyWritable, InMemoryBody, WSClient}
 import play.api.mvc.MultipartFormData
