@@ -220,62 +220,62 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
       }
     }
 
-    "handling file upload requests with error responses" must {
-
-      implicit val hc: HeaderCarrier = HeaderCarrier()
-
-      val s3Url = s"https://bucketname.s3.eu-west-2.amazonaws.com"
-
-      val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] =
-        Source.apply(Map("key" -> List("V1")).flatMap {
-          case (key, values) =>
-            values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
-        })
-
-      "process unsuccessful responses from S3" in {
-        List(
-          buildWsResponse(400),
-          buildWsResponse(500)
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockPostMultiPartForm(s3Url, parts, 0)(Some(httpResponse))
-            await(
-              connector
-                .upload(
-                  s3Url,
-                  MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
-                    Source[ByteString, _]
-                  ],
-                  0
-                )
-                .value
-            ) shouldBe Left(
-              Error(s"S3 file upload failed due to: ${httpResponse.body} with http status: ${httpResponse.status}")
-            )
-          }
-        }
-      }
-
-      "process successful responses from S3" in {
-        List(
-          buildWsResponse(204)
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockPostMultiPartForm(s3Url, parts, 0)(Some(httpResponse))
-            await(
-              connector
-                .upload(
-                  s3Url,
-                  MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
-                    Source[ByteString, _]
-                  ],
-                  0
-                )
-                .value
-            ) shouldBe Right(())
-          }
-        }
-      }
-    }
+//    "handling file upload requests with error responses" must {
+//
+//      implicit val hc: HeaderCarrier = HeaderCarrier()
+//
+//      val s3Url = s"https://bucketname.s3.eu-west-2.amazonaws.com"
+//
+//      val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] =
+//        Source.apply(Map("key" -> List("V1")).flatMap {
+//          case (key, values) =>
+//            values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
+//        })
+//
+//      "process unsuccessful responses from S3" in {
+//        List(
+//          buildWsResponse(400),
+//          buildWsResponse(500)
+//        ).foreach { httpResponse =>
+//          withClue(s"For http response [${httpResponse.toString}]") {
+//            mockPostMultiPartForm(s3Url, parts, 0)(Some(httpResponse))
+//            await(
+//              connector
+//                .upload(
+//                  s3Url,
+//                  MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
+//                    Source[ByteString, _]
+//                  ],
+//                  0
+//                )
+//                .value
+//            ) shouldBe Left(
+//              Error(s"S3 file upload failed due to: ${httpResponse.body} with http status: ${httpResponse.status}")
+//            )
+//          }
+//        }
+//      }
+//
+//      "process successful responses from S3" in {
+//        List(
+//          buildWsResponse(204)
+//        ).foreach { httpResponse =>
+//          withClue(s"For http response [${httpResponse.toString}]") {
+//            mockPostMultiPartForm(s3Url, parts, 0)(Some(httpResponse))
+//            await(
+//              connector
+//                .upload(
+//                  s3Url,
+//                  MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
+//                    Source[ByteString, _]
+//                  ],
+//                  0
+//                )
+//                .value
+//            ) shouldBe Right(())
+//          }
+//        }
+//      }
+//    }
   }
 }
