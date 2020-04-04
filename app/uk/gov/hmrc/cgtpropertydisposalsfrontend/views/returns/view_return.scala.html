@@ -47,7 +47,8 @@
         acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
         disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
         reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
-        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
+        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
+        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
 @(completeReturn: CompleteReturn, returnSummary: ReturnSummary, rebasingEligibilityUtil: RebasingEligibilityUtil, subscribedDetails: SubscribedDetails)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -60,12 +61,8 @@
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
   @returnHeading(title, returnSummary, subscribedDetails, request.userType)
-
-  <p class="js-enabled">
-   <a href="JavaScript: window.print()">
-    @messages(s"$key.printLink")
-   </a>
-  </p>
+  
+  @printLink(messages(s"$key.printLink"))
 
     @cyaSection() {
         @cyaRow(
@@ -123,7 +120,7 @@
           )
 
           <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
-          @reliefDetailsSummary(s.reliefDetails)
+          @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
           @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust)

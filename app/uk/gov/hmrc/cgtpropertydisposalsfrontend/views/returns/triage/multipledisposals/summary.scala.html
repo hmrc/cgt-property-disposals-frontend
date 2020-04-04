@@ -40,7 +40,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @(answers: CompleteMultipleDisposalsTriageAnswers, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userKey = @{if(isAgent) ".agent" else if(isATrust) ".trust" else ""}
 @cyaSection() {
   @answers.individualUserType.map{ individualUserType =>
       @cyaRow(
@@ -58,7 +58,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
       "numberOfProperties"
   )
     @cyaRow(
-        messages(s"multipleDisposalsCountryOfResidence$userKey.title"),
+        messages(s"multipleDisposalsNumberOfProperties.title"),
         Html(answers.numberOfProperties.toString),
         Some(cyaChange(messages("multipleDisposals.triage.cyaChange.numberOfProperties"), routes.MultipleDisposalsTriageController.howManyDisposals().url)),
         "multipleDisposalsNumberOfProperties"
@@ -89,7 +89,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         )
     } else {
         @cyaRow(
-            messages(s"multipleDisposalsWereAllPropertiesResidential$userKey.title"),
+            messages(s"multipleDisposalsWereAllPropertiesResidential.title"),
             Html(messages(s"yesNo.${answers.assetTypes === List(AssetType.Residential)}")),
             Some(cyaChange(messages("multipleDisposals.triage.cyaChange.wereAllPropertiesResidential"), routes.MultipleDisposalsTriageController.wereAllPropertiesResidential().url)),
             "wereAllPropertiesResidential"

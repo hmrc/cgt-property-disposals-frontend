@@ -278,8 +278,11 @@ class CommonTriageQuestionsController @Inject() (
           c => Some(List(c.assetType))
         )
       ) match {
-        case Some(assetTypes) if !hasSupportedAssetType(assetTypes) => Ok(assetTypeNotYetImplementedPage(backLink))
-        case _                                                      => Redirect(redirectToCheckYourAnswers(state))
+        case Some(assetTypes) if !hasSupportedAssetType(assetTypes) =>
+          val isATrust: Boolean = state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
+          Ok(assetTypeNotYetImplementedPage(backLink, isATrust))
+        case _ =>
+          Redirect(redirectToCheckYourAnswers(state))
       }
     }
   }

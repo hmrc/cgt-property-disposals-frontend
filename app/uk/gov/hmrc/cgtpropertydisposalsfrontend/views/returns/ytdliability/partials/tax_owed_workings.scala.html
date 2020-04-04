@@ -22,6 +22,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum,
@@ -35,7 +37,7 @@
         taxYear: TaxYear,
         assetType: AssetType,
         isATrust: Boolean
-)(implicit messages: Messages)
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @taxableIncome = @{ calculatedTax match {
   case _: CalculatedTaxDue.NonGainCalculatedTaxDue => None
@@ -56,6 +58,16 @@
   }
 }
 
+@higherRateDisplay = @{
+  taxDueAtHigherRate match {
+    case Some(t) => s"${t.taxRate}%"
+    case _ => ""
+  }
+}
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKeyWithoutTrust = @{if (isAgent) ".agent" else ""}
+
 @if(calculatedTax.initialGainOrLoss.amount.isNegative |
   calculatedTax.initialGainOrLoss.amount.isZero |
   calculatedTax.taxableGainOrNetLoss.isZero |
@@ -70,12 +82,12 @@
   @if(isATrust) {
     <p>
       <em>
-        @messages("calculator.trustRateInfo.p1")
+        @messages("calculator.trustRateInfo.p1", higherRateDisplay)
       </em>
     </p>
     <p>
       <em>
-      @messages("calculator.trustRateInfo.p2")
+      @messages(s"calculator$userKeyWithoutTrust.trustRateInfo.p2")
       </em>
     </p>
   } else {
@@ -107,7 +119,7 @@
 
         <p>
           <em>
-          @messages("calculator.incomeAboveThreshold", MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.inPounds()))
+          @messages(s"calculator$userKeyWithoutTrust.incomeAboveThreshold", MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.incomeTaxHigherRateThreshold.inPounds()))
           </em>
         </p>
 
