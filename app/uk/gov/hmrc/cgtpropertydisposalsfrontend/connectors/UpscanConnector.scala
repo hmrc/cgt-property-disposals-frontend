@@ -282,15 +282,29 @@ class UpscanConnectorImpl @Inject() (
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] = {
 
-    val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] = Source.apply(form.dataParts.flatMap {
+    implicit val actorSystem       = ActorSystem()
+    implicit val actorMaterializer = ActorMaterializer()
+
+    val parts: immutable.Iterable[MultipartFormData.Part[Source[ByteString, _]]] = form.dataParts.flatMap {
       case (key, values) =>
         values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
-    } ++ form.files)
+    } ++ form.files
 
+    implicit val multipartBodyWriter: BodyWritable[Source[MultipartFormData.Part[Source[ByteString, _]], _]] = {
+      val boundary    = Multipart.randomBoundary()
+      val contentType = s"multipart/form-data; boundary=$boundary"
+      BodyWritable(
+        body => {
+          val byteString = Multipart.transform(body, boundary).runFold(ByteString.empty)(_ ++ _)
+          InMemoryBody(Await.result(byteString, Duration(90, SECONDS)))
+        },
+        contentType
+      )
+    }
     EitherT[Future, Error, Unit](
       wsClient
         .url(href)
-        .post(parts)
+        .post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](Source(parts))(multipartBodyWriter)
         .map { response =>
           response.status match {
             case 204 => Right(())
