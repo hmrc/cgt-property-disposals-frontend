@@ -1279,7 +1279,7 @@ reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
 
 exemptionAndLosses.caption=Losses and exemptions
 
-inYearLosses.title=Do you want to include any other Capital Gains Tax losses you made in tax year {0} to {1}?
+inYearLosses.title=Do you want to include any other Capital Gains Tax losses made in tax year {0} to {1}?
 
 inYearLosses.individual.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
 inYearLosses.agent.helpText=For example, your client would make a loss if they sold a property for less than they paid for it.<br/> Including any other Capital Gains Tax losses your client made in this tax year will reduce their gain. Your client must have made the losses before {0}.
@@ -1341,9 +1341,7 @@ inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can re
 inYearLosses.trust.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 
 
-
-
-previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses you made in previous tax years?
+previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 
 previousYearsLosses.individual.uk.helpText=You can include previous losses in this return to reduce your gain. You can only include other losses made on other UK property sales or disposals that you have already reported to HMRC.
 previousYearsLosses.individual.nonUk.helpText=You can include previous losses that are liable for UK tax in this return. They will reduce your gain. You can only include other losses you have already reported to HMRC.
@@ -1398,21 +1396,10 @@ annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only
 annualExemptAmount.agent.helpText=In the tax year {0} to {1}, your client only has to pay Capital Gains Tax on gains above {3}.
 
 
-annualExemptAmount.trust.details.1.header=What is the Annual Exempt Amount?
-annualExemptAmount.agent.details.1.header=What is the Annual Exempt Amount?
-annualExemptAmount.individual.details.1.header=What is the Annual Exempt Amount?
-
-annualExemptAmount.trust.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
-annualExemptAmount.agent.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
-annualExemptAmount.individual.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
-
-annualExemptAmount.trust.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
-annualExemptAmount.agent.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
-annualExemptAmount.individual.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
-
-annualExemptAmount.trust.details.2.header=Who are vulnerable beneficiaries?
-annualExemptAmount.agent.details.2.header=Who are vulnerable beneficiaries?
-annualExemptAmount.individual.details.2.header=Who are vulnerable beneficiaries?
+annualExemptAmount.details.1.header=What is the Annual Exempt Amount?
+annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
+annualExemptAmount.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
+annualExemptAmount.details.2.header=Who are vulnerable beneficiaries?
 
 annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
 

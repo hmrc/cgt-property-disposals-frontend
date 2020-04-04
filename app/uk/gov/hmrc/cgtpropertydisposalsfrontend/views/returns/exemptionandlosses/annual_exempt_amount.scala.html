@@ -41,18 +41,19 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate, isTrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@baseKey = @{ "annualExemptAmount" }
 @key = @{request.userType match {
     case Some(UserType.Agent) => "annualExemptAmount.agent"
     case Some(UserType.Organisation) => "annualExemptAmount.trust"
     case _ => "annualExemptAmount.individual"
 }}
-@baseKey = @{ "annualExemptAmount" }
+@helpTextKey = @{if(isTrust) s"$baseKey.trust" else key}
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{disposalDate.taxYear}
 @annualExemptAmountString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountGeneral.inPounds()) }
 @annualExemptAmountForVulnerableString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountNonVulnerableTrust.inPounds()) }
-@helpText = @{ Some(Html( messages( s"$key.helpText", taxYear.startDateInclusive.getYear.toString, taxYear.endDateExclusive.getYear.toString, annualExemptAmountForVulnerableString, annualExemptAmountString ) )) }
+@helpText = @{ Some(Html( messages( s"$helpTextKey.helpText", taxYear.startDateInclusive.getYear.toString, taxYear.endDateExclusive.getYear.toString, annualExemptAmountForVulnerableString, annualExemptAmountString ) )) }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -82,8 +83,8 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
         )
 
         @if(isTrust) {
-          @details(messages(s"$key.details.1.header"), Html(messages(s"$key.details.1.body", appConfig.trustsTaxFreeAllowance)))
-          @details(messages(s"$key.details.2.header"),  Html(messages(s"$key.details.2.body", appConfig.trustsForVulnerable)))
+          @details(messages(s"$baseKey.details.1.header"), Html(messages(s"$baseKey.details.1.body", appConfig.trustsTaxFreeAllowance)))
+          @details(messages(s"$baseKey.details.2.header"),  Html(messages(s"$baseKey.details.2.body", appConfig.trustsForVulnerable)))
         } else {
           <p>@Html(messages(s"$baseKey.link", appConfig.annualExemptAmountUrl))</p>
         }
