@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
@@ -114,7 +114,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             helpText = Some(Html(
                 messages(
                     s"$contentKey.helpText",
-                    LocalDateUtils.govDisplayFormat(disposalDate.value)
+                    TimeUtils.govDisplayFormat(disposalDate.value)
                 )
             ))
         )

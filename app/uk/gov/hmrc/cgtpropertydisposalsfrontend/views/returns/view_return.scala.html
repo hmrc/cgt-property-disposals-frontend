@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, ReturnSummary}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteSingleDisposalReturn, CompleteMultipleDisposalsReturn}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
@@ -67,7 +67,7 @@
     @cyaSection() {
         @cyaRow(
             messages(s"$key.sentToHmrc"),
-            Html(LocalDateUtils.govDisplayFormat(returnSummary.submissionDate)),
+            Html(TimeUtils.govDisplayFormat(returnSummary.submissionDate)),
             None,
             "date-sent-table"
         )

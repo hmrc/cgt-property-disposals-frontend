@@ -21,7 +21,7 @@
 
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
@@ -52,7 +52,7 @@
 
         @caption(messages(s"$key.caption"))
 
-        @formWrapper(routes.UploadSupportingEvidenceController.doYouWantToUploadSupportingDocumentsSubmit(), 'novalidate -> "novalidate") {
+        @formWrapper(routes.SupportingEvidenceController.doYouWantToUploadSupportingDocumentsSubmit(), 'novalidate -> "novalidate") {
 
             @yesNo(
                 fieldId = key,

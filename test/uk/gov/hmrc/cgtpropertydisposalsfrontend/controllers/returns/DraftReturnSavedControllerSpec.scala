@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, accounts, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -96,7 +96,7 @@ class DraftReturnSavedControllerSpec
             )(Right(()))
           }
 
-          val formattedDate: String = LocalDateUtils.govDisplayFormat(LocalDateUtils.today().plusDays(29))
+          val formattedDate: String = TimeUtils.govDisplayFormat(TimeUtils.today().plusDays(29))
 
           checkPageIsDisplayed(
             performAction(),
@@ -126,8 +126,8 @@ class DraftReturnSavedControllerSpec
             ),
             journey,
             journey.draftReturn.fold(
-              _.copy(lastUpdatedDate = LocalDateUtils.today()),
-              _.copy(lastUpdatedDate = LocalDateUtils.today())
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today())
             ),
             "draftReturnSaved.warning"
           )
@@ -143,8 +143,8 @@ class DraftReturnSavedControllerSpec
             ),
             journey,
             journey.draftReturn.fold(
-              _.copy(lastUpdatedDate = LocalDateUtils.today()),
-              _.copy(lastUpdatedDate = LocalDateUtils.today())
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today())
             ),
             "draftReturnSaved.trust.warning"
           )
@@ -161,8 +161,8 @@ class DraftReturnSavedControllerSpec
             ),
             journey,
             journey.draftReturn.fold(
-              _.copy(lastUpdatedDate = LocalDateUtils.today()),
-              _.copy(lastUpdatedDate = LocalDateUtils.today())
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today())
             ),
             "draftReturnSaved.agent.warning"
           )
@@ -175,8 +175,8 @@ class DraftReturnSavedControllerSpec
         "there is an error updating the draft return" in {
           val journey = sample[FillingOutReturn]
           val updatedDraftReturn = journey.draftReturn.fold(
-            _.copy(lastUpdatedDate = LocalDateUtils.today()),
-            _.copy(lastUpdatedDate = LocalDateUtils.today())
+            _.copy(lastUpdatedDate = TimeUtils.today()),
+            _.copy(lastUpdatedDate = TimeUtils.today())
           )
 
           inSequence {

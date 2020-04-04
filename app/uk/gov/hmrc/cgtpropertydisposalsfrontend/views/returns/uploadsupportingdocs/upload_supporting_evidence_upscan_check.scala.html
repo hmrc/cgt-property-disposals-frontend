@@ -17,7 +17,7 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateReference
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus._
@@ -68,12 +68,12 @@
                     </dd>
                     @if(fileScanStatus._1._2) {
                       <dd class="cya-change">
-                        <a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(reference.value).url>
+                        <a href=@routes.SupportingEvidenceController.changeSupportingEvidence(reference.value).url>
                           @messages(s"$cyaKey.cya-change") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
                         </a>
                       </dd>
                       <dd class="cya-change">
-                        <a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(reference.value).url>
+                        <a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(reference.value).url>
                           @messages(s"$cyaKey.cya-delete") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
                         </a>
                       </dd>
@@ -82,7 +82,7 @@
           </dl>
 
         @fileScanStatus._2.map(f =>
-          formWrapper(routes.UploadSupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(reference.value), 'novalidate -> "novalidate") {
+          formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(reference.value), 'novalidate -> "novalidate") {
             submitButton(f)
           }
         )

@@ -16,11 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import java.time.LocalDateTime
+
 import play.api.libs.json.{Json, OFormat}
 
 final case class MandatoryEvidence(
   reference: String,
-  fileName: String
+  fileName: String,
+  createdOn: LocalDateTime
 )
 
 object MandatoryEvidence {

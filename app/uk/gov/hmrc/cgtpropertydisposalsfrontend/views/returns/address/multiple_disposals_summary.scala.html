@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -51,7 +51,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
 
     @cyaRow(
         messages(s"multipleDisposalsDisposalDate$userKey.title"),
-        Html(LocalDateUtils.govDisplayFormat(answers.disposalDate.value)),
+        Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
         Some(cyaChange(messages("returns.property-address.cyaChange.disposal-date"), returns.address.routes.PropertyDetailsController.disposalDate().url)),
         "multipleDisposalsDisposalDate"
     )

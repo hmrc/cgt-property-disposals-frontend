@@ -17,9 +17,9 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,7 +29,7 @@
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_evidence_summary
 )
 
-@(answers: CompleteUploadSupportingEvidenceAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteSupportingEvidenceAnswers, maxUploads: Int)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
     @key = @{"upload-supporting-evidence.check-your-answers"}
 
@@ -41,13 +41,13 @@
 
         @summary(answers)
 
-        @if(answers.evidences.size < viewConfig.maxUploads & answers.doYouWantToUploadSupportingEvidence){
+        @if(answers.evidences.size < maxUploads && answers.doYouWantToUploadSupportingEvidence){
           <p class="add-another-file">
-            <a href=@routes.UploadSupportingEvidenceController.uploadSupportingEvidence().url>@messages(s"$key.add-another-file")</a>
+            <a href=@routes.SupportingEvidenceController.uploadSupportingEvidence().url>@messages(s"$key.add-another-file")</a>
           </p>
         }
 
-        @formWrapper(routes.UploadSupportingEvidenceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+        @formWrapper(routes.SupportingEvidenceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
 
             @submitButton(messages("button.confirmAndContinue"))
 

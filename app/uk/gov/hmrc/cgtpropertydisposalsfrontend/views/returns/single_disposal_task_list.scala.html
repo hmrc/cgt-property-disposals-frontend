@@ -46,7 +46,7 @@
 @propertyAddressState = @{draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete)}
 @disposalDetailsState = @{draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
 @acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
-@uploadSupportingDocsState = @{draftReturn.uploadSupportingDocuments.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
+@uploadSupportingDocsState = @{draftReturn.supportingEvidenceAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
 
 @canSeeInitialGainOrLoss = @{
 
@@ -194,7 +194,7 @@
             </li>
 
             <li id="uploadSupportingDocs" class="app-task-list__item">
-                @taskLink(messages("task-list.upload-supporting-docs.link"), returns.uploadsupportingdocs.routes.UploadSupportingEvidenceController.checkYourAnswers().url, uploadSupportingDocsState)
+                @taskLink(messages("task-list.upload-supporting-docs.link"), returns.supportingdocs.routes.SupportingEvidenceController.checkYourAnswers().url, uploadSupportingDocsState)
             </li>
 
             <li id="checkAndSendReturn" class="app-task-list__item">

@@ -17,9 +17,9 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.SupportingEvidence
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.SupportingEvidence
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -60,8 +60,8 @@
                     <dd class="cya-answer" id="answer-@{fileIndex}">
                         @document.fileName
                     </dd>
-                    <dd class="cya-change"><a href=@routes.UploadSupportingEvidenceController.changeSupportingEvidence(document.reference).url>@messages(s"$cyaKey.cya-change")<span class="visuallyhidden"> @messages(s"$cyaKey.assistive", document.fileName)</span></a></dd>
-                    <dd class="cya-change cya-extra-action"><a href=@routes.UploadSupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$cyaKey.cya-delete")<span class="visuallyhidden"> @messages(s"$cyaKey.assistive", document.fileName)</span></a></dd>
+                    <dd class="cya-change"><a href=@routes.SupportingEvidenceController.changeSupportingEvidence(document.reference).url>@messages(s"$cyaKey.cya-change")<span class="visuallyhidden"> @messages(s"$cyaKey.assistive", document.fileName)</span></a></dd>
+                    <dd class="cya-change cya-extra-action"><a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$cyaKey.cya-delete")<span class="visuallyhidden"> @messages(s"$cyaKey.assistive", document.fileName)</span></a></dd>
                 </div>
 
             }

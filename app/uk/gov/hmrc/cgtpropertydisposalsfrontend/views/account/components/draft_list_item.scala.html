@@ -17,7 +17,7 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
 @this()
@@ -42,7 +42,7 @@
   <div class="grid-row">
     <div id="draftReturn-@key" class="column-three-quarters submission-summary">
       <span id="draftReturnLastUpdatedDate-@key" class="caption">
-        @messages("drafts.list.lastUpdated", LocalDateUtils.govShortDisplayFormat(draftReturn.lastUpdatedDate))
+        @messages("drafts.list.lastUpdated", TimeUtils.govShortDisplayFormat(draftReturn.lastUpdatedDate))
       </span>
       @completionDate.map(f => {
           <h4>
@@ -51,11 +51,11 @@
               _.examplePropertyDetailsAnswers.flatMap(
                   _.fold(_.address, c => Some(c.address))
               ).fold(
-                  LocalDateUtils.govShortDisplayFormat(f))(
+                  TimeUtils.govShortDisplayFormat(f))(
                   a => s"${a.line1}, ${a.postcode.value}"
               ),
             _.propertyAddress.fold(
-                LocalDateUtils.govShortDisplayFormat(f))(
+                TimeUtils.govShortDisplayFormat(f))(
                 a => s"${a.line1}, ${a.postcode.value}"
             )
           )
@@ -67,7 +67,7 @@
       @dueDate.map(f => {
         <h4>
           <span class="caption">{messages("drafts.list.sendAndPayBy")}</span>
-          {LocalDateUtils.govShortDisplayFormat(f)}
+          {TimeUtils.govShortDisplayFormat(f)}
         </h4>
       })
     </div>

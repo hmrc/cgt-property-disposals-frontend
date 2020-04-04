@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
@@ -142,7 +142,7 @@ class SingleDisposalsTriageController @Inject() (
                       reliefDetailsAnswers       = None,
                       exemptionAndLossesAnswers  = None,
                       yearToDateLiabilityAnswers = None,
-                      uploadSupportingDocuments  = None
+                      supportingEvidenceAnswers  = None
                     )
                   )
               }
@@ -208,7 +208,7 @@ class SingleDisposalsTriageController @Inject() (
                     reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                     exemptionAndLossesAnswers  = None,
                     yearToDateLiabilityAnswers = None,
-                    uploadSupportingDocuments  = None
+                    supportingEvidenceAnswers  = None
                   )
                 )
             }
@@ -290,7 +290,7 @@ class SingleDisposalsTriageController @Inject() (
     displayTriagePage(
       _.fold(_.assetType, c => Some(c.assetType)),
       answers => disposalDateBackLink(answers)
-    )(_ => disposalDateForm(LocalDateUtils.today()))(
+    )(_ => disposalDateForm(TimeUtils.today()))(
       extractField =
         _.fold(i => i.disposalDate.map(_.value).orElse(i.tooEarlyDisposalDate), c => Some(c.disposalDate.value)),
       page = { (journeyStatus, currentAnswers, form, isDraftReturn, assetType) =>
@@ -314,7 +314,7 @@ class SingleDisposalsTriageController @Inject() (
       triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
         case None => Redirect(disposalDateBackLink(triageAnswers))
         case Some(assetType) =>
-          disposalDateForm(LocalDateUtils.today())
+          disposalDateForm(TimeUtils.today())
             .bindFromRequest()
             .fold(
               formWithErrors =>
@@ -388,7 +388,7 @@ class SingleDisposalsTriageController @Inject() (
       initialGainOrLoss          = None,
       reliefDetailsAnswers       = currentDraftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
       yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
-      uploadSupportingDocuments  = None
+      supportingEvidenceAnswers  = None
     )
 
   private def updateDisposalDate(
@@ -425,7 +425,7 @@ class SingleDisposalsTriageController @Inject() (
     displayTriagePage(
       _.fold(_.disposalDate, c => Some(c.disposalDate)),
       _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
-    )(disposalDate => completionDateForm(disposalDate, LocalDateUtils.today()))(
+    )(disposalDate => completionDateForm(disposalDate, TimeUtils.today()))(
       extractField = _.fold(_.completionDate, c => Some(c.completionDate)),
       page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
         val isATrust = journeyStatus
@@ -445,7 +445,7 @@ class SingleDisposalsTriageController @Inject() (
     handleTriagePageSubmit(
       _.fold(_.disposalDate, c => Some(c.disposalDate)),
       _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
-    )(disposalDate => completionDateForm(disposalDate, LocalDateUtils.today()))(
+    )(disposalDate => completionDateForm(disposalDate, TimeUtils.today()))(
       page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
         val isATrust = journeyStatus
           .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
@@ -607,7 +607,7 @@ class SingleDisposalsTriageController @Inject() (
                       initialGainOrLoss          = None,
                       reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
-                      uploadSupportingDocuments  = None
+                      supportingEvidenceAnswers  = None
                     )
                   )
               }
@@ -942,7 +942,7 @@ object SingleDisposalsTriageController {
     Form(
       mapping(
         "" -> of(
-          LocalDateUtils.dateFormatter(
+          TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
             None,
             "disposalDate-day",
@@ -957,7 +957,7 @@ object SingleDisposalsTriageController {
   def completionDateForm(disposalDate: DisposalDate, maximumDateInclusive: LocalDate): Form[CompletionDate] = Form(
     mapping(
       "" -> of(
-        LocalDateUtils.dateFormatter(
+        TimeUtils.dateFormatter(
           Some(maximumDateInclusive),
           Some(disposalDate.value),
           "completionDate-day",

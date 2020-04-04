@@ -23,7 +23,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -50,8 +50,8 @@ class DraftReturnSavedController @Inject() (
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(FillingOutReturn(subscribedDetails, _, agentReferenceNumber, draftReturn)) => {
         val draftReturnWithLastUpdated = draftReturn.fold(
-          _.copy(lastUpdatedDate = LocalDateUtils.today()),
-          _.copy(lastUpdatedDate = LocalDateUtils.today())
+          _.copy(lastUpdatedDate = TimeUtils.today()),
+          _.copy(lastUpdatedDate = TimeUtils.today())
         )
 
         val response = returnsService

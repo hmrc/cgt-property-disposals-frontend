@@ -22,10 +22,10 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateReference
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingEvidenceController.FileUpload
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.FileUpload
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -57,7 +57,7 @@
 
         @caption(messages(s"$key.caption"))
 
-        @formWrapper(action = routes.UploadSupportingEvidenceController.uploadSupportingEvidenceSubmit(), 'enctype -> "multipart/form-data") {
+        @formWrapper(action = routes.SupportingEvidenceController.uploadSupportingEvidenceSubmit(), 'enctype -> "multipart/form-data") {
             @fileInput(
                fieldId = field,
                ref = Some(reference.value),

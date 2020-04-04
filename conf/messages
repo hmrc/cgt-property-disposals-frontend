@@ -1661,6 +1661,11 @@ calculator.noTaxToPay=No tax is due for this return
 mandatoryEvidence.title=Upload a document showing how the Capital gains Tax due was worked out
 mandatoryEvidence.helpText=Files can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 7 days.
 
+mandatoryEvidenceExpired.title=Your uploaded file has expired
+mandatoryEvidenceExpired.p1=Uploaded files can only be kept for 7 days before they expire. You must either upload the file again or replace it with another before you can continue.
+mandatoryEvidenceExpired.label=Supporting file
+mandatoryEvidenceExpired.cyaChange=the file or upload it again
+
 ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
 ytdLiability.cyaChange.mandatoryEvidence=your supporting file

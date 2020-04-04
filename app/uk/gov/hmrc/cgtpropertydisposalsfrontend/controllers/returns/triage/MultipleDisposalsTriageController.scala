@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, SessionData, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -235,7 +235,7 @@ class MultipleDisposalsTriageController @Inject() (
                         .unset(_.acquisitionPrice)
                     ),
                     yearToDateLiabilityAnswers = None,
-                    uploadSupportingDocuments  = None
+                    supportingEvidenceAnswers  = None
                   )
               )
               updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
@@ -419,7 +419,7 @@ class MultipleDisposalsTriageController @Inject() (
 
                 val result =
                   for {
-                    taxYear <- if (taxYearAfter6April2020) taxYearService.taxYear(LocalDateUtils.today())
+                    taxYear <- if (taxYearAfter6April2020) taxYearService.taxYear(TimeUtils.today())
                               else EitherT.pure[Future, Error](None)
                     updatedAnswers <- EitherT.fromEither[Future](
                                        updateTaxYearToAnswers(taxYearAfter6April2020, taxYear, answers)
@@ -520,7 +520,7 @@ class MultipleDisposalsTriageController @Inject() (
                     d.copy(
                       examplePropertyDetailsAnswers = None,
                       yearToDateLiabilityAnswers    = None,
-                      uploadSupportingDocuments     = None
+                      supportingEvidenceAnswers     = None
                     )
                 )
                 updateStateAndThen(newState, Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
@@ -532,7 +532,7 @@ class MultipleDisposalsTriageController @Inject() (
   def completionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
       val completionDate = answers.fold(_.completionDate, c => Some(c.completionDate))
-      val today          = LocalDateUtils.today()
+      val today          = TimeUtils.today()
       val form           = completionDate.fold(completionDateForm(today))(completionDateForm(today).fill)
       val backLink = answers.fold(
         _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
@@ -544,7 +544,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   def completionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
-      completionDateForm(LocalDateUtils.today())
+      completionDateForm(TimeUtils.today())
         .bindFromRequest()
         .fold(
           { formWithErrors =>
@@ -904,7 +904,7 @@ object MultipleDisposalsTriageController {
   def completionDateForm(maximumDateInclusive: LocalDate): Form[CompletionDate] = Form(
     mapping(
       "" -> of(
-        LocalDateUtils.dateFormatter(
+        TimeUtils.dateFormatter(
           Some(maximumDateInclusive),
           None,
           "multipleDisposalsCompletionDate-day",

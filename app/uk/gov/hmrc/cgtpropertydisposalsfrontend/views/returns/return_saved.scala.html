@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
@@ -42,7 +42,7 @@ warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 
   @pageHeading(title)
 
-  @warning(messages(warningMessageKey, LocalDateUtils.govDisplayFormat(draftReturn.lastUpdatedDate.plusDays(29))))
+  @warning(messages(warningMessageKey, TimeUtils.govDisplayFormat(draftReturn.lastUpdatedDate.plusDays(29))))
 
   <p>
     @messages("draftReturnSaved.p1")

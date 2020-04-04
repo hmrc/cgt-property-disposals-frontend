@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 
@@ -36,7 +36,7 @@
   <div class="grid-row">
     <div class="column-three-quarters submission-summary">
       <span id="sentDate-@sentReturn.submissionId" class="caption">
-        @messages("returns.list.sentDate", LocalDateUtils.govShortDisplayFormat(sentReturn.submissionDate))
+        @messages("returns.list.sentDate", TimeUtils.govShortDisplayFormat(sentReturn.submissionDate))
       </span>
       <h4>
         @sentReturn.propertyAddress.line1, @sentReturn.propertyAddress.postcode.value
@@ -62,7 +62,7 @@
           <h5>
             <span class="caption">@messages(if(numberOfOutstandingCharges > 1) "returns.list.nextPaymentDue" else "returns.list.paymentDue")</span>
             <strong id="paymentDue-@sentReturn.submissionId" class="bold">
-              @paymentDueDate.map(LocalDateUtils.govShortDisplayFormat(_))
+              @paymentDueDate.map(TimeUtils.govShortDisplayFormat(_))
             </strong>
           </h5>
         }

@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingEvidenceAnswers.CompleteUploadSupportingEvidenceAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 
@@ -43,7 +43,7 @@ object CompleteReturn {
     examplePropertyDetailsAnswers: CompleteExamplePropertyDetailsAnswers,
     exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
     yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
-    uploadSupportingDocumentAnswers: CompleteUploadSupportingEvidenceAnswers
+    supportingDocumentAnswers: CompleteSupportingEvidenceAnswers
   ) extends CompleteReturn
 
   object CompleteMultipleDisposalsReturn {
@@ -56,7 +56,7 @@ object CompleteReturn {
             Some(p: CompleteExamplePropertyDetailsAnswers),
             Some(e: CompleteExemptionAndLossesAnswers),
             Some(y: CompleteNonCalculatedYTDAnswers),
-            Some(u: CompleteUploadSupportingEvidenceAnswers),
+            Some(u: CompleteSupportingEvidenceAnswers),
             _
             ) =>
           Some(CompleteMultipleDisposalsReturn(t, p, e, y, u))
@@ -76,7 +76,7 @@ object CompleteReturn {
     reliefDetails: CompleteReliefDetailsAnswers,
     exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
     yearToDateLiabilityAnswers: Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers],
-    uploadSupportingDocumentAnswers: CompleteUploadSupportingEvidenceAnswers,
+    supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     initialGainOrLoss: Option[AmountInPence]
   ) extends CompleteReturn
 
@@ -94,7 +94,7 @@ object CompleteReturn {
             Some(e: CompleteExemptionAndLossesAnswers),
             Some(y: CompleteCalculatedYTDAnswers),
             i,
-            Some(u: CompleteUploadSupportingEvidenceAnswers),
+            Some(u: CompleteSupportingEvidenceAnswers),
             _
             ) =>
           Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Right(y), u, i))
@@ -109,7 +109,7 @@ object CompleteReturn {
             Some(e: CompleteExemptionAndLossesAnswers),
             Some(y: CompleteNonCalculatedYTDAnswers),
             i,
-            Some(u: CompleteUploadSupportingEvidenceAnswers),
+            Some(u: CompleteSupportingEvidenceAnswers),
             _
             ) =>
           Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Left(y), u, i))
@@ -137,7 +137,7 @@ object CompleteReturn {
     implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]             = Json.format
     implicit val nonCalculatedYearToDateLiabilityFormat: OFormat[CompleteNonCalculatedYTDAnswers] = Json.format
     implicit val calculatedYearToDateLiabilityFormat: OFormat[CompleteCalculatedYTDAnswers]       = Json.format
-    implicit val uploadSupportingDocuments: OFormat[CompleteUploadSupportingEvidenceAnswers]      = Json.format
+    implicit val supportingDocumentsFormat: OFormat[CompleteSupportingEvidenceAnswers]            = Json.format
     derived.oformat()
   }
 

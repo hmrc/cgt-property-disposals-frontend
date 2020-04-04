@@ -24,7 +24,7 @@ import configs.Configs
 import configs.syntax._
 import play.api.Configuration
 import play.api.http.HeaderNames.USER_AGENT
-import play.api.libs.json.{JsError, JsSuccess, Json, OFormat}
+import play.api.libs.json.{Json, OFormat}
 import play.api.libs.ws.{BodyWritable, InMemoryBody, WSClient}
 import play.api.mvc.MultipartFormData
 import play.core.formatters.Multipart
@@ -45,20 +45,15 @@ import scala.util.control.NonFatal
 
 final case class UpscanInitiateRequest(
   callbackUrl: String,
-  minimumFileSize: Int,
   maximumFileSize: Long
 )
 
-final object UpscanInitiateRequest {
+object UpscanInitiateRequest {
   implicit val format: OFormat[UpscanInitiateRequest] = Json.format[UpscanInitiateRequest]
 }
 
 @ImplementedBy(classOf[UpscanConnectorImpl])
 trait UpscanConnector {
-
-  def getUpscanSnapshot(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, UpscanSnapshot]
 
   def initiate(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
@@ -80,18 +75,8 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
-  def removeFile(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit]
-
-  def removeAllFiles(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit]
-
-  def getAll(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, List[UpscanFileDescriptor]]
 }
+
 @Singleton
 class UpscanConnectorImpl @Inject() (
   http: HttpClient,
@@ -109,7 +94,7 @@ class UpscanConnectorImpl @Inject() (
       .get[A](s"microservice.services.upscan-initiate.$key")
       .value
 
-  private val url: String = {
+  private val upscanInitiateUrl: String = {
     val protocol = getUpscanInitiateConfig[String]("protocol")
     val host     = getUpscanInitiateConfig[String]("host")
     val port     = getUpscanInitiateConfig[String]("port")
@@ -120,69 +105,18 @@ class UpscanConnectorImpl @Inject() (
 
   val selfBaseUrl: String = config.underlying.get[String]("self.url").value
 
-  private val minFileSize: Int  = getUpscanInitiateConfig[Int]("min-file-size")
   private val maxFileSize: Long = getUpscanInitiateConfig[Long]("max-file-size")
-
-  override def getUpscanSnapshot(
-    draftReturnId: DraftReturnId
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanSnapshot] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-snapshot-info/draft-return-id/${draftReturnId.value}"
-    EitherT[Future, Error, UpscanSnapshot](
-      http
-        .get(url)
-        .map { httpResponse =>
-          Json.fromJson[UpscanSnapshot](httpResponse.json) match {
-            case JsSuccess(upscanSnapshot, _) => Right(upscanSnapshot)
-            case JsError(errors)              => Left(Error(s"failed to get upscan snapshot: $errors"))
-          }
-        }
-        .recover {
-          case NonFatal(e) => Left(Error(e))
-        }
-    )
-  }
-
-  override def removeFile(
-    draftReturnId: DraftReturnId,
-    upscanInitiateReference: UpscanInitiateReference
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
-    val url =
-      baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/draft-return-id/${draftReturnId.value}/upscan-reference/${upscanInitiateReference.value}"
-    EitherT[Future, Error, Unit](
-      http
-        .get(url)
-        .map(_ => Right(()))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
-        }
-    )
-  }
-
-  override def removeAllFiles(
-    draftReturnId: DraftReturnId
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/delete-all-files/${draftReturnId.value}"
-    EitherT[Future, Error, Unit](
-      http
-        .get(url)
-        .map(_ => Right(()))
-        .recover {
-          case NonFatal(e) => Left(Error(e))
-        }
-    )
-  }
 
   override def initiate(draftReturnId: DraftReturnId)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val payload = UpscanInitiateRequest(
       baseUrl + s"/cgt-property-disposals/upscan-call-back/draft-return-id/${draftReturnId.value}",
-      minFileSize,
       maxFileSize
     )
     EitherT[Future, Error, HttpResponse](
       http
-        .post[UpscanInitiateRequest](url, payload, Map(USER_AGENT -> "cgt-property-disposals-frontend"))
+        .post[UpscanInitiateRequest](upscanInitiateUrl, payload, Map(USER_AGENT -> "cgt-property-disposals-frontend"))
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {
             Left(Error("S3 did not return 200 status code"))
@@ -225,30 +159,6 @@ class UpscanConnectorImpl @Inject() (
         .map { httpResponse =>
           httpResponse.status match {
             case Status.OK => Right(Json.fromJson[UpscanFileDescriptor](httpResponse.json).asOpt)
-            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
-              Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
-          }
-        }
-        .recover {
-          case NonFatal(e) => Left(Error(e))
-        }
-    )
-  }
-
-  override def getAll(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, List[UpscanFileDescriptor]] = {
-    val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor/all/${draftReturnId.value}"
-    EitherT[Future, Error, List[UpscanFileDescriptor]](
-      http
-        .get(url)
-        .map { httpResponse =>
-          httpResponse.status match {
-            case Status.OK =>
-              Right(Json.fromJson[List[UpscanFileDescriptor]](httpResponse.json).asOpt match {
-                case Some(fd) => fd
-                case None     => List()
-              })
             case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
               Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
           }

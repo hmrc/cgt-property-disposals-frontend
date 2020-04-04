@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -103,7 +103,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   )
   @cyaRow(
     messages("multipleDisposalsCompletionDate.title"),
-    Html(LocalDateUtils.govDisplayFormat(answers.completionDate.value)),
+    Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
     Some(cyaChange(messages("multipleDisposals.triage.cyaChange.completionDate"), routes.MultipleDisposalsTriageController.completionDate().url)),
       "completionDate"
   )

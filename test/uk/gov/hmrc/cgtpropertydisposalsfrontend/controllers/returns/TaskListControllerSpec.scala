@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
@@ -60,7 +60,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
@@ -84,6 +84,25 @@ class TaskListControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
+  def removeEvidence(u: SupportingEvidenceAnswers): SupportingEvidenceAnswers =
+    u.fold(
+      _.copy(evidences = List.empty),
+      _.copy(evidences = List.empty)
+    )
+
+  def removeEvidence(y: YearToDateLiabilityAnswers): YearToDateLiabilityAnswers = y match {
+    case c: CalculatedYTDAnswers =>
+      c.fold(
+        _.copy(mandatoryEvidence = None),
+        _.copy(mandatoryEvidence = None)
+      )
+    case n: NonCalculatedYTDAnswers =>
+      n.fold(
+        _.copy(mandatoryEvidence = None),
+        _.copy(mandatoryEvidence = sample[MandatoryEvidence].copy(createdOn = TimeUtils.now()))
+      )
+  }
+
   "TaskListController" when {
 
     "handling requests to display the single disposal task list page" must {
@@ -104,7 +123,12 @@ class TaskListControllerSpec
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => ()
       ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+          draftReturn.copy(
+            supportingEvidenceAnswers  = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
+          )
+        )
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -136,7 +160,12 @@ class TaskListControllerSpec
       def testSectionNonExistent(draftReturn: DraftSingleDisposalReturn)(
         sectionLinkId: String
       ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+          draftReturn.copy(
+            supportingEvidenceAnswers  = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
+          )
+        )
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -718,7 +747,7 @@ class TaskListControllerSpec
           )("initialGainOrLoss")
         }
 
-        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2015 for RESIDANTAL property" in {
+        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2015 for RESIDENTIAL property" in {
           testSectionNonExistent(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
@@ -740,7 +769,14 @@ class TaskListControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
-                journeyStatus = Some(sample[FillingOutReturn].copy(draftReturn = sample[DraftSingleDisposalReturn]))
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(draftReturn =
+                    sample[DraftSingleDisposalReturn].copy(
+                      supportingEvidenceAnswers  = None,
+                      yearToDateLiabilityAnswers = None
+                    )
+                  )
+                )
               )
             )
           }
@@ -776,7 +812,12 @@ class TaskListControllerSpec
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => ()
       ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+          draftReturn.copy(
+            supportingEvidenceAnswers  = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
+          )
+        )
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -954,7 +995,7 @@ class TaskListControllerSpec
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
             yearToDateLiabilityAnswers    = Some(sample[CompleteCalculatedYTDAnswers]),
-            uploadSupportingDocuments     = Some(sample[UploadSupportingEvidenceAnswers])
+            supportingEvidenceAnswers     = Some(sample[SupportingEvidenceAnswers])
           )
 
           testStateOfSection(

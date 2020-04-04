@@ -21,7 +21,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
 sentReturnItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.return_list_item,
@@ -45,7 +45,7 @@ sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.c
       r -> r.charges
            .filter(_.totalOutstanding() > AmountInPence.zero)
            .map(_.dueDate)
-           .sortWith(LocalDateUtils.order.compare(_, _) < 0)
+           .sortWith(TimeUtils.order.compare(_, _) < 0)
            .headOption
   )
  }

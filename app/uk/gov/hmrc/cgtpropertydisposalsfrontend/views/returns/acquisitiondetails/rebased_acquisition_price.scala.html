@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
@@ -46,7 +46,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @key = @{ "rebaseAcquisitionPrice" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-@rebaseCutOffDateDisplayString = @{LocalDateUtils.govDisplayFormat(rebaseCutOffDate)}
+@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate)}
 @title = @{messages(s"$key.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -78,7 +78,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
         @details(messages(s"$key.dropdown.header"),
         Html(s"""|
-        |<p> ${messages(s"$key$userKey.dropdown.p1", LocalDateUtils.govDisplayFormat(rebaseCutOffDate))} </p>
+        |<p> ${messages(s"$key$userKey.dropdown.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))} </p>
         |<p> ${messages(s"$key$userKey.dropdown.p2")} </p>
         |<p> ${messages(s"$key.dropdown.p3")} </p>
         |<p> ${Html(messages(s"$key.dropdown.p4", appConfig.marketValue))} </p>

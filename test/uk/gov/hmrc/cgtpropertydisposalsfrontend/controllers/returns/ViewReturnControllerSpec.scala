@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiond
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.govShortDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
@@ -47,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -200,7 +200,7 @@ class ViewReturnControllerSpec
             val document = Jsoup.parse(contentAsString(result))
 
             document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
-            document.select("#date-sent-table-answer").text() shouldBe LocalDateUtils.govDisplayFormat(
+            document.select("#date-sent-table-answer").text() shouldBe TimeUtils.govDisplayFormat(
               sentReturn.submissionDate
             )
             document.select("#property-address-table-question").text() shouldBe "Property address"
@@ -257,7 +257,7 @@ class ViewReturnControllerSpec
             val document = Jsoup.parse(contentAsString(result))
 
             document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
-            document.select("#date-sent-table-answer").text() shouldBe LocalDateUtils.govDisplayFormat(
+            document.select("#date-sent-table-answer").text() shouldBe TimeUtils.govDisplayFormat(
               sentReturn.submissionDate
             )
             val address = generateAddressLineForMultipleDisposals(completeMultipleDisposalsReturn)

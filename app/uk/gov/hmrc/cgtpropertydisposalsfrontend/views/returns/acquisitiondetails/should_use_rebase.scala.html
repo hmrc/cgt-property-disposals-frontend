@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -42,7 +42,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 
 @(form: Form[Boolean], backLink: Call, rebaseCutOffDate: LocalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "shouldUseRebase" }
-@rebaseCutOffDateDisplayString = @{LocalDateUtils.govDisplayFormat(rebaseCutOffDate)}
+@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate)}
 @title = @{messages(s"$key.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 

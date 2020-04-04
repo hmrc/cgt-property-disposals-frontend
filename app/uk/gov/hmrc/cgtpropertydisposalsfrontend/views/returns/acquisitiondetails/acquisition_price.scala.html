@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
@@ -48,7 +48,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @titleWithHelpTextAndContext = @{acquisitionMethod match {
   case AcquisitionMethod.Bought => (messages(s"${key}Bought$userKey.title"), Html(messages(s"${key}Bought$userKey.helpText")), s"acquisitionPriceBought$userKey")
-  case _ => (messages(s"${key}NotBought$userKey.title", LocalDateUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought$userKey.helpText")), s"acquisitionPriceNotBought$userKey")
+  case _ => (messages(s"${key}NotBought$userKey.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought$userKey.helpText")), s"acquisitionPriceNotBought$userKey")
 }}
 
 @mainTemplate(title = titleWithHelpTextAndContext._1, userType = request.userType, hasErrors = hasErrors) {

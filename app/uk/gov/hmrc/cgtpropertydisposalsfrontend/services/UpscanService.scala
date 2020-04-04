@@ -21,10 +21,7 @@ import java.time.LocalDateTime
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Singleton}
-import configs.Configs
-import configs.syntax._
 import javax.inject.Inject
-import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
@@ -34,8 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[UpscanServiceImpl])
 trait UpscanService {
@@ -51,40 +47,14 @@ trait UpscanService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
-  def removeFile(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit]
-
-  def removeAllFiles(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit]
-
-  def getAll(draftReturnId: DraftReturnId)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, List[UpscanFileDescriptor]]
-
 }
 
 @Singleton
 class UpscanServiceImpl @Inject() (
-  upscanConnector: UpscanConnector,
-  configuration: Configuration
-) extends UpscanService
+  upscanConnector: UpscanConnector
+)(implicit ec: ExecutionContext)
+    extends UpscanService
     with Logging {
-
-  private def getUpscanInitiateConfig[A: Configs](key: String): A =
-    configuration.underlying
-      .get[A](s"microservice.services.upscan-initiate.$key")
-      .value
-
-  private val maxUploads: Int = getUpscanInitiateConfig[Int]("max-uploads")
-
-  private def hasReachedMaxFileUpload(upscanSnapshot: UpscanSnapshot): Either[Error, Unit] =
-    if (upscanSnapshot.fileUploadCount >= maxUploads) {
-      Left(Error(MaxUploads))
-    } else {
-      Right(())
-    }
 
   private def augmentUpscanInitiateResponse(
     draftReturnId: DraftReturnId,
@@ -109,8 +79,6 @@ class UpscanServiceImpl @Inject() (
     timestamp: LocalDateTime
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanInitiateSuccess] =
     for {
-      snapshot     <- upscanConnector.getUpscanSnapshot(draftReturnId)
-      _            <- EitherT.fromEither(hasReachedMaxFileUpload(snapshot))
       httpResponse <- upscanConnector.initiate(draftReturnId)
       upscanInitiateRawResponse <- EitherT.fromOption(
                                     httpResponse.json.validate[UpscanInitiateRawResponse].asOpt,
@@ -136,18 +104,5 @@ class UpscanServiceImpl @Inject() (
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] =
     upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor)
-
-  override def removeFile(draftReturnId: DraftReturnId, upscanInitiateReference: UpscanInitiateReference)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit] =
-    upscanConnector.removeFile(draftReturnId, upscanInitiateReference)
-
-  override def removeAllFiles(draftReturnId: DraftReturnId)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    upscanConnector.removeAllFiles(draftReturnId)
-
-  override def getAll(
-    draftReturnId: DraftReturnId
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[UpscanFileDescriptor]] =
-    upscanConnector.getAll(draftReturnId)
 
 }

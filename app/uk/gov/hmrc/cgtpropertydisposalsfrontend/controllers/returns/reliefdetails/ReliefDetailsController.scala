@@ -325,7 +325,7 @@ class ReliefDetailsController @Inject() (
                 reliefDetailsAnswers       = Some(updatedReliefDetailsAnswers),
                 exemptionAndLossesAnswers  = None,
                 yearToDateLiabilityAnswers = None,
-                uploadSupportingDocuments  = None
+                supportingEvidenceAnswers  = None
               )
             else
               draftReturn.copy(

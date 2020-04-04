@@ -22,7 +22,7 @@ import java.util.UUID
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
@@ -41,7 +41,7 @@ final case class DraftSingleDisposalReturn(
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   initialGainOrLoss: Option[AmountInPence],
-  uploadSupportingDocuments: Option[UploadSupportingEvidenceAnswers],
+  supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -50,7 +50,7 @@ object DraftSingleDisposalReturn {
   implicit val eq: Eq[DraftSingleDisposalReturn] = Eq.fromUniversalEquals[DraftSingleDisposalReturn]
 
   def newDraftReturn(id: UUID, triageAnswers: SingleDisposalTriageAnswers): DraftSingleDisposalReturn =
-    DraftSingleDisposalReturn(id, triageAnswers, None, None, None, None, None, None, None, None, LocalDateUtils.today())
+    DraftSingleDisposalReturn(id, triageAnswers, None, None, None, None, None, None, None, None, TimeUtils.today())
 
 }
 
@@ -60,14 +60,14 @@ final case class DraftMultipleDisposalsReturn(
   examplePropertyDetailsAnswers: Option[ExamplePropertyDetailsAnswers],
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
-  uploadSupportingDocuments: Option[UploadSupportingEvidenceAnswers],
+  supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
 object DraftMultipleDisposalsReturn {
 
   def newDraftReturn(id: UUID, triageAnswers: MultipleDisposalsTriageAnswers): DraftMultipleDisposalsReturn =
-    DraftMultipleDisposalsReturn(id, triageAnswers, None, None, None, None, LocalDateUtils.today())
+    DraftMultipleDisposalsReturn(id, triageAnswers, None, None, None, None, TimeUtils.today())
 
 }
 
