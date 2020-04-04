@@ -57,7 +57,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$key$userKey"))
     }
 
     @caption(messages("ytdLiability.caption"))
@@ -75,7 +75,8 @@
             inputClass = Some("small"),
             aspect = "left",
             unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
+            assistiveText = messages("unit-input.assistive.pounds"),
+            customErrorKey = Some(s"$key$userKey")
         )
 
         <p>@Html(messages(s"$key.link", viewConfig.personalAllowanceUrl))</p>

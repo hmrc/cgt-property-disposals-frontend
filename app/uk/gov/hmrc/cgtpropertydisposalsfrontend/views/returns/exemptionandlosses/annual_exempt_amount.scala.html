@@ -52,9 +52,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @taxYear = @{disposalDate.taxYear}
 @annualExemptAmountString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountGeneral.inPounds()) }
 @annualExemptAmountForVulnerableString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountNonVulnerableTrust.inPounds()) }
-
-@individualHelpText = @{ Some(Html( messages( s"$key.helpText", taxYear.startDateInclusive.getYear.toString, taxYear.endDateExclusive.getYear.toString, annualExemptAmountString ) )) }
-@trustHelpText = @{ Some(Html( messages( s"$key.helpText", taxYear.startDateInclusive.getYear.toString, taxYear.endDateExclusive.getYear.toString, annualExemptAmountForVulnerableString, annualExemptAmountString ) )) }
+@helpText = @{ Some(Html( messages( s"$key.helpText", taxYear.startDateInclusive.getYear.toString, taxYear.endDateExclusive.getYear.toString, annualExemptAmountForVulnerableString, annualExemptAmountString ) )) }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -74,19 +72,20 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             hasErrors =  form.error(baseKey).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = if(isTrust) trustHelpText else individualHelpText,
+            helpText = helpText,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
             unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
+            assistiveText = messages("unit-input.assistive.pounds"),
+            customErrorKey = Some(key)
         )
 
         @if(isTrust) {
           @details(messages(s"$key.details.1.header"), Html(messages(s"$key.details.1.body", appConfig.trustsTaxFreeAllowance)))
           @details(messages(s"$key.details.2.header"),  Html(messages(s"$key.details.2.body", appConfig.trustsForVulnerable)))
         } else {
-          <p>@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>
+          <p>@Html(messages(s"$baseKey.link", appConfig.annualExemptAmountUrl))</p>
         }
 
         @submitButton(messages("button.saveAndContinue"))
