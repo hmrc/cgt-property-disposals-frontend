@@ -127,6 +127,8 @@ class CheckAllAnswersAndSubmitControllerSpec
       "the user is on a single disposal journey" must {
 
         val completeReturn = sample[CompleteSingleDisposalReturn]
+        val hasAttachments =
+          completeReturn.uploadSupportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
 
         val completeDraftReturn = DraftSingleDisposalReturn(
           UUID.randomUUID(),
@@ -142,7 +144,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           TimeUtils.today()
         )
 
-        val completeFillingOutReturn = sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+        val completeFillingOutReturn =
+          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction, {
@@ -166,7 +169,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               messageFromMessageKey(expectedTitleKey), { doc =>
                 validateSingleDisposalCheckAllYourAnswersSections(
                   doc,
-                  completeReturn,
+                  completeReturn.copy(hasAttachments = hasAttachments),
                   userType,
                   rebasingEligibilityUtil.isUk(completeReturn),
                   rebasingEligibilityUtil.isEligibleForRebase(completeReturn),
@@ -204,7 +207,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "the user is on a multiple disposals journey" must {
 
-        val completeReturn = sample[CompleteMultipleDisposalsReturn]
+        val completeReturn = sample[CompleteMultipleDisposalsReturn].copy(hasAttachments = true)
 
         val completeDraftReturn = DraftMultipleDisposalsReturn(
           UUID.randomUUID(),
@@ -281,6 +284,8 @@ class CheckAllAnswersAndSubmitControllerSpec
       def performAction(): Future[Result] = controller.checkAllAnswersSubmit()(FakeRequest())
 
       val completeReturn = sample[CompleteSingleDisposalReturn]
+      val hasAttachments =
+        completeReturn.uploadSupportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
 
       val completeDraftReturn = DraftSingleDisposalReturn(
         UUID.randomUUID(),

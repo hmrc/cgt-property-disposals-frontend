@@ -1753,6 +1753,8 @@ viewReturn.propertyAddress=Property address
 
 
 viewReturn.summaryHeading=Your return
+viewReturn.hasAttachments=Uploaded files and documents
+viewReturn.hasAttachments.p1=One or more documents uploaded
 
 multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
 multiple-disposals.guidance.agent.title=Your client sold or disposed of 2 or more properties

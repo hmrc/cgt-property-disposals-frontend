@@ -29,7 +29,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteCalculatedYTDAnswers, disposalDate: DisposalDate)(implicit messages: Messages)
+@(answers: CompleteCalculatedYTDAnswers, disposalDate: DisposalDate, showFiles: Boolean)(implicit messages: Messages)
 @taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
 
@@ -60,12 +60,15 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityController.taxDue().url)),
         "taxDue-value"
     )
-    @answers.mandatoryEvidence.map { mandatoryEvidence =>
+    @if(showFiles) {
+      @answers.mandatoryEvidence.map { mandatoryEvidence =>
         @cyaRow(
-            messages("ytdLiability.cyaLabel.mandatoryEvidence"),
-            Html(mandatoryEvidence.fileName),
-            Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
-            "mandatoryEvidence-value"
+          messages("ytdLiability.cyaLabel.mandatoryEvidence"),
+          Html(mandatoryEvidence.fileName),
+          Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+          "mandatoryEvidence-value"
         )
+      }
     }
+
 }

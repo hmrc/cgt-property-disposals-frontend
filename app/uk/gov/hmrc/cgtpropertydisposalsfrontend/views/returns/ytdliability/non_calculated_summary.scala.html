@@ -30,7 +30,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteNonCalculatedYTDAnswers)(implicit messages: Messages)
+@(answers: CompleteNonCalculatedYTDAnswers, showFiles: Boolean)(implicit messages: Messages)
 
 @taxableGainOrLossLabelWithAmount = @{
     if(answers.taxableGainOrLoss > AmountInPence.zero)
@@ -72,11 +72,13 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         Some(cyaChange(messages("ytdLiability.cyaChange.nonCalculatedTaxDue"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
         "nonCalculatedTaxDue-value"
     )
-
+  @if(showFiles) {
     @cyaRow(
-        messages("ytdLiability.cyaLabel.mandatoryEvidence"),
-        Html(answers.mandatoryEvidence.fileName),
-        Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
-        "mandatoryEvidence-value"
+      messages("ytdLiability.cyaLabel.mandatoryEvidence"),
+      Html(answers.mandatoryEvidence.fileName),
+      Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+      "mandatoryEvidence-value"
     )
+  }
+
 }
