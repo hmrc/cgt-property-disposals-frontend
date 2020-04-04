@@ -62,9 +62,9 @@ class TaskListController @Inject() (
     with SessionUpdates
     with Logging {
 
-  private val upscanStoreExpirySeconds: Long =
+  private val s3UrlExpirySeconds: Long =
     configuration.underlying
-      .get[FiniteDuration]("microservice.services.upscan-initiate.upscan-store-expiry-time")
+      .get[FiniteDuration]("microservice.services.upscan-initiate.s3-url-expiry-duration")
       .value
       .toSeconds
 
@@ -183,7 +183,7 @@ class TaskListController @Inject() (
       }
 
   private def fileHasExpired(createdOnTimestamp: LocalDateTime): Boolean = {
-    val p = createdOnTimestamp.plusSeconds(upscanStoreExpirySeconds)
+    val p = createdOnTimestamp.plusSeconds(s3UrlExpirySeconds)
     println(s"Got p=$p,  now ${TimeUtils.now()}\n\n")
     p.isBefore(TimeUtils.now())
   }
