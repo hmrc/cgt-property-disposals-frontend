@@ -43,7 +43,8 @@ object CompleteReturn {
     examplePropertyDetailsAnswers: CompleteExamplePropertyDetailsAnswers,
     exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
     yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
-    supportingDocumentAnswers: CompleteSupportingEvidenceAnswers
+    supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
+    hasAttachments: Boolean
   ) extends CompleteReturn
 
   object CompleteMultipleDisposalsReturn {
@@ -59,7 +60,7 @@ object CompleteReturn {
             Some(u: CompleteSupportingEvidenceAnswers),
             _
             ) =>
-          Some(CompleteMultipleDisposalsReturn(t, p, e, y, u))
+          Some(CompleteMultipleDisposalsReturn(t, p, e, y, u, hasAttachments = true))
 
         case _ =>
           None
@@ -77,7 +78,8 @@ object CompleteReturn {
     exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
     yearToDateLiabilityAnswers: Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers],
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
-    initialGainOrLoss: Option[AmountInPence]
+    initialGainOrLoss: Option[AmountInPence],
+    hasAttachments: Boolean
   ) extends CompleteReturn
 
   object CompleteSingleDisposalReturn {
@@ -97,7 +99,8 @@ object CompleteReturn {
             Some(u: CompleteSupportingEvidenceAnswers),
             _
             ) =>
-          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Right(y), u, i))
+          val hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
+          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Right(y), u, i, hasAttachments))
 
         case DraftSingleDisposalReturn(
             _,
@@ -112,7 +115,7 @@ object CompleteReturn {
             Some(u: CompleteSupportingEvidenceAnswers),
             _
             ) =>
-          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Left(y), u, i))
+          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Left(y), u, i, hasAttachments = true))
 
         case _ =>
           None

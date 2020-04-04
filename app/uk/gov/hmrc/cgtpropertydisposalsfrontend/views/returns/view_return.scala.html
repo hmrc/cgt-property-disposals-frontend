@@ -127,9 +127,13 @@
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @s.yearToDateLiabilityAnswers.fold(
-              nonCalculatedYearToDateLiabilitySummary(_),
-              calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate)
+              nonCalculatedYearToDateLiabilitySummary(_, showFiles = false),
+              calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = false)
           )
+
+          @if(s.hasAttachments) {
+
+          }
       }
 
       case m: CompleteMultipleDisposalsReturn => {
@@ -143,7 +147,12 @@
           @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-          @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers)
+          @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = false)
+
+          @if(m.hasAttachments) {
+            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
+            <p>@messages(s"$key.hasAttachments.p1")</p>
+          }
       }
   }
 
