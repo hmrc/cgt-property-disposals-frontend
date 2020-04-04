@@ -32,7 +32,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, ExemptionAndLossesAnswers}
@@ -102,12 +101,12 @@ class ExemptionAndLossesController @Inject() (
   private def withWasAUkResident(draftReturn: DraftReturn)(f: Boolean => Future[Result]): Future[Result] = {
     val wasUk = draftReturn.fold(
       _.triageAnswers.fold(
-        _.fold(_.wasAUKResident, c => Some(c.countryOfResidence === Country.uk)),
-        c => Some(c.countryOfResidence === Country.uk)
+        _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+        c => Some(c.countryOfResidence.isUk())
       ),
       _.triageAnswers.fold(
         _.wasAUKResident,
-        c => Some(c.countryOfResidence === Country.uk)
+        c => Some(c.countryOfResidence.isUk())
       )
     )
 

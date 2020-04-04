@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
@@ -25,7 +23,6 @@ import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.json.{JsString, Json}
 import play.api.libs.ws.ahc.AhcWSResponse
 import play.api.libs.ws.ahc.cache.{CacheableHttpResponseBodyPart, CacheableHttpResponseHeaders, CacheableHttpResponseStatus}
-import play.api.mvc.MultipartFormData
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
 import play.shaded.ahc.io.netty.handler.codec.http.DefaultHttpHeaders
@@ -42,22 +39,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
 class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
-
-  private def buildWsResponse(status: Int) =
-    new AhcWSResponse(
-      new Response.ResponseBuilder()
-        .accumulate(
-          new CacheableHttpResponseStatus(
-            Uri.create("https://bucketname.s3.eu-west-2.amazonaws.com"),
-            status,
-            "status text",
-            "protocols!"
-          )
-        )
-        .accumulate(new CacheableHttpResponseHeaders(false, new DefaultHttpHeaders().add("My-Header", "value")))
-        .accumulate(new CacheableHttpResponseBodyPart("error body".getBytes(), true))
-        .build()
-    )
 
   val config = Configuration(
     ConfigFactory.parseString(
