@@ -24,7 +24,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
-import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT}
+import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.json.{JsError, JsSuccess, Json, OFormat}
 import play.api.libs.ws.{BodyWritable, InMemoryBody, WSClient}
 import play.api.mvc.MultipartFormData
@@ -38,7 +38,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import play.api.http.HeaderNames.CONTENT_TYPE
 
 import scala.collection.immutable
 import scala.concurrent.duration.{Duration, SECONDS}
