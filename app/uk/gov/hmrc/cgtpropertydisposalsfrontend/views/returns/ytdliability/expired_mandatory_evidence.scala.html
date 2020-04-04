@@ -15,30 +15,48 @@
  *@
 
 @import play.api.i18n.Messages
-
+@import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MandatoryEvidence
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(expired : MandatoryEvidence)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@title = @{ "Uh oh!" }
+@key = @{ "mandatoryEvidenceExpired" }
+@title = @{ s"$key.title" }
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @caption(messages("ytdLiability.caption"))
+  @caption(messages("ytdLiability.caption"))
 
-    @pageHeading(title)
+  @pageHeading(title)
 
-    <p>Oh no! Looks like your thing has expired: @expired</p>
+  <p>
+  @messages(s"$key.p1")
+  </p>
 
-  <a href="@routes.YearToDateLiabilityController.uploadMandatoryEvidence().url">Upload a new file here</a>
+  @cyaSection(None, Some("cya-questions-short")) {
+
+    @cyaRow(
+      messages(s"$key.label"),
+      Html(expired.toString),
+      Some(cyaChange(
+        messages(s"$key.cyaChange"),
+        routes.YearToDateLiabilityController.uploadMandatoryEvidence().url
+      )),
+      key
+    )
+
+  }
 
 }
