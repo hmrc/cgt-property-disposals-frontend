@@ -30,7 +30,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary
 )
 
-@(answers: CompleteNonCalculatedYTDAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteNonCalculatedYTDAnswers, isMultiple: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("ytdLiability.cya.title")}
@@ -39,7 +39,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliabilit
 
  @pageHeading(title, Some(messages("ytdLiability.caption")))
 
- @summary(answers, showFiles = true)
+ @summary(answers, showFiles = true, isMultiple)
 
  @formWrapper(routes.YearToDateLiabilityController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))

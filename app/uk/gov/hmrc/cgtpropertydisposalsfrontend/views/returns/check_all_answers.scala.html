@@ -49,7 +49,6 @@
 
 @title = @{ messages("checkAllAnswers.title") }
 
-
 @mainTemplate(title = title, userType = request.userType) {
 
  @backLinkComponent(routes.TaskListController.taskList())
@@ -88,7 +87,7 @@
 
      <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
      @s.yearToDateLiabilityAnswers.fold(
-      nonCalculatedYearToDateLiabilitySummary(_, showFiles = true),
+      nonCalculatedYearToDateLiabilitySummary(_, showFiles = true, isMultiple = false),
       calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = true)
      )
 
@@ -108,7 +107,7 @@
        @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, isATrust)
 
        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-       @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true)
+       @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true)
 
        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
         @uploadSummary(m.supportingDocumentAnswers)

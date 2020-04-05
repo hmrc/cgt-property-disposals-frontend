@@ -2360,7 +2360,7 @@ class YearToDateLiabilityControllerSpec
             checkPageIsDisplayed(
               result,
               messageFromMessageKey("ytdLiability.cya.title"),
-              doc => validateNonCalculatedYearToDateLiabilityPage(completeAnswers, doc)
+              doc => validateNonCalculatedYearToDateLiabilityPage(completeAnswers, doc, Some(UserType.Individual))
             )
 
           "the user has just answered all the questions in the section and all updates are successful" in {
@@ -3499,15 +3499,21 @@ object YearToDateLiabilityControllerSpec extends Matchers {
 
   def validateNonCalculatedYearToDateLiabilityPage(
     answers: CompleteNonCalculatedYTDAnswers,
-    doc: Document
+    doc: Document,
+    userType: Option[UserType]
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    val userKey = userType match {
+      case Some(UserType.Agent)        => ".agent"
+      case Some(UserType.Organisation) => ".trust"
+      case _                           => ""
+    }
     if (answers.taxableGainOrLoss < AmountInPence.zero) {
-      doc.select("#taxableGainOrLossAnswer-answer").text shouldBe messages("taxableGainOrLoss.loss.label")
+      doc.select("#taxableGainOrLossAnswer-answer").text shouldBe messages(s"taxableGainOrLoss$userKey.loss.label")
       doc.select("#taxableGainOrLossAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
         answers.taxableGainOrLoss.inPounds().abs
       )
     } else if (answers.taxableGainOrLoss > AmountInPence.zero) {
-      doc.select("#taxableGainOrLossAnswer-answer").text shouldBe messages("taxableGainOrLoss.gain.label")
+      doc.select("#taxableGainOrLossAnswer-answer").text shouldBe messages(s"taxableGainOrLoss$userKey.gain.label")
       doc.select("#taxableGainOrLossAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
         answers.taxableGainOrLoss.inPounds()
       )
