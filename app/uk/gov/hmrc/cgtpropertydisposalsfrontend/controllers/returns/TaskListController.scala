@@ -113,9 +113,9 @@ class TaskListController @Inject() (
       case (expired, answers) =>
         answers match {
           case c: CalculatedYTDAnswers =>
-            c.unset(_.mandatoryEvidence).unset(_.upscanSuccessful).copy(expiredEvidence = Some(expired))
+            c.unset(_.mandatoryEvidence).unset(_.pendingUpscanUpload).copy(expiredEvidence = Some(expired))
           case n: NonCalculatedYTDAnswers =>
-            n.unset(_.mandatoryEvidence).unset(_.upscanSuccessful).copy(expiredEvidence = Some(expired))
+            n.unset(_.mandatoryEvidence).unset(_.pendingUpscanUpload).copy(expiredEvidence = Some(expired))
         }
     }
 
@@ -178,7 +178,7 @@ class TaskListController @Inject() (
         }
 
         mandatoryEvidence
-          .filter(m => fileHasExpired(m.createdOn))
+          .filter(m => fileHasExpired(m.uploadedOn))
           .map(_ -> answers)
       }
 

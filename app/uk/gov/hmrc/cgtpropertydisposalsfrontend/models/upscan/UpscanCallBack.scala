@@ -44,6 +44,18 @@ object UpscanCallBack {
     implicit val format = Json.format[UpscanFailure]
   }
 
+  implicit class UpscanCallBackOps(private val u: UpscanCallBack) extends AnyVal {
+
+    private def getFileName(data: Map[String, String], ref: => String): String =
+      data.getOrElse("fileName", sys.error(s"Could not find filename for reference $ref"))
+
+    def fileName: String = u match {
+      case f: UpscanFailure => getFileName(f.failureDetails, f.reference)
+      case s: UpscanSuccess => getFileName(s.uploadDetails, s.reference)
+    }
+
+  }
+
   implicit val format: OFormat[UpscanCallBack] = derived.oformat()
 
 }

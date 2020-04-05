@@ -21,6 +21,7 @@ import monocle.Lens
 import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
 
 sealed trait YearToDateLiabilityAnswers extends Product with Serializable
 
@@ -40,7 +41,7 @@ object YearToDateLiabilityAnswers {
       taxDue: Option[AmountInPence],
       mandatoryEvidence: Option[MandatoryEvidence],
       expiredEvidence: Option[MandatoryEvidence],
-      upscanSuccessful: Option[Boolean]
+      pendingUpscanUpload: Option[UpscanUpload]
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
@@ -98,7 +99,7 @@ object YearToDateLiabilityAnswers {
       taxDue: Option[AmountInPence],
       mandatoryEvidence: Option[MandatoryEvidence],
       expiredEvidence: Option[MandatoryEvidence],
-      upscanSuccessful: Option[Boolean]
+      pendingUpscanUpload: Option[UpscanUpload]
     ) extends CalculatedYTDAnswers
 
     object IncompleteCalculatedYTDAnswers {
@@ -162,7 +163,7 @@ object YearToDateLiabilityAnswers {
               .unset(_.taxDue)
               .unset(_.mandatoryEvidence)
               .unset(_.expiredEvidence)
-              .unset(_.upscanSuccessful)
+              .unset(_.pendingUpscanUpload)
           )
         case _: NonCalculatedYTDAnswers => None
       }

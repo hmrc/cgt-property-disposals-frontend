@@ -17,4 +17,4 @@ GET    /supporting-documents/check-your-answers                             uk.g
 POST   /supporting-documents/check-your-answers                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.checkYourAnswersSubmit()
 
 
-GET    /supporting-evidence/file-upload-error                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.uploadSupportingEvidenceError()
+GET    /supporting-evidence/document-did-not-upload                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.uploadSupportingEvidenceError()

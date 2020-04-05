@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MandatoryEvidence
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.UpscanFailure
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -36,7 +36,7 @@
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(mandatoryEvidence: MandatoryEvidence, hasFailed: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(failed: Option[UpscanFailure])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"mandatoryEvidence.check-upscan-status"}
 @title = @{messages(s"$key.title")}
@@ -47,15 +47,15 @@
 
     @pageHeading(title)
 
-    <p>@messages(if(hasFailed) s"$key.failed.help-text" else s"$key.in-progress.help-text" )</p>
+    <p>@messages(failed.fold(s"$key.in-progress.help-text")(_ => s"$key.failed.help-text"))</p>
 
     <dl class="govuk-check-your-answers cya-questions-long">
         <div>
             <dt class="cya-question" id="status-filename">
-            @mandatoryEvidence.fileName
+            dunno
             </dt>
             <dd class="cya-answer">
-                <p>@messages(if(hasFailed) s"$key.failed" else s"$key.in-progress" )</p>
+                <p>@messages(failed.fold(s"$key.in-progress")(_ => s"$key.failed"))</p>
             </dd>
             <dd class="cya-change">
                 <a href=@routes.YearToDateLiabilityController.uploadMandatoryEvidence().url>
@@ -66,7 +66,7 @@
         </div>
     </dl>
 
-    @if(!hasFailed){
+    @if(failed.isEmpty){
         @formWrapper(routes.YearToDateLiabilityController.scanningMandatoryEvidenceSubmit(), 'novalidate -> "novalidate") {
             @submitButton(messages(s"$key.button"))
         }
