@@ -16,14 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability
 
-import java.nio.file.Files.readAllBytes
-
-import akka.stream.scaladsl.{FileIO, Source}
-import akka.util.ByteString
 import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
@@ -31,7 +26,6 @@ import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText, of}
 import play.api.http.Writeable
-import play.api.libs.Files
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
@@ -44,7 +38,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.Inn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
@@ -55,8 +48,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanCallBack, UpscanUpload}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData, TimeUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanUpload, UpscanUploadStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
@@ -1119,6 +1112,13 @@ class YearToDateLiabilityController @Inject() (
         ): Future[Result] = {
           val result = for {
             newUpscanUpload <- upscanService.getUpscanUpload(pendingUpscanUpload.uploadReference)
+            _ <- if (newUpscanUpload.upscanUploadStatus === UpscanUploadStatus.Uploaded)
+                  EitherT.pure[Future, Error](())
+                else
+                  upscanService.updateUpscanUpload(
+                    newUpscanUpload.uploadReference,
+                    newUpscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded)
+                  )
             _ <- newUpscanUpload.upscanCallBack match {
                   case None => EitherT.pure[Future, Error](())
                   case Some(callback) =>
@@ -1131,21 +1131,24 @@ class YearToDateLiabilityController @Inject() (
               logger.warn("Error while trying to get and handle an upscan status", e)
               errorHandler.errorResult()
             },
-            upscanUpload =>
-              upscanUpload.upscanCallBack match {
-                case None                        => Ok(mandatoryEvidenceCheckUpscanPage(None))
-                case Some(failed: UpscanFailure) => Ok(mandatoryEvidenceCheckUpscanPage(Some(failed)))
-                case Some(_: UpscanSuccess)      => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-              }
+            upscanUpload => handleUpscanCallback(upscanUpload.upscanCallBack)
           )
+        }
+
+        def handleUpscanCallback(upscanCallBack: Option[UpscanCallBack]): Result = upscanCallBack match {
+          case None                        => Ok(mandatoryEvidenceCheckUpscanPage(None))
+          case Some(failed: UpscanFailure) => Ok(mandatoryEvidenceCheckUpscanPage(Some(failed)))
+          case Some(_: UpscanSuccess)      => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
 
         answers match {
           case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
-            checkAndHandleUpscanStatus(pendingUpscanUpload, Left(n))
+            if (pendingUpscanUpload.upscanCallBack.nonEmpty) handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
+            else checkAndHandleUpscanStatus(pendingUpscanUpload, Left(n))
 
           case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
-            checkAndHandleUpscanStatus(pendingUpscanUpload, Right(c))
+            if (pendingUpscanUpload.upscanCallBack.nonEmpty) handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
+            else checkAndHandleUpscanStatus(pendingUpscanUpload, Right(c))
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())

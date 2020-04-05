@@ -49,27 +49,24 @@
 
     <p>@messages(failed.fold(s"$key.in-progress.help-text")(_ => s"$key.failed.help-text"))</p>
 
-    <dl class="govuk-check-your-answers cya-questions-long">
-        <div>
-            <dt class="cya-question" id="status-filename">
-            dunno
-            </dt>
-            <dd class="cya-answer">
-                <p>@messages(failed.fold(s"$key.in-progress")(_ => s"$key.failed"))</p>
-            </dd>
-            <dd class="cya-change">
-                <a href=@routes.YearToDateLiabilityController.uploadMandatoryEvidence().url>
-                    @messages(s"$key.cya-change")
-                    <span class="visuallyhidden"> @messages(s"$key.cya.assistive")</span>
-                </a>
-            </dd>
-        </div>
-    </dl>
+  @failed match {
+    case None => {
+        @formWrapper(routes.YearToDateLiabilityController.scanningMandatoryEvidenceSubmit(), 'novalidate -> "novalidate") {
+            @submitButton(messages(s"$key.button.checkStatusAndContinue"))
+        }
+    }
+
+    case Some(fail) => {
+        @formWrapper(routes.YearToDateLiabilityController.uploadMandatoryEvidence(), 'novalidate -> "novalidate") {
+            @submitButton(messages(s"$key.button.uploadAnotherFile"))
+        }
+    }
+  }
+
+
 
     @if(failed.isEmpty){
-        @formWrapper(routes.YearToDateLiabilityController.scanningMandatoryEvidenceSubmit(), 'novalidate -> "novalidate") {
-            @submitButton(messages(s"$key.button"))
-        }
+
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
