@@ -1787,7 +1787,7 @@ drafts.list.resume=Complete return
 
 multipleDisposalsNumberOfProperties.title=How many disposals are you including in this return?
 multipleDisposalsNumberOfProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
-multipleDisposalsNumberOfProperties.p2=If you sold shares enter the number of companies you held the shares in. You must have sold all the shares on the same date.
+multipleDisposalsNumberOfProperties.p2=If you are reporting the sale of shares enter the number of companies the shares were held in. All of the shares must have been sold on the same date.
 multipleDisposalsNumberOfProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
 multipleDisposalsNumberOfProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
 multipleDisposalsNumberOfProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
@@ -1801,7 +1801,7 @@ multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 99
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange‘ dates?
-multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
+multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
 multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
@@ -1944,6 +1944,11 @@ multipleDisposals.triage.cyaChange.completionDate=the completion date for all th
 
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
+nonCalculatedTaxDue.error.required=Enter the amount of Capital Gains Tax due for this return
+nonCalculatedTaxDue.error.tooSmall=The amount of Capital Gains Tax due must be 0 or more
+nonCalculatedTaxDue.error.tooLarge=The amount of Capital Gains Tax due must be an amount of money 50,000,000,000 or less
+nonCalculatedTaxDue.error.invalid=The amount of Capital Gains Tax due must be an amount of money, like 493 or 2,040.59
+nonCalculatedTaxDue.error.tooManyDecimals=The amount of Capital Gains Tax due must be an amount of money with pence as 2 decimal places or less, like 493 or 2,040.59
 
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
