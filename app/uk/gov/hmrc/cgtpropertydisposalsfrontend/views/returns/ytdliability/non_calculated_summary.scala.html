@@ -22,6 +22,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -30,13 +32,21 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteNonCalculatedYTDAnswers, showFiles: Boolean)(implicit messages: Messages)
+@(answers: CompleteNonCalculatedYTDAnswers, showFiles: Boolean, isMultiple: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
+
+@userKey = @{request.userType match {
+  case Some(UserType.Agent) => ".agent"
+  case Some(UserType.Organisation) => ".trust"
+  case _ => ""
+}}
+
+@multipleKey = @{if(isMultiple) ".multiple" else ""}
 
 @taxableGainOrLossLabelWithAmount = @{
     if(answers.taxableGainOrLoss > AmountInPence.zero)
-        "taxableGainOrLoss.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds()))
+        s"taxableGainOrLoss$userKey.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds()))
     else if(answers.taxableGainOrLoss < AmountInPence.zero)
-        "taxableGainOrLoss.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds() * -1))
+        s"taxableGainOrLoss$userKey.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds() * -1))
     else
         "taxableGainOrLoss.noLossOrGain.label" -> None
 }
@@ -44,7 +54,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
 
 @cyaSection() {
     @cyaRow(
-    messages("taxableGainOrLoss.title"),
+    messages(s"taxableGainOrLoss$userKey$multipleKey.title"),
     Html(messages(taxableGainOrLossLabelWithAmount._1)),
     Some(cyaChange(messages("ytdLiability.cyaChange.taxableGainOrLoss"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
     "taxableGainOrLossAnswer"

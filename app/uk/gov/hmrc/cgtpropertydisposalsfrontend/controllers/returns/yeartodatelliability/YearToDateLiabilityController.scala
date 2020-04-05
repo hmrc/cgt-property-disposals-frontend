@@ -1407,11 +1407,28 @@ class YearToDateLiabilityController @Inject() (
             logger.warn("Cold not store complete year to date liability answers", e)
             errorHandler.errorResult()
           },
-          _ => Ok(nonCalculatedCheckYourAnswersPage(completeAnswers))
+          _ =>
+            Ok(
+              nonCalculatedCheckYourAnswersPage(
+                completeAnswers,
+                fillingOutReturn.draftReturn match {
+                  case _: DraftMultipleDisposalsReturn => true
+                  case _: DraftSingleDisposalReturn    => false
+                }
+              )
+            )
         )
 
       case c: CompleteNonCalculatedYTDAnswers =>
-        Ok(nonCalculatedCheckYourAnswersPage(c))
+        Ok(
+          nonCalculatedCheckYourAnswersPage(
+            c,
+            fillingOutReturn.draftReturn match {
+              case _: DraftMultipleDisposalsReturn => true
+              case _: DraftSingleDisposalReturn    => false
+            }
+          )
+        )
 
     }
 
