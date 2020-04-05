@@ -826,7 +826,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
     )
 
     completeReturn.yearToDateLiabilityAnswers.fold(
-      validateNonCalculatedYearToDateLiabilityPage(_, doc),
+      validateNonCalculatedYearToDateLiabilityPage(_, doc, userType),
       validateCalculatedYearToDateLiabilityPage(_, doc)
     )
   }
@@ -854,7 +854,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
       isATrust
     )
 
-    validateNonCalculatedYearToDateLiabilityPage(completeReturn.yearToDateLiabilityAnswers, doc)
+    validateNonCalculatedYearToDateLiabilityPage(completeReturn.yearToDateLiabilityAnswers, doc, userType)
   }
 
 }
