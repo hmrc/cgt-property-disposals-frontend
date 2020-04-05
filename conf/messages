@@ -59,7 +59,7 @@ landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property 
 landingPage.howTo.p2=If you’re a resident or representing a trust, you can use this service to:
 landingPage.howTo.list1.bullet1=report the disposal of UK residential property or land made from 6 April 2020
 landingPage.howTo.list1.bullet2=pay any tax you might owe for that disposal
-landingPage.howTo.list1.bullet3=view and amend your previous and current returns
+landingPage.howTo.list1.bullet3=view your previous and current returns
 
 landingPage.howTo.p3=If you’re a non-resident you must use this service to report sales or disposals from 6 April 2020 of:
 landingPage.howTo.list2.bullet1=residential UK property or land
@@ -1685,7 +1685,7 @@ confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due by
 confirmationOfSubmission.printPage=Print or save this page as a PDF
 confirmationOfSubmission.whatNext=What you need to do next
-confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may get a penalty if your payment is late.
+confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
 confirmationOfSubmission.howToPay=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
@@ -1845,9 +1845,9 @@ disposalDateMixedUseOrIndirect.trust.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
 disposalDateMixedUseOrIndirect.agent.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 disposalDateMixedUseOrIndirect.trust.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
-disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may get a penalty if your payment is late.
-disposalDateMixedUseOrIndirect.agent.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. Your client may get a penalty if your payment is late.
-disposalDateMixedUseOrIndirect.trust.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may get a penalty if your payment is late.
+disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may be charged interest on late payments.
+disposalDateMixedUseOrIndirect.agent.p3=Your client has 30 days from the date of completion to report their disposal and pay any tax due. They may be charged interest on late payments.
+disposalDateMixedUseOrIndirect.trust.p3=You have 30 days from the date of completion to report the disposal and pay any tax due. You may be charged interest on late payments.
 
 
 initialGainOrLoss.title=Did you make an initial gain or loss?
@@ -2013,7 +2013,7 @@ submitReturnError.p2=You’ll need to:
 submitReturnError.li1=Go to your Capital Gains Tax on UK property account home.
 submitReturnError.li2=If your return is in ‘Sent returns’ it has been received by HMRC. You do not need to send it again.
 submitReturnError.li3=If it is ‘Draft returns’ it has not been received by HMRC. You’ll need to try and send it again.
-submitReturnError.p3=You may get a penalty and have to pay interest if your return or payment is late.
+submitReturnError.p3=You may be charged interest on late payments.
 submitReturnError.button=Go to account home
 
 hasValidPostcode.singleDisposal.title=Does the property have a UK postcode?
@@ -2101,7 +2101,7 @@ accessibilityStatement.p1=This accessibility statement explains how accessible t
 accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href="{0}">accessibility statement</a> for the main GOV.UK website.
 accessibilityStatement.p3=This page only contains information about the Report and pay Capital Gains Tax on UK property service, available at {0}.
 accessibilityStatement.usingThisService.title=Using this service
-accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view and amend your previous and current returns.
+accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view your previous and current returns.
 accessibilityStatement.usingThisService.p2=This service is run by HM Revenue and Customs (HMRC).
 accessibilityStatement.usingThisService.p3=We want as many people as possible to be able to use this service. This means you should be able to:
 accessibilityStatement.usingThisService.li1=change colours, contrast levels and fonts
