@@ -25,6 +25,7 @@ import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.{UpscanConnectorImpl, UpscanInitiateRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}

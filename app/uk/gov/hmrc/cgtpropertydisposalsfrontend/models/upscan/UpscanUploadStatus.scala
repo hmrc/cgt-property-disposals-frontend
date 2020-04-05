@@ -16,22 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json._
+import cats.Eq
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 
-final case class UploadRequest(
-  href: String,
-  fields: Map[String, String]
-)
+sealed trait UpscanUploadStatus
 
-object UploadRequest {
-  implicit val format = Json.format[UploadRequest]
-}
+object UpscanUploadStatus {
+  case object Initiated extends UpscanUploadStatus
+  case object Uploaded extends UpscanUploadStatus
 
-final case class FileDescriptor(
-  reference: String,
-  uploadRequest: UploadRequest
-)
-
-object FileDescriptor {
-  implicit val format = Json.format[FileDescriptor]
+  implicit val eq: Eq[UpscanUploadStatus]          = Eq.fromUniversalEquals
+  implicit val format: OFormat[UpscanUploadStatus] = derived.oformat()
 }

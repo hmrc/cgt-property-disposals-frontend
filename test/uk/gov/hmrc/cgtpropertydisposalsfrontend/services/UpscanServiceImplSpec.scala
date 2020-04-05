@@ -23,13 +23,14 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, DraftReturnId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.READY_TO_UPLOAD
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInitiateSuccess
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanServiceImpl
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future

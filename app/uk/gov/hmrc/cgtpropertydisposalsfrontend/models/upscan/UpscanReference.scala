@@ -16,34 +16,22 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
+import play.api.mvc.PathBindable
 
-sealed trait UpscanCallBack extends Product with Serializable
+final case class UpscanReference(value: String) extends AnyVal
 
-object UpscanCallBack {
+object UpscanReference {
+  implicit val binder: PathBindable[UpscanReference] =
+    new PathBindable[UpscanReference] {
+      val stringBinder: PathBindable[String] = implicitly[PathBindable[String]]
 
-  final case class UpscanSuccess(
-    reference: String,
-    fileStatus: String,
-    downloadUrl: String,
-    uploadDetails: Map[String, String]
-  ) extends UpscanCallBack
+      override def bind(key: String, value: String): Either[String, UpscanReference] =
+        stringBinder.bind(key, value).map(UpscanReference.apply)
 
-  object UpscanSuccess {
-    implicit val format = Json.format[UpscanSuccess]
-  }
+      override def unbind(key: String, value: UpscanReference): String =
+        stringBinder.unbind(key, value.value)
+    }
 
-  final case class UpscanFailure(
-    reference: String,
-    fileStatus: String,
-    failureDetails: Map[String, String]
-  ) extends UpscanCallBack
-
-  object UpscanFailure {
-    implicit val format = Json.format[UpscanFailure]
-  }
-
-  implicit val format: OFormat[UpscanCallBack] = derived.oformat()
-
+  implicit val format: OFormat[UpscanReference] = Json.format[UpscanReference]
 }
