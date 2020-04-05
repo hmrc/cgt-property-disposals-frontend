@@ -42,8 +42,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUploadStatus.Uploaded
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanCallBack, UpscanReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, SessionData, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -75,7 +75,10 @@ class SupportingEvidenceController @Inject() (
   changeSupportingEvidencePage: pages.change_upload_supporting_evidence,
   expiredSupportingEvidencePage: expired_supporting_evidence,
   checkYourAnswersPage: pages.check_your_answers,
-  uploadSupportingEvidenceWithoutCallBackStatus: pages.upload_supporting_evidence_without_call_back_status
+  uploadSupportingEvidenceCallBackNotReceived: pages.upload_supporting_evidence_call_back_not_received,
+  uploadSupportingEvidenceCallBackReceived: pages.upload_supporting_evidence_call_back_received,
+  uploadSupportingEvidenceCallBackSuccess: pages.upload_supporting_evidence_call_back_success,
+  uploadSupportingEvidenceCallBackFailed: pages.upload_supporting_evidence_call_back_failed
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -320,38 +323,31 @@ class SupportingEvidenceController @Inject() (
             logger.warn(s"could not update the status of upscan upload to uploaded : $e")
             errorHandler.errorResult()
           },
-          s => Ok(uploadSupportingEvidenceWithoutCallBackStatus(s))
+          upscanUpload =>
+            upscanUpload.upscanCallBack match {
+              case Some(callBacResult) =>
+                callBacResult match {
+                  case UpscanCallBack.UpscanSuccess(_, _, _, uploadDetails) => {
+                    Ok(
+                      uploadSupportingEvidenceCallBackSuccess(
+                        uploadReference.value,
+                        uploadDetails.getOrElse("fileName", "could not get file name")
+                      )
+                    )
+                  }
+                  case UpscanCallBack.UpscanFailure(_, _, failureDetails) =>
+                    Ok(
+                      uploadSupportingEvidenceCallBackFailed(
+                        uploadReference.value,
+                        failureDetails.getOrElse("fileName", "could not get file name")
+                      )
+                    )
+                }
+              case None => {
+                Ok(uploadSupportingEvidenceCallBackNotReceived(upscanUpload))
+              }
+            }
         )
-//        upscanService.getUpscanUpload(uploadReference).value.map {
-//          case Left(error) => {
-//            logger.warn(s"could not get upscan upload : $error")
-//            errorHandler.errorResult()
-//          }
-//          case Right(upscanUpload) => {
-//            println(s"\n\n\n\n ${upscanUpload.toString}\n\n\n\n")
-//            //            upscanUpload.upscanCallBack match {
-//            //              case Some(value) =>
-//            //                value match {
-//            //                  case UpscanCallBack.UpscanSuccess(reference, fileStatus, downloadUrl, uploadDetails) => {
-//            //                    Ok(uploadSupportingEvidenceUpscanCheckPage(fileStatus, uploadReference))
-//            //                    //Redirect(routes.SupportingEvidenceController.checkYourAnswers())
-//            //                  }
-//            //                  case UpscanCallBack.UpscanFailure(reference, fileStatus, failureDetails) => {
-//            //                    Ok(
-//            //                      uploadSupportingEvidenceUpscanCheckPage(
-//            //                        fileStatus,
-//            //                        uploadReference
-//            //                      )
-//            //                    )
-//            //                  }
-//            //                }
-//            //              case None => {
-//            //                //logger.warn(s"could not find upscan upload with reference $uploadReference")
-//            Ok(uploadSupportingEvidenceWithoutCallBackStatus(upscanUpload))
-//          }
-      //}
-      //}
-
       }
     }
 
@@ -360,51 +356,34 @@ class SupportingEvidenceController @Inject() (
       Redirect(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(UploadReference(reference)))
     }
 
-//  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-//  private def handleGetFileDescriptorResult(
-//    multipart: MultipartFormData[Files.TemporaryFile],
-//    upscanFileDescriptor: UpscanFileDescriptor
-//  ): Either[Error, MultipartFormData[Source[ByteString, Any]]] = {
-//    val userFile =
-//      multipart.files
-//        .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
-//    val prepared: MultipartFormData[Source[ByteString, Any]] =
-//      multipart
-//        .copy(
-//          files = userFile,
-//          dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
-//            .mapValues(fieldValue => Seq(fieldValue))
-//        )
-//    Right(prepared)
-//  }
-
-  def changeSupportingEvidence(deleteId: String): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withUploadSupportingEvidenceAnswers(request) { (draftReturnId, cgtRef, _, _, answers) =>
-        Future.successful(Ok("change supporting evidence"))
-//        if (answers.fold(_.evidences, _.evidences).length >= maxUploads)
-//          Redirect(routes.SupportingEvidenceController.checkYourAnswers())
-//        else {
-//          upscanService
-//            .initiate(DraftReturnId(draftReturnId.toString), cgtRef, TimeUtils.now())
-//            .fold(
-//              { e =>
-//                logger.warn("Could not perform upscan initiate", e)
-//                errorHandler.errorResult()
-//              },
-//              success =>
-//                Ok(
-//                  changeSupportingEvidencePage(
-//                    uploadEvidenceForm,
-//                    success.upscanInitiateReference,
-//                    deleteId,
-//                    routes.SupportingEvidenceController.checkYourAnswers()
-//                  )
-//                )
-//            )
+  def changeSupportingEvidence(upscanReference: UpscanReference): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withUploadSupportingEvidenceAnswers(request) { (_, _, _, _, answers) =>
+        if (answers.fold(_.evidences, _.evidences).length >= maxUploads)
+          Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+        else {
+          upscanService
+            .initiate(
+              routes.SupportingEvidenceController.uploadSupportingEvidenceError(),
+              routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck
+            )
+            .fold(
+              { e =>
+                logger.warn("could not start upload supporting evidence", e)
+                errorHandler.errorResult()
+              },
+              uploadUpscan =>
+                Ok(
+                  uploadSupportingEvidencePage(
+                    uploadEvidenceForm,
+                    uploadUpscan,
+                    routes.SupportingEvidenceController.doYouWantToUploadSupportingDocuments()
+                  )
+                )
+            )
+        }
       }
-    //}
-  }
+    }
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   def changeSupportingEvidenceSubmit(ref: String, del: String): Action[MultipartFormData[Files.TemporaryFile]] =

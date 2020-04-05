@@ -20,7 +20,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUploadStatus._
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -37,18 +36,11 @@
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(upscanUpload : UpscanUpload)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(uploadReference : String, filename : String)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
     @key = @{"upload-supporting-evidence.check-upscan-status"}
     @cyaKey = @{"upload-supporting-evidence.check-your-answers"}
     @title = @{messages(s"$key.title")}
-
-    @fileScanStatus = @{
-        upscanUpload.upscanUploadStatus match {
-        case Uploaded => messages(s"$key.passed") -> messages(s"$key.passed.help-text") -> false -> Some(messages("button.saveAndContinue"))
-        case Initiated => messages(s"$key.failed") -> messages(s"$key.failed.help-text") -> true -> None
-        }
-    }
 
     @mainTemplate(title = title, userType = request.userType) {
 
@@ -56,37 +48,23 @@
         @pageHeading(title)
 
             <p>
-                @fileScanStatus._1._1._2
+                @{messages(s"$key.passed.help-text")}
             </p>
 
             <dl class="govuk-check-your-answers cya-questions-long">
                 <div>
                     <dt class="cya-question" id="status-filename">
-                        name of file
+                        @filename
                     </dt>
                     <dd class="cya-answer">
-                        @fileScanStatus._1._1._1
+                        Success
                     </dd>
-                    @if(fileScanStatus._1._2) {
-                    <dd class="cya-change">
-                        <a href=@routes.SupportingEvidenceController.changeSupportingEvidence(upscanUpload.uploadReference.value).url>
-                            @messages(s"$cyaKey.cya-change") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
-                        </a>
-                    </dd>
-                    <dd class="cya-change">
-                        <a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(upscanUpload.uploadReference.value).url>
-                            @messages(s"$cyaKey.cya-delete") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
-                        </a>
-                    </dd>
-                    }
                 </div>
             </dl>
 
-        @fileScanStatus._2.map(f =>
-            formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(upscanUpload.uploadReference.value), 'novalidate -> "novalidate") {
-            submitButton(f)
+            @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(uploadReference), 'novalidate -> "novalidate") {
+                @submitButton(messages("button.saveAndContinue"))
             }
-        )
 
         @returnToSummaryLink(displayReturnToSummaryLink = true)
 
