@@ -16,16 +16,46 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json.Json
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus
+import julienrf.json.derived
+import play.api.libs.json.{Json, OFormat}
 
-final case class UpscanCallBack(
-  reference: String,
-  fileStatus: UpscanFileDescriptorStatus,
-  downloadUrl: String,
-  uploadDetails: Map[String, String]
-)
+sealed trait UpscanCallBack extends Product with Serializable
 
 object UpscanCallBack {
-  implicit val format = Json.format[UpscanCallBack]
+
+  final case class UpscanSuccess(
+    reference: String,
+    fileStatus: String,
+    downloadUrl: String,
+    uploadDetails: Map[String, String]
+  ) extends UpscanCallBack
+
+  object UpscanSuccess {
+    implicit val format = Json.format[UpscanSuccess]
+  }
+
+  final case class UpscanFailure(
+    reference: String,
+    fileStatus: String,
+    failureDetails: Map[String, String]
+  ) extends UpscanCallBack
+
+  object UpscanFailure {
+    implicit val format = Json.format[UpscanFailure]
+  }
+
+  implicit class UpscanCallBackOps(private val u: UpscanCallBack) extends AnyVal {
+
+    private def getFileName(data: Map[String, String], ref: => String): String =
+      data.getOrElse("fileName", sys.error(s"Could not find filename for reference $ref"))
+
+    def fileName: String = u match {
+      case f: UpscanFailure => getFileName(f.failureDetails, f.reference)
+      case s: UpscanSuccess => getFileName(s.uploadDetails, s.reference)
+    }
+
+  }
+
+  implicit val format: OFormat[UpscanCallBack] = derived.oformat()
+
 }

@@ -16,9 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-sealed trait UpscanInitiateResponse
+import java.time.LocalDateTime
 
-object UpscanInitiateResponse {
-  final case class UpscanInitiateSuccess(upscanInitiateReference: UpscanInitiateReference)
-      extends UpscanInitiateResponse
+import play.api.libs.json.Json
+
+final case class UpscanUpload(
+  uploadReference: UploadReference,
+  upscanUploadMeta: UpscanUploadMeta,
+  uploadedOn: LocalDateTime,
+  upscanUploadStatus: UpscanUploadStatus,
+  upscanCallBack: Option[UpscanCallBack]
+)
+
+object UpscanUpload {
+  implicit val format = Json.format[UpscanUpload]
 }

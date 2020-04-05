@@ -18,8 +18,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
 import play.api.libs.json.Json
 
-final case class UpscanInitiateReference(value: String) extends AnyVal
+final case class UploadRequest(
+  href: String,
+  fields: Map[String, String]
+)
 
-object UpscanInitiateReference {
-  implicit val format = Json.format[UpscanInitiateReference]
+object UploadRequest {
+  implicit val format = Json.format[UploadRequest]
 }

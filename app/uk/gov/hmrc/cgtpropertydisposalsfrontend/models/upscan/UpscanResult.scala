@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json.Json
-
-final case class UpscanFileDescriptorId(id: String) extends AnyVal
-
-object UpscanFileDescriptorId {
-  implicit val format = Json.format[UpscanFileDescriptorId]
-}
+final case class UpscanResult(
+  reference: String,
+  fileStatus: String,
+  downloadUrl: Option[String],
+  uploadDetails: Option[Map[String, String]],
+  failureDetails: Option[Map[String, String]]
+)

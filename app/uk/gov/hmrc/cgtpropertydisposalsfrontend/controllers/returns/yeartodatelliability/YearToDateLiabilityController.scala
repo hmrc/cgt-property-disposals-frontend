@@ -16,10 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability
 
-import java.nio.file.Files.readAllBytes
-
-import akka.stream.scaladsl.{FileIO, Source}
-import akka.util.ByteString
 import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
@@ -30,10 +26,9 @@ import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, nonEmptyText, of}
 import play.api.http.Writeable
-import play.api.libs.Files
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -43,7 +38,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.Inn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
@@ -53,12 +47,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData, TimeUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanUpload, UpscanUploadStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{ytdliability => pages}
@@ -95,8 +89,6 @@ class YearToDateLiabilityController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
-
-  private val maxFileSize: Int = config.get[Int]("microservice.services.upscan-initiate.max-file-size")
 
   private def withFillingOutReturnAndYTDLiabilityAnswers(
     request: RequestWithSessionData[_]
@@ -360,7 +352,7 @@ class YearToDateLiabilityController @Inject() (
             val newDraftReturn = updateAnswers(value, currentDraftReturn)
 
             val result = for {
-              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
+              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure[Future, Error](())
                   else
                     returnsService.storeDraftReturn(
                       newDraftReturn,
@@ -447,7 +439,7 @@ class YearToDateLiabilityController @Inject() (
                         .unset(_.taxDue)
                         .unset(_.mandatoryEvidence)
                         .unset(_.expiredEvidence)
-                        .unset(_.upscanSuccessful)
+                        .unset(_.pendingUpscanUpload)
                         .copy(estimatedIncome = Some(AmountInPence.fromPounds(i)))
 
                     draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -527,7 +519,7 @@ class YearToDateLiabilityController @Inject() (
                         .unset(_.taxDue)
                         .unset(_.mandatoryEvidence)
                         .unset(_.expiredEvidence)
-                        .unset(_.upscanSuccessful)
+                        .unset(_.pendingUpscanUpload)
                         .copy(personalAllowance = Some(AmountInPence.fromPounds(p)))
 
                       draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -673,7 +665,7 @@ class YearToDateLiabilityController @Inject() (
           .unset(_.calculatedTaxDue)
           .unset(_.taxDue)
           .unset(_.mandatoryEvidence)
-          .unset(_.upscanSuccessful)
+          .unset(_.pendingUpscanUpload)
           .copy(hasEstimatedDetails = Some(hasEstimated))
 
         draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -704,7 +696,7 @@ class YearToDateLiabilityController @Inject() (
           .unset(_.taxDue)
           .unset(_.mandatoryEvidence)
           .unset(_.expiredEvidence)
-          .unset(_.upscanSuccessful)
+          .unset(_.pendingUpscanUpload)
           .copy(hasEstimatedDetails = Some(hasEstimated))
 
         draftReturn.fold(
@@ -863,7 +855,7 @@ class YearToDateLiabilityController @Inject() (
                   calculatedAnswers
                     .unset(_.mandatoryEvidence)
                     .unset(_.expiredEvidence)
-                    .unset(_.upscanSuccessful)
+                    .unset(_.pendingUpscanUpload)
                     .copy(taxDue = Some(taxDue))
                 draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers))
               }
@@ -874,20 +866,24 @@ class YearToDateLiabilityController @Inject() (
 
   def uploadMandatoryEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      def commonDisposalMandatoryEvidence(backLink: Call): Future[Result] =
-        upscanService
-          .initiate(
-            DraftReturnId(fillingOutReturn.draftReturn.id.toString),
-            fillingOutReturn.subscribedDetails.cgtReference,
-            TimeUtils.now()
-          )
-          .fold(
-            { e =>
-              logger.warn("Could not initiate upscan", e)
-              errorHandler.errorResult()
-            },
-            success => Ok(mandatoryEvidencePage(mandatoryEvidenceForm, success.upscanInitiateReference, backLink))
-          )
+      def commonDisposalMandatoryEvidence(backLink: Call): Future[Result] = {
+        val result = for {
+          upscanUpload <- upscanService
+                           .initiate(
+                             routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
+                             _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+                           )
+          _ <- updatePendingUpscanUpload(answers, fillingOutReturn, upscanUpload)
+        } yield upscanUpload
+
+        result.fold(
+          { e =>
+            logger.warn("Could not initiate upscan", e)
+            errorHandler.errorResult()
+          },
+          upscanUpload => Ok(mandatoryEvidencePage(mandatoryEvidenceForm, upscanUpload, backLink))
+        )
+      }
 
       (answers, fillingOutReturn.draftReturn) match {
         case (calculatedAnswers: CalculatedYTDAnswers, _: DraftSingleDisposalReturn) =>
@@ -917,115 +913,19 @@ class YearToDateLiabilityController @Inject() (
     }
   }
 
-  def uploadMandatoryEvidenceSubmit(): Action[MultipartFormData[Files.TemporaryFile]] =
-    authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-        (answers, fillingOutReturn.draftReturn) match {
-          case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-            withTaxDueAndCalculatedTaxDue(calculatedAnswers) { (taxDue, calculatedTaxDue) =>
-              if (calculatedTaxDue.amountOfTaxDue === taxDue) {
-                Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-              } else {
-                lazy val backLink = calculatedAnswers.fold(
-                  _ => routes.YearToDateLiabilityController.taxDue(),
-                  _ => routes.YearToDateLiabilityController.checkYourAnswers()
-                )
-                handleMandatoryEvidenceSubmit(calculatedAnswers, draftReturn, fillingOutReturn, backLink)
-              }
-            }
-
-          case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, draftReturn) =>
-            val backLink = nonCalculatedYTDAnswers.fold(
-              _ => routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
-              _ => routes.YearToDateLiabilityController.checkYourAnswers()
-            )
-            handleMandatoryEvidenceSubmit(nonCalculatedYTDAnswers, draftReturn, fillingOutReturn, backLink)
-
-          case _ =>
-            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
-        }
-      }
-    }
-
-  private def handleMandatoryEvidenceSubmit(
+  private def updatePendingUpscanUpload(
     currentAnswers: YearToDateLiabilityAnswers,
-    currentDraftReturn: DraftReturn,
     currentJourney: FillingOutReturn,
-    backLink: Call
-  )(implicit request: RequestWithSessionData[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
-    val multiPartFormData = request.body
-    val upscanReference   = multiPartFormData.dataParts.get("reference").flatMap(_.headOption)
-    val mandatoryEvidence = multiPartFormData.file("file")
-
-    (upscanReference, mandatoryEvidence) match {
-      case (None, Some(_)) =>
-        logger.warn("Could not find upscan file descriptor id")
-        errorHandler.errorResult()
-
-      case (Some(_), None) =>
-        logger.warn("Could not find file in form")
-        errorHandler.errorResult()
-
-      case (None, None) =>
-        logger.warn("Could not find upscan file descriptor id or file in form")
-        errorHandler.errorResult()
-
-      case (Some(upscanReference), Some(file)) =>
-        if (file.filename.trim().isEmpty)
-          BadRequest(
-            mandatoryEvidencePage(
-              mandatoryEvidenceForm.bindFromRequest(multiPartFormData.asFormUrlEncoded),
-              UpscanInitiateReference(upscanReference),
-              backLink
-            )
-          )
-        else {
-          val result = for {
-            fileDescriptor <- uploadFile(
-                               currentDraftReturn,
-                               UpscanInitiateReference(upscanReference),
-                               multiPartFormData,
-                               readAllBytes(file.ref).size
-                             )
-            _ <- updateMandatoryEvidence(
-                  currentAnswers,
-                  currentDraftReturn,
-                  currentJourney,
-                  upscanReference,
-                  file.filename,
-                  fileDescriptor
-                )
-          } yield ()
-
-          result.fold(
-            error => {
-              logger.warn(s"failed to upload file with error: $error")
-              errorHandler.errorResult()
-            },
-            _ => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-          )
-        }
-    }
-  }
-
-  private def updateMandatoryEvidence(
-    currentAnswers: YearToDateLiabilityAnswers,
-    currentDraftReturn: DraftReturn,
-    currentJourney: FillingOutReturn,
-    upscanReference: String,
-    filename: String,
-    fileDescriptor: UpscanFileDescriptor
+    upscanUpload: UpscanUpload
   )(implicit request: RequestWithSessionData[_]): EitherT[Future, Error, Unit] = {
-    val newMandatoryEvidence = MandatoryEvidence(upscanReference, filename, fileDescriptor.timestamp)
     val newAnswers = currentAnswers match {
       case c: CalculatedYTDAnswers =>
-        c.unset(_.expiredEvidence).unset(_.upscanSuccessful).copy(mandatoryEvidence = Some(newMandatoryEvidence))
+        c.unset(_.expiredEvidence).unset(_.mandatoryEvidence).copy(pendingUpscanUpload = Some(upscanUpload))
       case n: NonCalculatedYTDAnswers =>
-        n.unset(_.expiredEvidence).unset(_.upscanSuccessful).copy(mandatoryEvidence = Some(newMandatoryEvidence))
+        n.unset(_.expiredEvidence).unset(_.mandatoryEvidence).copy(pendingUpscanUpload = Some(upscanUpload))
     }
 
-    val newDraftReturn = currentDraftReturn.fold(
+    val newDraftReturn = currentJourney.draftReturn.fold(
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
     )
@@ -1042,49 +942,6 @@ class YearToDateLiabilityController @Inject() (
             )
           )
     } yield ()
-  }
-
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  private def uploadFile(
-    draftReturn: DraftReturn,
-    upscanInitiateReference: UpscanInitiateReference,
-    submittedFile: MultipartFormData[Files.TemporaryFile],
-    submittedFileSize: Int
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanFileDescriptor] =
-    for {
-      maybeUpscanFileDescriptor <- upscanService
-                                    .getUpscanFileDescriptor(
-                                      DraftReturnId(draftReturn.id.toString),
-                                      upscanInitiateReference
-                                    )
-      upscanFileDescriptor <- EitherT
-                               .fromOption(
-                                 maybeUpscanFileDescriptor,
-                                 Error("failed to retrieve upscan file descriptor details")
-                               )
-      prepared <- EitherT.pure[Future, Error](
-                   handleGetFileDescriptorResult(submittedFile, upscanFileDescriptor)
-                 )
-      _ <- upscanConnector
-            .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared, submittedFileSize)
-      _ <- upscanConnector
-            .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UpscanFileDescriptorStatus.UPLOADED))
-    } yield upscanFileDescriptor
-
-  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-  private def handleGetFileDescriptorResult(
-    multipart: MultipartFormData[Files.TemporaryFile],
-    upscanFileDescriptor: UpscanFileDescriptor
-  ): MultipartFormData[Source[ByteString, Any]] = {
-    val userFile =
-      multipart.files
-        .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
-    multipart
-      .copy(
-        files = userFile,
-        dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
-          .mapValues(fieldValue => Seq(fieldValue))
-      )
   }
 
   def taxableGainOrLoss(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -1155,7 +1012,7 @@ class YearToDateLiabilityController @Inject() (
                 .unset(_.taxDue)
                 .unset(_.mandatoryEvidence)
                 .unset(_.expiredEvidence)
-                .unset(_.upscanSuccessful)
+                .unset(_.pendingUpscanUpload)
                 .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
 
               draftReturn.fold(
@@ -1219,7 +1076,7 @@ class YearToDateLiabilityController @Inject() (
                 val newAnswers = nonCalculatedAnswers
                   .unset(_.mandatoryEvidence)
                   .unset(_.expiredEvidence)
-                  .unset(_.upscanSuccessful)
+                  .unset(_.pendingUpscanUpload)
                   .copy(taxDue = Some(taxDue))
                 draftReturn.fold(
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
@@ -1246,80 +1103,98 @@ class YearToDateLiabilityController @Inject() (
     }
   }
 
-  def scanningMandatoryEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      def checkAndHandleUpscanStatus(
-        mandatoryEvidence: MandatoryEvidence,
-        answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
-      ): Future[Result] = {
-        val result = for {
-          maybeFileDescriptor <- upscanService
-                                  .getUpscanFileDescriptor(
-                                    DraftReturnId(fillingOutReturn.draftReturn.id.toString),
-                                    UpscanInitiateReference(mandatoryEvidence.reference)
-                                  )
-          fileDescriptor <- EitherT.fromOption[Future](
-                             maybeFileDescriptor,
-                             Error(
-                               s"Could not find file descriptor for mandatory evidence with reference ${mandatoryEvidence.reference}"
-                             )
-                           )
-          _ <- fileDescriptor.status match {
-                case UpscanFileDescriptorStatus.READY =>
-                  storeUpscanSuccessOrFailure(upscanSuccess = true, answers, fillingOutReturn)
-                case UpscanFileDescriptorStatus.FAILED =>
-                  storeUpscanSuccessOrFailure(upscanSuccess = false, answers, fillingOutReturn)
-                case _ => EitherT.pure[Future, Error](())
-              }
-        } yield fileDescriptor.status
+  def scanningMandatoryEvidence(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        def checkAndHandleUpscanStatus(
+          pendingUpscanUpload: UpscanUpload,
+          answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
+        ): Future[Result] = {
+          val result = for {
+            newUpscanUpload <- upscanService.getUpscanUpload(pendingUpscanUpload.uploadReference)
+            _ <- if (newUpscanUpload.upscanUploadStatus === UpscanUploadStatus.Uploaded)
+                  EitherT.pure[Future, Error](())
+                else
+                  upscanService.updateUpscanUpload(
+                    newUpscanUpload.uploadReference,
+                    newUpscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded)
+                  )
+            _ <- newUpscanUpload.upscanCallBack match {
+                  case None => EitherT.pure[Future, Error](())
+                  case Some(callback) =>
+                    storeUpscanSuccessOrFailure(newUpscanUpload, callback, answers, fillingOutReturn)
+                }
+          } yield newUpscanUpload
 
-        result.fold(
-          { e =>
-            logger.warn("Error while trying to get and handle an upscan status", e)
-            errorHandler.errorResult()
-          },
-          upscanStatus =>
-            if (upscanStatus === UpscanFileDescriptorStatus.FAILED)
-              Ok(mandatoryEvidenceCheckUpscanPage(mandatoryEvidence, hasFailed = true))
-            else if (upscanStatus === UpscanFileDescriptorStatus.UPLOADED)
-              Ok(mandatoryEvidenceCheckUpscanPage(mandatoryEvidence, hasFailed = false))
-            else
-              Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        )
-      }
+          result.fold(
+            { e =>
+              logger.warn("Error while trying to get and handle an upscan status", e)
+              errorHandler.errorResult()
+            },
+            upscanUpload => handleUpscanCallback(upscanUpload.upscanCallBack)
+          )
+        }
 
-      answers match {
-        case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, Some(mandatoryEvidence), _, None) =>
-          checkAndHandleUpscanStatus(mandatoryEvidence, Left(n))
+        def handleUpscanCallback(upscanCallBack: Option[UpscanCallBack]): Result = upscanCallBack match {
+          case None                        => Ok(mandatoryEvidenceCheckUpscanPage(None))
+          case Some(failed: UpscanFailure) => Ok(mandatoryEvidenceCheckUpscanPage(Some(failed)))
+          case Some(_: UpscanSuccess)      => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
 
-        case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, Some(mandatoryEvidence), _, None) =>
-          checkAndHandleUpscanStatus(mandatoryEvidence, Right(c))
+        answers match {
+          case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
+            if (pendingUpscanUpload.upscanCallBack.nonEmpty) handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
+            else checkAndHandleUpscanStatus(pendingUpscanUpload, Left(n))
 
-        case IncompleteNonCalculatedYTDAnswers(_, _, _, Some(mandatoryEvidence), _, Some(false)) =>
-          Ok(mandatoryEvidenceCheckUpscanPage(mandatoryEvidence, hasFailed = true))
+          case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
+            if (pendingUpscanUpload.upscanCallBack.nonEmpty) handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
+            else checkAndHandleUpscanStatus(pendingUpscanUpload, Right(c))
 
-        case IncompleteCalculatedYTDAnswers(_, _, _, _, _, Some(mandatoryEvidence), _, Some(false)) =>
-          Ok(mandatoryEvidenceCheckUpscanPage(mandatoryEvidence, hasFailed = true))
-
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
       }
     }
-  }
 
-  def scanningMandatoryEvidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { _ =>
-    Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
+  def scanningMandatoryEvidenceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData { _ =>
+      Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
+    }
+
+  def uploadMandatoryEvidenceFailure(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    errorHandler.errorResult()
   }
 
   private def storeUpscanSuccessOrFailure(
-    upscanSuccess: Boolean,
+    upscanUpload: UpscanUpload,
+    upscanCallBack: UpscanCallBack,
     answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
     fillingOutReturn: FillingOutReturn
   )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
-    val newAnswers = answers.fold(
-      _.copy(upscanSuccessful = Some(upscanSuccess)),
-      _.copy(upscanSuccessful = Some(upscanSuccess))
-    )
+    val newAnswers =
+      upscanCallBack match {
+        case success: UpscanSuccess =>
+          val mandatoryEvidence =
+            MandatoryEvidence(
+              upscanUpload.uploadReference,
+              upscanUpload.upscanUploadMeta,
+              upscanUpload.uploadedOn,
+              success,
+              success.fileName
+            )
+          answers.fold(
+            _.unset(_.pendingUpscanUpload).copy(mandatoryEvidence = Some(mandatoryEvidence)),
+            _.unset(_.pendingUpscanUpload).copy(mandatoryEvidence = Some(mandatoryEvidence))
+          )
+
+        case _: UpscanFailure =>
+          answers.fold(
+            _.copy(pendingUpscanUpload = Some(upscanUpload)),
+            _.copy(pendingUpscanUpload = Some(upscanUpload))
+          )
+
+      }
+
     val newDraftReturn = fillingOutReturn.draftReturn.fold(
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -1367,11 +1242,10 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, expiredEvidence, _) if expiredEvidence.nonEmpty =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, Some(expiredEvidence), _) =>
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, _, Some(mandatoryEvidence), _, upscanSuccess)
-          if !upscanSuccess.contains(true) =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
         Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
 
       case IncompleteNonCalculatedYTDAnswers(None, _, _, _, _, _) =>
@@ -1444,11 +1318,10 @@ class YearToDateLiabilityController @Inject() (
       case c: CompleteCalculatedYTDAnswers =>
         Ok(calculatedCheckYouAnswersPage(c, disposalDate))
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, expiredEvidence, _) if expiredEvidence.nonEmpty =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, Some(expiredEvidence), _) =>
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, Some(mandatoryEvidence), _, upscanSuccess)
-          if !upscanSuccess.contains(true) =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
         Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
 
       case IncompleteCalculatedYTDAnswers(None, _, _, _, _, _, _, _) if !isATrust(fillingOutReturn) =>

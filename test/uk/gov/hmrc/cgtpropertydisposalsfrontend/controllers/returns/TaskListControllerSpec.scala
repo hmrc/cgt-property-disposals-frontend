@@ -99,7 +99,7 @@ class TaskListControllerSpec
     case n: NonCalculatedYTDAnswers =>
       n.fold(
         _.copy(mandatoryEvidence = None),
-        _.copy(mandatoryEvidence = sample[MandatoryEvidence].copy(createdOn = TimeUtils.now()))
+        _.copy(mandatoryEvidence = sample[MandatoryEvidence].copy(uploadedOn = TimeUtils.now()))
       )
   }
 

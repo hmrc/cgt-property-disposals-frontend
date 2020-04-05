@@ -18,11 +18,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
 import play.api.libs.json.Json
 
-final case class UpscanInitiateRawResponse(
-  reference: String,
-  uploadRequest: UploadRequest
+final case class UpscanInitiateRequest(
+  callbackUrl: String,
+  successRedirect: String,
+  errorRedirect: String,
+  minimumFileSize: Long,
+  maximumFileSize: Long
 )
 
-object UpscanInitiateRawResponse {
-  implicit val format = Json.format[UpscanInitiateRawResponse]
+object UpscanInitiateRequest {
+  implicit val format = Json.format[UpscanInitiateRequest]
 }

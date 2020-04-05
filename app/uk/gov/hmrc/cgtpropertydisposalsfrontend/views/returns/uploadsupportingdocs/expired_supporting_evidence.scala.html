@@ -45,27 +45,6 @@
 
         @pageHeading(title)
 
-        <p>
-          @messages(s"$key.p1")
-        </p>
 
-        @cyaSection(None, Some("cya-questions-short")) {
-
-            @for((document, fileIndex) <- expired.zipWithIndex) {
-
-                <div>
-                    <dt class="cya-question" id="question-@{fileIndex}">
-                        @messages(s"$key.label")
-                    </dt>
-                    <dd class="cya-answer" id="answer-@{fileIndex}">
-                        @document.fileName
-                    </dd>
-                    <dd class="cya-change"><a href=@routes.SupportingEvidenceController.changeSupportingEvidence(document.reference).url>@messages(s"$cyaKey.cya-change")<span class="visuallyhidden"> @messages(s"$cyaKey.assistive", document.fileName)</span></a></dd>
-                    <dd class="cya-change cya-extra-action"><a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(document.reference).url>@messages(s"$cyaKey.cya-delete")<span class="visuallyhidden"> @messages(s"$cyaKey.assistive", document.fileName)</span></a></dd>
-                </div>
-
-            }
-
-        }
 
     }
