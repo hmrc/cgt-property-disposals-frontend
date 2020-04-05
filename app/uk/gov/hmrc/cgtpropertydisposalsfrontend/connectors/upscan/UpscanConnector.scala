@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan
 
+<<<<<<< HEAD
 import akka.stream.Materializer
+=======
+>>>>>>> 662c21af51330bd0ec86c2b65a8cbac08e05787e
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
@@ -27,7 +30,10 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.Call
 import play.mvc.Http.Status
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
+<<<<<<< HEAD
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
+=======
+>>>>>>> 662c21af51330bd0ec86c2b65a8cbac08e05787e
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan => _, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -70,8 +76,12 @@ class UpscanConnectorImpl @Inject() (
   config: Configuration,
   servicesConfig: ServicesConfig
 )(
+<<<<<<< HEAD
   implicit ec: ExecutionContext,
   mat: Materializer
+=======
+  implicit ec: ExecutionContext
+>>>>>>> 662c21af51330bd0ec86c2b65a8cbac08e05787e
 ) extends UpscanConnector
     with Logging {
 

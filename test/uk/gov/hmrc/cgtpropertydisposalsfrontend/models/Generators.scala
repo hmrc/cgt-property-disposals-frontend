@@ -40,8 +40,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
@@ -51,7 +51,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse, UpscanInitiateReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UploadRequest, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
 object Generators
@@ -145,7 +145,7 @@ trait IdGen { this: GenUtils =>
 
   implicit val draftReturnIdGen: Gen[DraftReturnId] = gen[DraftReturnId]
 
-  implicit val upscanInitiateReference: Gen[UpscanInitiateReference] = gen[UpscanInitiateReference]
+  implicit val uploadReferenceGen: Gen[UploadReference] = gen[UploadReference]
 
 }
 
@@ -317,11 +317,9 @@ trait LowerPriorityReturnGen { this: GenUtils =>
 trait FileUploadGen { this: GenUtils =>
   implicit val completeUploadSupportingDocuments: Gen[CompleteSupportingEvidenceAnswers] =
     gen[CompleteSupportingEvidenceAnswers]
-  implicit val uploadRequestGen: Gen[UploadRequest]                         = gen[UploadRequest]
-  implicit val fileDescriptorGen: Gen[FileDescriptor]                       = gen[FileDescriptor]
-  implicit val upscanFileDescriptorGen: Gen[UpscanFileDescriptor]           = gen[UpscanFileDescriptor]
-  implicit val upscanInitiateRawResponseGen: Gen[UpscanInitiateRawResponse] = gen[UpscanInitiateRawResponse]
+  implicit val uploadRequestGen: Gen[UploadRequest] = gen[UploadRequest]
 
+  implicit val upscanUploadGen: Gen[UpscanUpload] = gen[UpscanUpload]
 }
 
 trait DisposalMethodGen { this: GenUtils =>

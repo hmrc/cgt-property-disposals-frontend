@@ -59,7 +59,7 @@ landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property 
 landingPage.howTo.p2=If you’re a resident or representing a trust, you can use this service to:
 landingPage.howTo.list1.bullet1=report the disposal of UK residential property or land made from 6 April 2020
 landingPage.howTo.list1.bullet2=pay any tax you might owe for that disposal
-landingPage.howTo.list1.bullet3=view and amend your previous and current returns
+landingPage.howTo.list1.bullet3=view your previous and current returns
 
 landingPage.howTo.p3=If you’re a non-resident you must use this service to report sales or disposals from 6 April 2020 of:
 landingPage.howTo.list2.bullet1=residential UK property or land
@@ -1685,7 +1685,7 @@ confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due by
 confirmationOfSubmission.printPage=Print or save this page as a PDF
 confirmationOfSubmission.whatNext=What you need to do next
-confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may get a penalty if your payment is late.
+confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
 confirmationOfSubmission.howToPay=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
@@ -1787,7 +1787,7 @@ drafts.list.resume=Complete return
 
 multipleDisposalsNumberOfProperties.title=How many disposals are you including in this return?
 multipleDisposalsNumberOfProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
-multipleDisposalsNumberOfProperties.p2=If you sold shares enter the number of companies you held the shares in. You must have sold all the shares on the same date.
+multipleDisposalsNumberOfProperties.p2=If you are reporting the sale of shares enter the number of companies the shares were held in. All of the shares must have been sold on the same date.
 multipleDisposalsNumberOfProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
 multipleDisposalsNumberOfProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
 multipleDisposalsNumberOfProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
@@ -1801,7 +1801,7 @@ multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 99
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange‘ dates?
-multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
+multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
 multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
@@ -1845,9 +1845,9 @@ disposalDateMixedUseOrIndirect.trust.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
 disposalDateMixedUseOrIndirect.agent.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 disposalDateMixedUseOrIndirect.trust.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
-disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may get a penalty if your payment is late.
-disposalDateMixedUseOrIndirect.agent.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. Your client may get a penalty if your payment is late.
-disposalDateMixedUseOrIndirect.trust.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may get a penalty if your payment is late.
+disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may be charged interest on late payments.
+disposalDateMixedUseOrIndirect.agent.p3=Your client has 30 days from the date of completion to report their disposal and pay any tax due. They may be charged interest on late payments.
+disposalDateMixedUseOrIndirect.trust.p3=You have 30 days from the date of completion to report the disposal and pay any tax due. You may be charged interest on late payments.
 
 
 initialGainOrLoss.title=Did you make an initial gain or loss?
@@ -1944,6 +1944,11 @@ multipleDisposals.triage.cyaChange.completionDate=the completion date for all th
 
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
+nonCalculatedTaxDue.error.required=Enter the amount of Capital Gains Tax due for this return
+nonCalculatedTaxDue.error.tooSmall=The amount of Capital Gains Tax due must be 0 or more
+nonCalculatedTaxDue.error.tooLarge=The amount of Capital Gains Tax due must be an amount of money 50,000,000,000 or less
+nonCalculatedTaxDue.error.invalid=The amount of Capital Gains Tax due must be an amount of money, like 493 or 2,040.59
+nonCalculatedTaxDue.error.tooManyDecimals=The amount of Capital Gains Tax due must be an amount of money with pence as 2 decimal places or less, like 493 or 2,040.59
 
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
@@ -2008,7 +2013,7 @@ submitReturnError.p2=You’ll need to:
 submitReturnError.li1=Go to your Capital Gains Tax on UK property account home.
 submitReturnError.li2=If your return is in ‘Sent returns’ it has been received by HMRC. You do not need to send it again.
 submitReturnError.li3=If it is ‘Draft returns’ it has not been received by HMRC. You’ll need to try and send it again.
-submitReturnError.p3=You may get a penalty and have to pay interest if your return or payment is late.
+submitReturnError.p3=You may be charged interest on late payments.
 submitReturnError.button=Go to account home
 
 hasValidPostcode.singleDisposal.title=Does the property have a UK postcode?
@@ -2096,7 +2101,7 @@ accessibilityStatement.p1=This accessibility statement explains how accessible t
 accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href="{0}">accessibility statement</a> for the main GOV.UK website.
 accessibilityStatement.p3=This page only contains information about the Report and pay Capital Gains Tax on UK property service, available at {0}.
 accessibilityStatement.usingThisService.title=Using this service
-accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view and amend your previous and current returns.
+accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view your previous and current returns.
 accessibilityStatement.usingThisService.p2=This service is run by HM Revenue and Customs (HMRC).
 accessibilityStatement.usingThisService.p3=We want as many people as possible to be able to use this service. This means you should be able to:
 accessibilityStatement.usingThisService.li1=change colours, contrast levels and fonts
@@ -2126,6 +2131,6 @@ mandatoryEvidence.check-upscan-status.in-progress.help-text=There is a delay in 
 mandatoryEvidence.check-upscan-status.in-progress=Scan in progress
 mandatoryEvidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
 mandatoryEvidence.check-upscan-status.failed=Failed
-mandatoryEvidence.check-upscan-status.cya-change=Upload another file
-mandatoryEvidence.check-upscan-status.cya-assistive=Upload another file
-mandatoryEvidence.check-upscan-status.button=Check status and continue
+mandatoryEvidence.check-upscan-status.changeFile=Change file
+mandatoryEvidence.check-upscan-status.button.checkStatusAndContinue=Check status and continue
+mandatoryEvidence.check-upscan-status.button.uploadAnotherFile=Upload another file

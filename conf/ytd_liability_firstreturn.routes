@@ -10,8 +10,6 @@ POST   /tax-amount/estimates                          uk.gov.hmrc.cgtpropertydis
 GET   /tax-amount/check-calculation-enter-cgt-due     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxDue()
 POST  /tax-amount/check-calculation-enter-cgt-due     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxDueSubmit()
 
-GET  /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.uploadMandatoryEvidence()
-POST /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.uploadMandatoryEvidenceSubmit()
 
 GET  /tax-amount/overall-gain                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxableGainOrLoss()
 POST /tax-amount/overall-gain                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxableGainOrLossSubmit()
@@ -20,8 +18,11 @@ GET  /tax-amount/own-calculation-enter-cgt-due        uk.gov.hmrc.cgtpropertydis
 POST /tax-amount/own-calculation-enter-cgt-due        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()
 
 
+GET  /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.uploadMandatoryEvidence()
+GET  /tax-amount/document-did-not-upload              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.uploadMandatoryEvidenceFailure()
 GET  /tax-amount/scanning-file                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.scanningMandatoryEvidence()
 POST /tax-amount/scanning-file                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.scanningMandatoryEvidenceSubmit()
+
 
 GET  /tax-amount/evidence-expired                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.mandatoryEvidenceExpired()
 
