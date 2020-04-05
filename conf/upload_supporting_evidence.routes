@@ -2,7 +2,6 @@ GET    /supporting-evidence/supporting-evidence                             uk.g
 POST   /supporting-evidence/supporting-evidence                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.doYouWantToUploadSupportingDocumentsSubmit()
 
 GET    /supporting-evidence/upload-supporting-evidence                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.uploadSupportingEvidence()
-POST   /supporting-evidence/upload-supporting-evidence                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.uploadSupportingEvidenceSubmit()
 
 GET    /supporting-evidence/upload-supporting-evidence-virus-check/:id      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(id : uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference)
 POST   /supporting-evidence/upload-supporting-evidence-virus-check          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(id : String)

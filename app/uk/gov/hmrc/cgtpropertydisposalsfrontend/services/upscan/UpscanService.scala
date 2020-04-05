@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan
 
-import java.time.LocalDateTime
 import java.util.UUID
 
 import cats.data.EitherT
@@ -27,12 +26,11 @@ import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
 import play.api.http.Status.OK
+import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.DraftReturnId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUploadStatus.Initiated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload, UpscanUploadMeta}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,7 +40,10 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[UpscanServiceImpl])
 trait UpscanService {
 
-  def initiate(timestamp: LocalDateTime)(
+  def initiate(
+    errorRedirect: Call,
+    successRedirect: UploadReference => Call
+  )(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, UpscanUpload]
 
@@ -60,14 +61,15 @@ class UpscanServiceImpl @Inject() (
     with Logging {
 
   override def initiate(
-    upscanInitiatedTimestamp: LocalDateTime
+    errorRedirect: Call,
+    successRedirect: UploadReference => Call
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanUpload] =
     for {
       uploadReference <- EitherT.pure(UploadReference(UUID.randomUUID().toString))
       httpResponse <- upscanConnector
                        .initiate(
-                         routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(uploadReference),
-                         routes.SupportingEvidenceController.uploadSupportingEvidenceError(),
+                         errorRedirect,
+                         successRedirect(uploadReference),
                          uploadReference
                        )
       upscanUploadMeta <- EitherT.fromOption(
@@ -75,7 +77,7 @@ class UpscanServiceImpl @Inject() (
                            Error("could not parse upscan initiate response")
                          )
       upscanUpload <- EitherT.pure(
-                       UpscanUpload(uploadReference, upscanUploadMeta, upscanInitiatedTimestamp, Initiated, None)
+                       UpscanUpload(uploadReference, upscanUploadMeta, TimeUtils.now(), Initiated, None)
                      )
       _ <- upscanConnector.saveUpscanUpload(upscanUpload)
     } yield upscanUpload
