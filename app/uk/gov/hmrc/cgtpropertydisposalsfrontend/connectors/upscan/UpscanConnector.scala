@@ -51,8 +51,7 @@ trait UpscanConnector {
   ): EitherT[Future, Error, HttpResponse]
 
   def updateUpscanUpload(
-    draftReturnId: DraftReturnId,
-    upscanReference: UpscanReference,
+    uploadReference: UploadReference,
     updatedUpscanUpload: UpscanUpload
   )(
     implicit hc: HeaderCarrier
@@ -179,19 +178,18 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
-  override def updateUpscanUpload(
-    draftReturnId: DraftReturnId,
-    upscanReference: UpscanReference,
+  def updateUpscanUpload(
+    uploadReference: UploadReference,
     updatedUpscanUpload: UpscanUpload
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
+  )(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse] = {
 
-    val url =
-      backEndBaseUrl + s"/cgt-property-disposals/upscan/draft-return-id/" +
-        s"${draftReturnId.value}/upscan-reference/${upscanReference.value} "
+    val url = backEndBaseUrl + s"/cgt-property-disposals/upscan/upload-reference/${uploadReference.value}"
 
     EitherT[Future, Error, HttpResponse](
       http
-        .post[UpscanUpload](url, updatedUpscanUpload)
+        .put[UpscanUpload](url, updatedUpscanUpload)
         .map { response =>
           response.status match {
             case Status.OK => Right(response)

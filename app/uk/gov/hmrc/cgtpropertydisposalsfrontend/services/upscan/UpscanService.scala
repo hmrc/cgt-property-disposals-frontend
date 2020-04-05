@@ -47,6 +47,13 @@ trait UpscanService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, UpscanUpload]
 
+  def updateUpscanUpload(
+    uploadReference: UploadReference,
+    upscanUpload: UpscanUpload
+  )(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
   def getUpscanUpload(
     uploadReference: UploadReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanUpload]
@@ -92,6 +99,19 @@ class UpscanServiceImpl @Inject() (
           .leftMap(Error(_))
       } else {
         Left(Error(s"call to get upscan upload failed ${response.status}"))
+      }
+    }
+
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+  override def updateUpscanUpload(
+    uploadReference: UploadReference,
+    upscanUpload: UpscanUpload
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
+    upscanConnector.updateUpscanUpload(uploadReference, upscanUpload).map { response =>
+      if (response.status === OK) {
+        Right(Unit)
+      } else {
+        Left(Error(s"call to update upscan upload failed ${response.status}"))
       }
     }
 
