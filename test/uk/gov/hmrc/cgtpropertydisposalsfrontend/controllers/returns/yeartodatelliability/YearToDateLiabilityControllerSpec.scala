@@ -29,8 +29,7 @@ import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.libs.Files.TemporaryFile
-import play.api.mvc.{Call, MultipartFormData, Result}
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
@@ -56,6 +55,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
@@ -1732,7 +1732,7 @@ class YearToDateLiabilityControllerSpec
           hasEstimatedDetails = Some(true),
           mandatoryEvidence   = None,
           expiredEvidence     = None,
-          upscanSuccessful    = None
+          pendingUpscanUpload = None
         )
         val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
           Some(oldAnswers),
@@ -1951,7 +1951,7 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.taxDue),
           completeAnswers.mandatoryEvidence,
           None,
-          Some(true)
+          None
         )
 
         def testRedirectWhenIncompleteAnswers(
@@ -2111,19 +2111,10 @@ class YearToDateLiabilityControllerSpec
 
         "redirect to the file scanning page" when {
 
-          "there is an a file in session but there is no upscan result yet file" in {
+          "there is an a pending upscan upload in session" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
-                upscanSuccessful = None
-              ),
-              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
-            )
-          }
-
-          "there is an a file in session and there is an unsuccssul upscan result" in {
-            testRedirectWhenIncompleteAnswers(
-              allQuestionAnswered.copy(
-                upscanSuccessful = Some(false)
+                pendingUpscanUpload = Some(sample[UpscanUpload])
               ),
               routes.YearToDateLiabilityController.scanningMandatoryEvidence()
             )
@@ -2206,7 +2197,7 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.taxDue),
           Some(completeAnswers.mandatoryEvidence),
           None,
-          Some(true)
+          None
         )
 
         val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
@@ -2334,19 +2325,10 @@ class YearToDateLiabilityControllerSpec
 
         "redirect to the file scanning page" when {
 
-          "there is an a file in session but there is no upscan result yet file" in {
+          "there is an a pending upscan upload in session" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
-                upscanSuccessful = None
-              ),
-              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
-            )
-          }
-
-          "there is an a file in session and there is an unsuccssul upscan result" in {
-            testRedirectWhenIncompleteAnswers(
-              allQuestionAnswered.copy(
-                upscanSuccessful = Some(false)
+                pendingUpscanUpload = Some(sample[UpscanUpload])
               ),
               routes.YearToDateLiabilityController.scanningMandatoryEvidence()
             )
@@ -2426,14 +2408,13 @@ class YearToDateLiabilityControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("mandatoryEvidence.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe backLink.url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.YearToDateLiabilityController
-                .uploadMandatoryEvidenceSubmit()
-                .url
-            }
+            messageFromMessageKey("mandatoryEvidence.title"),
+            doc => doc.select("#back").attr("href") shouldBe backLink.url
+//              doc
+//                .select("#content > article > form")
+//                .attr("action") shouldBe routes.YearToDateLiabilityController
+//                .uploadMandatoryEvidenceSubmit()
+//                .url
           )
         }
 
@@ -2493,21 +2474,6 @@ class YearToDateLiabilityControllerSpec
         }
 
       }
-
-    }
-
-    "handling submitted files from the upload mandatory evidence page" ignore {
-
-      def performAction(): Future[Result] =
-        controller.uploadMandatoryEvidenceSubmit()(
-          FakeRequest().withBody(
-            MultipartFormData[TemporaryFile](Map.empty, Seq.empty, Seq.empty)
-          )
-        )
-
-      behave like redirectToStartBehaviour(performAction)
-
-      behave like commonUploadMandatoryEvidenceBehaviour(performAction)
 
     }
 

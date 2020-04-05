@@ -26,7 +26,8 @@ final case class MandatoryEvidence(
   uploadReference: UploadReference,
   upscanUploadMeta: UpscanUploadMeta,
   uploadedOn: LocalDateTime,
-  upscanSuccess: UpscanSuccess
+  upscanSuccess: UpscanSuccess,
+  fileName: String
 )
 
 object MandatoryEvidence {

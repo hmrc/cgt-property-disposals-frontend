@@ -1179,7 +1179,8 @@ class YearToDateLiabilityController @Inject() (
               upscanUpload.uploadReference,
               upscanUpload.upscanUploadMeta,
               upscanUpload.uploadedOn,
-              success
+              success,
+              success.fileName
             )
           answers.fold(
             _.unset(_.pendingUpscanUpload).copy(mandatoryEvidence = Some(mandatoryEvidence)),

@@ -49,7 +49,7 @@
 
     @cyaRow(
       messages(s"$key.label"),
-      Html(expired.upscanSuccess.fileName),
+      Html(expired.fileName),
       Some(cyaChange(
         messages(s"$key.cyaChange"),
         routes.YearToDateLiabilityController.uploadMandatoryEvidence().url
