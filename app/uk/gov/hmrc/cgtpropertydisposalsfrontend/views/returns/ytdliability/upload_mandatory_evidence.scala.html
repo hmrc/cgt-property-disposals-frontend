@@ -45,7 +45,6 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
 @href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
-@ref = @{upscanUpload.upscanUploadMeta.reference}
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
     @backLinkComponent(backLink)
@@ -57,14 +56,9 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     @caption(messages("ytdLiability.caption"))
 
     <form action="@href" method="post" enctype="multipart/form-data">
-
-
-        @for((k,v) <- meta){
-            <input type="hidden" id="@k" name="@k" value="@v">
-        }
-
-        <input type="hidden" id="reference" name="reference" value="@ref">
-
+    @for((k,v) <- meta){
+        <input type="hidden" id="@k" name="@k" value="@v">
+    }
 
     @fileInput(
             fieldId = fieldId,
