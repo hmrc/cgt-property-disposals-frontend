@@ -25,7 +25,6 @@
 
 @(
         fieldId: String,
-        ref: Option[String],
         label: Html,
         autoComplete: AutoCompleteType,
         hasErrors: Boolean,
@@ -82,7 +81,6 @@
   @errorIdWithMessageKey.map { case (id, key) =>
     @errorInline(id, messages(s"$fieldId.$key"))
   }
-  <input type="hidden" name="reference" value="@{ref.getOrElse("")}" />
   <input
   class="@inputClasses"
   id="@fieldId"
