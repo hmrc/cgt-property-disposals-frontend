@@ -44,8 +44,6 @@ object UpscanCallBack {
     implicit val format = Json.format[UpscanFailure]
   }
 
-<<<<<<< HEAD
-=======
   implicit class UpscanCallBackOps(private val u: UpscanCallBack) extends AnyVal {
 
     private def getFileName(data: Map[String, String], ref: => String): String =
@@ -58,7 +56,6 @@ object UpscanCallBack {
 
   }
 
->>>>>>> 662c21af51330bd0ec86c2b65a8cbac08e05787e
   implicit val format: OFormat[UpscanCallBack] = derived.oformat()
 
 }
