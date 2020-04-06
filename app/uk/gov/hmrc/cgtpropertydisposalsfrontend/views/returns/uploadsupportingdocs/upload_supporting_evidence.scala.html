@@ -62,9 +62,14 @@
 
         <form action="@href" method="post" enctype="multipart/form-data">
 
+            @for((k,v) <- meta){
+                <input type="hidden" id="@k" name="@k" value="@v">
+            }
+
+            <input type="hidden" id="reference" name="reference" value="@ref">
+
             @fileInput(
                 fieldId = field,
-                ref = Some(ref),
                 label = Html(title),
                 helpText = Some(Html(messages(s"$key.help-text"))),
                 hasErrors = false,
@@ -72,12 +77,6 @@
                 labelAsHeading = true,
                 autoComplete = AutoCompleteType.On
             )
-
-            @for((k,v) <- meta){
-                <input type="hidden" id="@k" name="@k" value="@v">
-            }
-
-            <input type="hidden" id="reference" name="reference" value="@ref">
 
             @submitButton(messages("button.saveAndContinue"))
         </form>

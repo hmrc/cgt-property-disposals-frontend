@@ -58,9 +58,16 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
     <form action="@href" method="post" enctype="multipart/form-data">
 
+
+        @for((k,v) <- meta){
+            <input type="hidden" id="@k" name="@k" value="@v">
+        }
+
+        <input type="hidden" id="reference" name="reference" value="@ref">
+
+
     @fileInput(
             fieldId = fieldId,
-            ref = Some(ref),
             label = Html(title),
             helpText = Some(Html(messages(s"$key.helpText"))),
             hasErrors = false,
@@ -69,11 +76,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             autoComplete = AutoCompleteType.On
         )
 
-        @for((k,v) <- meta){
-            <input type="hidden" id="@k" name="@k" value="@v">
-        }
 
-        <input type="hidden" id="reference" name="reference" value="@ref">
 
         @submitButton(messages("button.saveAndContinue"))
 
