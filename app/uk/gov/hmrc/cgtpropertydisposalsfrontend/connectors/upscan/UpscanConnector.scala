@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan
 
-import akka.stream.Materializer
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
@@ -69,8 +68,7 @@ class UpscanConnectorImpl @Inject() (
   config: Configuration,
   servicesConfig: ServicesConfig
 )(
-  implicit ec: ExecutionContext,
-  mat: Materializer
+  implicit ec: ExecutionContext
 ) extends UpscanConnector
     with Logging {
 

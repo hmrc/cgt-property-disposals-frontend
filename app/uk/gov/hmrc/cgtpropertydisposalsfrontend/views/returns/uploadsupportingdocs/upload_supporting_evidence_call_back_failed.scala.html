@@ -60,19 +60,19 @@
                 Failed
             </dd>
             <dd class="cya-change">
-                <a href=@routes.SupportingEvidenceController.uploadSupportingEvidence().url>
+                <a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(uploadReference, addNew = true).url>
                     @messages(s"$cyaKey.cya-change") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
                 </a>
             </dd>
             <dd class="cya-change">
-                <a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(uploadReference).url>
+                <a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(uploadReference, addNew = false).url>
                     @messages(s"$cyaKey.cya-delete") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
                 </a>
             </dd>
         </div>
     </dl>
 
-    @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(uploadReference.value), 'novalidate -> "novalidate") {
+    @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidence(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.saveAndContinue"))
     }
 

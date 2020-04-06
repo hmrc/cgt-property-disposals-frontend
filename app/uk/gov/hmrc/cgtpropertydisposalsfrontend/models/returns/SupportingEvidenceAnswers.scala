@@ -20,7 +20,8 @@ import java.time.LocalDateTime
 
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.UpscanSuccess
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUploadMeta}
 
 sealed trait SupportingEvidenceAnswers extends Product with Serializable
 
@@ -28,8 +29,10 @@ object SupportingEvidenceAnswers {
 
   final case class SupportingEvidence(
     uploadReference: UploadReference,
-    fileName: String,
-    createdOn: LocalDateTime
+    upscanUploadMeta: UpscanUploadMeta,
+    uploadedOn: LocalDateTime,
+    upscanSuccess: UpscanSuccess,
+    fileName: String
   )
 
   object SupportingEvidence {
