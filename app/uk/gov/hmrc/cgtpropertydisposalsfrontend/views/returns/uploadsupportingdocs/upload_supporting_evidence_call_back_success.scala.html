@@ -62,7 +62,7 @@
                 </div>
             </dl>
 
-            @formWrapper(routes.SupportingEvidenceController.checkYourAnswers(), 'novalidate -> "novalidate") {
+            @formWrapper(routes.SupportingEvidenceController.successSubmit(uploadReference), 'novalidate -> "novalidate") {
                 @submitButton(messages("button.saveAndContinue"))
             }
 
