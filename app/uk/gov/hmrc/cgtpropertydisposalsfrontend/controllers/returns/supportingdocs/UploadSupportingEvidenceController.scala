@@ -253,10 +253,19 @@ class SupportingEvidenceController @Inject() (
                     )
               } yield ()
 
-              result.fold({ e =>
-                logger.warn("Could not update session", e)
-                errorHandler.errorResult()
-              }, _ => Redirect(routes.SupportingEvidenceController.checkYourAnswers()))
+              result.fold(
+                { e =>
+                  logger.warn("Could not update session", e)
+                  errorHandler.errorResult()
+                },
+                _ =>
+                  if (newDoYouWantToUploadSupportingEvidenceAnswer) {
+                    logger.warn("Supporting docsc not handled yet")
+                    errorHandler.errorResult()
+                  } else {
+                    Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+                  }
+              )
 
             }
         )
