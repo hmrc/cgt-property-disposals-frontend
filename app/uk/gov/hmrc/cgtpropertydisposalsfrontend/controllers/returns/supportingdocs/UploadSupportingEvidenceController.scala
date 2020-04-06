@@ -40,9 +40,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUploadStatus.Uploaded
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -258,13 +258,7 @@ class SupportingEvidenceController @Inject() (
                   logger.warn("Could not update session", e)
                   errorHandler.errorResult()
                 },
-                _ =>
-                  if (newDoYouWantToUploadSupportingEvidenceAnswer) {
-                    logger.warn("Supporting docsc not handled yet")
-                    errorHandler.errorResult()
-                  } else {
-                    Redirect(routes.SupportingEvidenceController.checkYourAnswers())
-                  }
+                _ => Redirect(routes.SupportingEvidenceController.checkYourAnswers())
               )
 
             }
