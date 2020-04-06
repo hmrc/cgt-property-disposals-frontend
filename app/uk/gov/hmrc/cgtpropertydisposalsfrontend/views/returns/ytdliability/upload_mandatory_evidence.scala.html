@@ -26,26 +26,29 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-fileInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.file_input,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    fileInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.file_input,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(form : Form[FileUpload], upscanUpload: UpscanUpload, backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-@key = @{ "mandatoryEvidence" }
-@fieldId = @{ "file" }
-@title = @{messages(s"$key.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
-@href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+
+    @key = @{ "mandatoryEvidence" }
+    @fieldId = @{ "file" }
+    @title = @{messages(s"$key.title")}
+    @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+    @meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
+    @href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
+
+    @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+
 
     @backLinkComponent(backLink)
 
@@ -60,7 +63,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
         <input type="hidden" id="@k" name="@k" value="@v">
     }
 
-    @fileInput(
+        @fileInput(
             fieldId = fieldId,
             label = Html(title),
             helpText = Some(Html(messages(s"$key.helpText"))),
@@ -70,11 +73,8 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             autoComplete = AutoCompleteType.On
         )
 
-
-
         @submitButton(messages("button.saveAndContinue"))
 
+        @returnToSummaryLink(displayReturnToSummaryLink = true)
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
-
-}
+        }

@@ -46,6 +46,18 @@
             "do-you-want-to-upload-supporting-evidence-value"
         )
 
+    @for((document, fileIndex) <- answers.evidences.zipWithIndex) {
 
-
+        <div>
+            <dt class="cya-question" id="question-@{fileIndex}">
+            @messages(s"$key.file-label", {fileIndex + 1})
+            </dt>
+            <dd class="cya-answer" id="answer-@{fileIndex}">
+            @document.fileName
+            </dd>
+            <dd class="cya-change"><a href="@{routes.SupportingEvidenceController.deleteSupportingEvidence(document.uploadReference, addNew = true).url}">@messages(s"$key.cya-change")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
+            <dd class="cya-change cya-extra-action"><a href="@{routes.SupportingEvidenceController.deleteSupportingEvidence(document.uploadReference, addNew = false).url}">@messages(s"$key.cya-delete")<span class="visuallyhidden"> @messages(s"$key.assistive", document.fileName)</span></a></dd>
+        </div>
     }
+
+}

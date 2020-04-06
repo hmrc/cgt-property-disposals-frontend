@@ -43,7 +43,7 @@
 
         @if(answers.evidences.size < maxUploads && answers.doYouWantToUploadSupportingEvidence){
           <p class="add-another-file">
-            <a href=@routes.SupportingEvidenceController.uploadSupportingEvidence().url>@messages(s"$key.add-another-file")</a>
+            <a href="@routes.SupportingEvidenceController.uploadSupportingEvidence().url">@messages(s"$key.add-another-file")</a>
           </p>
         }
 

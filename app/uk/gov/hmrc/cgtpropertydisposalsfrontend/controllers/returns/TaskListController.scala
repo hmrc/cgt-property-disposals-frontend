@@ -160,7 +160,7 @@ class TaskListController @Inject() (
       .fold(_.supportingEvidenceAnswers, _.supportingEvidenceAnswers)
       .flatMap { answers =>
         val supportingEvidence = answers.fold(_.evidences, _.evidences)
-        supportingEvidence.filter(f => fileHasExpired(f.createdOn)) match {
+        supportingEvidence.filter(f => fileHasExpired(f.uploadedOn)) match {
           case h :: t => Some(NonEmptyList(h, t) -> answers)
           case Nil    => None
         }

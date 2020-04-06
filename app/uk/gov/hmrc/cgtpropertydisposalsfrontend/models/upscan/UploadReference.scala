@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
+import cats.Eq
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 import play.api.mvc.PathBindable
@@ -33,7 +34,7 @@ object UploadReference {
       override def unbind(key: String, value: UploadReference): String =
         stringBinder.unbind(key, value.value)
     }
-
+  implicit val eq: Eq[UploadReference] = Eq.fromUniversalEquals
   implicit val format: Format[UploadReference] =
     implicitly[Format[String]].inmap(UploadReference(_), _.value)
 }
