@@ -20,13 +20,14 @@ import java.time.LocalDateTime
 
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference
 
 sealed trait SupportingEvidenceAnswers extends Product with Serializable
 
 object SupportingEvidenceAnswers {
 
   final case class SupportingEvidence(
-    reference: String,
+    uploadReference: UploadReference,
     fileName: String,
     createdOn: LocalDateTime
   )

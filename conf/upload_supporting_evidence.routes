@@ -6,10 +6,10 @@ GET    /supporting-evidence/upload-supporting-evidence                      uk.g
 GET    /supporting-evidence/upload-supporting-evidence-virus-check/:id      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(id : uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference)
 POST   /supporting-evidence/upload-supporting-evidence-virus-check          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(id : String)
 
-GET    /supporting-documents/change-supporting-evidence/:id                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.changeSupportingEvidence(id : String)
-POST   /supporting-documents/change-supporting-evidence/:id/:id2            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.changeSupportingEvidenceSubmit(id : String, id2: String)
+#GET    /supporting-documents/change-supporting-evidence/:id                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.changeSupportingEvidence(id : String)
+#POST   /supporting-documents/change-supporting-evidence/:id/:id2            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.changeSupportingEvidenceSubmit(id : String, id2: String)
 
-GET    /supporting-documents/delete-supporting-evidence/:id                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.deleteSupportingEvidence(id: String)
+GET    /supporting-documents/delete-supporting-evidence/:id                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.deleteSupportingEvidence(id: uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference)
 
 #GET    /supporting-documents/expired                                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.supportingEvidenceExpired()
 

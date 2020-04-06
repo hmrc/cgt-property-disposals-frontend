@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -36,7 +36,7 @@
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(uploadReference : String, filename : String)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(uploadReference : UploadReference, filename : String)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
     @key = @{"upload-supporting-evidence.check-upscan-status"}
     @cyaKey = @{"upload-supporting-evidence.check-your-answers"}
@@ -60,7 +60,7 @@
                 Failed
             </dd>
             <dd class="cya-change">
-                <a href=@routes.SupportingEvidenceController.changeSupportingEvidence(uploadReference).url>
+                <a href=@routes.SupportingEvidenceController.uploadSupportingEvidence().url>
                     @messages(s"$cyaKey.cya-change") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
                 </a>
             </dd>
@@ -72,7 +72,7 @@
         </div>
     </dl>
 
-    @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(uploadReference), 'novalidate -> "novalidate") {
+    @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(uploadReference.value), 'novalidate -> "novalidate") {
         @submitButton(messages("button.saveAndContinue"))
     }
 
