@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
+import java.util.Base64
+
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
@@ -30,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, rou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -74,9 +76,22 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   def checkAllAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) { (_, fillingOutReturn, completeReturn) =>
+      val cyaPageB64Html =
+        B64Html(
+          new String(
+            Base64.getEncoder.encode(
+              checkAllAnswersPage(
+                completeReturn,
+                rebasingEligibilityUtil,
+                fillingOutReturn.subscribedDetails.isATrust
+              ).toString().getBytes
+            )
+          )
+        )
+
       val result =
         for {
-          response <- EitherT.liftF(submitReturn(completeReturn, fillingOutReturn))
+          response <- EitherT.liftF(submitReturn(completeReturn, fillingOutReturn, cyaPageB64Html))
           newJourneyStatus = response match {
             case _: SubmitReturnError =>
               SubmitReturnFailed(
@@ -118,7 +133,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     }
   }
 
-  private def submitReturn(completeReturn: CompleteReturn, fillingOutReturn: FillingOutReturn)(
+  private def submitReturn(completeReturn: CompleteReturn, fillingOutReturn: FillingOutReturn, cyaPageB64Html: B64Html)(
     implicit hc: HeaderCarrier
   ): Future[SubmitReturnResult] =
     returnsService
@@ -127,7 +142,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
           completeReturn,
           fillingOutReturn.draftReturn.id,
           fillingOutReturn.subscribedDetails,
-          fillingOutReturn.agentReferenceNumber
+          fillingOutReturn.agentReferenceNumber,
+          cyaPageB64Html
         )
       )
       .bimap(

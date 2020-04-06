@@ -39,6 +39,7 @@
 )
 
 @(form : Form[FileUpload], upscanUpload: UpscanUpload, backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
     @key = @{ "mandatoryEvidence" }
     @fieldId = @{ "file" }
     @title = @{messages(s"$key.title")}
@@ -49,6 +50,7 @@
 
     @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
+
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
@@ -58,14 +60,9 @@
     @caption(messages("ytdLiability.caption"))
 
     <form action="@href" method="post" enctype="multipart/form-data">
-
-
-        @for((k,v) <- meta){
-            <input type="hidden" id="@k" name="@k" value="@v">
-        }
-
-        <input type="hidden" id="reference" name="reference" value="@ref">
-
+    @for((k,v) <- meta){
+        <input type="hidden" id="@k" name="@k" value="@v">
+    }
 
         @fileInput(
             fieldId = fieldId,

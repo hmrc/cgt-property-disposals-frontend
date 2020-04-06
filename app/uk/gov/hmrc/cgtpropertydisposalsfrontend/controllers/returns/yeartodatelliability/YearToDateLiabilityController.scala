@@ -1161,8 +1161,52 @@ class YearToDateLiabilityController @Inject() (
       Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
     }
 
-  def uploadMandatoryEvidenceFailure(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    errorHandler.errorResult()
+  def uploadMandatoryEvidenceFailure(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        def handlePendingUpscanUpload(
+          pendingUpscanUpload: UpscanUpload,
+          answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
+        ): Future[Result] =
+          removePendingUpscanUpload(pendingUpscanUpload, answers, fillingOutReturn).fold({ e =>
+            logger.warn("Could not update session", e)
+            errorHandler.errorResult()
+          }, _ => errorHandler.errorResult())
+
+        answers match {
+          case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
+            handlePendingUpscanUpload(pendingUpscanUpload, Left(n))
+          case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
+            handlePendingUpscanUpload(pendingUpscanUpload, Right(c))
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
+      }
+  }
+
+  private def removePendingUpscanUpload(
+    pendingUpscanUpload: UpscanUpload,
+    answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
+    fillingOutReturn: FillingOutReturn
+  )(implicit request: RequestWithSessionData[_]): EitherT[Future, Error, Unit] = {
+    val newAnswers = answers.fold(_.copy(pendingUpscanUpload = None), _.copy(pendingUpscanUpload = None))
+    val newDraftReturn = fillingOutReturn.draftReturn.fold(
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+    )
+
+    for {
+      _ <- returnsService.storeDraftReturn(
+            newDraftReturn,
+            fillingOutReturn.subscribedDetails.cgtReference,
+            fillingOutReturn.agentReferenceNumber
+          )
+      _ <- EitherT(
+            updateSession(sessionStore, request)(
+              _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+            )
+          )
+    } yield ()
   }
 
   private def storeUpscanSuccessOrFailure(
@@ -1245,8 +1289,14 @@ class YearToDateLiabilityController @Inject() (
       case IncompleteNonCalculatedYTDAnswers(_, _, _, _, Some(expiredEvidence), _) =>
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
-        Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
+      case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
+        removePendingUpscanUpload(pendingUpscanUpload, Left(n), fillingOutReturn).fold(
+          { e =>
+            logger.warn("Could not remove pending upscan upload", e)
+            errorHandler.errorResult()
+          },
+          _ => Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
+        )
 
       case IncompleteNonCalculatedYTDAnswers(None, _, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxableGainOrLoss())
@@ -1321,8 +1371,14 @@ class YearToDateLiabilityController @Inject() (
       case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, Some(expiredEvidence), _) =>
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
-        Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
+      case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
+        removePendingUpscanUpload(pendingUpscanUpload, Right(c), fillingOutReturn).fold(
+          { e =>
+            logger.warn("Could not remove pending upscan upload", e)
+            errorHandler.errorResult()
+          },
+          _ => Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
+        )
 
       case IncompleteCalculatedYTDAnswers(None, _, _, _, _, _, _, _) if !isATrust(fillingOutReturn) =>
         Redirect(routes.YearToDateLiabilityController.estimatedIncome())
