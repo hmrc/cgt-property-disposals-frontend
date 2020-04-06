@@ -14,25 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
-
-import java.util.UUID
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.B64Html
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 
-final case class SubmitReturnRequest(
-  completeReturn: CompleteReturn,
-  id: UUID,
-  subscribedDetails: SubscribedDetails,
-  agentReferenceNumber: Option[AgentReferenceNumber],
-  checkYourAnswerPageHtml: B64Html
-)
+final case class B64Html(value: String) extends AnyVal
 
-object SubmitReturnRequest {
-
-  implicit val format: OFormat[SubmitReturnRequest] = Json.format
-
+object B64Html {
+  implicit val format: OFormat[B64Html] = Json.format[B64Html]
 }
