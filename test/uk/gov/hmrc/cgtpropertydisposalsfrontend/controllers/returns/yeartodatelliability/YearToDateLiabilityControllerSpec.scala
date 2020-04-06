@@ -2093,6 +2093,7 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.uploadMandatoryEvidence()
             )
           }
+
         }
 
         "redirect to the file expired page" when {
@@ -2105,19 +2106,6 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
             )
 
-          }
-
-        }
-
-        "redirect to the file scanning page" when {
-
-          "there is an a pending upscan upload in session" in {
-            testRedirectWhenIncompleteAnswers(
-              allQuestionAnswered.copy(
-                pendingUpscanUpload = Some(sample[UpscanUpload])
-              ),
-              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
-            )
           }
 
         }
@@ -2319,19 +2307,6 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
             )
 
-          }
-
-        }
-
-        "redirect to the file scanning page" when {
-
-          "there is an a pending upscan upload in session" in {
-            testRedirectWhenIncompleteAnswers(
-              allQuestionAnswered.copy(
-                pendingUpscanUpload = Some(sample[UpscanUpload])
-              ),
-              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
-            )
           }
 
         }
