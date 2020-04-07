@@ -2089,11 +2089,11 @@ upload-supporting-evidence.check-upscan-status.caption=Supporting evidence
 upload-supporting-evidence.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
 upload-supporting-evidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
 upload-supporting-evidence.check-upscan-status.passed.help-text=Your supporting evidence file has been successfully saved and scanned. We will save it for 7 days or until you submit your return when it will be attached to your submission.
-upload-supporting-evidence.check-upscan-status.failed.cya-change=Upload another file
 upload-supporting-evidence.check-upscan-status.passed=Passed
 upload-supporting-evidence.check-upscan-status.failed=Failed
 upload-supporting-evidence.check-upscan-status.uploaded=Scan in progress
 upload-supporting-evidence.check-upscan-status.button.checkAgain=Check status and continue
+upload-supporting-evidence.check-upscan-status.button.uploadAnotherFile=Upload another file
 
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement

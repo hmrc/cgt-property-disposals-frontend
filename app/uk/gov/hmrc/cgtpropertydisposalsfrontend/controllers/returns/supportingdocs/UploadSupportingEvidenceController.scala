@@ -329,13 +329,8 @@ class SupportingEvidenceController @Inject() (
                   case Some(_: UpscanSuccess) =>
                     Redirect(routes.SupportingEvidenceController.checkYourAnswers())
 
-                  case Some(failure: UpscanFailure) =>
-                    Ok(
-                      uploadSupportingEvidenceCallBackFailed(
-                        uploadReference,
-                        failure.fileName
-                      )
-                    )
+                  case Some(_: UpscanFailure) =>
+                    Ok(uploadSupportingEvidenceCallBackFailed())
 
                   case None =>
                     Ok(uploadSupportingEvidenceCallBackNotReceived(upscanUpload))
