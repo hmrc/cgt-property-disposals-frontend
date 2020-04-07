@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -36,7 +35,7 @@
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(uploadReference : UploadReference, filename : String)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
     @key = @{"upload-supporting-evidence.check-upscan-status"}
     @cyaKey = @{"upload-supporting-evidence.check-your-answers"}
@@ -47,33 +46,10 @@
     @caption(messages(s"$cyaKey.caption"))
     @pageHeading(title)
 
-    <p>
-        @{messages(s"$key.failed.help-text")}
-    </p>
-
-    <dl class="govuk-check-your-answers cya-questions-long">
-        <div>
-            <dt class="cya-question" id="status-filename">
-                @filename
-            </dt>
-            <dd class="cya-answer">
-                Failed
-            </dd>
-            <dd class="cya-change">
-                <a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(uploadReference, addNew = true).url>
-                    @messages(s"$cyaKey.cya-change") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
-                </a>
-            </dd>
-            <dd class="cya-change">
-                <a href=@routes.SupportingEvidenceController.deleteSupportingEvidence(uploadReference, addNew = false).url>
-                    @messages(s"$cyaKey.cya-delete") <span class="visuallyhidden"> @messages(s"$cyaKey.assistive", "name of file")</span>
-                </a>
-            </dd>
-        </div>
-    </dl>
+    <p>@{messages(s"$key.failed.help-text")}</p>
 
     @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidence(), 'novalidate -> "novalidate") {
-        @submitButton(messages("button.saveAndContinue"))
+        @submitButton(messages(s"$key.button.uploadAnotherFile"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
