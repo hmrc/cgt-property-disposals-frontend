@@ -21,7 +21,7 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.BuildSubscriptionDataError
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
@@ -68,7 +68,8 @@ class StartController @Inject() (
   subscriptionService: SubscriptionService,
   weNeedMoreDetailsPage: views.html.onboarding.we_need_more_details,
   weOnlySupportGGPage: views.html.onboarding.we_only_support_gg,
-  timedOutPage: views.html.timed_out
+  timedOutPage: views.html.timed_out,
+  agentNoEnrolmentPage: views.html.agent_no_enrolment
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
@@ -112,8 +113,9 @@ class StartController @Inject() (
 
   def signOutAndSignIn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(NonGovernmentGatewayJourney) => Redirect(routes.StartController.start()).withNewSession
-      case _                                 => Redirect(routes.StartController.start())
+      case Some(NonGovernmentGatewayJourney | AgentWithoutAgentEnrolment) =>
+        Redirect(routes.StartController.start()).withNewSession
+      case _ => Redirect(routes.StartController.start())
     }
   }
 
@@ -121,11 +123,21 @@ class StartController @Inject() (
 
   def timedOut(): Action[AnyContent] = Action(implicit request => Ok(timedOutPage()))
 
+  def agentNoEnrolment(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(AgentWithoutAgentEnrolment) => Ok(agentNoEnrolmentPage())
+      case _                                => Redirect(routes.StartController.start())
+    }
+  }
+
   private def handleSessionJourneyStatus(
     journeyStatus: JourneyStatus
   )(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = journeyStatus match {
     case _: Subscribed =>
       Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
+
+    case AgentWithoutAgentEnrolment =>
+      Redirect(routes.StartController.agentNoEnrolment())
 
     case AlreadySubscribedWithDifferentGGAccount(_, _) =>
       Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
@@ -172,9 +184,15 @@ class StartController @Inject() (
     retrievedUserType: RetrievedUserType
   )(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = retrievedUserType match {
     case RetrievedUserType.Agent(ggCredId, arn) =>
+      val journeyStatusWithRedirect =
+        arn.fold[(JourneyStatus, Call)](AgentWithoutAgentEnrolment -> routes.StartController.agentNoEnrolment())(a =>
+          AgentStatus.AgentSupplyingClientDetails(a, ggCredId, None) -> agents.routes.AgentAccessController
+            .enterClientsCgtRef()
+        )
+
       updateSession(sessionStore, request)(
         _.copy(
-          journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None)),
+          journeyStatus = Some(journeyStatusWithRedirect._1),
           userType      = Some(UserType.Agent)
         )
       ).map {
@@ -183,7 +201,7 @@ class StartController @Inject() (
           errorHandler.errorResult(Some(UserType.Agent))
 
         case Right(_) =>
-          Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
+          Redirect(journeyStatusWithRedirect._2)
       }
 
     case RetrievedUserType.Subscribed(cgtReference, ggCredId) =>

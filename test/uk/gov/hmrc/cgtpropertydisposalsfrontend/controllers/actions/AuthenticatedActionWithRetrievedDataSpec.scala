@@ -303,17 +303,6 @@ class AuthenticatedActionWithRetrievedDataSpec
           checkIsTechnicalErrorPage(performAction(FakeRequest()))
         }
 
-        "a gg cred id can be found but no agent enrolment can be found" in {
-          val retrievalsResult = Future successful (
-            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Agent)) and
-              None and None and None and emptyEnrolments and Some(ggCredentials)
-          )
-
-          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
-
-          checkIsTechnicalErrorPage(performAction(FakeRequest()))
-        }
-
         "a gg cred id and an agent enrolment can be found but no agent reference nubmer can be found" in {
           val enrolments = Enrolments(Set(Enrolment(AgentsEnrolment.key)))
 
@@ -347,7 +336,23 @@ class AuthenticatedActionWithRetrievedDataSpec
               None and None and None and enrolments and Some(ggCredentials)
           )
 
-          val expectedRetrieval = RetrievedUserType.Agent(ggCredId, arn)
+          val expectedRetrieval = RetrievedUserType.Agent(ggCredId, Some(arn))
+
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+          val result = performAction(FakeRequest())
+
+          status(result)        shouldBe OK
+          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
+        }
+
+        "an arn cannot be found" in {
+          val retrievalsResult = Future successful (
+            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Agent)) and
+              None and None and None and emptyEnrolments and Some(ggCredentials)
+          )
+
+          val expectedRetrieval = RetrievedUserType.Agent(ggCredId, None)
 
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 

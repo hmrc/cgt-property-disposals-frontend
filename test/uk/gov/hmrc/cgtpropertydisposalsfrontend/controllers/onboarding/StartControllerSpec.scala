@@ -32,13 +32,14 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.cgtpropertydisposalsfrontend._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, StartController, agents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, SubscriptionStatus, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, SubscriptionStatus, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -1699,7 +1700,7 @@ class StartControllerSpec
           ""
         )
 
-        "redirect to the enter client's cgt reference page" when {
+        "redirect to the enter client's cgt reference page when the agent has an agent reference number and" when {
 
           "the session indicates that they are entering a client's details" in {
             inSequence {
@@ -1783,9 +1784,9 @@ class StartControllerSpec
 
         }
 
-        "show an error page" when {
+        "redirect to the agent no enrolment page when the agent has no agent reference number and" when {
 
-          "there is initially no session data and the journey status cannot be updated successfully" in {
+          "the session indicated they do not have an agent enrolment" in {
             inSequence {
               mockAuthWithAllRetrievals(
                 ConfidenceLevel.L50,
@@ -1793,14 +1794,69 @@ class StartControllerSpec
                 None,
                 None,
                 None,
-                Set(agentsEnrolment),
+                Set.empty,
+                Some(retrievedGGCredId)
+              )
+              mockGetSession(
+                SessionData.empty.copy(
+                  userType      = Some(UserType.Agent),
+                  journeyStatus = Some(AgentWithoutAgentEnrolment)
+                )
+              )
+            }
+
+            checkIsRedirect(
+              performAction(),
+              controllers.routes.StartController.agentNoEnrolment()
+            )
+          }
+
+          "there is initially no session data and the journey status is updated successfully" in {
+            inSequence {
+              mockAuthWithAllRetrievals(
+                ConfidenceLevel.L50,
+                Some(AffinityGroup.Agent),
+                None,
+                None,
+                None,
+                Set.empty,
                 Some(retrievedGGCredId)
               )
               mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.Agent),
-                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
+                  journeyStatus = Some(AgentWithoutAgentEnrolment)
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(),
+              controllers.routes.StartController.agentNoEnrolment()
+            )
+          }
+
+        }
+
+        "show an error page" when {
+
+          "there is initially no session data and the agent has an arn the journey status cannot be updated successfully" in {
+            inSequence {
+              mockAuthWithAllRetrievals(
+                ConfidenceLevel.L50,
+                Some(AffinityGroup.Agent),
+                None,
+                None,
+                None,
+                Set.empty,
+                Some(retrievedGGCredId)
+              )
+              mockGetSession(Right(None))
+              mockStoreSession(
+                SessionData.empty.copy(
+                  userType      = Some(UserType.Agent),
+                  journeyStatus = Some(AgentWithoutAgentEnrolment)
                 )
               )(Left(Error("")))
             }
@@ -2056,19 +2112,26 @@ class StartControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(Seq.empty), {
           case NonGovernmentGatewayJourney => true
+          case AgentWithoutAgentEnrolment  => true
           case _                           => false
         }
       )
 
       "trash the session adn redirect to the gg registration service" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney)))
+        List(
+          NonGovernmentGatewayJourney,
+          AgentWithoutAgentEnrolment
+        ).foreach { journey =>
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(journey)))
+          }
+
+          val result = performAction(Seq("key" -> "value"))
+          checkIsRedirect(result, controllers.routes.StartController.start())
+          session(result).data shouldBe Map.empty
         }
 
-        val result = performAction(Seq("key" -> "value"))
-        checkIsRedirect(result, controllers.routes.StartController.start())
-        session(result).data shouldBe Map.empty
       }
 
     }

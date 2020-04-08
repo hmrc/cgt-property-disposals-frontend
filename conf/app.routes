@@ -3,6 +3,7 @@ GET /start/report-pay-capital-gains-tax-uk-property                         uk.g
 GET /manage-clients-capital-gains-tax-on-uk-property-account                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.agentsLandingPage()
 GET /start/report-pay-capital-gains-tax-uk-property/sign-in                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.signInPage()
 
+GET /exit/gen-a-hmrc-agent-services-account                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.agentNoEnrolment()
 GET /exit/cannot-check-details                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weOnlySupportGG()
 
 GET /start                                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
