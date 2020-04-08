@@ -161,8 +161,8 @@
       return handleFileUploadError(singleFileUpload, "The file type " + file.type.toString() + " is not supported.");
     }
 
-    if (file.size > (5242880)) {
-      return handleFileUploadError(singleFileUpload, "The file must be less than 5MB in size");
+    if (file.size > (3145728)) {
+      return handleFileUploadError(singleFileUpload, "The file must be less than 3MB in size");
     }
     if (submitForm) {
       form.submit();
