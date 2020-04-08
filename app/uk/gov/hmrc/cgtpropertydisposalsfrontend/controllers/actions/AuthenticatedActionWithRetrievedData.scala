@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import cats.instances.either._
 import cats.instances.future._
+import cats.instances.option._
 import cats.syntax.either._
+import cats.syntax.traverse._
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
@@ -231,18 +234,17 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     ggCredId: GGCredId,
     allEnrolments: Enrolments
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
-    val maybeArn = for {
-      agentEnrolment <- Either.fromOption(
-                         allEnrolments.getEnrolment(AgentsEnrolment.key),
-                         s"Agent has no ${AgentsEnrolment.key} enrolment"
-                       )
-      arn <- Either.fromOption(
-              agentEnrolment
-                .getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier)
-                .map(id => AgentReferenceNumber(id.value)),
-              s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
-            )
-    } yield arn
+    val maybeArn = allEnrolments
+      .getEnrolment(AgentsEnrolment.key)
+      .map { enrolment =>
+        Either.fromOption(
+          enrolment
+            .getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier)
+            .map(id => AgentReferenceNumber(id.value)),
+          s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
+        )
+      }
+      .sequence[Either[String, ?], AgentReferenceNumber]
 
     maybeArn.fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]](
       { e =>

@@ -2134,3 +2134,9 @@ mandatoryEvidence.check-upscan-status.failed=Failed
 mandatoryEvidence.check-upscan-status.changeFile=Change file
 mandatoryEvidence.check-upscan-status.button.checkStatusAndContinue=Check status and continue
 mandatoryEvidence.check-upscan-status.button.uploadAnotherFile=Upload another file
+
+agentNoEnrolment.title=Use your agents services account to access this service
+agentNoEnrolment.p1=You’ll need to sign in using your agent services account user ID and password. If you do not have one, you’ll need to <a href="{0}">create an agent services account</a>.
+agentNoEnrolment.p2=Do not use sign in details for an HMRC online services for agents account.
+agentNoEnrolment.button.tryAgain=Try again
+
