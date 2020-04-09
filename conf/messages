@@ -1654,7 +1654,7 @@ calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
 mandatoryEvidence.title=Upload a document showing how the Capital gains Tax due was worked out
-mandatoryEvidence.helpText=Files can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 7 days.
+mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 7 days.
 
 mandatoryEvidenceExpired.title=Your uploaded file has expired
 mandatoryEvidenceExpired.p1=Uploaded files can only be kept for 7 days before they expire. You must either upload the file again or replace it with another before you can continue.
@@ -2057,7 +2057,7 @@ do-you-want-to-upload-supporting-evidence.title=Do you want to upload any suppor
 do-you-want-to-upload-supporting-evidence.error.required=Select yes if you want to upload supporting evidence
 do-you-want-to-upload-supporting-evidence.error.boolean=Select yes if you want to upload supporting evidence
 do-you-want-to-upload-supporting-evidence.caption=Supporting evidence
-do-you-want-to-upload-supporting-evidence.help-text=Up to 4 documents can be uploaded. For example, spreadsheets with calculations, invoices, receipts or valuations.
+do-you-want-to-upload-supporting-evidence.help-text=Up to 2 documents can be uploaded. For example, spreadsheets with calculations, invoices, receipts or valuations.
 
 upload-supporting-evidence.check-your-answers.title=Check your answers
 upload-supporting-evidence.check-your-answers.caption=Supporting evidence
@@ -2079,7 +2079,7 @@ upload-supporting-evidence.expired.cya-change=Change
 upload-supporting-evidence.supporting-evidence.title=Upload a document with your supporting evidence
 upload-supporting-evidence.supporting-evidence.caption=Supporting evidence
 upload-supporting-evidence.supporting-evidence.error.required=Upload a file containing your supporting evidence
-upload-supporting-evidence.supporting-evidence.help-text=The file can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
+upload-supporting-evidence.supporting-evidence.help-text=The file can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
 file.error.required=Select a file containing your supporting evidence
 
 
