@@ -401,14 +401,11 @@ class SupportingEvidenceController @Inject() (
               expiredEvidences = incomplete.expiredEvidences.filterNot(_.uploadReference === uploadReference)
             ), { complete =>
             val newEvidences = complete.evidences.filterNot(_.uploadReference === uploadReference)
-            if (newEvidences.isEmpty)
-              IncompleteSupportingEvidenceAnswers(
-                Some(complete.doYouWantToUploadSupportingEvidence),
-                List.empty,
-                List.empty
-              )
-            else
-              complete.copy(evidences = newEvidences)
+            IncompleteSupportingEvidenceAnswers(
+              Some(complete.doYouWantToUploadSupportingEvidence),
+              newEvidences,
+              List.empty
+            )
           }
         )
 
