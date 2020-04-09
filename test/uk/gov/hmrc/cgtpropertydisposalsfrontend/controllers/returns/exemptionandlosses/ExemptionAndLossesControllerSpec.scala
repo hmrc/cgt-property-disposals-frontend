@@ -308,7 +308,7 @@ class ExemptionAndLossesControllerSpec
 
     }
 
-    "handling submitted in year losses" must {
+    "handling submitted in year losses page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.inYearLossesSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
@@ -345,7 +345,7 @@ class ExemptionAndLossesControllerSpec
         )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(expectedErrorKey)(
+          testFormError(data: _*)("inYearLosses", expectedErrorKey)(
             "inYearLosses.title",
             disposalDate.taxYear.startDateInclusive.getYear.toString,
             disposalDate.taxYear.endDateExclusive.getYear.toString
@@ -641,7 +641,7 @@ class ExemptionAndLossesControllerSpec
 
     }
 
-    "handling submitted in previous years losses" must {
+    "handling submitted in previous years losses page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.previousYearsLossesSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
@@ -670,7 +670,7 @@ class ExemptionAndLossesControllerSpec
       "show a form error" when {
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(expectedErrorKey)("previousYearsLosses.title")(performAction)
+          testFormError(data: _*)("previousYearsLosses", expectedErrorKey)("previousYearsLosses.title")(performAction)
 
         "no option has been selected" in {
           test()("previousYearsLosses.error.required")
@@ -1004,7 +1004,7 @@ class ExemptionAndLossesControllerSpec
 
     }
 
-    "handling submitted annual exempt amounts" must {
+    "handling submitted annual exempt amounts page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.annualExemptAmountSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
@@ -1066,6 +1066,7 @@ class ExemptionAndLossesControllerSpec
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
           testFormError(data: _*)(
+            "annualExemptAmount",
             expectedErrorKey,
             MoneyUtils.formatAmountOfMoneyWithoutPoundSign(disposalDate.taxYear.annualExemptAmountGeneral.inPounds())
           )("annualExemptAmount.title")(performAction, currentSession)
@@ -1403,7 +1404,7 @@ class ExemptionAndLossesControllerSpec
 
   def testFormError(
     data: (String, String)*
-  )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
+  )(key: String, expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithSingleDisposalState(
       sample[CompleteExemptionAndLossesAnswers],
@@ -1424,6 +1425,12 @@ class ExemptionAndLossesControllerSpec
           errorArgs: _*
         )
         doc.title() should startWith("Error:")
+
+        val topErrorMsg     = doc.select(s"""a[href="#$key"]""").text()
+        val inlineErrorMsg  = doc.select(s"""span[id="$key-inline-error"]""").text()
+        val topErrorMessage = if (topErrorMsg.nonEmpty) "Error: " + topErrorMsg else topErrorMsg
+
+        topErrorMessage shouldEqual inlineErrorMsg
       },
       BAD_REQUEST
     )
