@@ -901,7 +901,7 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "annualExemptAmount.individual.title"
+              "annualExemptAmount.title"
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.ExemptionAndLossesController.previousYearsLosses().url
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
@@ -926,7 +926,7 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "annualExemptAmount.individual.title"
+              "annualExemptAmount.title"
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.ExemptionAndLossesController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
@@ -953,13 +953,13 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "annualExemptAmount.individual.title"
+              "annualExemptAmount.title"
             ), { doc =>
               doc.select("#annualExemptAmount-form-hint").text() contains messageFromMessageKey(
-                "annualExemptAmount.individual.helpText"
+                "annualExemptAmount.helpText"
               )
               doc.select("#content > article > form > p > a").text() contains messageFromMessageKey(
-                "annualExemptAmount.individual.link"
+                "annualExemptAmount.link"
               )
             }
           )
@@ -1068,7 +1068,7 @@ class ExemptionAndLossesControllerSpec
           testFormError(data: _*)(
             expectedErrorKey,
             MoneyUtils.formatAmountOfMoneyWithoutPoundSign(disposalDate.taxYear.annualExemptAmountGeneral.inPounds())
-          )("annualExemptAmount.individual.title")(performAction, currentSession)
+          )("annualExemptAmount.title")(performAction, currentSession)
 
         "the amount of money is invalid" in {
           amountOfMoneyErrorScenarios("annualExemptAmount", maximumAnnualExemptAmount.inPounds()).foreach { scenario =>

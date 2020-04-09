@@ -45,7 +45,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @key = @{request.userType match {
     case Some(UserType.Agent) => "annualExemptAmount.agent"
     case Some(UserType.Organisation) => "annualExemptAmount.trust"
-    case _ => "annualExemptAmount.individual"
+    case _ => "annualExemptAmount"
 }}
 @helpTextKey = @{if(isTrust) s"$baseKey.trust" else key}
 @title = @{messages(s"$key.title")}
