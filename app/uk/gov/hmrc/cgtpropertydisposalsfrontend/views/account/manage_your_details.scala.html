@@ -55,7 +55,7 @@
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 
  @pageHeading(title, Some(messages("account.caption")))
-  @cyaSection(None, Some("no-border")) {
+  @cyaSection(None, Some("cya-questions-long no-border")) {
     @cyaRow(
       messages("account.manageYourDetails.subtitle"),
       Html(details.cgtReference.value),

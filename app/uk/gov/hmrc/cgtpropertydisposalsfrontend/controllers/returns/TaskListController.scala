@@ -182,10 +182,7 @@ class TaskListController @Inject() (
           .map(_ -> answers)
       }
 
-  private def fileHasExpired(createdOnTimestamp: LocalDateTime): Boolean = {
-    val p = createdOnTimestamp.plusSeconds(s3UrlExpirySeconds)
-    println(s"Got p=$p,  now ${TimeUtils.now()}\n\n")
-    p.isBefore(TimeUtils.now())
-  }
+  private def fileHasExpired(createdOnTimestamp: LocalDateTime): Boolean =
+    createdOnTimestamp.plusSeconds(s3UrlExpirySeconds).isBefore(TimeUtils.now())
 
 }
