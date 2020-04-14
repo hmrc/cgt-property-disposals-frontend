@@ -8,8 +8,8 @@ POST   /supporting-evidence/upload-supporting-evidence-virus-check        uk.gov
 
 GET    /supporting-evidence/delete-supporting-evidence/:id                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.deleteSupportingEvidence(id: uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference, addNew: Boolean)
 
-GET    /supporting-evidence/expired                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.supportingEvidenceExpired()
-POST   /supporting-evidence/expired                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.supportingEvidenceExpiredSubmit()
+GET    /supporting-evidence/documents-deleted                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.supportingEvidenceExpired()
+POST   /supporting-evidence/documents-deleted                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.supportingEvidenceExpiredSubmit()
 
 GET    /supporting-evidence/check-your-answers                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.checkYourAnswers()
 POST   /supporting-evidence/check-your-answers                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.checkYourAnswersSubmit()
