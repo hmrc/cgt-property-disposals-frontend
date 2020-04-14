@@ -2068,13 +2068,13 @@ upload-supporting-evidence.check-your-answers.assistive=the file named {0}
 upload-supporting-evidence.check-your-answers.cya-delete=Delete
 upload-supporting-evidence.check-your-answers.add-another-file=Add another file
 
-upload-supporting-evidence.expired.title=Your uploaded supporting evidence has expired
-upload-supporting-evidence.expired.p1=Uploaded files can only be kept for 7 days before they expire. You can either upload these files again or delete them from your return.
+upload-supporting-evidence.expired.title=For your security, we deleted these documents
+upload-supporting-evidence.expired.p1=We save documents for 7 days.
+upload-supporting-evidence.expired.p2=If you want to add these documents to your return, you’ll need to try and upload them again.
 upload-supporting-evidence.expired.caption=Supporting evidence
-upload-supporting-evidence.expired.do-you-want-to-upload-documents=Do you want to upload any supporting evidence?
-upload-supporting-evidence.expired.label=Supporting evidence file
-upload-supporting-evidence.expired.cya-change=Change
-
+upload-supporting-evidence.expired.file-label=Document {0}
+upload-supporting-evidence.expired.deleted=Deleted
+upload-supporting-evidence.expired.button.tryAgain=Try again
 
 upload-supporting-evidence.supporting-evidence.title=Upload a document with your supporting evidence
 upload-supporting-evidence.supporting-evidence.caption=Supporting evidence

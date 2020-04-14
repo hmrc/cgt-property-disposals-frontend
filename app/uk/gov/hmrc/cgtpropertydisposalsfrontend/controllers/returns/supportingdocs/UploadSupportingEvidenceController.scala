@@ -549,6 +549,54 @@ class SupportingEvidenceController @Inject() (
     }
   }
 
+  def supportingEvidenceExpiredSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withUploadSupportingEvidenceAnswers(request) { (_, _, _, fillingOutReturn, answers) =>
+        answers match {
+          case IncompleteSupportingEvidenceAnswers(_, _, expired) if expired.nonEmpty =>
+            val updatedAnswers = answers.fold(
+              _.copy(expiredEvidences = List.empty),
+              complete =>
+                IncompleteSupportingEvidenceAnswers(
+                  Some(complete.doYouWantToUploadSupportingEvidence),
+                  complete.evidences,
+                  List.empty
+                )
+            )
+            val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
+              _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+            )
+
+            val result = for {
+              _ <- returnsService.storeDraftReturn(
+                    updatedDraftReturn,
+                    fillingOutReturn.subscribedDetails.cgtReference,
+                    fillingOutReturn.agentReferenceNumber
+                  )
+              _ <- EitherT(
+                    updateSession(sessionStore, request)(
+                      _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
+                    )
+                  )
+            } yield ()
+
+            result.fold(
+              { e =>
+                logger.warn("Could not update draft return", e)
+                errorHandler.errorResult()
+              }, { _ =>
+                logger.info(s"Deleted expired evidence}")
+                Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+              }
+            )
+
+          case _ =>
+            Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+        }
+      }
+  }
+
 }
 
 object SupportingEvidenceController {

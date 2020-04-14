@@ -43,6 +43,9 @@
 
   function labelText(el) {
     var fieldId = el.getAttribute('data-focuses') || el.id;
+    if (fieldId.indexOf('address-select') !== -1) {
+      return 'matching address selection'
+    }
     var label = document.querySelector('label[for="' + fieldId + '"]');
     if (label) {
       return textContent(label);
