@@ -18,10 +18,10 @@
 
 @this()
 
-@(heading: Option[String] = None, classes: Option[String] = None)(rows: => Html)
+@(heading: Option[String] = None, classes: Option[String] = Some("cya-questions-long"))(rows: => Html)
 
 @heading.map(h => Html(s"""<h2 class="heading-medium">$h</h2>"""))
 
-<dl class="govuk-check-your-answers cya-questions-long@{classes.map(c => s" $c")}">
+<dl class="govuk-check-your-answers@{classes.map(c => s" $c")}">
   @rows
 </dl>
