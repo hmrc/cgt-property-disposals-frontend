@@ -1420,7 +1420,6 @@ class ExemptionAndLossesControllerSpec
     checkPageIsDisplayed(
       performAction(data),
       messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
-      
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
@@ -1428,7 +1427,7 @@ class ExemptionAndLossesControllerSpec
 
         doc.title() should startWith("Error:")
 
-        val errorSummary     = doc.select(s"""a[href="#$key"]""").text()
+        val errorSummary    = doc.select(s"""a[href="#$key"]""").text()
         val inlineErrorMsg  = doc.select(s"""span[id="$key-inline-error"]""").text()
         val errorSummaryMsg = if (errorSummary.nonEmpty) "Error: " + errorSummary else errorSummary
 
