@@ -31,6 +31,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
@@ -2067,12 +2068,12 @@ class SingleDisposalsTriageControllerSpec
             Scenario(
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.Capacitor)),
               Right(sample[IndividualName]),
-              routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled
+              representee.routes.RepresenteeController.enterName()
             ),
             Scenario(
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
               Right(sample[IndividualName]),
-              routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled
+              representee.routes.RepresenteeController.enterName()
             )
           ).foreach {
             case Scenario(state, name, expectedRedirect) =>
@@ -2276,6 +2277,7 @@ class SingleDisposalsTriageControllerSpec
           None,
           None,
           None,
+          startingNewDraftReturn.representeeAnswers,
           TimeUtils.today()
         )
       )
