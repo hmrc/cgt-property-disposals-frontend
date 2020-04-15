@@ -94,7 +94,7 @@
   }
 
   @cyaRow(
-    messages(if(isATrust) "annualExemptAmount.trust.title" else "annualExemptAmount.individual.title"),
+    messages(if(isATrust) "annualExemptAmount.trust.title" else "annualExemptAmount.title"),
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),
     Some(cyaChange(messages("exemptionsAndLosses.cyaChange.annualExemptAmount"), routes.ExemptionAndLossesController.annualExemptAmount().url)),
     "annualExemptAmount"

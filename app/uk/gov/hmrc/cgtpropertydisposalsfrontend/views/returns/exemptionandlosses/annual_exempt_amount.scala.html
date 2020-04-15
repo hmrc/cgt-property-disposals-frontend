@@ -43,9 +43,9 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate, isTrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @baseKey = @{ "annualExemptAmount" }
 @key = @{request.userType match {
-    case Some(UserType.Agent) => "annualExemptAmount.agent"
-    case Some(UserType.Organisation) => "annualExemptAmount.trust"
-    case _ => "annualExemptAmount.individual"
+    case Some(UserType.Agent) => s"$baseKey.agent"
+    case Some(UserType.Organisation) => s"$baseKey.trust"
+    case _ => baseKey
 }}
 @helpTextKey = @{if(isTrust) s"$baseKey.trust" else key}
 @title = @{messages(s"$key.title")}
