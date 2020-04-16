@@ -35,6 +35,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{SelectorAndValue, TagAttributePairAndValue, TrustAgentOrIndividualDisplay}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, triage}
@@ -2934,19 +2935,19 @@ class MultipleDisposalsTriageControllerSpec
         )
       }
 
-      "redirect to the capacitors and personal representatives not handled page" when {
+      "redirect to the enter represented person's name page page" when {
 
         "an individual user type of capacitor is found" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.Capacitor)),
-            routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
+            representee.routes.RepresenteeController.enterName()
           )
         }
 
         "an individual user type of personal representative is found" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
-            routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
+            representee.routes.RepresenteeController.enterName()
           )
 
         }
@@ -3285,7 +3286,8 @@ class MultipleDisposalsTriageControllerSpec
         val completeAnswers    = sample[CompleteMultipleDisposalsTriageAnswers]
         val (session, journey) = sessionDataWithStartingNewDraftReturn(completeAnswers)
         val draftId            = UUID.randomUUID()
-        val newDraftReturn     = DraftMultipleDisposalsReturn.newDraftReturn(draftId, completeAnswers)
+        val newDraftReturn =
+          DraftMultipleDisposalsReturn.newDraftReturn(draftId, completeAnswers, journey.representeeAnswers)
         val newJourney = FillingOutReturn(
           journey.subscribedDetails,
           journey.ggCredId,

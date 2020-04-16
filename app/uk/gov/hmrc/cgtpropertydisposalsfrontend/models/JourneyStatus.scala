@@ -85,7 +85,8 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    newReturnTriageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
+    newReturnTriageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
+    representeeAnswers: Option[RepresenteeAnswers]
   ) extends JourneyStatus
 
   final case class FillingOutReturn(

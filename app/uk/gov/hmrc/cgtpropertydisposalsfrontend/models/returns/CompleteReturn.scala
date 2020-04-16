@@ -58,6 +58,7 @@ object CompleteReturn {
             Some(e: CompleteExemptionAndLossesAnswers),
             Some(y: CompleteNonCalculatedYTDAnswers),
             Some(u: CompleteSupportingEvidenceAnswers),
+            _,
             _
             ) =>
           Some(CompleteMultipleDisposalsReturn(t, p, e, y, u, hasAttachments = true))
@@ -97,6 +98,7 @@ object CompleteReturn {
             Some(y: CompleteCalculatedYTDAnswers),
             i,
             Some(u: CompleteSupportingEvidenceAnswers),
+            _,
             _
             ) =>
           val hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
@@ -113,6 +115,7 @@ object CompleteReturn {
             Some(y: CompleteNonCalculatedYTDAnswers),
             i,
             Some(u: CompleteSupportingEvidenceAnswers),
+            _,
             _
             ) =>
           Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Left(y), u, i, hasAttachments = true))

@@ -1,0 +1,5 @@
+GET   /about-person/enter-name              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.enterName()
+POST  /about-person/enter-name              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.enterNameSubmit()
+
+
+GET   /about-person/check-your-answers      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswers()
