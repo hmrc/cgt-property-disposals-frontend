@@ -103,11 +103,11 @@ class SupportingEvidenceController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(c: SubscribedDetails, _, _, d: DraftReturn))) =>
         d match {
-          case DraftSingleDisposalReturn(i, _, _, _, _, _, _, _, _, maybeSupportingDocumentsAnswers, _) =>
+          case DraftSingleDisposalReturn(i, _, _, _, _, _, _, _, _, maybeSupportingDocumentsAnswers, _, _) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
               f(i, c.cgtReference, s, r, IncompleteSupportingEvidenceAnswers.empty)
             )(f(i, c.cgtReference, s, r, _))
-          case DraftMultipleDisposalsReturn(i, _, _, _, _, maybeSupportingDocumentsAnswers, _) =>
+          case DraftMultipleDisposalsReturn(i, _, _, _, _, maybeSupportingDocumentsAnswers, _, _) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
               f(i, c.cgtReference, s, r, IncompleteSupportingEvidenceAnswers.empty)
             )(f(i, c.cgtReference, s, r, _))

@@ -669,7 +669,7 @@ triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence s
 triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
 triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 
-assetTypeForNonUkResidents.title=What type of property or asset did you sell?
+assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
 assetTypeForNonUkResidents.trust.title=What type of property, land or asset did the trust sell or dispose of?
 assetTypeForNonUkResidents.Residential=Residential
@@ -2122,4 +2122,30 @@ agentNoEnrolment.title=Use your agents services account to access this service
 agentNoEnrolment.p1=You’ll need to sign in using your agent services account user ID and password. If you do not have one, you’ll need to <a href="{0}">create an agent services account</a>.
 agentNoEnrolment.p2=Do not use sign in details for an HMRC online services for agents account.
 agentNoEnrolment.button.tryAgain=Try again
+
+representee.caption=Person represented
+
+representee.enterName.capacitor.title=What is the name of the person you are representing?
+representee.enterName.personalRep.title=What was the name of the person who died?
+representee.enterName.capacitor.p1=The name you enter should match the name the person uses on their official documents, like their National Insurance card.
+representee.enterName.personalRep.p1=The name you enter should match the name the person used on their official documents, like their National Insurance card.
+representee.enterName.firstName.label=First name
+representee.enterName.lastName.label=Last name
+representeeFirstName.error.required=Enter the person’s first name
+representeeFirstName.error.tooLong=First name must be 35 characters or fewer
+representeeFirstName.error.pattern=First name must only include letters, apostrophes, hyphens, spaces and ampersands
+representeeLastName.error.required=Enter the person’s last name
+representeeLastName.error.tooLong=Last name must be 35 characters or fewer
+representeeLastName.error.pattern=Last name must only include letters, apostrophes, hyphens, spaces and ampersands
+
+representee.cya.title=Check your answers
+
+representee.cyaLabel.whoFor=Who are you submitting for
+representee.cyaValue.whoFor.capacitor=Someone else
+representee.cyaValue.whoFor.personalRep=Someone who has died
+representee.cyaChange.whoFor=who you are submitting for
+
+representee.cyaLabel.personRepresented=Person represented
+representee.cyaChange.personRepresented=the person you are representing
+
 

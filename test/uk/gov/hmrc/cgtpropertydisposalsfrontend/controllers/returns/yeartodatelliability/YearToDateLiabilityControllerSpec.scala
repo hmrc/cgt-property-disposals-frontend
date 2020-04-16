@@ -212,6 +212,7 @@ class YearToDateLiabilityControllerSpec
       yearToDateLiabilityAnswers,
       Some(sample[AmountInPence]),
       Some(sample[CompleteSupportingEvidenceAnswers]),
+      None,
       TimeUtils.today()
     )
 

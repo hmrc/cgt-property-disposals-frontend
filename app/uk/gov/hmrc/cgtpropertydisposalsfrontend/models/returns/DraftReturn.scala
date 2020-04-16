@@ -42,6 +42,7 @@ final case class DraftSingleDisposalReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   initialGainOrLoss: Option[AmountInPence],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
+  representeeAnswers: Option[RepresenteeAnswers],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -49,8 +50,25 @@ object DraftSingleDisposalReturn {
 
   implicit val eq: Eq[DraftSingleDisposalReturn] = Eq.fromUniversalEquals[DraftSingleDisposalReturn]
 
-  def newDraftReturn(id: UUID, triageAnswers: SingleDisposalTriageAnswers): DraftSingleDisposalReturn =
-    DraftSingleDisposalReturn(id, triageAnswers, None, None, None, None, None, None, None, None, TimeUtils.today())
+  def newDraftReturn(
+    id: UUID,
+    triageAnswers: SingleDisposalTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): DraftSingleDisposalReturn =
+    DraftSingleDisposalReturn(
+      id,
+      triageAnswers,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      representeeAnswers,
+      TimeUtils.today()
+    )
 
 }
 
@@ -61,13 +79,18 @@ final case class DraftMultipleDisposalsReturn(
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
+  representeeAnswers: Option[RepresenteeAnswers],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
 object DraftMultipleDisposalsReturn {
 
-  def newDraftReturn(id: UUID, triageAnswers: MultipleDisposalsTriageAnswers): DraftMultipleDisposalsReturn =
-    DraftMultipleDisposalsReturn(id, triageAnswers, None, None, None, None, TimeUtils.today())
+  def newDraftReturn(
+    id: UUID,
+    triageAnswers: MultipleDisposalsTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): DraftMultipleDisposalsReturn =
+    DraftMultipleDisposalsReturn(id, triageAnswers, None, None, None, None, representeeAnswers, TimeUtils.today())
 
 }
 
