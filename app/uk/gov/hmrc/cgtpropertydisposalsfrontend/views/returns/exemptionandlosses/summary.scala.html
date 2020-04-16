@@ -34,11 +34,12 @@
 
 @(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate, isATrust: Boolean)(implicit messages: Messages, request: RequestWithSessionData[_])
 
-@previousYearUserValueKey = @{request.userType match {
-    case Some(UserType.Organisation) => { "previousYearsLossesValue.trust" }
-    case Some(UserType.Agent) => { "previousYearsLossesValue.agent" }
-    case _ => { "previousYearsLossesValue.individual" }
-}}
+@inYearLossesValueKey = @{ "inYearLossesValue" }
+@previousYearLossesValueKey = @{ "previousYearsLossesValue" }
+@annualExemptAmountKey = @{ "annualExemptAmount" }
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 
 @cyaSection() {
   @if(answers.inYearLosses.value === 0L) {
@@ -64,10 +65,10 @@
       "inYearLosses"
     )
     @cyaRow(
-      messages(s"$previousYearUserValueKey.label"),
+      messages(s"$inYearLossesValueKey.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.inYearLosses.inPounds())),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLossesValue"), routes.ExemptionAndLossesController.inYearLosses().url)),
-      "inYearLossesValue"
+      inYearLossesValueKey
     )
   }
 
@@ -86,18 +87,18 @@
       "previousYearsLosses"
     )
     @cyaRow(
-      messages(s"$previousYearUserValueKey.label"),
+      messages(s"$previousYearLossesValueKey.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.previousYearsLosses.inPounds())),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLossesValue"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
-      "previousYearsLossesValue"
+      previousYearLossesValueKey
     )
   }
 
   @cyaRow(
-    messages(if(isATrust) "annualExemptAmount.trust.title" else "annualExemptAmount.title"),
+    messages(s"$annualExemptAmountKey$userKey.title"),
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),
     Some(cyaChange(messages("exemptionsAndLosses.cyaChange.annualExemptAmount"), routes.ExemptionAndLossesController.annualExemptAmount().url)),
-    "annualExemptAmount"
+    annualExemptAmountKey
   )
 
 }
