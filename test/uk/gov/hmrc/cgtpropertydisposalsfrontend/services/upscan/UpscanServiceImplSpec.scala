@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan
 
-import java.util.UUID
-
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector

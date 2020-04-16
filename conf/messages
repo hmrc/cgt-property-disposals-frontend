@@ -2165,4 +2165,31 @@ representee.cyaChange.whoFor=who you are submitting for
 representee.cyaLabel.personRepresented=Person represented
 representee.cyaChange.personRepresented=the person you are representing
 
+representeeReferenceIdType.title=Select if you have one of these reference numbers for the person
+representeeReferenceIdType.helpText=The reference number you enter must match the name you entered and the details we hold about the person.
+representeeReferenceIdType.error.required=Select if you have one of these reference numbers for the person
+representeeReferenceIdType.noReferenceId.label=I do not have a reference number
+
+representeeCgtRef.label=Capital Gains Tax on UK property account number
+representeeCgtRef.helpText=It’s 15 characters and can include letters and numbers. For example, ‘XYCGTP123456789’.
+representeeCgtRef.error.required=Enter the person’s Capital Gains Tax on UK property account number
+representeeCgtRef.error.tooShort=Capital Gains Tax on UK property account number must be 15 characters
+representeeCgtRef.error.tooLong=Capital Gains Tax on UK property account number must be 15 characters
+representeeCgtRef.error.invalidCharacters=Capital Gains Tax on UK property account number must be 15 characters, start with an X, and only include letters a to z and numbers
+representeeCgtRef.error.pattern=Enter a real Capital Gains Tax on UK property account number
+
+representeeNino.label=National Insurance number
+representeeNino.helpText=It’s on their National Insurance card, a benefit letter, payslip or P60. For example, ‘QQ 12 34 56 C’.
+representeeNino.error.required=Enter the person’s National Insurance number
+representeeNino.error.tooShort=National Insurance number must be 9 characters
+representeeNino.error.tooLong=National Insurance number must be 9 characters
+representeeNino.error.invalidCharacters=National Insurance number must be 2 letters, 6 numbers, then A, B, C or D, like ‘QQ 12 34 56 C’
+representeeNino.error.pattern=Enter a real National Insurance number
+
+representeeSautr.label=Self Assessment Unique Taxpayer Reference
+representeeSautr.helpText=This is 10 numbers, for example ‘1234567890’. It will be on tax returns and other letters about Self Assessment. It may be called ‘reference’, ‘UTR’ or ‘official use’.
+representeeSautr.error.required=Enter the person’s Self Assessment Unique Taxpayer Reference
+representeeSautr.error.tooLong=Self Assessment Unique Taxpayer Reference must be 10 numbers
+representeeSautr.error.tooShort=Self Assessment Unique Taxpayer Reference must be 10 numbers
+representeeSautr.error.invalid=Self Assessment Unique Taxpayer Reference must only include numbers
 
