@@ -265,7 +265,7 @@ draftReturnSaved.warning=After {0} all the details in your Capital Gains Tax on 
 draftReturnSaved.trust.warning=After {0} all the details in the trust’s Capital Gains Tax on UK property return will be deleted.
 draftReturnSaved.agent.warning=After {0} all the details in the client’s Capital Gains Tax on UK property return will be deleted.
 draftReturnSaved.p1=After that date, you’ll need to start again.
-draftReturnSaved.p2=We will keep a return that is ‘In progress’ for 30 days from the day it was last saved. We will only save uploads for 7 days from the last day they were saved.
+draftReturnSaved.p2=We will keep a return that is ‘In progress’ for 30 days from the day it was last saved. We will only save uploads for 1 day from the last day they were saved.
 
 contactName.title=Change contact name
 contactName.extraContent=The contact name you use for other government services will not change.
@@ -1655,10 +1655,10 @@ calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
 mandatoryEvidence.title=Upload a document showing how the Capital gains Tax due was worked out
-mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 7 days.
+mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 1 day.
 
 mandatoryEvidenceExpired.title=Your uploaded file has expired
-mandatoryEvidenceExpired.p1=Uploaded files can only be kept for 7 days before they expire. You must either upload the file again or replace it with another before you can continue.
+mandatoryEvidenceExpired.p1=Uploaded files can only be kept for 1 day before they expire. You must either upload the file again or replace it with another before you can continue.
 mandatoryEvidenceExpired.label=Supporting file
 mandatoryEvidenceExpired.cyaChange=the file or upload it again
 
@@ -2070,7 +2070,7 @@ upload-supporting-evidence.check-your-answers.cya-delete=Delete
 upload-supporting-evidence.check-your-answers.add-another-file=Add another file
 
 upload-supporting-evidence.expired.title=For your security, we deleted these documents
-upload-supporting-evidence.expired.p1=We save documents for 7 days.
+upload-supporting-evidence.expired.p1=We save documents for 1 day.
 upload-supporting-evidence.expired.p2=If you want to add these documents to your return, you’ll need to try and upload them again.
 upload-supporting-evidence.expired.caption=Supporting evidence
 upload-supporting-evidence.expired.file-label=Document {0}
@@ -2088,7 +2088,7 @@ upload-supporting-evidence.check-upscan-status.title=Supporting evidence file up
 upload-supporting-evidence.check-upscan-status.caption=Supporting evidence
 upload-supporting-evidence.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
 upload-supporting-evidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
-upload-supporting-evidence.check-upscan-status.passed.help-text=Your supporting evidence file has been successfully saved and scanned. We will save it for 7 days or until you submit your return when it will be attached to your submission.
+upload-supporting-evidence.check-upscan-status.passed.help-text=Your supporting evidence file has been successfully saved and scanned. We will save it for 1 day or until you submit your return when it will be attached to your submission.
 upload-supporting-evidence.check-upscan-status.passed=Passed
 upload-supporting-evidence.check-upscan-status.failed=Failed
 upload-supporting-evidence.check-upscan-status.uploaded=Scan in progress
