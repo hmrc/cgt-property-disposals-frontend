@@ -669,7 +669,7 @@ triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence s
 triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
 triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 
-assetTypeForNonUkResidents.title=What type of property or asset did you sell?
+assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
 assetTypeForNonUkResidents.trust.title=What type of property, land or asset did the trust sell or dispose of?
 assetTypeForNonUkResidents.Residential=Residential
