@@ -33,7 +33,8 @@
         labelAsHeading: Boolean = false,
         extraContent: Option[Html] = None,
         inputClass: Option[String] = None,
-        labelClass: Option[String] = None
+        labelClass: Option[String] = None,
+        isMandatoryUpload: Boolean = false
 )(implicit messages: Messages)
 
 @classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
@@ -87,6 +88,7 @@
   type="file"
   name="@fieldId"
   value=""
+  is-mandatory-upload="@isMandatoryUpload"
   autocomplete="@autoComplete.value"
     @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
 </div>
