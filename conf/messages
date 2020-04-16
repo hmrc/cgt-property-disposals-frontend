@@ -1275,71 +1275,49 @@ reliefDetails.cyaChange.lettingsReliefValue=Amount of Lettings Relief
 reliefDetails.cyaChange.otherReliefsName=Other reliefs names
 reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
 
-
-
 exemptionAndLosses.caption=Losses and exemptions
 
 inYearLosses.title=Do you want to include any other Capital Gains Tax losses made in tax year {0} to {1}?
 
-inYearLosses.individual.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
+inYearLosses.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
 inYearLosses.agent.helpText=For example, your client would make a loss if they sold a property for less than they paid for it.<br/> Including any other Capital Gains Tax losses your client made in this tax year will reduce their gain. Your client must have made the losses before {0}.
 inYearLosses.trust.helpText=For example, the trust would make a loss if it sold a property for less than it paid for it.<br/> Including any other Capital Gains Tax losses the trust made in this tax year will reduce its gain. The trust must have made the losses before {0}.
 
 inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
-inYearLosses.individual.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.agent.error.required=Select yes if you want to include any other Capital Gains Tax losses your client made in the tax year
 inYearLosses.trust.error.required=Select yes if you want to include any other Capital Gains Tax losses the trust made in the tax year
 
 inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
-inYearLosses.individual.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.agent.error.invalid=Select yes if you want to include any other Capital Gains Tax losses your client made in the tax year
 inYearLosses.trust.error.invalid=Select yes if you want to include any other Capital Gains Tax losses the trust made in the tax year
 
-inYearLosses.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-inYearLosses.individual.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-inYearLosses.trust.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-inYearLosses.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.trust.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 
-inYearLossesValue.individual.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.trust.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 
-inYearLossesValue.individual.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+inYearLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
 inYearLossesValue.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
 inYearLossesValue.trust.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
 
-inYearLossesValue.individual.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+inYearLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 inYearLossesValue.trust.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 inYearLossesValue.organisation.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 
 inYearLossesValue.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
-inYearLosses.individual.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
-inYearLossesValue.individual.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 inYearLossesValue.agent.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 inYearLossesValue.trust.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 
-inYearLossesValue.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
-inYearLossesValue.individual.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+inYearLossesValue.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 inYearLossesValue.trust.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 inYearLossesValue.agent.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 
-inYearLosses.individual.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-inYearLosses.agent.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-inYearLosses.trust.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-
-inYearLossesValue.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
-inYearLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-inYearLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-
-
-inYearLossesValue.individual.label=Amount of losses from this tax year
+inYearLossesValue.label=Amount of losses from this tax year
 inYearLossesValue.agent.label=Amount of losses from this tax year
 inYearLossesValue.trust.label=Amount of losses from this tax year
-
-inYearLosses.individual.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.trust.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-
 
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 

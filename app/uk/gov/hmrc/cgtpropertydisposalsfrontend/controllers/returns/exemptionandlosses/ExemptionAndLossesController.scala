@@ -201,9 +201,9 @@ class ExemptionAndLossesController @Inject() (
     }
 
   def inYearLosses(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _, draftReturn, answers) =>
+    withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       withDisposalDate(draftReturn) { disposalDate =>
-        withWasAUkResident(draftReturn) { wasAUkResident =>
+        withWasAUkResident(draftReturn) { _ =>
           commonDisplayBehaviour(
             answers
           )(form =
@@ -212,7 +212,7 @@ class ExemptionAndLossesController @Inject() (
               c => inYearLossesForm.fill(c.inYearLosses.inPounds())
             )
           )(
-            page = inYearLossesPage(_, _, disposalDate)
+            page = inYearLossesPage(_, _, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
           )(
             _ => Some(()),
             controllers.returns.routes.TaskListController.taskList()
@@ -225,13 +225,13 @@ class ExemptionAndLossesController @Inject() (
   def inYearLossesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       withDisposalDate(draftReturn) { disposalDate =>
-        withWasAUkResident(draftReturn) { wasAUkResident =>
+        withWasAUkResident(draftReturn) { _ =>
           commonSubmitBehaviour(
             fillingOutReturn,
             draftReturn,
             answers
           )(form = inYearLossesForm)(
-            page = inYearLossesPage(_, _, disposalDate)
+            page = inYearLossesPage(_, _, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
           )(
             _ => Some(()),
             controllers.returns.routes.TaskListController.taskList()

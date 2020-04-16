@@ -41,25 +41,21 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
 @key = @{ "inYearLosses" }
 @valueKey = @{ "inYearLossesValue" }
 @taxYear = @{disposalDate.taxYear}
-@contentKey = @{request.userType match {
-    case Some(UserType.Organisation) => s"$key.trust"
-    case Some(UserType.Agent) => s"$key.agent"
-    case _ => s"$key.individual"
-}}
-@contentValueKey = @{request.userType match {
-    case Some(UserType.Organisation) => s"$valueKey.trust"
-    case Some(UserType.Agent) => s"$valueKey.agent"
-    case _ => s"$valueKey.individual"
-}}
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
 @title = @{messages(
-  "inYearLosses.title",
+  s"$key.title",
   taxYear.startDateInclusive.getYear.toString,
   taxYear.endDateExclusive.getYear.toString
 )}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @options = @{List(
     RadioOption(
@@ -67,7 +63,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
         content = Some(unitInput(
             fieldId = valueKey,
             value = form.data.getOrElse(valueKey, ""),
-            label = Html(messages(s"$contentValueKey.label")),
+            label = Html(messages(s"$valueKey$userKey.label")),
             formError = form.error(valueKey),
             hasErrors = form.error(valueKey).nonEmpty,
             autoComplete = AutoCompleteType.On,
@@ -92,13 +88,12 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     })
 }
 
-
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, Some(contentKey))
+        @errorSummary(form, None, s"$userKey")
     }
 
     @caption(messages("exemptionAndLosses.caption"))
@@ -113,12 +108,13 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             options = options,
             helpText = Some(Html(
                 messages(
-                    s"$contentKey.helpText",
+                    s"$key$userKey.helpText",
                     TimeUtils.govDisplayFormat(disposalDate.value)
                 )
-            ))
+            )),
+            customErrorKey = Some(s"$key$userKey")
         )
-        <p>@Html(messages(s"$contentKey.link", appConfig.cgtLossesUrl))</p>
+        <p>@Html(messages(s"$key$userKey.link", appConfig.cgtLossesUrl))</p>
 
         @submitButton(messages("button.saveAndContinue"))
     }
