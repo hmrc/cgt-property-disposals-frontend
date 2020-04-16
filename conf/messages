@@ -1299,9 +1299,9 @@ inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a num
 inYearLossesValue.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.trust.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 
-inYearLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-inYearLossesValue.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-inYearLossesValue.trust.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+inYearLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+inYearLossesValue.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+inYearLossesValue.trust.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 
 inYearLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 inYearLossesValue.trust.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
@@ -1320,49 +1320,51 @@ inYearLossesValue.agent.label=Amount of losses from this tax year
 inYearLossesValue.trust.label=Amount of losses from this tax year
 
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
+previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
+previousYearsLosses.trust.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 
-previousYearsLosses.individual.uk.helpText=You can include previous losses in this return to reduce your gain. You can only include other losses made on other UK property sales or disposals that you have already reported to HMRC.
-previousYearsLosses.individual.nonUk.helpText=You can include previous losses that are liable for UK tax in this return. They will reduce your gain. You can only include other losses you have already reported to HMRC.
+previousYearsLosses.uk.helpText=You can include previous losses in this return to reduce your gain. You can only include other losses made on other UK property sales or disposals that you have already reported to HMRC.
+previousYearsLosses.nonUk.helpText=You can include previous losses that are liable for UK tax in this return. They will reduce your gain. You can only include other losses you have already reported to HMRC.
 previousYearsLosses.agent.uk.helpText=Your client can include previous losses in this return to reduce their gain. They can only include other losses made on other UK property sales or disposals that they have already reported to HMRC.
 previousYearsLosses.agent.nonUk.helpText=Your client can include previous losses that are liable for UK tax in this return. They will reduce your client’s gain. Your client can only include other losses they have already reported to HMRC.
 previousYearsLosses.trust.uk.helpText=The trust can include previous losses in this return to reduce its gain. It can only include other losses made on other UK property sales or disposals that it has already reported to HMRC.
 previousYearsLosses.trust.nonUk.helpText=The trust can include previous losses that are liable for UK tax in this return. They will reduce the trust’s gain. The trust can only include other losses it has already reported to HMRC.
 
 previousYearsLosses.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
-previousYearsLosses.individual.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLosses.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLosses.trust.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 
-previousYearsLosses.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-previousYearsLosses.individual.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-previousYearsLosses.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
-previousYearsLosses.trust.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+previousYearsLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
+previousYearsLosses.agent.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
+previousYearsLosses.trust.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
 
-previousYearsLosses.individual.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-previousYearsLosses.agent.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-previousYearsLosses.trust.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.trust.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
 
-previousYearsLosses.individual.error.tooManyDecimals=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-previousYearsLosses.agent.error.tooManyDecimals=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-previousYearsLosses.trust.error.tooManyDecimals=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-
-previousYearsLosses.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
-previousYearsLosses.individual.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
-previousYearsLosses.agent.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
-previousYearsLosses.trust.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
-
-previousYearsLossesValue.individual.label=Amount of losses from previous tax years
+previousYearsLossesValue.label=Amount of losses from previous tax years
 previousYearsLossesValue.agent.label=Amount of losses from previous tax years
 previousYearsLossesValue.trust.label=Amount of losses from previous tax years
 
 previousYearsLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
-previousYearsLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+previousYearsLossesValue.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLossesValue.trust.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+
+previousYearsLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+previousYearsLossesValue.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+previousYearsLossesValue.trust.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+
 previousYearsLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
-previousYearsLossesValue.error.tooManyDecimals=	Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLossesValue.agent.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLossesValue.trust.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+
+previousYearsLossesValue.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+previousYearsLossesValue.agent.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+previousYearsLossesValue.trust.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+
 previousYearsLossesValue.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
-
-
-previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLossesValue.agent.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+previousYearsLossesValue.trust.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 
 
 annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?

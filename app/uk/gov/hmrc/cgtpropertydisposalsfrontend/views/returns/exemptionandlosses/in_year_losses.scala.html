@@ -51,7 +51,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 
 @title = @{messages(
-  s"$key.title",
+  s"$key$userKey.title",
   taxYear.startDateInclusive.getYear.toString,
   taxYear.endDateExclusive.getYear.toString
 )}
@@ -88,7 +88,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     })
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 

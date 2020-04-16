@@ -248,7 +248,7 @@ class ExemptionAndLossesController @Inject() (
   }
 
   def previousYearsLosses(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _, draftReturn, answers) =>
+    withFillingOutReturnAndAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       withWasAUkResident(draftReturn) { wasAukResident =>
         commonDisplayBehaviour(
           answers
@@ -258,7 +258,7 @@ class ExemptionAndLossesController @Inject() (
             c => previousYearsLossesForm.fill(c.previousYearsLosses.inPounds())
           )
         )(
-          page = previousYearsLossesPage(_, _, wasAukResident)
+          page = previousYearsLossesPage(_, _, wasAukResident, fillingOutReturn.subscribedDetails.isATrust)
         )(
           requiredPreviousAnswer = _.fold(
             _.inYearLosses,
@@ -278,7 +278,7 @@ class ExemptionAndLossesController @Inject() (
           draftReturn,
           answers
         )(form = previousYearsLossesForm)(
-          page = previousYearsLossesPage(_, _, wasAUkResident)
+          page = previousYearsLossesPage(_, _, wasAUkResident, fillingOutReturn.subscribedDetails.isATrust)
         )(
           requiredPreviousAnswer = _.fold(
             _.inYearLosses,

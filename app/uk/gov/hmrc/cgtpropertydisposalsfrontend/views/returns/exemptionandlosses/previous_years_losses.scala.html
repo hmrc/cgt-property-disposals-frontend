@@ -39,22 +39,17 @@
         details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[BigDecimal], backLink: Call, wasAUkResident: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, wasAUkResident: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
 @key = @{ "previousYearsLosses" }
 @valueKey = @{ "previousYearsLossesValue" }
-@contentKey = @{request.userType match {
-    case Some(UserType.Agent) => "previousYearsLosses.agent"
-    case Some(UserType.Organisation) => "previousYearsLosses.trust"
-    case _ => "previousYearsLosses.individual"
-}}
-@contentValueKey = @{request.userType match {
-    case Some(UserType.Agent) => "previousYearsLossesValue.agent"
-    case Some(UserType.Organisation) => "previousYearsLossesValue.trust"
-    case _ => "previousYearsLossesValue.individual"
-}}
-@residentSpecificKey = @{ if(wasAUkResident) s"$contentKey.uk" else s"$contentKey.nonUk" }
 
-@title = @{messages(s"$key.title")}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
+@residentSpecificKey = @{ if(wasAUkResident) s"$key$userKey.uk" else s"$key$userKey.nonUk" }
+
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @options = @{List(
@@ -63,7 +58,7 @@
         content = Some(unitInput(
             fieldId = valueKey,
             value = form.data.getOrElse(valueKey, ""),
-            label = Html(messages(s"$contentValueKey.label")),
+            label = Html(messages(s"$valueKey$userKey.label")),
             formError = form.error(valueKey),
             hasErrors = form.error(valueKey).nonEmpty,
             autoComplete = AutoCompleteType.On,
@@ -88,13 +83,12 @@
     })
 }
 
-
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, Some(contentKey))
+        @errorSummary(form, None, s"$userKey")
     }
 
     @caption(messages("exemptionAndLosses.caption"))
@@ -107,14 +101,14 @@
             error = form.error(key),
             hasErrors = hasErrors,
             options = options,
-            helpText = Some(Html(messages(s"$residentSpecificKey.helpText")))
+            helpText = Some(Html(messages(s"$residentSpecificKey.helpText"))),
+            customErrorKey = Some(s"$key$userKey")
         )
 
-        <p>@Html(messages(s"$key.link", if(wasAUkResident) appConfig.cgtLossesUrl else appConfig.cgtLossesUrlNonUk))</p>
+        <p>@Html(messages(s"$key$userKey.link", if(wasAUkResident) appConfig.cgtLossesUrl else appConfig.cgtLossesUrlNonUk))</p>
 
         @submitButton(messages("button.saveAndContinue"))
     }
-
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 
