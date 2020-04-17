@@ -22,19 +22,17 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.JsString
 import play.api.mvc.Call
-
-import scala.concurrent.{ExecutionContext, Future}
-import play.api.{Configuration, Mode}
 import play.api.test.Helpers._
+import play.api.{Configuration, Mode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanInitiateRequest, UpscanUpload}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
 
