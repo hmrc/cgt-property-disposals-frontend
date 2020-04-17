@@ -104,6 +104,9 @@
 
       if (totalEvents > 0 && GA_ENABLED) {
         event.preventDefault();
+        window.setTimeout(function () {
+          form.submit()
+        }, 2000);
         var r = 0;
         if (checkedRadios.length) {
           for (r; r < checkedRadios.length; r++) {
