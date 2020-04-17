@@ -182,7 +182,7 @@ class RepresenteeController @Inject() (
       )
 
     for {
-      _ <- currentJourney.fold(
+      _ <- newJourney.fold(
             _ => EitherT.pure[Future, Error](()),
             newFillingOutReturn =>
               returnsService.storeDraftReturn(
