@@ -21,23 +21,28 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.data.Form
+import play.api.data.Forms.{mapping, of}
+import play.api.data.{Form, FormError}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, Error, FormUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,7 +56,8 @@ class RepresenteeController @Inject() (
   cc: MessagesControllerComponents,
   val config: Configuration,
   cyaPage: representeePages.check_your_answers,
-  enterNamePage: representeePages.enter_name
+  enterNamePage: representeePages.enter_name,
+  enterIdPage: representeePages.enter_reference_number
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -165,6 +171,45 @@ class RepresenteeController @Inject() (
     }
   }
 
+  def enterId(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
+      val backLink = answers.fold(
+        _ => routes.RepresenteeController.enterName(),
+        _ => routes.RepresenteeController.checkYourAnswers()
+      )
+      val form = answers.fold(_.id, c => Some(c.id)).fold(idForm)(idForm.fill)
+
+      Ok(enterIdPage(form, backLink, journey.isRight))
+    }
+  }
+
+  def enterIdSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
+      lazy val backLink = answers.fold(
+        _ => routes.RepresenteeController.enterName(),
+        _ => routes.RepresenteeController.checkYourAnswers()
+      )
+
+      idForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors => BadRequest(enterIdPage(formWithErrors, backLink, journey.isRight)),
+          id =>
+            if (answers.fold(_.id, c => Some(c.id)).contains(id))
+              Redirect(routes.RepresenteeController.checkYourAnswers())
+            else {
+              val newAnswers = answers.fold(_.copy(id = Some(id)), _.copy(id = id))
+
+              updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
+                logger.warn("Could not update draft return", e)
+                errorHandler.errorResult()
+              }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+            }
+        )
+
+    }
+  }
+
   private def updateDraftReturnAndSession(
     newAnswers: RepresenteeAnswers,
     currentJourney: Either[StartingNewDraftReturn, FillingOutReturn]
@@ -200,11 +245,14 @@ class RepresenteeController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
       answers match {
-        case IncompleteRepresenteeAnswers(None) =>
+        case IncompleteRepresenteeAnswers(None, _) =>
           Redirect(routes.RepresenteeController.enterName())
 
-        case IncompleteRepresenteeAnswers(Some(name)) =>
-          val completeAnswers = CompleteRepresenteeAnswers(name)
+        case IncompleteRepresenteeAnswers(_, None) =>
+          Redirect(routes.RepresenteeController.enterId())
+
+        case IncompleteRepresenteeAnswers(Some(name), Some(id)) =>
+          val completeAnswers = CompleteRepresenteeAnswers(name, id)
           Ok(cyaPage(completeAnswers, representativeType, journey.isRight))
 
         case c: CompleteRepresenteeAnswers =>
@@ -219,5 +267,71 @@ class RepresenteeController @Inject() (
 object RepresenteeController {
 
   val nameForm: Form[IndividualName] = IndividualName.form("representeeFirstName", "representeeLastName")
+
+  val idForm: Form[RepresenteeReferenceId] = {
+    val (outerId, ninoId, sautrId, cgtReferenceId) =
+      ("representeeReferenceIdType", "representeeNino", "representeeSautr", "representeeCgtRef")
+
+    val ninoInnerOption: InnerOption[RepresenteeNino] =
+      InnerOption { data =>
+        FormUtils
+          .readValue(ninoId, data, identity)
+          .map(_.toUpperCase.replaceAllLiterally(" ", ""))
+          .flatMap(nino =>
+            if (nino.length > 9)
+              Left(FormError(ninoId, "error.tooLong"))
+            else if (nino.length < 9)
+              Left(FormError(ninoId, "error.tooShort"))
+            else if (nino.exists(!_.isLetterOrDigit))
+              Left(FormError(ninoId, "error.invalidCharacters"))
+            else if (!Nino.isValid(nino))
+              Left(FormError(ninoId, "error.pattern"))
+            else
+              Right(RepresenteeNino(NINO(nino)))
+          )
+          .leftMap(Seq(_))
+      }
+
+    val sautrInnerOption: InnerOption[RepresenteeSautr] =
+      InnerOption { data =>
+        FormUtils
+          .readValue(sautrId, data, identity)
+          .map(_.replaceAllLiterally(" ", ""))
+          .flatMap(sautr =>
+            if (sautr.exists(!_.isDigit))
+              Left(FormError(sautrId, "error.invalid"))
+            else if (sautr.length > 10)
+              Left(FormError(sautrId, "error.tooLong"))
+            else if (sautr.length < 10)
+              Left(FormError(sautrId, "error.tooShort"))
+            else
+              Right(RepresenteeSautr(SAUTR(sautr)))
+          )
+          .leftMap(Seq(_))
+      }
+
+    val cgtReferenceInnerOption: InnerOption[RepresenteeCgtReference] =
+      InnerOption(data => CgtReference.mapping.withPrefix(cgtReferenceId).bind(data).map(RepresenteeCgtReference))
+
+    val formatter = ConditionalRadioUtils.formatter[RepresenteeReferenceId](outerId)(
+      List(
+        Left(cgtReferenceInnerOption),
+        Left(ninoInnerOption),
+        Left(sautrInnerOption),
+        Right(NoReferenceId)
+      )
+    ) {
+      case RepresenteeCgtReference(cgtReference) => Map(outerId -> "0", cgtReferenceId -> cgtReference.value)
+      case RepresenteeNino(nino)                 => Map(outerId -> "1", ninoId -> nino.value)
+      case RepresenteeSautr(sautr)               => Map(outerId -> "2", sautrId -> sautr.value)
+      case NoReferenceId                         => Map(outerId -> "3")
+    }
+
+    Form(
+      mapping(
+        "" -> of(formatter)
+      )(identity)(Some(_))
+    )
+  }
 
 }

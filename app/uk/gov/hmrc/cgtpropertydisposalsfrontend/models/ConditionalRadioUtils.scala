@@ -24,7 +24,7 @@ import scala.util.Try
 
 object ConditionalRadioUtils {
 
-  final case class InnerOption[A](
+  final case class InnerOption[+A](
     readValue: Map[String, String] => Either[Seq[FormError], A]
   ) {
     def map[B](f: A => B): InnerOption[B] = InnerOption(

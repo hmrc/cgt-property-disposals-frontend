@@ -25,15 +25,17 @@ sealed trait RepresenteeAnswers extends Product with Serializable
 
 object RepresenteeAnswers {
 
-  final case class IncompleteRepresenteeAnswers(name: Option[IndividualName]) extends RepresenteeAnswers
+  final case class IncompleteRepresenteeAnswers(name: Option[IndividualName], id: Option[RepresenteeReferenceId])
+      extends RepresenteeAnswers
 
   object IncompleteRepresenteeAnswers {
 
-    val empty: IncompleteRepresenteeAnswers = IncompleteRepresenteeAnswers(None)
+    val empty: IncompleteRepresenteeAnswers = IncompleteRepresenteeAnswers(None, None)
 
   }
 
-  final case class CompleteRepresenteeAnswers(name: IndividualName) extends RepresenteeAnswers
+  final case class CompleteRepresenteeAnswers(name: IndividualName, id: RepresenteeReferenceId)
+      extends RepresenteeAnswers
 
   implicit class RepresenteeAnswersOps(private val r: RepresenteeAnswers) extends AnyVal {
     def fold[A](ifIncomplete: IncompleteRepresenteeAnswers => A, ifComplete: CompleteRepresenteeAnswers => A): A =

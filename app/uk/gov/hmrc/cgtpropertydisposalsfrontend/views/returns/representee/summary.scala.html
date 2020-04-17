@@ -43,7 +43,7 @@
 
     @cyaRow(
         messages("representee.cyaLabel.personRepresented"),
-        Html(answers.name.makeSingleName()),
+        Html(s"""${answers.name.makeSingleName()}<br>${answers.id}"""),
         Some(cyaChange(messages("representee.cyaChange.personRepresented"), routes.RepresenteeController.enterName().url)),
         "personRepresented"
     )
