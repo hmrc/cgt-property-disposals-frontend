@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
+import java.time.LocalDate
 
+import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
@@ -25,16 +26,19 @@ sealed trait RepresenteeAnswers extends Product with Serializable
 
 object RepresenteeAnswers {
 
-  final case class IncompleteRepresenteeAnswers(name: Option[IndividualName], id: Option[RepresenteeReferenceId])
-      extends RepresenteeAnswers
+  final case class IncompleteRepresenteeAnswers(
+    name: Option[IndividualName],
+    id: Option[RepresenteeReferenceId],
+    dateOfDeath: Option[LocalDate]
+  ) extends RepresenteeAnswers
 
   object IncompleteRepresenteeAnswers {
 
-    val empty: IncompleteRepresenteeAnswers = IncompleteRepresenteeAnswers(None, None)
+    val empty: IncompleteRepresenteeAnswers = IncompleteRepresenteeAnswers(None, None, None)
 
   }
 
-  final case class CompleteRepresenteeAnswers(name: IndividualName, id: RepresenteeReferenceId)
+  final case class CompleteRepresenteeAnswers(name: IndividualName, id: RepresenteeReferenceId, dateOfDeath: LocalDate)
       extends RepresenteeAnswers
 
   implicit class RepresenteeAnswersOps(private val r: RepresenteeAnswers) extends AnyVal {

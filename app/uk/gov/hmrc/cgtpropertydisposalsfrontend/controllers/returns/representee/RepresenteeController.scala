@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
@@ -28,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
@@ -36,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, Error, FormUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, Error, FormUtils, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -46,6 +48,9 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.data.Forms.{mapping, of}
+import play.api.data.{Form, FormError}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 
 class RepresenteeController @Inject() (
   val authenticatedAction: AuthenticatedAction,
@@ -57,7 +62,8 @@ class RepresenteeController @Inject() (
   val config: Configuration,
   cyaPage: representeePages.check_your_answers,
   enterNamePage: representeePages.enter_name,
-  enterIdPage: representeePages.enter_reference_number
+  enterIdPage: representeePages.enter_reference_number,
+  enterDateOfDeathPage: representeePages.enter_date_of_death
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -169,7 +175,7 @@ class RepresenteeController @Inject() (
   def enterId(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
       val backLink = answers.fold(
-        _ => routes.RepresenteeController.enterName(),
+        _ => routes.RepresenteeController.enterDateOfDeath(),
         _ => routes.RepresenteeController.checkYourAnswers()
       )
       val form = answers.fold(_.id, c => Some(c.id)).fold(idForm)(idForm.fill)
@@ -181,7 +187,7 @@ class RepresenteeController @Inject() (
   def enterIdSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
       lazy val backLink = answers.fold(
-        _ => routes.RepresenteeController.enterName(),
+        _ => routes.RepresenteeController.enterDateOfDeath(),
         _ => routes.RepresenteeController.checkYourAnswers()
       )
 
@@ -202,6 +208,43 @@ class RepresenteeController @Inject() (
             }
         )
 
+    }
+  }
+
+  def enterDateOfDeath(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      val form = answers.fold(_.dateOfDeath, c => Some(c.dateOfDeath)).fold(dateOfDeathForm)(dateOfDeathForm.fill)
+      val backLink = answers.fold(
+        _ => routes.RepresenteeController.enterName(),
+        _ => routes.RepresenteeController.checkYourAnswers()
+      )
+      Ok(enterDateOfDeathPage(form, backLink, representativeType, journey.isRight))
+    }
+  }
+
+  def enterDateOfDeathSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      lazy val backLink = answers.fold(
+        _ => routes.RepresenteeController.enterName(),
+        _ => routes.RepresenteeController.checkYourAnswers()
+      )
+      dateOfDeathForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            BadRequest(enterDateOfDeathPage(formWithErrors, backLink, representativeType, journey.isRight)),
+          dateOfDeath => {
+            val newAnswers =
+              answers.fold(
+                _.copy(dateOfDeath = Some(dateOfDeath)),
+                _.copy(dateOfDeath = dateOfDeath)
+              )
+            updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
+              logger.warn("Could not update draft return", e)
+              errorHandler.errorResult()
+            }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+          }
+        )
     }
   }
 
@@ -240,14 +283,17 @@ class RepresenteeController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
       answers match {
-        case IncompleteRepresenteeAnswers(None, _) =>
+        case IncompleteRepresenteeAnswers(None, _, _) =>
           Redirect(routes.RepresenteeController.enterName())
 
-        case IncompleteRepresenteeAnswers(_, None) =>
+        case IncompleteRepresenteeAnswers(_, _, None) if (representativeType.isLeft) =>
+          Redirect(routes.RepresenteeController.enterDateOfDeath())
+
+        case IncompleteRepresenteeAnswers(_, None, _) =>
           Redirect(routes.RepresenteeController.enterId())
 
-        case IncompleteRepresenteeAnswers(Some(name), Some(id)) =>
-          val completeAnswers = CompleteRepresenteeAnswers(name, id)
+        case IncompleteRepresenteeAnswers(Some(name), Some(id), Some(dateOfDeath)) =>
+          val completeAnswers = CompleteRepresenteeAnswers(name, id, dateOfDeath)
           Ok(cyaPage(completeAnswers, representativeType, journey.isRight))
 
         case c: CompleteRepresenteeAnswers =>
@@ -262,6 +308,15 @@ class RepresenteeController @Inject() (
 object RepresenteeController {
 
   val nameForm: Form[IndividualName] = IndividualName.form("representeeFirstName", "representeeLastName")
+
+  val key = "representee.dateOfDeath"
+  val dateOfDeathForm = Form(
+    mapping(
+      "" -> of(
+        TimeUtils.dateFormatter(Some(LocalDate.now().plusDays(1)), None, s"$key-day", s"$key-month", s"$key-year", key)
+      )
+    )(identity)(Some(_))
+  )
 
   val idForm: Form[RepresenteeReferenceId] = {
     val (outerId, ninoId, sautrId, cgtReferenceId) =
