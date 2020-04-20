@@ -153,21 +153,16 @@ class RepresenteeController @Inject() (
       nameForm
         .bindFromRequest()
         .fold(
-          formWithErrors => BadRequest(enterNamePage(formWithErrors, backLink, representativeType, journey.isRight)),
-          name =>
-            if (answers.fold(_.name, c => Some(c.name)).contains(name))
-              Redirect(routes.RepresenteeController.checkYourAnswers())
-            else {
+          formWithErrors => BadRequest(enterNamePage(formWithErrors, backLink, representativeType, journey.isRight)), {
+            name =>
               val newAnswers = IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
 
               updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
                 logger.warn("Could not update draft return", e)
                 errorHandler.errorResult()
               }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
-
-            }
+          }
         )
-
     }
   }
 

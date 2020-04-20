@@ -414,26 +414,6 @@ class RepresenteeControllerSpec
 
       }
 
-      "not perform any updates" when {
-
-        "the name submitted is the same as on already in session" in {
-          val name = IndividualName("Lloyd", "Droid")
-          val (session, _) =
-            sessionWithStartingNewDraftReturn(
-              sample[CompleteRepresenteeAnswers].copy(name = name),
-              Left(PersonalRepresentative)
-            )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-          }
-
-          checkIsRedirect(performAction(formData(name)), routes.RepresenteeController.checkYourAnswers())
-        }
-
-      }
-
     }
 
     "handling requests to display the enter id page" must {
