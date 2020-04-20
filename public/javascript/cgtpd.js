@@ -104,6 +104,9 @@
 
       if (totalEvents > 0 && GA_ENABLED) {
         event.preventDefault();
+        window.setTimeout(function () {
+          form.submit()
+        }, 2000);
         var r = 0;
         if (checkedRadios.length) {
           for (r; r < checkedRadios.length; r++) {
@@ -156,7 +159,7 @@
   function validateFile(file, form, singleFileUpload, submitForm) {
     if (!file) {
       var errorMessage = "";
-      if (singleFileUpload.id === "upload-mandatory-evidence")
+      if (singleFileUpload.getAttribute("data-is-mandatory-upload") === "true")
         errorMessage = "Upload a document showing how the Capital Gains Tax due was worked out"
       else
         errorMessage = "Upload a file containing your supporting evidence"

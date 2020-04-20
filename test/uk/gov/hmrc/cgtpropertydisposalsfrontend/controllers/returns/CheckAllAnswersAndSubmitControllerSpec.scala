@@ -283,7 +283,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     }
 
-    "handling submits on the check all answers page" ignore {
+    "handling submits on the check all answers page" must {
 
       def performAction(): Future[Result] = controller.checkAllAnswersSubmit()(FakeRequest())
 
@@ -323,7 +323,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         implicit val requestWithSessionData =
           RequestWithSessionData(None, AuthenticatedRequest(new MessagesRequest(FakeRequest(), messagesApi)))
         implicit val config   = viewConfig
-        implicit val messages = MessagesImpl(Lang.defaultLang, messagesApi)
+        implicit val messages = MessagesImpl(Lang.apply("en"), messagesApi)
 
         val cyaPageHtml =
           cyaPge(

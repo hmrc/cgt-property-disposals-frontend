@@ -45,6 +45,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
@@ -78,7 +80,8 @@ object Generators
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
     with YearToDateLiabilityAnswersGen
-    with ExamplePropertyDetailsAnswersGen {
+    with ExamplePropertyDetailsAnswersGen
+    with RepresenteeAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -470,5 +473,27 @@ trait ExamplePropertyDetailsAnswersGen { this: GenUtils =>
 
   implicit val completeExamplePropertyDetailsAnswersGen: Gen[CompleteExamplePropertyDetailsAnswers] =
     gen[CompleteExamplePropertyDetailsAnswers]
+
+}
+
+trait RepresenteeAnswersGen extends LowerPriorityRepresenteeAnswersGen { this: GenUtils =>
+
+  implicit val representeeAnswersGen: Gen[RepresenteeAnswers] = gen[RepresenteeAnswers]
+
+  implicit val incompleteRepresenteeAnswersGen: Gen[IncompleteRepresenteeAnswers] = gen[IncompleteRepresenteeAnswers]
+
+  implicit val representeeReferenceIdGen: Gen[RepresenteeReferenceId] = gen[RepresenteeReferenceId]
+
+  implicit val representeeCgtReferenceGen: Gen[RepresenteeCgtReference] = gen[RepresenteeCgtReference]
+
+}
+
+trait LowerPriorityRepresenteeAnswersGen { this: GenUtils =>
+
+  implicit val completeRepresenteeAnswersGen: Gen[CompleteRepresenteeAnswers] = gen[CompleteRepresenteeAnswers]
+
+  implicit val representeeSautrGen: Gen[RepresenteeSautr] = gen[RepresenteeSautr]
+
+  implicit val representeeNinoGen: Gen[RepresenteeNino] = gen[RepresenteeNino]
 
 }
