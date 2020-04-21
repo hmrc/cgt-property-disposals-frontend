@@ -108,8 +108,11 @@ class PropertyDetailsController @Inject() (
       _.triageAnswers.fold(_.assetType, c => Some(c.assetType)).map(Right(_))
     )
 
-  private def hasNonResidentialProperty(assetTypes: Either[List[AssetType], AssetType]): Boolean =
-    assetTypes.fold(_.contains(AssetType.NonResidential), _ === AssetType.NonResidential)
+  private def shouldAskIfPostcodeExists(assetTypes: Either[List[AssetType], AssetType]): Boolean =
+    assetTypes.fold(
+      _.forall(a => a === AssetType.NonResidential || a === AssetType.IndirectDisposal),
+      _ === AssetType.NonResidential
+    )
 
   def updateAddress(journey: FillingOutReturn, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier,
@@ -164,8 +167,7 @@ class PropertyDetailsController @Inject() (
   protected lazy val continueCall: Call            = addressRoutes.PropertyDetailsController.checkYourAnswers()
 
   override protected val enterPostcodePageBackLink: FillingOutReturn => Call = { fillingOutReturn =>
-    val hasNonResidentialAssetTypes = assetTypes(fillingOutReturn.draftReturn).exists(hasNonResidentialProperty)
-    if (hasNonResidentialAssetTypes)
+    if (assetTypes(fillingOutReturn.draftReturn).exists(shouldAskIfPostcodeExists))
       routes.PropertyDetailsController.singleDisposalHasUkPostcode()
     else
       fillingOutReturn.draftReturn.fold(
@@ -203,7 +205,7 @@ class PropertyDetailsController @Inject() (
   private def commonHasUkPostcodeBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
-        if (hasNonResidentialProperty(assetTypes)) {
+        if (shouldAskIfPostcodeExists(assetTypes)) {
           val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
           Ok(
             hasValidPostcodePage(
@@ -229,7 +231,7 @@ class PropertyDetailsController @Inject() (
   private def commonHasUkPostcodeSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
-        if (hasNonResidentialProperty(assetTypes)) {
+        if (shouldAskIfPostcodeExists(assetTypes)) {
           val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
 
           hasValidPostcodeForm
@@ -270,7 +272,7 @@ class PropertyDetailsController @Inject() (
   private def commonEnterLandUprnBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
-        if (hasNonResidentialProperty(assetTypes)) {
+        if (shouldAskIfPostcodeExists(assetTypes)) {
           val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
           Ok(
             enterUPRNPage(
@@ -296,7 +298,7 @@ class PropertyDetailsController @Inject() (
   private def commonEnterLandUprnSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
-        if (hasNonResidentialProperty(assetTypes)) {
+        if (shouldAskIfPostcodeExists(assetTypes)) {
           val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
 
           enterUPRNForm
@@ -351,7 +353,7 @@ class PropertyDetailsController @Inject() (
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
                   .fold(
                     _ =>
-                      if (hasNonResidentialProperty(assetTypes))
+                      if (shouldAskIfPostcodeExists(assetTypes))
                         routes.PropertyDetailsController.singleDisposalHasUkPostcode()
                       else routes.PropertyDetailsController.enterPostcode(),
                     _ => routes.PropertyDetailsController.checkYourAnswers()
@@ -623,8 +625,6 @@ class PropertyDetailsController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
       withAssetTypes(r.draftReturn) { assetTypes =>
-        val hasNonResidentialAssetType = hasNonResidentialProperty(assetTypes)
-
         r.draftReturn match {
           case m: DraftMultipleDisposalsReturn =>
             m.examplePropertyDetailsAnswers.fold[Future[Result]](
@@ -667,26 +667,32 @@ class PropertyDetailsController @Inject() (
                     Ok(
                       multipleDisposalsCheckYourAnswersPage(
                         completeAnswers,
-                        hasNonResidentialAssetType,
+                        shouldAskIfPostcodeExists(assetTypes),
                         r.subscribedDetails.isATrust
                       )
                     )
                 )
 
               case c: CompleteExamplePropertyDetailsAnswers =>
-                Ok(multipleDisposalsCheckYourAnswersPage(c, hasNonResidentialAssetType, r.subscribedDetails.isATrust))
+                Ok(
+                  multipleDisposalsCheckYourAnswersPage(
+                    c,
+                    shouldAskIfPostcodeExists(assetTypes),
+                    r.subscribedDetails.isATrust
+                  )
+                )
 
             }
 
           case s: DraftSingleDisposalReturn =>
             s.propertyAddress.fold(
               Redirect(
-                if (hasNonResidentialProperty(assetTypes))
+                if (shouldAskIfPostcodeExists(assetTypes))
                   routes.PropertyDetailsController.singleDisposalHasUkPostcode()
                 else
                   routes.PropertyDetailsController.enterPostcode()
               )
-            )(address => Ok(singleDisposalCheckYourAnswersPage(address, hasNonResidentialAssetType)))
+            )(address => Ok(singleDisposalCheckYourAnswersPage(address, shouldAskIfPostcodeExists(assetTypes))))
         }
       }
     }

@@ -27,14 +27,14 @@
         addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(propertyAddress: UkAddress, hasNonResidentialAssetType: Boolean)(implicit messages :Messages)
+@(propertyAddress: UkAddress, shouldAskIfPostcodeExists: Boolean)(implicit messages :Messages)
 
 @cyaSection() {
   @cyaRow(
     messages("returns.property-address.cyaLabel.property-address"),
     addressDisplay(propertyAddress, DisplayFormat.Block),
     Some(cyaChange(messages("returns.property-address.cyaChange.property-address"),
-        if(hasNonResidentialAssetType) routes.PropertyDetailsController.singleDisposalHasUkPostcode().url
+        if(shouldAskIfPostcodeExists) routes.PropertyDetailsController.singleDisposalHasUkPostcode().url
         else routes.PropertyDetailsController.enterPostcode().url)),
       "property-address"
   )

@@ -650,7 +650,7 @@ class MultipleDisposalsTriageController @Inject() (
           Redirect(routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents())
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _, _)
-            if (assetTypes =!= List(AssetType.Residential) && assetTypes =!= List(AssetType.NonResidential)) =>
+            if assetTypes.forall(a => a === AssetType.IndirectDisposal || a === AssetType.MixedUse) =>
           Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, None, _, _, _, _) =>

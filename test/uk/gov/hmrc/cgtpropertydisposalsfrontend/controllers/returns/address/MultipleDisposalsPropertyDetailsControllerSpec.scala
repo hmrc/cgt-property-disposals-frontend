@@ -347,27 +347,40 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user did not dispose of a non-residential property and" when {
 
-          "the user has not started this section before and the user did not dispose of a " +
-            "non-residential property" in {
-            test(
-              sample[DraftMultipleDisposalsReturn].copy(
-                triageAnswers =
-                  sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
-                examplePropertyDetailsAnswers = None
-              ),
-              routes.PropertyDetailsController.enterPostcode()
-            )
+          "the user has not started this section before" in {
+            forAll { assetTypes: List[AssetType] =>
+              whenever(
+                assetTypes.contains(AssetType.Residential) ||
+                  assetTypes.toSet === Set(AssetType.MixedUse, AssetType.NonResidential) ||
+                  assetTypes.toSet === Set(AssetType.IndirectDisposal, AssetType.MixedUse)
+              ) {
+                test(
+                  sample[DraftMultipleDisposalsReturn].copy(
+                    triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = assetTypes),
+                    examplePropertyDetailsAnswers = None
+                  ),
+                  routes.PropertyDetailsController.enterPostcode()
+                )
+              }
+            }
           }
 
           "the user has started but not completed this section" in {
-            test(
-              sample[DraftMultipleDisposalsReturn].copy(
-                triageAnswers =
-                  sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
-                examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
-              ),
-              routes.PropertyDetailsController.enterPostcode()
-            )
+            forAll { assetTypes: List[AssetType] =>
+              whenever(
+                assetTypes.contains(AssetType.Residential) ||
+                  assetTypes.toSet === Set(AssetType.MixedUse, AssetType.NonResidential) ||
+                  assetTypes.toSet === Set(AssetType.IndirectDisposal, AssetType.MixedUse)
+              ) {
+                test(
+                  sample[DraftMultipleDisposalsReturn].copy(
+                    triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = assetTypes),
+                    examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+                  ),
+                  routes.PropertyDetailsController.enterPostcode()
+                )
+              }
+            }
           }
 
         }
@@ -391,8 +404,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           "the user has started but not completed this section" in {
             test(
               sample[DraftMultipleDisposalsReturn].copy(
-                triageAnswers =
-                  sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(assetTypes = List(AssetType.NonResidential, AssetType.IndirectDisposal)),
                 examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
               ),
               routes.PropertyDetailsController.singleDisposalHasUkPostcode()
@@ -401,6 +414,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         }
       }
+
     }
 
     "handling requests to display the has a uk postcode page" must {
@@ -409,7 +423,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
-      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
+      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(performAction)
 
       "display the page" when {
 
@@ -478,7 +492,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
-      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
+      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(() => performAction())
 
       val nonResidentialPropertyDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
         triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -562,7 +576,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
-      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
+      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(performAction)
 
       "display the page" when {
 
@@ -640,7 +654,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
-      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
+      behave like redirectWhenShouldNotAskIfPostcodeExistsBehaviour(() => performAction())
 
       val answers = IncompleteExamplePropertyDetailsAnswers.empty
 
@@ -2553,33 +2567,40 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       }
     }
 
-  def redirectWhenNotNonResidentialAssetTypeBehaviour(performAction: () => Future[Result]): Unit =
+  def redirectWhenShouldNotAskIfPostcodeExistsBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the check your answers page" when {
 
-      "the user did not dispose of a non-residential property" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(
-                sample[FillingOutReturn].copy(
-                  draftReturn = sample[DraftMultipleDisposalsReturn].copy(
-                    triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                      assetTypes = List(AssetType.Residential)
+      "the asset types being disposed of do not require us to ask if a postcode exists" in {
+        forAll { assetTypes: List[AssetType] =>
+          whenever(
+            assetTypes.contains(AssetType.Residential) ||
+              assetTypes.toSet === Set(AssetType.MixedUse, AssetType.NonResidential) ||
+              assetTypes.toSet === Set(AssetType.IndirectDisposal, AssetType.MixedUse)
+          ) {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(
+                    sample[FillingOutReturn].copy(
+                      draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                          assetTypes = List(AssetType.Residential)
+                        )
+                      ),
+                      subscribedDetails = sample[SubscribedDetails].copy(
+                        name = Right(sample[IndividualName])
+                      )
                     )
-                  ),
-                  subscribedDetails = sample[SubscribedDetails].copy(
-                    name = Right(sample[IndividualName])
                   )
                 )
               )
-            )
-          )
+            }
+
+            checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
+          }
         }
-
-        checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
       }
-
     }
 
 }
