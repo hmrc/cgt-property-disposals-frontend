@@ -51,8 +51,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UploadRequest, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
@@ -323,6 +324,11 @@ trait FileUploadGen { this: GenUtils =>
   implicit val uploadRequestGen: Gen[UploadRequest] = gen[UploadRequest]
 
   implicit val upscanUploadGen: Gen[UpscanUpload] = gen[UpscanUpload]
+
+  implicit val upscanFailureGen: Gen[UpscanFailure] = gen[UpscanFailure]
+
+  implicit val upscanSuccessGen: Gen[UpscanSuccess] = gen[UpscanSuccess]
+
 }
 
 trait DisposalMethodGen { this: GenUtils =>
@@ -451,7 +457,8 @@ trait YearToDateLiabilityAnswersGen extends LowerPriorityYearToDateLiabilityAnsw
 
 }
 
-trait LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
+trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearToDateLiabilityAnswersGen {
+  this: GenUtils =>
 
   implicit val incompleteCalculatedYTDLiabilityAnswersGen: Gen[IncompleteCalculatedYTDAnswers] =
     gen[IncompleteCalculatedYTDAnswers].map {
@@ -463,6 +470,13 @@ trait LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
 
   implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYTDAnswers] =
     gen[CompleteNonCalculatedYTDAnswers]
+
+}
+
+trait EvenLowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
+
+  implicit val incompleteNonCalculatedYTDLiabilityAnswersGen: Gen[IncompleteNonCalculatedYTDAnswers] =
+    gen[IncompleteNonCalculatedYTDAnswers]
 
 }
 

@@ -47,7 +47,7 @@
 
     @pageHeading(title)
 
-    <p>@messages(failed.fold(s"$key.in-progress.help-text")(_ => s"$key.failed.help-text"))</p>
+    <p id="helpText">@messages(failed.fold(s"$key.in-progress.help-text")(_ => s"$key.failed.help-text"))</p>
 
   @failed match {
     case None => {
