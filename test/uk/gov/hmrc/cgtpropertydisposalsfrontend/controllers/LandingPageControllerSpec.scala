@@ -24,45 +24,48 @@ class LandingPageControllerSpec extends ControllerSpec {
 
   lazy val controller: LandingPageController = instanceOf[LandingPageController]
 
+  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
   "The LandingPageController" must {
 
-    "display the landing page" in {
-      implicit val messagesApi: MessagesApi = controller.messagesApi
-      val result                            = controller.landingPage()(FakeRequest())
-      contentAsString(controller.landingPage()(FakeRequest())) should include(
-        messageFromMessageKey("landingPage.title")
-      )
+    "handling requests to display the landing page" must {
 
-      checkPageIsDisplayed(
-        result,
-        messageFromMessageKey("landingPage.title"),
-        doc => doc.select(".button").attr("href") shouldBe s"${routes.StartController.start()}"
-      )
+      "display the page" in {
+        checkPageIsDisplayed(
+          controller.landingPage()(FakeRequest()),
+          messageFromMessageKey("landingPage.title"),
+          doc => doc.select(".button").attr("href") shouldBe s"${routes.StartController.start()}"
+        )
+      }
+
     }
 
-    "display the agents landing page" in {
-      implicit val messagesApi: MessagesApi = controller.messagesApi
-      val result                            = controller.agentsLandingPage()(FakeRequest())
+    "handling requests to display the agents landing page" must {
 
-      checkPageIsDisplayed(
-        result,
-        messageFromMessageKey("agentsLandingPage.title"),
-        doc => {
-          doc.select(".button").attr("href")                      shouldBe viewConfig.agentsSignInUrl
-          doc.select("#nonResidentsRebasingUrl > a").attr("href") shouldBe viewConfig.nonResidentsRebasingUrl
-          doc.select("#createAgentsAccountUrl > a").attr("href")  shouldBe viewConfig.createAgentsAccountUrl
-          doc.select("#nrcgtReturn-1 > a").attr("href")           shouldBe viewConfig.nrcgtReturn
-          doc.select("#nrcgtReturn-2 > a").attr("href")           shouldBe viewConfig.nrcgtReturn
-          doc.select("#contact-hmrc-1 > a").attr("href")          shouldBe viewConfig.contactHmrc
-          doc.select("#contact-hmrc-2 > a").attr("href")          shouldBe viewConfig.contactHmrc
-          doc.select("#cgtUrl > a").attr("href")                  shouldBe viewConfig.cgtUrl
-        }
-      )
+      "display the page" in {
+        checkPageIsDisplayed(
+          controller.agentsLandingPage()(FakeRequest()),
+          messageFromMessageKey("agentsLandingPage.title"),
+          doc => {
+            doc.select(".button").attr("href")                      shouldBe viewConfig.agentsSignInUrl
+            doc.select("#nonResidentsRebasingUrl > a").attr("href") shouldBe viewConfig.nonResidentsRebasingUrl
+            doc.select("#createAgentsAccountUrl > a").attr("href")  shouldBe viewConfig.createAgentsAccountUrl
+            doc.select("#nrcgtReturn-1 > a").attr("href")           shouldBe viewConfig.nrcgtReturn
+            doc.select("#nrcgtReturn-2 > a").attr("href")           shouldBe viewConfig.nrcgtReturn
+            doc.select("#contact-hmrc-1 > a").attr("href")          shouldBe viewConfig.contactHmrc
+            doc.select("#contact-hmrc-2 > a").attr("href")          shouldBe viewConfig.contactHmrc
+            doc.select("#cgtUrl > a").attr("href")                  shouldBe viewConfig.cgtUrl
+          }
+        )
+      }
     }
 
-    "display the sign in page" in {
-      implicit val messagesApi: MessagesApi = controller.messagesApi
-      contentAsString(controller.signInPage()(FakeRequest())) should include(messageFromMessageKey("signInPage.title"))
+    "handling requests to display the sign in page" must {
+
+      "redirect to the landing page" in {
+        checkIsRedirect(controller.signInPage()(FakeRequest()), routes.LandingPageController.landingPage())
+      }
+
     }
 
   }

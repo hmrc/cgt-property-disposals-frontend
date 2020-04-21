@@ -28,7 +28,6 @@ import cats.syntax.either._
 import cats.syntax.order._
 import cats.syntax.traverse._
 import com.google.inject.Inject
-import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
@@ -55,12 +54,10 @@ import scala.util.Try
 class JourneyStatusController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
-  config: Configuration,
   taxYearService: TaxYearService,
   sessionStore: SessionStore,
   cc: MessagesControllerComponents,
-  setReturnStatePage: views.html.testonly.set_return_state,
-  sign_in_page: views.html.sign_in
+  setReturnStatePage: views.html.testonly.set_return_state
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
