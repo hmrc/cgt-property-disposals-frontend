@@ -28,7 +28,6 @@ import play.api.data.Forms.{mapping, nonEmptyText, of}
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -70,7 +69,6 @@ class YearToDateLiabilityController @Inject() (
   returnsService: ReturnsService,
   cgtCalculationService: CgtCalculationService,
   upscanService: UpscanService,
-  upscanConnector: UpscanConnector,
   cc: MessagesControllerComponents,
   val config: Configuration,
   estimatedIncomePage: pages.estimated_income,
@@ -1112,17 +1110,18 @@ class YearToDateLiabilityController @Inject() (
         ): Future[Result] = {
           val result = for {
             newUpscanUpload <- upscanService.getUpscanUpload(pendingUpscanUpload.uploadReference)
-            _ <- if (newUpscanUpload.upscanUploadStatus === UpscanUploadStatus.Uploaded)
-                  EitherT.pure[Future, Error](())
-                else
-                  upscanService.updateUpscanUpload(
-                    newUpscanUpload.uploadReference,
-                    newUpscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded)
-                  )
-            _ <- newUpscanUpload.upscanCallBack match {
+            updatedUpscanUpload <- if (newUpscanUpload.upscanUploadStatus === UpscanUploadStatus.Uploaded)
+                                    EitherT.pure[Future, Error](newUpscanUpload)
+                                  else {
+                                    val updated = newUpscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded)
+                                    upscanService
+                                      .updateUpscanUpload(newUpscanUpload.uploadReference, updated)
+                                      .map(_ => updated)
+                                  }
+            _ <- updatedUpscanUpload.upscanCallBack match {
                   case None => EitherT.pure[Future, Error](())
                   case Some(callback) =>
-                    storeUpscanSuccessOrFailure(newUpscanUpload, callback, answers, fillingOutReturn)
+                    storeUpscanSuccessOrFailure(updatedUpscanUpload, callback, answers, fillingOutReturn)
                 }
           } yield newUpscanUpload
 
@@ -1165,19 +1164,18 @@ class YearToDateLiabilityController @Inject() (
     implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         def handlePendingUpscanUpload(
-          pendingUpscanUpload: UpscanUpload,
           answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
         ): Future[Result] =
-          removePendingUpscanUpload(pendingUpscanUpload, answers, fillingOutReturn).fold({ e =>
+          removePendingUpscanUpload(answers, fillingOutReturn).fold({ e =>
             logger.warn("Could not update session", e)
             errorHandler.errorResult()
           }, _ => errorHandler.errorResult())
 
         answers match {
-          case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
-            handlePendingUpscanUpload(pendingUpscanUpload, Left(n))
-          case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
-            handlePendingUpscanUpload(pendingUpscanUpload, Right(c))
+          case n: IncompleteNonCalculatedYTDAnswers if n.pendingUpscanUpload.isDefined =>
+            handlePendingUpscanUpload(Left(n))
+          case c: IncompleteCalculatedYTDAnswers if c.pendingUpscanUpload.isDefined =>
+            handlePendingUpscanUpload(Right(c))
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
@@ -1185,7 +1183,6 @@ class YearToDateLiabilityController @Inject() (
   }
 
   private def removePendingUpscanUpload(
-    pendingUpscanUpload: UpscanUpload,
     answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
     fillingOutReturn: FillingOutReturn
   )(implicit request: RequestWithSessionData[_]): EitherT[Future, Error, Unit] = {
@@ -1290,7 +1287,7 @@ class YearToDateLiabilityController @Inject() (
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
 
       case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
-        removePendingUpscanUpload(pendingUpscanUpload, Left(n), fillingOutReturn).fold(
+        removePendingUpscanUpload(Left(n), fillingOutReturn).fold(
           { e =>
             logger.warn("Could not remove pending upscan upload", e)
             errorHandler.errorResult()
@@ -1372,7 +1369,7 @@ class YearToDateLiabilityController @Inject() (
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
 
       case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
-        removePendingUpscanUpload(pendingUpscanUpload, Right(c), fillingOutReturn).fold(
+        removePendingUpscanUpload(Right(c), fillingOutReturn).fold(
           { e =>
             logger.warn("Could not remove pending upscan upload", e)
             errorHandler.errorResult()
