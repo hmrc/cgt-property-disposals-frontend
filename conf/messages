@@ -558,7 +558,7 @@ email-whitelisting.problem.p3=You’ll need to email HMRC at <strong class="bold
 email-whitelisting.problem.p4=You should include your name.
 
 
-agent.enter-client-cgt-ref.title=Enter your client’s Capital Gains Tax on UK property account number
+agent.enter-client-cgt-ref.title=What is your client’s Capital Gains Tax on UK property account number?
 agent.enter-client-cgt-ref.helpText=When your client created their account they got an email with this number. It is 15 characters. For example, XYCGTP123456789.
 agent.enter-client-cgt-ref.link=Find out how to manage your client’s account
 
