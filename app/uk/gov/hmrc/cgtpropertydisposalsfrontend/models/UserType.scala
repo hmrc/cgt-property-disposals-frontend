@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
-//import cats.Eq
 
 sealed trait UserType
 
@@ -28,8 +27,6 @@ object UserType {
   final case object Organisation extends UserType
   final case object NonGovernmentGatewayUser extends UserType
   final case object Agent extends UserType
-
-  //implicit val eq: Eq[UserType] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[UserType] = derived.oformat()

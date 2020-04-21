@@ -1265,7 +1265,6 @@ class ExemptionAndLossesControllerSpec
 
         "the amount of money is invalid" in {
           forAll(acceptedUserTypeGen) { userType: UserType =>
-            val userKey = userMessageKey(userType)
             amountOfMoneyErrorScenarios(key = key, errorContext = Some(s"$key")).foreach { scenario =>
               withClue(s"For $scenario: ") {
                 test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(userType)
