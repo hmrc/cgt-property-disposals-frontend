@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, NameFormValidationTests, SessionSupport, returns}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
@@ -522,6 +522,21 @@ class RepresenteeControllerSpec
 
       }
 
+      "redirect to check your answers page" when {
+        "the representive type is capacitor" in {
+          val answers = sample[CompleteRepresenteeAnswers]
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(answers, Right(Capacitor))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.checkYourAnswers())
+
+        }
+      }
+
     }
 
     "handling submitted date of death" must {
@@ -582,6 +597,29 @@ class RepresenteeControllerSpec
             mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
           }
           checkIsTechnicalErrorPage(performAction(formData(newDate)))
+        }
+
+        "the date entered is invalid" in {
+
+          val session = sessionWithFillingOutReturn(
+            IncompleteRepresenteeAnswers.empty.copy(name = Some(sample[IndividualName])),
+            Left(PersonalRepresentative)
+          )._1
+
+          val key = "representee.dateOfDeath"
+          DateErrorScenarios
+            .dateErrorScenarios(key, "")
+            .foreach { scenario =>
+              withClue(s"For date error scenario $scenario: ") {
+                val data = List(
+                  s"$key-day"   -> scenario.dayInput,
+                  s"$key-month" -> scenario.monthInput,
+                  s"$key-year"  -> scenario.yearInput
+                ).collect { case (key, Some(value)) => key -> value }
+
+                testFormError(performAction, "representee.dateOfDeath.title", session)(data, _)
+              }
+            }
         }
       }
 

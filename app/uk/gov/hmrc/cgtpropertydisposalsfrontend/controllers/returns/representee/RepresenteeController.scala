@@ -134,63 +134,6 @@ class RepresenteeController @Inject() (
     }
   }
 
-  private def withPersonalRepresentativeAnswers(request: RequestWithSessionData[_])(
-    f: (
-      Either[StartingNewDraftReturn, FillingOutReturn],
-      RepresenteeAnswers
-    ) => Future[Result]
-  ): Future[Result] =
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(startingNewDraftReturn: StartingNewDraftReturn) =>
-        val individualUserType =
-          startingNewDraftReturn.newReturnTriageAnswers.fold(
-            _.fold(_.individualUserType, _.individualUserType),
-            _.fold(_.individualUserType, _.individualUserType)
-          )
-        val answers = startingNewDraftReturn.representeeAnswers.getOrElse(IncompleteRepresenteeAnswers.empty)
-        individualUserType match {
-          case Some(PersonalRepresentative) =>
-            if (capacitorsAndPersonalRepresentativesJourneyEnabled)
-              f(Left(startingNewDraftReturn), answers)
-            else
-              Redirect(
-                controllers.returns.triage.routes.CommonTriageQuestionsController
-                  .capacitorsAndPersonalRepresentativesNotHandled()
-              )
-          case _ =>
-            Redirect(controllers.returns.routes.TaskListController.taskList())
-
-        }
-
-      case Some(fillingOutReturn: FillingOutReturn) =>
-        val individualUserType =
-          fillingOutReturn.draftReturn.fold(
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType)
-          )
-        val answers = fillingOutReturn.draftReturn
-          .fold(
-            _.representeeAnswers,
-            _.representeeAnswers
-          )
-          .getOrElse(IncompleteRepresenteeAnswers.empty)
-
-        individualUserType match {
-          case Some(PersonalRepresentative) =>
-            if (capacitorsAndPersonalRepresentativesJourneyEnabled)
-              f(Right(fillingOutReturn), answers)
-            else
-              Redirect(
-                controllers.returns.triage.routes.CommonTriageQuestionsController
-                  .capacitorsAndPersonalRepresentativesNotHandled()
-              )
-          case _ =>
-            Redirect(controllers.returns.routes.TaskListController.taskList())
-        }
-      case _ =>
-        Redirect(controllers.routes.StartController.start())
-    }
-
   def enterName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
       val backLink = answers.fold(
@@ -227,9 +170,13 @@ class RepresenteeController @Inject() (
   }
 
   def enterId(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
       val backLink = answers.fold(
-        _ => routes.RepresenteeController.enterDateOfDeath(),
+        _ =>
+          representativeType.fold(
+            _ => routes.RepresenteeController.enterDateOfDeath(),
+            _ => routes.RepresenteeController.enterDateOfDeath()
+          ),
         _ => routes.RepresenteeController.checkYourAnswers()
       )
       val form = answers.fold(_.id, c => Some(c.id)).fold(idForm)(idForm.fill)
@@ -239,9 +186,13 @@ class RepresenteeController @Inject() (
   }
 
   def enterIdSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
       lazy val backLink = answers.fold(
-        _ => routes.RepresenteeController.enterDateOfDeath(),
+        _ =>
+          representativeType.fold(
+            _ => routes.RepresenteeController.enterDateOfDeath(),
+            _ => routes.RepresenteeController.enterDateOfDeath()
+          ),
         _ => routes.RepresenteeController.checkYourAnswers()
       )
 
@@ -266,42 +217,52 @@ class RepresenteeController @Inject() (
   }
 
   def enterDateOfDeath(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withPersonalRepresentativeAnswers(request) { (journey, answers) =>
-      val form =
-        answers.fold(_.dateOfDeath, c => c.dateOfDeath).fold(dateOfDeathForm)(dateOfDeathForm.fill(_))
-      val backLink = answers.fold(
-        _ => routes.RepresenteeController.enterName(),
-        _ => routes.RepresenteeController.checkYourAnswers()
-      )
-      Ok(enterDateOfDeathPage(form, backLink, journey.isRight))
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      representativeType match {
+        case Right(Capacitor) => Redirect(routes.RepresenteeController.checkYourAnswers())
+        case Left(PersonalRepresentative) => {
+          val form =
+            answers.fold(_.dateOfDeath, c => c.dateOfDeath).fold(dateOfDeathForm)(dateOfDeathForm.fill(_))
+          val backLink = answers.fold(
+            _ => routes.RepresenteeController.enterName(),
+            _ => routes.RepresenteeController.checkYourAnswers()
+          )
+          Ok(enterDateOfDeathPage(form, backLink, journey.isRight))
+        }
+      }
     }
   }
 
   def enterDateOfDeathSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withPersonalRepresentativeAnswers(request) { (journey, answers) =>
-      lazy val backLink = answers.fold(
-        _ => routes.RepresenteeController.enterName(),
-        _ => routes.RepresenteeController.checkYourAnswers()
-      )
-      dateOfDeathForm
-        .bindFromRequest()
-        .fold(
-          formWithErrors => BadRequest(enterDateOfDeathPage(formWithErrors, backLink, journey.isRight)),
-          dateOfDeath =>
-            if (answers.fold(_.dateOfDeath, c => c.dateOfDeath).contains(dateOfDeath))
-              Redirect(routes.RepresenteeController.checkYourAnswers())
-            else {
-              val newAnswers =
-                answers.fold(
-                  _.copy(dateOfDeath = Some(dateOfDeath)),
-                  _.copy(dateOfDeath = Some(dateOfDeath))
-                )
-              updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
-                logger.warn("Could not update draft return", e)
-                errorHandler.errorResult()
-              }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
-            }
-        )
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      representativeType match {
+        case Right(Capacitor) => Redirect(routes.RepresenteeController.checkYourAnswers())
+        case Left(PersonalRepresentative) => {
+          lazy val backLink = answers.fold(
+            _ => routes.RepresenteeController.enterName(),
+            _ => routes.RepresenteeController.checkYourAnswers()
+          )
+          dateOfDeathForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors => BadRequest(enterDateOfDeathPage(formWithErrors, backLink, journey.isRight)),
+              dateOfDeath =>
+                if (answers.fold(_.dateOfDeath, c => c.dateOfDeath).contains(dateOfDeath))
+                  Redirect(routes.RepresenteeController.checkYourAnswers())
+                else {
+                  val newAnswers =
+                    answers.fold(
+                      _.copy(dateOfDeath = Some(dateOfDeath)),
+                      _.copy(dateOfDeath = Some(dateOfDeath))
+                    )
+                  updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
+                    logger.warn("Could not update draft return", e)
+                    errorHandler.errorResult()
+                  }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+                }
+            )
+        }
+      }
     }
   }
 
