@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
+import java.time.LocalDate
+
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status.BAD_REQUEST
@@ -27,7 +29,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, NameFormValidationTests, SessionSupport, returns}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
@@ -37,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, DraftMultipleDisposalsReturn, IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -416,6 +418,325 @@ class RepresenteeControllerSpec
 
     }
 
+    "handling requests to display the enter date of death page" must {
+
+      def performAction(): Future[Result] = controller.enterDateOfDeath()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(
+          sessionData: SessionData,
+          expectedTitleKey: String,
+          expectedBackLink: Call,
+          expectReturnToSummaryLink: Boolean,
+          expectedPrepopulatedValue: Option[DateOfDeath]
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(expectedTitleKey), { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.RepresenteeController.enterDateOfDeathSubmit().url
+              doc.select("#returnToSummaryLink").text() shouldBe (
+                if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link")
+                else ""
+              )
+              expectedPrepopulatedValue.foreach { date =>
+                doc.select("#dateOfDeath-day").attr("value")   shouldBe date.value.getDayOfMonth.toString
+                doc.select("#dateOfDeath-month").attr("value") shouldBe date.value.getMonthValue.toString
+                doc.select("#dateOfDeath-year").attr("value")  shouldBe date.value.getYear.toString
+              }
+            }
+          )
+
+        }
+
+        "the user is starting a draft return and" when {
+
+          "the user is a personal representative" in {
+            val date = DateOfDeath(LocalDate.now())
+            test(
+              sessionWithStartingNewDraftReturn(
+                IncompleteRepresenteeAnswers.empty.copy(dateOfDeath = Some(date)),
+                Left(PersonalRepresentative)
+              )._1,
+              "representee.dateOfDeath.title",
+              routes.RepresenteeController.enterName(),
+              expectReturnToSummaryLink = false,
+              Some(date)
+            )
+
+          }
+
+          "the section is complete" in {
+            val answers = sample[CompleteRepresenteeAnswers]
+            test(
+              sessionWithStartingNewDraftReturn(answers, Left(PersonalRepresentative))._1,
+              "representee.dateOfDeath.title",
+              routes.RepresenteeController.checkYourAnswers(),
+              expectReturnToSummaryLink = false,
+              answers.dateOfDeath
+            )
+          }
+
+        }
+
+        "the user has already started a draft return and" when {
+
+          "the user is a personal representative" in {
+            val date = DateOfDeath(LocalDate.now())
+            test(
+              sessionWithFillingOutReturn(
+                IncompleteRepresenteeAnswers.empty.copy(dateOfDeath = Some(date)),
+                Left(PersonalRepresentative)
+              )._1,
+              "representee.dateOfDeath.title",
+              routes.RepresenteeController.enterName(),
+              expectReturnToSummaryLink = true,
+              Some(date)
+            )
+          }
+
+          "the section is complete" in {
+            val answers = sample[CompleteRepresenteeAnswers]
+            test(
+              sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))._1,
+              "representee.dateOfDeath.title",
+              routes.RepresenteeController.checkYourAnswers(),
+              expectReturnToSummaryLink = true,
+              answers.dateOfDeath
+            )
+          }
+
+        }
+
+      }
+
+      "redirect to check your answers page" when {
+        "the representive type is capacitor" in {
+          val answers = sample[CompleteRepresenteeAnswers]
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(answers, Right(Capacitor))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.checkYourAnswers())
+
+        }
+      }
+
+    }
+
+    "handling submitted date of death" must {
+
+      def performAction(formData: Seq[(String, String)]): Future[Result] =
+        controller.enterDateOfDeathSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      val dayKey   = "representee.dateOfDeath-day"
+      val monthKey = "representee.dateOfDeath-month"
+      val yearKey  = "representee.dateOfDeath-year"
+
+      def formData(dateOfDeath: DateOfDeath): Seq[(String, String)] =
+        Seq(
+          dayKey   -> dateOfDeath.value.getDayOfMonth.toString,
+          monthKey -> dateOfDeath.value.getMonthValue.toString,
+          yearKey  -> dateOfDeath.value.getYear.toString
+        )
+
+      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction(Seq.empty))
+
+      "show an error page" when {
+
+        val oldAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(LocalDate.now())))
+        val newDate    = DateOfDeath(LocalDate.now().minusDays(1))
+        val (session, journey, draftReturn) =
+          sessionWithFillingOutReturn(oldAnswers, Left(PersonalRepresentative))
+        val newDraftReturn = draftReturn.copy(
+          representeeAnswers = Some(oldAnswers.copy(dateOfDeath = Some(newDate)))
+        )
+
+        val newJourney = journey.copy(draftReturn = newDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              newDraftReturn,
+              newJourney.subscribedDetails.cgtReference,
+              newJourney.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(newDate)))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              newDraftReturn,
+              newJourney.subscribedDetails.cgtReference,
+              newJourney.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
+          }
+          checkIsTechnicalErrorPage(performAction(formData(newDate)))
+        }
+
+        "the date entered is invalid" in {
+
+          val session = sessionWithFillingOutReturn(
+            IncompleteRepresenteeAnswers.empty.copy(name = Some(sample[IndividualName])),
+            Left(PersonalRepresentative)
+          )._1
+
+          val key = "representee.dateOfDeath"
+          DateErrorScenarios
+            .dateErrorScenarios(key, "")
+            .foreach { scenario =>
+              withClue(s"For date error scenario $scenario: ") {
+                val data = List(
+                  s"$key-day"   -> scenario.dayInput,
+                  s"$key-month" -> scenario.monthInput,
+                  s"$key-year"  -> scenario.yearInput
+                ).collect { case (key, Some(value)) => key -> value }
+
+                testFormError(performAction, "representee.dateOfDeath.title", session)(
+                  data,
+                  scenario.expectedErrorMessageKey
+                )
+              }
+            }
+        }
+      }
+
+      "redirect to the check your answers page" when {
+
+        val dateOfDeath = DateOfDeath(LocalDate.now())
+
+        "the user hasn't started a draft return yet and" when {
+
+          "the section is incomplete" in {
+            val (session, journey) =
+              sessionWithStartingNewDraftReturn(IncompleteRepresenteeAnswers.empty, Left(PersonalRepresentative))
+            val newJourney = journey.copy(
+              representeeAnswers = Some(
+                IncompleteRepresenteeAnswers.empty.copy(
+                  dateOfDeath = Some(dateOfDeath)
+                )
+              )
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsRedirect(performAction(formData(dateOfDeath)), routes.RepresenteeController.checkYourAnswers())
+          }
+
+          "the section is complete" in {
+            val data    = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
+            val newDate = DateOfDeath(LocalDate.now().minusDays(1))
+            val (session, journey) =
+              sessionWithStartingNewDraftReturn(data, Left(PersonalRepresentative))
+            val newJourney = journey.copy(
+              representeeAnswers = Some(data.copy(dateOfDeath = Some(newDate)))
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(formData(newDate)),
+              routes.RepresenteeController.checkYourAnswers()
+            )
+          }
+
+        }
+
+        "the user has started a draft return and" when {
+
+          "the section is incomplete" in {
+            val (session, journey, draftReturn) =
+              sessionWithFillingOutReturn(IncompleteRepresenteeAnswers.empty, Left(PersonalRepresentative))
+            val newDraftReturn = draftReturn.copy(
+              representeeAnswers = Some(
+                IncompleteRepresenteeAnswers.empty.copy(
+                  dateOfDeath = Some(dateOfDeath)
+                )
+              )
+            )
+            val newJourney = journey.copy(draftReturn = newDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                newJourney.subscribedDetails.cgtReference,
+                newJourney.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsRedirect(performAction(formData(dateOfDeath)), routes.RepresenteeController.checkYourAnswers())
+          }
+
+          "the section is complete" in {
+            val oldData = sample[IncompleteRepresenteeAnswers]
+            val (session, journey, draftReturn) =
+              sessionWithFillingOutReturn(oldData, Left(PersonalRepresentative))
+            val newDraftReturn = draftReturn.copy(
+              representeeAnswers = Some(
+                oldData.copy(
+                  dateOfDeath = Some(dateOfDeath)
+                )
+              )
+            )
+            val newJourney = journey.copy(draftReturn = newDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                newJourney.subscribedDetails.cgtReference,
+                newJourney.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsRedirect(performAction(formData(dateOfDeath)), routes.RepresenteeController.checkYourAnswers())
+
+          }
+
+        }
+
+      }
+
+    }
+
     "handling requests to display the enter id page" must {
 
       def performAction(): Future[Result] = controller.enterId()(FakeRequest())
@@ -469,28 +790,40 @@ class RepresenteeControllerSpec
             IncompleteRepresenteeAnswers.empty.copy(name = Some(sample[IndividualName]))
 
           "the user has not selected an option before" in {
-            test(
-              sessionWithStartingNewDraftReturn(
-                requiredPreviousAnswers,
-                Right(Capacitor)
-              )._1,
-              routes.RepresenteeController.enterName(),
-              expectReturnToSummaryLink = false,
-              None
-            )
+            List(
+              Left(PersonalRepresentative) -> routes.RepresenteeController.enterDateOfDeath(),
+              Right(Capacitor)             -> routes.RepresenteeController.enterName()
+            ) foreach {
+              case (representativeType, redirect) =>
+                test(
+                  sessionWithStartingNewDraftReturn(
+                    requiredPreviousAnswers,
+                    representativeType
+                  )._1,
+                  redirect,
+                  expectReturnToSummaryLink = false,
+                  None
+                )
+            }
           }
 
           "the user has previously submitted a cgt reference" in {
-            val cgtReference = sample[RepresenteeCgtReference]
-            test(
-              sessionWithStartingNewDraftReturn(
-                requiredPreviousAnswers.copy(id = Some(cgtReference)),
-                Left(PersonalRepresentative)
-              )._1,
-              routes.RepresenteeController.enterName(),
-              expectReturnToSummaryLink = false,
-              Some(cgtReference)
-            )
+            List(
+              Left(PersonalRepresentative) -> routes.RepresenteeController.enterDateOfDeath(),
+              Right(Capacitor)             -> routes.RepresenteeController.enterName()
+            ) foreach {
+              case (representativeType, redirect) =>
+                val cgtReference = sample[RepresenteeCgtReference]
+                test(
+                  sessionWithStartingNewDraftReturn(
+                    requiredPreviousAnswers.copy(id = Some(cgtReference)),
+                    representativeType
+                  )._1,
+                  redirect,
+                  expectReturnToSummaryLink = false,
+                  Some(cgtReference)
+                )
+            }
           }
 
           "the user has previously submitted a nino" in {
@@ -500,7 +833,7 @@ class RepresenteeControllerSpec
                 requiredPreviousAnswers.copy(id = Some(nino)),
                 Left(PersonalRepresentative)
               )._1,
-              routes.RepresenteeController.enterName(),
+              routes.RepresenteeController.enterDateOfDeath(),
               expectReturnToSummaryLink = false,
               Some(nino)
             )
@@ -514,11 +847,30 @@ class RepresenteeControllerSpec
                 requiredPreviousAnswers.copy(id = Some(sautr)),
                 Left(PersonalRepresentative)
               )._1,
-              routes.RepresenteeController.enterName(),
+              routes.RepresenteeController.enterDateOfDeath(),
               expectReturnToSummaryLink = false,
               Some(sautr)
             )
 
+          }
+
+          "Redirects based on representitive type" in {
+            List(
+              Left(PersonalRepresentative) -> routes.RepresenteeController.enterDateOfDeath(),
+              Right(Capacitor)             -> routes.RepresenteeController.enterName()
+            ) foreach {
+              case (representativeType, redirect) =>
+                val cgtReference = sample[RepresenteeCgtReference]
+                test(
+                  sessionWithStartingNewDraftReturn(
+                    requiredPreviousAnswers.copy(id = Some(cgtReference)),
+                    representativeType
+                  )._1,
+                  redirect,
+                  expectReturnToSummaryLink = false,
+                  Some(cgtReference)
+                )
+            }
           }
 
           "the user has previously submitted no reference" in {
@@ -557,7 +909,7 @@ class RepresenteeControllerSpec
                   .copy(id = Some(cgtReference)),
                 Left(PersonalRepresentative)
               )._1,
-              routes.RepresenteeController.enterName(),
+              routes.RepresenteeController.enterDateOfDeath(),
               expectReturnToSummaryLink = true,
               Some(cgtReference)
             )
@@ -869,7 +1221,8 @@ class RepresenteeControllerSpec
 
       val allQuestionsAnswers = IncompleteRepresenteeAnswers(
         Some(completeAnswers.name),
-        Some(completeAnswers.id)
+        Some(completeAnswers.id),
+        completeAnswers.dateOfDeath
       )
 
       "redirect to the enter name page" when {
@@ -900,6 +1253,19 @@ class RepresenteeControllerSpec
         }
       }
 
+      "redirect to the enter date of death page" when {
+
+        "that question hasn't been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(allQuestionsAnswers.copy(dateOfDeath = None), Left(PersonalRepresentative))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.enterDateOfDeath())
+        }
+      }
     }
 
   }

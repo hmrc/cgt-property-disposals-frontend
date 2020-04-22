@@ -2145,6 +2145,20 @@ representee.cyaChange.whoFor=who you are submitting for
 representee.cyaLabel.personRepresented=Person represented
 representee.cyaChange.personRepresented=the person you are representing
 
+representee.cyaLabel.dateOfDeath=What date did the person die
+
+representee.dateOfDeath.title=What date did the person die?
+representee.dateOfDeath.helpText=For example, 25 4 2020
+representee.dateOfDeath.error.required=Enter the date the person died
+representee.dateOfDeath-day.error.required=Date must include a day
+representee.dateOfDeath-month.error.required=Date must include a month
+representee.dateOfDeath-year.error.required=Date must include a year
+representee.dateOfDeath.error.invalid=Enter a real date
+representee.dateOfDeath-month.error.monthAndYearRequired=Date must include a month and a year
+representee.dateOfDeath-day.error.dayAndYearRequired=Date must include a day and a year
+representee.dateOfDeath-day.error.dayAndMonthRequired=Date must include a day and a month
+representee.dateOfDeath.error.tooFarInFuture=Date must be today or in the past
+
 representeeReferenceIdType.title=Select if you have one of these reference numbers for the person
 representeeReferenceIdType.helpText=The reference number you enter must match the name you entered and the details we hold about the person.
 representeeReferenceIdType.error.required=Select if you have one of these reference numbers for the person
