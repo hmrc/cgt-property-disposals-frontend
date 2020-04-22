@@ -617,7 +617,10 @@ class RepresenteeControllerSpec
                   s"$key-year"  -> scenario.yearInput
                 ).collect { case (key, Some(value)) => key -> value }
 
-                testFormError(performAction, "representee.dateOfDeath.title", session)(data, scenario.expectedErrorMessageKey)
+                testFormError(performAction, "representee.dateOfDeath.title", session)(
+                  data,
+                  scenario.expectedErrorMessageKey
+                )
               }
             }
         }
@@ -1250,6 +1253,19 @@ class RepresenteeControllerSpec
         }
       }
 
+      "redirect to the enter date of death page" when {
+
+        "that question hasn't been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(allQuestionsAnswers.copy(dateOfDeath = None), Left(PersonalRepresentative))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.enterDateOfDeath())
+        }
+      }
     }
 
   }
