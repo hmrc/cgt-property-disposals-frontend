@@ -584,7 +584,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Trust: ",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Right(IndividualName("John", "Doe"))
+            Left(TrustName("John Doe"))
           ),
           TestScenario(
             "organisation representing individual with tax due",
@@ -593,7 +593,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Trust: ",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Right(IndividualName("John", "Doe"))
+            Left(TrustName("John Doe"))
           )
         )
 
@@ -650,6 +650,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           }
         }
       }
+
     }
 
     "handling requests to pay a return" must {
