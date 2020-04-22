@@ -29,7 +29,7 @@ object RepresenteeAnswers {
   final case class IncompleteRepresenteeAnswers(
     name: Option[IndividualName],
     id: Option[RepresenteeReferenceId],
-    dateOfDeath: Option[LocalDate]
+    dateOfDeath: Option[DateOfDeath]
   ) extends RepresenteeAnswers
 
   object IncompleteRepresenteeAnswers {
@@ -38,8 +38,11 @@ object RepresenteeAnswers {
 
   }
 
-  final case class CompleteRepresenteeAnswers(name: IndividualName, id: RepresenteeReferenceId, dateOfDeath: LocalDate)
-      extends RepresenteeAnswers
+  final case class CompleteRepresenteeAnswers(
+    name: IndividualName,
+    id: RepresenteeReferenceId,
+    dateOfDeath: Option[DateOfDeath]
+  ) extends RepresenteeAnswers
 
   implicit class RepresenteeAnswersOps(private val r: RepresenteeAnswers) extends AnyVal {
     def fold[A](ifIncomplete: IncompleteRepresenteeAnswers => A, ifComplete: CompleteRepresenteeAnswers => A): A =

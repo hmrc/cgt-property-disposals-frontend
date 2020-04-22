@@ -23,21 +23,18 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.data.Forms.{mapping, of}
-import play.api.data.{Form, FormError}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, Error, FormUtils, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -137,6 +134,63 @@ class RepresenteeController @Inject() (
     }
   }
 
+  private def withPersonalRepresentativeAnswers(request: RequestWithSessionData[_])(
+    f: (
+      Either[StartingNewDraftReturn, FillingOutReturn],
+      RepresenteeAnswers
+    ) => Future[Result]
+  ): Future[Result] =
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(startingNewDraftReturn: StartingNewDraftReturn) =>
+        val individualUserType =
+          startingNewDraftReturn.newReturnTriageAnswers.fold(
+            _.fold(_.individualUserType, _.individualUserType),
+            _.fold(_.individualUserType, _.individualUserType)
+          )
+        val answers = startingNewDraftReturn.representeeAnswers.getOrElse(IncompleteRepresenteeAnswers.empty)
+        individualUserType match {
+          case Some(PersonalRepresentative) =>
+            if (capacitorsAndPersonalRepresentativesJourneyEnabled)
+              f(Left(startingNewDraftReturn), answers)
+            else
+              Redirect(
+                controllers.returns.triage.routes.CommonTriageQuestionsController
+                  .capacitorsAndPersonalRepresentativesNotHandled()
+              )
+          case _ =>
+            Redirect(controllers.returns.routes.TaskListController.taskList())
+
+        }
+
+      case Some(fillingOutReturn: FillingOutReturn) =>
+        val individualUserType =
+          fillingOutReturn.draftReturn.fold(
+            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
+            _.triageAnswers.fold(_.individualUserType, _.individualUserType)
+          )
+        val answers = fillingOutReturn.draftReturn
+          .fold(
+            _.representeeAnswers,
+            _.representeeAnswers
+          )
+          .getOrElse(IncompleteRepresenteeAnswers.empty)
+
+        individualUserType match {
+          case Some(PersonalRepresentative) =>
+            if (capacitorsAndPersonalRepresentativesJourneyEnabled)
+              f(Right(fillingOutReturn), answers)
+            else
+              Redirect(
+                controllers.returns.triage.routes.CommonTriageQuestionsController
+                  .capacitorsAndPersonalRepresentativesNotHandled()
+              )
+          case _ =>
+            Redirect(controllers.returns.routes.TaskListController.taskList())
+        }
+      case _ =>
+        Redirect(controllers.routes.StartController.start())
+    }
+
   def enterName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
       val backLink = answers.fold(
@@ -212,18 +266,19 @@ class RepresenteeController @Inject() (
   }
 
   def enterDateOfDeath(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
-      val form = answers.fold(_.dateOfDeath, c => Some(c.dateOfDeath)).fold(dateOfDeathForm)(dateOfDeathForm.fill)
+    withPersonalRepresentativeAnswers(request) { (journey, answers) =>
+      val form =
+        answers.fold(_.dateOfDeath, c => c.dateOfDeath).fold(dateOfDeathForm)(dateOfDeathForm.fill(_))
       val backLink = answers.fold(
         _ => routes.RepresenteeController.enterName(),
         _ => routes.RepresenteeController.checkYourAnswers()
       )
-      Ok(enterDateOfDeathPage(form, backLink, representativeType, journey.isRight))
+      Ok(enterDateOfDeathPage(form, backLink, journey.isRight))
     }
   }
 
   def enterDateOfDeathSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+    withPersonalRepresentativeAnswers(request) { (journey, answers) =>
       lazy val backLink = answers.fold(
         _ => routes.RepresenteeController.enterName(),
         _ => routes.RepresenteeController.checkYourAnswers()
@@ -231,19 +286,21 @@ class RepresenteeController @Inject() (
       dateOfDeathForm
         .bindFromRequest()
         .fold(
-          formWithErrors =>
-            BadRequest(enterDateOfDeathPage(formWithErrors, backLink, representativeType, journey.isRight)),
-          dateOfDeath => {
-            val newAnswers =
-              answers.fold(
-                _.copy(dateOfDeath = Some(dateOfDeath)),
-                _.copy(dateOfDeath = dateOfDeath)
-              )
-            updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
-              logger.warn("Could not update draft return", e)
-              errorHandler.errorResult()
-            }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
-          }
+          formWithErrors => BadRequest(enterDateOfDeathPage(formWithErrors, backLink, journey.isRight)),
+          dateOfDeath =>
+            if (answers.fold(_.dateOfDeath, c => c.dateOfDeath).contains(dateOfDeath))
+              Redirect(routes.RepresenteeController.checkYourAnswers())
+            else {
+              val newAnswers =
+                answers.fold(
+                  _.copy(dateOfDeath = Some(dateOfDeath)),
+                  _.copy(dateOfDeath = Some(dateOfDeath))
+                )
+              updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
+                logger.warn("Could not update draft return", e)
+                errorHandler.errorResult()
+              }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+            }
         )
     }
   }
@@ -292,7 +349,7 @@ class RepresenteeController @Inject() (
         case IncompleteRepresenteeAnswers(_, None, _) =>
           Redirect(routes.RepresenteeController.enterId())
 
-        case IncompleteRepresenteeAnswers(Some(name), Some(id), Some(dateOfDeath)) =>
+        case IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath) =>
           val completeAnswers = CompleteRepresenteeAnswers(name, id, dateOfDeath)
           Ok(cyaPage(completeAnswers, representativeType, journey.isRight))
 
@@ -310,12 +367,19 @@ object RepresenteeController {
   val nameForm: Form[IndividualName] = IndividualName.form("representeeFirstName", "representeeLastName")
 
   val key = "representee.dateOfDeath"
-  val dateOfDeathForm = Form(
+  val dateOfDeathForm: Form[DateOfDeath] = Form(
     mapping(
       "" -> of(
-        TimeUtils.dateFormatter(Some(LocalDate.now().plusDays(1)), None, s"$key-day", s"$key-month", s"$key-year", key)
+        TimeUtils.dateFormatter(
+          Some(LocalDate.now().plusDays(1)),
+          None,
+          s"$key-day",
+          s"$key-month",
+          s"$key-year",
+          key
+        )
       )
-    )(identity)(Some(_))
+    )(DateOfDeath(_))(d => Some(d.value))
   )
 
   val idForm: Form[RepresenteeReferenceId] = {

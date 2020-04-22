@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, DraftMultipleDisposalsReturn, IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -433,7 +433,7 @@ class RepresenteeControllerSpec
           expectedTitleKey: String,
           expectedBackLink: Call,
           expectReturnToSummaryLink: Boolean,
-          expectedPrepopulatedValue: Option[LocalDate]
+          expectedPrepopulatedValue: Option[DateOfDeath]
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -452,9 +452,9 @@ class RepresenteeControllerSpec
                 else ""
               )
               expectedPrepopulatedValue.foreach { date =>
-                doc.select("#dateOfDeath-day").attr("value")   shouldBe date.getDayOfMonth.toString
-                doc.select("#dateOfDeath-month").attr("value") shouldBe date.getMonthValue.toString
-                doc.select("#dateOfDeath-year").attr("value")  shouldBe date.getYear.toString
+                doc.select("#dateOfDeath-day").attr("value")   shouldBe date.value.getDayOfMonth.toString
+                doc.select("#dateOfDeath-month").attr("value") shouldBe date.value.getMonthValue.toString
+                doc.select("#dateOfDeath-year").attr("value")  shouldBe date.value.getYear.toString
               }
             }
           )
@@ -464,7 +464,7 @@ class RepresenteeControllerSpec
         "the user is starting a draft return and" when {
 
           "the user is a personal representative" in {
-            val date = LocalDate.now()
+            val date = DateOfDeath(LocalDate.now())
             test(
               sessionWithStartingNewDraftReturn(
                 IncompleteRepresenteeAnswers.empty.copy(dateOfDeath = Some(date)),
@@ -485,7 +485,7 @@ class RepresenteeControllerSpec
               "representee.dateOfDeath.title",
               routes.RepresenteeController.checkYourAnswers(),
               expectReturnToSummaryLink = false,
-              Some(answers.dateOfDeath)
+              answers.dateOfDeath
             )
           }
 
@@ -494,7 +494,7 @@ class RepresenteeControllerSpec
         "the user has already started a draft return and" when {
 
           "the user is a personal representative" in {
-            val date = LocalDate.now()
+            val date = DateOfDeath(LocalDate.now())
             test(
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty.copy(dateOfDeath = Some(date)),
@@ -514,7 +514,7 @@ class RepresenteeControllerSpec
               "representee.dateOfDeath.title",
               routes.RepresenteeController.checkYourAnswers(),
               expectReturnToSummaryLink = true,
-              Some(answers.dateOfDeath)
+              answers.dateOfDeath
             )
           }
 
@@ -533,11 +533,11 @@ class RepresenteeControllerSpec
       val monthKey = "representee.dateOfDeath-month"
       val yearKey  = "representee.dateOfDeath-year"
 
-      def formData(dateOfDeath: LocalDate): Seq[(String, String)] =
+      def formData(dateOfDeath: DateOfDeath): Seq[(String, String)] =
         Seq(
-          dayKey   -> dateOfDeath.getDayOfMonth.toString,
-          monthKey -> dateOfDeath.getMonthValue.toString,
-          yearKey  -> dateOfDeath.getYear.toString
+          dayKey   -> dateOfDeath.value.getDayOfMonth.toString,
+          monthKey -> dateOfDeath.value.getMonthValue.toString,
+          yearKey  -> dateOfDeath.value.getYear.toString
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -546,12 +546,12 @@ class RepresenteeControllerSpec
 
       "show an error page" when {
 
-        val oldAnswers = sample[CompleteRepresenteeAnswers]
-        val newDate    = LocalDate.now()
+        val oldAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(LocalDate.now())))
+        val newDate    = DateOfDeath(LocalDate.now().minusDays(1))
         val (session, journey, draftReturn) =
-          sessionWithFillingOutReturn(oldAnswers, Right(Capacitor))
+          sessionWithFillingOutReturn(oldAnswers, Left(PersonalRepresentative))
         val newDraftReturn = draftReturn.copy(
-          representeeAnswers = Some(oldAnswers.copy(dateOfDeath = newDate))
+          representeeAnswers = Some(oldAnswers.copy(dateOfDeath = Some(newDate)))
         )
 
         val newJourney = journey.copy(draftReturn = newDraftReturn)
@@ -581,15 +581,13 @@ class RepresenteeControllerSpec
             )(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
           }
-
           checkIsTechnicalErrorPage(performAction(formData(newDate)))
         }
-
       }
 
       "redirect to the check your answers page" when {
 
-        val dateOfDeath = LocalDate.now()
+        val dateOfDeath = DateOfDeath(LocalDate.now())
 
         "the user hasn't started a draft return yet and" when {
 
@@ -614,11 +612,12 @@ class RepresenteeControllerSpec
           }
 
           "the section is complete" in {
-            val data = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = dateOfDeath)
+            val data    = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
+            val newDate = DateOfDeath(LocalDate.now().minusDays(1))
             val (session, journey) =
               sessionWithStartingNewDraftReturn(data, Left(PersonalRepresentative))
             val newJourney = journey.copy(
-              representeeAnswers = Some(data.copy(dateOfDeath = dateOfDeath.plusDays(1)))
+              representeeAnswers = Some(data.copy(dateOfDeath = Some(newDate)))
             )
 
             inSequence {
@@ -628,7 +627,7 @@ class RepresenteeControllerSpec
             }
 
             checkIsRedirect(
-              performAction(formData(dateOfDeath.plusDays(1))),
+              performAction(formData(newDate)),
               routes.RepresenteeController.checkYourAnswers()
             )
           }
@@ -639,7 +638,7 @@ class RepresenteeControllerSpec
 
           "the section is incomplete" in {
             val (session, journey, draftReturn) =
-              sessionWithFillingOutReturn(IncompleteRepresenteeAnswers.empty, Right(Capacitor))
+              sessionWithFillingOutReturn(IncompleteRepresenteeAnswers.empty, Left(PersonalRepresentative))
             val newDraftReturn = draftReturn.copy(
               representeeAnswers = Some(
                 IncompleteRepresenteeAnswers.empty.copy(
@@ -666,7 +665,7 @@ class RepresenteeControllerSpec
           "the section is complete" in {
             val oldData = sample[IncompleteRepresenteeAnswers]
             val (session, journey, draftReturn) =
-              sessionWithFillingOutReturn(oldData, Right(Capacitor))
+              sessionWithFillingOutReturn(oldData, Left(PersonalRepresentative))
             val newDraftReturn = draftReturn.copy(
               representeeAnswers = Some(
                 oldData.copy(
@@ -1151,7 +1150,7 @@ class RepresenteeControllerSpec
       val allQuestionsAnswers = IncompleteRepresenteeAnswers(
         Some(completeAnswers.name),
         Some(completeAnswers.id),
-        Some(completeAnswers.dateOfDeath)
+        completeAnswers.dateOfDeath
       )
 
       "redirect to the enter name page" when {

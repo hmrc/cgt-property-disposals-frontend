@@ -21,10 +21,10 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DateOfDeath
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -38,12 +38,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
 )
 
-@(
-form: Form[LocalDate],
-backLink: Call,
-representativeType: Either[PersonalRepresentative.type, Capacitor.type],
-displayReturnToSummaryLink: Boolean
-)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[DateOfDeath], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{ "representee.dateOfDeath" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
