@@ -33,7 +33,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteExamplePropertyDetailsAnswers, hasNonResidentialAssetType: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(answers: CompleteExamplePropertyDetailsAnswers, shouldAskIfPostcodeExists: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
@@ -43,7 +43,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         messages("returns.property-address.cyaLabel.property-address"),
         addressDisplay(answers.address, DisplayFormat.Block),
         Some(cyaChange(messages("returns.property-address.cyaChange.property-address"),
-            if(hasNonResidentialAssetType) routes.PropertyDetailsController.singleDisposalHasUkPostcode().url
+            if(shouldAskIfPostcodeExists) routes.PropertyDetailsController.singleDisposalHasUkPostcode().url
             else routes.PropertyDetailsController.enterPostcode().url
         )),
         "property-address"

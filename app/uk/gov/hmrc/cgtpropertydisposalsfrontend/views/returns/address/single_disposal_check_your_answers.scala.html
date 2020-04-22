@@ -30,7 +30,7 @@
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary
 )
 
-@(propertyAddress: UkAddress, hasNonResidentialAssetType: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(propertyAddress: UkAddress, shouldAskIfPostcodeExists: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("returns.property-address.cya.title")}
@@ -39,7 +39,7 @@
 
     @pageHeading(title, Some(messages("returns.property-address.singleDisposal.caption")))
 
-    @summary(propertyAddress, hasNonResidentialAssetType)
+    @summary(propertyAddress, shouldAskIfPostcodeExists)
 
     @formWrapper(returns.address.routes.PropertyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

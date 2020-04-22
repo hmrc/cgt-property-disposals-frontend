@@ -21,8 +21,6 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.list._
-import cats.syntax.eq._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -1963,7 +1961,7 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-              val answers = c.copy(countryOfResidence = sample[Country])
+              val answers = c.copy(countryOfResidence = Country("FI", None))
 
               val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
 
@@ -2997,12 +2995,53 @@ class MultipleDisposalsTriageControllerSpec
       "redirect to the asset types not implemented page" when {
 
         "the user was not a non uk resident and they have selected asset types that are not supported" in {
-          forAll { assetTypes: List[AssetType] =>
-            whenever(assetTypes =!= List(AssetType.Residential) && assetTypes =!= List(AssetType.NonResidential)) {
+          List(
+            List(AssetType.IndirectDisposal),
+            List(AssetType.MixedUse),
+            List(AssetType.IndirectDisposal, AssetType.MixedUse),
+            List(AssetType.MixedUse, AssetType.IndirectDisposal)
+          ).foreach { assetTypes =>
+            testRedirectWhenIncomplete(
+              allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)),
+              routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+            )
+          }
+        }
 
-              testRedirectWhenIncomplete(
-                allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)),
-                routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+      }
+
+      "not redirect to the asset types not implemented page" when {
+
+        "the user selects a valid combination of asset types" in {
+          val invalidAssetTypes = List(
+            List(AssetType.IndirectDisposal),
+            List(AssetType.MixedUse),
+            List(AssetType.IndirectDisposal, AssetType.MixedUse),
+            List(AssetType.MixedUse, AssetType.IndirectDisposal)
+          )
+
+          forAll { assetTypes: List[AssetType] =>
+            whenever(!invalidAssetTypes.contains(assetTypes) && assetTypes.nonEmpty) {
+              val (session, journey, draftReturn) =
+                sessionDataWithFillingOutReturn(allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)))
+              val updatedDraftReturn =
+                draftReturn.copy(triageAnswers = completeAnswersNonUk.copy(assetTypes = assetTypes))
+              val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  updatedDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("multipleDisposals.triage.cya.title")
               )
             }
           }
