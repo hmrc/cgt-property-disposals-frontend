@@ -7,4 +7,7 @@ POST /about-person/select-reference-number   uk.gov.hmrc.cgtpropertydisposalsfro
 GET   /about-person/date-person-died        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.enterDateOfDeath()
 POST  /about-person/date-person-died        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.enterDateOfDeathSubmit()
 
+GET  /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetails()
+POST /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetailsSubmit()
+
 GET   /about-person/check-your-answers      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswers()
