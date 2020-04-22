@@ -27,19 +27,23 @@ object RepresenteeAnswers {
   final case class IncompleteRepresenteeAnswers(
     name: Option[IndividualName],
     id: Option[RepresenteeReferenceId],
-    dateOfDeath: Option[DateOfDeath]
+    dateOfDeath: Option[DateOfDeath],
+    contactDetails: Option[RepresenteeContactDetails],
+    hasConfirmedContactDetails: Boolean
   ) extends RepresenteeAnswers
 
   object IncompleteRepresenteeAnswers {
 
-    val empty: IncompleteRepresenteeAnswers = IncompleteRepresenteeAnswers(None, None, None)
+    val empty: IncompleteRepresenteeAnswers =
+      IncompleteRepresenteeAnswers(None, None, None, None, hasConfirmedContactDetails = false)
 
   }
 
   final case class CompleteRepresenteeAnswers(
     name: IndividualName,
     id: RepresenteeReferenceId,
-    dateOfDeath: Option[DateOfDeath]
+    dateOfDeath: Option[DateOfDeath],
+    contactDetails: RepresenteeContactDetails
   ) extends RepresenteeAnswers
 
   implicit class RepresenteeAnswersOps(private val r: RepresenteeAnswers) extends AnyVal {
