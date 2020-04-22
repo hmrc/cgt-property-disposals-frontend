@@ -49,9 +49,13 @@
         "personRepresented"
     )
 
-    answers.foldRight(
-      _.dateOfDeath.map( e => {
-        cyaRow(messages("representee.cyaLabel.dateOfDeath"), Html(TimeUtils.govShortDisplayFormat(e.value)), Some(cyaChange(messages("representee.cyaChange.personRepresented"), routes.RepresenteeController.enterDateOfDeath().url)), "dateOfDeath" )
+    answers.dateOfDeath.map(date => {
+        cyaRow(
+            messages("representee.cyaLabel.dateOfDeath"),
+            Html(TimeUtils.govShortDisplayFormat(date.value)),
+            Some(cyaChange(messages("representee.cyaChange.personRepresented"),
+            routes.RepresenteeController.enterDateOfDeath().url)), "dateOfDeath"
+        )
       })
     )
 

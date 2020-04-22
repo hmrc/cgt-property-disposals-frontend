@@ -175,7 +175,7 @@ class RepresenteeController @Inject() (
         _ =>
           representativeType.fold(
             _ => routes.RepresenteeController.enterDateOfDeath(),
-            _ => routes.RepresenteeController.enterDateOfDeath()
+            _ => routes.RepresenteeController.enterName()
           ),
         _ => routes.RepresenteeController.checkYourAnswers()
       )

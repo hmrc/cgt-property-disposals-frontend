@@ -617,7 +617,7 @@ class RepresenteeControllerSpec
                   s"$key-year"  -> scenario.yearInput
                 ).collect { case (key, Some(value)) => key -> value }
 
-                testFormError(performAction, "representee.dateOfDeath.title", session)(data, _)
+                testFormError(performAction, "representee.dateOfDeath.title", session)(data, scenario.expectedErrorMessageKey)
               }
             }
         }
@@ -787,28 +787,40 @@ class RepresenteeControllerSpec
             IncompleteRepresenteeAnswers.empty.copy(name = Some(sample[IndividualName]))
 
           "the user has not selected an option before" in {
-            test(
-              sessionWithStartingNewDraftReturn(
-                requiredPreviousAnswers,
-                Right(Capacitor)
-              )._1,
-              routes.RepresenteeController.enterDateOfDeath(),
-              expectReturnToSummaryLink = false,
-              None
-            )
+            List(
+              Left(PersonalRepresentative) -> routes.RepresenteeController.enterDateOfDeath(),
+              Right(Capacitor)             -> routes.RepresenteeController.enterName()
+            ) foreach {
+              case (representativeType, redirect) =>
+                test(
+                  sessionWithStartingNewDraftReturn(
+                    requiredPreviousAnswers,
+                    representativeType
+                  )._1,
+                  redirect,
+                  expectReturnToSummaryLink = false,
+                  None
+                )
+            }
           }
 
           "the user has previously submitted a cgt reference" in {
-            val cgtReference = sample[RepresenteeCgtReference]
-            test(
-              sessionWithStartingNewDraftReturn(
-                requiredPreviousAnswers.copy(id = Some(cgtReference)),
-                Left(PersonalRepresentative)
-              )._1,
-              routes.RepresenteeController.enterDateOfDeath(),
-              expectReturnToSummaryLink = false,
-              Some(cgtReference)
-            )
+            List(
+              Left(PersonalRepresentative) -> routes.RepresenteeController.enterDateOfDeath(),
+              Right(Capacitor)             -> routes.RepresenteeController.enterName()
+            ) foreach {
+              case (representativeType, redirect) =>
+                val cgtReference = sample[RepresenteeCgtReference]
+                test(
+                  sessionWithStartingNewDraftReturn(
+                    requiredPreviousAnswers.copy(id = Some(cgtReference)),
+                    representativeType
+                  )._1,
+                  redirect,
+                  expectReturnToSummaryLink = false,
+                  Some(cgtReference)
+                )
+            }
           }
 
           "the user has previously submitted a nino" in {
@@ -839,13 +851,32 @@ class RepresenteeControllerSpec
 
           }
 
+          "Redirects based on representitive type" in {
+            List(
+              Left(PersonalRepresentative) -> routes.RepresenteeController.enterDateOfDeath(),
+              Right(Capacitor)             -> routes.RepresenteeController.enterName()
+            ) foreach {
+              case (representativeType, redirect) =>
+                val cgtReference = sample[RepresenteeCgtReference]
+                test(
+                  sessionWithStartingNewDraftReturn(
+                    requiredPreviousAnswers.copy(id = Some(cgtReference)),
+                    representativeType
+                  )._1,
+                  redirect,
+                  expectReturnToSummaryLink = false,
+                  Some(cgtReference)
+                )
+            }
+          }
+
           "the user has previously submitted no reference" in {
             test(
               sessionWithStartingNewDraftReturn(
                 requiredPreviousAnswers.copy(id = Some(NoReferenceId)),
                 Right(Capacitor)
               )._1,
-              routes.RepresenteeController.enterDateOfDeath(),
+              routes.RepresenteeController.enterName(),
               expectReturnToSummaryLink = false,
               Some(NoReferenceId)
             )
