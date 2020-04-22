@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import java.time.LocalDate
-
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
