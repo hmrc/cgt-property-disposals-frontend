@@ -113,7 +113,7 @@ agentsLandingPage.report.uk-residents.p4=If your client is a resident who is an 
 
 agentsLandingPage.report.uk-residents.list1.bullet1=report your client’s UK residential property disposals made from 6 April 2020
 agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay any tax they might owe for that disposal
-agentsLandingPage.report.uk-residents.list1.bullet3=view and amend your client’s previous and current returns
+agentsLandingPage.report.uk-residents.list1.bullet3=view your client’s previous and current returns
 agentsLandingPage.report.what-residents-cannot-do.h4=What residents cannot do
 agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use the online service for your client to report UK property disposals for someone who has died - you’ll need to <a href="{0}">contact HMRC</a>.
 agentsLandingPage.report.non-residents.h4=Non-residents
@@ -175,12 +175,6 @@ agentsLandingPage.what-you-will-need-to-complete-the-return.p2=You may be asked 
 
 agentsLandingPage.ways-your-client-can-pay.h3=Ways your client can pay
 agentsLandingPage.ways-your-client-can-pay.p1=Your client can pay by bank transfer, debit card or corporate credit card from their account. They will need to provide their payment reference number. They can find it in their Capital Gains Tax on UK property account.
-
-signInPage.title=Sign in to report and pay Capital Gains Tax on UK property
-signInPage.list1.bullet5=view and amend your previous and current Capital Gains Tax on UK property returns
-signInPage.beforeYouStart.p1=If you’re an individual or a trust, you’ll need to use the same Government Gateway user ID and password you used when you created your Capital Gains Tax on UK property account.
-signInPage.beforeYouStart.p2=If you’re an agent, you’ll need to go to your <a href="{0}">agent services account</a> to access this service.
-signInPage.beforeYouStart.p3=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
 
 nino.title=Enter your National Insurance number
 nino.helpText=It’s on your National Insurance card, benefit letter, payslip or P60.<br>For example, ‘QQ 12 34 56 C’.
@@ -2150,6 +2144,20 @@ representee.cyaChange.whoFor=who you are submitting for
 
 representee.cyaLabel.personRepresented=Person represented
 representee.cyaChange.personRepresented=the person you are representing
+
+representee.cyaLabel.dateOfDeath=What date did the person die
+
+representee.dateOfDeath.title=What date did the person die?
+representee.dateOfDeath.helpText=For example, 25 4 2020
+representee.dateOfDeath.error.required=Enter the date the person died
+representee.dateOfDeath-day.error.required=Date must include a day
+representee.dateOfDeath-month.error.required=Date must include a month
+representee.dateOfDeath-year.error.required=Date must include a year
+representee.dateOfDeath.error.invalid=Enter a real date
+representee.dateOfDeath-month.error.monthAndYearRequired=Date must include a month and a year
+representee.dateOfDeath-day.error.dayAndYearRequired=Date must include a day and a year
+representee.dateOfDeath-day.error.dayAndMonthRequired=Date must include a day and a month
+representee.dateOfDeath.error.tooFarInFuture=Date must be today or in the past
 
 representeeReferenceIdType.title=Select if you have one of these reference numbers for the person
 representeeReferenceIdType.helpText=The reference number you enter must match the name you entered and the details we hold about the person.

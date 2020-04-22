@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -48,5 +49,14 @@
         "personRepresented"
     )
 
+    answers.dateOfDeath.map(date => {
+        cyaRow(
+            messages("representee.cyaLabel.dateOfDeath"),
+            Html(TimeUtils.govShortDisplayFormat(date.value)),
+            Some(cyaChange(messages("representee.cyaChange.personRepresented"),
+            routes.RepresenteeController.enterDateOfDeath().url)), "dateOfDeath"
+        )
+      })
+    )
 
 }

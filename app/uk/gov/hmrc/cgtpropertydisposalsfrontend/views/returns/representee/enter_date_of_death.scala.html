@@ -1,0 +1,72 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.data.Form
+@import play.api.i18n.Messages
+@import play.api.mvc.Call
+@import play.twirl.api.Html
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DateOfDeath
+
+@this(
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+)
+
+@(form: Form[DateOfDeath], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+
+@key = @{ "representee.dateOfDeath" }
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@title = @{messages(s"$key.title")}
+@errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
+
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+
+
+@backLinkComponent(backLink)
+
+@if(hasErrors) {
+@errorSummary(form)
+}
+
+@formWrapper(routes.RepresenteeController.enterDateOfDeathSubmit(), 'novalidate -> "novalidate") {
+ @dateInput(
+  fieldId = "dateOfDeath",
+  label = pageHeading(title, Some(messages("representee.caption"))),
+  dayValue = form.data.get(s"$key-day"),
+  monthValue = form.data.get(s"$key-month"),
+  yearValue = form.data.get(s"$key-year"),
+  helpText = Some(Html(messages(s"$key.helpText"))),
+  labelAsHeading = true,
+  errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
+  hasErrors = hasErrors
+ )
+ @submitButton(messages("button.saveAndContinue"))
+}
+
+@returnToSummaryLink(displayReturnToSummaryLink)
+
+}
