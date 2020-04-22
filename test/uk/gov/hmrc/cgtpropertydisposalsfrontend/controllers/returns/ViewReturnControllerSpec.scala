@@ -22,6 +22,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -45,7 +46,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.format
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteMultipleDisposalsReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -94,6 +97,21 @@ class ViewReturnControllerSpec
       ))
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
+
+  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
+    case UserType.Organisation => Left(sample[TrustName])
+    case _                     => Right(sample[IndividualName])
+  }
+
+  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
+    case UserType.Agent => Some(sample[AgentReferenceNumber])
+    case _              => None
+  }
+
+  val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
+    case UserType.Agent | UserType.Organisation | UserType.Individual => true
+    case _                                                            => false
+  }
 
   "ViewReturnController" when {
 
@@ -177,133 +195,150 @@ class ViewReturnControllerSpec
         county   = None,
         postcode = Postcode("abc123")
       )
-      //TODO: Fix it
-      "display the page for a single disposal journey" ignore {
-        forAll {
-          (
-            completeSingleDisposalReturn: CompleteSingleDisposalReturn,
-            agentReferenceNumber: Option[AgentReferenceNumber]
-          ) =>
-            val sampleViewingReturn = sample[ViewingReturn]
-              .copy(
-                completeReturn       = completeSingleDisposalReturn.copy(propertyAddress = address),
-                agentReferenceNumber = agentReferenceNumber
+
+      "display the page for a single disposal journey" in {
+
+        forAll(acceptedUserTypeGen, completeSingleDisposalReturnGen) { (userType, completeSingleDisposalReturn) =>
+          val subscribedDetails = sample[SubscribedDetails].copy(
+            name = setNameForUserType(userType)
+          )
+
+          val sampleViewingReturn = sample[ViewingReturn]
+            .copy(
+              completeReturn       = completeSingleDisposalReturn.copy(propertyAddress = address),
+              agentReferenceNumber = setAgentReferenceNumber(userType),
+              subscribedDetails    = subscribedDetails
+            )
+
+          val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(viewingReturn),
+                userType      = Some(userType)
               )
-
-            val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
-            val userType      = if (agentReferenceNumber.isDefined) Some(UserType.Agent) else None
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn), userType = userType))
-            }
-
-            val result   = performAction()
-            val document = Jsoup.parse(contentAsString(result))
-
-            document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
-            document.select("#date-sent-table-answer").text() shouldBe TimeUtils.govDisplayFormat(
-              sentReturn.submissionDate
             )
-            document.select("#property-address-table-question").text() shouldBe "Property address"
-            document.select("#property-address-table-answer").text()   shouldBe "123 fake street, abc123"
-            document.select("#return-reference-table-question").text() shouldBe "Return reference number"
-            document.select("#return-reference-table-answer").text()   shouldBe sentReturn.submissionId
+          }
 
-            document
-              .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
-              .text() shouldBe messageFromMessageKey(
-              "viewReturn.title"
-            )
-            if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
-              document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
-            } else {
-              document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
-            }
-            document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
-              viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
-            )
+          val result   = performAction()
+          val document = Jsoup.parse(contentAsString(result))
 
-            validatePaymentsSection(document, viewingReturn)
-            validateSingleDisposalCheckAllYourAnswersSections(
-              document,
-              completeSingleDisposalReturn,
-              userType,
-              rebasingUtil.isUk(completeSingleDisposalReturn),
-              rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn),
-              viewingReturn.subscribedDetails.isATrust
-            )
+          document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
+          document.select("#date-sent-table-answer").text() shouldBe TimeUtils.govDisplayFormat(
+            sentReturn.submissionDate
+          )
+          document.select("#property-address-table-question").text() shouldBe "Property address"
+          document.select("#property-address-table-answer").text()   shouldBe "123 fake street, abc123"
+          document.select("#return-reference-table-question").text() shouldBe "Return reference number"
+          document.select("#return-reference-table-answer").text()   shouldBe sentReturn.submissionId
+
+          document
+            .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
+            .text() shouldBe messageFromMessageKey(
+            "viewReturn.title"
+          )
+          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
+            document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
+          } else {
+            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+          }
+          document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
+            viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
+          )
+
+          validatePaymentsSection(document, viewingReturn)
+          validateSingleDisposalCheckAllYourAnswersSections(
+            document,
+            completeSingleDisposalReturn,
+            Some(userType),
+            rebasingUtil.isUk(completeSingleDisposalReturn),
+            rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn),
+            viewingReturn.subscribedDetails.isATrust
+          )
         }
       }
-      //TODO: Fix it
-      "display the page for a multiple disposals journey" ignore {
-        forAll {
-          (
-            completeMultipleDisposalsReturn: CompleteMultipleDisposalsReturn,
-            agentReferenceNumber: Option[AgentReferenceNumber]
-          ) =>
-            val sampleViewingReturn = sample[ViewingReturn]
-              .copy(
-                completeReturn       = completeMultipleDisposalsReturn,
-                agentReferenceNumber = agentReferenceNumber
-              )
 
-            val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
-            val userType      = if (agentReferenceNumber.isDefined) Some(UserType.Agent) else None
+      "display the page for a multiple disposals journey" in {
 
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn), userType = userType))
-            }
+        forAll(acceptedUserTypeGen, completeMultipleDisposalsReturnGen) { (userType, completeMultipleDisposalsReturn) =>
+          val subscribedDetails = sample[SubscribedDetails].copy(
+            name = setNameForUserType(userType)
+          )
 
-            val result   = performAction()
-            val document = Jsoup.parse(contentAsString(result))
-
-            document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
-            document.select("#date-sent-table-answer").text() shouldBe TimeUtils.govDisplayFormat(
-              sentReturn.submissionDate
-            )
-            val address = generateAddressLineForMultipleDisposals(completeMultipleDisposalsReturn)
-            document.select("#property-address-table-question").text() shouldBe "Property address"
-            document.select("#property-address-table-answer").text()   shouldBe address
-            document
-              .select("#return-reference-table-question")
-              .text() shouldBe "Return reference number"
-            document
-              .select("#return-reference-table-answer")
-              .text() shouldBe sentReturn.submissionId
-
-            document
-              .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
-              .text() shouldBe messageFromMessageKey(
-              "viewReturn.title"
+          val sampleViewingReturn = sample[ViewingReturn]
+            .copy(
+              completeReturn       = completeMultipleDisposalsReturn,
+              agentReferenceNumber = setAgentReferenceNumber(userType),
+              subscribedDetails    = subscribedDetails
             )
 
-            val expectedName = viewingReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName)
-            val actualName   = document.select("#user-details-name").text()
-            userType match {
-              case Some(UserType.Agent) => actualName shouldBe s"Client: $expectedName"
-              case _                    => actualName shouldBe expectedName
-            }
+          val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
 
-            if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
-              document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
-            } else {
-              document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
-            }
-            document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
-              viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
-            )
+          val sessionData = SessionData.empty.copy(
+            journeyStatus = Some(viewingReturn),
+            userType      = Some(userType)
+          )
 
-            validatePaymentsSection(document, viewingReturn)
-            validateMultipleDisposalsCheckAllYourAnswersSections(
-              document,
-              completeMultipleDisposalsReturn,
-              userType,
-              sampleViewingReturn.subscribedDetails.isATrust
-            )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          val result   = performAction()
+          val document = Jsoup.parse(contentAsString(result))
+
+          document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
+          document.select("#date-sent-table-answer").text() shouldBe TimeUtils.govDisplayFormat(
+            sentReturn.submissionDate
+          )
+          val address = generateAddressLineForMultipleDisposals(completeMultipleDisposalsReturn)
+          document.select("#property-address-table-question").text() shouldBe "Property address"
+          document.select("#property-address-table-answer").text()   shouldBe address
+          document
+            .select("#return-reference-table-question")
+            .text() shouldBe "Return reference number"
+          document
+            .select("#return-reference-table-answer")
+            .text() shouldBe sentReturn.submissionId
+
+          document
+            .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
+            .text() shouldBe messageFromMessageKey(
+            "viewReturn.title"
+          )
+
+          val expectedName = viewingReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName)
+          val actualName   = document.select("#user-details-name").text()
+
+          if (subscribedDetails.isATrust)
+            actualName shouldBe s"Trust: $expectedName"
+          else if (Some(userType).contains(UserType.Agent))
+            actualName shouldBe s"Client: $expectedName"
+          else
+            actualName shouldBe expectedName
+
+          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
+            document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
+          } else {
+            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+          }
+          document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
+            viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
+          )
+
+          validatePaymentsSection(document, viewingReturn)
+
+          validateMultipleDisposalsCheckAllYourAnswersSections(
+            document,
+            completeMultipleDisposalsReturn,
+            Some(userType),
+            subscribedDetails.isATrust
+          )
         }
       }
+
     }
 
     "handling requests to pay a charge" must {

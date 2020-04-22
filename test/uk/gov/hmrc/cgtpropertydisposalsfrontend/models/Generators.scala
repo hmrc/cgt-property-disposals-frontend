@@ -313,7 +313,7 @@ trait LowerPriorityReturnGen { this: GenUtils =>
 
   implicit val multipleDisposalDraftReturnGen: Gen[DraftMultipleDisposalsReturn] = gen[DraftMultipleDisposalsReturn]
 
-  implicit val completeMultipleDisposalReturnGen: Gen[CompleteMultipleDisposalsReturn] =
+  implicit val completeMultipleDisposalsReturnGen: Gen[CompleteMultipleDisposalsReturn] =
     gen[CompleteMultipleDisposalsReturn]
 
 }
