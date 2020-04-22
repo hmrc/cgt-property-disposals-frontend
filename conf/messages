@@ -2141,11 +2141,16 @@ representee.cyaLabel.whoFor=Who are you submitting for
 representee.cyaValue.whoFor.capacitor=Someone else
 representee.cyaValue.whoFor.personalRep=Someone who has died
 representee.cyaChange.whoFor=who you are submitting for
-
 representee.cyaLabel.personRepresented=Person represented
 representee.cyaChange.personRepresented=the person you are representing
-
-representee.cyaLabel.dateOfDeath=What date did the person die
+representee.cyaLabel.dateOfDeath=What date did the person die?
+representee.cyaChange.dateOfDeath=the date the person died
+representee.cyaLabel.contactName=Contact name for the person represented
+representee.cyaChange.contactName=the contact name for the person represented
+representee.cyaLabel.address=Contact address for the person represented
+representee.cyaChange.address=the contact address for the person represented
+representee.cyaLabel.email=Contact email for the person represented
+representee.cyaChange.email=the contact email for the person represented
 
 representee.dateOfDeath.title=What date did the person die?
 representee.dateOfDeath.helpText=For example, 25 4 2020
@@ -2187,3 +2192,11 @@ representeeSautr.error.tooLong=Self Assessment Unique Taxpayer Reference must be
 representeeSautr.error.tooShort=Self Assessment Unique Taxpayer Reference must be 10 numbers
 representeeSautr.error.invalid=Self Assessment Unique Taxpayer Reference must only include numbers
 
+representeeContactDetails.title=Check contact details we’ll use for this return
+representeeContactDetails.p1=We’ll only use these contact details if we need to get in touch about this return.
+representeeContactDetails.cyaLabel.contactName=Contact name
+representeeContactDetails.cyaChange.contactName=the contact name
+representeeContactDetails.cyaLabel.address=Contact address
+representeeContactDetails.cyaChange.address=the contact address
+representeeContactDetails.cyaLabel.email=Email address
+representeeContactDetails.cyaChange.email=the contact email address

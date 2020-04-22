@@ -500,6 +500,7 @@ trait RepresenteeAnswersGen extends LowerPriorityRepresenteeAnswersGen { this: G
 
   implicit val representeeCgtReferenceGen: Gen[RepresenteeCgtReference] = gen[RepresenteeCgtReference]
 
+  implicit val representeeContactDetailsGen: Gen[RepresenteeContactDetails] = gen[RepresenteeContactDetails]
 }
 
 trait LowerPriorityRepresenteeAnswersGen { this: GenUtils =>
