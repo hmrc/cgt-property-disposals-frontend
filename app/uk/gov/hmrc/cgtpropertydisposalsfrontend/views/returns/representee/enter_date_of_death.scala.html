@@ -20,8 +20,6 @@
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DateOfDeath
@@ -43,7 +41,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @key = @{ "representee.dateOfDeath" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @title = @{messages(s"$key.title")}
-@errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", "$key").map(form.error).find(_.isDefined).flatten}
+@errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
