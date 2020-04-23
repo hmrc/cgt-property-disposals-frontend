@@ -477,7 +477,7 @@ class RepresenteeControllerSpec
                 IncompleteRepresenteeAnswers.empty.copy(dateOfDeath = Some(date)),
                 Left(PersonalRepresentative)
               )._1,
-              "representee.dateOfDeath.title",
+              "dateOfDeath.title",
               routes.RepresenteeController.enterName(),
               expectReturnToSummaryLink = false,
               Some(date)
@@ -489,7 +489,7 @@ class RepresenteeControllerSpec
             val answers = sample[CompleteRepresenteeAnswers]
             test(
               sessionWithStartingNewDraftReturn(answers, Left(PersonalRepresentative))._1,
-              "representee.dateOfDeath.title",
+              "dateOfDeath.title",
               routes.RepresenteeController.checkYourAnswers(),
               expectReturnToSummaryLink = false,
               answers.dateOfDeath
@@ -507,7 +507,7 @@ class RepresenteeControllerSpec
                 IncompleteRepresenteeAnswers.empty.copy(dateOfDeath = Some(date)),
                 Left(PersonalRepresentative)
               )._1,
-              "representee.dateOfDeath.title",
+              "dateOfDeath.title",
               routes.RepresenteeController.enterName(),
               expectReturnToSummaryLink = true,
               Some(date)
@@ -518,7 +518,7 @@ class RepresenteeControllerSpec
             val answers = sample[CompleteRepresenteeAnswers]
             test(
               sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))._1,
-              "representee.dateOfDeath.title",
+              "dateOfDeath.title",
               routes.RepresenteeController.checkYourAnswers(),
               expectReturnToSummaryLink = true,
               answers.dateOfDeath
@@ -551,9 +551,9 @@ class RepresenteeControllerSpec
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterDateOfDeathSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
-      val dayKey   = "representee.dateOfDeath-day"
-      val monthKey = "representee.dateOfDeath-month"
-      val yearKey  = "representee.dateOfDeath-year"
+      val dayKey   = "dateOfDeath-day"
+      val monthKey = "dateOfDeath-month"
+      val yearKey  = "dateOfDeath-year"
 
       def formData(dateOfDeath: DateOfDeath): Seq[(String, String)] =
         Seq(
@@ -613,24 +613,31 @@ class RepresenteeControllerSpec
             Left(PersonalRepresentative)
           )._1
 
-          val key = "representee.dateOfDeath"
           DateErrorScenarios
-            .dateErrorScenarios(key, "")
+            .dateErrorScenarios("dateOfDeath", "")
             .foreach { scenario =>
               withClue(s"For date error scenario $scenario: ") {
                 val data = List(
-                  s"$key-day"   -> scenario.dayInput,
-                  s"$key-month" -> scenario.monthInput,
-                  s"$key-year"  -> scenario.yearInput
+                  "dateOfDeath-day"   -> scenario.dayInput,
+                  "dateOfDeath-month" -> scenario.monthInput,
+                  "dateOfDeath-year"  -> scenario.yearInput
                 ).collect { case (key, Some(value)) => key -> value }
 
-                testFormError(performAction, "representee.dateOfDeath.title", session)(
+                testFormError(performAction, "dateOfDeath.title", session)(
                   data,
                   scenario.expectedErrorMessageKey
                 )
               }
             }
         }
+
+        "the date is in the future" in {
+          testFormError(performAction, "dateOfDeath.title", session)(
+            formData(DateOfDeath(LocalDate.now().plusDays(1L))),
+            "dateOfDeath.error.tooFarInFuture"
+          )
+        }
+
       }
 
       "redirect to the check your answers page" when {
