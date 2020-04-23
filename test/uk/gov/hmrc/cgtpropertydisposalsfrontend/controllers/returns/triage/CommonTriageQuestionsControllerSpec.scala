@@ -863,7 +863,8 @@ class CommonTriageQuestionsControllerSpec
               IncompleteSingleDisposalTriageAnswers.empty.copy(
                 individualUserType         = Some(IndividualUserType.Self),
                 hasConfirmedSingleDisposal = true
-              )
+              ),
+              draftReturn.representeeAnswers
             )
 
           inSequence {
@@ -1025,7 +1026,8 @@ class CommonTriageQuestionsControllerSpec
                     d.id,
                     IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                       individualUserType = Some(IndividualUserType.Self)
-                    )
+                    ),
+                    d.representeeAnswers
                   ),
                 routes.MultipleDisposalsTriageController.checkYourAnswers()
               )
@@ -1048,7 +1050,8 @@ class CommonTriageQuestionsControllerSpec
                     IncompleteSingleDisposalTriageAnswers.empty.copy(
                       individualUserType         = Some(IndividualUserType.Self),
                       hasConfirmedSingleDisposal = true
-                    )
+                    ),
+                    d.representeeAnswers
                   ),
                 routes.SingleDisposalsTriageController.checkYourAnswers()
               )

@@ -54,15 +54,17 @@
                 <input type="hidden" id="@k" name="@k" value="@v">
             }
 
-            @fileInput(
-                fieldId = fieldId,
-                label = Html(title),
-                helpText = Some(Html(messages(s"$key.helpText"))),
-                hasErrors = false,
-                errorKey = None,
-                labelAsHeading = true,
-                autoComplete = AutoCompleteType.On
-            )
+
+        @fileInput(
+            fieldId = fieldId,
+            label = Html(title),
+            helpText = Some(Html(messages(s"$key.helpText"))),
+            hasErrors = false,
+            errorKey = None,
+            labelAsHeading = true,
+            autoComplete = AutoCompleteType.On,
+            isMandatoryUpload = true
+        )
 
         @submitButton(messages("button.saveAndContinue"))
 

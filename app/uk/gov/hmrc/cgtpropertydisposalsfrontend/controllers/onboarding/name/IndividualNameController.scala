@@ -62,11 +62,13 @@ trait IndividualNameController[J <: JourneyStatus] {
   ): Future[Result] =
     validJourney(request).fold[Future[Result]](toFuture, f.tupled)
 
+  private val individualNameForm = IndividualName.form("firstName", "lastName")
+
   def enterIndividualName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, journey) =>
         val form = {
-          name(journey).fold(IndividualName.form)(IndividualName.form.fill)
+          name(journey).fold(individualNameForm)(individualNameForm.fill)
         }
 
         Ok(enterNamePage(form, backLinkCall, enterNameSubmitCall, isSubscribedJourney))
@@ -76,7 +78,7 @@ trait IndividualNameController[J <: JourneyStatus] {
   def enterIndividualNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, journey) =>
-        IndividualName.form
+        individualNameForm
           .bindFromRequest()
           .fold(
             e => BadRequest(enterNamePage(e, backLinkCall, enterNameSubmitCall, isSubscribedJourney)),

@@ -32,6 +32,7 @@ import play.api.data.{Form, FormError, Forms}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
@@ -164,8 +165,8 @@ class MultipleDisposalsTriageController @Inject() (
       _.copy(newReturnTriageAnswers = newAnswersWithRedirectTo._1), {
         case (r, d) =>
           val newDraftReturn = newAnswersWithRedirectTo._1.bimap(
-            DraftMultipleDisposalsReturn.newDraftReturn(d.id, _),
-            DraftSingleDisposalReturn.newDraftReturn(d.id, _)
+            DraftMultipleDisposalsReturn.newDraftReturn(d.id, _, d.representeeAnswers),
+            DraftSingleDisposalReturn.newDraftReturn(d.id, _, d.representeeAnswers)
           )
 
           r.copy(draftReturn = newDraftReturn.merge)
@@ -615,7 +616,10 @@ class MultipleDisposalsTriageController @Inject() (
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
         case IncompleteMultipleDisposalsTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _) =>
-          Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+          Redirect(
+            representee.routes.RepresenteeController
+              .enterName()
+          )
 
         case IncompleteMultipleDisposalsTriageAnswers(
             Some(IndividualUserType.PersonalRepresentative),
@@ -628,7 +632,10 @@ class MultipleDisposalsTriageController @Inject() (
             _,
             _
             ) =>
-          Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+          Redirect(
+            representee.routes.RepresenteeController
+              .enterName()
+          )
 
         case IncompleteMultipleDisposalsTriageAnswers(_, None, _, _, _, _, _, _, _) =>
           Redirect(routes.MultipleDisposalsTriageController.guidance())
@@ -643,7 +650,7 @@ class MultipleDisposalsTriageController @Inject() (
           Redirect(routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents())
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _, _)
-            if (assetTypes =!= List(AssetType.Residential) && assetTypes =!= List(AssetType.NonResidential)) =>
+            if assetTypes.forall(a => a === AssetType.IndirectDisposal || a === AssetType.MixedUse) =>
           Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, None, _, _, _, _) =>
@@ -734,7 +741,8 @@ class MultipleDisposalsTriageController @Inject() (
               Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
 
             case c: CompleteMultipleDisposalsTriageAnswers =>
-              val newDraftReturn = DraftMultipleDisposalsReturn.newDraftReturn(uuidGenerator.nextId(), c)
+              val newDraftReturn = DraftMultipleDisposalsReturn
+                .newDraftReturn(uuidGenerator.nextId(), c, startingNewDraftReturn.representeeAnswers)
               val newJourney = FillingOutReturn(
                 startingNewDraftReturn.subscribedDetails,
                 startingNewDraftReturn.ggCredId,
@@ -774,7 +782,7 @@ class MultipleDisposalsTriageController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t)))) =>
+      case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t), _))) =>
         f(session, Left(s), t)
 
       case Some((session, r @ FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn))) =>

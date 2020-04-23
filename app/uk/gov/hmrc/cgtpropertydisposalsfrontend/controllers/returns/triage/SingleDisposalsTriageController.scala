@@ -29,6 +29,7 @@ import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
@@ -637,7 +638,10 @@ class SingleDisposalsTriageController @Inject() (
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
         case IncompleteSingleDisposalTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _) =>
-          Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+          Redirect(
+            representee.routes.RepresenteeController
+              .enterName()
+          )
 
         case IncompleteSingleDisposalTriageAnswers(
             Some(IndividualUserType.PersonalRepresentative),
@@ -650,7 +654,10 @@ class SingleDisposalsTriageController @Inject() (
             _,
             _
             ) =>
-          Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+          Redirect(
+            representee.routes.RepresenteeController
+              .enterName()
+          )
 
         case IncompleteSingleDisposalTriageAnswers(_, false, _, _, _, _, _, _, _) =>
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
@@ -760,7 +767,8 @@ class SingleDisposalsTriageController @Inject() (
           lazy val continueToTaskList = Redirect(returnsRoutes.TaskListController.taskList())
 
           def toFillingOurNewReturn(startingNewDraftReturn: StartingNewDraftReturn): Future[Result] = {
-            val newDraftReturn = DraftSingleDisposalReturn.newDraftReturn(uuidGenerator.nextId(), complete)
+            val newDraftReturn = DraftSingleDisposalReturn
+              .newDraftReturn(uuidGenerator.nextId(), complete, startingNewDraftReturn.representeeAnswers)
             val result = for {
               _ <- returnsService.storeDraftReturn(
                     newDraftReturn,
@@ -889,7 +897,7 @@ class SingleDisposalsTriageController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t)))) =>
+      case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t), _))) =>
         f(session, Left(s), t)
 
       case Some((session, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>

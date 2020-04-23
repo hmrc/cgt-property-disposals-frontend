@@ -21,8 +21,6 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.list._
-import cats.syntax.eq._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -35,6 +33,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{SelectorAndValue, TagAttributePairAndValue, TrustAgentOrIndividualDisplay}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, triage}
@@ -1962,7 +1961,7 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-              val answers = c.copy(countryOfResidence = sample[Country])
+              val answers = c.copy(countryOfResidence = Country("FI", None))
 
               val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
 
@@ -2934,19 +2933,19 @@ class MultipleDisposalsTriageControllerSpec
         )
       }
 
-      "redirect to the capacitors and personal representatives not handled page" when {
+      "redirect to the enter represented person's name page page" when {
 
         "an individual user type of capacitor is found" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.Capacitor)),
-            routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
+            representee.routes.RepresenteeController.enterName()
           )
         }
 
         "an individual user type of personal representative is found" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
-            routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
+            representee.routes.RepresenteeController.enterName()
           )
 
         }
@@ -2996,12 +2995,53 @@ class MultipleDisposalsTriageControllerSpec
       "redirect to the asset types not implemented page" when {
 
         "the user was not a non uk resident and they have selected asset types that are not supported" in {
-          forAll { assetTypes: List[AssetType] =>
-            whenever(assetTypes =!= List(AssetType.Residential) && assetTypes =!= List(AssetType.NonResidential)) {
+          List(
+            List(AssetType.IndirectDisposal),
+            List(AssetType.MixedUse),
+            List(AssetType.IndirectDisposal, AssetType.MixedUse),
+            List(AssetType.MixedUse, AssetType.IndirectDisposal)
+          ).foreach { assetTypes =>
+            testRedirectWhenIncomplete(
+              allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)),
+              routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+            )
+          }
+        }
 
-              testRedirectWhenIncomplete(
-                allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)),
-                routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+      }
+
+      "not redirect to the asset types not implemented page" when {
+
+        "the user selects a valid combination of asset types" in {
+          val invalidAssetTypes = List(
+            List(AssetType.IndirectDisposal),
+            List(AssetType.MixedUse),
+            List(AssetType.IndirectDisposal, AssetType.MixedUse),
+            List(AssetType.MixedUse, AssetType.IndirectDisposal)
+          )
+
+          forAll { assetTypes: List[AssetType] =>
+            whenever(!invalidAssetTypes.contains(assetTypes) && assetTypes.nonEmpty) {
+              val (session, journey, draftReturn) =
+                sessionDataWithFillingOutReturn(allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)))
+              val updatedDraftReturn =
+                draftReturn.copy(triageAnswers = completeAnswersNonUk.copy(assetTypes = assetTypes))
+              val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  updatedDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(Right(()))
+                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("multipleDisposals.triage.cya.title")
               )
             }
           }
@@ -3285,7 +3325,8 @@ class MultipleDisposalsTriageControllerSpec
         val completeAnswers    = sample[CompleteMultipleDisposalsTriageAnswers]
         val (session, journey) = sessionDataWithStartingNewDraftReturn(completeAnswers)
         val draftId            = UUID.randomUUID()
-        val newDraftReturn     = DraftMultipleDisposalsReturn.newDraftReturn(draftId, completeAnswers)
+        val newDraftReturn =
+          DraftMultipleDisposalsReturn.newDraftReturn(draftId, completeAnswers, journey.representeeAnswers)
         val newJourney = FillingOutReturn(
           journey.subscribedDetails,
           journey.ggCredId,

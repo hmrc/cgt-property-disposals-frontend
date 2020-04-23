@@ -96,6 +96,22 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   val rebasingEligibilityUtil = new RebasingEligibilityUtil()
 
+  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
+    case UserType.Organisation => Left(sample[TrustName])
+    case _                     => Right(sample[IndividualName])
+  }
+
+  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
+    case UserType.Agent => Some(sample[AgentReferenceNumber])
+    case _              => None
+  }
+
+  def sessionWithJourney(journeyStatus: JourneyStatus, userType: UserType): SessionData =
+    SessionData.empty.copy(
+      journeyStatus = Some(journeyStatus),
+      userType      = Some(userType)
+    )
+
   def sessionWithJourney(journeyStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
 
@@ -143,6 +159,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers.merge),
           completeReturn.initialGainOrLoss,
           Some(completeReturn.supportingDocumentAnswers),
+          None,
           TimeUtils.today()
         )
 
@@ -160,7 +177,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         "display the page" when {
 
-          def test(sessionData: SessionData, expectedTitleKey: String, userType: Option[UserType]): Unit = {
+          def test(sessionData: SessionData, expectedTitleKey: String, userType: Option[UserType], isATrust: Boolean)
+            : Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
@@ -175,7 +193,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                   userType,
                   rebasingEligibilityUtil.isUk(completeReturn),
                   rebasingEligibilityUtil.isEligibleForRebase(completeReturn),
-                  completeFillingOutReturn.subscribedDetails.isATrust
+                  isATrust
                 )
                 doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
                 doc
@@ -191,20 +209,33 @@ class CheckAllAnswersAndSubmitControllerSpec
             test(
               sessionWithJourney(completeFillingOutReturn),
               "checkAllAnswers.title",
-              None
+              None,
+              completeFillingOutReturn.subscribedDetails.isATrust
             )
           }
 
           "the return is complete and the user is an agent" in {
+            val userType = UserType.Agent
+            val subscribedDetails = sample[SubscribedDetails].copy(
+              name = setNameForUserType(userType)
+            )
+
             test(
               sessionWithJourney(
-                completeFillingOutReturn.copy(agentReferenceNumber = Some(sample[AgentReferenceNumber]))
-              ).copy(userType = Some(UserType.Agent)),
+                completeFillingOutReturn.copy(
+                  agentReferenceNumber = setAgentReferenceNumber(userType),
+                  subscribedDetails    = subscribedDetails
+                ),
+                userType = userType
+              ).copy(userType = Some(userType)),
               "checkAllAnswers.title",
-              Some(UserType.Agent)
+              Some(userType),
+              subscribedDetails.isATrust
             )
           }
+
         }
+
       }
 
       "the user is on a multiple disposals journey" must {
@@ -218,6 +249,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.exemptionAndLossesAnswers),
           Some(completeReturn.yearToDateLiabilityAnswers),
           Some(completeReturn.supportingDocumentAnswers),
+          None,
           TimeUtils.today()
         )
 
@@ -234,7 +266,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         "display the page" when {
 
-          def test(sessionData: SessionData, expectedTitleKey: String, userType: Option[UserType]): Unit = {
+          def test(sessionData: SessionData, expectedTitleKey: String, userType: Option[UserType], isATrust: Boolean)
+            : Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
@@ -247,7 +280,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                   doc,
                   completeReturn,
                   userType,
-                  completeFillingOutReturn.subscribedDetails.isATrust
+                  isATrust
                 )
                 doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
                 doc
@@ -263,17 +296,28 @@ class CheckAllAnswersAndSubmitControllerSpec
             test(
               sessionWithJourney(completeFillingOutReturn),
               "checkAllAnswers.title",
-              None
+              None,
+              completeFillingOutReturn.subscribedDetails.isATrust
             )
           }
 
           "the return is complete and the user is an agent" in {
+            val userType = UserType.Agent
+            val subscribedDetails = sample[SubscribedDetails].copy(
+              name = setNameForUserType(userType)
+            )
+
             test(
               sessionWithJourney(
-                completeFillingOutReturn.copy(agentReferenceNumber = Some(sample[AgentReferenceNumber]))
-              ).copy(userType = Some(UserType.Agent)),
+                completeFillingOutReturn.copy(
+                  agentReferenceNumber = setAgentReferenceNumber(userType),
+                  subscribedDetails    = subscribedDetails
+                ),
+                userType = userType
+              ).copy(userType = Some(userType)),
               "checkAllAnswers.title",
-              Some(UserType.Agent)
+              Some(userType),
+              subscribedDetails.isATrust
             )
           }
         }
@@ -281,7 +325,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     }
 
-    "handling submits on the check all answers page" ignore {
+    "handling submits on the check all answers page" must {
 
       def performAction(): Future[Result] = controller.checkAllAnswersSubmit()(FakeRequest())
 
@@ -300,6 +344,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         Some(completeReturn.yearToDateLiabilityAnswers.merge),
         completeReturn.initialGainOrLoss,
         Some(completeReturn.supportingDocumentAnswers),
+        None,
         TimeUtils.today()
       )
 
@@ -320,7 +365,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         implicit val requestWithSessionData =
           RequestWithSessionData(None, AuthenticatedRequest(new MessagesRequest(FakeRequest(), messagesApi)))
         implicit val config   = viewConfig
-        implicit val messages = MessagesImpl(Lang.defaultLang, messagesApi)
+        implicit val messages = MessagesImpl(Lang.apply("en"), messagesApi)
 
         val cyaPageHtml =
           cyaPge(
@@ -397,6 +442,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       "redirect to the submission error page" when {
+
         "there is an error submitting the return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -576,7 +622,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Trust: ",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Right(IndividualName("John", "Doe"))
+            Left(TrustName("John Doe"))
           ),
           TestScenario(
             "organisation representing individual with tax due",
@@ -585,7 +631,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Trust: ",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Right(IndividualName("John", "Doe"))
+            Left(TrustName("John Doe"))
           )
         )
 
@@ -642,6 +688,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           }
         }
       }
+
     }
 
     "handling requests to pay a return" must {
@@ -808,6 +855,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 }
 
 object CheckAllAnswersAndSubmitControllerSpec {
+
   def validateSingleDisposalCheckAllYourAnswersSections(
     doc: Document,
     completeReturn: CompleteSingleDisposalReturn,
@@ -837,10 +885,12 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.reliefDetails,
       doc
     )
+
     validateExemptionAndLossesCheckYourAnswersPage(
       completeReturn.exemptionsAndLossesDetails,
       doc,
-      isATrust
+      isATrust,
+      userType.contains(UserType.Agent)
     )
 
     completeReturn.yearToDateLiabilityAnswers.fold(
@@ -869,7 +919,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     validateExemptionAndLossesCheckYourAnswersPage(
       completeReturn.exemptionAndLossesAnswers,
       doc,
-      isATrust
+      isATrust,
+      userType.contains(UserType.Agent)
     )
 
     validateNonCalculatedYearToDateLiabilityPage(completeReturn.yearToDateLiabilityAnswers, doc, userType)

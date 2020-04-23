@@ -53,11 +53,11 @@ object IndividualName {
       .verifying(Constraint[String](validateName(_)))
   }
 
-  val form: Form[IndividualName] =
+  def form(firstNameKey: String, lastNameKey: String): Form[IndividualName] =
     Form(
       formMapping(
-        "firstName" -> mapping,
-        "lastName"  -> mapping
+        firstNameKey -> mapping,
+        lastNameKey  -> mapping
       )(IndividualName.apply)(IndividualName.unapply)
     )
 }

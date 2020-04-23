@@ -10,6 +10,7 @@ object AppDependencies {
     "uk.gov.hmrc"                %% "play-ui"                  % "8.4.0-play-26",
     "uk.gov.hmrc"                %% "bootstrap-play-26"        % "1.7.0",
     "uk.gov.hmrc"                %% "mongo-caching"            % "6.12.0-play-26",
+    "uk.gov.hmrc"                %% "domain"                   % "5.6.0-play-26",
     "org.typelevel"              %% "cats-core"                % "2.1.0",
     "com.github.kxbmap"          %% "configs"                  % "0.4.4",
     "org.julienrf"               %% "play-json-derived-codecs" % "7.0.0",

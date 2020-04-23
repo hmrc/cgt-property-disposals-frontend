@@ -1,0 +1,83 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+
+@this(
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display
+)
+
+@(
+        answers: CompleteRepresenteeAnswers,
+        representativeType: Either[PersonalRepresentative.type, Capacitor.type]
+)(implicit messages: Messages)
+
+@cyaSection() {
+    @cyaRow(
+        messages("representee.cyaLabel.whoFor"),
+        Html(messages(s"representee.cyaValue.whoFor.${representativeType.fold(_ => "personalRep", _ => "capacitor")}")),
+        Some(cyaChange(messages("representee.cyaChange.whoFor"), triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
+        "whoFor"
+    )
+
+    @cyaRow(
+        messages("representee.cyaLabel.personRepresented"),
+        Html(s"""${answers.name.makeSingleName()}<br>${answers.id}"""),
+        Some(cyaChange(messages("representee.cyaChange.personRepresented"), routes.RepresenteeController.enterName().url)),
+        "personRepresented"
+    )
+
+    @answers.dateOfDeath.map(date => {
+        cyaRow(
+            messages("representee.cyaLabel.dateOfDeath"),
+            Html(TimeUtils.govShortDisplayFormat(date.value)),
+            Some(cyaChange(messages("representee.cyaChange.dateOfDeath"),
+            routes.RepresenteeController.enterDateOfDeath().url)), "dateOfDeath"
+        )
+      })
+
+    @cyaRow(
+        messages("representee.cyaLabel.contactName"),
+        Html(answers.contactDetails.contactName.value),
+        Some(cyaChange(messages("representee.cyaChange.contactName"), "#")),
+        "contactName"
+    )
+    @cyaRow(
+        messages("representee.cyaLabel.address"),
+        addressDisplay(answers.contactDetails.address, Block),
+        Some(cyaChange(messages("representee.cyaChange.address"), "#")),
+        "address"
+    )
+    @cyaRow(
+        messages("representee.cyaLabel.email"),
+        Html(answers.contactDetails.emailAddress.value),
+        Some(cyaChange(messages("representee.cyaChange.email"), "#")),
+        "email"
+    )
+
+
+}

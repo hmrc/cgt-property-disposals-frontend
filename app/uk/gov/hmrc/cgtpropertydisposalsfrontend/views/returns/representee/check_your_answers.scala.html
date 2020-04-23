@@ -18,8 +18,8 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -27,24 +27,28 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary
+
 )
 
-@(propertyAddress: UkAddress, shouldAskIfPostcodeExists: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+        answers: CompleteRepresenteeAnswers,
+        representativeType: Either[PersonalRepresentative.type, Capacitor.type],
+        displayReturnToSummaryLink: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
-@title = @{messages("returns.property-address.cya.title")}
+@title = @{messages("representee.cya.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @pageHeading(title, Some(messages("returns.property-address.singleDisposal.caption")))
+    @caption(messages("representee.caption"))
 
-    @summary(propertyAddress, shouldAskIfPostcodeExists)
+    @pageHeading(title)
 
-    @formWrapper(returns.address.routes.PropertyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
-        @submitButton(messages("button.confirmAndContinue"))
-    }
+    @summary(answers, representativeType)
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+    @returnToSummaryLink(displayReturnToSummaryLink)
 
 }

@@ -630,7 +630,8 @@ class HomePageControllerSpec
           subscribed.subscribedDetails,
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
-          Right(sample[IncompleteSingleDisposalTriageAnswers])
+          Right(sample[IncompleteSingleDisposalTriageAnswers]),
+          None
         )
 
         val fillingOurReturn = FillingOutReturn(
@@ -786,7 +787,8 @@ class HomePageControllerSpec
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    Right(IncompleteSingleDisposalTriageAnswers.empty)
+                    Right(IncompleteSingleDisposalTriageAnswers.empty),
+                    None
                   )
                 )
               )
@@ -817,7 +819,8 @@ class HomePageControllerSpec
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    Right(IncompleteSingleDisposalTriageAnswers.empty)
+                    Right(IncompleteSingleDisposalTriageAnswers.empty),
+                    None
                   )
                 )
               )
@@ -851,7 +854,8 @@ class HomePageControllerSpec
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    Right(IncompleteSingleDisposalTriageAnswers.empty)
+                    Right(IncompleteSingleDisposalTriageAnswers.empty),
+                    None
                   )
                 )
               )

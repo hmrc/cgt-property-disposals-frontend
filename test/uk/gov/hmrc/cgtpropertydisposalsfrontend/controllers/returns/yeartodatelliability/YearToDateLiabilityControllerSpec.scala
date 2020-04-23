@@ -54,10 +54,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload, UpscanUploadStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -75,12 +79,15 @@ class YearToDateLiabilityControllerSpec
 
   val mockCgtCalculationService = mock[CgtCalculationService]
 
+  val mockUpscanService = mock[UpscanService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[ReturnsService].toInstance(mockReturnsService),
-      bind[CgtCalculationService].toInstance(mockCgtCalculationService)
+      bind[CgtCalculationService].toInstance(mockCgtCalculationService),
+      bind[UpscanService].toInstance(mockUpscanService)
     )
 
   lazy val controller = instanceOf[YearToDateLiabilityController]
@@ -212,6 +219,7 @@ class YearToDateLiabilityControllerSpec
       yearToDateLiabilityAnswers,
       Some(sample[AmountInPence]),
       Some(sample[CompleteSupportingEvidenceAnswers]),
+      None,
       TimeUtils.today()
     )
 
@@ -222,6 +230,36 @@ class YearToDateLiabilityControllerSpec
       .calculateTaxDue(_: CalculateCgtTaxDueRequest)(_: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
+
+  def mockUpscanInitiate(errorRedirectCall: Call, successRedirectCall: UploadReference => Call)(
+    result: Either[Error, UpscanUpload]
+  ) =
+    (mockUpscanService
+      .initiate(_: Call, _: UploadReference => Call)(_: HeaderCarrier))
+      .expects(
+        where { (actualErrorRedirectCall: Call, actualSuccessRedirectCall: UploadReference => Call, _: HeaderCarrier) =>
+          val uploadReference = sample[UploadReference]
+
+          actualErrorRedirectCall                    shouldBe errorRedirectCall
+          actualSuccessRedirectCall(uploadReference) shouldBe successRedirectCall(uploadReference)
+          true
+        }
+      )
+      .returning(EitherT.fromEither(result))
+
+  def mockGetUpscanUpload(uploadReference: UploadReference)(result: Either[Error, UpscanUpload]) =
+    (mockUpscanService
+      .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
+      .expects(uploadReference, *)
+      .returning(EitherT.fromEither(result))
+
+  def mockUpdateUpscanUpload(uploadReference: UploadReference, upscanUpload: UpscanUpload)(
+    result: Either[Error, Unit]
+  ) =
+    (mockUpscanService
+      .updateUpscanUpload(_: UploadReference, _: UpscanUpload)(_: HeaderCarrier))
+      .expects(uploadReference, upscanUpload, *)
+      .returning(EitherT.fromEither(result))
 
   def setTaxDue(calculatedTaxDue: CalculatedTaxDue, taxDue: AmountInPence): CalculatedTaxDue =
     calculatedTaxDue match {
@@ -2093,6 +2131,37 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
+          "there is a pending upscan upload in session and it is successfully removed" in {
+            val (session, journey, draftReturn) = sessionWithSingleDisposalState(
+              allQuestionAnswered.copy(pendingUpscanUpload = Some(sample[UpscanUpload])),
+              sample[DisposalDate],
+              sample[UserType],
+              wasUkResident = sample[Boolean]
+            )
+
+            val newDraftReturn = draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(allQuestionAnswered.copy(pendingUpscanUpload = None))
+            )
+            val newSession = session.copy(journeyStatus =
+              Some(
+                journey.copy(draftReturn = newDraftReturn)
+              )
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(newSession)(Right(()))
+            }
+
+            checkIsRedirect(performAction(), routes.YearToDateLiabilityController.uploadMandatoryEvidence())
+          }
+
         }
 
         "redirect to the file expired page" when {
@@ -2104,6 +2173,59 @@ class YearToDateLiabilityControllerSpec
               ),
               routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
             )
+
+          }
+
+        }
+
+        "show an error page" when {
+
+          "there is pending evidence in session and" when {
+
+            val (session, journey, draftReturn) = sessionWithSingleDisposalState(
+              allQuestionAnswered.copy(pendingUpscanUpload = Some(sample[UpscanUpload])),
+              sample[DisposalDate],
+              sample[UserType],
+              wasUkResident = sample[Boolean]
+            )
+
+            val newDraftReturn = draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(allQuestionAnswered.copy(pendingUpscanUpload = None))
+            )
+            val newSession = session.copy(journeyStatus =
+              Some(
+                journey.copy(draftReturn = newDraftReturn)
+              )
+            )
+
+            "there is an error updating the draft return" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "there is an error updating the session" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(Right(()))
+                mockStoreSession(newSession)(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
 
           }
 
@@ -2223,7 +2345,7 @@ class YearToDateLiabilityControllerSpec
           expectedRedirect: Call
         ): Unit = {
 
-          val (sessionData, fillingOutReturn, _) = sessionWithMultipleDisposalsState(
+          val (sessionData, _, _) = sessionWithMultipleDisposalsState(
             answers,
             UserType.Organisation,
             wasUkResident = true
@@ -2294,6 +2416,36 @@ class YearToDateLiabilityControllerSpec
 
           }
 
+          "there is a pending upscan upload in session and it is successfully removed" in {
+            val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
+              allQuestionAnswered.copy(pendingUpscanUpload = Some(sample[UpscanUpload])),
+              sample[UserType],
+              wasUkResident = sample[Boolean]
+            )
+
+            val newDraftReturn = draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(allQuestionAnswered.copy(pendingUpscanUpload = None))
+            )
+            val newSession = session.copy(journeyStatus =
+              Some(
+                journey.copy(draftReturn = newDraftReturn)
+              )
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(newSession)(Right(()))
+            }
+
+            checkIsRedirect(performAction(), routes.YearToDateLiabilityController.uploadMandatoryEvidence())
+          }
+
         }
 
         "redirect to the file expired page" when {
@@ -2305,6 +2457,58 @@ class YearToDateLiabilityControllerSpec
               ),
               routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
             )
+
+          }
+
+        }
+
+        "show an error page" when {
+
+          "there is pending evidence in session and" when {
+
+            val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
+              allQuestionAnswered.copy(pendingUpscanUpload = Some(sample[UpscanUpload])),
+              sample[UserType],
+              wasUkResident = sample[Boolean]
+            )
+
+            val newDraftReturn = draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(allQuestionAnswered.copy(pendingUpscanUpload = None))
+            )
+            val newSession = session.copy(journeyStatus =
+              Some(
+                journey.copy(draftReturn = newDraftReturn)
+              )
+            )
+
+            "there is an error updating the draft return" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "there is an error updating the session" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(Right(()))
+                mockStoreSession(newSession)(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
 
           }
 
@@ -2349,13 +2553,87 @@ class YearToDateLiabilityControllerSpec
 
     }
 
-    "handling requests to display the upload mandatory evidence page" ignore {
+    "handling requests to display the upload mandatory evidence page" must {
 
       def performAction(): Future[Result] = controller.uploadMandatoryEvidence()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
       behave like commonUploadMandatoryEvidenceBehaviour(performAction)
+
+      "show an error page" when {
+
+        val answers = IncompleteNonCalculatedYTDAnswers(
+          Some(sample[AmountInPence]),
+          Some(sample[Boolean]),
+          Some(sample[AmountInPence]),
+          None,
+          None,
+          None
+        )
+
+        val (session, journey, draftReturn) =
+          sessionWithMultipleDisposalsState(answers, UserType.Individual, wasUkResident = true)
+
+        val upscanUpload   = sample[UpscanUpload]
+        val newAnswers     = answers.copy(pendingUpscanUpload = Some(upscanUpload))
+        val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+
+        "there is an error performing an upscan initiate call" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockUpscanInitiate(
+              routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockUpscanInitiate(
+              routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )(Right(upscanUpload))
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockUpscanInitiate(
+              routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )(Right(upscanUpload))
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(
+              session.copy(
+                journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
+              )
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
 
       "display the page" when {
 
@@ -2368,27 +2646,47 @@ class YearToDateLiabilityControllerSpec
             sample[DisposalDate],
             completeReliefDetailsAnswersWithNoOtherReliefs
           )
-          val session = SessionData.empty.copy(
-            journeyStatus = Some(
-              sample[FillingOutReturn].copy(
-                draftReturn = draftReturn
-              )
-            )
-          )
+          val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+          val session = SessionData.empty.copy(journeyStatus = Some(journey))
+
+          val upscanUpload = sample[UpscanUpload]
+          val newAnswers = answers match {
+            case c: CalculatedYTDAnswers =>
+              c.unset(_.expiredEvidence).unset(_.mandatoryEvidence).copy(pendingUpscanUpload = Some(upscanUpload))
+            case n: NonCalculatedYTDAnswers =>
+              n.unset(_.expiredEvidence).unset(_.mandatoryEvidence).copy(pendingUpscanUpload = Some(upscanUpload))
+          }
+
+          val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+            mockUpscanInitiate(
+              routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )(Right(upscanUpload))
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(
+              session.copy(
+                journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
+              )
+            )(Right(()))
           }
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("mandatoryEvidence.title"),
-            doc => doc.select("#back").attr("href") shouldBe backLink.url
-//              doc
-//                .select("#content > article > form")
-//                .attr("action") shouldBe routes.YearToDateLiabilityController
-//                .uploadMandatoryEvidenceSubmit()
-//                .url
+            messageFromMessageKey("mandatoryEvidence.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe backLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe upscanUpload.upscanUploadMeta.uploadRequest.href
+            }
           )
         }
 
@@ -2948,7 +3246,568 @@ class YearToDateLiabilityControllerSpec
 
     }
 
+    "handling requests to display the scanning mandatory evidence page" must {
+
+      def performAction(): Future[Result] = controller.scanningMandatoryEvidence()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like noPendingUploadbBehaviour(performAction)
+
+      "show an error page" when {
+
+        val upscanUpload = sample[UpscanUpload].copy(
+          upscanUploadStatus = UpscanUploadStatus.Initiated,
+          upscanCallBack     = None
+        )
+
+        val answers = IncompleteNonCalculatedYTDAnswers(
+          Some(sample[AmountInPence]),
+          Some(sample[Boolean]),
+          Some(sample[AmountInPence]),
+          None,
+          None,
+          Some(upscanUpload)
+        )
+        val (session, journey, draftReturn) =
+          sessionWithMultipleDisposalsState(answers, sample[UserType], wasUkResident = sample[Boolean])
+
+        val callback = sample[UpscanFailure]
+        val newAnswers = answers.copy(pendingUpscanUpload =
+          Some(upscanUpload.copy(upscanCallBack = Some(callback), upscanUploadStatus = UpscanUploadStatus.Uploaded))
+        )
+        val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+
+        "there is an error getting the upscan upload" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(upscanUpload.uploadReference)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the upscan upload status to uploaded" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload))
+            mockUpdateUpscanUpload(
+              upscanUpload.uploadReference,
+              upscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded)
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the draft return with a callback" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload.copy(upscanCallBack = Some(callback))))
+            mockUpdateUpscanUpload(
+              upscanUpload.uploadReference,
+              upscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded, upscanCallBack = Some(callback))
+            )(Right(()))
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the session with a callback" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(upscanUpload.uploadReference)(
+              Right(
+                upscanUpload.copy(
+                  upscanCallBack     = Some(callback),
+                  upscanUploadStatus = UpscanUploadStatus.Uploaded
+                )
+              )
+            )
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(
+              Left(Error(""))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "show that the scan is still in progress" when {
+
+        "there is no callback yet" in {
+          val upscanUpload = sample[UpscanUpload].copy(
+            upscanCallBack     = None,
+            upscanUploadStatus = UpscanUploadStatus.Uploaded
+          )
+
+          val answers = sample[IncompleteCalculatedYTDAnswers].copy(
+            pendingUpscanUpload = Some(upscanUpload)
+          )
+
+          val session = sessionWithSingleDisposalState(
+            answers,
+            sample[DisposalDate],
+            sample[UserType],
+            wasUkResident = sample[Boolean]
+          )._1
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload))
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("mandatoryEvidence.check-upscan-status.title"), { doc =>
+              doc.select("#helpText").text() shouldBe messageFromMessageKey(
+                "mandatoryEvidence.check-upscan-status.in-progress.help-text"
+              )
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.YearToDateLiabilityController.scanningMandatoryEvidenceSubmit().url
+            }
+          )
+        }
+
+      }
+
+      "show that the scan has failed" when {
+
+        def checkPage(result: Future[Result]): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey("mandatoryEvidence.check-upscan-status.title"), { doc =>
+              doc.select("#helpText").text() shouldBe messageFromMessageKey(
+                "mandatoryEvidence.check-upscan-status.failed.help-text"
+              )
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.YearToDateLiabilityController.uploadMandatoryEvidence().url
+            }
+          )
+
+        val upscanUpload = sample[UpscanUpload].copy(
+          upscanUploadStatus = UpscanUploadStatus.Initiated,
+          upscanCallBack     = None
+        )
+
+        val answers = IncompleteNonCalculatedYTDAnswers(
+          Some(sample[AmountInPence]),
+          Some(sample[Boolean]),
+          Some(sample[AmountInPence]),
+          None,
+          None,
+          Some(upscanUpload)
+        )
+        val (session, journey, draftReturn) =
+          sessionWithMultipleDisposalsState(answers, sample[UserType], wasUkResident = sample[Boolean])
+
+        val callback = sample[UpscanFailure]
+        val newAnswers = answers.copy(pendingUpscanUpload =
+          Some(upscanUpload.copy(upscanCallBack = Some(callback), upscanUploadStatus = UpscanUploadStatus.Uploaded))
+        )
+        val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+        val updatedSession = session.copy(journeyStatus                  = Some(journey.copy(draftReturn = newDraftReturn)))
+
+        "the callback indicates that the scan has failed and all updates are successful" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload.copy(upscanCallBack = Some(callback))))
+            mockUpdateUpscanUpload(
+              upscanUpload.uploadReference,
+              upscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded, upscanCallBack = Some(callback))
+            )(Right(()))
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkPage(performAction())
+        }
+
+        "the session indicates that the scan has already failed" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(updatedSession)
+          }
+
+          checkPage(performAction())
+
+        }
+
+      }
+
+      "redirect to the check your answers page" when {
+        val upscanUpload = sample[UpscanUpload].copy(
+          upscanUploadStatus = UpscanUploadStatus.Initiated,
+          upscanCallBack     = None
+        )
+
+        val answers = IncompleteNonCalculatedYTDAnswers(
+          Some(sample[AmountInPence]),
+          Some(sample[Boolean]),
+          Some(sample[AmountInPence]),
+          None,
+          None,
+          Some(upscanUpload)
+        )
+
+        val (session, journey, draftReturn) =
+          sessionWithSingleDisposalState(
+            answers,
+            sample[DisposalDate],
+            sample[UserType],
+            wasUkResident = sample[Boolean]
+          )
+
+        val fileName = "file"
+        val callback = sample[UpscanSuccess].copy(uploadDetails = Map("fileName" -> fileName))
+
+        val newAnswers = answers.copy(
+          pendingUpscanUpload = None,
+          mandatoryEvidence = Some(
+            MandatoryEvidence(
+              upscanUpload.uploadReference,
+              upscanUpload.upscanUploadMeta,
+              upscanUpload.uploadedOn,
+              callback,
+              fileName
+            )
+          )
+        )
+        val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+        val updatedSession = session.copy(journeyStatus                  = Some(journey.copy(draftReturn = newDraftReturn)))
+
+        "the upscan callback comes back as a success" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload.copy(upscanCallBack = Some(callback))))
+            mockUpdateUpscanUpload(
+              upscanUpload.uploadReference,
+              upscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded, upscanCallBack = Some(callback))
+            )(Right(()))
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
+        }
+
+        "the session indicates that the scan has already failed" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(updatedSession)
+          }
+
+          checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
+        }
+
+      }
+
+    }
+
+    "handling submits on the scanning mandatory evidence page" must {
+
+      "redirect to the scanning mandatory evidence page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(SessionData.empty)
+        }
+
+        checkIsRedirect(
+          controller.scanningMandatoryEvidenceSubmit()(FakeRequest()),
+          routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+        )
+      }
+    }
+
+    "handling requests to display the upload mandatory evidence failure page" must {
+
+      def performAction(): Future[Result] = controller.uploadMandatoryEvidenceFailure()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like noPendingUploadbBehaviour(performAction)
+
+      "show an error page" when {
+        val answers = sample[IncompleteCalculatedYTDAnswers].copy(pendingUpscanUpload = Some(sample[UpscanUpload]))
+
+        val (session, journey, draftReturn) = sessionWithSingleDisposalState(
+          answers,
+          sample[DisposalDate],
+          sample[UserType],
+          wasUkResident = sample[Boolean]
+        )
+
+        val newAnswers     = answers.copy(pendingUpscanUpload            = None)
+        val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+        val newJourney     = journey.copy(draftReturn                    = newDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "display the page" when {
+
+        "all update are successful and" when {
+
+          "the user is in on a single disposal journey" in {
+            val answers = sample[IncompleteCalculatedYTDAnswers].copy(pendingUpscanUpload = Some(sample[UpscanUpload]))
+
+            val (session, journey, draftReturn) = sessionWithSingleDisposalState(
+              answers,
+              sample[DisposalDate],
+              sample[UserType],
+              wasUkResident = sample[Boolean]
+            )
+
+            val newAnswers     = answers.copy(pendingUpscanUpload            = None)
+            val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+            val newJourney     = journey.copy(draftReturn                    = newDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "the user is on a multiple disposal journey" in {
+            val answers =
+              sample[IncompleteNonCalculatedYTDAnswers].copy(pendingUpscanUpload = Some(sample[UpscanUpload]))
+
+            val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
+              answers,
+              sample[UserType],
+              wasUkResident = sample[Boolean]
+            )
+
+            val newAnswers     = answers.copy(pendingUpscanUpload            = None)
+            val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+            val newJourney     = journey.copy(draftReturn                    = newDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+        }
+      }
+
+    }
+
+    "handling requests to display the mandatory evidence expired page" must {
+
+      def performAction(): Future[Result] = controller.mandatoryEvidenceExpired()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "redirect to the check your answers page" when {
+
+        def test(answers: YearToDateLiabilityAnswers): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                answers,
+                sample[DisposalDate],
+                sample[UserType],
+                wasUkResident = sample[Boolean]
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
+        }
+
+        "there is no expired evidence when the journey is incomplete and" when {
+
+          "the user is on an calculated journey" in {
+            test(
+              sample[IncompleteCalculatedYTDAnswers].copy(expiredEvidence = None)
+            )
+          }
+
+          "the user is on a non-calulated jouney" in {
+            test(
+              sample[IncompleteCalculatedYTDAnswers].copy(expiredEvidence = None)
+            )
+          }
+
+        }
+
+        "the user has completed the section on a calculated journey" in {
+          test(sample[CompleteCalculatedYTDAnswers])
+        }
+
+        "the user has completed the section on a non-calculated journey" in {
+          test(sample[CompleteNonCalculatedYTDAnswers])
+        }
+
+      }
+
+      "display the page" when {
+
+        def checkPage(result: Future[Result]) =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey("mandatoryEvidenceExpired.title")
+          )
+
+        "the user is on a calculated journey" in {
+          val expiredEvidence = sample[MandatoryEvidence]
+          val session = sessionWithSingleDisposalState(
+            sample[IncompleteCalculatedYTDAnswers].copy(expiredEvidence = Some(expiredEvidence)),
+            sample[DisposalDate],
+            sample[UserType],
+            wasUkResident = sample[Boolean]
+          )._1
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPage(performAction())
+        }
+
+        "the user is on a non-calculated journey" in {
+          val expiredEvidence = sample[MandatoryEvidence]
+          val session = sessionWithMultipleDisposalsState(
+            sample[IncompleteNonCalculatedYTDAnswers].copy(expiredEvidence = Some(expiredEvidence)),
+            sample[UserType],
+            wasUkResident = sample[Boolean]
+          )._1
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPage(performAction())
+        }
+
+      }
+
+    }
+
   }
+
+  def noPendingUploadbBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the check your answers page" when {
+
+      def test(answers: YearToDateLiabilityAnswers): Unit = {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithSingleDisposalState(
+              answers,
+              sample[DisposalDate],
+              sample[UserType],
+              wasUkResident = sample[Boolean]
+            )._1
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
+      }
+
+      "there is no pending upscan upload when the journey is incomplete and" when {
+
+        "the user is on an calculated journey" in {
+          test(
+            sample[IncompleteCalculatedYTDAnswers].copy(pendingUpscanUpload = None)
+          )
+        }
+
+        "the user is on a non-calulated jouney" in {
+          test(
+            sample[IncompleteCalculatedYTDAnswers].copy(pendingUpscanUpload = None)
+          )
+        }
+
+      }
+
+      "the user has completed the section on a calculated journey" in {
+        test(sample[CompleteCalculatedYTDAnswers])
+      }
+
+      "the user has completed the section on a non-calculated journey" in {
+        test(sample[CompleteNonCalculatedYTDAnswers])
+
+      }
+
+    }
 
   def noDisposalDateBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the task list page" when {

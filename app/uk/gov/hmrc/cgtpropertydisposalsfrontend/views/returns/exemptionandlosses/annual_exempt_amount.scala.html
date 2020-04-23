@@ -40,20 +40,28 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate, isTrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-@baseKey = @{ "annualExemptAmount" }
-@key = @{request.userType match {
-    case Some(UserType.Agent) => s"$baseKey.agent"
-    case Some(UserType.Organisation) => s"$baseKey.trust"
-    case _ => baseKey
-}}
-@helpTextKey = @{if(isTrust) s"$baseKey.trust" else key}
-@title = @{messages(s"$key.title")}
+@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
+@key = @{ "annualExemptAmount" }
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
+@title = @{messages(s"$key$userKey.title")}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{disposalDate.taxYear}
+
 @annualExemptAmountString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountGeneral.inPounds()) }
 @annualExemptAmountForVulnerableString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountNonVulnerableTrust.inPounds()) }
-@helpText = @{ Some(Html( messages( s"$helpTextKey.helpText", taxYear.startDateInclusive.getYear.toString, taxYear.endDateExclusive.getYear.toString, annualExemptAmountForVulnerableString, annualExemptAmountString ) )) }
+
+@helpText = @{ Some(Html( messages(
+    s"$key$userKey.helpText",
+    taxYear.startDateInclusive.getYear.toString,
+    taxYear.endDateExclusive.getYear.toString,
+    annualExemptAmountForVulnerableString,
+    annualExemptAmountString
+) )) }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -67,10 +75,10 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
     @formWrapper(routes.ExemptionAndLossesController.annualExemptAmountSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
-            fieldId = baseKey,
-            value = form.data.getOrElse(baseKey, ""),
-            formError = form.error(baseKey),
-            hasErrors =  form.error(baseKey).nonEmpty,
+            fieldId = key,
+            value = form.data.getOrElse(key, ""),
+            formError = form.error(key),
+            hasErrors =  form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
             helpText = helpText,
@@ -82,11 +90,11 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             customErrorKey = Some(key)
         )
 
-        @if(isTrust) {
-          @details(messages(s"$baseKey.details.1.header"), Html(messages(s"$baseKey.details.1.body", appConfig.trustsTaxFreeAllowance)))
-          @details(messages(s"$baseKey.details.2.header"),  Html(messages(s"$baseKey.details.2.body", appConfig.trustsForVulnerable)))
+        @if(isATrust) {
+          @details(messages(s"$key.details.1.header"), Html(messages(s"$key.details.1.body", appConfig.trustsTaxFreeAllowance)))
+          @details(messages(s"$key.details.2.header"),  Html(messages(s"$key.details.2.body", appConfig.trustsForVulnerable)))
         } else {
-          <p>@Html(messages(s"$baseKey.link", appConfig.annualExemptAmountUrl))</p>
+          <p>@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>
         }
 
         @submitButton(messages("button.saveAndContinue"))
