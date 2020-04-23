@@ -43,6 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -1145,7 +1146,7 @@ class ReliefDetailsControllerSpec
           reliefDetailsAnswers       = Some(currentAnswers),
           exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
           yearToDateLiabilityAnswers = Some(sample[YearToDateLiabilityAnswers]),
-          supportingEvidenceAnswers  = Some(sample[SupportingEvidenceAnswers])
+          supportingEvidenceAnswers  = Some(sample[CompleteSupportingEvidenceAnswers])
         )
         val currentJourney = sample[FillingOutReturn].copy(draftReturn = currentDraftReturn)
 

@@ -24,7 +24,7 @@ import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText, of}
+import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -32,7 +32,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnecto
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.FileUpload
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -881,7 +880,7 @@ class YearToDateLiabilityController @Inject() (
             logger.warn("Could not initiate upscan", e)
             errorHandler.errorResult()
           },
-          upscanUpload => Ok(mandatoryEvidencePage(mandatoryEvidenceForm, upscanUpload, backLink))
+          upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink))
         )
       }
 
@@ -1506,14 +1505,6 @@ object YearToDateLiabilityController {
       mapping(
         "taxDue" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
-    )
-
-  val mandatoryEvidenceForm: Form[FileUpload] =
-    Form(
-      mapping(
-        "mandatoryEvidence" -> nonEmptyText,
-        "reference"         -> nonEmptyText
-      )(FileUpload.apply)(FileUpload.unapply)
     )
 
   val taxableGainOrLossForm: Form[BigDecimal] = {

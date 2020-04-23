@@ -17,7 +17,7 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
@@ -37,8 +37,8 @@
 
 @()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-    @key = @{"upload-supporting-evidence.check-upscan-status"}
-    @cyaKey = @{"upload-supporting-evidence.check-your-answers"}
+    @key = @{"supporting-evidence.check-upscan-status"}
+    @cyaKey = @{"supporting-evidence.check-your-answers"}
     @title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType) {

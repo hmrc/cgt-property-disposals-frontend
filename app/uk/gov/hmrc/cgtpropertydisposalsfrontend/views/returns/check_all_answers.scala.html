@@ -41,7 +41,7 @@
         reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
         initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary,
-        uploadSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_evidence_summary,
+        supportingEvidenceSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary,
         printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
@@ -92,7 +92,7 @@
      )
 
      <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
-     @uploadSummary(s.supportingDocumentAnswers)
+     @supportingEvidenceSummary(s.supportingDocumentAnswers)
 
     }
 
@@ -110,7 +110,7 @@
        @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true)
 
        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
-        @uploadSummary(m.supportingDocumentAnswers)
+        @supportingEvidenceSummary(m.supportingDocumentAnswers)
       }
 
 
