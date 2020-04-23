@@ -10,4 +10,17 @@ POST  /about-person/date-person-died        uk.gov.hmrc.cgtpropertydisposalsfron
 GET  /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetails()
 POST /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetailsSubmit()
 
-GET   /about-person/check-your-answers      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswers()
+GET   /about-person/check-your-answers       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswers()
+
+
+## Address
+GET  /about-person/is-uk-contact-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.isUk()
+POST /about-person/is-uk-contact-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.isUkSubmit()
+GET  /about-person/find-uk-contact-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterPostcode()
+POST /about-person/find-uk-contact-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterPostcodeSubmit()
+GET  /about-person/select-contact-address          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.selectAddress()
+POST /about-person/select-contact-address          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.selectAddressSubmit()
+GET  /about-person/enter-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterUkAddress()
+POST /about-person/enter-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterUkAddressSubmit()
+GET  /about-person/enter-non-uk-contact-address    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterNonUkAddress()
+POST /about-person/enter-non-uk-contact-address    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterNonUkAddressSubmit()

@@ -30,29 +30,30 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.SubscriptionReadyAddressJourney
 
 import scala.concurrent.Future
 
 class SubscriptionAddressControllerSpec
-    extends AddressControllerSpec[SubscriptionReady]
+    extends AddressControllerSpec[SubscriptionReadyAddressJourney]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
   val subscriptionDetails: SubscriptionDetails =
     sample[SubscriptionDetails].copy(address = ukAddress(1), addressSource = AddressSource.BusinessPartnerRecord)
 
-  val validJourneyStatus = SubscriptionReady(subscriptionDetails, sample[GGCredId])
+  val validJourneyStatus = SubscriptionReadyAddressJourney(SubscriptionReady(subscriptionDetails, sample[GGCredId]))
 
   lazy val controller = instanceOf[SubscriptionAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  override def updateAddress(journey: SubscriptionReady, address: Address): SubscriptionReady =
-    journey.copy(subscriptionDetails =
-      journey.subscriptionDetails.copy(address = address, addressSource = AddressSource.ManuallyEntered)
+  override def updateAddress(journey: SubscriptionReadyAddressJourney, address: Address): SubscriptionReady =
+    journey.journey.copy(subscriptionDetails =
+      journey.journey.subscriptionDetails.copy(address = address, addressSource = AddressSource.ManuallyEntered)
     )
 
-  override val mockUpdateAddress: Option[(SubscriptionReady, Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress: Option[(SubscriptionReadyAddressJourney, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

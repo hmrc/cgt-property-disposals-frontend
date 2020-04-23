@@ -42,16 +42,23 @@
 @(form: Form[NonUkAddress],
         backLink: Call,
         submit: Call,
-        addressJourneyType: AddressJourneyType[_]
+        addressJourneyType: AddressJourneyType
     )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"nonUkAddress"}
-@line1Key = @{s"${key}-line1"}
-@line2Key = @{s"${key}-line2"}
-@line3Key = @{s"${key}-line3"}
-@line4Key = @{s"${key}-line4"}
+@line1Key = @{s"$key-line1"}
+@line2Key = @{s"$key-line2"}
+@line3Key = @{s"$key-line3"}
+@line4Key = @{s"$key-line4"}
 @countryCodeKey = @{"countryCode"}
-@title = @{messages(s"${key}.title")}
+@title = @{
+  addressJourneyType match {
+      case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+          messages(s"$key.representee.title")
+      case _ =>
+          messages(s"$key.title")
+  }
+}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 

@@ -32,33 +32,39 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDetails, SubscribedUpdateDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.ManagingSubscription.SubscribedAddressJourney
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SubscribedChangeAddressControllerSpec
-    extends AddressControllerSpec[Subscribed]
+    extends AddressControllerSpec[SubscribedAddressJourney]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
   val subscribedDetails: SubscribedDetails =
     sample[SubscribedDetails].copy(address = ukAddress(1))
 
-  val validJourneyStatus = Subscribed(subscribedDetails, sample[GGCredId], None, List.empty, List.empty)
+  val validJourneyStatus = SubscribedAddressJourney(
+    Subscribed(subscribedDetails, sample[GGCredId], None, List.empty, List.empty)
+  )
 
   lazy val controller = instanceOf[SubscribedChangeAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  override def updateAddress(journey: Subscribed, address: Address): Subscribed =
-    journey.copy(subscribedDetails = journey.subscribedDetails.copy(address = address))
+  override def updateAddress(journey: SubscribedAddressJourney, address: Address): Subscribed =
+    journey.journey.copy(subscribedDetails = journey.journey.subscribedDetails.copy(address = address))
 
-  override val mockUpdateAddress: Option[(Subscribed, Address, Either[Error, Unit]) => Unit] =
+  override val mockUpdateAddress: Option[(SubscribedAddressJourney, Address, Either[Error, Unit]) => Unit] =
     Some {
-      case (newDetails: Subscribed, a: Address, r: Either[Error, Unit]) =>
+      case (newDetails: SubscribedAddressJourney, a: Address, r: Either[Error, Unit]) =>
         mockUpdateSubscribedDetails(
-          SubscribedUpdateDetails(newDetails.subscribedDetails.copy(address = a), newDetails.subscribedDetails)
+          SubscribedUpdateDetails(
+            newDetails.journey.subscribedDetails.copy(address = a),
+            newDetails.journey.subscribedDetails
+          )
         )(r)
     }
 
@@ -170,7 +176,10 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(performAction, accounts.routes.SubscribedChangeAddressController.selectAddress())
+      behave like submitEnterPostcode(
+        performAction,
+        accounts.routes.SubscribedChangeAddressController.selectAddress()
+      )
 
     }
 
