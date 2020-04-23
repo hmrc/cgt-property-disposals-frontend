@@ -384,21 +384,23 @@ object RepresenteeController {
 
   val nameForm: Form[IndividualName] = IndividualName.form("representeeFirstName", "representeeLastName")
 
-  val key = "representee.dateOfDeath"
-  val dateOfDeathForm: Form[DateOfDeath] = Form(
-    mapping(
-      "" -> of(
-        TimeUtils.dateFormatter(
-          Some(LocalDate.now().plusDays(1)),
-          None,
-          s"$key-day",
-          s"$key-month",
-          s"$key-year",
-          key
+  val dateOfDeathForm: Form[DateOfDeath] = {
+    val key = "dateOfDeath"
+    Form(
+      mapping(
+        "" -> of(
+          TimeUtils.dateFormatter(
+            Some(LocalDate.now()),
+            None,
+            s"$key-day",
+            s"$key-month",
+            s"$key-year",
+            key
+          )
         )
-      )
-    )(DateOfDeath(_))(d => Some(d.value))
-  )
+      )(DateOfDeath(_))(d => Some(d.value))
+    )
+  }
 
   val idForm: Form[RepresenteeReferenceId] = {
     val (outerId, ninoId, sautrId, cgtReferenceId) =
