@@ -47,18 +47,16 @@
 @name = @{justSubmittedReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName())}
 @amountOwed = @{justSubmittedReturn.submissionResponse.charge.map(_.amount.inPounds()).getOrElse(BigDecimal(0))}
 @chargeReference = @{justSubmittedReturn.submissionResponse.charge.map { charge => charge.chargeReference }}
-@isAgent = @{ request.userType.contains(UserType.Agent) }
-@isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
 
 @mainTemplate(title = title, userType = request.userType) {
 
 <div class="govuk-box-highlight">
      <p id="user-details-name">
-     @{
-         if(isATrust) messages(s"$key.organisationNameLine", name)
-         else if(isAgent) messages(s"$key.agentNameLine", name)
-         else name
-     }
+         @{request.userType match {
+         case Some(UserType.Organisation) => messages(s"$key.organisationNameLine", name)
+         case Some(UserType.Agent) => messages(s"$key.agentNameLine", name)
+         case _ => name
+         }}
      </p>
      <h1 class="heading-xlarge">@title</h1>
   <span class="heading-large" style="font-weight: normal;">
