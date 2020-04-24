@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 
 class LandingPageControllerSpec extends ControllerSpec {
 

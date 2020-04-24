@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAddress, SubscriptionContactAddressChangedEvent}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -58,10 +58,9 @@ class SubscriptionAddressController @Inject() (
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with AddressController[SubscriptionReady] {
+    with AddressController[SubscriptionReadyAddressJourney] {
 
-  override val toAddressJourneyType: SubscriptionReady => SubscriptionReadyAddressJourney =
-    SubscriptionReadyAddressJourney.apply
+  override val toJourneyStatus: SubscriptionReadyAddressJourney => JourneyStatus = _.journey
 
   val subscriptionReadyAddressLens: Lens[SubscriptionReady, Address] =
     lens[SubscriptionReady].subscriptionDetails.address
@@ -69,24 +68,24 @@ class SubscriptionAddressController @Inject() (
   val subscriptionReadyAddressSourceLens: Lens[SubscriptionReady, AddressSource] =
     lens[SubscriptionReady].subscriptionDetails.addressSource
 
-  def isATrust(journey: SubscriptionReady): Boolean = journey.subscriptionDetails.name.isLeft
+  def isATrust(journey: SubscriptionReadyAddressJourney): Boolean = journey.journey.subscriptionDetails.name.isLeft
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, SubscriptionReady)] =
+  ): Either[Result, (SessionData, SubscriptionReadyAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: SubscriptionReady)) => Right(sessionData -> s)
+      case Some((sessionData, s: SubscriptionReady)) => Right(sessionData -> SubscriptionReadyAddressJourney(s))
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: SubscriptionReady, address: Address, isManuallyEnteredAddress: Boolean)(
+  def updateAddress(journey: SubscriptionReadyAddressJourney, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, Error, SubscriptionReady] = {
+  ): EitherT[Future, Error, JourneyStatus] = {
     auditService.sendEvent(
       "subscriptionContactAddressChanged",
       SubscriptionContactAddressChangedEvent(
-        AuditAddress.fromAddress(journey.subscriptionDetails.address),
+        AuditAddress.fromAddress(journey.journey.subscriptionDetails.address),
         AuditAddress.fromAddress(address),
         if (isManuallyEnteredAddress) "manual-entry" else "postcode-lookup"
       ),
@@ -94,12 +93,12 @@ class SubscriptionAddressController @Inject() (
     )
 
     val addressSource =
-      if (address === journey.subscriptionDetails.address) journey.subscriptionDetails.addressSource
+      if (address === journey.journey.subscriptionDetails.address) journey.journey.subscriptionDetails.addressSource
       else AddressSource.ManuallyEntered
 
     EitherT.pure[Future, Error](
       (subscriptionReadyAddressLens ~ subscriptionReadyAddressSourceLens)
-        .set(journey)(address -> addressSource)
+        .set(journey.journey)(address -> addressSource)
     )
   }
 

@@ -59,6 +59,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -995,7 +996,7 @@ class TaskListControllerSpec
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
             yearToDateLiabilityAnswers    = Some(sample[CompleteCalculatedYTDAnswers]),
-            supportingEvidenceAnswers     = Some(sample[SupportingEvidenceAnswers])
+            supportingEvidenceAnswers     = Some(sample[CompleteSupportingEvidenceAnswers])
           )
 
           testStateOfSection(

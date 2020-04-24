@@ -38,7 +38,7 @@
  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(addresses: List[Address], form: Form[Address], backLink: Call, submit: Call, enterUkAddress: Call, addressJourneyType: AddressJourneyType[_],
+@(addresses: List[Address], form: Form[Address], backLink: Call, submit: Call, enterUkAddress: Call, addressJourneyType: AddressJourneyType,
         isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"address-select"}
@@ -54,6 +54,8 @@
    _ => messages(s"$key.returns.multipleDisposals.title"),
    _ => messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
   )
+ case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+   messages("address-select.representee.title")
  case _ => messages("address-select.title")
 }}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

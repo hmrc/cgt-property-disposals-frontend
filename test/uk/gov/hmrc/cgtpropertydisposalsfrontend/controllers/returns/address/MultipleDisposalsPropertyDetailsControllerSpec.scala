@@ -49,12 +49,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 class MultipleDisposalsPropertyDetailsControllerSpec
-    extends AddressControllerSpec[FillingOutReturn]
+    extends AddressControllerSpec[FillingOutReturnAddressJourney]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
     with ReturnsServiceSupport {
@@ -68,7 +69,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   val draftReturn: DraftMultipleDisposalsReturn =
     sample[DraftMultipleDisposalsReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
 
-  val validJourneyStatus = FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
+  override val validJourneyStatus = FillingOutReturnAddressJourney(
+    FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
+  )
 
   override def overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](bind[ReturnsService].toInstance(mockReturnsService)) ::: super.overrideBindings
@@ -84,26 +87,27 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     case other        => sys.error(s"User type '$other' not handled")
   }
 
-  override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
-    case a: UkAddress =>
-      journey.copy(draftReturn =
-        draftReturn.copy(examplePropertyDetailsAnswers =
-          Some(
-            incompleteAnswers.copy(address = Some(a), disposalDate = None)
+  override def updateAddress(journey: FillingOutReturnAddressJourney, address: Address): FillingOutReturn =
+    address match {
+      case a: UkAddress =>
+        journey.journey.copy(draftReturn =
+          draftReturn.copy(examplePropertyDetailsAnswers =
+            Some(
+              incompleteAnswers.copy(address = Some(a), disposalDate = None)
+            )
           )
         )
-      )
-    case _: NonUkAddress => journey
-  }
+      case _: NonUkAddress => journey.journey
+    }
 
-  override val mockUpdateAddress: Option[(FillingOutReturn, Address, Either[Error, Unit]) => Unit] =
+  override val mockUpdateAddress: Option[(FillingOutReturnAddressJourney, Address, Either[Error, Unit]) => Unit] =
     Some {
-      case (newDetails: FillingOutReturn, a: UkAddress, r: Either[Error, Unit]) =>
+      case (newDetails: FillingOutReturnAddressJourney, a: UkAddress, r: Either[Error, Unit]) =>
         val newAnswers = incompleteAnswers.copy(address = Some(a), disposalDate = None)
         mockStoreDraftReturn(
           draftReturn.copy(examplePropertyDetailsAnswers = Some(newAnswers)),
-          newDetails.subscribedDetails.cgtReference,
-          newDetails.agentReferenceNumber
+          newDetails.journey.subscribedDetails.cgtReference,
+          newDetails.journey.agentReferenceNumber
         )(r)
 
       case (_, _: NonUkAddress, _) =>

@@ -33,10 +33,19 @@
  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType[_])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"isUk"}
-@title = @{messages("subscription.isUk.title")}
+@journeyErrorKey = @{ addressJourneyType match {
+    case f: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney=> ".representee."
+    case _ => ""
+}}
+@title = @{
+  addressJourneyType match {
+      case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => messages("isUk.representee.title")
+      case _ => messages("subscription.isUk.title")
+  }
+}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
@@ -44,7 +53,7 @@
   @backLinkComponent(backLink)
 
   @if(hasErrors) {
-    @errorSummary(form)
+      @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}"))
   }
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
@@ -52,7 +61,7 @@
     fieldId = key,
     label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
     labelAsHeading = true,
-    errorKey = form.error(key).map(e => e.message),
+    errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
     hasErrors = hasErrors,
     selected = form.value
    )

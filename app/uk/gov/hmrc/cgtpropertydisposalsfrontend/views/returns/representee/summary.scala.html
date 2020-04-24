@@ -69,7 +69,7 @@
     @cyaRow(
         messages("representee.cyaLabel.address"),
         addressDisplay(answers.contactDetails.address, Block),
-        Some(cyaChange(messages("representee.cyaChange.address"), "#")),
+        Some(cyaChange(messages("representee.cyaChange.address"), routes.ChangeRepresenteeContactAddressController.isUk().url)),
         "address"
     )
     @cyaRow(
