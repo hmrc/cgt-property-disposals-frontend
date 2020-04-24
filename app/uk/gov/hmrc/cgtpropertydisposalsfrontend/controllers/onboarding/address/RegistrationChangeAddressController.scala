@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAddress, RegistrationContactAddressChangedEvent}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -56,50 +56,58 @@ class RegistrationChangeAddressController @Inject() (
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with AddressController[RegistrationReady] {
+    with AddressController[RegistrationReadyAddressJourney] {
 
-  override val toAddressJourneyType: RegistrationReady => RegistrationReadyAddressJourney =
-    RegistrationReadyAddressJourney.apply
+  override val toJourneyStatus: RegistrationReadyAddressJourney => JourneyStatus = _.journey
 
   // trusts do not use this journey
-  def isATrust(journey: RegistrationReady): Boolean = false
+  def isATrust(journey: RegistrationReadyAddressJourney): Boolean = false
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, RegistrationReady)] =
+  ): Either[Result, (SessionData, RegistrationReadyAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
+      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> RegistrationReadyAddressJourney(r))
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: RegistrationReady, address: Address, isManuallyEnteredAddress: Boolean)(
+  def updateAddress(journey: RegistrationReadyAddressJourney, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, Error, RegistrationReady] = {
+  ): EitherT[Future, Error, JourneyStatus] = {
     auditService.sendEvent(
       "registrationContactAddressChanged",
       RegistrationContactAddressChangedEvent(
-        AuditAddress.fromAddress(journey.registrationDetails.address),
+        AuditAddress.fromAddress(journey.journey.registrationDetails.address),
         AuditAddress.fromAddress(address),
         if (isManuallyEnteredAddress) "manual-entry" else "postcode-lookup"
       ),
       "registration-contact-address-changed"
     )
 
-    EitherT.pure[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(address = address)))
+    EitherT.pure[Future, Error](
+      journey.journey.copy(registrationDetails = journey.journey.registrationDetails.copy(address = address))
+    )
   }
 
-  protected lazy val backLinkCall: Call             = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
-  protected lazy val isUkCall: Call                 = routes.RegistrationChangeAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call           = routes.RegistrationChangeAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call       = routes.RegistrationChangeAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call = routes.RegistrationChangeAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call    = routes.RegistrationChangeAddressController.enterNonUkAddress()
+  protected lazy val backLinkCall: Call   = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
+  protected lazy val isUkCall: Call       = routes.RegistrationChangeAddressController.isUk()
+  protected lazy val isUkSubmitCall: Call = routes.RegistrationChangeAddressController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call =
+    routes.RegistrationChangeAddressController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call =
+    routes.RegistrationChangeAddressController.enterUkAddressSubmit()
+  protected lazy val enterNonUkAddressCall: Call =
+    routes.RegistrationChangeAddressController.enterNonUkAddress()
   protected lazy val enterNonUkAddressSubmitCall: Call =
     routes.RegistrationChangeAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call       = routes.RegistrationChangeAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call = routes.RegistrationChangeAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call       = routes.RegistrationChangeAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call = routes.RegistrationChangeAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call            = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
+  protected lazy val enterPostcodeCall: Call =
+    routes.RegistrationChangeAddressController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call =
+    routes.RegistrationChangeAddressController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call =
+    routes.RegistrationChangeAddressController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call =
+    routes.RegistrationChangeAddressController.selectAddressSubmit()
+  protected lazy val continueCall: Call = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
 }

@@ -42,12 +42,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 class SingleDisposalPropertyDetailsControllerSpec
-    extends AddressControllerSpec[FillingOutReturn]
+    extends AddressControllerSpec[FillingOutReturnAddressJourney]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
     with ReturnsServiceSupport {
@@ -58,7 +59,9 @@ class SingleDisposalPropertyDetailsControllerSpec
       propertyAddress = Some(ukAddress(1))
     )
 
-  val validJourneyStatus = FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
+  val validJourneyStatus = FillingOutReturnAddressJourney(
+    FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
+  )
 
   override def overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](bind[ReturnsService].toInstance(mockReturnsService)) ::: super.overrideBindings
@@ -67,18 +70,19 @@ class SingleDisposalPropertyDetailsControllerSpec
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
-    case a: UkAddress    => journey.copy(draftReturn = draftReturn.copy(propertyAddress = Some(a)))
-    case _: NonUkAddress => journey
-  }
+  override def updateAddress(journey: FillingOutReturnAddressJourney, address: Address): FillingOutReturn =
+    address match {
+      case a: UkAddress    => journey.journey.copy(draftReturn = draftReturn.copy(propertyAddress = Some(a)))
+      case _: NonUkAddress => journey.journey
+    }
 
-  override val mockUpdateAddress: Option[(FillingOutReturn, Address, Either[Error, Unit]) => Unit] =
+  override val mockUpdateAddress: Option[(FillingOutReturnAddressJourney, Address, Either[Error, Unit]) => Unit] =
     Some {
-      case (newDetails: FillingOutReturn, a: UkAddress, r: Either[Error, Unit]) =>
+      case (newDetails: FillingOutReturnAddressJourney, a: UkAddress, r: Either[Error, Unit]) =>
         mockStoreDraftReturn(
           draftReturn.copy(propertyAddress = Some(a)),
-          newDetails.subscribedDetails.cgtReference,
-          newDetails.agentReferenceNumber
+          newDetails.journey.subscribedDetails.cgtReference,
+          newDetails.journey.agentReferenceNumber
         )(r)
 
       case (_, _: NonUkAddress, _) =>

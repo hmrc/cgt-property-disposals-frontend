@@ -25,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -55,29 +55,32 @@ class RegistrationEnterAddressController @Inject() (
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with AddressController[IndividualSupplyingInformation] {
+    with AddressController[IndividualSupplyingInformationAddressJourney] {
 
-  override val toAddressJourneyType: IndividualSupplyingInformation => IndividualSupplyingInformationAddressJourney =
-    IndividualSupplyingInformationAddressJourney.apply
+  val toJourneyStatus: IndividualSupplyingInformationAddressJourney => JourneyStatus = _.journey
 
   // trusts do not use this journey
-  def isATrust(journey: IndividualSupplyingInformation): Boolean = false
+  def isATrust(journey: IndividualSupplyingInformationAddressJourney): Boolean = false
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
+  ): Either[Result, (SessionData, IndividualSupplyingInformationAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _, _, _))) =>
-        Right(sessionData -> r)
+        Right(sessionData -> IndividualSupplyingInformationAddressJourney(r))
       case _ =>
         Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: IndividualSupplyingInformation, address: Address, isManuallyEnteredAddress: Boolean)(
+  def updateAddress(
+    journey: IndividualSupplyingInformationAddressJourney,
+    address: Address,
+    isManuallyEnteredAddress: Boolean
+  )(
     implicit hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, Error, IndividualSupplyingInformation] =
-    EitherT.pure[Future, Error](journey.copy(address = Some(address)))
+  ): EitherT[Future, Error, JourneyStatus] =
+    EitherT.pure[Future, Error](journey.journey.copy(address = Some(address)))
 
   protected lazy val backLinkCall: Call =
     controllers.onboarding.name.routes.RegistrationEnterIndividualNameController.enterIndividualName()

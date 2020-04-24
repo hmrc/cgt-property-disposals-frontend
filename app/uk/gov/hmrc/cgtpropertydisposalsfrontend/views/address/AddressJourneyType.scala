@@ -17,72 +17,78 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address
 
 import cats.Eq
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresenteeAnswers, RepresenteeContactDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, FillingOutReturnAddressJourney}
 
-sealed trait AddressJourneyType[J <: JourneyStatus] extends Product with Serializable {
-  val journey: J
-}
+sealed trait AddressJourneyType extends Product with Serializable
 
 object AddressJourneyType {
 
   // user is entering/editing an address to subscribe with
-  sealed trait Onboarding[J <: JourneyStatus] extends AddressJourneyType[J]
+  sealed trait Onboarding extends AddressJourneyType
 
   // user has subscribed and is managing their subscription address
-  sealed trait ManagingSubscription[J <: JourneyStatus] extends AddressJourneyType[J]
+  sealed trait ManagingSubscription extends AddressJourneyType
 
   // user is entering address they want to report cgt for
-  sealed trait Returns[J <: JourneyStatus] extends AddressJourneyType[J]
+  sealed trait Returns extends AddressJourneyType
 
   object Onboarding {
 
-    final case class RegistrationReadyAddressJourney(journey: RegistrationReady) extends Onboarding[RegistrationReady]
+    final case class RegistrationReadyAddressJourney(journey: RegistrationReady) extends Onboarding
 
     final case class IndividualSupplyingInformationAddressJourney(journey: IndividualSupplyingInformation)
-        extends Onboarding[IndividualSupplyingInformation]
+        extends Onboarding
 
-    final case class SubscriptionReadyAddressJourney(journey: SubscriptionReady) extends Onboarding[SubscriptionReady]
+    final case class SubscriptionReadyAddressJourney(journey: SubscriptionReady) extends Onboarding
 
   }
 
   object ManagingSubscription {
 
-    final case class SubscribedAddressJourney(journey: Subscribed) extends ManagingSubscription[Subscribed]
+    final case class SubscribedAddressJourney(journey: Subscribed) extends ManagingSubscription
 
   }
 
   object Returns {
 
-    final case class FillingOutReturnAddressJourney(journey: FillingOutReturn) extends Returns[FillingOutReturn]
+    final case class FillingOutReturnAddressJourney(journey: FillingOutReturn) extends Returns
+
+    final case class ChangingRepresenteeContactAddressJourney(
+      journey: Either[StartingNewDraftReturn, FillingOutReturn],
+      answers: RepresenteeAnswers,
+      contactDetails: RepresenteeContactDetails
+    ) extends Returns
 
   }
 
-  implicit def eq[J <: JourneyStatus]: Eq[AddressJourneyType[J]] = Eq.fromUniversalEquals[AddressJourneyType[J]]
+  implicit val eq: Eq[AddressJourneyType] = Eq.fromUniversalEquals[AddressJourneyType]
 
-  implicit class AddressJourneyTypeOps(private val a: AddressJourneyType[_]) extends AnyVal {
+  implicit class AddressJourneyTypeOps(private val a: AddressJourneyType) extends AnyVal {
 
     def showAccountMenu(): Boolean = a match {
-      case _: ManagingSubscription[_] => true
-      case _                          => false
+      case _: ManagingSubscription => true
+      case _                       => false
     }
     def captionMessageKey(): String = a match {
-      case _: Onboarding[_]           => "subscription.caption"
-      case _: ManagingSubscription[_] => "account.caption"
+      case _: Onboarding           => "subscription.caption"
+      case _: ManagingSubscription => "account.caption"
       case f: FillingOutReturnAddressJourney =>
         f.journey.draftReturn.fold(
           _ => "returns.property-details.multipleDisposals.caption",
           _ => "returns.property-address.singleDisposal.caption"
         )
+      case _: ChangingRepresenteeContactAddressJourney => "representee.caption"
     }
 
     def showReturnToSummaryLink(): Boolean =
       a match {
-        case _: Returns[_] => true
-        case _             => false
+        case _: FillingOutReturnAddressJourney           => true
+        case c: ChangingRepresenteeContactAddressJourney => c.journey.isRight
+        case _                                           => false
       }
   }
 

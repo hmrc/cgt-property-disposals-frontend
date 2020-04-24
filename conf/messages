@@ -2160,6 +2160,9 @@ dateOfDeath-day.error.required=Date must include a day
 dateOfDeath-month.error.required=Date must include a month
 dateOfDeath-year.error.required=Date must include a year
 dateOfDeath.error.invalid=Enter a real date
+dateOfDeath-day.error.invalid=Enter a real date
+dateOfDeath-month.error.invalid=Enter a real date
+dateOfDeath-year.error.invalid=Enter a real date
 dateOfDeath-month.error.monthAndYearRequired=Date must include a month and a year
 dateOfDeath-day.error.dayAndYearRequired=Date must include a day and a year
 dateOfDeath-day.error.dayAndMonthRequired=Date must include a day and a month
@@ -2201,3 +2204,12 @@ representeeContactDetails.cyaLabel.address=Contact address
 representeeContactDetails.cyaChange.address=the contact address
 representeeContactDetails.cyaLabel.email=Email address
 representeeContactDetails.cyaChange.email=the contact email address
+
+isUk.representee.title=Is the contact address in the UK?
+isUk.representee.error.required=Select yes if the contact address is in the UK
+isUk.representee.error.boolean=Select yes if the contact address is in the UK
+
+enterPostcode.representee.title=Find the UK contact address
+address-select.representee.title=Select the contact address
+address.uk.representee.title=Enter the UK contact address
+nonUkAddress.representee.title=Enter the non-UK contact address

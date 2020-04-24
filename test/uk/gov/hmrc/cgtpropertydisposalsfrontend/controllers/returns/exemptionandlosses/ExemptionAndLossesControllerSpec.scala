@@ -1809,43 +1809,4 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     )
   }
 
-  def validateExemptionAndLossesCheckYourAnswersPage(
-    completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
-    doc: Document,
-    isATrust: Boolean
-  ): Unit = {
-
-    if (completeExemptionAndLossesAnswers.inYearLosses.isZero) {
-      doc.select("#inYearLosses-answer").text shouldBe "No"
-    } else {
-      doc.select("#inYearLosses-answer").text shouldBe "Yes"
-      doc.select("#inYearLossesValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
-        completeExemptionAndLossesAnswers.inYearLosses.inPounds()
-      )
-    }
-
-    if (completeExemptionAndLossesAnswers.previousYearsLosses.isZero) {
-      doc.select("#previousYearsLosses-answer").text shouldBe "No"
-    } else {
-      doc.select("#previousYearsLosses-answer").text shouldBe "Yes"
-      doc.select("#previousYearsLossesValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
-        completeExemptionAndLossesAnswers.previousYearsLosses.inPounds()
-      )
-    }
-
-    if (isATrust) {
-      doc
-        .select("#annualExemptAmount-question")
-        .text() shouldBe "How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?"
-    } else {
-      doc
-        .select("#annualExemptAmount-question")
-        .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
-    }
-
-    doc.select("#annualExemptAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
-      completeExemptionAndLossesAnswers.annualExemptAmount.inPounds()
-    )
-  }
-
 }

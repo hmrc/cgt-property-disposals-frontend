@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAddress, SubscribedContactAddressChangedEvent}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
@@ -59,57 +59,65 @@ class SubscribedChangeAddressController @Inject() (
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with AddressController[Subscribed] {
+    with AddressController[SubscribedAddressJourney] {
 
-  override val toAddressJourneyType: Subscribed => SubscribedAddressJourney = SubscribedAddressJourney.apply
+  override val toJourneyStatus: SubscribedAddressJourney => JourneyStatus = _.journey
 
-  def isATrust(journey: Subscribed): Boolean = journey.subscribedDetails.isATrust
+  def isATrust(journey: SubscribedAddressJourney): Boolean = journey.journey.subscribedDetails.isATrust
+
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, Subscribed)] =
+  ): Either[Result, (SessionData, SubscribedAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: Subscribed)) => Right(sessionData -> s)
+      case Some((sessionData, s: Subscribed)) => Right(sessionData -> SubscribedAddressJourney(s))
       case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: Subscribed, address: Address, isManuallyEnteredAddress: Boolean)(
+  def updateAddress(journey: SubscribedAddressJourney, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, Error, Subscribed] = {
-    val updatedSubscribedDetails = journey.subscribedDetails.copy(address = address)
+  ): EitherT[Future, Error, JourneyStatus] = {
+    val updatedSubscribedDetails = journey.journey.subscribedDetails.copy(address = address)
 
-    if (journey.subscribedDetails === updatedSubscribedDetails) {
-      EitherT.pure[Future, Error](journey)
+    if (journey.journey.subscribedDetails === updatedSubscribedDetails) {
+      EitherT.pure[Future, Error](journey.journey)
     } else {
       auditService.sendEvent(
         "contactAddressChanged",
         SubscribedContactAddressChangedEvent(
-          AuditAddress.fromAddress(journey.subscribedDetails.address),
+          AuditAddress.fromAddress(journey.journey.subscribedDetails.address),
           AuditAddress.fromAddress(address),
           if (isManuallyEnteredAddress) "manual-entry" else "postcode-lookup",
-          journey.subscribedDetails.cgtReference.value,
-          journey.agentReferenceNumber.isDefined,
-          journey.agentReferenceNumber.map(_.value)
+          journey.journey.subscribedDetails.cgtReference.value,
+          journey.journey.agentReferenceNumber.isDefined,
+          journey.journey.agentReferenceNumber.map(_.value)
         ),
         "contact-address-changed"
       )
       subscriptionService
-        .updateSubscribedDetails(SubscribedUpdateDetails(updatedSubscribedDetails, journey.subscribedDetails))
-        .map(_ => journey.copy(subscribedDetails = updatedSubscribedDetails))
+        .updateSubscribedDetails(SubscribedUpdateDetails(updatedSubscribedDetails, journey.journey.subscribedDetails))
+        .map(_ => journey.journey.copy(subscribedDetails = updatedSubscribedDetails))
     }
   }
 
-  protected lazy val backLinkCall: Call             = controllers.accounts.routes.AccountController.manageYourDetails()
-  protected lazy val isUkCall: Call                 = routes.SubscribedChangeAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call           = routes.SubscribedChangeAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call       = routes.SubscribedChangeAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call = routes.SubscribedChangeAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call    = routes.SubscribedChangeAddressController.enterNonUkAddress()
+  protected lazy val backLinkCall: Call   = controllers.accounts.routes.AccountController.manageYourDetails()
+  protected lazy val isUkCall: Call       = routes.SubscribedChangeAddressController.isUk()
+  protected lazy val isUkSubmitCall: Call = routes.SubscribedChangeAddressController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call =
+    routes.SubscribedChangeAddressController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call =
+    routes.SubscribedChangeAddressController.enterUkAddressSubmit()
+  protected lazy val enterNonUkAddressCall: Call =
+    routes.SubscribedChangeAddressController.enterNonUkAddress()
   protected lazy val enterNonUkAddressSubmitCall: Call =
     routes.SubscribedChangeAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call       = routes.SubscribedChangeAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call = routes.SubscribedChangeAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call       = routes.SubscribedChangeAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call = routes.SubscribedChangeAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call            = controllers.accounts.routes.AccountController.contactAddressUpdated()
+  protected lazy val enterPostcodeCall: Call =
+    routes.SubscribedChangeAddressController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call =
+    routes.SubscribedChangeAddressController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call =
+    routes.SubscribedChangeAddressController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call =
+    routes.SubscribedChangeAddressController.selectAddressSubmit()
+  protected lazy val continueCall: Call = controllers.accounts.routes.AccountController.contactAddressUpdated()
 }

@@ -29,27 +29,28 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registratio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.RegistrationReadyAddressJourney
 
 import scala.concurrent.Future
 
 class RegistrationChangeAddressControllerSpec
-    extends AddressControllerSpec[RegistrationReady]
+    extends AddressControllerSpec[RegistrationReadyAddressJourney]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val validJourneyStatus = sample[RegistrationReady]
+  val validJourneyStatus = RegistrationReadyAddressJourney(sample[RegistrationReady])
 
   lazy val controller = instanceOf[RegistrationChangeAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   override def updateAddress(
-    journey: RegistrationReady,
+    journey: RegistrationReadyAddressJourney,
     address: Address
   ): RegistrationReady =
-    journey.copy(registrationDetails = journey.registrationDetails.copy(address = address))
+    journey.journey.copy(registrationDetails = journey.journey.registrationDetails.copy(address = address))
 
-  override val mockUpdateAddress: Option[(RegistrationReady, Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress: Option[(RegistrationReadyAddressJourney, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

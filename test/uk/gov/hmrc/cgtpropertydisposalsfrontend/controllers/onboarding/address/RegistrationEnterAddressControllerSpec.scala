@@ -33,33 +33,38 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.IndividualSupplyingInformationAddressJourney
 
 import scala.concurrent.Future
 
 class RegistrationEnterAddressControllerSpec
-    extends AddressControllerSpec[IndividualSupplyingInformation]
+    extends AddressControllerSpec[IndividualSupplyingInformationAddressJourney]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val validJourneyStatus = IndividualSupplyingInformation(
-    Some(sample[IndividualName]),
-    None,
-    Some(sample[Email]),
-    Some(sample[EmailSource]),
-    sample[GGCredId]
-  )
+  val validJourneyStatus =
+    IndividualSupplyingInformationAddressJourney(
+      IndividualSupplyingInformation(
+        Some(sample[IndividualName]),
+        None,
+        Some(sample[Email]),
+        Some(sample[EmailSource]),
+        sample[GGCredId]
+      )
+    )
 
   lazy val controller = instanceOf[RegistrationEnterAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   override def updateAddress(
-    journey: IndividualSupplyingInformation,
+    journey: IndividualSupplyingInformationAddressJourney,
     address: Address
   ): IndividualSupplyingInformation =
-    journey.copy(address = Some(address))
+    journey.journey.copy(address = Some(address))
 
-  override val mockUpdateAddress: Option[(IndividualSupplyingInformation, Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress
+    : Option[(IndividualSupplyingInformationAddressJourney, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

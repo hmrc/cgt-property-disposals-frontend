@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcod
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData, TaxYear, TimeUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, SessionData, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -78,20 +78,19 @@ class PropertyDetailsController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with AddressController[FillingOutReturn] {
+    with AddressController[FillingOutReturnAddressJourney] {
 
   import PropertyDetailsController._
 
-  override val toAddressJourneyType: FillingOutReturn => FillingOutReturnAddressJourney =
-    FillingOutReturnAddressJourney.apply
+  val toJourneyStatus: FillingOutReturnAddressJourney => JourneyStatus = _.journey
 
-  def isATrust(journey: FillingOutReturn): Boolean = journey.subscribedDetails.isATrust
+  def isATrust(journey: FillingOutReturnAddressJourney): Boolean = journey.journey.subscribedDetails.isATrust
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, FillingOutReturn)] =
+  ): Either[Result, (SessionData, FillingOutReturnAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: FillingOutReturn)) => Right(sessionData -> r)
+      case Some((sessionData, r: FillingOutReturn)) => Right(sessionData -> FillingOutReturnAddressJourney(r))
       case _                                        => Left(Redirect(controllers.routes.StartController.start()))
     }
 
@@ -114,19 +113,23 @@ class PropertyDetailsController @Inject() (
       _ === AssetType.NonResidential
     )
 
-  def updateAddress(journey: FillingOutReturn, address: Address, isManuallyEnteredAddress: Boolean)(
+  override def updateAddress(
+    journey: FillingOutReturnAddressJourney,
+    address: Address,
+    isManuallyEnteredAddress: Boolean
+  )(
     implicit hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, Error, FillingOutReturn] =
+  ): EitherT[Future, Error, JourneyStatus] =
     address match {
       case _: NonUkAddress =>
-        EitherT.leftT[Future, FillingOutReturn](Error("Got non uk address in returns journey but expected uk address"))
+        EitherT.leftT[Future, JourneyStatus](Error("Got non uk address in returns journey but expected uk address"))
       case a: UkAddress =>
-        journey.draftReturn match {
+        journey.journey.draftReturn match {
           case m: DraftMultipleDisposalsReturn =>
             val answers = m.examplePropertyDetailsAnswers.getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
             if (answers.fold(_.address, c => Some(c.address)).contains(a))
-              EitherT.pure(journey)
+              EitherT.pure(journey.journey)
             else {
               val updatedDraftReturn = m.copy(
                 examplePropertyDetailsAnswers = Some(answers.unset(_.disposalDate).copy(address = Some(a)))
@@ -134,24 +137,24 @@ class PropertyDetailsController @Inject() (
               returnsService
                 .storeDraftReturn(
                   updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
+                  journey.journey.subscribedDetails.cgtReference,
+                  journey.journey.agentReferenceNumber
                 )
-                .map(_ => journey.copy(draftReturn = updatedDraftReturn))
+                .map(_ => journey.journey.copy(draftReturn = updatedDraftReturn))
             }
 
           case d: DraftSingleDisposalReturn =>
             if (d.propertyAddress.contains(a))
-              EitherT.pure(journey)
+              EitherT.pure(journey.journey)
             else {
               val updatedDraftReturn = d.copy(propertyAddress = Some(a))
               returnsService
                 .storeDraftReturn(
                   updatedDraftReturn,
-                  journey.subscribedDetails.cgtReference,
-                  journey.agentReferenceNumber
+                  journey.journey.subscribedDetails.cgtReference,
+                  journey.journey.agentReferenceNumber
                 )
-                .map(_ => journey.copy(draftReturn = updatedDraftReturn))
+                .map(_ => journey.journey.copy(draftReturn = updatedDraftReturn))
             }
         }
 
@@ -166,11 +169,11 @@ class PropertyDetailsController @Inject() (
   protected lazy val selectAddressSubmitCall: Call = addressRoutes.PropertyDetailsController.selectAddressSubmit()
   protected lazy val continueCall: Call            = addressRoutes.PropertyDetailsController.checkYourAnswers()
 
-  override protected val enterPostcodePageBackLink: FillingOutReturn => Call = { fillingOutReturn =>
-    if (assetTypes(fillingOutReturn.draftReturn).exists(shouldAskIfPostcodeExists))
+  override protected val enterPostcodePageBackLink: FillingOutReturnAddressJourney => Call = { fillingOutReturn =>
+    if (assetTypes(fillingOutReturn.journey.draftReturn).exists(shouldAskIfPostcodeExists))
       routes.PropertyDetailsController.singleDisposalHasUkPostcode()
     else
-      fillingOutReturn.draftReturn.fold(
+      fillingOutReturn.journey.draftReturn.fold(
         _.examplePropertyDetailsAnswers
           .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
           .fold(
@@ -204,13 +207,13 @@ class PropertyDetailsController @Inject() (
 
   private def commonHasUkPostcodeBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
-      withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+      withAssetTypes(fillingOutReturn.journey.draftReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true)
           Ok(
             hasValidPostcodePage(
               hasValidPostcodeForm,
-              hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
+              hasUkPostcodeBackLink(fillingOutReturn.journey, isSingleDisposal),
               isSingleDisposal
             )
           )
@@ -230,9 +233,9 @@ class PropertyDetailsController @Inject() (
 
   private def commonHasUkPostcodeSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
-      withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+      withAssetTypes(fillingOutReturn.journey.draftReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true)
 
           hasValidPostcodeForm
             .bindFromRequest()
@@ -241,7 +244,7 @@ class PropertyDetailsController @Inject() (
                 BadRequest(
                   hasValidPostcodePage(
                     formWithErrors,
-                    hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
+                    hasUkPostcodeBackLink(fillingOutReturn.journey, isSingleDisposal),
                     isSingleDisposal
                   )
                 ),
@@ -271,9 +274,9 @@ class PropertyDetailsController @Inject() (
 
   private def commonEnterLandUprnBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
-      withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+      withAssetTypes(fillingOutReturn.journey.draftReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true)
           Ok(
             enterUPRNPage(
               enterUPRNForm,
@@ -297,9 +300,9 @@ class PropertyDetailsController @Inject() (
 
   private def commonEnterLandUprnSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
-      withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+      withAssetTypes(fillingOutReturn.journey.draftReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true)
 
           enterUPRNForm
             .bindFromRequest()
@@ -326,7 +329,7 @@ class PropertyDetailsController @Inject() (
 
   def multipleDisposalsGuidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
+      r.journey.draftReturn match {
         case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
         case m: DraftMultipleDisposalsReturn =>
           val backLink =
@@ -336,7 +339,7 @@ class PropertyDetailsController @Inject() (
                 _ => controllers.returns.routes.TaskListController.taskList(),
                 _ => routes.PropertyDetailsController.checkYourAnswers()
               )
-          Ok(multipleDisposalsGuidancePage(backLink, r.subscribedDetails.isATrust))
+          Ok(multipleDisposalsGuidancePage(backLink, r.journey.subscribedDetails.isATrust))
       }
     }
   }
@@ -344,8 +347,8 @@ class PropertyDetailsController @Inject() (
   def multipleDisposalsGuidanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withValidJourney(request) { (_, r) =>
-        withAssetTypes(r.draftReturn) { assetTypes =>
-          r.draftReturn match {
+        withAssetTypes(r.journey.draftReturn) { assetTypes =>
+          r.journey.draftReturn match {
             case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
             case m: DraftMultipleDisposalsReturn =>
               val redirectTo =
@@ -367,7 +370,7 @@ class PropertyDetailsController @Inject() (
 
   def disposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
+      r.journey.draftReturn match {
         case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
         case m: DraftMultipleDisposalsReturn =>
           m.triageAnswers.fold(
@@ -382,7 +385,7 @@ class PropertyDetailsController @Inject() (
 
               val f    = getDisposalDateFrom(taxYear, completionDate)
               val form = disposalDate.fold(f)(c => f.fill(c.value))
-              Ok(multipleDisposalsDisposalDatePage(form, r.subscribedDetails.isATrust))
+              Ok(multipleDisposalsDisposalDatePage(form, r.journey.subscribedDetails.isATrust))
 
             case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
           }
@@ -392,7 +395,7 @@ class PropertyDetailsController @Inject() (
 
   def disposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
+      r.journey.draftReturn match {
         case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
         case m: DraftMultipleDisposalsReturn =>
           m.triageAnswers.fold(
@@ -416,7 +419,7 @@ class PropertyDetailsController @Inject() (
                     BadRequest(
                       multipleDisposalsDisposalDatePage(
                         formWithErrors.copy(errors = updatedFormWithErrors),
-                        r.subscribedDetails.isATrust
+                        r.journey.subscribedDetails.isATrust
                       )
                     )
                   }, { date =>
@@ -437,12 +440,12 @@ class PropertyDetailsController @Inject() (
                       val result = for {
                         _ <- returnsService.storeDraftReturn(
                               updatedDraftReturn,
-                              r.subscribedDetails.cgtReference,
-                              r.agentReferenceNumber
+                              r.journey.subscribedDetails.cgtReference,
+                              r.journey.agentReferenceNumber
                             )
                         _ <- EitherT(
                               updateSession(sessionStore, request)(
-                                _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                                _.copy(journeyStatus = Some(r.journey.copy(draftReturn = updatedDraftReturn)))
                               )
                             )
                       } yield ()
@@ -468,7 +471,7 @@ class PropertyDetailsController @Inject() (
 
   def disposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
+      r.journey.draftReturn match {
         case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
         case m: DraftMultipleDisposalsReturn =>
           val answers = m.examplePropertyDetailsAnswers
@@ -481,14 +484,14 @@ class PropertyDetailsController @Inject() (
 
           val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
 
-          Ok(multipleDisposalsDisposalPricePage(form, backLink, r.subscribedDetails.isATrust))
+          Ok(multipleDisposalsDisposalPricePage(form, backLink, r.journey.subscribedDetails.isATrust))
       }
     }
   }
 
   def disposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
+      r.journey.draftReturn match {
         case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
         case m: DraftMultipleDisposalsReturn =>
           val answers = m.examplePropertyDetailsAnswers
@@ -500,7 +503,7 @@ class PropertyDetailsController @Inject() (
             .fold(
               formWithErrors =>
                 BadRequest(
-                  multipleDisposalsDisposalPricePage(formWithErrors, backLink, r.subscribedDetails.isATrust)
+                  multipleDisposalsDisposalPricePage(formWithErrors, backLink, r.journey.subscribedDetails.isATrust)
                 ),
               disposalPrice =>
                 if (answers
@@ -521,12 +524,12 @@ class PropertyDetailsController @Inject() (
                   val result = for {
                     _ <- returnsService.storeDraftReturn(
                           updatedDraftReturn,
-                          r.subscribedDetails.cgtReference,
-                          r.agentReferenceNumber
+                          r.journey.subscribedDetails.cgtReference,
+                          r.journey.agentReferenceNumber
                         )
                     _ <- EitherT(
                           updateSession(sessionStore, request)(
-                            _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                            _.copy(journeyStatus = Some(r.journey.copy(draftReturn = updatedDraftReturn)))
                           )
                         )
                   } yield ()
@@ -546,7 +549,7 @@ class PropertyDetailsController @Inject() (
 
   def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
+      r.journey.draftReturn match {
         case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
         case m: DraftMultipleDisposalsReturn =>
           val answers = m.examplePropertyDetailsAnswers
@@ -559,14 +562,14 @@ class PropertyDetailsController @Inject() (
 
           val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
 
-          Ok(multipleDisposalsAcquisitionPricePage(form, backLink, r.subscribedDetails.isATrust))
+          Ok(multipleDisposalsAcquisitionPricePage(form, backLink, r.journey.subscribedDetails.isATrust))
       }
     }
   }
 
   def acquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
+      r.journey.draftReturn match {
         case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
         case m: DraftMultipleDisposalsReturn =>
           val answers = m.examplePropertyDetailsAnswers
@@ -578,7 +581,7 @@ class PropertyDetailsController @Inject() (
             .fold(
               formWithErrors =>
                 BadRequest(
-                  multipleDisposalsAcquisitionPricePage(formWithErrors, backLink, r.subscribedDetails.isATrust)
+                  multipleDisposalsAcquisitionPricePage(formWithErrors, backLink, r.journey.subscribedDetails.isATrust)
                 ),
               acquisitionPrice =>
                 if (answers
@@ -599,12 +602,12 @@ class PropertyDetailsController @Inject() (
                   val result = for {
                     _ <- returnsService.storeDraftReturn(
                           updatedDraftReturn,
-                          r.subscribedDetails.cgtReference,
-                          r.agentReferenceNumber
+                          r.journey.subscribedDetails.cgtReference,
+                          r.journey.agentReferenceNumber
                         )
                     _ <- EitherT(
                           updateSession(sessionStore, request)(
-                            _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                            _.copy(journeyStatus = Some(r.journey.copy(draftReturn = updatedDraftReturn)))
                           )
                         )
                   } yield ()
@@ -624,8 +627,8 @@ class PropertyDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      withAssetTypes(r.draftReturn) { assetTypes =>
-        r.draftReturn match {
+      withAssetTypes(r.journey.draftReturn) { assetTypes =>
+        r.journey.draftReturn match {
           case m: DraftMultipleDisposalsReturn =>
             m.examplePropertyDetailsAnswers.fold[Future[Result]](
               Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
@@ -648,12 +651,12 @@ class PropertyDetailsController @Inject() (
                 val result = for {
                   _ <- returnsService.storeDraftReturn(
                         updatedDraftReturn,
-                        r.subscribedDetails.cgtReference,
-                        r.agentReferenceNumber
+                        r.journey.subscribedDetails.cgtReference,
+                        r.journey.agentReferenceNumber
                       )
                   _ <- EitherT(
                         updateSession(sessionStore, request)(
-                          _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                          _.copy(journeyStatus = Some(r.journey.copy(draftReturn = updatedDraftReturn)))
                         )
                       )
                 } yield ()
@@ -668,7 +671,7 @@ class PropertyDetailsController @Inject() (
                       multipleDisposalsCheckYourAnswersPage(
                         completeAnswers,
                         shouldAskIfPostcodeExists(assetTypes),
-                        r.subscribedDetails.isATrust
+                        r.journey.subscribedDetails.isATrust
                       )
                     )
                 )
@@ -678,7 +681,7 @@ class PropertyDetailsController @Inject() (
                   multipleDisposalsCheckYourAnswersPage(
                     c,
                     shouldAskIfPostcodeExists(assetTypes),
-                    r.subscribedDetails.isATrust
+                    r.journey.subscribedDetails.isATrust
                   )
                 )
 
