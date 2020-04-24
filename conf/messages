@@ -234,7 +234,6 @@ enterPostcode.title=Find your UK contact address
 
 
 email.title=Enter a contact email address
-email.amend.title=Enter a contact email address
 email.helpText=For example, name@example.com
 email.extraContent=We will only use this email address to contact you about your Capital Gains Tax on UK property disposals.
 email.amend.extraContent=The email addresses you use for other government services will not change.
@@ -2212,3 +2211,7 @@ enterPostcode.representee.title=Find the UK contact address
 address-select.representee.title=Select the contact address
 address.uk.representee.title=Enter the UK contact address
 nonUkAddress.representee.title=Enter the non-UK contact address
+
+email.representee.extraContent=The email addresses you use for other government services will not change.
+confirmEmail.representee.title=You have 30 minutes to confirm the email address
+confirmEmail.verified.representee.p1=We’ll use this address to contact you about your Capital Gains Tax on UK property return.

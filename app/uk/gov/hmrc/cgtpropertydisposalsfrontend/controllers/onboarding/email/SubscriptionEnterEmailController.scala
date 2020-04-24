@@ -27,10 +27,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.EnteringSubscriptionEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -58,44 +59,42 @@ class SubscriptionEnterEmailController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with EmailController[SubscriptionMissingData, SubscriptionMissingData] {
-
-  override val isAmendJourney: Boolean      = false
-  override val isSubscribedJourney: Boolean = false
+    with EmailController[EnteringSubscriptionEmail] {
 
   override def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, SubscriptionMissingData)] =
+  ): Either[Result, (SessionData, EnteringSubscriptionEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: SubscriptionMissingData)) => Right(sessionData -> s)
+      case Some((sessionData, s: SubscriptionMissingData)) => Right(sessionData -> EnteringSubscriptionEmail(s))
       case _                                               => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, SubscriptionMissingData)] =
+  ): Either[Result, (SessionData, EnteringSubscriptionEmail)] =
     validJourney(request)
 
   val subscriptionMissingDataEmailLens: Lens[SubscriptionMissingData, Option[Email]] =
     lens[SubscriptionMissingData].businessPartnerRecord.emailAddress
 
-  override def updateEmail(journey: SubscriptionMissingData, email: Email)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscriptionMissingData] =
-    EitherT.rightT[Future, Error](subscriptionMissingDataEmailLens.set(journey)(Some(email)))
+  override def updateEmail(enteringSubscriptionEmail: EnteringSubscriptionEmail, email: Email)(
+    implicit hc: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, JourneyStatus] =
+    EitherT.rightT[Future, Error](subscriptionMissingDataEmailLens.set(enteringSubscriptionEmail.journey)(Some(email)))
 
-  override def auditEmailVerifiedEvent(journey: SubscriptionMissingData, email: Email)(
+  override def auditEmailVerifiedEvent(enteringSubscriptionEmail: EnteringSubscriptionEmail, email: Email)(
     implicit hc: HeaderCarrier,
     request: Request[_]
   ): Unit = ()
 
-  override def auditEmailChangeAttempt(journey: SubscriptionMissingData, email: Email)(
+  override def auditEmailChangeAttempt(enteringSubscriptionEmail: EnteringSubscriptionEmail, email: Email)(
     implicit hc: HeaderCarrier,
     request: Request[_]
   ): Unit = ()
 
-  override def name(journeyStatus: SubscriptionMissingData): ContactName =
-    ContactName(journeyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))
+  override def name(enteringSubscriptionEmail: EnteringSubscriptionEmail): ContactName =
+    ContactName(enteringSubscriptionEmail.journey.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))
 
   override lazy protected val backLinkCall: Option[Call]      = None
   override lazy protected val enterEmailCall: Call            = routes.SubscriptionEnterEmailController.enterEmail()
