@@ -30,6 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, BusinessPartnerRecordServiceSupport, ControllerSpec, NameFormValidationTests, SessionSupport, SubscriptionServiceSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -44,6 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, DraftMultipleDisposalsReturn, IndividualUserType, RepresenteeAnswers, RepresenteeContactDetails, RepresenteeReferenceId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.concurrent.Future
@@ -55,6 +57,7 @@ class RepresenteeControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
     with ReturnsServiceSupport
+    with BusinessPartnerRecordServiceSupport
     with NameFormValidationTests {
 
   override lazy val additionalConfig: Configuration = Configuration(
@@ -65,7 +68,9 @@ class RepresenteeControllerSpec
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[BusinessPartnerRecordService].toInstance(mockBusinessPartnerRecordService),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
   lazy val controller = instanceOf[RepresenteeController]
@@ -93,7 +98,6 @@ class RepresenteeControllerSpec
     subscribedDetails: SubscribedDetails = sample[SubscribedDetails]
   ): (SessionData, StartingNewDraftReturn) =
     sessionWithStartingNewDraftReturn(Some(answers), Some(representativeType.merge), subscribedDetails)
-
   def sessionWithFillingOutReturn(
     answers: Option[RepresenteeAnswers],
     individualUserType: Option[IndividualUserType],
@@ -945,6 +949,197 @@ class RepresenteeControllerSpec
 
     }
 
+    "handling requests to display the confirm person page" must {
+      def performAction(): Future[Result] = controller.confirmPerson()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+
+      def test(
+        sessionData: SessionData,
+        expectedBackLink: Call,
+        expectReturnToSummaryLink: Boolean,
+        expectedPrepopulatedValue: Option[RepresenteeReferenceId]
+      ): Unit = {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionData)
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("representeeConfirmPerson.title"),
+          doc => {
+            doc.select("#back").attr("href") shouldBe expectedBackLink.url
+            doc
+              .select("#name-question")
+              .text shouldBe (messageFromMessageKey("representeeConfirmPerson.summaryline1"))
+            doc
+              .select("#name-answer")
+              .text shouldBe "First Last"
+            doc
+              .select("#account-question")
+              .text shouldBe messageFromMessageKey("representeeConfirmPerson.summaryline2")
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.RepresenteeController.confirmPersonSubmit().url
+            doc
+              .select("#confirmed > legend > h2")
+              .text() shouldBe messageFromMessageKey("representeeConfirmPerson.formTitle")
+          }
+        )
+      }
+
+      "display the page" when {
+
+        "the user has name and id " when {
+          val requiredPreviousAnswers =
+            IncompleteRepresenteeAnswers(
+              Some(IndividualName("First", "Last")),
+              Some(RepresenteeNino(NINO("AB123456C"))),
+              Some(sample[DateOfDeath]),
+              None,
+              false
+            )
+          "show the summary" in {
+            test(
+              sessionWithStartingNewDraftReturn(
+                requiredPreviousAnswers,
+                Left(PersonalRepresentative)
+              )._1,
+              routes.RepresenteeController.enterId(),
+              expectReturnToSummaryLink = false,
+              None
+            )
+          }
+        }
+      }
+
+      "redirect the page to enter-id" when {
+
+        "the user has no id " when {
+          val requiredPreviousAnswers =
+            IncompleteRepresenteeAnswers(Some(IndividualName("First", "Last")), None, None, None, false)
+          "redirect to enter id page" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithStartingNewDraftReturn(
+                  requiredPreviousAnswers,
+                  Left(PersonalRepresentative)
+                )._1
+              )
+            }
+            checkIsRedirect(performAction(), routes.RepresenteeController.checkYourAnswers())
+          }
+        }
+      }
+
+    }
+
+    "handling requests to submit the confirm person page" must {
+      def performAction(formData: Seq[(String, String)]): Future[Result] =
+        controller.confirmPersonSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like nonCapacitorOrPersonalRepBehaviour(() => performAction(Seq.empty))
+
+      "show a form error" when {
+
+        val session = sessionWithFillingOutReturn(
+          IncompleteRepresenteeAnswers(
+            Some(sample[IndividualName]),
+            Some(sample[RepresenteeNino]),
+            Some(sample[DateOfDeath]),
+            None,
+            false
+          ),
+          Right(Capacitor)
+        )._1
+
+        def testConfirmPersonFormError(
+          performAction: Seq[(String, String)] => Future[Result],
+          currentSession: SessionData,
+          expectedErrorMessageKey: String
+        )(data: Seq[(String, String)]): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(currentSession)
+          }
+
+          checkPageIsDisplayed(
+            performAction(data),
+            messageFromMessageKey("representeeConfirmPerson.title"), { doc =>
+              doc.select("#confirmed-inline-error").text() contains messageFromMessageKey(
+                expectedErrorMessageKey
+              )
+              doc.select("#confirmed-inline-error > span").text() shouldBe ("Error:")
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "nothing is selected" in {
+          testConfirmPersonFormError(performAction, session, "confirmed.error.required")(Seq.empty)
+        }
+      }
+
+      "redirect the page to enter-name" when {
+        "the user has clicked No " in {
+          val requiredPreviousAnswers = IncompleteRepresenteeAnswers(
+            Some(IndividualName("First", "Last")),
+            Some(RepresenteeNino(NINO("AB123456C"))),
+            None,
+            None,
+            false
+          )
+
+          val session = sessionWithStartingNewDraftReturn(
+            requiredPreviousAnswers,
+            Left(PersonalRepresentative)
+          )._1
+          val Some(sndr: StartingNewDraftReturn) = session.journeyStatus
+          val newSndr =
+            sndr.copy(representeeAnswers = Some(IncompleteRepresenteeAnswers(None, None, None, None, false)))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(session.copy(journeyStatus = Some(newSndr)))(Right())
+          }
+          checkIsRedirect(performAction(List("confirmed" -> "false")), routes.RepresenteeController.checkYourAnswers())
+        }
+
+        "the user has clicked Yes " in {
+          val requiredPreviousAnswers = IncompleteRepresenteeAnswers(
+            Some(IndividualName("First", "Last")),
+            Some(RepresenteeNino(NINO("AB123456C"))),
+            None,
+            None,
+            false
+          )
+
+          val session = sessionWithStartingNewDraftReturn(
+            requiredPreviousAnswers,
+            Left(PersonalRepresentative)
+          )._1
+
+          val Some(sndr: StartingNewDraftReturn) = session.journeyStatus
+
+          val newSndr =
+            sndr.copy(representeeAnswers = Some(requiredPreviousAnswers.copy(hasConfirmedContactDetails = true)))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(session.copy(journeyStatus = Some(newSndr)))(Right())
+          }
+          checkIsRedirect(performAction(List("confirmed" -> "true")), routes.RepresenteeController.checkYourAnswers())
+        }
+      }
+
+    }
+
     "handling submitted ids" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
@@ -1059,7 +1254,7 @@ class RepresenteeControllerSpec
 
       "show an error page" when {
 
-        val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(sample[IndividualName]))
+        val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(IndividualName("First", "Last")))
         val cgtRef  = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
         val (session, journey, draftReturn) =
@@ -1073,6 +1268,7 @@ class RepresenteeControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+            mockGetSubscriptionDetails()
             mockStoreDraftReturn(
               newDraftReturn,
               newJourney.subscribedDetails.cgtReference,
@@ -1087,6 +1283,7 @@ class RepresenteeControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+            mockGetSubscriptionDetails()
             mockStoreDraftReturn(
               newDraftReturn,
               newJourney.subscribedDetails.cgtReference,
@@ -1105,7 +1302,7 @@ class RepresenteeControllerSpec
         "all updates are successful and" when {
 
           "the user has submitted a valid cgt reference" in {
-            val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(sample[IndividualName]))
+            val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(IndividualName("First", "Last")))
             val cgtRef  = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
             val (session, journey, draftReturn) =
@@ -1118,6 +1315,7 @@ class RepresenteeControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
+              mockGetSubscriptionDetails()
               mockStoreDraftReturn(
                 newDraftReturn,
                 newJourney.subscribedDetails.cgtReference,
@@ -1126,12 +1324,12 @@ class RepresenteeControllerSpec
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
             }
 
-            checkIsRedirect(performAction(formData(cgtRef)), routes.RepresenteeController.checkYourAnswers())
+            checkIsRedirect(performAction(formData(cgtRef)), routes.RepresenteeController.confirmPerson())
           }
 
           "the user has submitted a valid nino" in {
             val answers = IncompleteRepresenteeAnswers.empty.copy(
-              name = Some(sample[IndividualName]),
+              name = Some(IndividualName("First", "Last")),
               id   = Some(sample[RepresenteeCgtReference])
             )
             val nino = RepresenteeNino(NINO("AB123456C"))
@@ -1146,6 +1344,7 @@ class RepresenteeControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
+              mockGetBusinessPartnerRecord()
               mockStoreDraftReturn(
                 newDraftReturn,
                 newJourney.subscribedDetails.cgtReference,
@@ -1154,12 +1353,12 @@ class RepresenteeControllerSpec
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
             }
 
-            checkIsRedirect(performAction(formData(nino)), routes.RepresenteeController.checkYourAnswers())
+            checkIsRedirect(performAction(formData(nino)), routes.RepresenteeController.confirmPerson())
 
           }
 
           "the user has submitted a valid sa utr" in {
-            val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(sample[IndividualName]))
+            val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(IndividualName("First", "Last")))
             val sautr   = RepresenteeSautr(SAUTR("1234567890"))
 
             val (session, journey) =
@@ -1170,15 +1369,16 @@ class RepresenteeControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
+              mockGetBusinessPartnerRecord()
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
             }
 
-            checkIsRedirect(performAction(formData(sautr)), routes.RepresenteeController.checkYourAnswers())
+            checkIsRedirect(performAction(formData(sautr)), routes.RepresenteeController.confirmPerson())
 
           }
 
           "the user has submitted no reference" in {
-            val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(sample[IndividualName]))
+            val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(IndividualName("First", "Last")))
 
             val (session, journey) =
               sessionWithStartingNewDraftReturn(answers, Right(Capacitor))
@@ -1191,11 +1391,55 @@ class RepresenteeControllerSpec
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
             }
 
-            checkIsRedirect(performAction(formData(NoReferenceId)), routes.RepresenteeController.checkYourAnswers())
+            checkIsRedirect(performAction(formData(NoReferenceId)), routes.RepresenteeController.confirmPersonSubmit())
           }
 
         }
 
+      }
+
+      "redirect the page to enter-id" when {
+        def performAction( ): Future[Result] =
+          controller.checkYourAnswers()(FakeRequest())
+        "the user has no id " when {
+          val requiredPreviousAnswers =
+            IncompleteRepresenteeAnswers(Some(IndividualName("First", "Last")), None, Some(sample[DateOfDeath]), None, false)
+          "redirect to enter id page" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithStartingNewDraftReturn(
+                  requiredPreviousAnswers,
+                  Left(PersonalRepresentative)
+                )._1
+              )
+            }
+            checkIsRedirect(performAction(), routes.RepresenteeController.enterId())
+          }
+        }
+      }
+        "redirect the page to enter-name" when {
+          def performAction( ): Future[Result] =
+            controller.checkYourAnswers()(FakeRequest())
+          "the user has no name" when {
+            val requiredPreviousAnswers =
+              IncompleteRepresenteeAnswers(None, None, None, None, false)
+            "redirect to enter name page" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithStartingNewDraftReturn(
+                    requiredPreviousAnswers,
+                    Left(PersonalRepresentative)
+                  )._1
+                )
+              }
+
+              checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
+
+            }
+
+        }
       }
 
       "not do any updates" when {

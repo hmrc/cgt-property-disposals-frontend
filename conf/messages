@@ -2203,3 +2203,9 @@ representeeContactDetails.cyaLabel.address=Contact address
 representeeContactDetails.cyaChange.address=the contact address
 representeeContactDetails.cyaLabel.email=Email address
 representeeContactDetails.cyaChange.email=the contact email address
+
+representeeConfirmPerson.title=Check the details we hold for the person
+representeeConfirmPerson.summaryline1=Name
+representeeConfirmPerson.summaryline2=Capital Gains Tax on UK property account number
+representeeConfirmPerson.formTitle=Is this the person you're completing this return for
+confirmed.error.required=Select yes to confirm this is the person you are representing
