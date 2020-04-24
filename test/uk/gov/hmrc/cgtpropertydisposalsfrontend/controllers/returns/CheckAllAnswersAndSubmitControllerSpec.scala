@@ -622,7 +622,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Trust: ",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Left(TrustName("John Doe"))
+            Right(IndividualName("John", "Doe"))
           ),
           TestScenario(
             "organisation representing individual with tax due",
@@ -631,7 +631,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Trust: ",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Left(TrustName("John Doe"))
+            Right(IndividualName("John", "Doe"))
           )
         )
 
