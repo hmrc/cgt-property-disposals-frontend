@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -49,6 +50,8 @@
 
     @summary(answers, representativeType)
 
-    @returnToSummaryLink(displayReturnToSummaryLink)
+    @formWrapper(routes.RepresenteeController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+        @submitButton(messages("button.confirmAndContinue"))
+    }
 
 }
