@@ -35,15 +35,22 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.Inn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, Error, FormUtils, TimeUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.confirm_person
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
 import returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.domain.Nino
@@ -57,13 +64,16 @@ class RepresenteeController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  businessPartnerRecordService: BusinessPartnerRecordService,
+  subscriptionService: SubscriptionService,
   cc: MessagesControllerComponents,
   val config: Configuration,
   cyaPage: representeePages.check_your_answers,
   enterNamePage: representeePages.enter_name,
   enterIdPage: representeePages.enter_reference_number,
   enterDateOfDeathPage: representeePages.enter_date_of_death,
-  checkContactDetailsPage: representeePages.check_contact_details
+  checkContactDetailsPage: representeePages.check_contact_details,
+  confirmPersonPage: confirm_person
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -188,6 +198,86 @@ class RepresenteeController @Inject() (
     }
   }
 
+  def confirmPerson(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      val backLink = answers.fold(
+        _ => routes.RepresenteeController.enterId(),
+        _ => routes.RepresenteeController.checkYourAnswers()
+      )
+      answers match {
+        case incompleteAnswers @ IncompleteRepresenteeAnswers(Some(_), Some(_), _, None, false) =>
+          Ok(confirmPersonPage(incompleteAnswers, representativeType, journey.isRight, confirmPersonForm, backLink))
+
+        case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+      }
+    }
+  }
+
+  def confirmPersonSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+        val backLink = answers.fold(
+          _ => routes.RepresenteeController.enterId(),
+          _ => routes.RepresenteeController.checkYourAnswers()
+        )
+        def handleForm(incompleteRepresenteeAnswers: IncompleteRepresenteeAnswers): Future[Result] =
+          confirmPersonForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                BadRequest(
+                  confirmPersonPage(
+                    incompleteRepresenteeAnswers,
+                    representativeType,
+                    journey.isRight,
+                    formWithErrors,
+                    backLink
+                  )
+                ),
+              isYes =>
+                if (isYes) {
+                  updateDraftReturnAndSession(
+                    incompleteRepresenteeAnswers.copy(hasConfirmedContactDetails = true),
+                    journey
+                  ).fold({ e =>
+                    logger.warn("Could not update draft return", e)
+                    errorHandler.errorResult()
+                  }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+                } else {
+                  updateDraftReturnAndSession(
+                    IncompleteRepresenteeAnswers(None, None, None, None, false),
+                    journey
+                  ).fold({ e =>
+                    logger.warn("Could not update draft return", e)
+                    errorHandler.errorResult()
+                  }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+                }
+            )
+
+        answers match {
+          case incompleteRepresenteeAnswers @ IncompleteRepresenteeAnswers(
+                _,
+                _,
+                _,
+                None,
+                false
+              ) =>
+            handleForm(incompleteRepresenteeAnswers)
+          case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+
+        }
+
+      }
+    }
+
+  private def doNamesMatch(name: IndividualName, comparedName: IndividualName): Boolean = {
+    def format(word: String): String = s"${word.toLowerCase().filterNot(_.isWhitespace).trim}"
+    import cats.implicits._
+    (format(name.firstName) === format(comparedName.firstName)) && (format(name.lastName) === format(
+      comparedName.lastName
+    ))
+  }
+
   def enterIdSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
       lazy val backLink = answers.fold(
@@ -207,12 +297,60 @@ class RepresenteeController @Inject() (
             if (answers.fold(_.id, c => Some(c.id)).contains(id))
               Redirect(routes.RepresenteeController.checkYourAnswers())
             else {
+              val name: Option[IndividualName] = answers.fold(i => i.name, c => Some(c.name))
+              val response: EitherT[Future, Error, Option[Either[BusinessPartnerRecordResponse, SubscribedDetails]]] =
+                id match {
+                  case RepresenteeNino(ninoId) =>
+                    businessPartnerRecordService
+                      .getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(ninoId), name))
+                      .map(bpr => Some(Left(bpr)))
+                  case RepresenteeSautr(sautr) =>
+                    businessPartnerRecordService
+                      .getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(sautr), name))
+                      .map(bpr => Some(Left(bpr)))
+                  case RepresenteeCgtReference(cgtReference) => {
+                    subscriptionService.getSubscribedDetails(cgtReference).map(sd => Some(Right(sd)))
+                  }
+                  case NoReferenceId =>
+                    EitherT[Future, Error, Option[Either[BusinessPartnerRecordResponse, SubscribedDetails]]](
+                      Future.successful(Right(None))
+                    )
+                  case _ =>
+                    EitherT[Future, Error, Option[Either[BusinessPartnerRecordResponse, SubscribedDetails]]](
+                      Future.successful(Left(Error("error")))
+                    )
+                }
+
+              val nameCheck: EitherT[Future, Error, Unit] = response.subflatMap(value =>
+                value match {
+                  case Some(Left(BusinessPartnerRecordResponse(_, _))) =>
+                    Right()
+                  case Some(Right(SubscribedDetails(Right(i), _, _, _, _, _, _)))
+                      if name.fold(false)(doNamesMatch(_, i)) =>
+                    Right()
+                  case Some(Right(SubscribedDetails(Left(_), _, _, _, _, _, _))) =>
+                    Right()
+                  case None => Right()
+                  case _ => {
+                    Left(Error(s"Name check error"))
+                  }
+                }
+              )
+
               val newAnswers = answers.fold(_.copy(id = Some(id)), _.copy(id = id))
 
-              updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
-                logger.warn("Could not update draft return", e)
-                errorHandler.errorResult()
-              }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+              val result = for {
+                _ <- nameCheck.leftMap { e =>
+                      logger.warn("Name check error", e)
+                      BadRequest("Name check error")
+                    }
+                _ <- updateDraftReturnAndSession(newAnswers, journey).leftMap { e =>
+                      logger.warn("Could not update draft return", e)
+                      errorHandler.errorResult()
+                    }
+              } yield ()
+
+              result.fold(e => e, _ => Redirect(routes.RepresenteeController.confirmPerson()))
             }
         )
 
@@ -336,7 +474,6 @@ class RepresenteeController @Inject() (
             )
           )
       )
-
     for {
       _ <- newJourney.fold(
             _ => EitherT.pure[Future, Error](()),
@@ -496,6 +633,14 @@ object RepresenteeController {
     Form(
       mapping(
         "" -> of(formatter)
+      )(identity)(Some(_))
+    )
+  }
+
+  val confirmPersonForm: Form[Boolean] = {
+    Form(
+      mapping(
+        "confirmed" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
   }

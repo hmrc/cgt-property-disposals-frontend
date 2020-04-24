@@ -9,6 +9,8 @@ POST  /about-person/date-person-died        uk.gov.hmrc.cgtpropertydisposalsfron
 
 GET  /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetails()
 POST /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetailsSubmit()
+GET /about-person/confirm-person    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.confirmPerson()
+POST /about-person/confirm-person   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.confirmPersonSubmit()
 
 GET   /about-person/check-your-answers       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswers()
 POST  /about-person/check-your-answers       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswersSubmit()

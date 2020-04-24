@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import cats.data.EitherT
 import play.api.Configuration
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
@@ -24,7 +25,13 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -35,6 +42,27 @@ trait AuthSupport {
 
   val mockAuthConnector: AuthConnector             = mock[AuthConnector]
   val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
+  def mockGetSubscriptionDetails(): Unit =
+    (mockSubscriptionService
+      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
+      .expects(*, *)
+      .returning(
+        EitherT[Future, Error, SubscribedDetails](
+          Future.successful(
+            Right(
+              SubscribedDetails(
+                Right(IndividualName("First", "Last")),
+                Email("email"),
+                UkAddress("Some St.", None, None, None, Postcode("EC1 AB2")),
+                ContactName(""),
+                CgtReference("cgtReference"),
+                None,
+                false
+              )
+            )
+          )
+        )
+      )
 
   lazy val testAuthenticatedAction = new AuthenticatedActionWithRetrievedData(
     mockSubscriptionService,
