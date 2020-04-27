@@ -42,6 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{Indire
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Other, Sold}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -624,6 +625,13 @@ class SingleDisposalsTriageController @Inject() (
       lazy val displayReturnToSummaryLink = state.fold(_ => false, _ => true)
       val isIndividual                    = state.fold(_.subscribedDetails, _._2.subscribedDetails).userType().isRight
 
+      val representeeAnswers = state
+        .fold(
+          _.representeeAnswers,
+          _._1.representeeAnswers
+        )
+      val isIncomplete = !representeeAnswers.map(_.fold(_ => false, _ => true)).getOrElse(false)
+
       triageAnswers match {
         case c: CompleteSingleDisposalTriageAnswers =>
           val isATrust = state
@@ -637,7 +645,8 @@ class SingleDisposalsTriageController @Inject() (
         case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
-        case IncompleteSingleDisposalTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _) =>
+        case IncompleteSingleDisposalTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _)
+            if isIncomplete =>
           Redirect(
             representee.routes.RepresenteeController
               .enterName()
@@ -653,7 +662,7 @@ class SingleDisposalsTriageController @Inject() (
             _,
             _,
             _
-            ) =>
+            ) if isIncomplete =>
           Redirect(
             representee.routes.RepresenteeController
               .enterName()
