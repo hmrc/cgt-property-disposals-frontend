@@ -25,3 +25,10 @@ GET  /about-person/enter-uk-contact-address        uk.gov.hmrc.cgtpropertydispos
 POST /about-person/enter-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterUkAddressSubmit()
 GET  /about-person/enter-non-uk-contact-address    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterNonUkAddress()
 POST /about-person/enter-non-uk-contact-address    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.enterNonUkAddressSubmit()
+
+## Email
+GET  /about-person/enter-email                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeEmailController.enterEmail()
+POST /about-person/enter-email                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeEmailController.enterEmailSubmit()
+GET  /about-person/confirm-email                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeEmailController.checkYourInbox()
+GET  /about-person/verify-email                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeEmailController.verifyEmail(p: java.util.UUID)
+GET  /about-person/email-confirmed                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeEmailController.emailVerified()

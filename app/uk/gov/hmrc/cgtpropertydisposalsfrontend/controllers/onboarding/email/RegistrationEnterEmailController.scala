@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.EnteringRegistrationEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails
@@ -59,37 +60,42 @@ class RegistrationEnterEmailController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with EmailController[IndividualMissingEmail, RegistrationReady] {
+    with EmailController[EnteringRegistrationEmail] {
 
-  override val isAmendJourney: Boolean      = false
-  override val isSubscribedJourney: Boolean = false
-
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, IndividualMissingEmail)] =
+  override def validJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, EnteringRegistrationEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, i: IndividualMissingEmail)) => Right(sessionData -> i)
+      case Some((sessionData, i: IndividualMissingEmail)) => Right(sessionData -> EnteringRegistrationEmail(Right(i)))
       case _                                              => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, RegistrationReady)] =
+  ): Either[Result, (SessionData, EnteringRegistrationEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
+      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> EnteringRegistrationEmail(Left(r)))
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateEmail(journey: IndividualMissingEmail, email: Email)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, RegistrationReady] =
+  override def updateEmail(enteringRegistrationEmail: EnteringRegistrationEmail, email: Email)(
+    implicit hc: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, JourneyStatus] =
     EitherT.rightT[Future, Error](
       RegistrationReady(
-        RegistrationDetails(journey.name, email, journey.address, EmailSource.ManuallyEntered),
-        journey.ggCredId
+        RegistrationDetails(
+          enteringRegistrationEmail.journey.fold(_.registrationDetails.name, _.name),
+          email,
+          enteringRegistrationEmail.journey.fold(_.registrationDetails.address, _.address),
+          EmailSource.ManuallyEntered
+        ),
+        enteringRegistrationEmail.journey.fold(_.ggCredId, _.ggCredId)
       )
     )
 
   override def auditEmailVerifiedEvent(
-    journey: IndividualMissingEmail,
+    enteringRegistrationEmail: EnteringRegistrationEmail,
     email: Email
   )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
     auditService.sendEvent(
@@ -101,7 +107,7 @@ class RegistrationEnterEmailController @Inject() (
     )
 
   override def auditEmailChangeAttempt(
-    journey: IndividualMissingEmail,
+    enteringRegistrationEmail: EnteringRegistrationEmail,
     email: Email
   )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
     auditService.sendEvent(
@@ -112,8 +118,8 @@ class RegistrationEnterEmailController @Inject() (
       "registration-setup-email-address-attempted"
     )
 
-  override def name(journeyStatus: IndividualMissingEmail): ContactName =
-    ContactName(journeyStatus.name.makeSingleName())
+  override def name(enteringRegistrationEmail: EnteringRegistrationEmail): ContactName =
+    ContactName(enteringRegistrationEmail.journey.fold(_.registrationDetails.name, _.name).makeSingleName())
 
   override lazy protected val backLinkCall: Option[Call]    = None
   override lazy protected val enterEmailCall: Call          = routes.RegistrationEnterEmailController.enterEmail()

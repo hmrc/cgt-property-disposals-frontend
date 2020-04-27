@@ -19,6 +19,7 @@
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
@@ -29,19 +30,43 @@
  submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
  alertBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.alert_banner,
- accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(email: Email, backLink: Call, enterEmail: Call, enterEmailSubmit: Call, resent: Boolean, showAccountMenu: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(email: Email, backLink: Call, enterEmail: Call, enterEmailSubmit: Call, resent: Boolean, emailJourneyType: EmailJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
-@title = @{if (resent) messages("confirmEmail.resent") + " " + messages("confirmEmail.title") else messages("confirmEmail.title")}
-@menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+
+@title = @{
+  val prefix = if (resent) s"${messages("confirmEmail.resent")} " else ""
+  val suffix = emailJourneyType match {
+   case _: EmailJourneyType.Returns.ChangingRepresenteeEmail => messages("confirmEmail.representee.title")
+   case _ => messages("confirmEmail.title")
+  }
+
+  s"$prefix$suffix"
+}
+
+@isManagingSubscriptionJourney = @{
+  emailJourneyType match {
+   case _: EmailJourneyType.ManagingSubscription => true
+   case _ => false
+  }
+}
+
+@menu = @{
+ if(isManagingSubscriptionJourney)  Some(accountMenu(None))
+ else None
+}
+
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = !isManagingSubscriptionJourney, accountMenu = menu) {
 
  @backLinkComponent(backLink)
 
- @pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption")))
+ @caption(messages(emailJourneyType.captionMessageKey))
+
+ @pageHeading(title)
 
  <p>
    @messages("confirmEmail.sentEmail", email.value)

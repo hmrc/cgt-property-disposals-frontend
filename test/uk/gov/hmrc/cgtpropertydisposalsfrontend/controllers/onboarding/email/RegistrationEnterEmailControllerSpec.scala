@@ -17,44 +17,62 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
 
 import java.util.UUID
+
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.EnteringRegistrationEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 
 import scala.concurrent.Future
 
 class RegistrationEnterEmailControllerSpec
-    extends EmailControllerSpec[IndividualMissingEmail, RegistrationReady]
+    extends EmailControllerSpec[EnteringRegistrationEmail]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val isAmendJourney: Boolean = false
+  override def toJourneyStatus(journeyType: EnteringRegistrationEmail): JourneyStatus = journeyType.journey.merge
 
-  override val validJourneyStatus: IndividualMissingEmail =
-    sample[IndividualMissingEmail]
+  val individualMissingEmail = sample[IndividualMissingEmail]
 
-  override val validVerificationCompleteJourneyStatus: RegistrationReady =
-    sample[RegistrationReady]
+  override val validJourneyStatus: EnteringRegistrationEmail =
+    EnteringRegistrationEmail(Right(individualMissingEmail))
 
-  override def updateEmail(journey: IndividualMissingEmail, email: Email): RegistrationReady =
-    RegistrationReady(
-      RegistrationDetails(journey.name, email, journey.address, EmailSource.ManuallyEntered),
-      journey.ggCredId
+  override val validVerificationCompleteJourneyStatus: EnteringRegistrationEmail =
+    EnteringRegistrationEmail(Left(sample[RegistrationReady]))
+
+  override def updateEmail(
+    enteringRegistrationEmail: EnteringRegistrationEmail,
+    email: Email
+  ): EnteringRegistrationEmail =
+    EnteringRegistrationEmail(
+      Left(
+        RegistrationReady(
+          RegistrationDetails(
+            individualMissingEmail.name,
+            email,
+            individualMissingEmail.address,
+            EmailSource.ManuallyEntered
+          ),
+          individualMissingEmail.ggCredId
+        )
+      )
     )
 
-  override val mockUpdateEmail: Option[(IndividualMissingEmail, RegistrationReady, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail
+    : Option[(EnteringRegistrationEmail, EnteringRegistrationEmail, Either[Error, Unit]) => Unit] =
+    None
 
   override lazy val controller: RegistrationEnterEmailController = instanceOf[RegistrationEnterEmailController]
 
@@ -89,7 +107,7 @@ class RegistrationEnterEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        ContactName(validJourneyStatus.name.makeSingleName()),
+        ContactName(individualMissingEmail.name.makeSingleName()),
         emailRoutes.RegistrationEnterEmailController.verifyEmail,
         emailRoutes.RegistrationEnterEmailController.checkYourInbox()
       )

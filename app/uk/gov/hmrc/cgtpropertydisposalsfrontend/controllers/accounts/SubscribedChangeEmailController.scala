@@ -27,12 +27,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.ManagingSubscription.ChangingAccountEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{SubscribedChangeEmailAddressAttemptedEvent, SubscribedChangeEmailAddressVerifiedEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
@@ -62,25 +63,24 @@ class SubscribedChangeEmailController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with EmailController[Subscribed, Subscribed] {
+    with EmailController[ChangingAccountEmail] {
 
-  override val isAmendJourney: Boolean      = true
-  override val isSubscribedJourney: Boolean = true
-
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Subscribed)] =
+  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, ChangingAccountEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: Subscribed)) => Right(sessionData -> s)
+      case Some((sessionData, s: Subscribed)) => Right(sessionData -> ChangingAccountEmail(s))
       case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, Subscribed)] =
+  ): Either[Result, (SessionData, ChangingAccountEmail)] =
     validJourney(request)
 
-  override def updateEmail(journey: Subscribed, email: Email)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Subscribed] = {
+  override def updateEmail(changingAccountEmail: ChangingAccountEmail, email: Email)(
+    implicit hc: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, JourneyStatus] = {
+    val journey                 = changingAccountEmail.journey
     val journeyWithUpdatedEmail = journey.subscribedDetails.copy(emailAddress = email)
     if (journey.subscribedDetails === journeyWithUpdatedEmail) {
       EitherT.pure[Future, Error](journey)
@@ -92,9 +92,10 @@ class SubscribedChangeEmailController @Inject() (
   }
 
   override def auditEmailVerifiedEvent(
-    journey: Subscribed,
+    changingAccountEmail: ChangingAccountEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+  )(implicit hc: HeaderCarrier, request: Request[_]): Unit = {
+    val journey = changingAccountEmail.journey
     auditService.sendEvent(
       "changeEmailAddressVerified",
       SubscribedChangeEmailAddressVerifiedEvent(
@@ -106,11 +107,13 @@ class SubscribedChangeEmailController @Inject() (
       ),
       "change-email-address-verified"
     )
+  }
 
   override def auditEmailChangeAttempt(
-    journey: Subscribed,
+    changingAccountEmail: ChangingAccountEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+  )(implicit hc: HeaderCarrier, request: Request[_]): Unit = {
+    val journey = changingAccountEmail.journey
     auditService.sendEvent(
       "changeEmailAddressAttempted",
       SubscribedChangeEmailAddressAttemptedEvent(
@@ -122,9 +125,10 @@ class SubscribedChangeEmailController @Inject() (
       ),
       "change-email-address-attempted"
     )
+  }
 
-  override def name(journeyStatus: Subscribed): ContactName =
-    journeyStatus.subscribedDetails.contactName
+  override def name(changingAccountEmail: ChangingAccountEmail): ContactName =
+    changingAccountEmail.journey.subscribedDetails.contactName
 
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.accounts.routes.AccountController.manageYourDetails()

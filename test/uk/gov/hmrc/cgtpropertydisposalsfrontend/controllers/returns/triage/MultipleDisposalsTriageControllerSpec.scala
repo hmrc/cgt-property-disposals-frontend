@@ -3021,7 +3021,7 @@ class MultipleDisposalsTriageControllerSpec
           )
 
           forAll { assetTypes: List[AssetType] =>
-            whenever(!invalidAssetTypes.contains(assetTypes) && assetTypes.nonEmpty) {
+            whenever(!invalidAssetTypes.contains(assetTypes.distinct) && assetTypes.nonEmpty) {
               val (session, journey, draftReturn) =
                 sessionDataWithFillingOutReturn(allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)))
               val updatedDraftReturn =

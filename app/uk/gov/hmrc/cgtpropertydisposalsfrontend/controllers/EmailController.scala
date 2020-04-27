@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.SubmitEmailDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailToBeVerified}
@@ -43,7 +44,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: JourneyStatus] {
+trait EmailController[JourneyType <: EmailJourneyType] {
   this: FrontendController with WithAuthAndSessionDataAction with Logging with SessionUpdates =>
 
   implicit val viewConfig: ViewConfig
@@ -54,37 +55,36 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   val emailVerificationService: EmailVerificationService
   val auditService: AuditService
   val errorHandler: ErrorHandler
-  val isAmendJourney: Boolean
-  val isSubscribedJourney: Boolean
 
   val enterEmailPage: views.html.onboarding.email.enter_email
   val checkYourInboxPage: views.html.onboarding.email.check_your_inbox
   val emailVerifiedPage: views.html.onboarding.email.email_verified
 
-  def updateEmail(journey: Journey, email: Email)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, VerificationCompleteJourney]
+  def updateEmail(journey: JourneyType, email: Email)(
+    implicit hc: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, JourneyStatus]
 
-  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Journey)]
+  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, JourneyType)]
 
   def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, VerificationCompleteJourney)]
+  ): Either[Result, (SessionData, JourneyType)]
 
-  def auditEmailVerifiedEvent(journey: Journey, email: Email)(
+  def auditEmailVerifiedEvent(journey: JourneyType, email: Email)(
     implicit hc: HeaderCarrier,
     request: Request[_]
   ): Unit
 
-  def auditEmailChangeAttempt(journey: Journey, email: Email)(
+  def auditEmailChangeAttempt(journey: JourneyType, email: Email)(
     implicit hc: HeaderCarrier,
     request: Request[_]
   ): Unit
 
-  def name(journeyStatus: Journey): ContactName
+  def name(journeyStatus: JourneyType): ContactName
 
   private def withValidJourney(request: RequestWithSessionData[_])(
-    f: (SessionData, Journey) => Future[Result]
+    f: (SessionData, JourneyType) => Future[Result]
   ): Future[Result] =
     validJourney(request).fold[Future[Result]](toFuture, f.tupled)
 
@@ -98,11 +98,11 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
 
   def enterEmail(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
-      case (sessionData, _) =>
+      case (sessionData, journey) =>
         val form = sessionData.emailToBeVerified.fold(
           EmailController.submitEmailForm
         )(e => EmailController.submitEmailForm.fill(SubmitEmailDetails(e.email, e.hasResentVerificationEmail)))
-        Ok(enterEmailPage(form, isAmendJourney, isSubscribedJourney, backLinkCall, enterEmailSubmitCall))
+        Ok(enterEmailPage(form, journey, backLinkCall, enterEmailSubmitCall))
     }
   }
 
@@ -117,8 +117,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                 BadRequest(
                   enterEmailPage(
                     formWithErrors,
-                    isAmendJourney,
-                    isSubscribedJourney,
+                    journey,
                     backLinkCall,
                     enterEmailSubmitCall
                   )
@@ -165,7 +164,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   def checkYourInbox(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (sessionData, _) =>
+        case (sessionData, journey) =>
           sessionData.emailToBeVerified.fold(
             Redirect(enterEmailCall)
           )(emailToBeVerified =>
@@ -176,7 +175,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                 enterEmailCall,
                 enterEmailSubmitCall,
                 emailToBeVerified.hasResentVerificationEmail,
-                isSubscribedJourney
+                journey
               )
             )
           )
@@ -229,13 +228,14 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
       validVerificationCompleteJourney(request)
         .fold[Future[Result]](
           toFuture, {
-            case (sessionData, _) =>
+            case (sessionData, journey) =>
               sessionData.emailToBeVerified.fold(
                 Redirect(enterEmailCall)
               ) { emailToBeVerified =>
                 if (emailToBeVerified.verified) {
-                  Ok(emailVerifiedPage(emailToBeVerified.email, emailVerifiedContinueCall, isSubscribedJourney))
+                  Ok(emailVerifiedPage(emailToBeVerified.email, emailVerifiedContinueCall, journey))
                 } else {
+
                   logger.warn(
                     "Email verified endpoint called but email was not verified"
                   )
