@@ -2205,5 +2205,5 @@ confirmEmail.verified.representee.p1=We’ll use this address to contact you abo
 representeeConfirmPerson.title=Check the details we hold for the person
 representeeConfirmPerson.summaryline1=Name
 representeeConfirmPerson.summaryline2=Capital Gains Tax on UK property account number
-representeeConfirmPerson.formTitle=Is this the person you're completing this return for
+representeeConfirmPerson.formTitle=Is this the person you’re completing this return for
 confirmed.error.required=Select yes to confirm this is the person you are representing

@@ -41,18 +41,17 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
         representativeType: Either[PersonalRepresentative.type, Capacitor.type]
 )(implicit messages: Messages)
 @id = @{
-    val IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, None, false) = answers
+    val IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, None, false, false) = answers
     id match {
         case RepresenteeNino(NINO(value)) => value
         case RepresenteeSautr(SAUTR(value)) => value
         case RepresenteeCgtReference(CgtReference(value)) => value
         case NoReferenceId => ""
-        case _ => ""
     }
 }
 
 @name = @{
-    val IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, None, false) = answers
+    val IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, None, false, false) = answers
     name
 }
 

@@ -55,7 +55,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee 
 import returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
+import cats.syntax.eq._
+import cats.instances.string._
 import scala.concurrent.{ExecutionContext, Future}
 
 class RepresenteeController @Inject() (
@@ -200,12 +201,10 @@ class RepresenteeController @Inject() (
 
   def confirmPerson(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
-      val backLink = answers.fold(
-        _ => routes.RepresenteeController.enterId(),
-        _ => routes.RepresenteeController.checkYourAnswers()
-      )
+      val backLink = routes.RepresenteeController.enterId()
+
       answers match {
-        case incompleteAnswers @ IncompleteRepresenteeAnswers(Some(_), Some(_), _, None, false) =>
+        case incompleteAnswers @ IncompleteRepresenteeAnswers(Some(_), Some(_), _, None, false, false) =>
           Ok(confirmPersonPage(incompleteAnswers, representativeType, journey.isRight, confirmPersonForm, backLink))
 
         case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
@@ -216,10 +215,8 @@ class RepresenteeController @Inject() (
   def confirmPersonSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
-        val backLink = answers.fold(
-          _ => routes.RepresenteeController.enterId(),
-          _ => routes.RepresenteeController.checkYourAnswers()
-        )
+        val backLink = routes.RepresenteeController.enterId()
+
         def handleForm(incompleteRepresenteeAnswers: IncompleteRepresenteeAnswers): Future[Result] =
           confirmPersonForm
             .bindFromRequest()
@@ -237,7 +234,7 @@ class RepresenteeController @Inject() (
               isYes =>
                 if (isYes) {
                   updateDraftReturnAndSession(
-                    incompleteRepresenteeAnswers.copy(hasConfirmedContactDetails = true),
+                    incompleteRepresenteeAnswers.copy(hasConfirmedPerson = true),
                     journey
                   ).fold({ e =>
                     logger.warn("Could not update draft return", e)
@@ -245,7 +242,7 @@ class RepresenteeController @Inject() (
                   }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
                 } else {
                   updateDraftReturnAndSession(
-                    IncompleteRepresenteeAnswers(None, None, None, None, false),
+                    IncompleteRepresenteeAnswers.empty,
                     journey
                   ).fold({ e =>
                     logger.warn("Could not update draft return", e)
@@ -260,6 +257,7 @@ class RepresenteeController @Inject() (
                 _,
                 _,
                 None,
+                false,
                 false
               ) =>
             handleForm(incompleteRepresenteeAnswers)
@@ -272,7 +270,7 @@ class RepresenteeController @Inject() (
 
   private def doNamesMatch(name: IndividualName, comparedName: IndividualName): Boolean = {
     def format(word: String): String = s"${word.toLowerCase().filterNot(_.isWhitespace).trim}"
-    import cats.implicits._
+
     (format(name.firstName) === format(comparedName.firstName)) && (format(name.lastName) === format(
       comparedName.lastName
     ))
@@ -297,64 +295,66 @@ class RepresenteeController @Inject() (
             if (answers.fold(_.id, c => Some(c.id)).contains(id))
               Redirect(routes.RepresenteeController.checkYourAnswers())
             else {
-              val name: Option[IndividualName] = answers.fold(i => i.name, c => Some(c.name))
-              val response: EitherT[Future, Error, Option[Either[BusinessPartnerRecordResponse, SubscribedDetails]]] =
-                id match {
-                  case RepresenteeNino(ninoId) =>
-                    businessPartnerRecordService
-                      .getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(ninoId), name))
-                      .map(bpr => Some(Left(bpr)))
-                  case RepresenteeSautr(sautr) =>
-                    businessPartnerRecordService
-                      .getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(sautr), name))
-                      .map(bpr => Some(Left(bpr)))
-                  case RepresenteeCgtReference(cgtReference) => {
-                    subscriptionService.getSubscribedDetails(cgtReference).map(sd => Some(Right(sd)))
-                  }
-                  case NoReferenceId =>
-                    EitherT[Future, Error, Option[Either[BusinessPartnerRecordResponse, SubscribedDetails]]](
-                      Future.successful(Right(None))
-                    )
-                  case _ =>
-                    EitherT[Future, Error, Option[Either[BusinessPartnerRecordResponse, SubscribedDetails]]](
-                      Future.successful(Left(Error("error")))
-                    )
-                }
-
-              val nameCheck: EitherT[Future, Error, Unit] = response.subflatMap(value =>
-                value match {
-                  case Some(Left(BusinessPartnerRecordResponse(_, _))) =>
-                    Right()
-                  case Some(Right(SubscribedDetails(Right(i), _, _, _, _, _, _)))
-                      if name.fold(false)(doNamesMatch(_, i)) =>
-                    Right()
-                  case Some(Right(SubscribedDetails(Left(_), _, _, _, _, _, _))) =>
-                    Right()
-                  case None => Right()
-                  case _ => {
-                    Left(Error(s"Name check error"))
-                  }
-                }
-              )
-
-              val newAnswers = answers.fold(_.copy(id = Some(id)), _.copy(id = id))
-
-              val result = for {
-                _ <- nameCheck.leftMap { e =>
-                      logger.warn("Name check error", e)
-                      BadRequest("Name check error")
+              val maybeName: Option[IndividualName] = answers.fold(i => i.name, c => Some(c.name))
+              maybeName.fold(Future.successful(Redirect(routes.RepresenteeController.checkYourAnswers()))) {
+                name =>
+                  val response: EitherT[Future, Error, Unit] =
+                    id match {
+                      case RepresenteeNino(ninoId) =>
+                        businessPartnerRecordService
+                          .getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(ninoId), Some(name)))
+                          .subflatMap { response =>
+                            response match {
+                              case BusinessPartnerRecordResponse(None, _) => Left(Error(s"Name check error"))
+                              case _                                      => Right()
+                            }
+                          }
+                      case RepresenteeSautr(sautr) =>
+                        businessPartnerRecordService
+                          .getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(sautr), Some(name)))
+                          .subflatMap { response =>
+                            response match {
+                              case BusinessPartnerRecordResponse(None, _) => Left(Error(s"Name check error"))
+                              case _                                      => Right()
+                            }
+                          }
+                      case RepresenteeCgtReference(cgtReference) => {
+                        subscriptionService
+                          .getSubscribedDetails(cgtReference)
+                          .subflatMap(sd =>
+                            sd match {
+                              case SubscribedDetails(Right(i), _, _, _, _, _, _) if doNamesMatch(name, i) =>
+                                Right()
+                              case SubscribedDetails(_, _, _, _, _, _, _) => Left(Error(s"Name check error"))
+                            }
+                          )
+                      }
+                      case NoReferenceId =>
+                        EitherT[Future, Error, Unit](Future.successful(Right()))
                     }
-                _ <- updateDraftReturnAndSession(newAnswers, journey).leftMap { e =>
-                      logger.warn("Could not update draft return", e)
-                      errorHandler.errorResult()
-                    }
-              } yield ()
 
-              result.fold(e => e, _ => Redirect(routes.RepresenteeController.confirmPerson()))
+                  val result = for {
+                    _ <- response.leftMap { e =>
+                          logger.warn("Name check error", e)
+                          BadRequest("Name check error")
+                        }
+                    _ <- {
+                      val newAnswers = answers.fold(_.copy(id = Some(id), hasConfirmedPerson = false), _.copy(id = id))
+
+                      updateDraftReturnAndSession(newAnswers, journey).leftMap { e =>
+                        logger.warn("Could not update draft return", e)
+                        errorHandler.errorResult()
+                      }
+                    }
+                  } yield ()
+
+                  result.fold(e => e, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+
+              }
             }
         )
-
     }
+
   }
 
   def enterDateOfDeath(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -415,7 +415,7 @@ class RepresenteeController @Inject() (
       case c: CompleteRepresenteeAnswers =>
         EitherT.pure[Future, Error](c.contactDetails)
 
-      case IncompleteRepresenteeAnswers(_, _, _, Some(details), _) =>
+      case IncompleteRepresenteeAnswers(_, _, _, Some(details), _, _) =>
         EitherT.pure[Future, Error](details)
 
       case incompleteWithoutContactDetails: IncompleteRepresenteeAnswers =>
@@ -448,7 +448,7 @@ class RepresenteeController @Inject() (
   def checkContactDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
       answers match {
-        case i @ IncompleteRepresenteeAnswers(_, _, _, Some(_), false) =>
+        case i @ IncompleteRepresenteeAnswers(_, _, _, Some(_), _, false) =>
           updateDraftReturnAndSession(i.copy(hasConfirmedContactDetails = true), journey).fold({ e =>
             logger.warn("Could not update draft return or session", e)
             errorHandler.errorResult()
@@ -493,20 +493,23 @@ class RepresenteeController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
       answers match {
-        case IncompleteRepresenteeAnswers(None, _, _, _, _) =>
+        case IncompleteRepresenteeAnswers(None, _, _, _, _, _) =>
           Redirect(routes.RepresenteeController.enterName())
 
-        case IncompleteRepresenteeAnswers(_, _, None, _, _) if (representativeType.isLeft) =>
+        case IncompleteRepresenteeAnswers(_, _, None, _, _, _) if (representativeType.isLeft) =>
           Redirect(routes.RepresenteeController.enterDateOfDeath())
 
-        case IncompleteRepresenteeAnswers(_, None, _, _, _) =>
+        case IncompleteRepresenteeAnswers(_, None, _, _, _, _) =>
           Redirect(routes.RepresenteeController.enterId())
 
-        case IncompleteRepresenteeAnswers(_, _, _, contactDetails, hasConfirmedContactDetails)
+        case IncompleteRepresenteeAnswers(Some(_), Some(_), _, _, false, false) =>
+          Redirect(routes.RepresenteeController.confirmPerson())
+
+        case IncompleteRepresenteeAnswers(_, _, _, contactDetails, _, hasConfirmedContactDetails)
             if contactDetails.isEmpty || !hasConfirmedContactDetails =>
           Redirect(routes.RepresenteeController.checkContactDetails())
 
-        case IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, Some(contactDetails), true) =>
+        case IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, Some(contactDetails), true, true) =>
           val completeAnswers = CompleteRepresenteeAnswers(name, id, dateOfDeath, contactDetails)
 
           updateDraftReturnAndSession(completeAnswers, journey).fold(

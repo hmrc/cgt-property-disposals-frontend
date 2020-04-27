@@ -70,27 +70,32 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @formTitle = @{messages("representeeConfirmPerson.formTitle")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
     @backLinkComponent(backLink)
+
+    @if(hasErrors) {
+        @errorSummary(form)
+    }
     @caption(messages("representee.caption"))
 
     @pageHeading(title)
 
-    @summary_for_confirmation(answers, representativeType)
-
-    @returnToSummaryLink(displayReturnToSummaryLink)
     @formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = Html(s"<h2>$formTitle</h2>"),
             labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors,
+            hasErrors = form.value.isEmpty,
             selected = form.value,
             helpText = None
         )
 
         @submitButton(messages("button.saveAndContinue"))
     }
+
+    @summary_for_confirmation(answers, representativeType)
+
+    @returnToSummaryLink(displayReturnToSummaryLink)
 }
 

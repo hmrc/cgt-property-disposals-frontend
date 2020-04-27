@@ -17,11 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SapNumber
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
+
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -32,26 +29,17 @@ trait BusinessPartnerRecordServiceSupport {
   this: ControllerSpec with SessionSupport =>
 
   val mockBusinessPartnerRecordService = mock[BusinessPartnerRecordService]
-  def mockGetBusinessPartnerRecord(): Unit =
+  def mockGetBusinessPartnerRecord(
+    businessPartnerRecordRequest: BusinessPartnerRecordRequest,
+    expectedBusinessPartnerRecordResponse: BusinessPartnerRecordResponse
+  ): Unit =
     (mockBusinessPartnerRecordService
       .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
-      .expects(*, *)
+      .expects(businessPartnerRecordRequest, *)
       .returning(
         EitherT[Future, Error, BusinessPartnerRecordResponse](
           Future.successful(
-            Right(
-              BusinessPartnerRecordResponse(
-                Some(
-                  BusinessPartnerRecord(
-                    None,
-                    UkAddress("Some St.", None, None, None, Postcode("EC1 AB2")),
-                    SapNumber("123"),
-                    Right(IndividualName("First", "Last"))
-                  )
-                ),
-                None
-              )
-            )
+            Right(expectedBusinessPartnerRecordResponse)
           )
         )
       )
