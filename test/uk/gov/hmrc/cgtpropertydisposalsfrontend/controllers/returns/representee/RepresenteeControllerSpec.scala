@@ -1663,6 +1663,10 @@ class RepresenteeControllerSpec
       }
     }
 
+    "handling requests to display the cya page" must {}
+
+    "handling submits on the cya page" must {}
+
   }
 
   def testFormError(

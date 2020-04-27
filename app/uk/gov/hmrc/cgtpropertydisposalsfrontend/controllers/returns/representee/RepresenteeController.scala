@@ -370,7 +370,14 @@ class RepresenteeController @Inject() (
 
         case IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, Some(contactDetails), true) =>
           val completeAnswers = CompleteRepresenteeAnswers(name, id, dateOfDeath, contactDetails)
-          Ok(cyaPage(completeAnswers, representativeType, journey.isRight))
+
+          updateDraftReturnAndSession(completeAnswers, journey).fold(
+            { e =>
+              logger.warn("Could not update draft return or session", e)
+              errorHandler.errorResult()
+            },
+            _ => Ok(cyaPage(completeAnswers, representativeType, journey.isRight))
+          )
 
         case c: CompleteRepresenteeAnswers =>
           Ok(cyaPage(c, representativeType, journey.isRight))
