@@ -28,6 +28,7 @@ import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
@@ -310,22 +311,50 @@ class CommonTriageQuestionsController @Inject() (
       }
   }
 
-  private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Option[Call] =
+  private def isIndividualASelfUserType(
+    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
+  ): Boolean =
+    triageAnswers
+      .fold(
+        m =>
+          m.fold(
+            _.individualUserType,
+            c => c.individualUserType
+          ),
+        s =>
+          s.fold(
+            _.individualUserType,
+            c => c.individualUserType
+          )
+      )
+      .contains(IndividualUserType.Self)
+
+  private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Option[Call] = {
+    val triageAnswers  = triageAnswersFomState(state)
+    val isSelfUserType = isIndividualASelfUserType(triageAnswers)
+
     if (!isIndividual(state))
       None
     else
       Some(
-        triageAnswersFomState(state).fold(
+        triageAnswers.fold(
           _.fold(
-            _ => routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
+            _ =>
+              if (isSelfUserType)
+                routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+              else representee.routes.RepresenteeController.checkYourAnswers(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           ),
           _.fold(
-            _ => routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
+            _ =>
+              if (isSelfUserType)
+                routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+              else representee.routes.RepresenteeController.checkYourAnswers(),
             _ => routes.SingleDisposalsTriageController.checkYourAnswers()
           )
         )
       )
+  }
 
   private def updateNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn],

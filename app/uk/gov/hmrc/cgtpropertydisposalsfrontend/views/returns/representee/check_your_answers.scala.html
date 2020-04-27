@@ -15,7 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
-
+@import play.api.mvc.Call
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
@@ -29,20 +29,23 @@
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary
-
+        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
 @(
         answers: CompleteRepresenteeAnswers,
         representativeType: Either[PersonalRepresentative.type, Capacitor.type],
-        displayReturnToSummaryLink: Boolean
+        displayReturnToSummaryLink: Boolean,
+        backLink: Call
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("representee.cya.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
+
+    @backLinkComponent(backLink)
 
     @caption(messages("representee.caption"))
 

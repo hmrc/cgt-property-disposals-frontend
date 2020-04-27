@@ -25,10 +25,10 @@ import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.{Form, FormError}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
@@ -376,16 +376,18 @@ class RepresenteeController @Inject() (
               logger.warn("Could not update draft return or session", e)
               errorHandler.errorResult()
             },
-            _ => Ok(cyaPage(completeAnswers, representativeType, journey.isRight))
+            _ => Ok(cyaPage(completeAnswers, representativeType, journey.isRight, backLink))
           )
 
         case c: CompleteRepresenteeAnswers =>
-          Ok(cyaPage(c, representativeType, journey.isRight))
+          Ok(cyaPage(c, representativeType, journey.isRight, backLink))
 
       }
 
     }
   }
+
+  private def backLink(): Call = returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) {

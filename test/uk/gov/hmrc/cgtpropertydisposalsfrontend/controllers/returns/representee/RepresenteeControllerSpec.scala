@@ -29,6 +29,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
@@ -1562,110 +1563,138 @@ class RepresenteeControllerSpec
 
       }
 
-      "handling requests to display the check you answers page" must {
-
-        def performAction(): Future[Result] =
-          controller.checkYourAnswers()(FakeRequest())
-
-        behave like redirectToStartBehaviour(performAction)
-
-        behave like nonCapacitorOrPersonalRepBehaviour(performAction)
-
-        val completeAnswers = sample[CompleteRepresenteeAnswers]
-
-        val allQuestionsAnswers = IncompleteRepresenteeAnswers(
-          Some(completeAnswers.name),
-          Some(completeAnswers.id),
-          completeAnswers.dateOfDeath,
-          Some(sample[RepresenteeContactDetails]),
-          true
-        )
-
-        "redirect to the enter name page" when {
-
-          "that question hasn't been answered yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(allQuestionsAnswers.copy(name = None), Left(PersonalRepresentative))._1
-              )
-            }
-
-            checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
-          }
-        }
-
-        "redirect to the enter id page" when {
-
-          "that question hasn't been answered yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(allQuestionsAnswers.copy(id = None), Right(Capacitor))._1
-              )
-            }
-
-            checkIsRedirect(performAction(), routes.RepresenteeController.enterId())
-          }
-        }
-
-        "redirect to the enter date of death page" when {
-
-          "that question hasn't been answered yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(allQuestionsAnswers.copy(dateOfDeath = None), Left(PersonalRepresentative))._1
-              )
-            }
-
-            checkIsRedirect(performAction(), routes.RepresenteeController.enterDateOfDeath())
-          }
-        }
-
-        "redirect to the check contact details page" when {
-
-          "there are no contact details in session" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(
-                  allQuestionsAnswers.copy(contactDetails = None),
-                  Left(PersonalRepresentative)
-                )._1
-              )
-            }
-
-            checkIsRedirect(
-              performAction(),
-              routes.RepresenteeController.checkContactDetails()
-            )
-          }
-
-          "the user has not confirmed the contact details" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(
-                  allQuestionsAnswers.copy(hasConfirmedContactDetails = false),
-                  Right(Capacitor)
-                )._1
-              )
-            }
-
-            checkIsRedirect(
-              performAction(),
-              routes.RepresenteeController.checkContactDetails()
-            )
-          }
-
-        }
-      }
     }
 
-    "handling requests to display the cya page" must {}
+    "handling requests to display the check you answers page" must {
 
-    "handling submits on the cya page" must {}
+      def performAction(): Future[Result] =
+        controller.checkYourAnswers()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+
+      val completeAnswers = sample[CompleteRepresenteeAnswers]
+
+      val allQuestionsAnswers = IncompleteRepresenteeAnswers(
+        Some(completeAnswers.name),
+        Some(completeAnswers.id),
+        completeAnswers.dateOfDeath,
+        Some(sample[RepresenteeContactDetails]),
+        true
+      )
+
+      "redirect to the enter name page" when {
+
+        "that question hasn't been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(allQuestionsAnswers.copy(name = None), Left(PersonalRepresentative))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
+        }
+      }
+
+      "redirect to the enter id page" when {
+
+        "that question hasn't been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(allQuestionsAnswers.copy(id = None), Right(Capacitor))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.enterId())
+        }
+      }
+
+      "redirect to the enter date of death page" when {
+
+        "that question hasn't been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(allQuestionsAnswers.copy(dateOfDeath = None), Left(PersonalRepresentative))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.enterDateOfDeath())
+        }
+      }
+
+      "redirect to the check contact details page" when {
+
+        "there are no contact details in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(
+                allQuestionsAnswers.copy(contactDetails = None),
+                Left(PersonalRepresentative)
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.RepresenteeController.checkContactDetails()
+          )
+        }
+
+        "the user has not confirmed the contact details" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(
+                allQuestionsAnswers.copy(hasConfirmedContactDetails = false),
+                Right(Capacitor)
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.RepresenteeController.checkContactDetails()
+          )
+        }
+
+      }
+
+    }
+
+    "handling submits on the cya page" must {
+
+      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      val completeAnswers = sample[CompleteRepresenteeAnswers]
+
+      val allQuestionsAnswers = CompleteRepresenteeAnswers(
+        completeAnswers.name,
+        completeAnswers.id,
+        completeAnswers.dateOfDeath,
+        sample[RepresenteeContactDetails]
+      )
+
+      "redirect to the how many properties page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithFillingOutReturn(allQuestionsAnswers, Right(Capacitor))._1
+          )
+        }
+
+        checkIsRedirect(
+          performAction(),
+          returns.triage.routes.CommonTriageQuestionsController.howManyProperties()
+        )
+      }
+    }
 
   }
 
