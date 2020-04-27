@@ -31,12 +31,13 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.ManagingSubscription.ChangingAccountEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -45,15 +46,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 class SubscribedChangeEmailControllerSpec
-    extends EmailControllerSpec[Subscribed, Subscribed]
+    extends EmailControllerSpec[ChangingAccountEmail]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val isAmendJourney: Boolean = true
+  override def toJourneyStatus(journeyType: ChangingAccountEmail): JourneyStatus = journeyType.journey
 
-  override val validJourneyStatus: Subscribed = sample[Subscribed]
+  override val validJourneyStatus: ChangingAccountEmail = ChangingAccountEmail(sample[Subscribed])
 
-  override val validVerificationCompleteJourneyStatus: Subscribed = validJourneyStatus
+  override val validVerificationCompleteJourneyStatus: ChangingAccountEmail = validJourneyStatus
 
   override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
 
@@ -72,13 +73,20 @@ class SubscribedChangeEmailControllerSpec
       .expects(subscribedUpdateDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
-  override def updateEmail(journey: Subscribed, email: Email): Subscribed =
-    journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
+  override def updateEmail(changingAccountEmail: ChangingAccountEmail, email: Email): ChangingAccountEmail = {
+    val journey = changingAccountEmail.journey
+    ChangingAccountEmail(
+      journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
+    )
+  }
 
-  override val mockUpdateEmail: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
-    case (oldDetails: Subscribed, newDetails: Subscribed, r: Either[Error, Unit]) =>
-      mockSubscriptionUpdate(SubscribedUpdateDetails(newDetails.subscribedDetails, oldDetails.subscribedDetails))(r)
-  })
+  override val mockUpdateEmail: Option[(ChangingAccountEmail, ChangingAccountEmail, Either[Error, Unit]) => Unit] =
+    Some({
+      case (oldDetails: ChangingAccountEmail, newDetails: ChangingAccountEmail, r: Either[Error, Unit]) =>
+        mockSubscriptionUpdate(
+          SubscribedUpdateDetails(newDetails.journey.subscribedDetails, oldDetails.journey.subscribedDetails)
+        )(r)
+    })
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -111,7 +119,7 @@ class SubscribedChangeEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        validJourneyStatus.subscribedDetails.contactName,
+        validJourneyStatus.journey.subscribedDetails.contactName,
         controllers.accounts.routes.SubscribedChangeEmailController.verifyEmail,
         controllers.accounts.routes.SubscribedChangeEmailController.checkYourInbox()
       )

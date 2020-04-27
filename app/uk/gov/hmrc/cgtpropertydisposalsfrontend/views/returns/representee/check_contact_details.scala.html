@@ -68,7 +68,7 @@
         @cyaRow(
             messages(s"$key.cyaLabel.email"),
             Html(contactDetails.emailAddress.value),
-            Some(cyaChange(messages(s"$key.cyaChange.email"), "#")),
+            Some(cyaChange(messages(s"$key.cyaChange.email"), routes.ChangeRepresenteeEmailController.enterEmail().url)),
             "emailAddress"
         )
     }

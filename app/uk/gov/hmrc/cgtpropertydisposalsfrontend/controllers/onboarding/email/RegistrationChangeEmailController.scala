@@ -23,12 +23,13 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.ChangingRegistrationEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{RegistrationChangeEmailAddressVerifiedEvent, RegistrationChangeEmailAttemptedEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -58,30 +59,27 @@ class RegistrationChangeEmailController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with EmailController[RegistrationReady, RegistrationReady] {
-
-  override val isAmendJourney: Boolean      = false
-  override val isSubscribedJourney: Boolean = false
+    with EmailController[ChangingRegistrationEmail] {
 
   override def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, RegistrationReady)] =
+  ): Either[Result, (SessionData, ChangingRegistrationEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
+      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> ChangingRegistrationEmail(r))
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, RegistrationReady)] =
-    validJourney(request)
+  ): Either[Result, (SessionData, ChangingRegistrationEmail)] = validJourney(request)
 
-  override def updateEmail(journey: RegistrationReady, email: Email)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, RegistrationReady] =
+  override def updateEmail(changingRegistrationEmail: ChangingRegistrationEmail, email: Email)(
+    implicit hc: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, JourneyStatus] =
     EitherT.rightT[Future, Error](
-      journey.copy(
-        registrationDetails = journey.registrationDetails.copy(
+      changingRegistrationEmail.journey.copy(
+        registrationDetails = changingRegistrationEmail.journey.registrationDetails.copy(
           emailAddress = email,
           emailSource  = EmailSource.ManuallyEntered
         )
@@ -89,33 +87,33 @@ class RegistrationChangeEmailController @Inject() (
     )
 
   override def auditEmailVerifiedEvent(
-    journey: RegistrationReady,
+    changingRegistrationEmail: ChangingRegistrationEmail,
     email: Email
   )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
     auditService.sendEvent(
       "registrationChangeEmailAddressVerified",
       RegistrationChangeEmailAddressVerifiedEvent(
-        journey.registrationDetails.emailAddress.value,
+        changingRegistrationEmail.journey.registrationDetails.emailAddress.value,
         email.value
       ),
       "registration-change-email-address-verified"
     )
 
   override def auditEmailChangeAttempt(
-    journey: RegistrationReady,
+    changingRegistrationEmail: ChangingRegistrationEmail,
     email: Email
   )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
     auditService.sendEvent(
       "registrationChangeEmailAddressAttempted",
       RegistrationChangeEmailAttemptedEvent(
-        journey.registrationDetails.emailAddress.value,
+        changingRegistrationEmail.journey.registrationDetails.emailAddress.value,
         email.value
       ),
       "registration-change-email-address-attempted"
     )
 
-  override def name(journeyStatus: RegistrationReady): ContactName =
-    ContactName(journeyStatus.registrationDetails.name.makeSingleName())
+  override def name(changingRegistrationEmail: ChangingRegistrationEmail): ContactName =
+    ContactName(changingRegistrationEmail.journey.registrationDetails.name.makeSingleName())
 
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()
