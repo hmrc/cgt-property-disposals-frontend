@@ -964,7 +964,8 @@ class RepresenteeControllerSpec
 
       def test(
         sessionData: SessionData,
-        expectedBackLink: Call
+        expectedBackLink: Call,
+        expectedName: IndividualName
       ): Unit = {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -981,7 +982,7 @@ class RepresenteeControllerSpec
               .text shouldBe (messageFromMessageKey("representeeConfirmPerson.summaryline1"))
             doc
               .select("#name-answer")
-              .text shouldBe "First Last"
+              .text shouldBe s"${expectedName.firstName} ${expectedName.lastName}"
             doc
               .select("#account-question")
               .text shouldBe messageFromMessageKey("representeeConfirmPerson.summaryline2")
@@ -998,9 +999,10 @@ class RepresenteeControllerSpec
       "display the page" when {
 
         "the user has name and id " when {
+          val name = IndividualName("First", "Last")
           val requiredPreviousAnswers =
             IncompleteRepresenteeAnswers(
-              Some(IndividualName("First", "Last")),
+              Some(name),
               Some(RepresenteeNino(NINO("AB123456C"))),
               Some(sample[DateOfDeath]),
               None,
@@ -1013,7 +1015,8 @@ class RepresenteeControllerSpec
                 requiredPreviousAnswers,
                 Left(PersonalRepresentative)
               )._1,
-              routes.RepresenteeController.enterId()
+              routes.RepresenteeController.enterId(),
+              name
             )
           }
         }
@@ -1161,7 +1164,34 @@ class RepresenteeControllerSpec
         }
 
         "cgt reference is selected and a value is submitted" which {
+          "does not belong to the name entered" in {
+            val name        = IndividualName("First", "Last")
+            val anotherName = IndividualName("Another", "Name")
+            val answers     = IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
+            val cgtRef      = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
+            val (session, journey, draftReturn) =
+              sessionWithFillingOutReturn(answers, Right(Capacitor))
+            val newDraftReturn = draftReturn.copy(
+              representeeAnswers = Some(answers.copy(id = Some(cgtRef)))
+            )
+            val newJourney = journey.copy(draftReturn = newDraftReturn)
+            val expectedSubscribedDetails = SubscribedDetails(
+              Right(anotherName),
+              Email("email"),
+              UkAddress("Some St.", None, None, None, Postcode("EC1 AB2")),
+              ContactName(""),
+              CgtReference("cgtReference"),
+              None,
+              false
+            )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGetSubscriptionDetails(cgtRef.value, Right(expectedSubscribedDetails))
+            }
+            checkIsSimpleBadRequest(performAction(formData(cgtRef)), "Name check error")
+          }
           "is empty" in {
             test(Seq(outerKey -> "0"), "representeeCgtRef.error.required")
           }
@@ -1191,6 +1221,31 @@ class RepresenteeControllerSpec
         }
 
         "nino is selected and a value is submitted" which {
+          "does not belong to the name entered" in {
+            val individualName = IndividualName("First", "Last")
+            val answers = IncompleteRepresenteeAnswers.empty.copy(
+              name = Some(individualName),
+              id   = Some(sample[RepresenteeCgtReference])
+            )
+            val ninoValue = NINO("AB123456C")
+            val nino      = RepresenteeNino(ninoValue)
+
+            val (session, journey, draftReturn) =
+              sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
+
+            val businessPartnerRecordRequest =
+              IndividualBusinessPartnerRecordRequest(Right(ninoValue), Some(individualName))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGetBusinessPartnerRecord(
+                businessPartnerRecordRequest,
+                Right(BusinessPartnerRecordResponse(None, None))
+              )
+            }
+            checkIsSimpleBadRequest(performAction(formData(nino)), "Name check error")
+          }
 
           "is empty" in {
             test(Seq(outerKey -> "1"), "representeeNino.error.required")
@@ -1258,11 +1313,21 @@ class RepresenteeControllerSpec
           false
         )
 
+        "there is an error getting the subscription details" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetSubscriptionDetails(cgtRef.value, Left(Error("Some error")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(cgtRef)))
+        }
+
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockGetSubscriptionDetails(cgtRef.value, expectedSubscribedDetails)
+            mockGetSubscriptionDetails(cgtRef.value, Right(expectedSubscribedDetails))
             mockStoreDraftReturn(
               newDraftReturn,
               newJourney.subscribedDetails.cgtReference,
@@ -1277,7 +1342,7 @@ class RepresenteeControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockGetSubscriptionDetails(cgtRef.value, expectedSubscribedDetails)
+            mockGetSubscriptionDetails(cgtRef.value, Right(expectedSubscribedDetails))
             mockStoreDraftReturn(
               newDraftReturn,
               newJourney.subscribedDetails.cgtReference,
@@ -1287,6 +1352,32 @@ class RepresenteeControllerSpec
           }
 
           checkIsTechnicalErrorPage(performAction(formData(cgtRef)))
+        }
+
+        "there is an error getting the business partner response" in {
+          val individualName = IndividualName("First", "Last")
+          val answers = IncompleteRepresenteeAnswers.empty.copy(
+            name = Some(individualName),
+            id   = Some(sample[RepresenteeCgtReference])
+          )
+          val ninoValue = NINO("AB123456C")
+          val nino      = RepresenteeNino(ninoValue)
+
+          val (session, journey, draftReturn) =
+            sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
+          val newDraftReturn = draftReturn.copy(
+            representeeAnswers = Some(answers.copy(id = Some(nino)))
+          )
+          val newJourney = journey.copy(draftReturn = newDraftReturn)
+          val businessPartnerRecordRequest =
+            IndividualBusinessPartnerRecordRequest(Right(ninoValue), Some(individualName))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetBusinessPartnerRecord(businessPartnerRecordRequest, Left(Error("Some error")))
+          }
+          checkIsTechnicalErrorPage(performAction(formData(nino)))
         }
 
       }
@@ -1317,7 +1408,7 @@ class RepresenteeControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockGetSubscriptionDetails(cgtRef.value, expectedSubscribedDetails)
+              mockGetSubscriptionDetails(cgtRef.value, Right(expectedSubscribedDetails))
               mockStoreDraftReturn(
                 newDraftReturn,
                 newJourney.subscribedDetails.cgtReference,
@@ -1361,7 +1452,7 @@ class RepresenteeControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockGetBusinessPartnerRecord(businessPartnerRecordRequest, expectedBusinessPartnerRecordResponse)
+              mockGetBusinessPartnerRecord(businessPartnerRecordRequest, Right(expectedBusinessPartnerRecordResponse))
               mockStoreDraftReturn(
                 newDraftReturn,
                 newJourney.subscribedDetails.cgtReference,
@@ -1400,7 +1491,7 @@ class RepresenteeControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockGetBusinessPartnerRecord(businessPartnerRecordRequest, expectedBusinessPartnerRecordResponse)
+              mockGetBusinessPartnerRecord(businessPartnerRecordRequest, Right(expectedBusinessPartnerRecordResponse))
               mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
             }
 
@@ -2050,6 +2141,7 @@ class RepresenteeControllerSpec
         )
       }
     }
+
     "handling requests for check your answers page" must {
       "redirect the page to confirm-person" when {
         def performAction(): Future[Result] =

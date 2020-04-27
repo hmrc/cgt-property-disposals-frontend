@@ -31,7 +31,7 @@ trait BusinessPartnerRecordServiceSupport {
   val mockBusinessPartnerRecordService = mock[BusinessPartnerRecordService]
   def mockGetBusinessPartnerRecord(
     businessPartnerRecordRequest: BusinessPartnerRecordRequest,
-    expectedBusinessPartnerRecordResponse: BusinessPartnerRecordResponse
+    expectedBusinessPartnerRecordResponse: Either[Error, BusinessPartnerRecordResponse]
   ): Unit =
     (mockBusinessPartnerRecordService
       .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
@@ -39,7 +39,7 @@ trait BusinessPartnerRecordServiceSupport {
       .returning(
         EitherT[Future, Error, BusinessPartnerRecordResponse](
           Future.successful(
-            Right(expectedBusinessPartnerRecordResponse)
+            expectedBusinessPartnerRecordResponse
           )
         )
       )

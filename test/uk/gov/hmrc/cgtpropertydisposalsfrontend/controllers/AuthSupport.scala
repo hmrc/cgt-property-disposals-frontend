@@ -38,14 +38,17 @@ trait AuthSupport {
 
   val mockAuthConnector: AuthConnector             = mock[AuthConnector]
   val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
-  def mockGetSubscriptionDetails(cgtReference: CgtReference, expectedSubscribedDetails: SubscribedDetails): Unit =
+  def mockGetSubscriptionDetails(
+    cgtReference: CgtReference,
+    expectedSubscribedDetails: Either[Error, SubscribedDetails]
+  ): Unit =
     (mockSubscriptionService
       .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(
         EitherT[Future, Error, SubscribedDetails](
           Future.successful(
-            Right(expectedSubscribedDetails)
+            expectedSubscribedDetails
           )
         )
       )

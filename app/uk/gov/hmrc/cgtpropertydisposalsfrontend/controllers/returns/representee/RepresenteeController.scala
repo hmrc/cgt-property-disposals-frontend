@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
@@ -217,6 +217,15 @@ class RepresenteeController @Inject() (
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         val backLink = routes.RepresenteeController.enterId()
 
+        def updateSessionAndCYA(updatedAnswers: IncompleteRepresenteeAnswers): Future[Result] =
+          updateDraftReturnAndSession(
+            updatedAnswers,
+            journey
+          ).fold({ e =>
+            logger.warn("Could not update draft return", e)
+            errorHandler.errorResult()
+          }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+
         def handleForm(incompleteRepresenteeAnswers: IncompleteRepresenteeAnswers): Future[Result] =
           confirmPersonForm
             .bindFromRequest()
@@ -232,23 +241,10 @@ class RepresenteeController @Inject() (
                   )
                 ),
               isYes =>
-                if (isYes) {
-                  updateDraftReturnAndSession(
-                    incompleteRepresenteeAnswers.copy(hasConfirmedPerson = true),
-                    journey
-                  ).fold({ e =>
-                    logger.warn("Could not update draft return", e)
-                    errorHandler.errorResult()
-                  }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
-                } else {
-                  updateDraftReturnAndSession(
-                    IncompleteRepresenteeAnswers.empty,
-                    journey
-                  ).fold({ e =>
-                    logger.warn("Could not update draft return", e)
-                    errorHandler.errorResult()
-                  }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
-                }
+                if (isYes)
+                  updateSessionAndCYA(incompleteRepresenteeAnswers.copy(hasConfirmedPerson = true))
+                else
+                  updateSessionAndCYA(IncompleteRepresenteeAnswers.empty)
             )
 
         answers match {
@@ -303,9 +299,10 @@ class RepresenteeController @Inject() (
                       case RepresenteeNino(ninoId) =>
                         businessPartnerRecordService
                           .getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(ninoId), Some(name)))
+                          .leftMap(_ => Error(ConnectorException))
                           .subflatMap { response =>
                             response match {
-                              case BusinessPartnerRecordResponse(None, _) => Left(Error(s"Name check error"))
+                              case BusinessPartnerRecordResponse(None, _) => Left(Error(NameCheckException))
                               case _                                      => Right()
                             }
                           }
@@ -314,7 +311,7 @@ class RepresenteeController @Inject() (
                           .getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(sautr), Some(name)))
                           .subflatMap { response =>
                             response match {
-                              case BusinessPartnerRecordResponse(None, _) => Left(Error(s"Name check error"))
+                              case BusinessPartnerRecordResponse(None, _) => Left(Error(NameCheckException))
                               case _                                      => Right()
                             }
                           }
@@ -325,7 +322,7 @@ class RepresenteeController @Inject() (
                             sd match {
                               case SubscribedDetails(Right(i), _, _, _, _, _, _) if doNamesMatch(name, i) =>
                                 Right()
-                              case SubscribedDetails(_, _, _, _, _, _, _) => Left(Error(s"Name check error"))
+                              case SubscribedDetails(_, _, _, _, _, _, _) => Left(Error(NameCheckException))
                             }
                           )
                       }
@@ -333,20 +330,35 @@ class RepresenteeController @Inject() (
                         EitherT[Future, Error, Unit](Future.successful(Right()))
                     }
 
-                  val result = for {
-                    _ <- response.leftMap { e =>
-                          logger.warn("Name check error", e)
-                          BadRequest("Name check error")
-                        }
-                    _ <- {
-                      val newAnswers = answers.fold(_.copy(id = Some(id), hasConfirmedPerson = false), _.copy(id = id))
+                  val result =
+                    for {
+                      _ <- response.leftMap { e =>
+                            e match {
+                              case Error(Right(NameCheckException)) => {
+                                logger.warn("Name check error", e)
+                                BadRequest("Name check error")
+                              }
+                              case Error(Right(ConnectorException)) => {
+                                logger.warn("Could not connect to downstream", e)
+                                errorHandler.errorResult()
+                              }
+                              case _ => {
+                                logger.warn("server error", e)
+                                errorHandler.errorResult()
+                              }
+                            }
 
-                      updateDraftReturnAndSession(newAnswers, journey).leftMap { e =>
-                        logger.warn("Could not update draft return", e)
-                        errorHandler.errorResult()
+                          }
+                      _ <- {
+                        val newAnswers =
+                          answers.fold(_.copy(id = Some(id), hasConfirmedPerson = false), _.copy(id = id))
+
+                        updateDraftReturnAndSession(newAnswers, journey).leftMap { e =>
+                          logger.warn("Could not update draft return", e)
+                          errorHandler.errorResult()
+                        }
                       }
-                    }
-                  } yield ()
+                    } yield ()
 
                   result.fold(e => e, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
 
@@ -553,6 +565,8 @@ class RepresenteeController @Inject() (
 }
 
 object RepresenteeController {
+  case object NameCheckException extends Exception
+  case object ConnectorException extends Exception
 
   val nameForm: Form[IndividualName] = IndividualName.form("representeeFirstName", "representeeLastName")
 
