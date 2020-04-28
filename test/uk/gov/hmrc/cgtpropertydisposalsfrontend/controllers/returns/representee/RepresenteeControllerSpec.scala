@@ -1908,6 +1908,35 @@ class RepresenteeControllerSpec
         )
 
       "redirect to the enter name page" when {
+        "redirect the page to confirm-person" when {
+          def performAction(): Future[Result] =
+            controller.checkYourAnswers()(FakeRequest())
+          "the user has not yet confirmed the person " when {
+            val requiredPreviousAnswers =
+              IncompleteRepresenteeAnswers(
+                Some(IndividualName("First", "Last")),
+                Some(sample[RepresenteeNino]),
+                Some(sample[DateOfDeath]),
+                None,
+                false,
+                false
+              )
+            "redirect to confirm person page" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithStartingNewDraftReturn(
+                    requiredPreviousAnswers,
+                    Left(PersonalRepresentative)
+                  )._1
+                )
+              }
+              checkIsRedirect(performAction(), routes.RepresenteeController.confirmPerson())
+            }
+          }
+        }
+
+        "redirect to the enter name page" when {
 
         "that question hasn't been answered yet" in {
           inSequence {

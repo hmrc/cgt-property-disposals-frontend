@@ -82,8 +82,6 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
 
     @summary_for_confirmation(answers, representativeType)
 
-    @returnToSummaryLink(displayReturnToSummaryLink)
-
     @formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
@@ -97,6 +95,8 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
 
         @submitButton(messages("button.saveAndContinue"))
     }
+
+    @returnToSummaryLink(displayReturnToSummaryLink)
 
 }
 
