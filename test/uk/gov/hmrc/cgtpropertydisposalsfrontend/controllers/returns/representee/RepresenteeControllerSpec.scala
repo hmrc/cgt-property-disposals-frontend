@@ -1666,9 +1666,12 @@ class RepresenteeControllerSpec
 
       "show the page" when {
 
-        "the user has just answered all the questions and all updates are successful" ignore {
+        "the user has just answered all the questions and all updates are successful" in {
+          val updatedAllQuestionsAnswers = allQuestionsAnswers.copy(
+            contactDetails = Some(completeAnswers.contactDetails)
+          )
           val (session, journey, draftReturn) =
-            sessionWithFillingOutReturn(allQuestionsAnswers, Left(PersonalRepresentative))
+            sessionWithFillingOutReturn(updatedAllQuestionsAnswers, Left(PersonalRepresentative))
           val newDraftReturn = draftReturn.copy(representeeAnswers = Some(completeAnswers))
           val updatedJourney = journey.copy(draftReturn            = newDraftReturn)
 
@@ -1728,9 +1731,11 @@ class RepresenteeControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-
+          val updatedAllQuestionsAnswers = allQuestionsAnswers.copy(
+            contactDetails = Some(completeAnswers.contactDetails)
+          )
           val (session, journey, draftReturn) =
-            sessionWithFillingOutReturn(allQuestionsAnswers, Left(PersonalRepresentative))
+            sessionWithFillingOutReturn(updatedAllQuestionsAnswers, Left(PersonalRepresentative))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1747,10 +1752,12 @@ class RepresenteeControllerSpec
           checkIsTechnicalErrorPage(performAction())
         }
 
-        "there is an error updating the session" ignore {
-
+        "there is an error updating the session" in {
+          val updatedAllQuestionsAnswers = allQuestionsAnswers.copy(
+            contactDetails = Some(completeAnswers.contactDetails)
+          )
           val (session, journey, draftReturn) =
-            sessionWithFillingOutReturn(allQuestionsAnswers, Left(PersonalRepresentative))
+            sessionWithFillingOutReturn(updatedAllQuestionsAnswers, Left(PersonalRepresentative))
 
           inSequence {
             mockAuthWithNoRetrievals()
