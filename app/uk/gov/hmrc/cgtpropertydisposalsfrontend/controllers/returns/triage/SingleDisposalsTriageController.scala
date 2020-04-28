@@ -624,6 +624,13 @@ class SingleDisposalsTriageController @Inject() (
       lazy val displayReturnToSummaryLink = state.fold(_ => false, _ => true)
       val isIndividual                    = state.fold(_.subscribedDetails, _._2.subscribedDetails).userType().isRight
 
+      val representeeAnswers = state
+        .fold(
+          _.representeeAnswers,
+          _._1.representeeAnswers
+        )
+      val representeeAnswersIncomplete = !representeeAnswers.map(_.fold(_ => false, _ => true)).getOrElse(false)
+
       triageAnswers match {
         case c: CompleteSingleDisposalTriageAnswers =>
           val isATrust = state
@@ -637,7 +644,8 @@ class SingleDisposalsTriageController @Inject() (
         case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
-        case IncompleteSingleDisposalTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _) =>
+        case IncompleteSingleDisposalTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _)
+            if representeeAnswersIncomplete =>
           Redirect(
             representee.routes.RepresenteeController
               .enterName()
@@ -653,7 +661,7 @@ class SingleDisposalsTriageController @Inject() (
             _,
             _,
             _
-            ) =>
+            ) if representeeAnswersIncomplete =>
           Redirect(
             representee.routes.RepresenteeController
               .enterName()

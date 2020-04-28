@@ -25,11 +25,12 @@ import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.{Form, FormError}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
@@ -44,6 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
+import returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -369,15 +371,45 @@ class RepresenteeController @Inject() (
 
         case IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, Some(contactDetails), true) =>
           val completeAnswers = CompleteRepresenteeAnswers(name, id, dateOfDeath, contactDetails)
-          Ok(cyaPage(completeAnswers, representativeType, journey.isRight))
 
-        case c: CompleteRepresenteeAnswers =>
-          Ok(cyaPage(c, representativeType, journey.isRight))
+          updateDraftReturnAndSession(completeAnswers, journey).fold(
+            { e =>
+              logger.warn("Could not update draft return or session", e)
+              errorHandler.errorResult()
+            },
+            _ =>
+              Ok(
+                cyaPage(
+                  completeAnswers,
+                  representativeType,
+                  journey.isRight,
+                  triageRoutes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+                )
+              )
+          )
+
+        case completeAnswers: CompleteRepresenteeAnswers =>
+          Ok(
+            cyaPage(
+              completeAnswers,
+              representativeType,
+              journey.isRight,
+              triageRoutes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+            )
+          )
 
       }
 
     }
   }
+
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) {
+      case _ =>
+        Redirect(triage.routes.CommonTriageQuestionsController.howManyProperties())
+    }
+  }
+
 }
 
 object RepresenteeController {

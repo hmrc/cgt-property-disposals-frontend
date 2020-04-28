@@ -409,6 +409,7 @@ class ReliefDetailsControllerSpec
             }
           }
         }
+
       }
 
       "show an error page" when {
@@ -578,6 +579,7 @@ class ReliefDetailsControllerSpec
           }
         }
       }
+
     }
 
     "handling requests to display the lettings relief page" must {
@@ -1634,6 +1636,7 @@ class ReliefDetailsControllerSpec
             )
           }
         }
+
         "the user has set residential relief to no" in {
           val completeAnswersWithoutResidentialRelief = CompleteReliefDetailsAnswers(
             AmountInPence(0),
@@ -1660,6 +1663,7 @@ class ReliefDetailsControllerSpec
             }
           )
         }
+
       }
 
     }
@@ -1684,6 +1688,7 @@ class ReliefDetailsControllerSpec
       }
 
     }
+
   }
 
   def noPrivateResidentsReliefBehaviour(performAction: () => Future[Result]): Unit =

@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import scala.concurrent.Future
 
@@ -687,12 +688,16 @@ class CommonTriageQuestionsControllerSpec
           )
         }
 
-        "the user is on the single disposal journey and has already answered the question" in {
+        "the user is on the single disposal journey, selected 'self' individual user type and" +
+          "has already answered the question" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithFillingOutReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true
+                )
               )._1
             )
           }
@@ -702,6 +707,66 @@ class CommonTriageQuestionsControllerSpec
             messageFromMessageKey("numberOfProperties.title"), { doc =>
               doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .howManyPropertiesSubmit()
+                .url
+              doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
+            }
+          )
+        }
+
+        "the user is on the single disposal journey, selected 'capacitor' individual user type and" +
+          "has already answered the question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.Capacitor),
+                  hasConfirmedSingleDisposal = true
+                )
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("numberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe returns.representee.routes.RepresenteeController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .howManyPropertiesSubmit()
+                .url
+              doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
+            }
+          )
+        }
+
+        "the user is on the single disposal journey, selected 'personal representative' individual user type and" +
+          "has already answered the question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.PersonalRepresentative),
+                  hasConfirmedSingleDisposal = true
+                )
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("numberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe returns.representee.routes.RepresenteeController
+                .checkYourAnswers()
                 .url
               doc
                 .select("#content > article > form")

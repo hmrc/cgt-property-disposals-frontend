@@ -44,6 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
@@ -90,11 +91,13 @@ class SingleDisposalsTriageControllerSpec
 
   def sessionDataWithStartingNewDraftReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
-    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    representeeAnswers: RepresenteeAnswers  = sample[IncompleteRepresenteeAnswers]
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       subscribedDetails      = sample[SubscribedDetails].copy(name = name),
-      newReturnTriageAnswers = Right(singleDisposalTriageAnswers)
+      newReturnTriageAnswers = Right(singleDisposalTriageAnswers),
+      representeeAnswers     = Some(representeeAnswers)
     )
 
     SessionData.empty
@@ -122,10 +125,13 @@ class SingleDisposalsTriageControllerSpec
 
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
-    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    representeeAnswers: RepresenteeAnswers  = sample[IncompleteRepresenteeAnswers]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
-    val draftReturn =
-      sample[DraftSingleDisposalReturn].copy(triageAnswers = singleDisposalTriageAnswers)
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(
+      triageAnswers      = singleDisposalTriageAnswers,
+      representeeAnswers = Some(representeeAnswers)
+    )
 
     val (session, journey) = sessionDataWithFillingOurReturn(
       draftReturn,
@@ -2088,11 +2094,13 @@ class SingleDisposalsTriageControllerSpec
           }
 
         "a question has not yet been answered and a draft return has not been created" in {
-          test(sessionDataWithStartingNewDraftReturn(_, _)._1)
+          test(
+            sessionDataWithStartingNewDraftReturn(_, _, representeeAnswers = sample[IncompleteRepresenteeAnswers])._1
+          )
         }
 
         "a question has not yet been answered and a draft return has been created" in {
-          test(sessionDataWithFillingOutReturn(_, _)._1)
+          test(sessionDataWithFillingOutReturn(_, _, representeeAnswers = sample[IncompleteRepresenteeAnswers])._1)
         }
 
       }
