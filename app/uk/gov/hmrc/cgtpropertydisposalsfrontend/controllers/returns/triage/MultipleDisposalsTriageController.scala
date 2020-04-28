@@ -616,14 +616,14 @@ class MultipleDisposalsTriageController @Inject() (
           _.representeeAnswers,
           _._2.representeeAnswers
         )
-      val isIncomplete = !representeeAnswers.map(_.fold(_ => false, _ => true)).getOrElse(false)
+      val representeeAnswersIncomplete = !representeeAnswers.map(_.fold(_ => false, _ => true)).getOrElse(false)
 
       triageAnswers match {
         case IncompleteMultipleDisposalsTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
         case IncompleteMultipleDisposalsTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _)
-            if isIncomplete =>
+            if representeeAnswersIncomplete =>
           Redirect(
             representee.routes.RepresenteeController
               .enterName()
@@ -639,7 +639,7 @@ class MultipleDisposalsTriageController @Inject() (
             _,
             _,
             _
-            ) if isIncomplete =>
+            ) if representeeAnswersIncomplete =>
           Redirect(
             representee.routes.RepresenteeController
               .enterName()

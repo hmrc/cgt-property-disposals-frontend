@@ -45,6 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
+import returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -376,18 +377,31 @@ class RepresenteeController @Inject() (
               logger.warn("Could not update draft return or session", e)
               errorHandler.errorResult()
             },
-            _ => Ok(cyaPage(completeAnswers, representativeType, journey.isRight, backLink))
+            _ =>
+              Ok(
+                cyaPage(
+                  completeAnswers,
+                  representativeType,
+                  journey.isRight,
+                  triageRoutes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+                )
+              )
           )
 
-        case c: CompleteRepresenteeAnswers =>
-          Ok(cyaPage(c, representativeType, journey.isRight, backLink))
+        case completeAnswers: CompleteRepresenteeAnswers =>
+          Ok(
+            cyaPage(
+              completeAnswers,
+              representativeType,
+              journey.isRight,
+              triageRoutes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+            )
+          )
 
       }
 
     }
   }
-
-  private def backLink(): Call = returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) {

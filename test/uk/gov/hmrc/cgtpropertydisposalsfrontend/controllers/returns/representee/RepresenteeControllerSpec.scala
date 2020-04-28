@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
@@ -1660,6 +1660,122 @@ class RepresenteeControllerSpec
             performAction(),
             routes.RepresenteeController.checkContactDetails()
           )
+        }
+
+      }
+
+      "show the page" when {
+
+        "the user has just answered all the questions and all updates are successful" ignore {
+          val (session, journey, draftReturn) =
+            sessionWithFillingOutReturn(allQuestionsAnswers, Left(PersonalRepresentative))
+          val newDraftReturn = draftReturn.copy(representeeAnswers = Some(completeAnswers))
+          val updatedJourney = journey.copy(draftReturn            = newDraftReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("representee.cya.title"),
+            doc => {
+              doc.select("#back").attr("href") shouldBe returns.triage.routes.CommonTriageQuestionsController
+                .whoIsIndividualRepresenting()
+                .url
+
+              doc.select("#content > article > form").attr("action") shouldBe routes.RepresenteeController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user has already answered all the questions" in {
+          val completeAnswers = sample[CompleteRepresenteeAnswers]
+          val (session, _, _) = sessionWithFillingOutReturn(completeAnswers, Left(PersonalRepresentative))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("representee.cya.title"),
+            doc => {
+              doc.select("#back").attr("href") shouldBe returns.triage.routes.CommonTriageQuestionsController
+                .whoIsIndividualRepresenting()
+                .url
+
+              doc.select("#content > article > form").attr("action") shouldBe routes.RepresenteeController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
+        }
+
+      }
+
+      "show an error page" when {
+
+        "there is an error updating the draft return" in {
+
+          val (session, journey, draftReturn) =
+            sessionWithFillingOutReturn(allQuestionsAnswers, Left(PersonalRepresentative))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(
+                representeeAnswers = Some(completeAnswers)
+              ),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the session" ignore {
+
+          val (session, journey, draftReturn) =
+            sessionWithFillingOutReturn(allQuestionsAnswers, Left(PersonalRepresentative))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(
+                representeeAnswers = Some(completeAnswers)
+              ),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(
+              session.copy(
+                journeyStatus = Some(
+                  journey.copy(draftReturn =
+                    draftReturn.copy(
+                      representeeAnswers = Some(completeAnswers)
+                    )
+                  )
+                )
+              )
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
         }
 
       }
