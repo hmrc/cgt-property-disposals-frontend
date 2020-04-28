@@ -243,7 +243,6 @@ class CommonTriageQuestionsController @Inject() (
   def disposalDateTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withState(request) { (_, state) =>
       val triageAnswers = triageAnswersFomState(state)
-      val isATrust      = state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
       lazy val backLink = triageAnswers.fold(
         _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
         _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
@@ -255,8 +254,8 @@ class CommonTriageQuestionsController @Inject() (
       ) match {
         case None => Redirect(redirectToCheckYourAnswers(state))
         case Some(wasUk) =>
-          if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink, isATrust))
-          else Ok(disposalDateTooEarlyNonUkResidents(backLink, isATrust))
+          if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink))
+          else Ok(disposalDateTooEarlyNonUkResidents(backLink))
       }
     }
   }
@@ -280,8 +279,7 @@ class CommonTriageQuestionsController @Inject() (
         )
       ) match {
         case Some(assetTypes) if !hasSupportedAssetType(assetTypes) =>
-          val isATrust: Boolean = state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
-          Ok(assetTypeNotYetImplementedPage(backLink, isATrust))
+          Ok(assetTypeNotYetImplementedPage(backLink))
         case _ =>
           Redirect(redirectToCheckYourAnswers(state))
       }

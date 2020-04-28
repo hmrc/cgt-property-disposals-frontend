@@ -750,16 +750,13 @@ completionDate-day.error.dayAndYearRequired=Completion date must include a day a
 completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
 disposalDateTooEarly.non-uk.title=You cannot use this service
-disposalDateTooEarly.non-uk.p1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
-disposalDateTooEarly.agent.non-uk.p1=This is because when your client sold or disposed of the property, they exchanged contracts before 6 April 2020.
-disposalDateTooEarly.trust.non-uk.p1=This is because when the trust sold or disposed of the property, they exchanged contracts before 6 April 2020.
-disposalDateTooEarly.non-uk.p2=If you made an indirect disposal and sold shares not property it’s because you sold the shares before 6 April 2020.
-disposalDateTooEarly.non-uk.p3=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
+disposalDateTooEarly.non-uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
+disposalDateTooEarly.non-uk.p2=If an indirect disposal was made, it’s because the shares were sold before 6 April 2020.
+disposalDateTooEarly.non-uk.h2=What you’ll need to do next
+disposalDateTooEarly.non-uk.p3=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 
 disposalDateTooEarly.uk.title=You cannot use this service
-disposalDateTooEarly.uk.p1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
-disposalDateTooEarly.agent.uk.p1=This is because when your client sold or disposed of the property, they exchanged contracts before 6 April 2020.
-disposalDateTooEarly.trust.uk.p1=This is because when the trust sold or disposed of the property, they exchanged contracts before 6 April 2020.
+disposalDateTooEarly.uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
 disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
 
 triage.check-your-answers.title=Check your answers
@@ -1506,7 +1503,7 @@ estimatedIncome.title=What do you believe your gross income will be in this tax 
 estimatedIncome.agent.title=What does your client believe their gross income will be in this tax year?
 estimatedIncome.non-resident.title=What do you believe your gross income liable to UK tax will be in this tax year?
 estimatedIncome.agent.non-resident.title=What does your client believe their gross income liable to UK tax will be in this tax year?
-estimatedIncome.helpText=The amount should be your total income liable to UK income tax for the tax year {0} to {1}. It‘s your gross income before any deductions, like tax or National Insurance.
+estimatedIncome.helpText=The amount should be your total income liable to UK income tax for the tax year {0} to {1}. It’s your gross income before any deductions, like tax or National Insurance.
 estimatedIncome.agent.helpText=The amount should be their income liable to UK income tax for the tax year {0} to {1}. It’s their gross income before any deductions, like tax or National Insurance.
 estimatedIncome.details.summary=What should not be included
 estimatedIncome.details.p1=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
@@ -1805,28 +1802,16 @@ multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all t
 multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
 multipleDisposalsCountryOfResidence.agent.title=What country was your client a resident of when they exchanged contracts?
 multipleDisposalsCountryOfResidence.trust.title=What country was the trust a resident of when they exchanged contracts?
-multipleDisposalsCountryOfResidence.helpText=It‘s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
-multipleDisposalsCountryOfResidence.agent.helpText=It‘s usually the day your client and the new owner swapped contracts and they paid a deposit.
-multipleDisposalsCountryOfResidence.trust.helpText=It‘s usually the day the trust and the new owner swapped contracts and they paid a deposit.
+multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+multipleDisposalsCountryOfResidence.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
+multipleDisposalsCountryOfResidence.trust.helpText=It’s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 
-disposalDateMixedUseOrIndirect.title=You cannot use this service
-disposalDateMixedUseOrIndirect.agent.title=You cannot use this service
-disposalDateMixedUseOrIndirect.trust.title=You cannot use this service
-disposalDateMixedUseOrIndirect.p1.reason1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
-disposalDateMixedUseOrIndirect.agent.p1.reason1=This is because when your client sold or disposed of the property, they exchanged contracts before 6 April 2020.
-disposalDateMixedUseOrIndirect.trust.p1.reason1=This is because when the trust sold or disposed of the property, it exchanged contracts before 6 April 2020.
-disposalDateMixedUseOrIndirect.p1.reason2=If you made an indirect disposal and sold shares not property, it’s because you sold the shares before 6 April 2020.
-disposalDateMixedUseOrIndirect.agent.p1.reason2=If they made an indirect disposal and sold shares not property, it’s because they sold the shares before 6 April 2020.
-disposalDateMixedUseOrIndirect.trust.p1.reason2=If the trust made an indirect disposal and sold shares not property, it’s because it sold the shares before 6 April 2020.
-disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
-disposalDateMixedUseOrIndirect.agent.h2=What you’ll need to do next
-disposalDateMixedUseOrIndirect.trust.h2=What you’ll need to do next
-disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
-disposalDateMixedUseOrIndirect.agent.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
-disposalDateMixedUseOrIndirect.trust.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
-disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report your disposal and pay any tax due. You may be charged interest on late payments.
-disposalDateMixedUseOrIndirect.agent.p3=Your client has 30 days from the date of completion to report their disposal and pay any tax due. They may be charged interest on late payments.
-disposalDateMixedUseOrIndirect.trust.p3=You have 30 days from the date of completion to report the disposal and pay any tax due. You may be charged interest on late payments.
+assetTypeNotYetImplemented.title=You cannot use this service
+assetTypeNotYetImplemented.p1=You cannot use this service to report Capital Gains Tax on:
+assetTypeNotYetImplemented.li1=disposals of mixed-use UK property
+assetTypeNotYetImplemented.li2=indirect disposals of UK land
+assetTypeNotYetImplemented.h2=What you’ll need to do next
+assetTypeNotYetImplemented.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Captial Gains Tax on UK property or land form</a>.
 
 
 initialGainOrLoss.title=Did you make an initial gain or loss?
@@ -1846,7 +1831,7 @@ initialGainOrLoss.details.li3=3. Then subtract any money you spent on making imp
 initialGainOrLoss.details.li4=4. Then subtract any money you spent on selling the property, such as on legal fees or for estate agents.
 initialGainOrLoss.details.li5=5. This will give you the amount of the initial gain or loss.
 initialGainOrLoss.details.example.title=Example
-initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent‘s fees. This gave you an initial gain of £10,000.
+initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent’s fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
 initialGainOrLoss.summary.hint=Click on the link to change your answers
 initialGainOrLoss.cya.hint=whether you made an initial gain, a loss, or no gain or loss

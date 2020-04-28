@@ -1303,9 +1303,9 @@ class CommonTriageQuestionsControllerSpec
                 doc.select("#content > article > p:nth-child(4)").text() shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.non-uk.p2"
                 )
-                doc.select("#content > article > p:nth-child(5)").html() shouldBe messageFromMessageKey(
+                doc.select("#content > article > p:nth-child(6)").html() shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.non-uk.p3",
-                  viewConfig.reportingCgtBefore6April2020
+                  viewConfig.nrcgtReturn
                 )
               }
             )
@@ -1546,41 +1546,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"),
-              doc =>
-                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
-                  .assetTypeForNonUkResidents()
-                  .url
-            )
-          }
-
-          "the asset type is mixed use" in {
-            test(AssetType.MixedUse)
-          }
-
-          "the asset type is indirect disposal" in {
-            test(AssetType.IndirectDisposal)
-          }
-
-        }
-
-        "the trust is on a single disposal journey and" when {
-
-          def test(assetType: AssetType): Unit = {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionDataWithStartingNewDraftReturn(
-                  Right(sample[CompleteSingleDisposalTriageAnswers].copy(assetType = assetType)),
-                  Left(sample[TrustName]),
-                  UserType.Organisation
-                )._1
-              )
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.trust.title"),
+              messageFromMessageKey("assetTypeNotYetImplemented.title"),
               doc =>
                 doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
                   .assetTypeForNonUkResidents()
@@ -1613,41 +1579,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"),
-              doc =>
-                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
-                  .assetTypeForNonUkResidents()
-                  .url
-            )
-          }
-
-          "the asset type is mixed use" in {
-            test(AssetType.MixedUse)
-          }
-
-          "the asset type is indirect disposal" in {
-            test(AssetType.IndirectDisposal)
-          }
-
-        }
-
-        "the trust is on a multiple disposals journey and" when {
-
-          def test(assetType: AssetType): Unit = {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionDataWithStartingNewDraftReturn(
-                  Left(sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(assetType))),
-                  Left(sample[TrustName]),
-                  UserType.Organisation
-                )._1
-              )
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.trust.title"),
+              messageFromMessageKey("assetTypeNotYetImplemented.title"),
               doc =>
                 doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
                   .assetTypeForNonUkResidents()
