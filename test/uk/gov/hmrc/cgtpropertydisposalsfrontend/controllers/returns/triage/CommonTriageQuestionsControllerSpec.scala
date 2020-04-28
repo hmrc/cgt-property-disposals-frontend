@@ -748,6 +748,36 @@ class CommonTriageQuestionsControllerSpec
           )
         }
 
+        "the user is on the single disposal journey, selected 'personal representative' individual user type and" +
+          "has already answered the question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.PersonalRepresentative),
+                  hasConfirmedSingleDisposal = true
+                )
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("numberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe returns.representee.routes.RepresenteeController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .howManyPropertiesSubmit()
+                .url
+              doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
+            }
+          )
+        }
+
         "the user is on the multiple disposals journey" in {
           inSequence {
             mockAuthWithNoRetrievals()
