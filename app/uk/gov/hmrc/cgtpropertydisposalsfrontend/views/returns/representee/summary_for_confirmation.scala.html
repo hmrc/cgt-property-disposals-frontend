@@ -40,13 +40,15 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
         answers: IncompleteRepresenteeAnswers,
         representativeType: Either[PersonalRepresentative.type, Capacitor.type]
 )(implicit messages: Messages)
-@id = @{
-    val IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, None, false, false) = answers
-    id match {
-        case RepresenteeNino(NINO(value)) => value
-        case RepresenteeSautr(SAUTR(value)) => value
-        case RepresenteeCgtReference(CgtReference(value)) => value
-        case NoReferenceId => ""
+@isDisplayedWithLabelAndId = @{
+    {
+        val IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, None, false, false) = answers
+        id match {
+            case RepresenteeNino(NINO(value)) => (false, "", "")
+            case RepresenteeSautr(SAUTR(value)) => (false, "", "")
+            case RepresenteeCgtReference(CgtReference(value)) => (true, messages("representeeConfirmPerson.summaryLine2.cgtReferenceId"), value)
+            case NoReferenceId => (false, "", "")
+        }
     }
 }
 
@@ -57,7 +59,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 
 @cyaSection() {
     @cyaRow(
-        messages("representeeConfirmPerson.summaryline1"),
+        messages("representeeConfirmPerson.summaryLine1"),
         Html {
             s"${name.makeSingleName()}"
         },
@@ -65,12 +67,14 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
         "name"
     )
 
-    @cyaRow(
-        messages("representeeConfirmPerson.summaryline2"),
-        Html(id),
-        None,
-        "account"
-    )
-
-
+    @{if (isDisplayedWithLabelAndId._1)
+        cyaRow(
+            isDisplayedWithLabelAndId._2,
+            Html(isDisplayedWithLabelAndId._3),
+            None,
+            "account"
+        )
+    else
+        Html("")
+    }
 }

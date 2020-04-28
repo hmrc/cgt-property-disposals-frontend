@@ -965,7 +965,8 @@ class RepresenteeControllerSpec
       def test(
         sessionData: SessionData,
         expectedBackLink: Call,
-        expectedName: IndividualName
+        expectedName: IndividualName,
+        isCgtRow: Boolean
       ): Unit = {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -979,13 +980,15 @@ class RepresenteeControllerSpec
             doc.select("#back").attr("href") shouldBe expectedBackLink.url
             doc
               .select("#name-question")
-              .text shouldBe (messageFromMessageKey("representeeConfirmPerson.summaryline1"))
+              .text shouldBe (messageFromMessageKey("representeeConfirmPerson.summaryLine1"))
             doc
               .select("#name-answer")
               .text shouldBe s"${expectedName.firstName} ${expectedName.lastName}"
-            doc
-              .select("#account-question")
-              .text shouldBe messageFromMessageKey("representeeConfirmPerson.summaryline2")
+            if (isCgtRow)
+              doc
+                .select("#account-question")
+                .text shouldBe messageFromMessageKey("representeeConfirmPerson.summaryLine2.cgtReferenceId")
+            else ()
             doc
               .select("#content > article > form")
               .attr("action") shouldBe routes.RepresenteeController.confirmPersonSubmit().url
@@ -1016,7 +1019,8 @@ class RepresenteeControllerSpec
                 Left(PersonalRepresentative)
               )._1,
               routes.RepresenteeController.enterId(),
-              name
+              name,
+              false
             )
           }
         }
@@ -1897,20 +1901,20 @@ class RepresenteeControllerSpec
 
       val completeAnswers = sample[CompleteRepresenteeAnswers]
 
-
-        val allQuestionsAnswers = IncompleteRepresenteeAnswers(
-          Some(completeAnswers.name),
-          Some(completeAnswers.id),
-          completeAnswers.dateOfDeath,
-          Some(sample[RepresenteeContactDetails]),
-          true,
-          true
-        )
+      val allQuestionsAnswers = IncompleteRepresenteeAnswers(
+        Some(completeAnswers.name),
+        Some(completeAnswers.id),
+        completeAnswers.dateOfDeath,
+        Some(sample[RepresenteeContactDetails]),
+        true,
+        true
+      )
 
       "redirect to the enter name page" when {
         "redirect the page to confirm-person" when {
           def performAction(): Future[Result] =
             controller.checkYourAnswers()(FakeRequest())
+
           "the user has not yet confirmed the person " when {
             val requiredPreviousAnswers =
               IncompleteRepresenteeAnswers(
@@ -1938,84 +1942,84 @@ class RepresenteeControllerSpec
 
         "redirect to the enter name page" when {
 
-        "that question hasn't been answered yet" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithFillingOutReturn(allQuestionsAnswers.copy(name = None), Left(PersonalRepresentative))._1
+          "that question hasn't been answered yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithFillingOutReturn(allQuestionsAnswers.copy(name = None), Left(PersonalRepresentative))._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
+          }
+        }
+
+        "redirect to the enter id page" when {
+
+          "that question hasn't been answered yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithFillingOutReturn(allQuestionsAnswers.copy(id = None), Right(Capacitor))._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.RepresenteeController.enterId())
+          }
+        }
+
+        "redirect to the enter date of death page" when {
+
+          "that question hasn't been answered yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithFillingOutReturn(allQuestionsAnswers.copy(dateOfDeath = None), Left(PersonalRepresentative))._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.RepresenteeController.enterDateOfDeath())
+          }
+        }
+
+        "redirect to the check contact details page" when {
+
+          "there are no contact details in session" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithFillingOutReturn(
+                  allQuestionsAnswers.copy(contactDetails = None),
+                  Left(PersonalRepresentative)
+                )._1
+              )
+            }
+
+            checkIsRedirect(
+              performAction(),
+              routes.RepresenteeController.checkContactDetails()
             )
           }
 
-          checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
+          "the user has not confirmed the contact details" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithFillingOutReturn(
+                  allQuestionsAnswers.copy(hasConfirmedContactDetails = false),
+                  Right(Capacitor)
+                )._1
+              )
+            }
+
+            checkIsRedirect(
+              performAction(),
+              routes.RepresenteeController.checkContactDetails()
+            )
+          }
+
         }
       }
-
-      "redirect to the enter id page" when {
-
-        "that question hasn't been answered yet" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithFillingOutReturn(allQuestionsAnswers.copy(id = None), Right(Capacitor))._1
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.RepresenteeController.enterId())
-        }
-      }
-
-      "redirect to the enter date of death page" when {
-
-        "that question hasn't been answered yet" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithFillingOutReturn(allQuestionsAnswers.copy(dateOfDeath = None), Left(PersonalRepresentative))._1
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.RepresenteeController.enterDateOfDeath())
-        }
-      }
-
-      "redirect to the check contact details page" when {
-
-        "there are no contact details in session" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithFillingOutReturn(
-                allQuestionsAnswers.copy(contactDetails = None),
-                Left(PersonalRepresentative)
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.RepresenteeController.checkContactDetails()
-          )
-        }
-
-        "the user has not confirmed the contact details" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithFillingOutReturn(
-                allQuestionsAnswers.copy(hasConfirmedContactDetails = false),
-                Right(Capacitor)
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.RepresenteeController.checkContactDetails()
-          )
-        }
-
-      }
-
       "show the page" when {
 
         "the user has just answered all the questions and all updates are successful" in {
