@@ -1,0 +1,77 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.NINO
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeSautr
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeNino
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+
+@this(
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+)
+
+@(
+        id: RepresenteeReferenceId,
+        name: IndividualName,
+        representativeType: Either[PersonalRepresentative.type, Capacitor.type]
+)(implicit messages: Messages)
+@isDisplayedWithLabelAndId = @{
+    {
+        id match {
+            case RepresenteeNino(NINO(value)) => (false, "", "")
+            case RepresenteeSautr(SAUTR(value)) => (false, "", "")
+            case RepresenteeCgtReference(CgtReference(value)) => (true, messages("representeeConfirmPerson.summaryLine2.cgtReferenceId"), value)
+            case NoReferenceId => (false, "", "")
+        }
+    }
+}
+
+@cyaSection() {
+    @cyaRow(
+        messages("representeeConfirmPerson.summaryLine1"),
+        Html {
+            s"${name.makeSingleName()}"
+        },
+        None,
+        "name"
+    )
+
+    @{if (isDisplayedWithLabelAndId._1)
+        cyaRow(
+            isDisplayedWithLabelAndId._2,
+            Html(isDisplayedWithLabelAndId._3),
+            None,
+            "account"
+        )
+    else
+        Html("")
+    }
+}

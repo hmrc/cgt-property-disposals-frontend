@@ -97,6 +97,11 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   def checkIsRedirect(result: Future[Result], expectedRedirectCall: Call): Unit =
     checkIsRedirect(result, expectedRedirectCall.url)
 
+  def checkIsSimpleBadRequest(result: Future[Result], expectedContent: String): Unit = {
+    status(result)          shouldBe BAD_REQUEST
+    contentAsString(result) should include(expectedContent)
+  }
+
   def checkPageIsDisplayed(
     result: Future[Result],
     expectedTitle: String,

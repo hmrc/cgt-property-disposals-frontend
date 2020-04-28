@@ -2201,3 +2201,9 @@ nonUkAddress.representee.title=Enter the non-UK contact address
 email.representee.extraContent=The email addresses you use for other government services will not change.
 confirmEmail.representee.title=You have 30 minutes to confirm the email address
 confirmEmail.verified.representee.p1=We’ll use this address to contact you about your Capital Gains Tax on UK property return.
+
+representeeConfirmPerson.title=Check the details we hold for the person
+representeeConfirmPerson.summaryLine1=Name
+representeeConfirmPerson.summaryLine2.cgtReferenceId=Capital Gains Tax on UK property account number
+representeeConfirmPerson.formTitle=Is this the person you’re completing this return for
+confirmed.error.required=Select yes to confirm this is the person you are representing
