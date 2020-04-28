@@ -38,6 +38,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -55,12 +57,13 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
 )
 
 @(
-        answers: IncompleteRepresenteeAnswers,
-        representativeType: Either[PersonalRepresentative.type, Capacitor.type],
-        displayReturnToSummaryLink: Boolean,
-        form: Form[Boolean],
-        backLink: Call
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+id: RepresenteeReferenceId,
+name: IndividualName,
+representativeType: Either[PersonalRepresentative.type, Capacitor.type],
+displayReturnToSummaryLink: Boolean,
+form: Form[Boolean],
+backLink: Call
+    )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 @title = @{
     messages("representeeConfirmPerson.title")
 }
@@ -80,7 +83,7 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
 
     @pageHeading(title)
 
-    @summary_for_confirmation(answers, representativeType)
+    @summary_for_confirmation(id, name, representativeType)
 
     @formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
         @yesNo(

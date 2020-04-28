@@ -29,6 +29,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeNino
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -37,12 +39,12 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 )
 
 @(
-        answers: IncompleteRepresenteeAnswers,
+        id: RepresenteeReferenceId,
+        name: IndividualName,
         representativeType: Either[PersonalRepresentative.type, Capacitor.type]
 )(implicit messages: Messages)
 @isDisplayedWithLabelAndId = @{
     {
-        val IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, None, false, false) = answers
         id match {
             case RepresenteeNino(NINO(value)) => (false, "", "")
             case RepresenteeSautr(SAUTR(value)) => (false, "", "")
@@ -50,11 +52,6 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
             case NoReferenceId => (false, "", "")
         }
     }
-}
-
-@name = @{
-    val IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, None, false, false) = answers
-    name
 }
 
 @cyaSection() {

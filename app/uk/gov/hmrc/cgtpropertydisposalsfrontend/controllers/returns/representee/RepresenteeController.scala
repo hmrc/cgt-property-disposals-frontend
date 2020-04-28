@@ -204,8 +204,17 @@ class RepresenteeController @Inject() (
       val backLink = routes.RepresenteeController.enterId()
 
       answers match {
-        case incompleteAnswers @ IncompleteRepresenteeAnswers(Some(_), Some(_), _, None, false, false) =>
-          Ok(confirmPersonPage(incompleteAnswers, representativeType, journey.isRight, confirmPersonForm, backLink))
+        case incompleteAnswers @ IncompleteRepresenteeAnswers(Some(name), Some(id), _, None, false, false) =>
+          Ok(
+            confirmPersonPage(
+              id,
+              name,
+              representativeType,
+              journey.isRight,
+              confirmPersonForm,
+              backLink
+            )
+          )
 
         case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
       }
@@ -226,14 +235,19 @@ class RepresenteeController @Inject() (
             errorHandler.errorResult()
           }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
 
-        def handleForm(incompleteRepresenteeAnswers: IncompleteRepresenteeAnswers): Future[Result] =
+        def handleForm(
+          id: RepresenteeReferenceId,
+          name: IndividualName,
+          incompleteRepresenteeAnswers: IncompleteRepresenteeAnswers
+        ): Future[Result] =
           confirmPersonForm
             .bindFromRequest()
             .fold(
               formWithErrors =>
                 BadRequest(
                   confirmPersonPage(
-                    incompleteRepresenteeAnswers,
+                    id,
+                    name,
                     representativeType,
                     journey.isRight,
                     formWithErrors,
@@ -249,14 +263,14 @@ class RepresenteeController @Inject() (
 
         answers match {
           case incompleteRepresenteeAnswers @ IncompleteRepresenteeAnswers(
-                _,
-                _,
+                Some(name),
+                Some(id),
                 _,
                 None,
                 false,
                 false
               ) =>
-            handleForm(incompleteRepresenteeAnswers)
+            handleForm(id, name, incompleteRepresenteeAnswers)
           case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
 
         }
