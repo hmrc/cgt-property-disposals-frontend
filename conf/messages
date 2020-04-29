@@ -2136,7 +2136,7 @@ representee.cyaLabel.address=Contact address for person represented
 representee.cyaChange.address=the contact address for the person represented
 representee.cyaLabel.email=Contact email for person represented
 representee.cyaChange.email=the contact email for the person represented
-representee.cyaLabel.cgtReference=CGT Ref:<br>
+representee.cyaLabel.cgtReference=CGT Ref:<br>{0}
 
 dateOfDeath.title=What date did the person die?
 dateOfDeath.helpText=For example, 25 4 2020

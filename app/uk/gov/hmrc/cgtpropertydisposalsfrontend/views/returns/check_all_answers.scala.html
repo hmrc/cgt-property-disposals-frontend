@@ -51,7 +51,6 @@
 
 @(completeReturn: CompleteReturn, rebasingEligibilityUtil: RebasingEligibilityUtil, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentative
 @title = @{ messages("checkAllAnswers.title") }
 
 @mainTemplate(title = title, userType = request.userType) {
