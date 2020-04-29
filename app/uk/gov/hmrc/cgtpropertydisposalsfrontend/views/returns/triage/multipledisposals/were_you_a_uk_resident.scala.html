@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -36,11 +37,23 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Boolean], backLink: Call, hasCreatedDraftReturn: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+        form: Form[Boolean],
+        backLink: Call,
+        hasCreatedDraftReturn: Boolean,
+        isATrust: Boolean,
+        representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsWereYouAUKResident"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userKey = @{
+  if (representativeType.exists(_.isLeft)) ".personalRep"
+  else if (representativeType.exists(_.isRight)) ".capacitor"
+  else if (isAgent) ".agent"
+  else if (isATrust) ".trust"
+  else ""
+}
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 

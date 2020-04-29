@@ -88,7 +88,12 @@ class MultipleDisposalsTriageController @Inject() (
         _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
       )
       Ok(
-        guidancePage(backLink, state.isRight, state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust))
+        guidancePage(
+          backLink,
+          state.isRight,
+          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+          answers.representativeType()
+        )
       )
     }
 
@@ -189,7 +194,8 @@ class MultipleDisposalsTriageController @Inject() (
           form,
           backLink,
           state.isRight,
-          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+          answers.representativeType()
         )
       )
     }
@@ -211,7 +217,8 @@ class MultipleDisposalsTriageController @Inject() (
                 formWithErrors,
                 backLink,
                 state.isRight,
-                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+                answers.representativeType()
               )
             )
           },
@@ -320,7 +327,8 @@ class MultipleDisposalsTriageController @Inject() (
             form,
             backLink,
             state.isRight,
-            state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+            state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+            answers.representativeType()
           )
         )
       }
@@ -343,7 +351,8 @@ class MultipleDisposalsTriageController @Inject() (
                 formWithErrors,
                 backLink,
                 state.isRight,
-                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+                answers.representativeType()
               )
             )
           },
@@ -473,7 +482,8 @@ class MultipleDisposalsTriageController @Inject() (
           form,
           backLink,
           state.isRight,
-          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+          answers.representativeType()
         )
       )
     }
@@ -495,7 +505,8 @@ class MultipleDisposalsTriageController @Inject() (
                   formWithErrors,
                   backLink,
                   state.isRight,
-                  state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+                  state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+                  answers.representativeType()
                 )
               )
             },
