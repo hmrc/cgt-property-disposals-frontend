@@ -384,6 +384,7 @@ class CommonTriageQuestionsControllerSpec
             triageAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self)
             ),
+            representeeAnswers        = None,
             propertyAddress           = None,
             disposalDetailsAnswers    = None,
             acquisitionDetailsAnswers = None,
@@ -544,6 +545,7 @@ class CommonTriageQuestionsControllerSpec
                 d.copy(
                   triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
                     .copy(individualUserType = Some(IndividualUserType.Capacitor)),
+                  representeeAnswers        = None,
                   propertyAddress           = None,
                   disposalDetailsAnswers    = None,
                   acquisitionDetailsAnswers = None,
@@ -583,6 +585,7 @@ class CommonTriageQuestionsControllerSpec
               d =>
                 d.copy(
                   triageAnswers             = newAnswers,
+                  representeeAnswers        = None,
                   propertyAddress           = None,
                   disposalDetailsAnswers    = None,
                   acquisitionDetailsAnswers = None,
@@ -623,6 +626,7 @@ class CommonTriageQuestionsControllerSpec
               d =>
                 d.copy(
                   triageAnswers                 = newAnswers,
+                  representeeAnswers            = None,
                   examplePropertyDetailsAnswers = None,
                   yearToDateLiabilityAnswers    = None,
                   supportingEvidenceAnswers     = None
