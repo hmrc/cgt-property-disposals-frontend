@@ -437,6 +437,7 @@ class CommonTriageQuestionsController @Inject() (
             m =>
               m.copy(
                 triageAnswers                 = updateMultipleDisposalAnswers(m.triageAnswers),
+                representeeAnswers            = None,
                 examplePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers    = None,
                 supportingEvidenceAnswers     = None
@@ -444,6 +445,7 @@ class CommonTriageQuestionsController @Inject() (
             s =>
               s.copy(
                 triageAnswers              = updateSingleDisposalAnswers(s.triageAnswers),
+                representeeAnswers         = None,
                 propertyAddress            = None,
                 disposalDetailsAnswers     = None,
                 acquisitionDetailsAnswers  = None,

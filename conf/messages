@@ -805,6 +805,7 @@ task-list.Complete=Complete
 task-list.CannotStart=Cannot start
 task-list.ToDo=To do
 task-list.incompleteTriage=You must complete this section to continue. Some of the details you entered may have been saved as a draft.
+task-list.representee.link=Enter the details of the person you’re representing
 task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
 task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss

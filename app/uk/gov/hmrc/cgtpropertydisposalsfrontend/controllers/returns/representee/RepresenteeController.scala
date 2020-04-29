@@ -20,17 +20,20 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.string._
 import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.{Form, FormError}
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
@@ -41,10 +44,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPa
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, Error, FormUtils, TimeUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -52,11 +53,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.confirm_person
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
-import returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import cats.syntax.eq._
-import cats.instances.string._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class RepresenteeController @Inject() (
@@ -317,7 +316,7 @@ class RepresenteeController @Inject() (
                           .subflatMap { response =>
                             response match {
                               case BusinessPartnerRecordResponse(None, _) => Left(Error(NameCheckException))
-                              case _                                      => Right()
+                              case _                                      => Right(())
                             }
                           }
                       case RepresenteeSautr(sautr) =>
@@ -326,7 +325,7 @@ class RepresenteeController @Inject() (
                           .subflatMap { response =>
                             response match {
                               case BusinessPartnerRecordResponse(None, _) => Left(Error(NameCheckException))
-                              case _                                      => Right()
+                              case _                                      => Right(())
                             }
                           }
                       case RepresenteeCgtReference(cgtReference) => {
@@ -335,13 +334,13 @@ class RepresenteeController @Inject() (
                           .subflatMap(sd =>
                             sd match {
                               case SubscribedDetails(Right(i), _, _, _, _, _, _) if doNamesMatch(name, i) =>
-                                Right()
+                                Right(())
                               case SubscribedDetails(_, _, _, _, _, _, _) => Left(Error(NameCheckException))
                             }
                           )
                       }
                       case NoReferenceId =>
-                        EitherT[Future, Error, Unit](Future.successful(Right()))
+                        EitherT[Future, Error, Unit](Future.successful(Right(())))
                     }
 
                   val result =

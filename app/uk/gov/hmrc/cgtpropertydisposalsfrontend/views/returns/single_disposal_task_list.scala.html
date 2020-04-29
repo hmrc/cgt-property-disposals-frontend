@@ -21,10 +21,12 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
@@ -42,11 +44,20 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
 @title = @{messages("service.title")}
-@triageState = @{draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)}
-@propertyAddressState = @{draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete)}
-@disposalDetailsState = @{draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
-@acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
-@uploadSupportingDocsState = @{draftReturn.supportingEvidenceAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
+    
+@representeeState = @{
+  draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType) match {
+      case Some(Capacitor) | Some(PersonalRepresentative) =>
+        Some(draftReturn.representeeAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete)))
+      case _ =>
+          None
+  }
+}
+@triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
+@propertyAddressState = @{draftReturn.propertyAddress.fold[TaskListStatus](ToDo)(_ => Complete)}
+@disposalDetailsState = @{draftReturn.disposalDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
+@acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
+@uploadSupportingDocsState = @{draftReturn.supportingEvidenceAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
 
 @canSeeInitialGainOrLoss = @{
 
@@ -72,35 +83,35 @@
 
 @initialGainOrLossState = @{
     (acquistionDetailsState, disposalDetailsState) match {
-        case (TaskListStatus.Complete, TaskListStatus.Complete) =>
-            draftReturn.initialGainOrLoss.fold[TaskListStatus](TaskListStatus.InProgress)(_ => TaskListStatus.Complete)
+        case (Complete, Complete) =>
+            draftReturn.initialGainOrLoss.fold[TaskListStatus](InProgress)(_ => Complete)
         case _ => TaskListStatus.CannotStart
     }
 }
 
 @reliefDetailsState = @{
     (disposalDetailsState, acquistionDetailsState) match {
-        case (TaskListStatus.Complete, TaskListStatus.Complete) =>
-            if(canSeeInitialGainOrLoss && initialGainOrLossState =!= TaskListStatus.Complete) TaskListStatus.CannotStart
-            else draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+        case (Complete, Complete) =>
+            if(canSeeInitialGainOrLoss && initialGainOrLossState =!= Complete) TaskListStatus.CannotStart
+            else draftReturn.reliefDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
         case _ => TaskListStatus.CannotStart
     }
 }
 
 @exemptionsAndLossesState = @{
     reliefDetailsState match {
-        case TaskListStatus.Complete =>
-            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+        case Complete =>
+            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
         case _ => TaskListStatus.CannotStart
     }
 }
 
 @ytdLiabilityState = @{
   (disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
-    case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-      draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
-          case c: CalculatedYTDAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
-          case n: NonCalculatedYTDAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+    case (Complete, Complete, Complete, Complete) =>
+      draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](ToDo) {
+          case c: CalculatedYTDAnswers    => c.fold(_ => InProgress, _ => Complete)
+          case n: NonCalculatedYTDAnswers => n.fold(_ => InProgress, _ => Complete)
       }
 
       case _ => TaskListStatus.CannotStart
@@ -109,8 +120,8 @@
 
 @checkAndSendReturnState = @{
     (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
-        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-            TaskListStatus.ToDo
+        case (Complete, Complete, Complete, Complete, Complete, Complete, Complete) =>
+            ToDo
 
         case _ =>
             TaskListStatus.CannotStart
@@ -129,15 +140,28 @@
                 </span>
             @messages("triage.caption")
         </h2>
+
         <ul class="app-task-list__items">
-            <li id="canTheyUseOurService" class="app-task-list__item">
-                @taskLink(messages("task-list.triage.link"), returns.triage.routes.SingleDisposalsTriageController.checkYourAnswers().url, triageState)
+        @representeeState.map{ state =>
+            <li id="representee" class="app-task-list__item">
+            @taskLink(messages("task-list.representee.link"), returns.representee.routes.RepresenteeController.checkYourAnswers().url, state)
             </li>
+        }
+
+       @if(!representeeState.forall(_.isComplete)){
         </ul>
-    </li>
-@if(triageState.isComplete) {
-    <li>
-        <h2 class="app-task-list__section">
+         @warning(messages("task-list.incompleteTriage"))
+        } else {
+            <li id="canTheyUseOurService" class="app-task-list__item">
+            @taskLink(messages("task-list.triage.link"), returns.triage.routes.SingleDisposalsTriageController.checkYourAnswers().url, triageState)
+            </li>
+         </ul>
+
+    @if(!triageState.isComplete){
+        @warning(messages("task-list.incompleteTriage"))
+    } else {
+        <li>
+            <h2 class="app-task-list__section">
                 <span class="app-task-list__section-number">
                     2.
                 </span>
@@ -203,9 +227,9 @@
 
         </ul>
     </li>
-} else {
-    @warning(messages("task-list.incompleteTriage"))
-}
+    }
+    }
+
 </ol>
 
 <p><a id="saveAndComeBackLater" href="@{

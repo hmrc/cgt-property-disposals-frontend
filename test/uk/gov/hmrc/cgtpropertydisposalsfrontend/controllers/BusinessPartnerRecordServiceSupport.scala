@@ -23,7 +23,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPart
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait BusinessPartnerRecordServiceSupport {
   this: ControllerSpec with SessionSupport =>
