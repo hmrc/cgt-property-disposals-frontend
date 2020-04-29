@@ -91,7 +91,7 @@ backLink: Call
             label = Html(s"<h2>$formTitle</h2>"),
             labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
-            hasErrors = form.value.isEmpty,
+            hasErrors = hasErrors,
             selected = form.value,
             helpText = None
         )
