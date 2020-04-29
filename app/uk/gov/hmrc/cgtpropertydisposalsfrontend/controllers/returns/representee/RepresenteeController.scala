@@ -527,7 +527,7 @@ class RepresenteeController @Inject() (
         case IncompleteRepresenteeAnswers(_, None, _, _, _, _) =>
           Redirect(routes.RepresenteeController.enterId())
 
-        case IncompleteRepresenteeAnswers(Some(_), Some(_), _, _, false, false) =>
+        case IncompleteRepresenteeAnswers(Some(_), Some(_), _, _, false, _) =>
           Redirect(routes.RepresenteeController.confirmPerson())
 
         case IncompleteRepresenteeAnswers(_, _, _, contactDetails, _, hasConfirmedContactDetails)

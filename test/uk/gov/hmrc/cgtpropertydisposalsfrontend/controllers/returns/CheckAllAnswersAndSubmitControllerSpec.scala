@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.Mult
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
@@ -56,7 +57,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{C
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
@@ -147,7 +148,8 @@ class CheckAllAnswersAndSubmitControllerSpec
       "the user is on a single disposal journey" must {
 
         val completeReturn = sample[CompleteSingleDisposalReturn].copy(
-          triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+          triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor)),
+          representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
         )
         val hasAttachments =
           completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
@@ -163,7 +165,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers.merge),
           completeReturn.initialGainOrLoss,
           Some(completeReturn.supportingDocumentAnswers),
-          None,
+          completeReturn.representeeAnswers,
           TimeUtils.today()
         )
 
@@ -292,7 +294,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeReturn = sample[CompleteMultipleDisposalsReturn]
           .copy(
-            triageAnswers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Capacitor)),
+            triageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
             representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
             hasAttachments     = true
           )
@@ -969,6 +972,11 @@ object CheckAllAnswersAndSubmitControllerSpec {
     isRebasing: Boolean,
     isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
+
+    completeReturn.representeeAnswers.foreach(
+      RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
+    )
+
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
       userType,
@@ -1010,6 +1018,10 @@ object CheckAllAnswersAndSubmitControllerSpec {
     userType: Option[UserType],
     isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    completeReturn.representeeAnswers.foreach(
+      RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
+    )
+
     validateMultipleDisposalsTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
       userType,

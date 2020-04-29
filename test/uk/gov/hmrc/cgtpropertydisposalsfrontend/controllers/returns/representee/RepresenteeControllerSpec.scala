@@ -18,10 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
 import java.time.LocalDate
 
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status.BAD_REQUEST
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Action, AnyContent, Call, Result}
@@ -29,13 +31,11 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, BusinessPartnerRecordServiceSupport, ControllerSpec, NameFormValidationTests, SessionSupport, returns}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, BusinessPartnerRecordServiceSupport, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -47,8 +47,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, DraftMultipleDisposalsReturn, IndividualUserType, RepresenteeAnswers, RepresenteeContactDetails, RepresenteeReferenceId}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -1099,7 +1099,7 @@ class RepresenteeControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreSession(session.copy(journeyStatus = Some(newSndr)))(Right())
+            mockStoreSession(session.copy(journeyStatus = Some(newSndr)))(Right(()))
           }
           checkIsRedirect(performAction(List("confirmed" -> "false")), routes.RepresenteeController.checkYourAnswers())
         }
@@ -1124,7 +1124,7 @@ class RepresenteeControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreSession(session.copy(journeyStatus = Some(newSndr)))(Right())
+            mockStoreSession(session.copy(journeyStatus = Some(newSndr)))(Right(()))
           }
           checkIsRedirect(performAction(List("confirmed" -> "true")), routes.RepresenteeController.checkYourAnswers())
         }
@@ -1174,12 +1174,9 @@ class RepresenteeControllerSpec
             val answers     = IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
             val cgtRef      = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
-            val (session, journey, draftReturn) =
+            val (session, _, draftReturn) =
               sessionWithFillingOutReturn(answers, Right(Capacitor))
-            val newDraftReturn = draftReturn.copy(
-              representeeAnswers = Some(answers.copy(id = Some(cgtRef)))
-            )
-            val newJourney = journey.copy(draftReturn = newDraftReturn)
+
             val expectedSubscribedDetails = SubscribedDetails(
               Right(anotherName),
               Email("email"),
@@ -1367,12 +1364,9 @@ class RepresenteeControllerSpec
           val ninoValue = NINO("AB123456C")
           val nino      = RepresenteeNino(ninoValue)
 
-          val (session, journey, draftReturn) =
+          val (session, _, draftReturn) =
             sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
-          val newDraftReturn = draftReturn.copy(
-            representeeAnswers = Some(answers.copy(id = Some(nino)))
-          )
-          val newJourney = journey.copy(draftReturn = newDraftReturn)
+
           val businessPartnerRecordRequest =
             IndividualBusinessPartnerRecordRequest(Right(ninoValue), Some(individualName))
 
@@ -1911,115 +1905,102 @@ class RepresenteeControllerSpec
       )
 
       "redirect to the enter name page" when {
-        "redirect the page to confirm-person" when {
-          def performAction(): Future[Result] =
-            controller.checkYourAnswers()(FakeRequest())
 
-          "the user has not yet confirmed the person " when {
-            val requiredPreviousAnswers =
-              IncompleteRepresenteeAnswers(
-                Some(IndividualName("First", "Last")),
-                Some(sample[RepresenteeNino]),
-                Some(sample[DateOfDeath]),
-                None,
-                false,
-                false
-              )
-            "redirect to confirm person page" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  sessionWithStartingNewDraftReturn(
-                    requiredPreviousAnswers,
-                    Left(PersonalRepresentative)
-                  )._1
-                )
-              }
-              checkIsRedirect(performAction(), routes.RepresenteeController.confirmPerson())
-            }
-          }
-        }
-
-        "redirect to the enter name page" when {
-
-          "that question hasn't been answered yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(allQuestionsAnswers.copy(name = None), Left(PersonalRepresentative))._1
-              )
-            }
-
-            checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
-          }
-        }
-
-        "redirect to the enter id page" when {
-
-          "that question hasn't been answered yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(allQuestionsAnswers.copy(id = None), Right(Capacitor))._1
-              )
-            }
-
-            checkIsRedirect(performAction(), routes.RepresenteeController.enterId())
-          }
-        }
-
-        "redirect to the enter date of death page" when {
-
-          "that question hasn't been answered yet" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(allQuestionsAnswers.copy(dateOfDeath = None), Left(PersonalRepresentative))._1
-              )
-            }
-
-            checkIsRedirect(performAction(), routes.RepresenteeController.enterDateOfDeath())
-          }
-        }
-
-        "redirect to the check contact details page" when {
-
-          "there are no contact details in session" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(
-                  allQuestionsAnswers.copy(contactDetails = None),
-                  Left(PersonalRepresentative)
-                )._1
-              )
-            }
-
-            checkIsRedirect(
-              performAction(),
-              routes.RepresenteeController.checkContactDetails()
+        "that question hasn't been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(allQuestionsAnswers.copy(name = None), Left(PersonalRepresentative))._1
             )
           }
 
-          "the user has not confirmed the contact details" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithFillingOutReturn(
-                  allQuestionsAnswers.copy(hasConfirmedContactDetails = false),
-                  Right(Capacitor)
-                )._1
-              )
-            }
-
-            checkIsRedirect(
-              performAction(),
-              routes.RepresenteeController.checkContactDetails()
-            )
-          }
-
+          checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
         }
       }
+
+      "redirect to the enter id page" when {
+
+        "that question hasn't been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(allQuestionsAnswers.copy(id = None), Right(Capacitor))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.enterId())
+        }
+      }
+
+      "redirect to the enter date of death page" when {
+
+        "that question hasn't been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(allQuestionsAnswers.copy(dateOfDeath = None), Left(PersonalRepresentative))._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.RepresenteeController.enterDateOfDeath())
+        }
+      }
+
+      "redirect the page to confirm-person" when {
+
+        "the user has not yet confirmed the person" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithStartingNewDraftReturn(
+                allQuestionsAnswers.copy(hasConfirmedPerson = false),
+                Left(PersonalRepresentative)
+              )._1
+            )
+          }
+          checkIsRedirect(performAction(), routes.RepresenteeController.confirmPerson())
+        }
+
+      }
+
+      "redirect to the check contact details page" when {
+
+        "there are no contact details in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(
+                allQuestionsAnswers.copy(contactDetails = None),
+                Left(PersonalRepresentative)
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.RepresenteeController.checkContactDetails()
+          )
+        }
+
+        "the user has not confirmed the contact details" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(
+                allQuestionsAnswers.copy(hasConfirmedContactDetails = false),
+                Right(Capacitor)
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.RepresenteeController.checkContactDetails()
+          )
+        }
+
+      }
+
       "show the page" when {
 
         "the user has just answered all the questions and all updates are successful" in {
@@ -2058,28 +2039,30 @@ class RepresenteeControllerSpec
         }
 
         "the user has already answered all the questions" in {
-          val completeAnswers = sample[CompleteRepresenteeAnswers]
-          val (session, _, _) = sessionWithFillingOutReturn(completeAnswers, Left(PersonalRepresentative))
+          forAll { completeAnswers: CompleteRepresenteeAnswers =>
+            val (session, _, _) = sessionWithFillingOutReturn(completeAnswers, Left(PersonalRepresentative))
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
 
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("representee.cya.title"),
-            doc => {
-              doc.select("#back").attr("href") shouldBe returns.triage.routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresenting()
-                .url
-
-              doc.select("#content > article > form").attr("action") shouldBe routes.RepresenteeController
-                .checkYourAnswersSubmit()
-                .url
             }
-          )
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("representee.cya.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe returns.triage.routes.CommonTriageQuestionsController
+                  .whoIsIndividualRepresenting()
+                  .url
+
+                doc.select("#content > article > form").attr("action") shouldBe routes.RepresenteeController
+                  .checkYourAnswersSubmit()
+                  .url
+
+                RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(completeAnswers, doc)
+              }
+            )
+          }
         }
 
       }
@@ -2175,113 +2158,6 @@ class RepresenteeControllerSpec
       }
     }
 
-    "handling requests for check your answers page" must {
-      "redirect the page to confirm-person" when {
-        def performAction(): Future[Result] =
-          controller.checkYourAnswers()(FakeRequest())
-        "the user has not yet confirmed the person " when {
-          val requiredPreviousAnswers =
-            IncompleteRepresenteeAnswers(
-              Some(IndividualName("First", "Last")),
-              Some(sample[RepresenteeNino]),
-              Some(sample[DateOfDeath]),
-              None,
-              false,
-              false
-            )
-          "redirect to confirm person page" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithStartingNewDraftReturn(
-                  requiredPreviousAnswers,
-                  Left(PersonalRepresentative)
-                )._1
-              )
-            }
-            checkIsRedirect(performAction(), routes.RepresenteeController.confirmPerson())
-          }
-        }
-      }
-
-      "redirect the page to check-contact-details" when {
-        def performAction(): Future[Result] =
-          controller.checkYourAnswers()(FakeRequest())
-        "the user has confirmed the person but contact details has not been entered " when {
-          val requiredPreviousAnswers =
-            IncompleteRepresenteeAnswers(
-              Some(IndividualName("First", "Last")),
-              Some(sample[RepresenteeNino]),
-              Some(sample[DateOfDeath]),
-              None,
-              true,
-              false
-            )
-          "redirect to check contact details page" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithStartingNewDraftReturn(
-                  requiredPreviousAnswers,
-                  Left(PersonalRepresentative)
-                )._1
-              )
-            }
-            checkIsRedirect(performAction(), routes.RepresenteeController.checkContactDetails())
-          }
-        }
-      }
-      "redirect the page to enter-id" when {
-        def performAction(): Future[Result] =
-          controller.checkYourAnswers()(FakeRequest())
-        "the user has no id " when {
-          val requiredPreviousAnswers =
-            IncompleteRepresenteeAnswers(
-              Some(IndividualName("First", "Last")),
-              None,
-              Some(sample[DateOfDeath]),
-              None,
-              false,
-              false
-            )
-          "redirect to enter id page" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithStartingNewDraftReturn(
-                  requiredPreviousAnswers,
-                  Left(PersonalRepresentative)
-                )._1
-              )
-            }
-            checkIsRedirect(performAction(), routes.RepresenteeController.enterId())
-          }
-        }
-      }
-      "redirect the page to enter-name" when {
-        def performAction(): Future[Result] =
-          controller.checkYourAnswers()(FakeRequest())
-        "the user has no name" when {
-          val requiredPreviousAnswers =
-            IncompleteRepresenteeAnswers(None, None, None, None, false, false)
-          "redirect to enter name page" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithStartingNewDraftReturn(
-                  requiredPreviousAnswers,
-                  Left(PersonalRepresentative)
-                )._1
-              )
-            }
-
-            checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
-
-          }
-
-        }
-      }
-    }
   }
 
   def testFormError(
@@ -2336,6 +2212,55 @@ class RepresenteeControllerSpec
       }
     }
 
+}
+
+object RepresenteeControllerSpec extends Matchers {
+
+  def validateRepresenteeCheckYourAnswersPage(
+    answers: CompleteRepresenteeAnswers,
+    doc: Document
+  )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
+    val addressLines: List[String] = {
+      val lines = answers.contactDetails.address match {
+        case UkAddress(line1, line2, town, county, postcode) =>
+          List(Some(line1), line2, town, county, Some(postcode.value))
+        case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+          List(Some(line1), line2, line3, line4, postcode, country.name)
+      }
+
+      lines.collect { case Some(s) => s }
+    }
+
+    val expectedIdContent = answers.id match {
+      case RepresenteeCgtReference(cgtRef) =>
+        Some(
+          messagesApi("representee.cyaLabel.cgtReference", cgtRef.value)
+            .replaceAllLiterally("<br>", " ")
+        )
+      case _ =>
+        None
+    }
+
+    doc
+      .select("#personRepresented-answer")
+      .text() shouldBe s"${answers.name.makeSingleName()}${expectedIdContent.fold("")(s => s" $s")}"
+
+    doc.select("#contactName-answer").text() shouldBe answers.contactDetails.contactName.value
+
+    doc
+      .select("#address-answer")
+      .text()
+      .replaceAllLiterally(" ", "") shouldBe addressLines.mkString("")
+
+    doc.select("#email-answer").text() shouldBe answers.contactDetails.emailAddress.value
+
+    answers.dateOfDeath.foreach { date =>
+      doc.select("#dateOfDeath-answer").text() shouldBe TimeUtils.govShortDisplayFormat(date.value)(
+        MessagesImpl(lang, messagesApi)
+      )
+    }
+
+  }
 }
 
 class DisabledRepresenteeControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
