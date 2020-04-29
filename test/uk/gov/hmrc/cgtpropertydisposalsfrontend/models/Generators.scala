@@ -517,4 +517,5 @@ trait LowerPriorityRepresenteeAnswersGen { this: GenUtils =>
 
   implicit val representeeNinoGen: Gen[RepresenteeNino] = gen[RepresenteeNino]
 
+  implicit val dateOfDeathGen: Gen[DateOfDeath] = gen[DateOfDeath]
 }

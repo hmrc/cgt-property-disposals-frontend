@@ -40,19 +40,19 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait AddressControllerSpec[J <: JourneyStatus]
+trait AddressControllerSpec[A <: AddressJourneyType]
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
     with PostcodeFormValidationTests {
 
-  val validJourneyStatus: J
+  val validJourneyStatus: A
 
-  def updateAddress(journey: J, address: Address): JourneyStatus
+  def updateAddress(journey: A, address: Address): JourneyStatus
 
-  val mockUpdateAddress: Option[(J, Address, Either[Error, Unit]) => Unit]
+  val mockUpdateAddress: Option[(A, Address, Either[Error, Unit]) => Unit]
 
-  val controller: AddressController[J]
+  val controller: AddressController[A]
 
   val mockService = mock[UKAddressLookupService]
 
@@ -85,7 +85,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
   val addressLookupResult = AddressLookupResult(postcode, None, addresses)
 
   lazy val sessionWithValidJourneyStatus =
-    SessionData.empty.copy(journeyStatus = Some(validJourneyStatus))
+    SessionData.empty.copy(journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)))
 
   def userMessageKey(userType: UserType): String = userType match {
     case UserType.Individual   => ""
@@ -115,6 +115,11 @@ trait AddressControllerSpec[J <: JourneyStatus]
     performAction: () => Future[Result]
   )(implicit messagesApi: MessagesApi): Unit = {
 
+    lazy val expectedTitleKey = validJourneyStatus match {
+      case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => "isUk.representee.title"
+      case _                                                                      => "subscription.isUk.title"
+    }
+
     "show the page" when {
       "the address lookup results have been cleared from session" in {
         val session = sessionWithValidJourneyStatus.copy(
@@ -132,7 +137,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("subscription.isUk.title"))
+        contentAsString(result) should include(messageFromMessageKey(expectedTitleKey))
       }
 
       "there are no address lookup results to clear from session" in {
@@ -145,7 +150,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("subscription.isUk.title"))
+        contentAsString(result) should include(messageFromMessageKey(expectedTitleKey))
       }
     }
     "display an error page" when {
@@ -177,13 +182,19 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
     "return a form error" when {
       "no selection has been made" in {
+        val expectedErrorKey = validJourneyStatus match {
+          case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+            "isUk.representee.error.required"
+          case _ => "isUk.error.required"
+        }
+
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result = performAction(Seq.empty)
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("isUk.error.required"))
+        contentAsString(result) should include(messageFromMessageKey(expectedErrorKey))
       }
     }
 
@@ -214,18 +225,20 @@ trait AddressControllerSpec[J <: JourneyStatus]
     implicit messagesApi: MessagesApi
   ): Unit =
     s"display the enter UK address page for ${userTypeClue(userType)}" when {
-      val expectedTitleMessageKey =
-        controller.toAddressJourneyType(validJourneyStatus) match {
+      lazy val expectedTitleMessageKey =
+        validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             f.journey.draftReturn.fold(
               _ => "address.uk.returns.multipleDisposals.title",
               _ => s"address.uk.returns${userMessageKey(userType)}.singleDisposal.title"
             )
+          case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+            "address.uk.representee.title"
           case _ => "address.uk.title"
         }
 
       "the endpoint is requested" in {
-        val session = controller.toAddressJourneyType(validJourneyStatus) match {
+        val session = validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             SessionData.empty.copy(
               userType = Some(userType),
@@ -240,7 +253,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           case _ =>
             SessionData.empty.copy(
               userType            = Some(userType),
-              journeyStatus       = Some(validJourneyStatus),
+              journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
               addressLookupResult = Some(addressLookupResult)
             )
         }
@@ -337,8 +350,8 @@ trait AddressControllerSpec[J <: JourneyStatus]
     }
     "display an error page" when {
 
-      mockUpdateAddress.foreach { mockAddressUpdate =>
-        "the address cannot be updated" in {
+      "the address cannot be updated if updates are required" in {
+        mockUpdateAddress.foreach { mockAddressUpdate =>
           val newAddress = UkAddress("Test street", None, None, None, Postcode("W1A2HR"))
 
           inSequence {
@@ -396,9 +409,14 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
   def displayEnterNonUkPage(performAction: () => Future[Result])(implicit messagesApi: MessagesApi): Unit =
     "display the enter non UK address page" when {
+      lazy val expectedTitleKey = validJourneyStatus match {
+        case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => "nonUkAddress.representee.title"
+        case _                                                                      => "nonUkAddress.title"
+      }
+
       "the endpoint is requested" in {
         val session = SessionData.empty.copy(
-          journeyStatus       = Some(validJourneyStatus),
+          journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
           addressLookupResult = None
         )
         inSequence {
@@ -408,7 +426,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("nonUkAddress.title"))
+        contentAsString(result) should include(messageFromMessageKey(expectedTitleKey))
       }
     }
 
@@ -483,8 +501,8 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
     "display an error page" when {
 
-      mockUpdateAddress.foreach { mockAddressUpdate =>
-        "the address cannot be updated" in {
+      "the address cannot be updated if updates are required" in {
+        mockUpdateAddress.foreach { mockAddressUpdate =>
           val newAddress = NonUkAddress("House 1", None, None, None, None, Country("NZ", Some("New Zealand")))
 
           inSequence {
@@ -495,7 +513,6 @@ trait AddressControllerSpec[J <: JourneyStatus]
           checkIsTechnicalErrorPage(performAction(Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")))
         }
       }
-
       "the address cannot be stored in the session" in {
         val newAddress = NonUkAddress("House 1", None, None, None, None, Country("NZ", Some("New Zealand")))
         val updatedSession = sessionWithValidJourneyStatus.copy(
@@ -554,17 +571,21 @@ trait AddressControllerSpec[J <: JourneyStatus]
     implicit messagesApi: MessagesApi
   ): Unit =
     s"display the enter postcode page for ${userTypeClue(userType)}" when {
-      val expectedTitleMessageKey =
-        controller.toAddressJourneyType(validJourneyStatus) match {
+      lazy val expectedTitleMessageKey =
+        validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             f.journey.draftReturn.fold(
               _ => "enterPostcode.returns.multipleDisposals.title",
               _ => s"enterPostcode.returns${userMessageKey(userType)}.singleDisposal.title"
             )
+
+          case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+            "enterPostcode.representee.title"
+
           case _ => "enterPostcode.title"
         }
 
-      val session = controller.toAddressJourneyType(validJourneyStatus) match {
+      lazy val session = validJourneyStatus match {
         case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
           SessionData.empty.copy(
             userType = Some(userType),
@@ -579,7 +600,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         case _ =>
           SessionData.empty.copy(
             userType            = Some(userType),
-            journeyStatus       = Some(validJourneyStatus),
+            journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
             addressLookupResult = Some(addressLookupResult)
           )
       }
@@ -595,7 +616,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
       "there is an address lookup result in session" in {
         val addressLookupResult = AddressLookupResult(postcode, None, List.empty)
-        val session = controller.toAddressJourneyType(validJourneyStatus) match {
+        val session = validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             SessionData.empty.copy(
               userType = Some(userType),
@@ -610,7 +631,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           case _ =>
             SessionData.empty.copy(
               userType            = Some(userType),
-              journeyStatus       = Some(validJourneyStatus),
+              journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
               addressLookupResult = Some(addressLookupResult)
             )
         }
@@ -829,17 +850,21 @@ trait AddressControllerSpec[J <: JourneyStatus]
     }
 
     s"display the select address page for ${userTypeClue(userType)}" when {
-      val expectedMessageTitleKey = controller.toAddressJourneyType(validJourneyStatus) match {
+      lazy val expectedMessageTitleKey = validJourneyStatus match {
         case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
           f.journey.draftReturn.fold(
             _ => "address-select.returns.multipleDisposals.title",
             _ => s"address-select.returns${userMessageKey(userType)}.singleDisposal.title"
           )
+
+        case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+          "address-select.representee.title"
+
         case _ => "address-select.title"
       }
 
       s"there is an address lookup result in session for ${userTypeClue(userType)}" in {
-        val session = controller.toAddressJourneyType(validJourneyStatus) match {
+        val session = validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             SessionData.empty.copy(
               userType = Some(userType),
@@ -854,7 +879,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           case _ =>
             SessionData.empty.copy(
               userType            = Some(userType),
-              journeyStatus       = Some(validJourneyStatus),
+              journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
               addressLookupResult = Some(addressLookupResult)
             )
         }
@@ -878,7 +903,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
     whenNoAddressLookupResult: => Call,
     continue: => Call
   )(implicit messagesApi: MessagesApi): Unit = {
-    val sessionWithValidJourneyStatusAndAddressLookupResult =
+    lazy val sessionWithValidJourneyStatusAndAddressLookupResult =
       sessionWithValidJourneyStatus.copy(
         addressLookupResult = Some(addressLookupResult)
       )
@@ -922,8 +947,8 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
     "show an error page" when {
 
-      mockUpdateAddress.foreach { mockAddressUpdate =>
-        "the address cannot be updated" in {
+      "the address cannot be updated if updates are required" in {
+        mockUpdateAddress.foreach { mockAddressUpdate =>
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithValidJourneyStatusAndAddressLookupResult)

@@ -42,7 +42,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         backLink: Call,
         submit: Call,
         enterUkAddress: Call,
-        addressJourneyType: AddressJourneyType[_],
+        addressJourneyType: AddressJourneyType,
         isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
@@ -56,6 +56,8 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     _ => messages(s"$returnsKey.multipleDisposals.title"),
     _ => messages(s"$returnsKey$userKey.singleDisposal.title")
   )
+ case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+   messages("enterPostcode.representee.title")
  case _ => messages("enterPostcode.title")
 }}
 

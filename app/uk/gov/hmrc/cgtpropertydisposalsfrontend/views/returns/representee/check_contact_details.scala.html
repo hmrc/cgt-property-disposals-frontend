@@ -62,13 +62,13 @@
         @cyaRow(
             messages(s"$key.cyaLabel.address"),
             addressDisplay(contactDetails.address, Block),
-            Some(cyaChange(messages(s"$key.cyaChange.address"), "#")),
+            Some(cyaChange(messages(s"$key.cyaChange.address"), routes.ChangeRepresenteeContactAddressController.isUk().url)),
             "address"
         )
         @cyaRow(
             messages(s"$key.cyaLabel.email"),
             Html(contactDetails.emailAddress.value),
-            Some(cyaChange(messages(s"$key.cyaChange.email"), "#")),
+            Some(cyaChange(messages(s"$key.cyaChange.email"), routes.ChangeRepresenteeEmailController.enterEmail().url)),
             "emailAddress"
         )
     }

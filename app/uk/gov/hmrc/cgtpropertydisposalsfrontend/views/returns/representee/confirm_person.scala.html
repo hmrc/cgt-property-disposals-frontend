@@ -1,0 +1,104 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@*
+* Copyright 2020 HM Revenue & Customs
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*@
+@import play.api.i18n.Messages
+@import play.api.data.Form
+@import play.api.mvc.Call
+@import play.twirl.api.Html
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+
+@this(
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+summary_for_confirmation: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary_for_confirmation,
+radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input
+)
+
+@(
+id: RepresenteeReferenceId,
+name: IndividualName,
+representativeType: Either[PersonalRepresentative.type, Capacitor.type],
+displayReturnToSummaryLink: Boolean,
+form: Form[Boolean],
+backLink: Call
+    )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@title = @{
+    messages("representeeConfirmPerson.title")
+}
+@key = @{
+    "confirmed"
+}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@formTitle = @{messages("representeeConfirmPerson.formTitle")}
+
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+    @backLinkComponent(backLink)
+
+    @if(hasErrors) {
+        @errorSummary(form)
+    }
+    @caption(messages("representee.caption"))
+
+    @pageHeading(title)
+
+    @summary_for_confirmation(id, name, representativeType)
+
+    @formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
+        @yesNo(
+            fieldId = key,
+            label = Html(s"<h2>$formTitle</h2>"),
+            labelAsHeading = true,
+            errorKey = form.error(key).map(e => e.message),
+            hasErrors = hasErrors,
+            selected = form.value,
+            helpText = None
+        )
+
+        @submitButton(messages("button.saveAndContinue"))
+    }
+
+    @returnToSummaryLink(displayReturnToSummaryLink)
+
+}
+

@@ -37,7 +37,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AddressController[J <: JourneyStatus] {
+trait AddressController[A <: AddressJourneyType] {
   this: FrontendController with Logging with WithAuthAndSessionDataAction with SessionUpdates =>
 
   val errorHandler: ErrorHandler
@@ -48,18 +48,18 @@ trait AddressController[J <: JourneyStatus] {
   val enterUkAddressPage: views.html.address.enter_uk_address
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address
   val isUkPage: views.html.address.isUk
-  val toAddressJourneyType: J => AddressJourneyType[J]
+  val toJourneyStatus: A => JourneyStatus
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
 
-  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
+  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, A)]
 
-  def isATrust(journey: J): Boolean
+  def isATrust(journey: A): Boolean
 
-  def updateAddress(journey: J, address: Address, isManuallyEnteredAddress: Boolean)(
+  def updateAddress(journey: A, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier,
     request: Request[_]
-  ): EitherT[Future, Error, J]
+  ): EitherT[Future, Error, JourneyStatus]
 
   protected def backLinkCall: Call
   protected val isUkCall: Call
@@ -74,10 +74,10 @@ trait AddressController[J <: JourneyStatus] {
   protected val selectAddressSubmitCall: Call
   protected val continueCall: Call
 
-  protected val enterPostcodePageBackLink: J => Call = _ => isUkCall
+  protected val enterPostcodePageBackLink: A => Call = _ => isUkCall
 
   protected def withValidJourney(request: RequestWithSessionData[_])(
-    f: (SessionData, J) => Future[Result]
+    f: (SessionData, A) => Future[Result]
   ): Future[Result] =
     validJourney(request).fold[Future[Result]](toFuture, f.tupled)
 
@@ -91,10 +91,10 @@ trait AddressController[J <: JourneyStatus] {
                 logger.warn(s"Could not clear addressLookupResult", e)
                 errorHandler.errorResult()
               case Right(_) =>
-                Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, toAddressJourneyType(journey)))
+                Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, journey))
             }
           } else {
-            Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, toAddressJourneyType(journey)))
+            Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, journey))
           }
       }
     }
@@ -106,8 +106,7 @@ trait AddressController[J <: JourneyStatus] {
           Address.isUkForm
             .bindFromRequest()
             .fold[Future[Result]](
-              formWithErrors =>
-                BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall, toAddressJourneyType(journey))), {
+              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall, journey)), {
                 case true  => Redirect(enterPostcodeCall)
                 case false => Redirect(enterNonUkAddressCall)
               }
@@ -125,7 +124,7 @@ trait AddressController[J <: JourneyStatus] {
               backLinkCall,
               enterUkAddressSubmitCall,
               enterPostcodeCall,
-              toAddressJourneyType(journey),
+              journey,
               isATrust(journey)
             )
           )
@@ -146,7 +145,7 @@ trait AddressController[J <: JourneyStatus] {
                     backLinkCall,
                     enterUkAddressSubmitCall,
                     enterPostcodeCall,
-                    toAddressJourneyType(journey),
+                    journey,
                     isATrust(journey)
                   )
                 ),
@@ -164,7 +163,7 @@ trait AddressController[J <: JourneyStatus] {
               Address.nonUkAddressForm,
               isUkCall,
               enterNonUkAddressSubmitCall,
-              toAddressJourneyType(journey)
+              journey
             )
           )
       }
@@ -183,7 +182,7 @@ trait AddressController[J <: JourneyStatus] {
                     formWithErrors,
                     isUkCall,
                     enterNonUkAddressSubmitCall,
-                    toAddressJourneyType(journey)
+                    journey
                   )
                 ),
               storeAddress(continueCall, journey, true)
@@ -205,7 +204,7 @@ trait AddressController[J <: JourneyStatus] {
               enterPostcodePageBackLink(journey),
               enterPostcodeSubmitCall,
               enterUkAddressCall,
-              toAddressJourneyType(journey),
+              journey,
               isATrust(journey)
             )
           )
@@ -226,7 +225,7 @@ trait AddressController[J <: JourneyStatus] {
                     enterPostcodePageBackLink(journey),
                     enterPostcodeSubmitCall,
                     enterUkAddressCall,
-                    toAddressJourneyType(journey),
+                    journey,
                     isATrust(journey)
                   )
                 ), {
@@ -239,7 +238,7 @@ trait AddressController[J <: JourneyStatus] {
                         isUkCall,
                         enterPostcodeSubmitCall,
                         enterUkAddressCall,
-                        toAddressJourneyType(journey),
+                        journey,
                         isATrust(journey)
                       )
                     )
@@ -293,7 +292,7 @@ trait AddressController[J <: JourneyStatus] {
                   enterPostcodeCall,
                   selectAddressSubmitCall,
                   enterUkAddressCall,
-                  toAddressJourneyType(journey),
+                  journey,
                   isATrust(journey)
                 )
               )
@@ -322,7 +321,7 @@ trait AddressController[J <: JourneyStatus] {
                         enterPostcodeCall,
                         selectAddressSubmitCall,
                         enterUkAddressCall,
-                        toAddressJourneyType(journey),
+                        journey,
                         isATrust(journey)
                       )
                     ),
@@ -334,12 +333,12 @@ trait AddressController[J <: JourneyStatus] {
 
   protected def storeAddress(
     continue: Call,
-    currentJourneyStatus: J,
+    currentJourneyStatus: A,
     isManuallyEnteredAddress: Boolean
   )(address: Address)(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
       journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address, isManuallyEnteredAddress)
-      _ <- if (journeyWithUpdatedAddress === currentJourneyStatus)
+      _ <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
             EitherT.pure[Future, Error](())
           else {
             EitherT[Future, Error, Unit](

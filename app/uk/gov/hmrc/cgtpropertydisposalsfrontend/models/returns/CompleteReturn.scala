@@ -27,8 +27,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
@@ -44,6 +46,7 @@ object CompleteReturn {
     exemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
     yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
+    representeeAnswers: Option[CompleteRepresenteeAnswers],
     hasAttachments: Boolean
   ) extends CompleteReturn
 
@@ -58,10 +61,12 @@ object CompleteReturn {
             Some(e: CompleteExemptionAndLossesAnswers),
             Some(y: CompleteNonCalculatedYTDAnswers),
             Some(u: CompleteSupportingEvidenceAnswers),
-            _,
+            representeeAnswers,
             _
             ) =>
-          Some(CompleteMultipleDisposalsReturn(t, p, e, y, u, hasAttachments = true))
+          validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
+            CompleteMultipleDisposalsReturn(t, p, e, y, u, maybeCompleteRepresenteeAnswers, hasAttachments = true)
+          )
 
         case _ =>
           None
@@ -80,6 +85,7 @@ object CompleteReturn {
     yearToDateLiabilityAnswers: Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers],
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     initialGainOrLoss: Option[AmountInPence],
+    representeeAnswers: Option[CompleteRepresenteeAnswers],
     hasAttachments: Boolean
   ) extends CompleteReturn
 
@@ -98,11 +104,25 @@ object CompleteReturn {
             Some(y: CompleteCalculatedYTDAnswers),
             i,
             Some(u: CompleteSupportingEvidenceAnswers),
-            _,
+            representeeAnswers,
             _
             ) =>
           val hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
-          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Right(y), u, i, hasAttachments))
+          validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
+            CompleteSingleDisposalReturn(
+              t,
+              p,
+              d,
+              a,
+              r,
+              e,
+              Right(y),
+              u,
+              i,
+              maybeCompleteRepresenteeAnswers,
+              hasAttachments
+            )
+          )
 
         case DraftSingleDisposalReturn(
             _,
@@ -115,10 +135,24 @@ object CompleteReturn {
             Some(y: CompleteNonCalculatedYTDAnswers),
             i,
             Some(u: CompleteSupportingEvidenceAnswers),
-            _,
+            representeeAnswers,
             _
             ) =>
-          Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Left(y), u, i, hasAttachments = true))
+          validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
+            CompleteSingleDisposalReturn(
+              t,
+              p,
+              d,
+              a,
+              r,
+              e,
+              Left(y),
+              u,
+              i,
+              maybeCompleteRepresenteeAnswers,
+              hasAttachments = true
+            )
+          )
 
         case _ =>
           None
@@ -130,6 +164,21 @@ object CompleteReturn {
 
     }
   }
+
+  private def validRepresenteeAnswers(
+    individualUserType: Option[IndividualUserType],
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): Option[Option[CompleteRepresenteeAnswers]] =
+    (individualUserType, representeeAnswers) match {
+      case (Some(Capacitor) | Some(PersonalRepresentative), Some(r: CompleteRepresenteeAnswers)) =>
+        Some(Some(r))
+
+      case (Some(Capacitor) | Some(PersonalRepresentative), _) =>
+        None
+
+      case _ =>
+        Some(None)
+    }
 
   @silent
   implicit val format: OFormat[CompleteReturn] = {
@@ -144,6 +193,7 @@ object CompleteReturn {
     implicit val nonCalculatedYearToDateLiabilityFormat: OFormat[CompleteNonCalculatedYTDAnswers] = Json.format
     implicit val calculatedYearToDateLiabilityFormat: OFormat[CompleteCalculatedYTDAnswers]       = Json.format
     implicit val supportingDocumentsFormat: OFormat[CompleteSupportingEvidenceAnswers]            = Json.format
+    implicit val representeeAnswersFormat: OFormat[CompleteRepresenteeAnswers]                    = Json.format
     derived.oformat()
   }
 

@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import scala.concurrent.Future
 
@@ -383,6 +384,7 @@ class CommonTriageQuestionsControllerSpec
             triageAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self)
             ),
+            representeeAnswers        = None,
             propertyAddress           = None,
             disposalDetailsAnswers    = None,
             acquisitionDetailsAnswers = None,
@@ -543,6 +545,7 @@ class CommonTriageQuestionsControllerSpec
                 d.copy(
                   triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
                     .copy(individualUserType = Some(IndividualUserType.Capacitor)),
+                  representeeAnswers        = None,
                   propertyAddress           = None,
                   disposalDetailsAnswers    = None,
                   acquisitionDetailsAnswers = None,
@@ -582,6 +585,7 @@ class CommonTriageQuestionsControllerSpec
               d =>
                 d.copy(
                   triageAnswers             = newAnswers,
+                  representeeAnswers        = None,
                   propertyAddress           = None,
                   disposalDetailsAnswers    = None,
                   acquisitionDetailsAnswers = None,
@@ -622,6 +626,7 @@ class CommonTriageQuestionsControllerSpec
               d =>
                 d.copy(
                   triageAnswers                 = newAnswers,
+                  representeeAnswers            = None,
                   examplePropertyDetailsAnswers = None,
                   yearToDateLiabilityAnswers    = None,
                   supportingEvidenceAnswers     = None
@@ -687,12 +692,16 @@ class CommonTriageQuestionsControllerSpec
           )
         }
 
-        "the user is on the single disposal journey and has already answered the question" in {
+        "the user is on the single disposal journey, selected 'self' individual user type and" +
+          "has already answered the question" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithFillingOutReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true
+                )
               )._1
             )
           }
@@ -702,6 +711,66 @@ class CommonTriageQuestionsControllerSpec
             messageFromMessageKey("numberOfProperties.title"), { doc =>
               doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .howManyPropertiesSubmit()
+                .url
+              doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
+            }
+          )
+        }
+
+        "the user is on the single disposal journey, selected 'capacitor' individual user type and" +
+          "has already answered the question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.Capacitor),
+                  hasConfirmedSingleDisposal = true
+                )
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("numberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe returns.representee.routes.RepresenteeController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
+                .howManyPropertiesSubmit()
+                .url
+              doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
+            }
+          )
+        }
+
+        "the user is on the single disposal journey, selected 'personal representative' individual user type and" +
+          "has already answered the question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.PersonalRepresentative),
+                  hasConfirmedSingleDisposal = true
+                )
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("numberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe returns.representee.routes.RepresenteeController
+                .checkYourAnswers()
                 .url
               doc
                 .select("#content > article > form")
@@ -1238,9 +1307,9 @@ class CommonTriageQuestionsControllerSpec
                 doc.select("#content > article > p:nth-child(4)").text() shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.non-uk.p2"
                 )
-                doc.select("#content > article > p:nth-child(5)").html() shouldBe messageFromMessageKey(
+                doc.select("#content > article > p:nth-child(6)").html() shouldBe messageFromMessageKey(
                   "disposalDateTooEarly.non-uk.p3",
-                  viewConfig.reportingCgtBefore6April2020
+                  viewConfig.nrcgtReturn
                 )
               }
             )
@@ -1481,41 +1550,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"),
-              doc =>
-                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
-                  .assetTypeForNonUkResidents()
-                  .url
-            )
-          }
-
-          "the asset type is mixed use" in {
-            test(AssetType.MixedUse)
-          }
-
-          "the asset type is indirect disposal" in {
-            test(AssetType.IndirectDisposal)
-          }
-
-        }
-
-        "the trust is on a single disposal journey and" when {
-
-          def test(assetType: AssetType): Unit = {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionDataWithStartingNewDraftReturn(
-                  Right(sample[CompleteSingleDisposalTriageAnswers].copy(assetType = assetType)),
-                  Left(sample[TrustName]),
-                  UserType.Organisation
-                )._1
-              )
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.trust.title"),
+              messageFromMessageKey("assetTypeNotYetImplemented.title"),
               doc =>
                 doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
                   .assetTypeForNonUkResidents()
@@ -1548,41 +1583,7 @@ class CommonTriageQuestionsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"),
-              doc =>
-                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
-                  .assetTypeForNonUkResidents()
-                  .url
-            )
-          }
-
-          "the asset type is mixed use" in {
-            test(AssetType.MixedUse)
-          }
-
-          "the asset type is indirect disposal" in {
-            test(AssetType.IndirectDisposal)
-          }
-
-        }
-
-        "the trust is on a multiple disposals journey and" when {
-
-          def test(assetType: AssetType): Unit = {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionDataWithStartingNewDraftReturn(
-                  Left(sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(assetType))),
-                  Left(sample[TrustName]),
-                  UserType.Organisation
-                )._1
-              )
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("disposalDateMixedUseOrIndirect.trust.title"),
+              messageFromMessageKey("assetTypeNotYetImplemented.title"),
               doc =>
                 doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
                   .assetTypeForNonUkResidents()

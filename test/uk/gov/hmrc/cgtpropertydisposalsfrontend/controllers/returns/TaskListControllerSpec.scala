@@ -56,8 +56,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
@@ -184,11 +186,77 @@ class TaskListControllerSpec
         )
       }
 
+      "display the page with the proper person represented section status" when {
+
+        "the individual user type is personal representative or capacitor and" when {
+
+          "the section has not been started" in {
+            val draftReturn =
+              sample[DraftSingleDisposalReturn].copy(
+                triageAnswers =
+                  sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = None
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.ToDo,
+              _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is incomplete" in {
+            val draftReturn =
+              sample[DraftSingleDisposalReturn].copy(
+                triageAnswers =
+                  sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[IncompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.InProgress,
+              _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is complete" in {
+            val draftReturn =
+              sample[DraftSingleDisposalReturn].copy(
+                triageAnswers =
+                  sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.Complete
+            )
+          }
+
+        }
+
+      }
+
       "display the page with the proper single disposal triage section status" when {
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
           val incompleteTriage =
-            sample[DraftSingleDisposalReturn].copy(triageAnswers = sample[IncompleteSingleDisposalTriageAnswers])
+            sample[DraftSingleDisposalReturn].copy(
+              triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = None)
+            )
           testStateOfSection(
             incompleteTriage
           )(
@@ -201,49 +269,10 @@ class TaskListControllerSpec
 
         }
 
-        "the session data indicates Enter initial gain or loss" in {
-          testStateOfSection(
-            sample[DraftSingleDisposalReturn]
-              .copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(assetType = AssetType.Residential)
-                  .copy(countryOfResidence = Country("TR", Some("Turkey"))),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
-                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2010, 10, 1))))
-              )
-              .copy(initialGainOrLoss = None)
-          )(
-            "initialGainOrLoss",
-            messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
-            initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
-            TaskListStatus.InProgress
-          )
-        }
-
-        "the session data indicates Submit initial gain or loss " in {
-          testStateOfSection(
-            sample[DraftSingleDisposalReturn]
-              .copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(assetType = AssetType.Residential)
-                  .copy(countryOfResidence = Country("TR", Some("Turkey"))),
-                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
-                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2010, 10, 1))))
-              )
-              .copy(initialGainOrLoss = Some(AmountInPence(0)))
-          )(
-            "initialGainOrLoss",
-            messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
-            initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
-            TaskListStatus.Complete
-          )
-        }
-
         "the session data indicates that they are filling in a return and the triage section is complete" in {
           testStateOfSection(
-            sample[DraftSingleDisposalReturn].copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers])
+            sample[DraftSingleDisposalReturn]
+              .copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None))
           )(
             "canTheyUseOurService",
             messageFromMessageKey("task-list.triage.link"),
@@ -259,7 +288,10 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and enter property address is todo" in {
           testStateOfSection(
             sample[DraftSingleDisposalReturn]
-              .copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers], propertyAddress = None)
+              .copy(
+                triageAnswers   = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+                propertyAddress = None
+              )
           )(
             "propertyAddress",
             messageFromMessageKey("task-list.enter-property-address.link"),
@@ -271,7 +303,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and enter property address is complete" in {
           testStateOfSection(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers   = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers   = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress = Some(sample[UkAddress])
             )
           )(
@@ -289,7 +321,10 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and the section has not been started yet is todo" in {
           testStateOfSection(
             sample[DraftSingleDisposalReturn]
-              .copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers], disposalDetailsAnswers = None)
+              .copy(
+                triageAnswers          = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+                disposalDetailsAnswers = None
+              )
           )(
             "disposalDetails",
             messageFromMessageKey("task-list.disposals-details.link"),
@@ -302,7 +337,7 @@ class TaskListControllerSpec
           testStateOfSection(
             sample[DraftSingleDisposalReturn]
               .copy(
-                triageAnswers          = sample[CompleteSingleDisposalTriageAnswers],
+                triageAnswers          = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
                 disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])
               )
           )(
@@ -316,7 +351,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have completed the section" in {
           testStateOfSection(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers          = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers          = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers])
             )
           )(
@@ -334,7 +369,10 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and the section has not been started yet is todo" in {
           testStateOfSection(
             sample[DraftSingleDisposalReturn]
-              .copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers], acquisitionDetailsAnswers = None)
+              .copy(
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+                acquisitionDetailsAnswers = None
+              )
           )(
             "acquisitionDetails",
             messageFromMessageKey("task-list.acquisition-details.link"),
@@ -347,7 +385,7 @@ class TaskListControllerSpec
           testStateOfSection(
             sample[DraftSingleDisposalReturn]
               .copy(
-                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
                 acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])
               )
           )(
@@ -362,7 +400,7 @@ class TaskListControllerSpec
           testStateOfSection(
             sample[DraftSingleDisposalReturn]
               .copy(
-                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
               )
           )(
@@ -388,7 +426,7 @@ class TaskListControllerSpec
         "the session data indicates that the property address has not been entered in" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress           = None,
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -404,7 +442,7 @@ class TaskListControllerSpec
           List(None, Some(sample[IncompleteDisposalDetailsAnswers])).foreach { disposalDetailsState =>
             test(
               sample[DraftSingleDisposalReturn].copy(
-                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
                 propertyAddress           = Some(sample[UkAddress]),
                 disposalDetailsAnswers    = disposalDetailsState,
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -421,7 +459,7 @@ class TaskListControllerSpec
           List(None, Some(sample[IncompleteAcquisitionDetailsAnswers])).foreach { acquisitionDetailsAnswers =>
             test(
               sample[DraftSingleDisposalReturn].copy(
-                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
                 propertyAddress           = Some(sample[UkAddress]),
                 disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = acquisitionDetailsAnswers,
@@ -438,7 +476,7 @@ class TaskListControllerSpec
           "been completed and the reliefs section has not been started yet" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -454,7 +492,7 @@ class TaskListControllerSpec
           "been completed and the reliefs section has been started but not completed yet" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -469,7 +507,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have completed the section" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -489,6 +527,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = None,
                 countryOfResidence = country,
                 assetType          = AssetType.Residential
               ),
@@ -522,7 +561,7 @@ class TaskListControllerSpec
         "the session data indicates that the reliefs section is has not yet been started" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -536,7 +575,7 @@ class TaskListControllerSpec
         "the session data indicates that the reliefs section is has not yet been completed" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -550,7 +589,7 @@ class TaskListControllerSpec
         "the reliefs section has been completed and the section has not been started yet" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -561,24 +600,10 @@ class TaskListControllerSpec
           )
         }
 
-        "the losses and exemptions section section has been completed and the section has not been started yet" in {
-          test(
-            sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
-              propertyAddress           = Some(sample[UkAddress]),
-              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
-              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
-              reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
-              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
-            ),
-            TaskListStatus.Complete
-          )
-        }
-
         "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress           = None,
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -592,7 +617,8 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have completed the section" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -618,7 +644,7 @@ class TaskListControllerSpec
         "the session data indicates that the exemptions and losses section has not yet been started" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -633,7 +659,7 @@ class TaskListControllerSpec
         "the session data indicates that the reliefs section is has not yet been completed" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -648,7 +674,7 @@ class TaskListControllerSpec
         "the reliefs section has been completed and the section has not been started yet" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -663,7 +689,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress            = None,
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -678,7 +704,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have completed the section" in {
           test(
             sample[DraftSingleDisposalReturn].copy(
-              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
               propertyAddress            = None,
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -706,7 +732,11 @@ class TaskListControllerSpec
           testSectionNonExistent(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.Residential, countryOfResidence = Country("GB", Some("United Kingdom"))),
+                .copy(
+                  assetType          = AssetType.Residential,
+                  countryOfResidence = Country("GB", Some("United Kingdom")),
+                  individualUserType = None
+                ),
               reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
                 answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
@@ -721,8 +751,11 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.Residential)
-                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+                .copy(
+                  assetType          = AssetType.Residential,
+                  countryOfResidence = Country("TR", Some("Turkey")),
+                  individualUserType = None
+                ),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
                 answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
@@ -737,8 +770,11 @@ class TaskListControllerSpec
           testSectionNonExistent(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.NonResidential)
-                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+                .copy(
+                  assetType          = AssetType.NonResidential,
+                  countryOfResidence = Country("TR", Some("Turkey")),
+                  individualUserType = None
+                ),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
                 answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
@@ -752,8 +788,11 @@ class TaskListControllerSpec
           testSectionNonExistent(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.Residential)
-                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+                .copy(
+                  assetType          = AssetType.Residential,
+                  countryOfResidence = Country("TR", Some("Turkey")),
+                  individualUserType = None
+                ),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
                 answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2020, 10, 1)))
@@ -847,11 +886,75 @@ class TaskListControllerSpec
         )
       }
 
+      "display the page with the proper person represented section status" when {
+
+        "the individual user type is personal representative or capacitor and" when {
+
+          "the section has not been started" in {
+            val draftReturn =
+              sample[DraftMultipleDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = None
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.ToDo,
+              _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is incomplete" in {
+            val draftReturn =
+              sample[DraftMultipleDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[IncompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.InProgress,
+              _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is complete" in {
+            val draftReturn =
+              sample[DraftMultipleDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.Complete
+            )
+          }
+
+        }
+
+      }
+
       "display the page with the proper multiple disposal triage section status" when {
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
           val incompleteTriage = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers]
+            triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
           )
 
           testStateOfSection(
@@ -867,12 +970,12 @@ class TaskListControllerSpec
         }
 
         "the session data indicates that they are filling in a return and the triage section is complete" in {
-          val completeTraige = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+          val completeTriage = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
           )
 
           testStateOfSection(
-            completeTraige
+            completeTriage
           )(
             "canTheyUseOurService",
             messageFromMessageKey("task-list.triage.link"),
@@ -887,7 +990,7 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the enter details of one property section is incomplete" in {
           val incompletePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
             examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
           )
 
@@ -905,7 +1008,7 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the enter details of one property section is complete" in {
           val completePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
           )
 
@@ -926,7 +1029,7 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the enter losses and exemptions section is incomplete" in {
           val incompleteExemptionAndLossesAnswers = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[IncompleteExemptionAndLossesAnswers])
           )
@@ -945,7 +1048,7 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the enter losses and exemptions section is complete" in {
           val completeExemptionAndLossesAnswers = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers])
           )
@@ -968,7 +1071,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and" +
           " the enter capital gains tax liability so far this tax year section is incomplete" in {
           val incompleteNonCalculatedYTDAnswers = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
             yearToDateLiabilityAnswers    = Some(sample[NonCalculatedYTDAnswers])
@@ -992,7 +1095,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and" +
           " the check and send return, pay any tax due section is incomplete" in {
           val checkAllAnswersAndSubmitAnswers = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers],
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
             exemptionAndLossesAnswers     = Some(sample[CompleteExemptionAndLossesAnswers]),
             yearToDateLiabilityAnswers    = Some(sample[CompleteCalculatedYTDAnswers]),

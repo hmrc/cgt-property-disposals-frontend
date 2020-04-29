@@ -27,9 +27,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.EnteringSubscriptionEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
@@ -38,28 +39,39 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import scala.concurrent.Future
 
 class SubscriptionEnterEmailControllerSpec
-    extends EmailControllerSpec[SubscriptionMissingData, SubscriptionMissingData]
+    extends EmailControllerSpec[EnteringSubscriptionEmail]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val isAmendJourney: Boolean = false
+  override def toJourneyStatus(journeyType: EnteringSubscriptionEmail): JourneyStatus = journeyType.journey
 
-  override val validJourneyStatus: SubscriptionMissingData =
-    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None), None, sample[GGCredId], None)
-
-  override val validVerificationCompleteJourneyStatus: SubscriptionMissingData =
-    SubscriptionMissingData(
-      sample[BusinessPartnerRecord].copy(emailAddress = None),
-      Some(sample[Email]),
-      sample[GGCredId],
-      None
+  override val validJourneyStatus: EnteringSubscriptionEmail =
+    EnteringSubscriptionEmail(
+      SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None), None, sample[GGCredId], None)
     )
 
-  override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
-    journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email)))
+  override val validVerificationCompleteJourneyStatus: EnteringSubscriptionEmail =
+    EnteringSubscriptionEmail(
+      SubscriptionMissingData(
+        sample[BusinessPartnerRecord].copy(emailAddress = None),
+        Some(sample[Email]),
+        sample[GGCredId],
+        None
+      )
+    )
+
+  override def updateEmail(
+    enteringSubscriptionEmail: EnteringSubscriptionEmail,
+    email: Email
+  ): EnteringSubscriptionEmail = {
+    val journey = enteringSubscriptionEmail.journey
+    EnteringSubscriptionEmail(
+      journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email)))
+    )
+  }
 
   override val mockUpdateEmail
-    : Option[(SubscriptionMissingData, SubscriptionMissingData, Either[Error, Unit]) => Unit] = None
+    : Option[(EnteringSubscriptionEmail, EnteringSubscriptionEmail, Either[Error, Unit]) => Unit] = None
 
   override lazy val controller: SubscriptionEnterEmailController = instanceOf[SubscriptionEnterEmailController]
 
@@ -93,7 +105,7 @@ class SubscriptionEnterEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        ContactName(validJourneyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName())),
+        ContactName(validJourneyStatus.journey.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName())),
         emailRoutes.SubscriptionEnterEmailController.verifyEmail,
         emailRoutes.SubscriptionEnterEmailController.checkYourInbox()
       )

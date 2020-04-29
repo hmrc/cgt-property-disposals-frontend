@@ -46,6 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, Tru
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
@@ -100,7 +101,8 @@ class MultipleDisposalsTriageControllerSpec
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers),
       subscribedDetails      = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber   = if (isAgent) Some(sample[AgentReferenceNumber]) else None
+      agentReferenceNumber   = if (isAgent) Some(sample[AgentReferenceNumber]) else None,
+      representeeAnswers     = Some(sample[IncompleteRepresenteeAnswers])
     )
     SessionData.empty.copy(
       journeyStatus = Some(startingNewDraftReturn),
@@ -2933,7 +2935,7 @@ class MultipleDisposalsTriageControllerSpec
         )
       }
 
-      "redirect to the enter represented person's name page page" when {
+      "redirect to the enter represented person's name page" when {
 
         "an individual user type of capacitor is found" in {
           testRedirectWhenIncomplete(
@@ -3021,7 +3023,7 @@ class MultipleDisposalsTriageControllerSpec
           )
 
           forAll { assetTypes: List[AssetType] =>
-            whenever(!invalidAssetTypes.contains(assetTypes) && assetTypes.nonEmpty) {
+            whenever(!invalidAssetTypes.contains(assetTypes.distinct) && assetTypes.nonEmpty) {
               val (session, journey, draftReturn) =
                 sessionDataWithFillingOutReturn(allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)))
               val updatedDraftReturn =

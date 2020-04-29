@@ -27,36 +27,44 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.ChangingRegistrationEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 
 import scala.concurrent.Future
 
 class RegistrationChangeEmailControllerSpec
-    extends EmailControllerSpec[RegistrationReady, RegistrationReady]
+    extends EmailControllerSpec[ChangingRegistrationEmail]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val isAmendJourney: Boolean = false
+  override def toJourneyStatus(journeyType: ChangingRegistrationEmail): JourneyStatus = journeyType.journey
 
-  override val validJourneyStatus: RegistrationReady =
-    sample[RegistrationReady]
+  override val validJourneyStatus: ChangingRegistrationEmail =
+    ChangingRegistrationEmail(sample[RegistrationReady])
 
-  override val validVerificationCompleteJourneyStatus: RegistrationReady =
+  override val validVerificationCompleteJourneyStatus: ChangingRegistrationEmail =
     validJourneyStatus
 
-  override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
-    journey.copy(
-      registrationDetails = journey.registrationDetails.copy(
-        emailAddress = email,
-        emailSource  = EmailSource.ManuallyEntered
+  override def updateEmail(
+    changingRegistrationEmail: ChangingRegistrationEmail,
+    email: Email
+  ): ChangingRegistrationEmail =
+    ChangingRegistrationEmail(
+      changingRegistrationEmail.journey.copy(
+        registrationDetails = changingRegistrationEmail.journey.registrationDetails.copy(
+          emailAddress = email,
+          emailSource  = EmailSource.ManuallyEntered
+        )
       )
     )
 
-  override val mockUpdateEmail: Option[(RegistrationReady, RegistrationReady, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail
+    : Option[(ChangingRegistrationEmail, ChangingRegistrationEmail, Either[Error, Unit]) => Unit] =
+    None
 
   override lazy val controller: RegistrationChangeEmailController = instanceOf[RegistrationChangeEmailController]
 
@@ -91,7 +99,7 @@ class RegistrationChangeEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        ContactName(validJourneyStatus.registrationDetails.name.makeSingleName()),
+        ContactName(validJourneyStatus.journey.registrationDetails.name.makeSingleName()),
         emailRoutes.RegistrationChangeEmailController.verifyEmail,
         emailRoutes.RegistrationChangeEmailController.checkYourInbox()
       )

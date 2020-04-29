@@ -24,38 +24,48 @@ import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.ChangingSubscriptionEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 
 import scala.concurrent.Future
 
 class SubscriptionChangeEmailControllerSpec
-    extends EmailControllerSpec[SubscriptionReady, SubscriptionReady]
+    extends EmailControllerSpec[ChangingSubscriptionEmail]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override val isAmendJourney: Boolean = true
+  override def toJourneyStatus(journeyType: ChangingSubscriptionEmail): JourneyStatus = journeyType.journey
 
-  override val validJourneyStatus: SubscriptionReady =
-    sample[SubscriptionReady]
+  override val validJourneyStatus: ChangingSubscriptionEmail =
+    ChangingSubscriptionEmail(sample[SubscriptionReady])
 
-  override val validVerificationCompleteJourneyStatus: SubscriptionReady =
+  override val validVerificationCompleteJourneyStatus: ChangingSubscriptionEmail =
     validJourneyStatus
 
-  override def updateEmail(journey: SubscriptionReady, email: Email): SubscriptionReady =
-    journey.copy(
-      subscriptionDetails = journey.subscriptionDetails.copy(
-        emailAddress = email,
-        emailSource  = EmailSource.ManuallyEntered
+  override def updateEmail(
+    changingSubscriptionEmail: ChangingSubscriptionEmail,
+    email: Email
+  ): ChangingSubscriptionEmail = {
+    val journey = changingSubscriptionEmail.journey
+    ChangingSubscriptionEmail(
+      journey.copy(
+        subscriptionDetails = journey.subscriptionDetails.copy(
+          emailAddress = email,
+          emailSource  = EmailSource.ManuallyEntered
+        )
       )
     )
+  }
 
-  override val mockUpdateEmail: Option[(SubscriptionReady, SubscriptionReady, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail
+    : Option[(ChangingSubscriptionEmail, ChangingSubscriptionEmail, Either[Error, Unit]) => Unit] =
+    None
 
   override lazy val controller: SubscriptionChangeEmailController = instanceOf[SubscriptionChangeEmailController]
 
@@ -90,7 +100,7 @@ class SubscriptionChangeEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        validJourneyStatus.subscriptionDetails.contactName,
+        validJourneyStatus.journey.subscriptionDetails.contactName,
         emailRoutes.SubscriptionChangeEmailController.verifyEmail,
         emailRoutes.SubscriptionChangeEmailController.checkYourInbox()
       )

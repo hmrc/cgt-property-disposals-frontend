@@ -14,12 +14,15 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.either._
+
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 
@@ -42,11 +45,13 @@
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
         initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary,
         supportingEvidenceSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary,
+        representeeSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
         printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
 @(completeReturn: CompleteReturn, rebasingEligibilityUtil: RebasingEligibilityUtil, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentative
 @title = @{ messages("checkAllAnswers.title") }
 
 @mainTemplate(title = title, userType = request.userType) {
@@ -57,7 +62,15 @@
 
   @completeReturn match {
     case s: CompleteSingleDisposalReturn => {
-     <h2>@messages("task-list.triage.link")</h2>
+      @s.representeeAnswers.map { representeeAnswers =>
+       <h2 class="heading-medium">@messages("task-list.representee.link")</h2>
+      @representeeSummary(
+       representeeAnswers,
+       Either.fromOption(representeeAnswers.dateOfDeath.map(_ => PersonalRepresentative), Capacitor).swap
+      )
+      }
+
+     <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
      @singleDisposalTriageSummary(s.triageAnswers, isATrust)
 
      <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
@@ -97,7 +110,15 @@
     }
 
       case m: CompleteMultipleDisposalsReturn => {
-       <h2>@messages("task-list.triage.link")</h2>
+       @m.representeeAnswers.map { representeeAnswers =>
+        <h2 class="heading-medium">@messages("task-list.representee.link")</h2>
+       @representeeSummary(
+        representeeAnswers,
+        Either.fromOption(representeeAnswers.dateOfDeath.map(_ => PersonalRepresentative), Capacitor).swap
+       )
+       }
+
+       <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
        @multipleDisposalsTriageSummary(m.triageAnswers, isATrust)
 
        <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>

@@ -20,7 +20,6 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,32 +27,25 @@ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(backLink: Call, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
-@isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@key = @{ "assetTypeNotYetImplemented" }
 
-@key = @{"disposalDateMixedUseOrIndirect"}
-
-@title = @{messages(s"$key$userKey.title")}
+@title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
 @backLinkComponent(backLink)
 
 @pageHeading(title)
-<p>
- @messages(s"$key$userKey.p1.reason1")
-</p>
-<p>
- @messages(s"$key$userKey.p1.reason2")
-</p>
+<p>@messages(s"$key.p1")</p>
+<ul class="list-bullet">
+ <li>@messages(s"$key.li1")</li>
+ <li>@messages(s"$key.li2")</li>
+</ul>
 
-<h2>@messages(s"$key$userKey.h2")</h2>
-<p>
- @Html(messages(s"$key$userKey.p2", appConfig.nrcgtReturn))
-</p>
-<p>
- @messages(s"$key$userKey.p3")
-</p>
+ <h2 class="heading-medium">@messages(s"$key.h2")</h2>
+
+ <p>@Html(messages(s"$key.p2", appConfig.nrcgtReturn))</p>
+
 }

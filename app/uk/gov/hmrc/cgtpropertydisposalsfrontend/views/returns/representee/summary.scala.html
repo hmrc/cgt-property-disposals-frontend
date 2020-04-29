@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId._
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -46,7 +47,12 @@
 
     @cyaRow(
         messages("representee.cyaLabel.personRepresented"),
-        Html(s"""${answers.name.makeSingleName()}<br>${answers.id}"""),
+        Html(s"""${
+            answers.name.makeSingleName()}<br>
+            ${answers.id match {
+                case RepresenteeCgtReference(cgtReference) => messages("representee.cyaLabel.cgtReference") + cgtReference.value
+                case _ => ""
+            }}"""),
         Some(cyaChange(messages("representee.cyaChange.personRepresented"), routes.RepresenteeController.enterName().url)),
         "personRepresented"
     )
@@ -69,13 +75,13 @@
     @cyaRow(
         messages("representee.cyaLabel.address"),
         addressDisplay(answers.contactDetails.address, Block),
-        Some(cyaChange(messages("representee.cyaChange.address"), "#")),
+        Some(cyaChange(messages("representee.cyaChange.address"), routes.ChangeRepresenteeContactAddressController.isUk().url)),
         "address"
     )
     @cyaRow(
         messages("representee.cyaLabel.email"),
         Html(answers.contactDetails.emailAddress.value),
-        Some(cyaChange(messages("representee.cyaChange.email"), "#")),
+        Some(cyaChange(messages("representee.cyaChange.email"), routes.ChangeRepresenteeEmailController.enterEmail().url)),
         "email"
     )
 
