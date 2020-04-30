@@ -932,26 +932,51 @@ returns.disposal-details.caption=Sale or disposal details
 shareOfProperty.title=How much of the property did you own?
 shareOfProperty.agent.title=How much of the property did your client own?
 shareOfProperty.trust.title=How much of the property did the trust own?
+shareOfProperty.personalRep.title=How much of the property did the person own? personal rep
+shareOfProperty.capacitor.title=How much of the property did the person own? capacitor
+
 shareOfProperty.error.required=Select how much of the property you owned
 shareOfProperty.agent.error.required=Select how much of the property your client owned
 shareOfProperty.trust.error.required=Select how much of the property the trust owned
+shareOfProperty.personalRep.error.required=Select how much of the property the person owned
+shareOfProperty.capacitor.error.required=Select how much of the property the person owned
 
 returns.shareOfProperty.Full=100%
 returns.shareOfProperty.Half=50%
 returns.shareOfProperty.Other=Other share
 percentageShare.label=Percentage you owned
+percentageShare.agent.label=Percentage your client owned
+percentageShare.trust.label=Percentage your trust owned
+percentageShare.personalRep.label=Percentage the person owned
+percentageShare.capacitor.label=Percentage the person owned
+
+
 percentageShare.error.required=Enter how much of the property you owned as a percentage
 percentageShare.agent.error.required=Enter how much of the property your client owned as a percentage
 percentageShare.trust.error.required=Enter how much of the property the trust owned as a percentage
+percentageShare.personalRep.error.required=Enter how much of the property the person owned as a percentage
+percentageShare.capacitor.error.required=Enter how much of the property the person owned as a percentage
+
+
 percentageShare.error.invalid=The percentage of the property you owned must be a number
 percentageShare.agent.error.invalid=The percentage of the property your client owned must be a number
 percentageShare.trust.error.invalid=The percentage of the property the trust owned must be a number
+percentageShare.personalRep.error.invalid=The percentage of the property the person owned must be a number
+percentageShare.capacitor.error.invalid=The percentage of the property the person owned must be a number
+
 percentageShare.error.tooLarge=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.agent.error.tooLarge=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.trust.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.personalRep.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.capacitor.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+
+
 percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.agent.error.tooSmall=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.trust.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.personalRep.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.capacitor.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
 percentageShare.agent.error.tooManyDecimals=The percentage of the property your client owned must have 2 decimal places or less, for example 33.33
 percentageShare.trust.error.tooManyDecimals=The percentage of the property the trust owned must have 2 decimal places or less, for example 33.33

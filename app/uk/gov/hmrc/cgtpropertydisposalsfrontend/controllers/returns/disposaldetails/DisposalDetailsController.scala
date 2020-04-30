@@ -178,14 +178,19 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, _, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         displayPage(answers)(
           form = _.fold(
             _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
             c => shareOfPropertyForm.fill(c.shareOfProperty)
           )
         )(
-          page = howMuchDidYouOwnPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+          page = howMuchDidYouOwnPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            draftReturn.triageAnswers.representativeType()
+          )
         )(
           requiredPreviousAnswer               = _ => Some(()),
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -199,7 +204,12 @@ class DisposalDetailsController @Inject() (
         submitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = shareOfPropertyForm
         )(
-          page = howMuchDidYouOwnPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+          page = howMuchDidYouOwnPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            draftReturn.triageAnswers.representativeType()
+          )
         )(
           requiredPreviousAnswer               = _ => Some(()),
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
