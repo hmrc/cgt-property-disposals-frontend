@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordResponse
@@ -51,6 +51,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPar
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.{change_contact_name, confirm_person}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -73,7 +74,9 @@ class RepresenteeController @Inject() (
   enterDateOfDeathPage: representeePages.enter_date_of_death,
   checkContactDetailsPage: representeePages.check_contact_details,
   confirmPersonPage: representeePages.confirm_person,
-  nameMatchErrorPage: representeePages.name_match_error
+  nameMatchErrorPage: representeePages.name_match_error,
+  confirmPersonPage: confirm_person,
+  changeContactNamePage: change_contact_name
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -454,6 +457,55 @@ class RepresenteeController @Inject() (
 
         updateDraftReturnAndSession(newAnswers, journey).map(_ => defaultContactDetails)
     }
+
+  def changeContactName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    val backLink = routes.RepresenteeController.checkContactDetails()
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
+      getContactDetails(journey, answers).fold(
+        { e =>
+          logger.warn("Could not get representee contact details", e)
+          errorHandler.errorResult()
+        },
+        _ => Ok(changeContactNamePage(ContactName.form, backLink))
+      )
+    }
+  }
+
+  def changeContactNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
+      val backLink = routes.RepresenteeController.checkContactDetails()
+      ContactName.form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => BadRequest(changeContactNamePage(formWithErrors, backLink)),
+          contactName =>
+            if (answers
+                  .fold(_.contactDetails.map(_.contactName), c => Some(c.contactDetails.contactName))
+                  .contains(contactName))
+              Redirect(routes.RepresenteeController.checkYourAnswers())
+            else {
+              val newAnswers =
+                answers.fold(
+                  i => i.copy(contactDetails = i.contactDetails.map(_.copy(contactName = contactName))),
+                  c =>
+                    IncompleteRepresenteeAnswers(
+                      Some(c.name),
+                      Some(c.id),
+                      c.dateOfDeath,
+                      Some(c.contactDetails.copy(contactName = contactName)),
+                      true,
+                      true
+                    )
+                )
+              updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
+                logger.warn("Could not update draft return", e)
+                errorHandler.errorResult()
+              }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+            }
+        )
+
+    }
+  }
 
   def checkContactDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
