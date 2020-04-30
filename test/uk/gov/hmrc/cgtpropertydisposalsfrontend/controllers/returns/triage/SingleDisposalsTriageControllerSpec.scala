@@ -401,7 +401,8 @@ class SingleDisposalsTriageControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(
-        sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(countryOfResidence = Country.uk, individualUserType = Some(IndividualUserType.Self))
       )(
         "wereYouAUKResident.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
@@ -664,6 +665,7 @@ class SingleDisposalsTriageControllerSpec
 
       {
         val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+          individualUserType = Some(IndividualUserType.Self),
           countryOfResidence = Country.uk,
           assetType          = AssetType.Residential
         )
@@ -1501,7 +1503,10 @@ class SingleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
+                  sample[CompleteSingleDisposalTriageAnswers].copy(
+                    individualUserType = Some(IndividualUserType.Self),
+                    countryOfResidence = Country.uk
+                  )
                 )._1
               )
             }
@@ -1523,7 +1528,10 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = country))(
+      )(
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(countryOfResidence = country, individualUserType = Some(IndividualUserType.Self))
+      )(
         "triage.enterCountry.title",
         doc => checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
       )
@@ -1611,7 +1619,10 @@ class SingleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
+                  sample[CompleteSingleDisposalTriageAnswers].copy(
+                    individualUserType = Some(IndividualUserType.Self),
+                    countryOfResidence = Country.uk
+                  )
                 )._1
               )
             }
@@ -1730,7 +1741,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(sample[IndividualUserType]),
+          individualUserType         = Some(IndividualUserType.Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod             = Some(DisposalMethod.Sold),
           wasAUKResident             = Some(false),
@@ -1761,7 +1772,11 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(
         sample[CompleteSingleDisposalTriageAnswers]
-          .copy(countryOfResidence = sample[Country], assetType = AssetType.Residential)
+          .copy(
+            countryOfResidence = sample[Country],
+            assetType          = AssetType.Residential,
+            individualUserType = Some(IndividualUserType.Self)
+          )
       )(
         "assetTypeForNonUkResidents.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
@@ -1828,7 +1843,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(sample[IndividualUserType]),
+          individualUserType         = Some(IndividualUserType.Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod             = Some(DisposalMethod.Sold),
           wasAUKResident             = Some(false),
@@ -2576,7 +2591,9 @@ class SingleDisposalsTriageControllerSpec
       "redirect to the check your answers page" when {
 
         "the user has not answered all the questions in the triage section" in {
-          val incompleteAnswers = sample[IncompleteSingleDisposalTriageAnswers]
+          val incompleteAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(IndividualUserType.Self)
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
