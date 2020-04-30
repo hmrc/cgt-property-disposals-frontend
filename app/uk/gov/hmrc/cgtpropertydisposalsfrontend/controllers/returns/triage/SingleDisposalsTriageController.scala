@@ -626,8 +626,8 @@ class SingleDisposalsTriageController @Inject() (
       _ => routes.SingleDisposalsTriageController.countryOfResidence()
     )(_ => sharesDisposalDateForm)(
       _.fold(
-        _.completionDate.map(e => ShareDisposalDate(e.value)),
-        e => Some(ShareDisposalDate(e.completionDate.value))
+        _.disposalDate.map(d => ShareDisposalDate(d.value)),
+        e => Some(ShareDisposalDate(e.disposalDate.value))
       ),
       (_, currentAnswers, form, isDraftReturn, _) =>
         disposalDateOfSharesForNonUk(
@@ -650,7 +650,7 @@ class SingleDisposalsTriageController @Inject() (
                   disposalDateOfSharesForNonUk(
                     formWithErrors,
                     backLink(triageAnswers, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
-                    true
+                    state.isRight
                   )
                 ), { date =>
                 val result = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate)) match {

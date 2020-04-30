@@ -18,14 +18,4 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import java.time.LocalDate
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Format
-
 final case class ShareDisposalDate(value: LocalDate) extends AnyVal
-
-object ShareDisposalDate {
-
-  implicit val format: Format[ShareDisposalDate] =
-    implicitly[Format[LocalDate]].inmap(ShareDisposalDate(_), _.value)
-
-}
