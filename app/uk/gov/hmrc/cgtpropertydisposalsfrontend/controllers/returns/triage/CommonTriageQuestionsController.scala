@@ -268,7 +268,7 @@ class CommonTriageQuestionsController @Inject() (
           routes.MultipleDisposalsTriageController.countryOfResidence(), //TODO placeholder for multiple version of page
         _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
       )
-      Ok(disposalDateTooEarlyNonUkResidents(backLink, true))
+      Ok(disposalDateTooEarlyNonUkResidents(backLink))
     }
   }
 
