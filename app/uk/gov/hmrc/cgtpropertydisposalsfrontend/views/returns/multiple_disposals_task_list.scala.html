@@ -15,13 +15,14 @@
  *@
 
 @import play.api.i18n.Messages
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftMultipleDisposalsReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -32,75 +33,90 @@
 
 @(draftReturn: DraftMultipleDisposalsReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@title = @{
-messages("service.title")
-}
-@triageState = @{
-    draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+@title = @{messages("service.title")}
+@representeeState = @{
+    draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType) match {
+        case Some(Capacitor) | Some(PersonalRepresentative) =>
+            Some(draftReturn.representeeAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete)))
+        case _ =>
+            None
+    }
 }
 
+@triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
+
 @examplePropertyDetailsState = @{
-    draftReturn.examplePropertyDetailsAnswers.fold[TaskListStatus](
-        TaskListStatus.ToDo
-    )(
-        _.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+    draftReturn.examplePropertyDetailsAnswers.fold[TaskListStatus](ToDo)(
+        _.fold(_ => InProgress, _ => Complete)
     )
 }
 
 @exemptionsAndLossesState = @{
     examplePropertyDetailsState match {
-        case TaskListStatus.Complete =>
-            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+        case Complete =>
+            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
         case _ =>
-            TaskListStatus.CannotStart
+            CannotStart
     }
 }
 
 @ytdLiabilityState = @{
     exemptionsAndLossesState match {
-        case TaskListStatus.Complete =>
-            draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
-                case c: CalculatedYTDAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
-                case n: NonCalculatedYTDAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+        case Complete =>
+            draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](ToDo) {
+                case c: CalculatedYTDAnswers => c.fold(_ => InProgress, _ => Complete)
+                case n: NonCalculatedYTDAnswers => n.fold(_ => InProgress, _ => Complete)
             }
-        case _ => TaskListStatus.CannotStart
+        case _ => CannotStart
     }
 }
 
-@uploadSupportingDocsState = @{draftReturn.supportingEvidenceAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
+@uploadSupportingDocsState = @{
+    draftReturn.supportingEvidenceAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+}
 
 @checkAndSendReturnState = @{
     (examplePropertyDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
-        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-            TaskListStatus.ToDo
-
-        case _ =>
-            TaskListStatus.CannotStart
+        case (Complete, Complete, Complete, Complete) => ToDo
+        case _                                        => CannotStart
     }
 }
-
 
 
 @mainTemplate(title = title, userType = request.userType) {
 
-@pageHeading(title)
+    @pageHeading(title)
 
-<ol class="app-task-list">
-    <li>
-        <h2 class="app-task-list__section">
+    <ol class="app-task-list">
+        <li>
+            <h2 class="app-task-list__section">
                 <span class="app-task-list__section-number">
                     1.
                 </span>
-            @messages("triage.caption")
-        </h2>
-        <ul class="app-task-list__items">
-            <li id="canTheyUseOurService" class="app-task-list__item">
-                @taskLink(messages("task-list.triage.link"), returns.triage.routes.MultipleDisposalsTriageController.checkYourAnswers().url, triageState)
-            </li>
-        </ul>
-    </li>
+                @messages("triage.caption")
+            </h2>
 
-    @if(triageState.isComplete) {
+            <ul class="app-task-list__items">
+
+                @representeeState.map { state =>
+                    <li id="representee" class="app-task-list__item">
+                        @taskLink(messages("task-list.representee.link"), returns.representee.routes.RepresenteeController.checkYourAnswers().url, state)
+                    </li>
+                }
+
+                @if(!representeeState.forall(_.isComplete)) {
+                </ul>
+        @warning(messages("task-list.incompleteTriage"))
+        } else {
+        <li id="canTheyUseOurService" class="app-task-list__item">
+        @taskLink(messages("task-list.triage.link"), returns.triage.routes.MultipleDisposalsTriageController.checkYourAnswers().url, triageState)
+        </li>
+        </ul>
+
+
+    @if(!triageState.isComplete) {
+        @warning(messages("task-list.incompleteTriage"))
+    } else {
         <li>
             <h2 class="app-task-list__section">
                 <span class="app-task-list__section-number">
@@ -147,13 +163,12 @@ messages("service.title")
                 </li>
             </ul>
         </li>
-    } else {
-        @warning(messages("task-list.incompleteTriage"))
+    }
     }
 
-</ol>
+    </ol>
 
-<p><a id="saveAndComeBackLater" href="@{
+    <p><a id="saveAndComeBackLater" href="@{
         returns.routes.DraftReturnSavedController.draftReturnSaved()
     }">@messages("task-list.save-and-come-back.link")</a></p>
 

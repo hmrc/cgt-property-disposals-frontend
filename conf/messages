@@ -723,6 +723,22 @@ assetTypeForNonUkResidents.trust.error.invalid=Select the type of property or as
 assetTypeForNonUkResidents.capacitor.error.invalid=Select the type of property or asset the person sold or disposed of
 assetTypeForNonUkResidents.personalRep.error.invalid=Select the type of property or asset the person sold or disposed of
 
+sharesDisposalDate.title=What was the date of disposal of the shares?
+sharesDisposalDate.helpText=For example, 25 4 2020.
+sharesDisposalDate.error.required=Enter the date of disposal
+sharesDisposalDate-day.error.required=Date of disposal must include a day
+sharesDisposalDate-month.error.required=Date of disposal must include a month
+sharesDisposalDate-year.error.required=Date of disposal must include a year
+sharesDisposalDate.error.invalid=Enter a real disposal date
+sharesDisposalDate-day.error.invalid=Enter a real disposal date
+sharesDisposalDate-month.error.invalid=Enter a real disposal date
+sharesDisposalDate-year.error.invalid=Enter a real disposal date
+sharesDisposalDate-month.error.monthAndYearRequired=Date of disposal must include a month and a year
+sharesDisposalDate-day.error.dayAndYearRequired=Date of disposal must include a day and a year
+sharesDisposalDate-day.error.dayAndMonthRequired=Date of disposal must include a day and a month
+sharesDisposalDate.error.tooFarInFuture=The date you disposed of the shares cannot be in the future
+
+
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.agent.title=Did your client dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.trust.title=Are you reporting the disposal of a UK residential property?
@@ -852,6 +868,7 @@ task-list.Complete=Complete
 task-list.CannotStart=Cannot start
 task-list.ToDo=To do
 task-list.incompleteTriage=You must complete this section to continue. Some of the details you entered may have been saved as a draft.
+task-list.representee.link=Enter the details of the person you’re representing
 task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
 task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss
@@ -2182,7 +2199,7 @@ representee.cyaLabel.address=Contact address for person represented
 representee.cyaChange.address=the contact address for the person represented
 representee.cyaLabel.email=Contact email for person represented
 representee.cyaChange.email=the contact email for the person represented
-representee.cyaLabel.cgtReference=CGT Ref:<br>
+representee.cyaLabel.cgtReference=CGT Ref:<br>{0}
 
 dateOfDeath.title=What date did the person die?
 dateOfDeath.helpText=For example, 25 4 2020
@@ -2248,3 +2265,9 @@ nonUkAddress.representee.title=Enter the non-UK contact address
 email.representee.extraContent=The email addresses you use for other government services will not change.
 confirmEmail.representee.title=You have 30 minutes to confirm the email address
 confirmEmail.verified.representee.p1=We’ll use this address to contact you about your Capital Gains Tax on UK property return.
+
+representeeConfirmPerson.title=Check the details we hold for the person
+representeeConfirmPerson.summaryLine1=Name
+representeeConfirmPerson.summaryLine2.cgtReferenceId=Capital Gains Tax on UK property account number
+representeeConfirmPerson.formTitle=Is this the person you’re completing this return for?
+confirmed.error.required=Select yes to confirm this is the person you are representing

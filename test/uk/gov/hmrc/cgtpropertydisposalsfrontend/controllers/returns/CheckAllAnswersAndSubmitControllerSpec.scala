@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.Mult
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
@@ -57,9 +58,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -145,7 +147,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "the user is on a single disposal journey" must {
 
-        val completeReturn = sample[CompleteSingleDisposalReturn]
+        val completeReturn = sample[CompleteSingleDisposalReturn].copy(
+          triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor)),
+          representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
+        )
         val hasAttachments =
           completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
 
@@ -160,7 +165,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers.merge),
           completeReturn.initialGainOrLoss,
           Some(completeReturn.supportingDocumentAnswers),
-          None,
+          completeReturn.representeeAnswers,
           TimeUtils.today()
         )
 
@@ -237,11 +242,63 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         }
 
+        "redirect to the task list page" when {
+
+          "the user has chosen a user type of capacitor or personal rep and" when {
+
+            "there are no representee answers" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithJourney(
+                    completeFillingOutReturn.copy(
+                      draftReturn = completeDraftReturn.copy(
+                        triageAnswers =
+                          sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor)),
+                        representeeAnswers = None
+                      )
+                    )
+                  )
+                )
+              }
+
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
+            }
+
+            "the representee answers are incomplete" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithJourney(
+                    completeFillingOutReturn.copy(
+                      draftReturn = completeDraftReturn.copy(
+                        triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                          .copy(individualUserType = Some(PersonalRepresentative)),
+                        representeeAnswers = Some(sample[IncompleteRepresenteeAnswers])
+                      )
+                    )
+                  )
+                )
+              }
+
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
+            }
+
+          }
+
+        }
+
       }
 
       "the user is on a multiple disposals journey" must {
 
-        val completeReturn = sample[CompleteMultipleDisposalsReturn].copy(hasAttachments = true)
+        val completeReturn = sample[CompleteMultipleDisposalsReturn]
+          .copy(
+            triageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
+            hasAttachments     = true
+          )
 
         val completeDraftReturn = DraftMultipleDisposalsReturn(
           UUID.randomUUID(),
@@ -250,7 +307,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.exemptionAndLossesAnswers),
           Some(completeReturn.yearToDateLiabilityAnswers),
           Some(completeReturn.supportingDocumentAnswers),
-          None,
+          completeReturn.representeeAnswers,
           TimeUtils.today()
         )
 
@@ -322,6 +379,53 @@ class CheckAllAnswersAndSubmitControllerSpec
             )
           }
         }
+
+        "redirect to the task list page" when {
+
+          "the user has chosen a user type of capacitor or personal rep and" when {
+
+            "there are no representee answers" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithJourney(
+                    completeFillingOutReturn.copy(
+                      draftReturn = completeDraftReturn.copy(
+                        triageAnswers =
+                          sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Capacitor)),
+                        representeeAnswers = None
+                      )
+                    )
+                  )
+                )
+              }
+
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
+            }
+
+            "the representee answers are incomplete" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithJourney(
+                    completeFillingOutReturn.copy(
+                      draftReturn = completeDraftReturn.copy(
+                        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                          .copy(individualUserType = Some(PersonalRepresentative)),
+                        representeeAnswers = Some(sample[IncompleteRepresenteeAnswers])
+                      )
+                    )
+                  )
+                )
+              }
+
+              checkIsRedirect(performAction(), routes.TaskListController.taskList())
+            }
+
+          }
+
+        }
+
       }
 
     }
@@ -330,7 +434,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       def performAction(): Future[Result] = controller.checkAllAnswersSubmit()(FakeRequest())
 
-      val completeReturn = sample[CompleteSingleDisposalReturn]
+      val completeReturn = sample[CompleteSingleDisposalReturn].copy(
+        triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+        representeeAnswers = None
+      )
       val hasAttachments =
         completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
 
@@ -884,6 +991,11 @@ object CheckAllAnswersAndSubmitControllerSpec {
     isRebasing: Boolean,
     isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
+
+    completeReturn.representeeAnswers.foreach(
+      RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
+    )
+
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
       userType,
@@ -925,6 +1037,10 @@ object CheckAllAnswersAndSubmitControllerSpec {
     userType: Option[UserType],
     isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    completeReturn.representeeAnswers.foreach(
+      RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
+    )
+
     validateMultipleDisposalsTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
       userType,

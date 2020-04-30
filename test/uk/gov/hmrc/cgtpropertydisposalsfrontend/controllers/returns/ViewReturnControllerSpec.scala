@@ -198,14 +198,20 @@ class ViewReturnControllerSpec
 
       "display the page for a single disposal journey" in {
 
-        forAll(acceptedUserTypeGen, completeSingleDisposalReturnGen) { (userType, completeSingleDisposalReturn) =>
+        forAll(acceptedUserTypeGen, completeSingleDisposalReturnGen) { (userType, c) =>
           val subscribedDetails = sample[SubscribedDetails].copy(
             name = setNameForUserType(userType)
           )
 
+          val completeSingleDisposalReturn = c.copy(
+            triageAnswers      = c.triageAnswers.copy(individualUserType = None),
+            propertyAddress    = address,
+            representeeAnswers = None
+          )
+
           val sampleViewingReturn = sample[ViewingReturn]
             .copy(
-              completeReturn       = completeSingleDisposalReturn.copy(propertyAddress = address),
+              completeReturn       = completeSingleDisposalReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
               subscribedDetails    = subscribedDetails
             )
@@ -262,9 +268,14 @@ class ViewReturnControllerSpec
 
       "display the page for a multiple disposals journey" in {
 
-        forAll(acceptedUserTypeGen, completeMultipleDisposalsReturnGen) { (userType, completeMultipleDisposalsReturn) =>
+        forAll(acceptedUserTypeGen, completeMultipleDisposalsReturnGen) { (userType, c) =>
           val subscribedDetails = sample[SubscribedDetails].copy(
             name = setNameForUserType(userType)
+          )
+
+          val completeMultipleDisposalsReturn = c.copy(
+            triageAnswers      = c.triageAnswers.copy(individualUserType = None),
+            representeeAnswers = None
           )
 
           val sampleViewingReturn = sample[ViewingReturn]

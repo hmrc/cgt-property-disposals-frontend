@@ -260,6 +260,18 @@ class CommonTriageQuestionsController @Inject() (
     }
   }
 
+  def disposalsOfSharesTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withState(request) { (_, state) =>
+      val triageAnswers = triageAnswersFomState(state)
+      lazy val backLink = triageAnswers.fold(
+        _ =>
+          routes.MultipleDisposalsTriageController.countryOfResidence(), //TODO placeholder for multiple version of page
+        _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
+      )
+      Ok(disposalDateTooEarlyNonUkResidents(backLink))
+    }
+  }
+
   def assetTypeNotYetImplemented(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withState(request) { (_, state) =>
       val triageAnswers = triageAnswersFomState(state)
@@ -437,6 +449,7 @@ class CommonTriageQuestionsController @Inject() (
             m =>
               m.copy(
                 triageAnswers                 = updateMultipleDisposalAnswers(m.triageAnswers),
+                representeeAnswers            = None,
                 examplePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers    = None,
                 supportingEvidenceAnswers     = None
@@ -444,6 +457,7 @@ class CommonTriageQuestionsController @Inject() (
             s =>
               s.copy(
                 triageAnswers              = updateSingleDisposalAnswers(s.triageAnswers),
+                representeeAnswers         = None,
                 propertyAddress            = None,
                 disposalDetailsAnswers     = None,
                 acquisitionDetailsAnswers  = None,

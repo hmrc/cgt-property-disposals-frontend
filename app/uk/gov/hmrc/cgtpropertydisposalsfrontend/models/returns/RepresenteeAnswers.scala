@@ -29,13 +29,21 @@ object RepresenteeAnswers {
     id: Option[RepresenteeReferenceId],
     dateOfDeath: Option[DateOfDeath],
     contactDetails: Option[RepresenteeContactDetails],
+    hasConfirmedPerson: Boolean,
     hasConfirmedContactDetails: Boolean
   ) extends RepresenteeAnswers
 
   object IncompleteRepresenteeAnswers {
 
     val empty: IncompleteRepresenteeAnswers =
-      IncompleteRepresenteeAnswers(None, None, None, None, hasConfirmedContactDetails = false)
+      IncompleteRepresenteeAnswers(
+        None,
+        None,
+        None,
+        None,
+        hasConfirmedPerson         = false,
+        hasConfirmedContactDetails = false
+      )
 
   }
 
