@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteSingleDisposalReturn, CompleteMultipleDisposalsReturn}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -51,7 +52,13 @@
         printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
-@(completeReturn: CompleteReturn, returnSummary: ReturnSummary, rebasingEligibilityUtil: RebasingEligibilityUtil, subscribedDetails: SubscribedDetails)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+    completeReturn: CompleteReturn,
+    returnSummary: ReturnSummary,
+    rebasingEligibilityUtil: RebasingEligibilityUtil,
+    subscribedDetails: SubscribedDetails,
+    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("viewReturn.title")}
 @amountOwed = @{returnSummary.mainReturnChargeAmount}
@@ -103,7 +110,7 @@
     @completeReturn match {
     case s: CompleteSingleDisposalReturn => {
     <h2>@messages("task-list.triage.link")</h2>
-          @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust)
+          @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
           @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())

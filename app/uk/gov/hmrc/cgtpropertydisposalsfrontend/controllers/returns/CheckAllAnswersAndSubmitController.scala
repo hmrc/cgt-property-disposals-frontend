@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiond
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -68,7 +69,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
         checkAllAnswersPage(
           completeReturn,
           rebasingEligibilityUtil,
-          fillingOutReturn.subscribedDetails.isATrust
+          fillingOutReturn.subscribedDetails.isATrust,
+          representativeType(completeReturn)
         )
       )
     }
@@ -83,7 +85,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
               checkAllAnswersPage(
                 completeReturn,
                 rebasingEligibilityUtil,
-                fillingOutReturn.subscribedDetails.isATrust
+                fillingOutReturn.subscribedDetails.isATrust,
+                representativeType(completeReturn)
               ).toString().getBytes
             )
           )
@@ -232,6 +235,25 @@ class CheckAllAnswersAndSubmitController @Inject() (
       case _ =>
         Redirect(baseRoutes.StartController.start())
     }
+
+  private def representativeType(
+    completeReturn: CompleteReturn
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    completeReturn.fold(
+      _.triageAnswers.fold(
+        _.individualUserType,
+        _.individualUserType
+      ),
+      _.triageAnswers.fold(
+        _.individualUserType,
+        _.individualUserType
+      )
+    ) match {
+      case Some(Capacitor)              => Some(Right(Capacitor))
+      case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
+      case _                            => None
+    }
+
 }
 
 object CheckAllAnswersAndSubmitController {
