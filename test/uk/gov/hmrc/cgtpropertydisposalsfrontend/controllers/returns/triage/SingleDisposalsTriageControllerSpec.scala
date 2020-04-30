@@ -1953,6 +1953,303 @@ class SingleDisposalsTriageControllerSpec
 
     }
 
+    "handling requests to display the share disposal page for non uk residents page" must {
+
+      val requiredPreviousAnswers =
+        IncompleteSingleDisposalTriageAnswers.empty.copy(
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Other),
+          wasAUKResident             = Some(false),
+          countryOfResidence         = Some(sample[Country])
+        )
+
+      def performAction(): Future[Result] = controller.disposalDateOfShares()(FakeRequest())
+
+      "Page is displayed correctly" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithFillingOutReturn(
+              requiredPreviousAnswers.copy(
+                assetType = Some(AssetType.IndirectDisposal)
+              )
+            )._1
+          )
+        }
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("sharesDisposalDate.title"),
+          doc => {
+            doc.select("#sharesDisposalDate-form-hint").text() shouldBe messageFromMessageKey(
+              "sharesDisposalDate.helpText"
+            )
+            doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+              .assetTypeForNonUkResidents()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit().url
+          }
+        )
+
+      }
+
+    }
+
+    "handling submitted answers to the shrare disposal date for non uk residents page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.disposalDateOfSharesSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      def formData(date: LocalDate) =
+        List(
+          "sharesDisposalDate-day"   -> date.getDayOfMonth().toString,
+          "sharesDisposalDate-month" -> date.getMonthValue().toString,
+          "sharesDisposalDate-year"  -> date.getYear().toString
+        )
+
+      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: SingleDisposalTriageAnswers) =
+        d.copy(
+          triageAnswers = newAnswers,
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
+            _.unset(_.acquisitionDate)
+              .unset(_.acquisitionPrice)
+              .unset(_.rebasedAcquisitionPrice)
+              .unset(_.shouldUseRebase)
+              .unset(_.improvementCosts)
+              .unset(_.acquisitionFees)
+          ),
+          initialGainOrLoss = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief)
+              .unset(_.lettingsRelief)
+          ),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
+            case _: NonCalculatedYTDAnswers => None
+            case c: CalculatedYTDAnswers =>
+              Some(
+                c.unset(_.hasEstimatedDetails)
+                  .unset(_.calculatedTaxDue)
+                  .unset(_.taxDue)
+                  .unset(_.mandatoryEvidence)
+                  .unset(_.expiredEvidence)
+                  .unset(_.pendingUpscanUpload)
+              )
+          },
+          supportingEvidenceAnswers = None
+        )
+
+      val tomorrow = today.plusDays(1L)
+
+      val taxYear = sample[TaxYear]
+
+      val requiredPreviousAnswers =
+        IncompleteSingleDisposalTriageAnswers.empty.copy(
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Other),
+          wasAUKResident             = Some(false),
+          assetType                  = Some(AssetType.IndirectDisposal)
+        )
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
+
+      behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
+        requiredPreviousAnswers,
+        routes.SingleDisposalsTriageController.assetTypeForNonUkResidents(), {
+          case (answers, w) =>
+            answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.IndirectDisposal))
+        }
+      )
+
+      "show an error page" when {
+
+        "there is a problem getting the tax year" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithFillingOutReturn(requiredPreviousAnswers)._1)
+            mockGetTaxYear(today)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(today): _*))
+        }
+
+      }
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "sharesDisposalDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
+
+        "the date is invalid" in {
+          dateErrorScenarios("sharesDisposalDate", "").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val formData = List(
+                "sharesDisposalDate-day"   -> scenario.dayInput,
+                "sharesDisposalDate-month" -> scenario.monthInput,
+                "sharesDisposalDate-year"  -> scenario.yearInput
+              ).collect { case (id, Some(input)) => id -> input }
+              test(formData, scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+        "the disposal date is in the future" in {
+          DateErrorScenario(
+            Some(tomorrow.getDayOfMonth.toString),
+            Some(tomorrow.getMonthValue.toString),
+            Some(tomorrow.getYear.toString),
+            "sharesDisposalDate.error.tooFarInFuture"
+          )
+
+          test(formData(tomorrow), "sharesDisposalDate.error.tooFarInFuture")
+        }
+
+      }
+
+      behave like unsuccessfulUpdatesBehaviour(
+        performAction,
+        requiredPreviousAnswers,
+        formData(today),
+        requiredPreviousAnswers
+          .copy(disposalDate = Some(DisposalDate(today, taxYear)), completionDate = Some(CompletionDate(today))),
+        updateDraftReturn,
+        () => mockGetTaxYear(today)(Right(Some(taxYear)))
+      )
+
+      "handle valid dates" when {
+
+        "the user is starting in a draft return and" when {
+
+          "no tax year can be found for the given disposal date" in {
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers,
+              formData(today),
+              requiredPreviousAnswers
+                .copy(
+                  tooEarlyDisposalDate = Some(today),
+                  disposalDate         = None,
+                  completionDate       = Some(CompletionDate(today))
+                ),
+              checkIsRedirect(_, routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()),
+              () => mockGetTaxYear(today)(Right(None))
+            )
+
+          }
+
+          "a tax year can be found and the journey was complete" in {
+            val completeJourney =
+              sample[CompleteSingleDisposalTriageAnswers]
+                .copy(
+                  disposalDate   = DisposalDate(today, taxYear),
+                  completionDate = CompletionDate(today),
+                  assetType      = IndirectDisposal
+                )
+            val date = today.minusDays(1L)
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeJourney,
+              formData(date),
+              IncompleteSingleDisposalTriageAnswers(
+                completeJourney.individualUserType,
+                true,
+                Some(completeJourney.disposalMethod),
+                Some(completeJourney.countryOfResidence.isUk()),
+                if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
+                Some(completeJourney.assetType),
+                Some(DisposalDate(date, taxYear)),
+                Some(CompletionDate(date)),
+                None
+              ),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
+              () => mockGetTaxYear(date)(Right(Some(taxYear)))
+            )
+
+          }
+
+        }
+
+        "the user is filling our a draft return and" when {
+
+          "the section is incomplete" in {
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              requiredPreviousAnswers,
+              formData(today),
+              updateDraftReturn(
+                _,
+                requiredPreviousAnswers
+                  .copy(disposalDate = Some(DisposalDate(today, taxYear)), completionDate = Some(CompletionDate(today)))
+              ),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
+              () => mockGetTaxYear(today)(Right(Some(taxYear)))
+            )
+
+          }
+
+          "the section is complete" in {
+            forAll { c: CompleteSingleDisposalTriageAnswers =>
+              val completeJourney = c.copy(
+                disposalDate   = DisposalDate(today, taxYear),
+                completionDate = CompletionDate(today),
+                assetType      = IndirectDisposal
+              )
+              val date = today.minusDays(1L)
+              val newAnswers =
+                IncompleteSingleDisposalTriageAnswers(
+                  completeJourney.individualUserType,
+                  true,
+                  Some(completeJourney.disposalMethod),
+                  Some(completeJourney.countryOfResidence.isUk()),
+                  if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
+                  Some(completeJourney.assetType),
+                  Some(DisposalDate(date, taxYear)),
+                  Some(CompletionDate(date)),
+                  None
+                )
+
+              testSuccessfulUpdateFillingOutReturn(
+                performAction,
+                completeJourney,
+                formData(date),
+                updateDraftReturn(_, newAnswers),
+                checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
+                () => mockGetTaxYear(date)(Right(Some(taxYear)))
+              )
+            }
+          }
+        }
+
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                requiredPreviousAnswers.copy(
+                  disposalDate = Some(DisposalDate(today, taxYear))
+                )
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(formData(today): _*),
+            routes.SingleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =
@@ -2064,11 +2361,12 @@ class SingleDisposalsTriageControllerSpec
                 .copy(
                   wasAUKResident     = Some(false),
                   countryOfResidence = Some(sample[Country]),
-                  assetType          = Some(AssetType.IndirectDisposal)
+                  assetType          = Some(AssetType.IndirectDisposal),
+                  completionDate     = None,
+                  disposalDate       = None
                 ),
               Right(sample[IndividualName]),
-              routes.CommonTriageQuestionsController
-                .assetTypeNotYetImplemented()
+              routes.SingleDisposalsTriageController.disposalDateOfShares()
             ),
             Scenario(
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.Capacitor)),
@@ -2102,22 +2400,6 @@ class SingleDisposalsTriageControllerSpec
           test(sessionDataWithFillingOutReturn(_, _, representeeAnswers = sample[IncompleteRepresenteeAnswers])._1)
         }
 
-      }
-
-      "show a exit page when a user has selected indirect disposals" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionDataWithStartingNewDraftReturn(
-              allQuestionsAnswered.copy(
-                assetType = Some(AssetType.IndirectDisposal)
-              )
-            )._1
-          )
-        }
-
-        val result = performAction()
-        checkIsRedirect(result, routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
       }
 
       "show a exit page when a user has selected mixed use" in {
