@@ -685,6 +685,22 @@ assetTypeForNonUkResidents.agent.error.invalid=Select the type of property or as
 assetTypeForNonUkResidents.trust.error.required=Select the type of property or asset the trust sold or disposed of
 assetTypeForNonUkResidents.trust.error.invalid=Select the type of property or asset the trust sold or disposed of
 
+sharesDisposalDate.title=What was the date of disposal of the shares?
+sharesDisposalDate.helpText=For example, 25 4 2020.
+sharesDisposalDate.error.required=Enter the date of disposal
+sharesDisposalDate-day.error.required=Date of disposal must include a day
+sharesDisposalDate-month.error.required=Date of disposal must include a month
+sharesDisposalDate-year.error.required=Date of disposal must include a year
+sharesDisposalDate.error.invalid=Enter a real disposal date
+sharesDisposalDate-day.error.invalid=Enter a real disposal date
+sharesDisposalDate-month.error.invalid=Enter a real disposal date
+sharesDisposalDate-year.error.invalid=Enter a real disposal date
+sharesDisposalDate-month.error.monthAndYearRequired=Date of disposal must include a month and a year
+sharesDisposalDate-day.error.dayAndYearRequired=Date of disposal must include a day and a year
+sharesDisposalDate-day.error.dayAndMonthRequired=Date of disposal must include a day and a month
+sharesDisposalDate.error.tooFarInFuture=The date you disposed of the shares cannot be in the future
+
+
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.agent.title=Did your client dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.trust.title=Are you reporting the disposal of a UK residential property?
@@ -2159,6 +2175,9 @@ dateOfDeath-day.error.required=Date must include a day
 dateOfDeath-month.error.required=Date must include a month
 dateOfDeath-year.error.required=Date must include a year
 dateOfDeath.error.invalid=Enter a real date
+dateOfDeath-day.error.invalid=Enter a real date
+dateOfDeath-month.error.invalid=Enter a real date
+dateOfDeath-year.error.invalid=Enter a real date
 dateOfDeath-month.error.monthAndYearRequired=Date must include a month and a year
 dateOfDeath-day.error.dayAndYearRequired=Date must include a day and a year
 dateOfDeath-day.error.dayAndMonthRequired=Date must include a day and a month

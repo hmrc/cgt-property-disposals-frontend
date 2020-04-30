@@ -260,6 +260,18 @@ class CommonTriageQuestionsController @Inject() (
     }
   }
 
+  def disposalsOfSharesTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withState(request) { (_, state) =>
+      val triageAnswers = triageAnswersFomState(state)
+      lazy val backLink = triageAnswers.fold(
+        _ =>
+          routes.MultipleDisposalsTriageController.countryOfResidence(), //TODO placeholder for multiple version of page
+        _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
+      )
+      Ok(disposalDateTooEarlyNonUkResidents(backLink, true))
+    }
+  }
+
   def assetTypeNotYetImplemented(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withState(request) { (_, state) =>
       val triageAnswers = triageAnswersFomState(state)

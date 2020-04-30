@@ -73,6 +73,7 @@ class SingleDisposalsTriageController @Inject() (
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
   countryOfResidencePage: triagePages.country_of_residence,
   assetTypeForNonUkResidentsPage: triagePages.asset_type_for_non_uk_residents,
+  disposalDateOfSharesForNonUk: triagePages.disposal_date_of_shares,
   didYouDisposeOfResidentialPropertyPage: triagePages.did_you_dispose_of_residential_property,
   disposalDatePage: triagePages.disposal_date,
   completionDatePage: triagePages.completion_date,
@@ -619,6 +620,87 @@ class SingleDisposalsTriageController @Inject() (
       )
   }
 
+  def disposalDateOfShares(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    displayTriagePage(
+      _.fold(_.assetType, c => Some(c.assetType).filterNot(e => e === IndirectDisposal)),
+      _ => routes.SingleDisposalsTriageController.countryOfResidence()
+    )(_ => sharesDisposalDateForm)(
+      _.fold(
+        _.completionDate.map(e => ShareDisposalDate(e.value)),
+        e => Some(ShareDisposalDate(e.completionDate.value))
+      ),
+      (_, currentAnswers, form, isDraftReturn, _) =>
+        disposalDateOfSharesForNonUk(
+          form,
+          backLink(currentAnswers, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
+          isDraftReturn
+        )
+    )
+  }
+
+  def disposalDateOfSharesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
+        case Some(assetType) if (assetType === AssetType.IndirectDisposal) =>
+          sharesDisposalDateForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                BadRequest(
+                  disposalDateOfSharesForNonUk(
+                    formWithErrors,
+                    backLink(triageAnswers, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
+                    true
+                  )
+                ), { date =>
+                val result = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate)) match {
+                  case Some(existingDisposalDate) if (existingDisposalDate.value === date.value) =>
+                    EitherT.pure(Some(existingDisposalDate.taxYear))
+                  case _ =>
+                    for {
+                      taxYear <- taxYearService.taxYear(date.value)
+                      updatedDisposalDate = updateDisposalDate(date.value, taxYear, triageAnswers)
+                      updatedDisposalAndCompletionDate = updatedDisposalDate
+                        .copy(completionDate = Some(CompletionDate(date.value)))
+                      newState = state.bimap(
+                        _.copy(newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)), {
+                          case (d, r) =>
+                            r.copy(draftReturn = updateDraftReturnForDisposalDate(d, updatedDisposalAndCompletionDate))
+                        }
+                      )
+                      _ <- newState.fold(
+                            _ => EitherT.pure(()),
+                            r =>
+                              returnsService.storeDraftReturn(
+                                r.draftReturn,
+                                r.subscribedDetails.cgtReference,
+                                r.agentReferenceNumber
+                              )
+                          )
+                      _ <- EitherT(
+                            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState.merge)))
+                          )
+                    } yield taxYear
+                }
+
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult()
+                  },
+                  taxYear =>
+                    if (taxYear.isEmpty)
+                      Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
+                    else
+                      Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
+                )
+              }
+            )
+        case _ => Redirect(disposalDateBackLink(triageAnswers))
+      }
+    }
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
       lazy val displayReturnToSummaryLink = state.fold(_ => false, _ => true)
@@ -634,7 +716,7 @@ class SingleDisposalsTriageController @Inject() (
             .contains(true)
           Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust))
 
-        case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
+        case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, __) if isIndividual =>
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
         case IncompleteSingleDisposalTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _) =>
@@ -680,16 +762,16 @@ class SingleDisposalsTriageController @Inject() (
         case IncompleteSingleDisposalTriageAnswers(_, _, _, Some(true), _, Some(NonResidential), _, _, _) =>
           Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
 
-        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), _, _, _) =>
-          Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), None, None, _) =>
+          Redirect(routes.SingleDisposalsTriageController.disposalDateOfShares())
 
         case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.MixedUse), _, _, _) =>
           Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
-        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, None, _, _) =>
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, None, _, None) =>
           Redirect(routes.SingleDisposalsTriageController.whenWasDisposalDate())
 
-        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, _, None, _) =>
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, _, None, None) =>
           Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
 
         case IncompleteSingleDisposalTriageAnswers(
@@ -993,5 +1075,23 @@ object SingleDisposalsTriageController {
       )
     )(identity)(Some(_))
   )
+
+  val sharesDisposalDateForm: Form[ShareDisposalDate] = {
+    val key = "sharesDisposalDate"
+    Form(
+      mapping(
+        "" -> of(
+          TimeUtils.dateFormatter(
+            Some(LocalDate.now()),
+            None,
+            s"$key-day",
+            s"$key-month",
+            s"$key-year",
+            key
+          )
+        )
+      )(ShareDisposalDate(_))(d => Some(d.value))
+    )
+  }
 
 }
