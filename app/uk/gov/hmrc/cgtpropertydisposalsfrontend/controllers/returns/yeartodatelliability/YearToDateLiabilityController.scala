@@ -47,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanUpload, UpscanUploadStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
@@ -1109,19 +1109,12 @@ class YearToDateLiabilityController @Inject() (
           answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
         ): Future[Result] = {
           val result = for {
-            newUpscanUpload <- upscanService.getUpscanUpload(pendingUpscanUpload.uploadReference)
-            updatedUpscanUpload <- if (newUpscanUpload.upscanUploadStatus === UpscanUploadStatus.Uploaded)
-                                    EitherT.pure[Future, Error](newUpscanUpload)
-                                  else {
-                                    val updated = newUpscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded)
-                                    upscanService
-                                      .updateUpscanUpload(newUpscanUpload.uploadReference, updated)
-                                      .map(_ => updated)
-                                  }
-            _ <- updatedUpscanUpload.upscanCallBack match {
+            newUpscanUpload <- upscanService
+                                .getUpscanUpload(pendingUpscanUpload.uploadReference)
+            _ <- newUpscanUpload.upscanCallBack match {
                   case None => EitherT.pure[Future, Error](())
                   case Some(callback) =>
-                    storeUpscanSuccessOrFailure(updatedUpscanUpload, callback, answers, fillingOutReturn)
+                    storeUpscanSuccessOrFailure(newUpscanUpload, callback, answers, fillingOutReturn)
                 }
           } yield newUpscanUpload
 

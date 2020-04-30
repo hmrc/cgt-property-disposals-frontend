@@ -16,20 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.mvc.Call
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UploadRequest, UpscanUpload, UpscanUploadMeta}
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json.{JsString, Json}
-import play.api.mvc.Request
+import play.api.mvc.{Call, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UploadRequest, UpscanUpload, UpscanUploadMeta}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -74,26 +72,6 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
             .expects(reference, *)
             .returning(EitherT.fromEither[Future](response))
           await(service.getUpscanUpload(reference).value).isLeft shouldBe true
-        }
-      }
-
-      "updating upscan" when {
-        "Response is OK" in {
-          val response = Right(HttpResponse(OK))
-          (mockConnector
-            .updateUpscanUpload(_: UploadReference, _: UpscanUpload)(_: HeaderCarrier))
-            .expects(reference, upload, *)
-            .returning(EitherT.fromEither[Future](response))
-          await(service.updateUpscanUpload(reference, upload).value).isRight shouldBe true
-        }
-
-        "Internal server error" in {
-          val response = Right(HttpResponse(INTERNAL_SERVER_ERROR))
-          (mockConnector
-            .updateUpscanUpload(_: UploadReference, _: UpscanUpload)(_: HeaderCarrier))
-            .expects(reference, upload, *)
-            .returning(EitherT.fromEither[Future](response))
-          await(service.updateUpscanUpload(reference, upload).value).isRight shouldBe true
         }
       }
 
