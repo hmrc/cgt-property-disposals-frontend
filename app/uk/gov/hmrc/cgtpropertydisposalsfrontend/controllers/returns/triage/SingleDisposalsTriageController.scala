@@ -169,7 +169,7 @@ class SingleDisposalsTriageController @Inject() (
           backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
           isDraftReturn,
           isATrust,
-          representativeType(currentAnswers)
+          currentAnswers.representativeType()
         )
       }
     )
@@ -189,7 +189,7 @@ class SingleDisposalsTriageController @Inject() (
           backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
           isDraftReturn,
           isATrust,
-          representativeType(currentAnswers)
+          currentAnswers.representativeType()
         )
       },
       updateState = { (wasAUKResident, state, answers) =>
@@ -240,7 +240,7 @@ class SingleDisposalsTriageController @Inject() (
             backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
             isDraftReturn,
             isATrust,
-            representativeType(currentAnswers)
+            currentAnswers.representativeType()
           )
         }
       )
@@ -260,7 +260,7 @@ class SingleDisposalsTriageController @Inject() (
             backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
             isDraftReturn,
             isATrust,
-            representativeType(currentAnswers)
+            currentAnswers.representativeType()
           )
         },
         updateState = { (wasResidentialProperty, state, answers) =>
@@ -508,7 +508,7 @@ class SingleDisposalsTriageController @Inject() (
           backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
           isDraftReturn,
           isATrust,
-          representativeType(currentAnswers)
+          currentAnswers.representativeType()
         )
       }
     )
@@ -527,7 +527,7 @@ class SingleDisposalsTriageController @Inject() (
           backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
           isDraftReturn,
           isATrust,
-          representativeType(currentAnswers)
+          currentAnswers.representativeType()
         )
       },
       updateState = { (country, state, answers) =>
@@ -574,7 +574,7 @@ class SingleDisposalsTriageController @Inject() (
           backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
           isDraftReturn,
           isATrust,
-          representativeType(currentAnswers)
+          currentAnswers.representativeType()
         )
       }
     )
@@ -594,7 +594,7 @@ class SingleDisposalsTriageController @Inject() (
             backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
             isDraftReturn,
             isATrust,
-            representativeType(currentAnswers)
+            currentAnswers.representativeType()
           )
         },
         updateState = { (assetType, state, answers) =>
@@ -731,7 +731,7 @@ class SingleDisposalsTriageController @Inject() (
               _._2.subscribedDetails.isATrust
             )
             .contains(true)
-          Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust, representativeType(c)))
+          Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust, c.representativeType()))
 
         case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, __) if isIndividual =>
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
@@ -858,7 +858,7 @@ class SingleDisposalsTriageController @Inject() (
             newCompleteTriageAnswers,
             displayReturnToSummaryLink,
             isATrust,
-            representativeType(newCompleteTriageAnswers)
+            newCompleteTriageAnswers.representativeType()
           )
         )
     }
@@ -917,15 +917,6 @@ class SingleDisposalsTriageController @Inject() (
       }
     }
   }
-
-  private def representativeType(
-    triageAnswers: SingleDisposalTriageAnswers
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-    triageAnswers.fold[Option[IndividualUserType]](_.individualUserType, _.individualUserType) match {
-      case Some(Capacitor)              => Some(Right(Capacitor))
-      case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
-      case _                            => None
-    }
 
   private def handleTriagePageSubmit[R, A, Page: Writeable](
     requiredField: SingleDisposalTriageAnswers => Option[R],

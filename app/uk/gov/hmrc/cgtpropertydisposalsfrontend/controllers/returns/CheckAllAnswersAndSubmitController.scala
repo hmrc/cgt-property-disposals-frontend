@@ -240,19 +240,9 @@ class CheckAllAnswersAndSubmitController @Inject() (
     completeReturn: CompleteReturn
   ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
     completeReturn.fold(
-      _.triageAnswers.fold(
-        _.individualUserType,
-        _.individualUserType
-      ),
-      _.triageAnswers.fold(
-        _.individualUserType,
-        _.individualUserType
-      )
-    ) match {
-      case Some(Capacitor)              => Some(Right(Capacitor))
-      case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
-      case _                            => None
-    }
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType()
+    )
 
 }
 
