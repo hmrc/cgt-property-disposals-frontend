@@ -88,6 +88,8 @@ class SingleDisposalsTriageController @Inject() (
 
   type JourneyState = Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)]
 
+  private val indirectDisposalsEnabled: Boolean = config.underlying.getBoolean("indirect-disposals.enabled")
+
   def howDidYouDisposeOfProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayTriagePage(
       _.fold(incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None, _ => Some(())),
@@ -769,6 +771,10 @@ class SingleDisposalsTriageController @Inject() (
 
         case IncompleteSingleDisposalTriageAnswers(_, _, _, Some(true), _, Some(NonResidential), _, _, _) =>
           Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
+
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), _, _, _)
+            if !indirectDisposalsEnabled =>
+          Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
         case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), None, None, _) =>
           Redirect(routes.SingleDisposalsTriageController.disposalDateOfShares())
