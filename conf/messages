@@ -998,8 +998,8 @@ disposalPrice.capacitor.Gifted.title=What was the market value of the property w
 disposalPrice.SoldOther.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
 disposalPrice.agent.SoldOther.helpText=If the property was shared, only enter the amount your client got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.trust.SoldOther.helpText=If the property was shared, only enter the amount the trust got for its share. You’ll be able to enter any additional costs later.
-disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You'll be able to enter any additional costs later.
-disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You'll be able to enter any additional costs later.
+disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
+disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
 
 
 disposalPrice.Gifted.helpText=If you owned part of the property, only enter your share of the market value. You’ll be able to enter any additional costs later.
