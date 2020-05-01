@@ -27,6 +27,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, rou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -61,7 +63,8 @@ class ViewReturnController @Inject() (
             sentReturn,
             returnSummary,
             rebasingEligibilityUtil,
-            subscribedDetails
+            subscribedDetails,
+            representativeType(sentReturn)
           )
         )
     }
@@ -108,5 +111,13 @@ class ViewReturnController @Inject() (
       case Some(v: ViewingReturn) => f(v)
       case _                      => Redirect(baseRoutes.StartController.start())
     }
+
+  private def representativeType(
+    completeReturn: CompleteReturn
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    completeReturn.fold(
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType()
+    )
 
 }

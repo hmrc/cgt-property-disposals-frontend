@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
@@ -190,7 +190,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgent(
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
         performAction
       )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
         "disposalMethod.agent.title",
@@ -378,7 +378,10 @@ class SingleDisposalsTriageControllerSpec
     "handling requests to display the were you a uk resident page" must {
 
       val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(disposalMethod = Some(DisposalMethod.Sold))
+        IncompleteSingleDisposalTriageAnswers.empty.copy(
+          individualUserType = Some(IndividualUserType.Self),
+          disposalMethod     = Some(DisposalMethod.Sold)
+        )
 
       def performAction(): Future[Result] = controller.wereYouAUKResident()(FakeRequest())
 
@@ -400,10 +403,35 @@ class SingleDisposalsTriageControllerSpec
         _.select("#wereYouAUKResident-false").attr("checked") shouldBe "checked"
       )
 
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(individualUserType = Some(IndividualUserType.Capacitor)),
+        requiredPreviousAnswers
+          .copy(wasAUKResident = Some(false), individualUserType = Some(IndividualUserType.Capacitor))
+      )(
+        "wereYouAUKResident.capacitor.title",
+        checkContent(_, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
+        _.select("#wereYouAUKResident-false").attr("checked") shouldBe "checked"
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
+        requiredPreviousAnswers
+          .copy(wasAUKResident = Some(false), individualUserType = Some(IndividualUserType.PersonalRepresentative))
+      )(
+        "wereYouAUKResident.personalRep.title",
+        checkContent(_, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
+        _.select("#wereYouAUKResident-false").attr("checked") shouldBe "checked"
+      )
+
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(
-        sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(countryOfResidence = Country.uk, individualUserType = Some(IndividualUserType.Self))
       )(
         "wereYouAUKResident.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
@@ -411,10 +439,47 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgent(
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(countryOfResidence = Country.uk, individualUserType = Some(IndividualUserType.Capacitor))
+      )(
+        "wereYouAUKResident.capacitor.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#wereYouAUKResident-true").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(countryOfResidence = Country.uk, individualUserType = Some(IndividualUserType.PersonalRepresentative))
+      )(
+        "wereYouAUKResident.personalRep.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#wereYouAUKResident-true").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
         performAction
       )(requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk)))(
         "wereYouAUKResident.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          wasAUKResident     = Some(true),
+          countryOfResidence = Some(Country.uk),
+          individualUserType = Some(IndividualUserType.PersonalRepresentative)
+        )
+      )(
+        "wereYouAUKResident.personalRep.title",
         doc => checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
       )
 
@@ -457,8 +522,10 @@ class SingleDisposalsTriageControllerSpec
           supportingEvidenceAnswers  = None
         )
 
-      val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(disposalMethod = Some(DisposalMethod.Sold))
+      val requiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
+        disposalMethod     = Some(DisposalMethod.Sold),
+        individualUserType = Some(IndividualUserType.Self)
+      )
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
@@ -468,7 +535,7 @@ class SingleDisposalsTriageControllerSpec
         { case (answers, m) => answers.copy(disposalMethod = m) }
       )
 
-      "show a form error" when {
+      "show a form error for self type" when {
 
         def test(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "wereYouAUKResident.title")(formData, expectedErrorKey, requiredPreviousAnswers)
@@ -480,6 +547,49 @@ class SingleDisposalsTriageControllerSpec
         "the option is not recognised" in {
           test(List("wereYouAUKResident" -> "3"), "wereYouAUKResident.error.boolean")
         }
+
+      }
+
+      "show a form error for personal representative type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "wereYouAUKResident.personalRep.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(IndividualUserType.PersonalRepresentative)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "wereYouAUKResident.personalRep.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("wereYouAUKResident" -> "3"), "wereYouAUKResident.personalRep.error.boolean")
+        }
+
+      }
+
+      "show a form error for capacitor type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "wereYouAUKResident.capacitor.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(IndividualUserType.Capacitor)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "wereYouAUKResident.capacitor.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("wereYouAUKResident" -> "3"), "wereYouAUKResident.capacitor.error.boolean")
+        }
+
       }
 
       behave like unsuccessfulUpdatesBehaviour(
@@ -613,6 +723,7 @@ class SingleDisposalsTriageControllerSpec
             )
           }
         }
+
       }
 
       "not do any updates" when {
@@ -664,25 +775,99 @@ class SingleDisposalsTriageControllerSpec
         _.select("#didYouDisposeOfResidentialProperty-false").attr("checked") shouldBe "checked"
       )
 
-      {
-        val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          individualUserType = Some(IndividualUserType.Capacitor)
+        ),
+        requiredPreviousAnswers.copy(
+          assetType          = Some(AssetType.NonResidential),
+          individualUserType = Some(IndividualUserType.Capacitor)
+        )
+      )(
+        "didYouDisposeOfResidentialProperty.capacitor.title",
+        checkContent(_, routes.SingleDisposalsTriageController.wereYouAUKResident()),
+        _.select("#didYouDisposeOfResidentialProperty-false").attr("checked") shouldBe "checked"
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          individualUserType = Some(IndividualUserType.PersonalRepresentative)
+        ),
+        requiredPreviousAnswers.copy(
+          assetType          = Some(AssetType.NonResidential),
+          individualUserType = Some(IndividualUserType.PersonalRepresentative)
+        )
+      )(
+        "didYouDisposeOfResidentialProperty.personalRep.title",
+        checkContent(_, routes.SingleDisposalsTriageController.wereYouAUKResident()),
+        _.select("#didYouDisposeOfResidentialProperty-false").attr("checked") shouldBe "checked"
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          individualUserType = Some(IndividualUserType.Self),
           countryOfResidence = Country.uk,
           assetType          = AssetType.Residential
         )
-        behave like displayIndividualTriagePageBehaviorCompleteJourney(
-          performAction
-        )(completeAnswers)(
-          "didYouDisposeOfResidentialProperty.title", { doc =>
-            checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
-            doc.select("#didYouDisposeOfResidentialProperty-true").attr("checked") shouldBe "checked"
-          }
-        )
-      }
+      )(
+        "didYouDisposeOfResidentialProperty.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#didYouDisposeOfResidentialProperty-true").attr("checked") shouldBe "checked"
+        }
+      )
 
-      behave like displayCustomContentForAgent(
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          individualUserType = Some(IndividualUserType.Capacitor),
+          countryOfResidence = Country.uk,
+          assetType          = AssetType.Residential
+        )
+      )(
+        "didYouDisposeOfResidentialProperty.capacitor.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#didYouDisposeOfResidentialProperty-true").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          individualUserType = Some(IndividualUserType.PersonalRepresentative),
+          countryOfResidence = Country.uk,
+          assetType          = AssetType.Residential
+        )
+      )(
+        "didYouDisposeOfResidentialProperty.personalRep.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#didYouDisposeOfResidentialProperty-true").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
         performAction
       )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
         "didYouDisposeOfResidentialProperty.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          assetType          = Some(AssetType.Residential),
+          individualUserType = Some(IndividualUserType.PersonalRepresentative)
+        )
+      )(
+        "didYouDisposeOfResidentialProperty.personalRep.title",
         doc => checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
       )
 
@@ -711,7 +896,10 @@ class SingleDisposalsTriageControllerSpec
         controller.didYouDisposeOfAResidentialPropertySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(wasAUKResident = Some(true))
+        IncompleteSingleDisposalTriageAnswers.empty.copy(
+          wasAUKResident     = Some(true),
+          individualUserType = Some(IndividualUserType.Self)
+        )
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
@@ -721,7 +909,7 @@ class SingleDisposalsTriageControllerSpec
         { case (answers, w) => answers.copy(wasAUKResident = w) }
       )
 
-      "show a form error" when {
+      "show a form error fro self type" when {
 
         def test(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "didYouDisposeOfResidentialProperty.title")(
@@ -736,6 +924,54 @@ class SingleDisposalsTriageControllerSpec
 
         "the option is not recognised" in {
           test(List("didYouDisposeOfResidentialProperty" -> "3"), "didYouDisposeOfResidentialProperty.error.boolean")
+        }
+
+      }
+
+      "show a form error fro capacitor type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "didYouDisposeOfResidentialProperty.capacitor.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(IndividualUserType.Capacitor)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "didYouDisposeOfResidentialProperty.capacitor.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(
+            List("didYouDisposeOfResidentialProperty" -> "3"),
+            "didYouDisposeOfResidentialProperty.capacitor.error.boolean"
+          )
+        }
+
+      }
+
+      "show a form error fro personal representative type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "didYouDisposeOfResidentialProperty.personalRep.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(IndividualUserType.PersonalRepresentative)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "didYouDisposeOfResidentialProperty.personalRep.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(
+            List("didYouDisposeOfResidentialProperty" -> "3"),
+            "didYouDisposeOfResidentialProperty.personalRep.error.boolean"
+          )
         }
 
       }
@@ -817,6 +1053,7 @@ class SingleDisposalsTriageControllerSpec
             }
           }
         }
+
       }
 
       "not do any updates" when {
@@ -921,7 +1158,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgent(
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
         performAction
       )(requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)))(
         "disposalDate.agent.title",
@@ -1239,7 +1476,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgent(
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
         performAction
       )(requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))))(
         "completionDate.agent.title",
@@ -1460,13 +1697,12 @@ class SingleDisposalsTriageControllerSpec
 
     "handling requests to display the country of residence page" must {
 
-      val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(IndividualUserType.Self),
-          hasConfirmedSingleDisposal = true,
-          disposalMethod             = Some(DisposalMethod.Sold),
-          wasAUKResident             = Some(false)
-        )
+      val requiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
+        individualUserType         = Some(IndividualUserType.Self),
+        hasConfirmedSingleDisposal = true,
+        disposalMethod             = Some(DisposalMethod.Sold),
+        wasAUKResident             = Some(false)
+      )
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
       val country                    = Country(countryCode, Some(countryName))
@@ -1491,7 +1727,9 @@ class SingleDisposalsTriageControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = Some(true)))._1
+                sessionDataWithStartingNewDraftReturn(
+                  requiredPreviousAnswers.copy(wasAUKResident = Some(true))
+                )._1
               )
             }
 
@@ -1503,7 +1741,10 @@ class SingleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
+                  sample[CompleteSingleDisposalTriageAnswers].copy(
+                    individualUserType = Some(IndividualUserType.Self),
+                    countryOfResidence = Country.uk
+                  )
                 )._1
               )
             }
@@ -1525,15 +1766,52 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = country))(
+      )(
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(countryOfResidence = country, individualUserType = Some(IndividualUserType.Self))
+      )(
         "triage.enterCountry.title",
         doc => checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
       )
 
-      behave like displayCustomContentForAgent(
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(countryOfResidence = country, individualUserType = Some(IndividualUserType.Capacitor))
+      )(
+        "triage.enterCountry.capacitor.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          countryOfResidence = country,
+          individualUserType = Some(IndividualUserType.PersonalRepresentative)
+        )
+      )(
+        "triage.enterCountry.personalRep.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
         performAction
       )(requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
         "triage.enterCountry.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          countryOfResidence = Some(country),
+          individualUserType = Some(IndividualUserType.PersonalRepresentative)
+        )
+      )(
+        "triage.enterCountry.personalRep.title",
         doc => checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
       )
 
@@ -1613,7 +1891,10 @@ class SingleDisposalsTriageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
+                  sample[CompleteSingleDisposalTriageAnswers].copy(
+                    individualUserType = Some(IndividualUserType.Self),
+                    countryOfResidence = Country.uk
+                  )
                 )._1
               )
             }
@@ -1625,13 +1906,55 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      "show a form error" when {
+      "show a form error for self type" when {
 
         def test(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "triage.enterCountry.title")(
             formData,
             expectedErrorKey,
             requiredPreviousAnswers
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "countryCode.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("countryCode" -> "XX"), "countryCode.error.notFound")
+        }
+
+      }
+
+      "show a form error for capacitor type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "triage.enterCountry.capacitor.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(IndividualUserType.Capacitor)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "countryCode.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("countryCode" -> "XX"), "countryCode.error.notFound")
+        }
+
+      }
+
+      "show a form error for personal representative type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "triage.enterCountry.personalRep.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(IndividualUserType.PersonalRepresentative)
+            )
           )
 
         "nothing is submitted" in {
@@ -1732,7 +2055,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(sample[IndividualUserType]),
+          individualUserType         = Some(IndividualUserType.Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod             = Some(DisposalMethod.Sold),
           wasAUKResident             = Some(false),
@@ -1759,11 +2082,43 @@ class SingleDisposalsTriageControllerSpec
         _.select("#assetTypeForNonUkResidents-2").attr("checked") shouldBe "checked"
       )
 
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(individualUserType = Some(IndividualUserType.Capacitor)),
+        requiredPreviousAnswers.copy(
+          assetType          = Some(AssetType.MixedUse),
+          individualUserType = Some(IndividualUserType.Capacitor)
+        )
+      )(
+        "assetTypeForNonUkResidents.capacitor.title",
+        checkContent(_, routes.SingleDisposalsTriageController.countryOfResidence()),
+        _.select("#assetTypeForNonUkResidents-2").attr("checked") shouldBe "checked"
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
+        requiredPreviousAnswers.copy(
+          assetType          = Some(AssetType.MixedUse),
+          individualUserType = Some(IndividualUserType.PersonalRepresentative)
+        )
+      )(
+        "assetTypeForNonUkResidents.personalRep.title",
+        checkContent(_, routes.SingleDisposalsTriageController.countryOfResidence()),
+        _.select("#assetTypeForNonUkResidents-2").attr("checked") shouldBe "checked"
+      )
+
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(
         sample[CompleteSingleDisposalTriageAnswers]
-          .copy(countryOfResidence = sample[Country], assetType = AssetType.Residential)
+          .copy(
+            countryOfResidence = sample[Country],
+            assetType          = AssetType.Residential,
+            individualUserType = Some(IndividualUserType.Self)
+          )
       )(
         "assetTypeForNonUkResidents.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
@@ -1771,10 +2126,54 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgent(
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(
+            countryOfResidence = sample[Country],
+            assetType          = AssetType.Residential,
+            individualUserType = Some(IndividualUserType.Capacitor)
+          )
+      )(
+        "assetTypeForNonUkResidents.capacitor.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#assetTypeForNonUkResidents-0").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers]
+          .copy(
+            countryOfResidence = sample[Country],
+            assetType          = AssetType.Residential,
+            individualUserType = Some(IndividualUserType.PersonalRepresentative)
+          )
+      )(
+        "assetTypeForNonUkResidents.personalRep.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#assetTypeForNonUkResidents-0").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
         performAction
       )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
         "assetTypeForNonUkResidents.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          assetType          = Some(AssetType.Residential),
+          individualUserType = Some(IndividualUserType.PersonalRepresentative)
+        )
+      )(
+        "assetTypeForNonUkResidents.personalRep.title",
         doc => checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
       )
 
@@ -1830,7 +2229,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(sample[IndividualUserType]),
+          individualUserType         = Some(IndividualUserType.Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod             = Some(DisposalMethod.Sold),
           wasAUKResident             = Some(false),
@@ -1845,7 +2244,7 @@ class SingleDisposalsTriageControllerSpec
         { case (answers, country) => answers.copy(countryOfResidence = country) }
       )
 
-      "show a form error" when {
+      "show a form error for self type" when {
 
         def test(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "assetTypeForNonUkResidents.title")(
@@ -1860,6 +2259,54 @@ class SingleDisposalsTriageControllerSpec
 
         "the option is not recognised" in {
           test(List("assetTypeForNonUkResidents" -> "4"), "assetTypeForNonUkResidents.error.invalid")
+        }
+
+      }
+
+      "show a form error for capacitor type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "assetTypeForNonUkResidents.capacitor.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(IndividualUserType.Capacitor)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "assetTypeForNonUkResidents.capacitor.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(
+            List("assetTypeForNonUkResidents" -> "4"),
+            "assetTypeForNonUkResidents.capacitor.error.invalid"
+          )
+        }
+
+      }
+
+      "show a form error for personal representative type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "assetTypeForNonUkResidents.personalRep.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(IndividualUserType.PersonalRepresentative)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "assetTypeForNonUkResidents.personalRep.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(
+            List("assetTypeForNonUkResidents" -> "4"),
+            "assetTypeForNonUkResidents.personalRep.error.invalid"
+          )
         }
 
       }
@@ -2578,7 +3025,9 @@ class SingleDisposalsTriageControllerSpec
       "redirect to the check your answers page" when {
 
         "the user has not answered all the questions in the triage section" in {
-          val incompleteAnswers = sample[IncompleteSingleDisposalTriageAnswers]
+          val incompleteAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
+            individualUserType = Some(IndividualUserType.Self)
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2707,7 +3156,8 @@ class SingleDisposalsTriageControllerSpec
     checkPrepopulatedContent: Document => Unit
   ): Unit = {
     val scenarioDescription = description.map(_ + " and when ").getOrElse("")
-    s"display the page when ${scenarioDescription}no option has been selected before" in {
+
+    s"display the page when ${scenarioDescription}no option has been selected before for ${userType(answersWithCurrentAnswer)}" in {
       List(
         sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers)._1,
         sessionDataWithFillingOutReturn(requiredPreviousAnswers)._1
@@ -2727,7 +3177,7 @@ class SingleDisposalsTriageControllerSpec
       }
     }
 
-    s"display the page when ${scenarioDescription}an option has been selected before" in {
+    s"display the page when ${scenarioDescription}an option has been selected before for ${userType(answersWithCurrentAnswer)}" in {
       List(
         sessionDataWithStartingNewDraftReturn(answersWithCurrentAnswer)._1,
         sessionDataWithFillingOutReturn(answersWithCurrentAnswer)._1
@@ -2751,13 +3201,19 @@ class SingleDisposalsTriageControllerSpec
 
   }
 
+  private def userType(answers: SingleDisposalTriageAnswers) = answers.representativeType() match {
+    case Some(Left(PersonalRepresentative)) => "personal representative"
+    case Some(Right(Capacitor))             => "capacitor"
+    case None                               => "self"
+  }
+
   def displayIndividualTriagePageBehaviorCompleteJourney(
     performAction: () => Future[Result]
   )(answers: CompleteSingleDisposalTriageAnswers)(
     pageTitleKey: String,
     checkContent: Document => Unit
   ): Unit =
-    "display the page when the journey has already been completed" in {
+    s"display the page when the journey has already been completed for ${userType(answers)}" in {
       List(
         sessionDataWithStartingNewDraftReturn(answers)._1,
         sessionDataWithFillingOutReturn(answers)._1
@@ -2777,13 +3233,13 @@ class SingleDisposalsTriageControllerSpec
       }
     }
 
-  def displayCustomContentForAgent(
+  def displayCustomContentForAgentWithSelfAndPersonalRepType(
     performAction: () => Future[Result]
   )(answers: IncompleteSingleDisposalTriageAnswers)(
     pageTitleKey: String,
     checkContent: Document => Unit
   ): Unit =
-    "use the agent page title" when {
+    s"use the agent page title with ${userType(answers)} type" when {
 
       "an agent requests the page for an individual client" in {
 
@@ -2842,6 +3298,7 @@ class SingleDisposalsTriageControllerSpec
           checkContent
         )
       }
+
     }
 
   def displayCustomContentForTrusts(

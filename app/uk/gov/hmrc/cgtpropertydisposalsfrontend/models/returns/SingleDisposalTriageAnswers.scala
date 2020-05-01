@@ -25,6 +25,7 @@ import monocle.Lens
 import monocle.macros.Lenses
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 sealed trait SingleDisposalTriageAnswers extends Product with Serializable
 
@@ -73,12 +74,12 @@ object SingleDisposalTriageAnswers {
     completionDate: CompletionDate
   ) extends SingleDisposalTriageAnswers
 
-  implicit class IndividualTriageQuestionOps(private val i: SingleDisposalTriageAnswers) extends AnyVal {
+  implicit class IndividualTriageQuestionOps(private val s: SingleDisposalTriageAnswers) extends AnyVal {
 
     def fold[A](
       ifIncomplete: IncompleteSingleDisposalTriageAnswers => A,
       ifComplete: CompleteSingleDisposalTriageAnswers => A
-    ): A = i match {
+    ): A = s match {
       case incomplete: IncompleteSingleDisposalTriageAnswers => ifIncomplete(incomplete)
       case complete: CompleteSingleDisposalTriageAnswers     => ifComplete(complete)
     }
@@ -89,6 +90,13 @@ object SingleDisposalTriageAnswers {
       fieldLens(IncompleteSingleDisposalTriageAnswers).set(None)(
         fold(identity, IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers)
       )
+
+    def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+      s.fold[Option[IndividualUserType]](_.individualUserType, _.individualUserType) match {
+        case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
+        case Some(Capacitor)              => Some(Right(Capacitor))
+        case _                            => None
+      }
 
   }
 

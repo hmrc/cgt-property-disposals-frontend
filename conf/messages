@@ -642,47 +642,86 @@ disposalMethod.trust.error.invalid=Select if the trust sold it, gave it away or 
 wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
 wereYouAUKResident.agent.title=Was your client a UK resident on the day contracts were exchanged?
 wereYouAUKResident.trust.title=Was the trust resident in the UK on the day contracts were exchanged?
+wereYouAUKResident.capacitor.title=Was the person a UK resident on the day contracts were exchanged?
+wereYouAUKResident.personalRep.title=Was the person a UK resident on the day they died or on the contract exchange date?
+
 wereYouAUKResident.helpText=Contract exchange usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
+
 wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
+
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
 wereYouAUKResident.agent.error.required=Select yes if your client was a UK resident when they exchanged contracts
 wereYouAUKResident.agent.error.boolean=Select yes if your client was a UK resident when they exchanged contracts
 wereYouAUKResident.trust.error.required=Select whether the trust was resident in the UK on the day contracts were exchanged
 wereYouAUKResident.trust.error.boolean=Select whether the trust was resident in the UK on the day contracts were exchanged
+wereYouAUKResident.capacitor.error.required=Select yes if the person was a UK resident on the day contracts were exchanged
+wereYouAUKResident.capacitor.error.boolean=Select yes if the person was a UK resident on the day contracts were exchanged
+wereYouAUKResident.personalRep.error.required=Select yes if the person was a UK resident on the day they died or on the contract exchange date
+wereYouAUKResident.personalRep.error.boolean=Select yes if the person was a UK resident on the day they died or on the contract exchange date
 
 triage.enterCountry.title=What was your country of residence on the day you ‘exchanged’ contracts?
 triage.enterCountry.agent.title=What country was your client a resident of when they exchanged contracts?
 triage.enterCountry.trust.title=What country was the trust a resident of when they exchanged contracts?
+triage.enterCountry.capacitor.title=What country was the person a resident of when they exchanged contracts?
+triage.enterCountry.personalRep.title=What country was the person a resident of on the day they died or on the disposal date?
+
 triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
 triage.enterCountry.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.trust.helpText=It’s usually the day the trust and the new owner swapped contracts and they paid a deposit.
+triage.enterCountry.capacitor.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
+triage.enterCountry.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
+
 triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
 triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
 triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
+triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
 assetTypeForNonUkResidents.trust.title=What type of property, land or asset did the trust sell or dispose of?
+assetTypeForNonUkResidents.capacitor.title=What types of property or assets were disposed of?
+assetTypeForNonUkResidents.personalRep.title=What types of property or assets were disposed of?
+
 assetTypeForNonUkResidents.Residential=Residential
 assetTypeForNonUkResidents.Residential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 assetTypeForNonUkResidents.NonResidential=Non-residential
 assetTypeForNonUkResidents.MixedUse=Mixed use
+
 assetTypeForNonUkResidents.MixedUse.helpText=Part of the property was residential and part was non-residential while you owned it.
 assetTypeForNonUkResidents.agent.MixedUse.helpText=Part of the property was residential and part was non-residential while your client owned it.
 assetTypeForNonUkResidents.trust.MixedUse.helpText=Part of the property was residential and part was non-residential while the trust owned it.
+assetTypeForNonUkResidents.capacitor.MixedUse.helpText=Part of the property was residential and part was non-residential.
+assetTypeForNonUkResidents.personalRep.MixedUse.helpText=Part of the property was residential and part was non-residential.
+
 assetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
 assetTypeForNonUkResidents.agent.IndirectDisposal=Company shares in UK land - your client made an indirect disposal
 assetTypeForNonUkResidents.trust.IndirectDisposal=Company shares in UK land - the trust made an indirect disposal
+assetTypeForNonUkResidents.capacitor.IndirectDisposal=Company shares - the person made an indirect disposal
+assetTypeForNonUkResidents.personalRep.IndirectDisposal=Company shares - the person made an indirect disposal
+
 assetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
+assetTypeForNonUkResidents.agent.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
+assetTypeForNonUkResidents.trust.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
+assetTypeForNonUkResidents.capacitor.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
+assetTypeForNonUkResidents.personalRep.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
+
 assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
-assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
 assetTypeForNonUkResidents.agent.error.required=Select the type of property or asset your client sold or disposed of
-assetTypeForNonUkResidents.agent.error.invalid=Select the type of property or asset your client sold or disposed of
 assetTypeForNonUkResidents.trust.error.required=Select the type of property or asset the trust sold or disposed of
+assetTypeForNonUkResidents.capacitor.error.required=Select the type of property or asset the person sold or disposed of
+assetTypeForNonUkResidents.personalRep.error.required=Select the type of property or asset the person sold or disposed of
+
+assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+assetTypeForNonUkResidents.agent.error.invalid=Select the type of property or asset your client sold or disposed of
 assetTypeForNonUkResidents.trust.error.invalid=Select the type of property or asset the trust sold or disposed of
+assetTypeForNonUkResidents.capacitor.error.invalid=Select the type of property or asset the person sold or disposed of
+assetTypeForNonUkResidents.personalRep.error.invalid=Select the type of property or asset the person sold or disposed of
 
 sharesDisposalDate.title=What was the date of disposal of the shares?
 sharesDisposalDate.helpText=For example, 25 4 2020.
@@ -703,6 +742,9 @@ sharesDisposalDate.error.tooFarInFuture=The date you disposed of the shares cann
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.agent.title=Did your client dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.trust.title=Are you reporting the disposal of a UK residential property?
+didYouDisposeOfResidentialProperty.capacitor.title=Are you reporting the disposal of a UK residential property?
+didYouDisposeOfResidentialProperty.personalRep.title=Are you reporting the disposal of a UK residential property?
+
 didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
 didYouDisposeOfResidentialProperty.NonResidential=No
@@ -712,12 +754,17 @@ didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or 
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
+
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a UK residential property
-didYouDisposeOfResidentialProperty.agent.error.required=Select yes if your client disposed of a UK residential property
-didYouDisposeOfResidentialProperty.trust.error.required=Select yes if you are reporting the disposal of a residential property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a UK residential property
+didYouDisposeOfResidentialProperty.agent.error.required=Select yes if your client disposed of a UK residential property
 didYouDisposeOfResidentialProperty.agent.error.boolean=Select yes if your client disposed of a UK residential property
+didYouDisposeOfResidentialProperty.trust.error.required=Select yes if you are reporting the disposal of a residential property
 didYouDisposeOfResidentialProperty.trust.error.boolean=Select yes if you are reporting the disposal of a residential property
+didYouDisposeOfResidentialProperty.capacitor.error.required=Select yes if the person disposed of a UK residential property
+didYouDisposeOfResidentialProperty.capacitor.error.boolean=Select yes if the person disposed of a UK residential property
+didYouDisposeOfResidentialProperty.personalRep.error.required=Select yes if the person disposed of a UK residential property
+didYouDisposeOfResidentialProperty.personalRep.error.boolean=Select yes if the person disposed of a UK residential property
 
 ukResidentCanOnlyReportResidential.title=You cannot use this service
 ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.

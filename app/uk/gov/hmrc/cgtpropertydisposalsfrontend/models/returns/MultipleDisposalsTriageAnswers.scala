@@ -18,13 +18,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.syntax.eq._
 import cats.instances.list._
-
 import julienrf.json.derived
 import monocle.Lens
 import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 sealed trait MultipleDisposalsTriageAnswers
 
@@ -88,6 +88,13 @@ object MultipleDisposalsTriageAnswers {
       fieldLens(IncompleteMultipleDisposalsTriageAnswers).set(None)(
         fold(identity, IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers)
       )
+
+    def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+      m.fold[Option[IndividualUserType]](_.individualUserType, _.individualUserType) match {
+        case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
+        case Some(Capacitor)              => Some(Right(Capacitor))
+        case _                            => None
+      }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

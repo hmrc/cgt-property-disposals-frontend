@@ -479,7 +479,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           cyaPge(
             completeReturn,
             instanceOf[RebasingEligibilityUtil],
-            completeFillingOutReturn.subscribedDetails.isATrust
+            completeFillingOutReturn.subscribedDetails.isATrust,
+            representativeType(completeReturn)
           ).toString
 
         SubmitReturnRequest(
@@ -963,6 +964,14 @@ class CheckAllAnswersAndSubmitControllerSpec
 }
 
 object CheckAllAnswersAndSubmitControllerSpec {
+
+  def representativeType(
+    completeReturn: CompleteReturn
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    completeReturn.fold(
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType()
+    )
 
   def validateSingleDisposalCheckAllYourAnswersSections(
     doc: Document,

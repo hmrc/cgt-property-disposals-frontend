@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -49,7 +50,12 @@
         printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
-@(completeReturn: CompleteReturn, rebasingEligibilityUtil: RebasingEligibilityUtil, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+    completeReturn: CompleteReturn,
+    rebasingEligibilityUtil: RebasingEligibilityUtil,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{ messages("checkAllAnswers.title") }
 
@@ -70,7 +76,7 @@
       }
 
      <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
-     @singleDisposalTriageSummary(s.triageAnswers, isATrust)
+     @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType)
 
      <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
      @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())

@@ -102,7 +102,6 @@ object DraftReturn {
         case m: DraftMultipleDisposalsReturn => whenMultiple(m)
         case s: DraftSingleDisposalReturn    => whenSingle(s)
       }
-
   }
 
   implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals

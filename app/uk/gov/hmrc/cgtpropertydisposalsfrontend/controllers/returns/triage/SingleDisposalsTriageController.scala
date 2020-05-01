@@ -165,11 +165,13 @@ class SingleDisposalsTriageController @Inject() (
       page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
         val isATrust = journeyStatus
           .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
+
         wereYouAUKResidentPage(
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -183,11 +185,13 @@ class SingleDisposalsTriageController @Inject() (
       page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
         val isATrust = journeyStatus
           .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
+
         wereYouAUKResidentPage(
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       },
       updateState = { (wasAUKResident, state, answers) =>
@@ -237,7 +241,8 @@ class SingleDisposalsTriageController @Inject() (
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
             isDraftReturn,
-            isATrust
+            isATrust,
+            currentAnswers.representativeType()
           )
         }
       )
@@ -256,7 +261,8 @@ class SingleDisposalsTriageController @Inject() (
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
             isDraftReturn,
-            isATrust
+            isATrust,
+            currentAnswers.representativeType()
           )
         },
         updateState = { (wasResidentialProperty, state, answers) =>
@@ -503,7 +509,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -521,7 +528,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       },
       updateState = { (country, state, answers) =>
@@ -567,7 +575,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -586,7 +595,8 @@ class SingleDisposalsTriageController @Inject() (
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
             isDraftReturn,
-            isATrust
+            isATrust,
+            currentAnswers.representativeType()
           )
         },
         updateState = { (assetType, state, answers) =>
@@ -723,7 +733,7 @@ class SingleDisposalsTriageController @Inject() (
               _._2.subscribedDetails.isATrust
             )
             .contains(true)
-          Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust))
+          Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust, c.representativeType()))
 
         case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, __) if isIndividual =>
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
@@ -849,7 +859,14 @@ class SingleDisposalsTriageController @Inject() (
           )
           .contains(true)
 
-        Ok(checkYourAnswersPage(newCompleteTriageAnswers, displayReturnToSummaryLink, isATrust))
+        Ok(
+          checkYourAnswersPage(
+            newCompleteTriageAnswers,
+            displayReturnToSummaryLink,
+            isATrust,
+            newCompleteTriageAnswers.representativeType()
+          )
+        )
     }
   }
 
