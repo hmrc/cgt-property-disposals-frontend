@@ -55,7 +55,14 @@
     else ""
 }
 
-@userTypeErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
+@userTypeErrorPrefix = @{
+    if (representativeType.exists(_.isLeft)) "personalRep."
+    else if (isAgent) "agent."
+    else if (isATrust) "trust."
+    else if (representativeType.exists(_.isRight)) "capacitor."
+    else ""
+}
+
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
