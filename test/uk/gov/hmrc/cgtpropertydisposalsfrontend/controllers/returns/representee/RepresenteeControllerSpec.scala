@@ -138,8 +138,7 @@ class RepresenteeControllerSpec
           sessionData: SessionData,
           expectedTitleKey: String,
           expectedBackLink: Call,
-          expectedPrepopulatedValue: ContactName
-        ): Unit = {
+          expectReturnToSummaryLink: Boolean): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
@@ -152,18 +151,34 @@ class RepresenteeControllerSpec
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.RepresenteeController.changeContactName().url
+              doc.select("#returnToSummaryLink").text() shouldBe (
+                if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link")
+                else ""
+                )
+
             }
           )
         }
-        "the user is a clicks on the change contact details" in {
+        "the user makes a request for changing contact details" in {
           val (session, journey, draftReturn) =
             sessionWithFillingOutReturn(sample[CompleteRepresenteeAnswers], Right(Capacitor))
 
           test(
             session,
             "representeeContactName.change.title",
+            routes.RepresenteeController.checkYourAnswers(),
+            true
+          )
+        }
+        "the user makes a request for changing contact details starting a new journey" in {
+          val (session, _) =
+            sessionWithStartingNewDraftReturn(sample[IncompleteRepresenteeAnswers], Right(Capacitor))
+
+          test(
+            session,
+            "representeeContactName.change.title",
             routes.RepresenteeController.checkContactDetails(),
-            ContactName("First Last")
+            false
           )
         }
       }
@@ -186,7 +201,8 @@ class RepresenteeControllerSpec
           }
       )
 
-      "redirect to check your answers page" in {
+      "redirect to check your answers page" when {
+        "the user enters a valid contact name" in {
         val contactDetails            = incompleteRepresenteeAnswers.contactDetails
         val newContactName            = ContactName("First Last")
         val updatedContactDetails     = contactDetails.map(_.copy(contactName = newContactName))
@@ -208,6 +224,7 @@ class RepresenteeControllerSpec
           routes.RepresenteeController.checkYourAnswers()
         )
       }
+        }
     }
 
     "handling requests to display the enter name page" must {

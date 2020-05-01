@@ -26,20 +26,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
 )
 
 @(
         form: Form[ContactName],
-        backLink: Call
+        backLink: Call,
+        displayReturnToSummaryLink: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{
@@ -47,7 +48,7 @@
 }
 
 @contactNameKey = @{
-    "representeeContactName"
+    "contactName"
 }
 @hasErrors = @{
     form.hasErrors || form.hasGlobalErrors
@@ -70,7 +71,7 @@
 
     @formWrapper(routes.RepresenteeController.changeContactNameSubmit(), 'novalidate -> "novalidate") {
         @textInput(
-            fieldId = "contactName",
+            fieldId = contactNameKey,
             value = form.data.getOrElse(contactNameKey, ""),
             errorKey = form.error(contactNameKey).map(e => e.message),
             hasErrors = form.error(contactNameKey).nonEmpty,
@@ -83,5 +84,5 @@
 
         @submitButton(messages("button.saveAndContinue"))
     }
-
+    @returnToSummaryLink(displayReturnToSummaryLink)
 }

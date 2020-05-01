@@ -459,25 +459,28 @@ class RepresenteeController @Inject() (
     }
 
   def changeContactName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    val backLink = routes.RepresenteeController.checkContactDetails()
     withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
-      getContactDetails(journey, answers).fold(
-        { e =>
-          logger.warn("Could not get representee contact details", e)
-          errorHandler.errorResult()
-        },
-        _ => Ok(changeContactNamePage(ContactName.form, backLink))
+      val backLink = answers.fold(
+        i => routes.RepresenteeController.checkContactDetails(),
+        c => routes.RepresenteeController.checkYourAnswers()
       )
+      answers.fold(i => i.contactDetails, c => Some(c.contactDetails)) match {
+        case None => Redirect(routes.RepresenteeController.checkYourAnswers())
+        case _    => Ok(changeContactNamePage(ContactName.form, backLink, journey.isRight))
+      }
     }
   }
 
   def changeContactNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
-      val backLink = routes.RepresenteeController.checkContactDetails()
+      val backLink = answers.fold(
+        i => routes.RepresenteeController.checkContactDetails(),
+        c => routes.RepresenteeController.checkYourAnswers()
+      )
       ContactName.form
         .bindFromRequest()
         .fold(
-          formWithErrors => BadRequest(changeContactNamePage(formWithErrors, backLink)),
+          formWithErrors => BadRequest(changeContactNamePage(formWithErrors, backLink, journey.isRight)),
           contactName =>
             if (answers
                   .fold(_.contactDetails.map(_.contactName), c => Some(c.contactDetails.contactName))
@@ -494,7 +497,7 @@ class RepresenteeController @Inject() (
                       c.dateOfDeath,
                       Some(c.contactDetails.copy(contactName = contactName)),
                       true,
-                      true
+                      false
                     )
                 )
               updateDraftReturnAndSession(newAnswers, journey).fold({ e =>

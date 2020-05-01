@@ -69,7 +69,7 @@
     @cyaRow(
         messages("representee.cyaLabel.contactName"),
         Html(answers.contactDetails.contactName.value),
-        Some(cyaChange(messages("representee.cyaChange.contactName"), "#")),
+        Some(cyaChange(messages("representee.cyaChange.contactName"), routes.RepresenteeController.changeContactName().url)),
         "contactName"
     )
     @cyaRow(
