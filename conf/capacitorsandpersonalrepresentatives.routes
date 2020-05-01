@@ -19,6 +19,8 @@ POST /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfro
 GET   /about-person/check-your-answers       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswers()
 POST  /about-person/check-your-answers       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswersSubmit()
 
+GET  /about-person/enter-different-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.changeContactName()
+POST /about-person/enter-different-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.changeContactNameSubmit()
 
 ## Address
 GET  /about-person/is-uk-contact-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.isUk()
