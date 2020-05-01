@@ -984,10 +984,8 @@ percentageShare.trust.error.tooManyDecimals=The percentage of the property the t
 disposalPrice.SoldOther.title=How much did you get when you sold or disposed of the property?
 disposalPrice.agent.SoldOther.title=How much did your client get when they sold or disposed of the property?
 disposalPrice.trust.SoldOther.title=How much did the trust get when they sold or disposed of the property?
-
 disposalPrice.personalRep.SoldOther.title=What was the disposal amount
-
-disposalPrice.trust.SoldOther.title=What was the disposal amount
+disposalPrice.capacitor.SoldOther.title=What was the disposal amount
 
 
 
