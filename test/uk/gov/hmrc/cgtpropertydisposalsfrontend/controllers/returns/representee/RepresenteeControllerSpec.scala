@@ -138,7 +138,8 @@ class RepresenteeControllerSpec
           sessionData: SessionData,
           expectedTitleKey: String,
           expectedBackLink: Call,
-          expectReturnToSummaryLink: Boolean): Unit = {
+          expectReturnToSummaryLink: Boolean
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
@@ -154,7 +155,7 @@ class RepresenteeControllerSpec
               doc.select("#returnToSummaryLink").text() shouldBe (
                 if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link")
                 else ""
-                )
+              )
 
             }
           )
@@ -203,28 +204,28 @@ class RepresenteeControllerSpec
 
       "redirect to check your answers page" when {
         "the user enters a valid contact name" in {
-        val contactDetails            = incompleteRepresenteeAnswers.contactDetails
-        val newContactName            = ContactName("First Last")
-        val updatedContactDetails     = contactDetails.map(_.copy(contactName = newContactName))
-        val updatedRepresenteeAnswers = incompleteRepresenteeAnswers.copy(contactDetails = updatedContactDetails)
-        val updatedDraftReturn        = draftReturn.copy(representeeAnswers = Some(updatedRepresenteeAnswers))
-        val updatedSession            = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            updatedDraftReturn,
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Right(()))
-          mockStoreSession(updatedSession)(Right(()))
+          val contactDetails            = incompleteRepresenteeAnswers.contactDetails
+          val newContactName            = ContactName("First Last")
+          val updatedContactDetails     = contactDetails.map(_.copy(contactName = newContactName))
+          val updatedRepresenteeAnswers = incompleteRepresenteeAnswers.copy(contactDetails = updatedContactDetails)
+          val updatedDraftReturn        = draftReturn.copy(representeeAnswers = Some(updatedRepresenteeAnswers))
+          val updatedSession            = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+          checkIsRedirect(
+            performAction(formDataForContactName(ContactName("First Last"))),
+            routes.RepresenteeController.checkYourAnswers()
+          )
         }
-        checkIsRedirect(
-          performAction(formDataForContactName(ContactName("First Last"))),
-          routes.RepresenteeController.checkYourAnswers()
-        )
       }
-        }
     }
 
     "handling requests to display the enter name page" must {
