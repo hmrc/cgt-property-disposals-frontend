@@ -932,8 +932,8 @@ returns.disposal-details.caption=Sale or disposal details
 shareOfProperty.title=How much of the property did you own?
 shareOfProperty.agent.title=How much of the property did your client own?
 shareOfProperty.trust.title=How much of the property did the trust own?
-shareOfProperty.personalRep.title=How much of the property did the person own? personal rep
-shareOfProperty.capacitor.title=How much of the property did the person own? capacitor
+shareOfProperty.personalRep.title=How much of the property did the person own?
+shareOfProperty.capacitor.title=How much of the property did the person own?
 
 shareOfProperty.error.required=Select how much of the property you owned
 shareOfProperty.agent.error.required=Select how much of the property your client owned
