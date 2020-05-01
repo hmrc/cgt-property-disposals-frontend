@@ -51,7 +51,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPar
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.confirm_person
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -73,7 +72,8 @@ class RepresenteeController @Inject() (
   enterIdPage: representeePages.enter_reference_number,
   enterDateOfDeathPage: representeePages.enter_date_of_death,
   checkContactDetailsPage: representeePages.check_contact_details,
-  confirmPersonPage: confirm_person
+  confirmPersonPage: representeePages.confirm_person,
+  nameMatchErrorPage: representeePages.name_match_error
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -203,7 +203,7 @@ class RepresenteeController @Inject() (
       val backLink = routes.RepresenteeController.enterId()
 
       answers match {
-        case incompleteAnswers @ IncompleteRepresenteeAnswers(Some(name), Some(id), _, None, false, false) =>
+        case IncompleteRepresenteeAnswers(Some(name), Some(id), _, None, false, false) =>
           Ok(
             confirmPersonPage(
               id,
@@ -347,20 +347,18 @@ class RepresenteeController @Inject() (
                     for {
                       _ <- response.leftMap { e =>
                             e match {
-                              case Error(Right(NameCheckException)) => {
+                              case Error(Right(NameCheckException)) =>
                                 logger.warn("Name check error", e)
-                                BadRequest("Name check error")
-                              }
-                              case Error(Right(ConnectorException)) => {
+                                Redirect(routes.RepresenteeController.nameMatchError())
+
+                              case Error(Right(ConnectorException)) =>
                                 logger.warn("Could not connect to downstream", e)
                                 errorHandler.errorResult()
-                              }
-                              case _ => {
+
+                              case _ =>
                                 logger.warn("server error", e)
                                 errorHandler.errorResult()
-                              }
                             }
-
                           }
                       _ <- {
                         val newAnswers =
@@ -373,8 +371,7 @@ class RepresenteeController @Inject() (
                       }
                     } yield ()
 
-                  result.fold(e => e, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
-
+                  result.map(_ => Redirect(routes.RepresenteeController.checkYourAnswers())).merge
               }
             }
         )
@@ -481,6 +478,16 @@ class RepresenteeController @Inject() (
 
         case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
       }
+    }
+  }
+
+  def nameMatchError(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request)((_, _, _) => Ok(nameMatchErrorPage()))
+  }
+
+  def nameMatchErrorSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withCapacitorOrPersonalRepresentativeAnswers(request) { (_, _, _) =>
+      Redirect(routes.RepresenteeController.enterName())
     }
   }
 

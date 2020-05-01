@@ -1168,31 +1168,7 @@ class RepresenteeControllerSpec
         }
 
         "cgt reference is selected and a value is submitted" which {
-          "does not belong to the name entered" in {
-            val name        = IndividualName("First", "Last")
-            val anotherName = IndividualName("Another", "Name")
-            val answers     = IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
-            val cgtRef      = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
-            val (session, _, draftReturn) =
-              sessionWithFillingOutReturn(answers, Right(Capacitor))
-
-            val expectedSubscribedDetails = SubscribedDetails(
-              Right(anotherName),
-              Email("email"),
-              UkAddress("Some St.", None, None, None, Postcode("EC1 AB2")),
-              ContactName(""),
-              CgtReference("cgtReference"),
-              None,
-              false
-            )
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockGetSubscriptionDetails(cgtRef.value, Right(expectedSubscribedDetails))
-            }
-            checkIsSimpleBadRequest(performAction(formData(cgtRef)), "Name check error")
-          }
           "is empty" in {
             test(Seq(outerKey -> "0"), "representeeCgtRef.error.required")
           }
@@ -1217,56 +1193,6 @@ class RepresenteeControllerSpec
               Seq(outerKey -> "0", cgtReferenceKey -> "BYCGTP123456789"),
               "representeeCgtRef.error.pattern"
             )
-          }
-
-        }
-
-        "nino is selected and a value is submitted" which {
-          "does not belong to the name entered" in {
-            val individualName = IndividualName("First", "Last")
-            val answers = IncompleteRepresenteeAnswers.empty.copy(
-              name = Some(individualName),
-              id   = Some(sample[RepresenteeCgtReference])
-            )
-            val ninoValue = NINO("AB123456C")
-            val nino      = RepresenteeNino(ninoValue)
-
-            val (session, journey, draftReturn) =
-              sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
-
-            val businessPartnerRecordRequest =
-              IndividualBusinessPartnerRecordRequest(Right(ninoValue), Some(individualName))
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockGetBusinessPartnerRecord(
-                businessPartnerRecordRequest,
-                Right(BusinessPartnerRecordResponse(None, None))
-              )
-            }
-            checkIsSimpleBadRequest(performAction(formData(nino)), "Name check error")
-          }
-
-          "is empty" in {
-            test(Seq(outerKey -> "1"), "representeeNino.error.required")
-          }
-
-          "is too short" in {
-            test(Seq(outerKey -> "1", ninoKey -> "AB123"), "representeeNino.error.tooShort")
-
-          }
-
-          "is too long" in {
-            test(Seq(outerKey -> "1", ninoKey -> "AB123456789B"), "representeeNino.error.tooLong")
-          }
-
-          "contains invalid characters" in {
-            test(Seq(outerKey -> "1", ninoKey -> "AB123456$"), "representeeNino.error.invalidCharacters")
-          }
-
-          "contains valid characters but is not of the right format" in {
-            test(Seq(outerKey -> "1", ninoKey -> "ZZ123456C"), "representeeNino.error.pattern")
           }
 
         }
@@ -1364,7 +1290,7 @@ class RepresenteeControllerSpec
           val ninoValue = NINO("AB123456C")
           val nino      = RepresenteeNino(ninoValue)
 
-          val (session, _, draftReturn) =
+          val (session, _, _) =
             sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
 
           val businessPartnerRecordRequest =
@@ -1376,6 +1302,103 @@ class RepresenteeControllerSpec
             mockGetBusinessPartnerRecord(businessPartnerRecordRequest, Left(Error("Some error")))
           }
           checkIsTechnicalErrorPage(performAction(formData(nino)))
+        }
+
+      }
+
+      "redirect to the name match error page" when {
+
+        "cgt reference is selected and a value is submitted" which {
+
+          "does not belong to the name entered" in {
+            val name        = IndividualName("First", "Last")
+            val anotherName = IndividualName("Another", "Name")
+            val answers     = IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
+            val cgtRef      = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
+
+            val session = sessionWithFillingOutReturn(answers, Right(Capacitor))._1
+
+            val expectedSubscribedDetails = SubscribedDetails(
+              Right(anotherName),
+              Email("email"),
+              UkAddress("Some St.", None, None, None, Postcode("EC1 AB2")),
+              ContactName(""),
+              CgtReference("cgtReference"),
+              None,
+              false
+            )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGetSubscriptionDetails(cgtRef.value, Right(expectedSubscribedDetails))
+            }
+            checkIsRedirect(performAction(formData(cgtRef)), routes.RepresenteeController.nameMatchError())
+          }
+
+        }
+
+        "nino is selected and a value is submitted" which {
+
+          "does not belong to the name entered" in {
+            val individualName = IndividualName("First", "Last")
+            val answers = IncompleteRepresenteeAnswers.empty.copy(
+              name = Some(individualName),
+              id   = Some(sample[RepresenteeCgtReference])
+            )
+            val ninoValue = NINO("AB123456C")
+            val nino      = RepresenteeNino(ninoValue)
+
+            val session =
+              sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))._1
+
+            val businessPartnerRecordRequest =
+              IndividualBusinessPartnerRecordRequest(Right(ninoValue), Some(individualName))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGetBusinessPartnerRecord(
+                businessPartnerRecordRequest,
+                Right(BusinessPartnerRecordResponse(None, None))
+              )
+            }
+
+            checkIsRedirect(performAction(formData(nino)), routes.RepresenteeController.nameMatchError())
+          }
+
+        }
+
+        "sa utr is selected and a value is submitted" which {
+
+          "does not belong to the name entered" in {
+            val individualName = IndividualName("First", "Last")
+            val answers = IncompleteRepresenteeAnswers.empty.copy(
+              name = Some(individualName),
+              id   = Some(sample[RepresenteeCgtReference])
+            )
+            val sautr = SAUTR("1234567890")
+
+            val session =
+              sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))._1
+
+            val businessPartnerRecordRequest =
+              IndividualBusinessPartnerRecordRequest(Left(sautr), Some(individualName))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGetBusinessPartnerRecord(
+                businessPartnerRecordRequest,
+                Right(BusinessPartnerRecordResponse(None, None))
+              )
+            }
+
+            checkIsRedirect(
+              performAction(formData(RepresenteeSautr(sautr))),
+              routes.RepresenteeController.nameMatchError()
+            )
+          }
+
         }
 
       }
@@ -2156,6 +2179,52 @@ class RepresenteeControllerSpec
           returns.triage.routes.CommonTriageQuestionsController.howManyProperties()
         )
       }
+    }
+
+    "handling requests to display the name match error page" must {
+
+      def performAction(): Future[Result] = controller.nameMatchError()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+
+      "display the page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithFillingOutReturn(sample[RepresenteeAnswers], Left(PersonalRepresentative))._1)
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("representeeNameMatchError.title"),
+          doc =>
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.RepresenteeController.nameMatchErrorSubmit().url
+        )
+
+      }
+
+    }
+
+    "handling submits on the name match error page" must {
+
+      def performAction(): Future[Result] = controller.nameMatchErrorSubmit()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+
+      "redirect to the enter name page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithStartingNewDraftReturn(sample[RepresenteeAnswers], Right(Capacitor))._1)
+        }
+
+        checkIsRedirect(performAction(), routes.RepresenteeController.enterName())
+      }
+
     }
 
   }
