@@ -7,10 +7,14 @@ POST /about-person/select-reference-number   uk.gov.hmrc.cgtpropertydisposalsfro
 GET   /about-person/date-person-died        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.enterDateOfDeath()
 POST  /about-person/date-person-died        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.enterDateOfDeathSubmit()
 
-GET  /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetails()
-POST /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetailsSubmit()
+GET   /about-person/details-did-not-match-records    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.nameMatchError()
+POST  /about-person/details-did-not-match-records    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.nameMatchErrorSubmit()
+
 GET /about-person/confirm-person    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.confirmPerson()
 POST /about-person/confirm-person   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.confirmPersonSubmit()
+
+GET  /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetails()
+POST /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetailsSubmit()
 
 GET   /about-person/check-your-answers       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswers()
 POST  /about-person/check-your-answers       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkYourAnswersSubmit()

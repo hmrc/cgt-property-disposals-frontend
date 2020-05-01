@@ -2271,3 +2271,7 @@ representeeConfirmPerson.summaryLine1=Name
 representeeConfirmPerson.summaryLine2.cgtReferenceId=Capital Gains Tax on UK property account number
 representeeConfirmPerson.formTitle=Is this the person you’re completing this return for?
 confirmed.error.required=Select yes to confirm this is the person you are representing
+
+representeeNameMatchError.title=The details you entered did not match our records
+representeeNameMatchError.p1=The reference number and name you entered for the person did not match the details we hold.
+representeeNameMatchError.p2=Check you have the correct details for the person and try again.
