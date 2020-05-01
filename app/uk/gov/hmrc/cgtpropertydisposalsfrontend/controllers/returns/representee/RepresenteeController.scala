@@ -75,7 +75,6 @@ class RepresenteeController @Inject() (
   checkContactDetailsPage: representeePages.check_contact_details,
   confirmPersonPage: representeePages.confirm_person,
   nameMatchErrorPage: representeePages.name_match_error,
-  confirmPersonPage: confirm_person,
   changeContactNamePage: change_contact_name
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
