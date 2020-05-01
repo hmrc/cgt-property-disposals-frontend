@@ -87,14 +87,15 @@ class DisposalDetailsControllerSpec
     case _              => None
   }
 
-  def userMessageKey(individualUserType: IndividualUserType, userType: UserType): String = (individualUserType, userType) match {
-    case (Capacitor, _) => ".capacitor"
-    case (PersonalRepresentative, _) => ".personalRep"
-    case (_, UserType.Individual)   => ""
-    case (_, UserType.Organisation) => ".trust"
-    case (_, UserType.Agent)        => ".agent"
-    case other                 => sys.error(s"User type '$other' not handled")
-  }
+  def userMessageKey(individualUserType: IndividualUserType, userType: UserType): String =
+    (individualUserType, userType) match {
+      case (Capacitor, _)              => ".capacitor"
+      case (PersonalRepresentative, _) => ".personalRep"
+      case (_, UserType.Individual)    => ""
+      case (_, UserType.Organisation)  => ".trust"
+      case (_, UserType.Agent)         => ".agent"
+      case other                       => sys.error(s"User type '$other' not handled")
+    }
 
   def fillingOutReturn(
     disposalMethod: DisposalMethod,
@@ -1843,7 +1844,7 @@ class DisposalDetailsControllerSpec
             result,
             messageFromMessageKey("returns.disposal-details.cya.title"), { doc =>
               validateDisposalDetailsCheckYourAnswersPage(completeDisposalDetailsAnswers, doc)
-              val userKey = userMessageKey(Self, userType)// TODO
+              val userKey = userMessageKey(Self, userType) //TODO - change when the CYA changes go in
               doc.select("#propertyShare-question").text() shouldBe messageFromMessageKey(
                 s"shareOfProperty$userKey.title"
               )
