@@ -329,8 +329,14 @@ class DisposalDetailsController @Inject() (
                 c => disposalFeesForm.fill(c.disposalFees.inPounds())
               )
             )(
-              page =
-                disposalFeesPage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
+              page = disposalFeesPage(
+                _,
+                _,
+                disposalMethod,
+                shareOfProperty,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.triageAnswers.representativeType()
+              )
             )(
               requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
               redirectToIfNoRequiredPreviousAnswer =
@@ -348,8 +354,14 @@ class DisposalDetailsController @Inject() (
             submitBehaviour(fillingOutReturn, draftReturn, answers)(
               form = disposalFeesForm
             )(
-              page =
-                disposalFeesPage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
+              page = disposalFeesPage(
+                _,
+                _,
+                disposalMethod,
+                shareOfProperty,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.triageAnswers.representativeType()
+              )
             )(
               requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
               redirectToIfNoRequiredPreviousAnswer =
