@@ -264,7 +264,7 @@ contactName.title=Change contact name
 contactName.extraContent=The contact name you use for other government services will not change.
 contactName.error.pattern=Contact name must only include letters, numbers, hyphens, apostrophes, commas, ampersands and spaces
 contactName.error.required=Enter your contact name
-contactName.error.tooLong=Contact name must must be 105 characters or fewer
+contactName.error.tooLong=Contact name must must be 35 characters or fewer
 
 address.postcode.label=Postcode
 address.postcode.helpText=For example, AB2 9WQ

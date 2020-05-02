@@ -40,7 +40,7 @@ object ContactName {
     val regexPredicate = "^[a-zA-Z0-9 &,`\\-\'.^]{1,105}$".r.pattern.asPredicate()
 
     def validateContactName(s: String): ValidationResult =
-      if (s.length > 105) Invalid("error.tooLong")
+      if (s.length > 35) Invalid("error.tooLong")
       else if (!regexPredicate.test(s)) Invalid("error.pattern")
       else Valid
 

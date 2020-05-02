@@ -43,7 +43,7 @@ trait ContactNameFormValidationTests { this: ControllerSpec =>
         mockActions()
 
         val result = performAction(
-          Seq("contactName" -> List.fill(110)("a").mkString(""))
+          Seq("contactName" -> List.fill(36)("a").mkString(""))
         )
         status(result)          shouldBe BAD_REQUEST
         contentAsString(result) should include(messageFromMessageKey("contactName.error.tooLong"))
