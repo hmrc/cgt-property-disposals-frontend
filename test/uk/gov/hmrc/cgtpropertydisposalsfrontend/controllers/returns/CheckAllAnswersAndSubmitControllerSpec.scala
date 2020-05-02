@@ -434,12 +434,16 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       def performAction(): Future[Result] = controller.checkAllAnswersSubmit()(FakeRequest())
 
-      val completeReturn = sample[CompleteSingleDisposalReturn].copy(
-        triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-        representeeAnswers = None
-      )
-      val hasAttachments =
-        completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
+      val (completeReturn, hasAttachments) = {
+        val r = sample[CompleteSingleDisposalReturn].copy(
+          triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+          representeeAnswers = None
+        )
+        val hasAttachments =
+          r.supportingDocumentAnswers.evidences.nonEmpty || r.yearToDateLiabilityAnswers.isLeft
+
+        r.copy(hasAttachments = hasAttachments) -> hasAttachments
+      }
 
       val completeDraftReturn = DraftSingleDisposalReturn(
         UUID.randomUUID(),
