@@ -30,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.SubscriptionReadyAddressJourney
 
 import scala.concurrent.Future
@@ -93,9 +94,11 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
-      behave like displayEnterUkAddressPage(UserType.Organisation, performAction)
+      List(Capacitor, PersonalRepresentative, Self).foreach { individualUserType =>
+        behave like displayEnterUkAddressPage(UserType.Individual, individualUserType, performAction)
+        behave like displayEnterUkAddressPage(UserType.Agent, individualUserType, performAction)
+        behave like displayEnterUkAddressPage(UserType.Organisation, individualUserType, performAction)
+      }
 
     }
 
@@ -140,10 +143,11 @@ class SubscriptionAddressControllerSpec
       def performAction(): Future[Result] = controller.enterPostcode()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
-
-      behave like enterPostcodePage(UserType.Individual, performAction)
-      behave like enterPostcodePage(UserType.Agent, performAction)
-      behave like enterPostcodePage(UserType.Organisation, performAction)
+      List(Capacitor, PersonalRepresentative, Self).foreach { individualUserType =>
+        behave like enterPostcodePage(UserType.Individual, individualUserType, performAction)
+        behave like enterPostcodePage(UserType.Agent, individualUserType, performAction)
+        behave like enterPostcodePage(UserType.Organisation, individualUserType, performAction)
+      }
 
     }
 
@@ -165,23 +169,28 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(
-        UserType.Individual,
-        performAction,
-        controllers.onboarding.routes.SubscriptionController.checkYourDetails()
-      )
+      List(Capacitor, PersonalRepresentative, Self).foreach { individualUserType =>
+        behave like displaySelectAddress(
+          UserType.Individual,
+          individualUserType,
+          performAction,
+          controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+        )
 
-      behave like displaySelectAddress(
-        UserType.Agent,
-        performAction,
-        controllers.onboarding.routes.SubscriptionController.checkYourDetails()
-      )
+        behave like displaySelectAddress(
+          UserType.Agent,
+          individualUserType,
+          performAction,
+          controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+        )
 
-      behave like displaySelectAddress(
-        UserType.Organisation,
-        performAction,
-        controllers.onboarding.routes.SubscriptionController.checkYourDetails()
-      )
+        behave like displaySelectAddress(
+          UserType.Organisation,
+          individualUserType,
+          performAction,
+          controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+        )
+      }
 
     }
 

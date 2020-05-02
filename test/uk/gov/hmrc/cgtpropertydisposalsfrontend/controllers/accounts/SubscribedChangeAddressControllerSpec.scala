@@ -32,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDetails, SubscribedUpdateDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.ManagingSubscription.SubscribedAddressJourney
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -114,9 +115,9 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
-      behave like displayEnterUkAddressPage(UserType.Organisation, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, Self, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, Self, performAction)
+      behave like displayEnterUkAddressPage(UserType.Organisation, Self, performAction)
 
     }
 
@@ -163,9 +164,9 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, performAction)
-      behave like enterPostcodePage(UserType.Agent, performAction)
-      behave like enterPostcodePage(UserType.Organisation, performAction)
+      behave like enterPostcodePage(UserType.Individual, Self, performAction)
+      behave like enterPostcodePage(UserType.Agent, Self, performAction)
+      behave like enterPostcodePage(UserType.Organisation, Self, performAction)
 
     }
 
@@ -190,23 +191,28 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(
-        UserType.Individual,
-        performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails()
-      )
+      List(Capacitor, PersonalRepresentative, Self).foreach { individualUserType =>
+        behave like displaySelectAddress(
+          UserType.Individual,
+          individualUserType,
+          performAction,
+          controllers.accounts.routes.AccountController.manageYourDetails()
+        )
 
-      behave like displaySelectAddress(
-        UserType.Agent,
-        performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails()
-      )
+        behave like displaySelectAddress(
+          UserType.Agent,
+          individualUserType,
+          performAction,
+          controllers.accounts.routes.AccountController.manageYourDetails()
+        )
 
-      behave like displaySelectAddress(
-        UserType.Organisation,
-        performAction,
-        controllers.accounts.routes.AccountController.manageYourDetails()
-      )
+        behave like displaySelectAddress(
+          UserType.Organisation,
+          individualUserType,
+          performAction,
+          controllers.accounts.routes.AccountController.manageYourDetails()
+        )
+      }
     }
 
     "handling submitted selected addresses" must {

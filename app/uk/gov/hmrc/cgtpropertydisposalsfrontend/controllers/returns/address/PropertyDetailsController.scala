@@ -90,8 +90,17 @@ class PropertyDetailsController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, FillingOutReturnAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: FillingOutReturn)) => Right(sessionData -> FillingOutReturnAddressJourney(r))
-      case _                                        => Left(Redirect(controllers.routes.StartController.start()))
+      case Some((sessionData, r: FillingOutReturn)) =>
+        Right(
+          sessionData -> FillingOutReturnAddressJourney(
+            r,
+            r.draftReturn.fold(
+              e => e.triageAnswers.fold(_.individualUserType, _.individualUserType),
+              e => e.triageAnswers.fold(_.individualUserType, _.individualUserType)
+            )
+          )
+        )
+      case _ => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   private def withAssetTypes(

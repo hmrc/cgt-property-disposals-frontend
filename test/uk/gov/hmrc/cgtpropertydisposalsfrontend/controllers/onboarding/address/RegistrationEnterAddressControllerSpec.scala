@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.IndividualSupplyingInformationAddressJourney
 
 import scala.concurrent.Future
@@ -104,8 +105,8 @@ class RegistrationEnterAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, Self, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, Self, performAction)
 
     }
 
@@ -151,8 +152,8 @@ class RegistrationEnterAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, performAction)
-      behave like enterPostcodePage(UserType.Agent, performAction)
+      behave like enterPostcodePage(UserType.Individual, Self, performAction)
+      behave like enterPostcodePage(UserType.Agent, Self, performAction)
 
     }
 
@@ -179,12 +180,14 @@ class RegistrationEnterAddressControllerSpec
 
       behave like displaySelectAddress(
         UserType.Individual,
+        Self,
         performAction,
         nameRoutes.RegistrationEnterIndividualNameController.enterIndividualName()
       )
 
       behave like displaySelectAddress(
         UserType.Agent,
+        Self,
         performAction,
         nameRoutes.RegistrationEnterIndividualNameController.enterIndividualName()
       )

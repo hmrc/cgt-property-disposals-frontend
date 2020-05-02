@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, RepresenteeAnswers, RepresenteeContactDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, UserType}
@@ -156,8 +157,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, Self, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, Self, performAction)
 
     }
 
@@ -203,7 +204,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Individual, Self, performAction)
 
     }
 
@@ -230,6 +231,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like displaySelectAddress(
         UserType.Individual,
+        Self,
         performAction,
         routes.RepresenteeController.checkYourAnswers()
       )

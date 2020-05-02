@@ -44,6 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -67,10 +68,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     )
 
   val draftReturn: DraftMultipleDisposalsReturn =
-    sample[DraftMultipleDisposalsReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
+    sample[DraftMultipleDisposalsReturn].copy(
+      examplePropertyDetailsAnswers = Some(incompleteAnswers),
+      triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self))
+    )
 
   override val validJourneyStatus = FillingOutReturnAddressJourney(
-    FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
+    FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn),
+    Option(Self)
   )
 
   override def overrideBindings: List[GuiceableModule] =
@@ -873,13 +878,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
     }
 
+    //DO this
     "handling requests to display the enter UK address page" must {
 
       def performAction(): Future[Result] = controller.enterUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, Self, performAction)
 
     }
 
@@ -903,9 +909,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, performAction)
-      behave like enterPostcodePage(UserType.Agent, performAction)
-      behave like enterPostcodePage(UserType.Organisation, performAction)
+      List(Capacitor, PersonalRepresentative, Self).foreach { individualUserType =>
+        behave like enterPostcodePage(UserType.Individual, individualUserType, performAction)
+        behave like enterPostcodePage(UserType.Agent, individualUserType, performAction)
+        behave like enterPostcodePage(UserType.Organisation, individualUserType, performAction)
+      }
 
     }
 
@@ -927,23 +935,28 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(
-        UserType.Individual,
-        performAction,
-        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
-      )
+      List(Capacitor, PersonalRepresentative, Self).foreach { individualUserType =>
+        behave like displaySelectAddress(
+          UserType.Individual,
+          individualUserType,
+          performAction,
+          controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+        )
 
-      behave like displaySelectAddress(
-        UserType.Agent,
-        performAction,
-        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
-      )
+        behave like displaySelectAddress(
+          UserType.Agent,
+          individualUserType,
+          performAction,
+          controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+        )
 
-      behave like displaySelectAddress(
-        UserType.Organisation,
-        performAction,
-        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
-      )
+        behave like displaySelectAddress(
+          UserType.Organisation,
+          individualUserType,
+          performAction,
+          controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
+        )
+      }
 
     }
 
