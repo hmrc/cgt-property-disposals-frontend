@@ -178,14 +178,19 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, _, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         displayPage(answers)(
           form = _.fold(
             _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
             c => shareOfPropertyForm.fill(c.shareOfProperty)
           )
         )(
-          page = howMuchDidYouOwnPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+          page = howMuchDidYouOwnPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            draftReturn.triageAnswers.representativeType()
+          )
         )(
           requiredPreviousAnswer               = _ => Some(()),
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -199,7 +204,12 @@ class DisposalDetailsController @Inject() (
         submitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = shareOfPropertyForm
         )(
-          page = howMuchDidYouOwnPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+          page = howMuchDidYouOwnPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            draftReturn.triageAnswers.representativeType()
+          )
         )(
           requiredPreviousAnswer               = _ => Some(()),
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -245,8 +255,14 @@ class DisposalDetailsController @Inject() (
                 c => disposalPriceForm.fill(c.disposalPrice.inPounds())
               )
             )(
-              page =
-                disposalPricePage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
+              page = disposalPricePage(
+                _,
+                _,
+                disposalMethod,
+                shareOfProperty,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.triageAnswers.representativeType()
+              )
             )(
               requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
               redirectToIfNoRequiredPreviousAnswer =
@@ -264,8 +280,14 @@ class DisposalDetailsController @Inject() (
             submitBehaviour(fillingOutReturn, draftReturn, answers)(
               form = disposalPriceForm
             )(
-              page =
-                disposalPricePage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
+              page = disposalPricePage(
+                _,
+                _,
+                disposalMethod,
+                shareOfProperty,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.triageAnswers.representativeType()
+              )
             )(
               requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
               redirectToIfNoRequiredPreviousAnswer =
@@ -307,8 +329,14 @@ class DisposalDetailsController @Inject() (
                 c => disposalFeesForm.fill(c.disposalFees.inPounds())
               )
             )(
-              page =
-                disposalFeesPage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
+              page = disposalFeesPage(
+                _,
+                _,
+                disposalMethod,
+                shareOfProperty,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.triageAnswers.representativeType()
+              )
             )(
               requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
               redirectToIfNoRequiredPreviousAnswer =
@@ -326,8 +354,14 @@ class DisposalDetailsController @Inject() (
             submitBehaviour(fillingOutReturn, draftReturn, answers)(
               form = disposalFeesForm
             )(
-              page =
-                disposalFeesPage(_, _, disposalMethod, shareOfProperty, fillingOutReturn.subscribedDetails.isATrust)
+              page = disposalFeesPage(
+                _,
+                _,
+                disposalMethod,
+                shareOfProperty,
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.triageAnswers.representativeType()
+              )
             )(
               requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
               redirectToIfNoRequiredPreviousAnswer =
