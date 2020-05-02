@@ -51,7 +51,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPar
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.{change_contact_name, confirm_person}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -75,7 +74,7 @@ class RepresenteeController @Inject() (
   checkContactDetailsPage: representeePages.check_contact_details,
   confirmPersonPage: representeePages.confirm_person,
   nameMatchErrorPage: representeePages.name_match_error,
-  changeContactNamePage: change_contact_name
+  changeContactNamePage: representeePages.change_contact_name
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -473,8 +472,8 @@ class RepresenteeController @Inject() (
   def changeContactNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
       val backLink = answers.fold(
-        i => routes.RepresenteeController.checkContactDetails(),
-        c => routes.RepresenteeController.checkYourAnswers()
+        _ => routes.RepresenteeController.checkContactDetails(),
+        _ => routes.RepresenteeController.checkYourAnswers()
       )
       ContactName.form
         .bindFromRequest()
@@ -488,7 +487,11 @@ class RepresenteeController @Inject() (
             else {
               val newAnswers =
                 answers.fold(
-                  i => i.copy(contactDetails = i.contactDetails.map(_.copy(contactName = contactName))),
+                  i =>
+                    i.copy(
+                      contactDetails             = i.contactDetails.map(_.copy(contactName = contactName)),
+                      hasConfirmedContactDetails = false
+                    ),
                   c =>
                     IncompleteRepresenteeAnswers(
                       Some(c.name),

@@ -27,16 +27,16 @@ import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Action, AnyContent, Call, Result}
+import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, BusinessPartnerRecordServiceSupport, ContactNameControllerSpec, ContactNameFormValidationTests, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, BusinessPartnerRecordServiceSupport, ContactNameFormValidationTests, ControllerSpec, DateErrorScenarios, NameFormValidationTests, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -48,12 +48,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, DraftMultipleDisposalsReturn, IndividualUserType, RepresenteeAnswers, RepresenteeContactDetails, RepresenteeReferenceId}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TimeUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import play.api.test.CSRFTokenHelper._
 
 import scala.concurrent.Future
 
@@ -190,9 +189,12 @@ class RepresenteeControllerSpec
 
       def performAction: Seq[(String, String)] => Future[Result] =
         data => controller.changeContactNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken)
+
       val incompleteRepresenteeAnswers = sample[IncompleteRepresenteeAnswers]
+
       val (session, journey, draftReturn) =
         sessionWithFillingOutReturn(incompleteRepresenteeAnswers, Right(Capacitor))
+
       behave like contactNameFormValidationTests(
         performAction,
         () =>
@@ -203,13 +205,15 @@ class RepresenteeControllerSpec
       )
 
       "redirect to check your answers page" when {
+
         "the user enters a valid contact name" in {
-          val contactDetails            = incompleteRepresenteeAnswers.contactDetails
-          val newContactName            = ContactName("First Last")
-          val updatedContactDetails     = contactDetails.map(_.copy(contactName = newContactName))
-          val updatedRepresenteeAnswers = incompleteRepresenteeAnswers.copy(contactDetails = updatedContactDetails)
-          val updatedDraftReturn        = draftReturn.copy(representeeAnswers = Some(updatedRepresenteeAnswers))
-          val updatedSession            = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+          val contactDetails        = incompleteRepresenteeAnswers.contactDetails
+          val newContactName        = ContactName("First Last")
+          val updatedContactDetails = contactDetails.map(_.copy(contactName = newContactName))
+          val updatedRepresenteeAnswers = incompleteRepresenteeAnswers
+            .copy(contactDetails = updatedContactDetails, hasConfirmedContactDetails = false)
+          val updatedDraftReturn = draftReturn.copy(representeeAnswers = Some(updatedRepresenteeAnswers))
+          val updatedSession     = session.copy(journeyStatus          = Some(journey.copy(draftReturn = updatedDraftReturn)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
