@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 
 @this(
@@ -32,7 +33,12 @@
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary
 )
 
-@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(
+    answers: CompleteDisposalDetailsAnswers,
+    disposalMethod: DisposalMethod,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("returns.disposal-details.cya.title")}
@@ -41,7 +47,7 @@
 
     @pageHeading(title, Some(messages("returns.disposal-details.caption")))
 
-    @summary(answers, disposalMethod, isATrust)
+    @summary(answers, disposalMethod, isATrust, representativeType)
 
     @formWrapper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

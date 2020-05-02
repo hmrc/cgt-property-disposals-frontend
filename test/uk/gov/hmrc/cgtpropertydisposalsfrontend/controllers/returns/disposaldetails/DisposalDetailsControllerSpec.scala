@@ -1838,13 +1838,14 @@ class DisposalDetailsControllerSpec
           expectedTitleKey: String,
           expectedDisposalPriceTitleKey: String,
           expectedDisposalFeesTitleKey: String,
-          userType: UserType
+          userType: UserType,
+          individualUserType: IndividualUserType
         ): Unit =
           checkPageIsDisplayed(
             result,
             messageFromMessageKey("returns.disposal-details.cya.title"), { doc =>
               validateDisposalDetailsCheckYourAnswersPage(completeDisposalDetailsAnswers, doc)
-              val userKey = userMessageKey(Self, userType) //TODO - change when the CYA changes go in
+              val userKey = userMessageKey(individualUserType, userType) //TODO - change when the CYA changes go in
               doc.select("#propertyShare-question").text() shouldBe messageFromMessageKey(
                 s"shareOfProperty$userKey.title"
               )
@@ -1881,9 +1882,10 @@ class DisposalDetailsControllerSpec
                 performAction(),
                 completeAnswers,
                 "returns.disposal-details.cya.title",
-                expectedTitles(completeAnswers, disposalMethod, userType)._1,
-                expectedTitles(completeAnswers, disposalMethod, userType)._2,
-                userType
+                expectedTitles(completeAnswers, disposalMethod, userType, individualUserType)._1,
+                expectedTitles(completeAnswers, disposalMethod, userType, individualUserType)._2,
+                userType,
+                individualUserType
               )
           }
         }
@@ -1935,9 +1937,10 @@ class DisposalDetailsControllerSpec
                 performAction(),
                 completeAnswers,
                 "returns.disposal-details.cya.title",
-                expectedTitles(completeAnswers, disposalMethod, userType)._1,
-                expectedTitles(completeAnswers, disposalMethod, userType)._2,
-                userType
+                expectedTitles(completeAnswers, disposalMethod, userType, individualUserType)._1,
+                expectedTitles(completeAnswers, disposalMethod, userType, individualUserType)._2,
+                userType,
+                individualUserType
               )
           }
         }
@@ -2038,12 +2041,15 @@ class DisposalDetailsControllerSpec
 }
 
 object DisposalDetailsControllerSpec extends Matchers {
-  def userMessageKey(userType: UserType): String = userType match {
-    case UserType.Individual   => ""
-    case UserType.Organisation => ".trust"
-    case UserType.Agent        => ".agent"
-    case other                 => sys.error(s"User type '$other' not handled")
-  }
+  def userMessageKey(individualUserType: IndividualUserType, userType: UserType): String =
+    (individualUserType, userType) match {
+      case (Capacitor, _)              => ".capacitor"
+      case (PersonalRepresentative, _) => ".personalRep"
+      case (_, UserType.Individual)    => ""
+      case (_, UserType.Organisation)  => ".trust"
+      case (_, UserType.Agent)         => ".agent"
+      case other                       => sys.error(s"User type '$other' not handled")
+    }
 
   def validateDisposalDetailsCheckYourAnswersPage(
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
@@ -2064,9 +2070,10 @@ object DisposalDetailsControllerSpec extends Matchers {
   def expectedTitles(
     completeAnswers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
-    userType: UserType
+    userType: UserType,
+    individualUserType: IndividualUserType
   ): (String, String) = {
-    val userKey = userMessageKey(userType)
+    val userKey = userMessageKey(individualUserType, userType)
 
     val disposalMethodKey = disposalMethod match {
       case DisposalMethod.Gifted => ".Gifted"
