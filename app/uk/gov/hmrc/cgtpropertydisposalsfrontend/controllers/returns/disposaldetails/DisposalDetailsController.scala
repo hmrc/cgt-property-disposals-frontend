@@ -429,11 +429,26 @@ class DisposalDetailsController @Inject() (
                     logger.warn("Could not update session", e)
                     errorHandler.errorResult
                   },
-                  _ => Ok(checkYouAnswers(completeAnswers, disposalMethod, fillingOutReturn.subscribedDetails.isATrust))
+                  _ =>
+                    Ok(
+                      checkYouAnswers(
+                        completeAnswers,
+                        disposalMethod,
+                        fillingOutReturn.subscribedDetails.isATrust,
+                        draftReturn.triageAnswers.representativeType()
+                      )
+                    )
                 )
 
               case answers: CompleteDisposalDetailsAnswers =>
-                Ok(checkYouAnswers(answers, disposalMethod, fillingOutReturn.subscribedDetails.isATrust))
+                Ok(
+                  checkYouAnswers(
+                    answers,
+                    disposalMethod,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    draftReturn.triageAnswers.representativeType()
+                  )
+                )
             }
 
         }

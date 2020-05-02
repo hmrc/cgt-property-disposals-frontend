@@ -967,25 +967,26 @@ percentageShare.capacitor.error.invalid=The percentage of the property the perso
 percentageShare.error.tooLarge=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.agent.error.tooLarge=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.trust.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
-percentageShare.personalRep.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
-percentageShare.capacitor.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
-
+percentageShare.personalRep.error.tooLarge=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.capacitor.error.tooLarge=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
 
 percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.agent.error.tooSmall=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.trust.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
-percentageShare.personalRep.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
-percentageShare.capacitor.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.personalRep.error.tooSmall=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.capacitor.error.tooSmall=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
 
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
 percentageShare.agent.error.tooManyDecimals=The percentage of the property your client owned must have 2 decimal places or less, for example 33.33
 percentageShare.trust.error.tooManyDecimals=The percentage of the property the trust owned must have 2 decimal places or less, for example 33.33
+percentageShare.personalRep.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
+percentageShare.capacitor.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
 
 disposalPrice.SoldOther.title=How much did you get when you sold or disposed of the property?
 disposalPrice.agent.SoldOther.title=How much did your client get when they sold or disposed of the property?
 disposalPrice.trust.SoldOther.title=How much did the trust get when they sold or disposed of the property?
-disposalPrice.personalRep.SoldOther.title=What was the disposal amount
-disposalPrice.capacitor.SoldOther.title=What was the disposal amount
+disposalPrice.personalRep.SoldOther.title=What was the disposal amount?
+disposalPrice.capacitor.SoldOther.title=What was the disposal amount?
 
 
 
