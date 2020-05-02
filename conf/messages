@@ -1410,10 +1410,10 @@ previousYearsLosses.agent.uk.helpText=Your client can include previous losses in
 previousYearsLosses.agent.nonUk.helpText=Your client can include previous losses that are liable for UK tax in this return. They will reduce your client’s gain. Your client can only include other losses they have already reported to HMRC.
 previousYearsLosses.trust.uk.helpText=The trust can include previous losses in this return to reduce its gain. It can only include other losses made on other UK property sales or disposals that it has already reported to HMRC.
 previousYearsLosses.trust.nonUk.helpText=The trust can include previous losses that are liable for UK tax in this return. They will reduce the trust’s gain. The trust can only include other losses it has already reported to HMRC.
-previousYearsLosses.capacitor.uk.helpText=You can include previous losses in this return to reduce the person's gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
-previousYearsLosses.capacitor.nonUk.helpText=You can include previous losses in this return to reduce the person's gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
-previousYearsLosses.personalRep.uk.helpText=You can include previous losses in this return to reduce the person's gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
-previousYearsLosses.personalRep.nonUk.helpText=You can include previous losses in this return to reduce the person's gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
+previousYearsLosses.capacitor.uk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
+previousYearsLosses.capacitor.nonUk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
+previousYearsLosses.personalRep.uk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
+previousYearsLosses.personalRep.nonUk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
 
 previousYearsLosses.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLosses.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
@@ -1473,10 +1473,14 @@ previousYearsLossesValue.personalRep.error.required=Enter an amount of Capital G
 annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
 annualExemptAmount.agent.title=How much of your client’s Capital Gains Tax Annual Exempt Amount do they want to use?
 annualExemptAmount.trust.title=How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?
+annualExemptAmount.capacitor.title=How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?
+annualExemptAmount.personalRep.title=How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?
 
 annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.agent.helpText=In the tax year {0} to {1}, your client only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount. <br/> <br/>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
+annualExemptAmount.capacitor.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {2}.
+annualExemptAmount.personalRep.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {2}.
 
 annualExemptAmount.details.1.header=What is the Annual Exempt Amount?
 annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
@@ -1488,22 +1492,32 @@ annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual 
 annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.agent.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.trust.error.tooLarge=Annual Exempt Amount must be {0} or less
+annualExemptAmount.capacitor.error.tooLarge=Annual Exempt Amount must be {0} or less
+annualExemptAmount.personalRep.error.tooLarge=Annual Exempt Amount must be {0} or less
 
 annualExemptAmount.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,000
 annualExemptAmount.agent.error.required=Enter how much of your client’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,000
 annualExemptAmount.trust.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,000
+annualExemptAmount.capacitor.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
+annualExemptAmount.personalRep.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
 
 annualExemptAmount.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
 annualExemptAmount.agent.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
 annualExemptAmount.trust.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
+annualExemptAmount.capacitor.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
+annualExemptAmount.personalRep.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
 
 annualExemptAmount.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.agent.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.trust.error.tooSmall=Annual Exempt Amount must be 0 or more
+annualExemptAmount.capacitor.error.tooSmall=Annual Exempt Amount must be 0 or more
+annualExemptAmount.personalRep.error.tooSmall=Annual Exempt Amount must be 0 or more
 
 annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 annualExemptAmount.agent.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 annualExemptAmount.trust.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
+annualExemptAmount.capacitor.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
+annualExemptAmount.personalRep.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 
 
 taxableGainOrLoss.title=Did you make an overall gain or loss on the property sale or disposal?

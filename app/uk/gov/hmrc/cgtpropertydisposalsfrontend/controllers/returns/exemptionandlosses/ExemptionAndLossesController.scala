@@ -332,7 +332,13 @@ class ExemptionAndLossesController @Inject() (
             c => emptyForm.fill(c.annualExemptAmount.inPounds())
           )
         })(
-          page = annualExemptAmountPage(_, _, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
+          page = annualExemptAmountPage(
+            _,
+            _,
+            disposalDate,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(draftReturn)
+          )
         )(
           requiredPreviousAnswer = _.fold(
             _.previousYearsLosses,
@@ -365,7 +371,13 @@ class ExemptionAndLossesController @Inject() (
                 )
               )
             )
-            annualExemptAmountPage(updatedForm, backlink, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
+            annualExemptAmountPage(
+              updatedForm,
+              backlink,
+              disposalDate,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(draftReturn)
+            )
           }
         )(
           requiredPreviousAnswer = _.fold(
@@ -388,7 +400,14 @@ class ExemptionAndLossesController @Inject() (
       withDisposalDate(draftReturn) { disposalDate =>
         answers match {
           case c: CompleteExemptionAndLossesAnswers =>
-            Ok(checkYourAnswersPage(c, disposalDate, fillingOutReturn.subscribedDetails.isATrust))
+            Ok(
+              checkYourAnswersPage(
+                c,
+                disposalDate,
+                fillingOutReturn.subscribedDetails.isATrust,
+                representativeType(draftReturn)
+              )
+            )
 
           case IncompleteExemptionAndLossesAnswers(None, _, _) =>
             Redirect(routes.ExemptionAndLossesController.inYearLosses())
@@ -429,7 +448,15 @@ class ExemptionAndLossesController @Inject() (
                 logger.warn("Could not update the session", e)
                 errorHandler.errorResult()
               },
-              _ => Ok(checkYourAnswersPage(completeAnswers, disposalDate, fillingOutReturn.subscribedDetails.isATrust))
+              _ =>
+                Ok(
+                  checkYourAnswersPage(
+                    completeAnswers,
+                    disposalDate,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    representativeType(draftReturn)
+                  )
+                )
             )
         }
       }
