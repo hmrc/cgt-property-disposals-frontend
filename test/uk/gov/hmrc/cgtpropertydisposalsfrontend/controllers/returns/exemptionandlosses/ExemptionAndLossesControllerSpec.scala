@@ -93,13 +93,6 @@ class ExemptionAndLossesControllerSpec
     case _              => None
   }
 
-  def userMessageKey(userType: UserType): String = userType match {
-    case UserType.Individual   => ""
-    case UserType.Organisation => ".trust"
-    case UserType.Agent        => ".agent"
-    case other                 => sys.error(s"User type '$other' not handled")
-  }
-
   def userMessageKey(individualUserType: IndividualUserType, userType: UserType): String =
     (individualUserType, userType) match {
       case (Capacitor, _)              => ".capacitor"
@@ -217,7 +210,7 @@ class ExemptionAndLossesControllerSpec
     case _                                                            => false
   }
 
-  val acceptedIndividualUserType: Gen[IndividualUserType] = individualUserTypeGen.filter {
+  val acceptedIndividualUserTypeGen: Gen[IndividualUserType] = individualUserTypeGen.filter {
     case Self | Capacitor | PersonalRepresentative => true
     case _                                         => false
   }
@@ -235,7 +228,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the task list page" when {
 
         "there is no disposal date" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -260,7 +253,7 @@ class ExemptionAndLossesControllerSpec
         "the exemption and losses section has not yet been started" in {
           val disposalDate = sample[DisposalDate]
 
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -274,7 +267,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -296,7 +289,7 @@ class ExemptionAndLossesControllerSpec
         "the exemption and losses section has been completed" in {
           val disposalDate = sample[DisposalDate]
 
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -310,7 +303,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -330,7 +323,7 @@ class ExemptionAndLossesControllerSpec
 
         "the amount in the session is zero" in {
           val disposalDate = sample[DisposalDate]
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -346,7 +339,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -363,7 +356,7 @@ class ExemptionAndLossesControllerSpec
         "the amount in the session is non-zero" in {
           val amountInPence = AmountInPence(1000L)
           val disposalDate  = sample[DisposalDate]
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -379,7 +372,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -412,7 +405,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the task list page" when {
 
         "there is no disposal date" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -455,28 +448,28 @@ class ExemptionAndLossesControllerSpec
         }
 
         "no option has been selected" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
               test()(s"$key$userKey.error.required")(userType, individualUserType, userKey)
           }
         }
 
         "the option selected is not valid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
               test(key -> "2")(s"$key$userKey.error.invalid")(userType, individualUserType, userKey)
           }
         }
 
         "the amount of money is invalid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data    = (key -> "0") :: scenario.formData
-                  val userKey = userMessageKey(userType)
+                  val userKey = userMessageKey(individualUserType, userType)
                   test(data: _*)(scenario.expectedErrorMessageKey)(userType, individualUserType, userKey)
                 }
               }
@@ -514,7 +507,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "there is an error updating the draft return" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val newAmount = AmountInPence(123L)
               val (session, journey, updatedDraftReturn) =
@@ -537,7 +530,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "there is an error updating the session" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val newAmount = AmountInPence(123L)
               val (session, journey, updatedDraftReturn) =
@@ -575,7 +568,7 @@ class ExemptionAndLossesControllerSpec
             val answers = sample[IncompleteExemptionAndLossesAnswers].copy(
               inYearLosses = None
             )
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> "0", valueKey -> newAmount.inPounds().toString)
@@ -589,7 +582,7 @@ class ExemptionAndLossesControllerSpec
               sample[CompleteExemptionAndLossesAnswers].copy(
                 inYearLosses = AmountInPence(newAmount.value + 1)
               )
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> "0", valueKey -> newAmount.inPounds().toString)
@@ -600,7 +593,7 @@ class ExemptionAndLossesControllerSpec
           "the user selects yes and submits a valid value and the journey was incomplete" in {
             val answers =
               sample[IncompleteExemptionAndLossesAnswers].copy(inYearLosses = None)
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> "1")
@@ -612,7 +605,7 @@ class ExemptionAndLossesControllerSpec
             val answers =
               sample[CompleteExemptionAndLossesAnswers].copy(inYearLosses = AmountInPence(1L))
 
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> "1")
@@ -627,7 +620,7 @@ class ExemptionAndLossesControllerSpec
       "not do any updates" when {
 
         "the value submitted hasn't changed" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val answers = sample[CompleteExemptionAndLossesAnswers].copy(
                 inYearLosses = AmountInPence.zero
@@ -669,7 +662,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the in year losses page" when {
 
         "that question has not been answered" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -692,7 +685,7 @@ class ExemptionAndLossesControllerSpec
       "display the page" when {
 
         "the exemption and losses section has been not completed" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -708,7 +701,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -725,7 +718,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "the exemption and losses section has been completed" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -739,7 +732,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -756,7 +749,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "the amount in the session is zero" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -773,7 +766,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -788,7 +781,7 @@ class ExemptionAndLossesControllerSpec
         "the amount in the session is non-zero" in {
           val amountInPence = AmountInPence(1000L)
 
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -805,7 +798,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -836,7 +829,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the in year losses page" when {
 
         "that question has not been answered" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -872,28 +865,28 @@ class ExemptionAndLossesControllerSpec
         }
 
         "no option has been selected" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
               test()(s"$key$userKey.error.required")(userType, individualUserType, userKey)
           }
         }
 
         "the option selected is not valid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
               test(key -> "2")(s"$key$userKey.error.invalid")(userType, individualUserType, userKey)
           }
         }
 
         "the amount of money is invalid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data    = (key -> "0") :: scenario.formData
-                  val userKey = userMessageKey(userType)
+                  val userKey = userMessageKey(individualUserType, userType)
                   test(data: _*)(scenario.expectedErrorMessageKey)(userType, individualUserType, userKey)
                 }
               }
@@ -930,7 +923,7 @@ class ExemptionAndLossesControllerSpec
 
         "there is an error updating the draft return" in {
 
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val newAmount = AmountInPence(123L)
               val (session, journey, updatedDraftReturn) =
@@ -954,7 +947,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "there is an error updating the session" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val newAmount = AmountInPence(123L)
               val (session, journey, updatedDraftReturn) =
@@ -993,7 +986,7 @@ class ExemptionAndLossesControllerSpec
               inYearLosses        = Some(sample[AmountInPence]),
               previousYearsLosses = None
             )
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> "0", valueKey -> newAmount.inPounds().toString)
@@ -1007,7 +1000,7 @@ class ExemptionAndLossesControllerSpec
               sample[CompleteExemptionAndLossesAnswers].copy(
                 previousYearsLosses = AmountInPence(newAmount.value + 1)
               )
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> "0", valueKey -> newAmount.inPounds().toString)
@@ -1021,7 +1014,7 @@ class ExemptionAndLossesControllerSpec
               previousYearsLosses = None
             )
 
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> "1")
@@ -1034,7 +1027,7 @@ class ExemptionAndLossesControllerSpec
               previousYearsLosses = AmountInPence(1L)
             )
 
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> "1")
@@ -1054,7 +1047,7 @@ class ExemptionAndLossesControllerSpec
             previousYearsLosses = AmountInPence(1L)
           )
 
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val session =
                 sessionWithMultipleDisposalsState(answers, sample[DisposalDate], userType, Some(individualUserType))._1
@@ -1087,7 +1080,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the task list page" when {
 
         "there is no disposal date" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1110,7 +1103,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to previous years losses page" when {
 
         "that question has not been answered yet" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1135,7 +1128,7 @@ class ExemptionAndLossesControllerSpec
       "display the page" when {
 
         "the exemption and losses section has not yet been completed" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1152,7 +1145,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -1170,7 +1163,7 @@ class ExemptionAndLossesControllerSpec
 
         "the exemption and losses section has been completed" in {
           val amount = AmountInPence(1000L)
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1186,7 +1179,7 @@ class ExemptionAndLossesControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(userType)
+              val userKey = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
@@ -1206,7 +1199,7 @@ class ExemptionAndLossesControllerSpec
           val amount            = AmountInPence(1000L)
           val acceptedUserTypes = List[UserType](UserType.Individual, UserType.Agent)
 
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               whenever(acceptedUserTypes.contains(userType)) {
                 inSequence {
@@ -1221,7 +1214,7 @@ class ExemptionAndLossesControllerSpec
                   )
                 }
 
-                val userKey = userMessageKey(userType)
+                val userKey = userMessageKey(individualUserType, userType)
 
                 checkPageIsDisplayed(
                   performAction(),
@@ -1298,7 +1291,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the task list page" when {
 
         "there is no disposal date" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1321,7 +1314,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to previous years losses page" when {
 
         "that question has not been answered yet" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1356,7 +1349,7 @@ class ExemptionAndLossesControllerSpec
             Some(individualUserType)
           )._1
 
-          val userKey = userMessageKey(userType)
+          val userKey = userMessageKey(individualUserType, userType)
 
           testFormError(data: _*)(
             key,
@@ -1366,7 +1359,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "the amount of money is invalid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               amountOfMoneyErrorScenarios(key = key, errorContext = Some(s"$key")).foreach { scenario =>
                 withClue(s"For $scenario: ") {
@@ -1406,7 +1399,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "there is an error updating the draft return" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val newAmount = AmountInPence(123L)
               val (session, journey, updatedDraftReturn) =
@@ -1429,7 +1422,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "there is an error updating the session" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val newAmount = AmountInPence(123L)
               val (session, journey, updatedDraftReturn) =
@@ -1469,7 +1462,7 @@ class ExemptionAndLossesControllerSpec
               annualExemptAmount  = None
             )
 
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> newAmount.inPounds().toString)
@@ -1487,7 +1480,7 @@ class ExemptionAndLossesControllerSpec
               annualExemptAmount = AmountInPence(newAmount.value + 1)
             )
 
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 testSuccessfulUpdatesAfterSubmit(
                   performAction(key -> newAmount.inPounds().toString)
@@ -1510,7 +1503,7 @@ class ExemptionAndLossesControllerSpec
             annualExemptAmount = AmountInPence(1L)
           )
 
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val session =
                 sessionWithMultipleDisposalsState(answers, disposalDate, userType, Some(individualUserType))._1
@@ -1590,7 +1583,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the in year losses page" when {
 
         "that question has not been answered" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               testIsRedirectWhenMissingAnswer(
                 allQuestionsAnswered.copy(inYearLosses = None),
@@ -1604,7 +1597,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the previous years losses page" when {
 
         "that question has not been answered" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               testIsRedirectWhenMissingAnswer(
                 allQuestionsAnswered.copy(previousYearsLosses = None),
@@ -1618,7 +1611,7 @@ class ExemptionAndLossesControllerSpec
       "redirect to the annual exempt amount page" when {
 
         "that question has not been answered" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               testIsRedirectWhenMissingAnswer(
                 allQuestionsAnswered.copy(annualExemptAmount = None),
@@ -1634,7 +1627,7 @@ class ExemptionAndLossesControllerSpec
         "the user has just answered all the questions and" when {
 
           "there is an error updating the draft return" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (session, _, journey, updatedDraftReturn) =
                   getSessionJourneyAndDraftReturn(userType, individualUserType)
@@ -1654,7 +1647,7 @@ class ExemptionAndLossesControllerSpec
           }
 
           "there is an error updating the session" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (session, updatedSession, journey, updatedDraftReturn) =
                   getSessionJourneyAndDraftReturn(userType, individualUserType)
@@ -1683,15 +1676,9 @@ class ExemptionAndLossesControllerSpec
         "display the page" when {
 
           "the user has already answered all the questions" in {
-            val acceptedUserTypes = List[UserType](UserType.Individual, UserType.Agent, UserType.Organisation)
-
-            forAll {
-              (
-                completeAnswers: CompleteExemptionAndLossesAnswers,
-                userType: UserType,
-                individualUserType: IndividualUserType
-              ) =>
-                whenever(acceptedUserTypes.contains(userType)) {
+            forAll { (completeAnswers: CompleteExemptionAndLossesAnswers) =>
+              forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+                (userType: UserType, individualUserType: IndividualUserType) =>
                   val (session, journey, draftReturn) = sessionWithSingleDisposalState(
                     allQuestionsAnswered,
                     sample[DisposalDate],
@@ -1717,7 +1704,8 @@ class ExemptionAndLossesControllerSpec
                         completeAnswers,
                         doc,
                         journey.subscribedDetails.isATrust,
-                        isAnAgent
+                        isAnAgent,
+                        individualUserType
                       )
                       doc
                         .select("#content > article > form")
@@ -1726,12 +1714,12 @@ class ExemptionAndLossesControllerSpec
                         .url
                     }
                   )
-                }
+              }
             }
           }
 
           "the user has just answered all the questions and all updates are successful" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (session, updatedSession, journey, updatedDraftReturn) =
                   getSessionJourneyAndDraftReturn(userType, individualUserType)
@@ -1755,7 +1743,8 @@ class ExemptionAndLossesControllerSpec
                       completeAnswers,
                       doc,
                       journey.subscribedDetails.isATrust,
-                      isAnAgent
+                      isAnAgent,
+                      individualUserType
                     )
                     doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
                       .checkYourAnswersSubmit()
@@ -1766,7 +1755,7 @@ class ExemptionAndLossesControllerSpec
           }
 
           "the user wishes to use in year losses" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val (_, updatedSession, _, _) = getSessionJourneyAndDraftReturn(userType, individualUserType)
                 inSequence {
@@ -1798,7 +1787,7 @@ class ExemptionAndLossesControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       "redirect to the task list page" in {
-        forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+        forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
           (userType: UserType, individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1905,7 +1894,8 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
     doc: Document,
     isATrust: Boolean,
-    isAnAgent: Boolean
+    isAnAgent: Boolean,
+    individualUserType: IndividualUserType
   ): Unit = {
 
     if (completeExemptionAndLossesAnswers.inYearLosses.isZero) {
@@ -1926,7 +1916,15 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       )
     }
 
-    if (isATrust) {
+    if (individualUserType === IndividualUserType.PersonalRepresentative) {
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"
+    } else if (individualUserType === IndividualUserType.Capacitor) {
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"
+    } else if (isATrust) {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?"

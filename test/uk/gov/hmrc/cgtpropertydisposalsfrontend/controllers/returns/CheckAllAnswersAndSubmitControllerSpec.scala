@@ -1012,12 +1012,15 @@ object CheckAllAnswersAndSubmitControllerSpec {
       doc
     )
 
-    validateExemptionAndLossesCheckYourAnswersPage(
-      completeReturn.exemptionsAndLossesDetails,
-      doc,
-      isATrust,
-      userType.contains(UserType.Agent)
-    )
+    completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>
+      validateExemptionAndLossesCheckYourAnswersPage(
+        completeReturn.exemptionsAndLossesDetails,
+        doc,
+        isATrust,
+        userType.contains(UserType.Agent),
+        individualUserType
+      )
+    }
 
     completeReturn.yearToDateLiabilityAnswers.fold(
       validateNonCalculatedYearToDateLiabilityPage(_, doc, userType),
@@ -1046,12 +1049,15 @@ object CheckAllAnswersAndSubmitControllerSpec {
       doc
     )
 
-    validateExemptionAndLossesCheckYourAnswersPage(
-      completeReturn.exemptionAndLossesAnswers,
-      doc,
-      isATrust,
-      userType.contains(UserType.Agent)
-    )
+    completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>
+      validateExemptionAndLossesCheckYourAnswersPage(
+        completeReturn.exemptionAndLossesAnswers,
+        doc,
+        isATrust,
+        userType.contains(UserType.Agent),
+        individualUserType
+      )
+    }
 
     validateNonCalculatedYearToDateLiabilityPage(completeReturn.yearToDateLiabilityAnswers, doc, userType)
   }
