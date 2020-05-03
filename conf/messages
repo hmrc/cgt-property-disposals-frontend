@@ -932,95 +932,177 @@ returns.disposal-details.caption=Sale or disposal details
 shareOfProperty.title=How much of the property did you own?
 shareOfProperty.agent.title=How much of the property did your client own?
 shareOfProperty.trust.title=How much of the property did the trust own?
+shareOfProperty.personalRep.title=How much of the property did the person own?
+shareOfProperty.capacitor.title=How much of the property did the person own?
+
 shareOfProperty.error.required=Select how much of the property you owned
 shareOfProperty.agent.error.required=Select how much of the property your client owned
 shareOfProperty.trust.error.required=Select how much of the property the trust owned
+shareOfProperty.personalRep.error.required=Select how much of the property the person owned
+shareOfProperty.capacitor.error.required=Select how much of the property the person owned
 
 returns.shareOfProperty.Full=100%
 returns.shareOfProperty.Half=50%
 returns.shareOfProperty.Other=Other share
 percentageShare.label=Percentage you owned
+percentageShare.agent.label=Percentage your client owned
+percentageShare.trust.label=Percentage your trust owned
+percentageShare.personalRep.label=Percentage the person owned
+percentageShare.capacitor.label=Percentage the person owned
+
+
 percentageShare.error.required=Enter how much of the property you owned as a percentage
 percentageShare.agent.error.required=Enter how much of the property your client owned as a percentage
 percentageShare.trust.error.required=Enter how much of the property the trust owned as a percentage
+percentageShare.personalRep.error.required=Enter how much of the property the person owned as a percentage
+percentageShare.capacitor.error.required=Enter how much of the property the person owned as a percentage
+
+
 percentageShare.error.invalid=The percentage of the property you owned must be a number
 percentageShare.agent.error.invalid=The percentage of the property your client owned must be a number
 percentageShare.trust.error.invalid=The percentage of the property the trust owned must be a number
+percentageShare.personalRep.error.invalid=The percentage of the property the person owned must be a number
+percentageShare.capacitor.error.invalid=The percentage of the property the person owned must be a number
+
 percentageShare.error.tooLarge=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.agent.error.tooLarge=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.trust.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.personalRep.error.tooLarge=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.capacitor.error.tooLarge=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
+
 percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.agent.error.tooSmall=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.trust.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.personalRep.error.tooSmall=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.capacitor.error.tooSmall=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
+
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
 percentageShare.agent.error.tooManyDecimals=The percentage of the property your client owned must have 2 decimal places or less, for example 33.33
 percentageShare.trust.error.tooManyDecimals=The percentage of the property the trust owned must have 2 decimal places or less, for example 33.33
+percentageShare.personalRep.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
+percentageShare.capacitor.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
 
 disposalPrice.SoldOther.title=How much did you get when you sold or disposed of the property?
 disposalPrice.agent.SoldOther.title=How much did your client get when they sold or disposed of the property?
 disposalPrice.trust.SoldOther.title=How much did the trust get when they sold or disposed of the property?
+disposalPrice.personalRep.SoldOther.title=What was the disposal amount?
+disposalPrice.capacitor.SoldOther.title=What was the disposal amount?
+
+
+
 disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
 disposalPrice.agent.Gifted.title=What was the market value of the property when your client gave it away?
 disposalPrice.trust.Gifted.title=What was the market value of the property when the trust gave it away?
+disposalPrice.personalRep.Gifted.title=What was the market value of the property when it was disposed of?
+disposalPrice.capacitor.Gifted.title=What was the market value of the property when it was disposed of?
+
 disposalPrice.SoldOther.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
 disposalPrice.agent.SoldOther.helpText=If the property was shared, only enter the amount your client got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.trust.SoldOther.helpText=If the property was shared, only enter the amount the trust got for its share. You’ll be able to enter any additional costs later.
+disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
+disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
+
+
 disposalPrice.Gifted.helpText=If you owned part of the property, only enter your share of the market value. You’ll be able to enter any additional costs later.
 disposalPrice.agent.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your client’s share.
 disposalPrice.trust.Gifted.helpText=If the property was shared, only enter the amount the trust got for its share. You’ll be able to enter any additional costs later.
+disposalPrice.personalRep.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
+disposalPrice.capacitor.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
+
 disposalPrice.SoldOther.error.required=Enter how much you sold or disposed of the property for
 disposalPrice.agent.SoldOther.error.required=Enter how much your client sold or disposed of the property for
 disposalPrice.trust.SoldOther.error.required=Enter how much the trust sold or disposed of the property for
+disposalPrice.personalRep.SoldOther.error.required=Enter the disposal amount
+disposalPrice.capacitor.SoldOther.error.required=Enter the disposal amount
+
+
+
 disposalPrice.Gifted.error.required=Enter the market value when you gave it away
 disposalPrice.agent.Gifted.error.required=Enter the market value of the property when it was given away
 disposalPrice.trust.Gifted.error.required=Enter the market value when the trust gave it away
+disposalPrice.personalRep.Gifted.error.required=Enter the market value of the property when it was disposed of
+disposalPrice.capacitor.Gifted.error.required=Enter the market value of the property when it was disposed of
+
 disposalPrice.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.agent.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.trust.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.personalRep.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.capacitor.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+
 disposalPrice.SoldOther.error.invalid=How much the property was sold for must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.agent.SoldOther.error.invalid=How much your client sold the property for must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.trust.SoldOther.error.invalid=How much the trust sold the property for must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.personalRep.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.capacitor.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
+
+
+
 disposalPrice.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.agent.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.trust.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.SoldOther.error.tooSmall=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
 disposalPrice.agent.SoldOther.error.tooSmall=How much your client sold the property for must be an amount of money between 1 and 50,000,000,000
 disposalPrice.trust.SoldOther.error.tooSmall=How much the trust sold the property for must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
 disposalPrice.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.agent.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.trust.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.SoldOther.error.tooLarge=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
 disposalPrice.agent.SoldOther.error.tooLarge=How much your client sold the property for must be an amount of money between 1 and 50,000,000,000
 disposalPrice.trust.SoldOther.error.tooLarge=How much the trust sold the property for must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
 disposalPrice.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.agent.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.trust.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.capacitor.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.personalRep.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.SoldOther.error.tooManyDecimals=How much you sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.agent.SoldOther.error.tooManyDecimals=How much your client sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.trust.SoldOther.error.tooManyDecimals=How much the trust sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-
+disposalPrice.personalRep.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.capacitor.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 disposalFees.title=What were your additional costs when you sold or disposed of the property?
 disposalFees.agent.title=What were your client’s additional disposal costs?
 disposalFees.trust.title=What were the trust’s additional disposal costs?
+disposalFees.personalRep.title=What were the person’s additional disposal costs?
+disposalFees.capacitor.title=What were the person’s additional disposal costs?
 disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor. If you shared these costs, you can only claim your share.
 disposalFees.agent.helpText=For example, the amount your client paid to an estate agent or solicitor. If your client shared these costs, they can only claim their share.
 disposalFees.trust.helpText=For example, the amount the trust paid to an estate agent or solicitor. If the trust shared these costs, it can only claim its share.
+disposalFees.personalRep.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
+disposalFees.capacitor.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
 disposalFees.error.required=Enter the amount of additional costs when you sold or disposed of the property
 disposalFees.agent.error.required=Enter your client’s additional disposal costs
 disposalFees.trust.error.required=Enter the trust’s additional disposal costs
+disposalFees.personalRep.error.required=Enter the person’s additional disposal costs
+disposalFees.capacitor.error.required=Enter the person’s additional disposal costs
 disposalFees.error.invalid=How much you paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
 disposalFees.agent.error.invalid=How much your client paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
 disposalFees.trust.error.invalid=How much the trust paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.capacitor.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.personalRep.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
 disposalFees.error.tooSmall=How much you paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.agent.error.tooSmall=How much your client paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.trust.error.tooSmall=How much the trust paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
+disposalFees.personalRep.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.capacitor.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.error.tooLarge=How much you paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.agent.error.tooLarge=How much your client paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.trust.error.tooLarge=How much the trust paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
+disposalFees.personalRep.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.capacitor.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.error.tooManyDecimals=How much you paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.agent.error.tooManyDecimals=How much your client paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.trust.error.tooManyDecimals=How much the trust paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.personalRep.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.capacitor.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 
 returns.disposal-details.cya.title=Check your answers
@@ -1795,6 +1877,8 @@ viewReturn.hasAttachments.p1=One or more documents uploaded
 multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
 multiple-disposals.guidance.agent.title=Your client sold or disposed of 2 or more properties
 multiple-disposals.guidance.trust.title=The trust sold or disposed of 2 or more properties
+multiple-disposals.guidance.capacitor.title=Two or more properties were sold or disposed of
+multiple-disposals.guidance.personalRep.title=Two or more properties were sold or disposed of
 multiple-disposals.guidance.p1=You can report all property sales (or ‘disposals’) in the same return. You can only do this if they all had:
 multiple-disposals.guidance.li1=the same ‘completion’ date
 multiple-disposals.guidance.li2=contract ‘exchange’ dates on or after 6 April 2020
@@ -1805,8 +1889,6 @@ multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and �
 multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property.
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
-multiple-disposals.guidance.details.agent.link=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day your client got the money from the sale or disposal and the new owner got the keys.
-multiple-disposals.guidance.details.trust.link=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day the trust got the money from the sale or disposal and the new owner got the keys.
 
 returns.list.title=Sent returns
 returns.list.ref=Return ref:
@@ -1841,17 +1923,23 @@ multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 99
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange‘ dates?
+multipleDisposalsWereYouAUKResident.capacitor.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.personalRep.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
 multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
+multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.agent.error.required=Select yes if your client was a UK resident on all of the contract exchange dates
 multipleDisposalsWereYouAUKResident.agent.error.boolean=Select yes if your client was a UK resident on all of the contract exchange dates
 multipleDisposalsWereYouAUKResident.trust.error.required=Select yes if the trust was a UK resident on all of the contract exchange dates
 multipleDisposalsWereYouAUKResident.trust.error.boolean=Select yes if the trust was a UK resident on all of the contract exchange dates
-multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
-multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
+multipleDisposalsWereYouAUKResident.capacitor.error.boolean=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
+multipleDisposalsWereYouAUKResident.personalRep.error.boolean=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
 
 multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
 multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
@@ -1866,9 +1954,13 @@ multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all t
 multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
 multipleDisposalsCountryOfResidence.agent.title=What country was your client a resident of when they exchanged contracts?
 multipleDisposalsCountryOfResidence.trust.title=What country was the trust a resident of when they exchanged contracts?
+multipleDisposalsCountryOfResidence.capacitor.title=What country was the person a resident of when they made the disposals?
+multipleDisposalsCountryOfResidence.personalRep.title=What country was the person a resident of when they made the disposals?
 multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
 multipleDisposalsCountryOfResidence.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
 multipleDisposalsCountryOfResidence.trust.helpText=It’s usually the day the trust and the new owner swapped contracts and they paid a deposit.
+multipleDisposalsCountryOfResidence.capacitor.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
+multipleDisposalsCountryOfResidence.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 
 assetTypeNotYetImplemented.title=You cannot use this service
 assetTypeNotYetImplemented.p1=You cannot use this service to report Capital Gains Tax on:
@@ -1924,6 +2016,8 @@ multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.trust.title=What types of property or assets did the trust dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.title=What types of property or assets did the person dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.title=What types of property or assets did the person dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.helpText=Select all that apply.
 multipleDisposalsAssetTypeForNonUkResidents.Residential=Residential
 multipleDisposalsAssetTypeForNonUkResidents.Residential.helpText=Includes houses, flats, or other dwellings, including their gardens or grounds.
@@ -1932,16 +2026,24 @@ multipleDisposalsAssetTypeForNonUkResidents.MixedUse=Mixed use
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse.helpText=Part of the property was residential while you owned it.
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse.agent.helpText=Part of the property was residential and part was non-residential while your client owned it
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse.trust.helpText=Part of the property was residential and part was non-residential while the trust owned it
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.capacitor.helpText=Part of the property was residential and part was non-residential while the person owned it
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.personalRep.helpText=Part of the property was residential and part was non-residential while the person owned it
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
 multipleDisposalsAssetTypeForNonUkResidents.agent.IndirectDisposal=Company shares - your client made an indirect disposal
 multipleDisposalsAssetTypeForNonUkResidents.trust.IndirectDisposal=Company shares - the trust made an indirect disposal
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.IndirectDisposal=Company shares - the person made an indirect disposal
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.IndirectDisposal=Company shares - the person made an indirect disposal
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 multipleDisposalsAssetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
 multipleDisposalsAssetTypeForNonUkResidents.agent.error.required=Select the types of property or assets your client disposed of
 multipleDisposalsAssetTypeForNonUkResidents.trust.error.required=Select the types of property or assets the trust disposed of
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.error.required=Select the types of property or assets the person disposed of
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.error.required=Select the types of property or assets the person disposed of
 multipleDisposalsAssetTypeForNonUkResidents.agent.error.invalid=Select the types of property or assets your client disposed of
 multipleDisposalsAssetTypeForNonUkResidents.trust.error.invalid=Select the types of property or assets the trust disposed of
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.error.invalid=Select the types of property or assets the person disposed of
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.error.invalid=Select the types of property or assets the person disposed of
 
 multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
 multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
@@ -2265,7 +2367,8 @@ nonUkAddress.representee.title=Enter the non-UK contact address
 email.representee.extraContent=The email addresses you use for other government services will not change.
 confirmEmail.representee.title=You have 30 minutes to confirm the email address
 confirmEmail.verified.representee.p1=We’ll use this address to contact you about your Capital Gains Tax on UK property return.
-
+representeeContactName.change.title=Change contact name
+representeeContactName.change.help=The contact name used for other government services will not change.
 representeeConfirmPerson.title=Check the details we hold for the person
 representeeConfirmPerson.summaryLine1=Name
 representeeConfirmPerson.summaryLine2.cgtReferenceId=Capital Gains Tax on UK property account number

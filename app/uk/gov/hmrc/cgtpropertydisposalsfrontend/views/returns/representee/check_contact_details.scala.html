@@ -56,7 +56,7 @@
         @cyaRow(
             messages(s"$key.cyaLabel.contactName"),
             Html(contactDetails.contactName.value),
-            Some(cyaChange(messages(s"$key.cyaChange.contactName"), "#")),
+            Some(cyaChange(messages(s"$key.cyaChange.contactName"), routes.RepresenteeController.changeContactName().url)),
             "contactName"
         )
         @cyaRow(
