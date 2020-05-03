@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.onboarding
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.syntax._
@@ -22,17 +22,15 @@ import play.api.Configuration
 import play.api.libs.json.{Reads, Writes}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.cache.repository.CacheMongoRepository
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.Repo
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[BusinessPartnerRecordNameMatchRetryStoreImpl])
-trait BusinessPartnerRecordNameMatchRetryStore {
+@ImplementedBy(classOf[NameMatchRetryStoreImpl])
+trait NameMatchRetryStore {
 
   def get[A <: NameMatchDetails: Reads](
     ggCredId: GGCredId
@@ -46,12 +44,12 @@ trait BusinessPartnerRecordNameMatchRetryStore {
 }
 
 @Singleton
-class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject() (
+class NameMatchRetryStoreImpl @Inject() (
   mongo: ReactiveMongoComponent,
   configuration: Configuration
 )(
   implicit ec: ExecutionContext
-) extends BusinessPartnerRecordNameMatchRetryStore
+) extends NameMatchRetryStore
     with Repo {
 
   val cacheRepository: CacheMongoRepository = {

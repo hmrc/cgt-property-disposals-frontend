@@ -122,7 +122,7 @@ class AgentAccessControllerSpec
       EmptyRetrieval
     )(result)
 
-  def mockGetSubscriptionDetails(cgtReference: CgtReference)(result: Either[Error, SubscribedDetails]) =
+  def mockGetSubscriptionDetails(cgtReference: CgtReference)(result: Either[Error, Option[SubscribedDetails]]) =
     (mockSubscriptionService
       .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
@@ -281,7 +281,7 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(initialAgentSessionData)
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
-            mockGetSubscriptionDetails(validCgtReference)(Right(clientDetails))
+            mockGetSubscriptionDetails(validCgtReference)(Right(Some(clientDetails)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -301,6 +301,19 @@ class AgentAccessControllerSpec
 
         "the cgt reference is valid and the agent has permission to access to the client " +
           "but no details can be found for the cgt reference" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(initialAgentSessionData)
+            mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
+            mockGetSubscriptionDetails(validCgtReference)(Right(None))
+          }
+
+          val result = performAction("cgtReference" -> validCgtReference.value)
+          checkIsTechnicalErrorPage(result)
+        }
+
+        "the cgt reference is valid and the agent has permission to access to the client " +
+          "but there is an error getting the subscription details" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(initialAgentSessionData)
@@ -353,7 +366,7 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(initialAgentSessionData)
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
-            mockGetSubscriptionDetails(validCgtReference)(Right(ukClientDetails))
+            mockGetSubscriptionDetails(validCgtReference)(Right(Some(ukClientDetails)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -383,7 +396,7 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(initialAgentSessionData)
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
-            mockGetSubscriptionDetails(validCgtReference)(Right(nonUkClientDetails))
+            mockGetSubscriptionDetails(validCgtReference)(Right(Some(nonUkClientDetails)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
