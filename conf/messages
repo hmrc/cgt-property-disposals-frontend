@@ -319,6 +319,8 @@ nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbe
 countryCode.error.required=Select a country from the options presented as you type
 countryCode.error.notFound=Select a country from the options presented as you type
 
+countryOfResidence.cyaChange=country of residence
+
 address-select.title=Select your contact address
 address-select.agent.title=Select your contact address
 address-select.trust.title=Select your contact address
@@ -732,6 +734,8 @@ assetTypeForNonUkResidents.trust.error.invalid=Select the type of property or as
 assetTypeForNonUkResidents.capacitor.error.invalid=Select the type of property or asset the person sold or disposed of
 assetTypeForNonUkResidents.personalRep.error.invalid=Select the type of property or asset the person sold or disposed of
 
+assetTypeForNonUkResidents.cyaChange=the type of property or asset disposed of
+
 sharesDisposalDate.title=What was the date of disposal of the shares?
 sharesDisposalDate.helpText=For example, 25 4 2020.
 sharesDisposalDate.error.required=Enter the date of disposal
@@ -775,6 +779,8 @@ didYouDisposeOfResidentialProperty.capacitor.error.boolean=Select yes if the per
 didYouDisposeOfResidentialProperty.personalRep.error.required=Select yes if the person disposed of a UK residential property
 didYouDisposeOfResidentialProperty.personalRep.error.boolean=Select yes if the person disposed of a UK residential property
 
+didYouDisposeOfResidentialProperty.cyaChange=whether UK residential property was disposed of
+
 ukResidentCanOnlyReportResidential.title=You cannot use this service
 ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
 ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
@@ -800,6 +806,8 @@ disposalDate-month.error.monthAndYearRequired=Contract exchange date must includ
 disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
+disposalDate.cyaChange=the contract exchange date
+
 completionDate.title=What was the completion date when you sold or disposed of the property?
 completionDate.agent.title=When the property was disposed of what was the completion date?
 completionDate.trust.title=When the property was disposed of what was the completion date?
@@ -820,6 +828,8 @@ completionDate-year.error.invalid=Enter a real completion date
 completionDate-month.error.monthAndYearRequired=Completion date must include a month and a year
 completionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
 completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
+
+completionDate.cyaChange=the completion date
 
 disposalDateTooEarly.non-uk.title=You cannot use this service
 disposalDateTooEarly.non-uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
@@ -2073,7 +2083,6 @@ multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Completion date mu
 multipleDisposals.triage.cya.title=Check your answers
 multipleDisposals.triage.cya.guidanceLink=Help completing this section
 multipleDisposals.triage.cyaChange.numberOfProperties=the number of properties exchanges in the same tax year
-multipleDisposals.triage.cyaChange.wereYouAUKResident=whether you were a UK resident on all the dates when you exchanged contracts
 multipleDisposals.triage.cyaChange.countryOfResidence=your country of residence
 multipleDisposals.triage.cyaChange.assetTypes=the types of property included in this return
 multipleDisposals.triage.cyaChange.wereAllPropertiesResidential=whether all the properties were residential properties

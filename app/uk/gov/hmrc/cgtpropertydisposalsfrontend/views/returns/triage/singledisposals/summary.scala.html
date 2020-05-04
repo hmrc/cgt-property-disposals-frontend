@@ -83,33 +83,33 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         @cyaRow(
             messages(s"triage.enterCountry$userKey.title"),
             Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
-            Some(cyaChange(messages("triage.cyaChange.countryOfResidence"), routes.SingleDisposalsTriageController.countryOfResidence().url)),
+            Some(cyaChange(messages("countryOfResidence.cyaChange"), routes.SingleDisposalsTriageController.countryOfResidence().url)),
             "countryOfResidence"
         )
         @cyaRow(
             messages(s"assetTypeForNonUkResidents$userKey.title"),
             Html(messages(s"assetTypeForNonUkResidents.${answers.assetType.toString}")),
-            Some(cyaChange(messages("triage.cyaChange.assetTypeForNonUkResidents"), routes.SingleDisposalsTriageController.assetTypeForNonUkResidents().url)),
+            Some(cyaChange(messages("assetTypeForNonUkResidents.cyaChange"), routes.SingleDisposalsTriageController.assetTypeForNonUkResidents().url)),
             "assetTypeForNonUkResidents"
         )
     } else {
         @cyaRow(
             messages(s"didYouDisposeOfResidentialProperty$userKey.title"),
             Html(messages(s"didYouDisposeOfResidentialProperty.${answers.assetType.toString}")),
-            Some(cyaChange(messages("triage.cyaChange.propertyType"), routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty().url)),
+            Some(cyaChange(messages("didYouDisposeOfResidentialProperty.cyaChange"), routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty().url)),
             "propertyType"
         )
     }
   @cyaRow(
     messages(s"disposalDate$userKey.title"),
     Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
-    Some(cyaChange(messages("triage.cyaChange.disposalDate"), routes.SingleDisposalsTriageController.whenWasDisposalDate().url)),
+    Some(cyaChange(messages("disposalDate.cyaChange"), routes.SingleDisposalsTriageController.whenWasDisposalDate().url)),
       "disposalDate"
   )
   @cyaRow(
     messages(s"completionDate$userKey.title"),
     Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
-    Some(cyaChange(messages("triage.cyaChange.completionDate"), routes.SingleDisposalsTriageController.whenWasCompletionDate().url)),
+    Some(cyaChange(messages("completionDate.cyaChange"), routes.SingleDisposalsTriageController.whenWasCompletionDate().url)),
       "completionDate"
   )
 }
