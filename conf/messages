@@ -1138,6 +1138,8 @@ returns.otherAcquisitionMethod.label=How you got the property
 returns.otherAcquisitionMethod.agent.label=How your client acquired the property
 returns.otherAcquisitionMethod.trust.label=How the trust acquired the property
 
+acquisitionMethod.cyaChange=how the property was acquired
+
 acquisitionMethod.error.required=Select how you got the property
 acquisitionMethod.agent.error.required=Select how your client acquired the property
 acquisitionMethod.trust.error.required=Select how the trust acquired the property
@@ -1198,6 +1200,8 @@ acquisitionDate-day.error.dayAndMonthRequired=The date you got the property must
 acquisitionDate-day.agent.error.dayAndMonthRequired=The date your client acquired the property must include a day and a month
 acquisitionDate-day.trust.error.dayAndMonthRequired=The date the trust acquired the property must include a day and a month
 
+acquisitionDate.cyaChange=the date the property was acquired
+
 acquisitionPriceBought.title=How much did you pay for the property?
 acquisitionPriceBought.agent.title=How much did your client pay for the property?
 acquisitionPriceBought.trust.title=How much did the trust pay for the property?
@@ -1241,6 +1245,9 @@ acquisitionPriceNotBought.error.tooManyDecimals=The market value must be an amou
 acquisitionPriceNotBought.agent.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceNotBought.trust.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
+acquisitionPriceBought.cyaChange=how much was paid for the property
+acquisitionPriceNotBought.cyaChange=the market value of the property on {0}
+
 improvementCosts.title=Do you want to claim any improvement costs?
 improvementCosts.agent.title=Were there any improvement costs?
 improvementCosts.trust.title=Were there any improvement costs?
@@ -1265,6 +1272,9 @@ improvementCostsValue.label=Amount spent on improvements
 improvementCosts.details.summary=What are improvements?
 improvementCosts.details.p1=Improvements include adding an extension or replacing a basic kitchen with a luxury one.
 
+improvementCosts.cyaChange=if there were any improvement costs
+improvementCostsValue.cyaChange=the amount spent on improvements
+
 acquisitionFees.title=Do you want to claim any additional costs you paid when you got the property?
 acquisitionFees.rebased.title=Do you want to claim any additional costs you paid when you rebased the property?
 acquisitionFees.agent.title=Were there any additional acquisition costs?
@@ -1288,6 +1298,9 @@ acquisitionFees.trust.details.p2=To work out the trust’s gain or loss, you mus
 acquisitionFees.details.p3=This process is called rebasing.
 acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
 
+acquisitionFees.cyaChange=if there were any additional acquisition costs
+acquisitionFees.rebased.cyaChange=if there were any additional rebasing costs
+
 acquisitionFees.error.required=Select yes if there are additional costs
 acquisitionFeesValue.label=Amount of additional costs
 acquisitionFeesValue.error.required=Enter how much was paid in additional costs
@@ -1295,6 +1308,8 @@ acquisitionFeesValue.error.invalid=Additional costs must be an amount of money, 
 acquisitionFeesValue.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
 acquisitionFeesValue.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
 acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 1,480 or 900.50
+
+acquisitionFeesValue.cyaChange=the amount of additional costs
 
 acquisitionDetails.cya.title=Check your answers
 acquisitionDetails.cyaChange.acquisitionMethod=acquisition method
@@ -1328,6 +1343,8 @@ rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to
 rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check a property’s market value. This means you should enter an estimate now and if you need to amend the amount do it later using this service. Or if you already complete a Self Assessment tax return you can provide the correct market value in your next Self Assessment.
 rebaseAcquisitionPrice.agent.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so your client can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 rebaseAcquisitionPrice.trust.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so the trust can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
+
+rebaseAcquisitionPrice.cyaChange=the market value of the property on {0}
 
 shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
 shouldUseRebase.helpText=You can use the rebased value or the actual cost of the property in your workings out. The amount you use could mean your gain or loss is lower.
