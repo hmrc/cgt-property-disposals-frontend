@@ -596,6 +596,8 @@ individualUserType.agent.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
+individualUserType.cyaChange=who you are reporting the tax for
+
 capacitorsPersonalRepresentativesNotHandled.title=You cannot use this service
 capacitorsPersonalRepresentativesNotHandled.cannotUse=You cannot use this online service to report Capital Gains Tax on UK property for:
 capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet1=someone else
@@ -626,6 +628,9 @@ numberOfProperties.trust.details.p1=<a href="{0}" target="_blank">The completion
 numberOfProperties.error.invalid=Select how many UK properties you are including in this return
 numberOfProperties.error.required=Select how many UK properties you are including in this return
 
+numberOfProperties.cyaChange=how many properties you want to include in this return
+
+
 disposalMethod.title=How did you sell or dispose of the UK property?
 disposalMethod.agent.title=How did your client sell or dispose of the UK property?
 disposalMethod.trust.title=How did the trust sell or dispose of the UK property?
@@ -638,6 +643,8 @@ disposalMethod.trust.error.required=Select if the trust sold it, gave it away or
 disposalMethod.error.invalid=Select if you sold it, gave it away or other
 disposalMethod.agent.error.invalid=Select if your client sold it, gave it away or other
 disposalMethod.trust.error.invalid=Select if the trust sold it, gave it away or other
+
+disposalMethod.cyaChange=how the property was sold or disposed of
 
 wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
 wereYouAUKResident.agent.title=Was your client a UK resident on the day contracts were exchanged?
@@ -663,6 +670,8 @@ wereYouAUKResident.capacitor.error.required=Select yes if the person was a UK re
 wereYouAUKResident.capacitor.error.boolean=Select yes if the person was a UK resident on the day contracts were exchanged
 wereYouAUKResident.personalRep.error.required=Select yes if the person was a UK resident on the day they died or on the contract exchange date
 wereYouAUKResident.personalRep.error.boolean=Select yes if the person was a UK resident on the day they died or on the contract exchange date
+
+wereYouAUKResident.cyaChange=UK residence status
 
 triage.enterCountry.title=What was your country of residence on the day you ‘exchanged’ contracts?
 triage.enterCountry.agent.title=What country was your client a resident of when they exchanged contracts?
@@ -823,10 +832,6 @@ disposalDateTooEarly.uk.p1=This is because when the property was sold or dispose
 disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
 
 triage.check-your-answers.title=Check your answers
-triage.cyaChange.individualUserType=who you are reporting the tax for
-triage.cyaChange.numberOfProperties=how many properties you want to include in this return
-triage.cyaChange.disposalMethod=how you sold or disposed of the property
-triage.cyaChange.wereYouAUKResident=whether you were a UK resident when you exchanged contracts when selling the property
 triage.cyaChange.countryOfResidence=your country of residence on the day you ‘exchanged’ contracts
 triage.cyaChange.assetTypeForNonUkResidents=the type of property or asset you sold
 triage.cyaChange.propertyType=whether you sold or disposed of a residential property
@@ -941,6 +946,8 @@ shareOfProperty.trust.error.required=Select how much of the property the trust o
 shareOfProperty.personalRep.error.required=Select how much of the property the person owned
 shareOfProperty.capacitor.error.required=Select how much of the property the person owned
 
+shareOfProperty.cyaChange=how much of the property was owned
+
 returns.shareOfProperty.Full=100%
 returns.shareOfProperty.Half=50%
 returns.shareOfProperty.Other=Other share
@@ -1035,8 +1042,6 @@ disposalPrice.trust.SoldOther.error.invalid=How much the trust sold the property
 disposalPrice.personalRep.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
 
-
-
 disposalPrice.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.agent.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.trust.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
@@ -1067,6 +1072,8 @@ disposalPrice.agent.SoldOther.error.tooManyDecimals=How much your client sold th
 disposalPrice.trust.SoldOther.error.tooManyDecimals=How much the trust sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.personalRep.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.capacitor.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+disposalPrice.cyaChange=the disposal amount
 
 disposalFees.title=What were your additional costs when you sold or disposed of the property?
 disposalFees.agent.title=What were your client’s additional disposal costs?
@@ -1104,6 +1111,7 @@ disposalFees.trust.error.tooManyDecimals=How much the trust paid for the additio
 disposalFees.personalRep.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.capacitor.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
+disposalFees.cyaChange=the amount of additional costs
 
 returns.disposal-details.cya.title=Check your answers
 
