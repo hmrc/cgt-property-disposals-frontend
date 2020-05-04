@@ -103,7 +103,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.CommonTriageQuestionsController.howManyProperties()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -122,7 +123,8 @@ class SingleDisposalsTriageController @Inject() (
             form,
             backLink(currentAnswers, routes.CommonTriageQuestionsController.howManyProperties()),
             isDraftReturn,
-            isATrust
+            isATrust,
+            currentAnswers.representativeType()
           )
         },
         updateState = { (disposalMethod, state, answers) =>
@@ -311,7 +313,8 @@ class SingleDisposalsTriageController @Inject() (
           disposalDateBackLink(currentAnswers),
           isDraftReturn,
           assetType,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -334,7 +337,8 @@ class SingleDisposalsTriageController @Inject() (
                     disposalDateBackLink(triageAnswers),
                     state.isRight,
                     assetType,
-                    isATrust
+                    isATrust,
+                    triageAnswers.representativeType()
                   )
                 ), { date =>
                 val result = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate)) match {
@@ -445,7 +449,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -463,7 +468,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       },
       updateState = { (date, state, answers) =>
