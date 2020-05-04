@@ -1938,6 +1938,8 @@ multipleDisposalsNumberOfProperties.error.required=Enter the number of disposals
 multipleDisposalsNumberOfProperties.error.tooSmall=Number of disposals must be 2 or more
 multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 999 or less
 
+multipleDisposalsNumberOfProperties.cyaChange=how many disposals
+
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange‘ dates?
@@ -1959,6 +1961,8 @@ multipleDisposalsWereYouAUKResident.trust.error.boolean=Select yes if the trust 
 multipleDisposalsWereYouAUKResident.capacitor.error.boolean=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.personalRep.error.boolean=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
 
+multipleDisposalsWereYouAUKResident.cyaChange=UK residence status on all of the contract exchange dates
+
 multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
 multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 multipleDisposalsWereAllPropertiesResidential.link=What residential property includes
@@ -1968,6 +1972,8 @@ multipleDisposalsWereAllPropertiesResidential.details.li2=a building that is bei
 multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 
 multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
+
+multipleDisposalsWereAllPropertiesResidential.cyaChange=whether all the properties were residential properties
 
 multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
 multipleDisposalsCountryOfResidence.agent.title=What country was your client a resident of when they exchanged contracts?
@@ -2031,6 +2037,8 @@ multipleDisposalsTaxYear.after=After 6 April 2020
 multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
 
+multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
+
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.trust.title=What types of property or assets did the trust dispose of?
@@ -2063,6 +2071,8 @@ multipleDisposalsAssetTypeForNonUkResidents.trust.error.invalid=Select the types
 multipleDisposalsAssetTypeForNonUkResidents.capacitor.error.invalid=Select the types of property or assets the person disposed of
 multipleDisposalsAssetTypeForNonUkResidents.personalRep.error.invalid=Select the types of property or assets the person disposed of
 
+multipleDisposalsAssetTypeForNonUkResidents.cyaChange=the types of property or assets included in this return
+
 multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
 multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
 multipleDisposalsCompletionDate.details.summary=What happens on the ‘completion’ date?
@@ -2080,14 +2090,10 @@ multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Completion date
 multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
 multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
+multipleDisposalsCompletionDate.cyaChange=the completion date for all properties
+
 multipleDisposals.triage.cya.title=Check your answers
 multipleDisposals.triage.cya.guidanceLink=Help completing this section
-multipleDisposals.triage.cyaChange.numberOfProperties=the number of properties exchanges in the same tax year
-multipleDisposals.triage.cyaChange.countryOfResidence=your country of residence
-multipleDisposals.triage.cyaChange.assetTypes=the types of property included in this return
-multipleDisposals.triage.cyaChange.wereAllPropertiesResidential=whether all the properties were residential properties
-multipleDisposals.triage.cyaChange.taxYear=when the contracts were exchanged on all the properties
-multipleDisposals.triage.cyaChange.completionDate=the completion date for all the properties
 
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.

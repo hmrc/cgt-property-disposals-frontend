@@ -56,7 +56,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
       @cyaRow(
           messages("who-are-you-reporting-for.title"),
           Html(messages(if(isAgent) s"individualUserType.agent.${individualUserType.toString}" else s"individualUserType.${individualUserType.toString}")),
-          Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
+          Some(cyaChange(messages("individualUserType.cyaChange"), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
           "individualUserType"
       )
   }
@@ -64,27 +64,27 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   @cyaRow(
     messages("numberOfProperties.title"),
     Html(messages("numberOfProperties.MoreThanOne")),
-    Some(cyaChange(messages("triage.cyaChange.numberOfProperties"), routes.CommonTriageQuestionsController.howManyProperties().url)),
+    Some(cyaChange(messages("numberOfProperties.cyaChange"), routes.CommonTriageQuestionsController.howManyProperties().url)),
       "numberOfProperties"
   )
     @cyaRow(
         messages(s"multipleDisposalsNumberOfProperties.title"),
         Html(answers.numberOfProperties.toString),
-        Some(cyaChange(messages("multipleDisposals.triage.cyaChange.numberOfProperties"), routes.MultipleDisposalsTriageController.howManyDisposals().url)),
+        Some(cyaChange(messages("multipleDisposalsNumberOfProperties.cyaChange"), routes.MultipleDisposalsTriageController.howManyDisposals().url)),
         "multipleDisposalsNumberOfProperties"
     )
 
   @cyaRow(
     messages(s"multipleDisposalsWereYouAUKResident$userKey.title"),
     Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
-    Some(cyaChange(messages("multipleDisposals.triage.cyaChange.wereYouAUKResident"), routes.MultipleDisposalsTriageController.wereYouAUKResident().url)),
+    Some(cyaChange(messages("multipleDisposalsWereYouAUKResident.cyaChange"), routes.MultipleDisposalsTriageController.wereYouAUKResident().url)),
       "wereYouAUKResident"
   )
     @if(!answers.countryOfResidence.isUk()){
         @cyaRow(
             messages(s"multipleDisposalsCountryOfResidence$userKey.title"),
             Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
-            Some(cyaChange(messages("multipleDisposals.triage.cyaChange.countryOfResidence"), routes.MultipleDisposalsTriageController.countryOfResidence().url)),
+            Some(cyaChange(messages("countryOfResidence.cyaChange"), routes.MultipleDisposalsTriageController.countryOfResidence().url)),
             "countryOfResidence"
         )
         @cyaRow(
@@ -94,27 +94,27 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
                     messages(s"multipleDisposalsAssetTypeForNonUkResidents.${assetType.toString}")
                 ).mkString(", ")
             ),
-            Some(cyaChange(messages("multipleDisposals.triage.cyaChange.assetTypes"), routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents().url)),
+            Some(cyaChange(messages("multipleDisposalsAssetTypeForNonUkResidents.cyaChange"), routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents().url)),
             "assetTypeForNonUkResidents"
         )
     } else {
         @cyaRow(
             messages(s"multipleDisposalsWereAllPropertiesResidential.title"),
             Html(messages(s"yesNo.${answers.assetTypes === List(AssetType.Residential)}")),
-            Some(cyaChange(messages("multipleDisposals.triage.cyaChange.wereAllPropertiesResidential"), routes.MultipleDisposalsTriageController.wereAllPropertiesResidential().url)),
+            Some(cyaChange(messages("multipleDisposalsWereAllPropertiesResidential.cyaChange"), routes.MultipleDisposalsTriageController.wereAllPropertiesResidential().url)),
             "wereAllPropertiesResidential"
         )
     }
   @cyaRow(
     messages("multipleDisposalsTaxYear.title"),
     Html(s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"),
-    Some(cyaChange(messages("multipleDisposals.triage.cyaChange.taxYear"), routes.MultipleDisposalsTriageController.whenWereContractsExchanged().url)),
+    Some(cyaChange(messages("multipleDisposalsTaxYear.cyaChange"), routes.MultipleDisposalsTriageController.whenWereContractsExchanged().url)),
       "taxYear"
   )
   @cyaRow(
     messages("multipleDisposalsCompletionDate.title"),
     Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
-    Some(cyaChange(messages("multipleDisposals.triage.cyaChange.completionDate"), routes.MultipleDisposalsTriageController.completionDate().url)),
+    Some(cyaChange(messages("multipleDisposalsCompletionDate.cyaChange"), routes.MultipleDisposalsTriageController.completionDate().url)),
       "completionDate"
   )
 }
