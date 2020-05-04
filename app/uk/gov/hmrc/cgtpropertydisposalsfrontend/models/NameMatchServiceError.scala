@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.data.Form
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 
-sealed trait NameMatchError[+A <: NameMatchDetails] extends Product with Serializable
+sealed trait NameMatchServiceError[+A <: NameMatchDetails] extends Product with Serializable
 
-object NameMatchError {
+object NameMatchServiceError {
 
-  final case class BackendError(error: Error) extends NameMatchError[Nothing]
+  final case class BackendError(error: Error) extends NameMatchServiceError[Nothing]
 
-  final case class TooManyUnsuccessfulAttempts() extends NameMatchError[Nothing]
+  final case class TooManyUnsuccessfulAttempts() extends NameMatchServiceError[Nothing]
 
   final case class NameMatchFailed[A <: NameMatchDetails](
     unsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[A]
-  ) extends NameMatchError[A]
-
-  final case class ValidationError[A <: NameMatchDetails](formWithErrors: Form[A]) extends NameMatchError[A]
+  ) extends NameMatchServiceError[A]
 
 }

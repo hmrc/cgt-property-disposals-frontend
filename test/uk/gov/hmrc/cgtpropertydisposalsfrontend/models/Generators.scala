@@ -32,8 +32,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualRepresenteeNameMatchDetails, IndividualSautrNameMatchDetails, TrustNameMatchDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
@@ -221,11 +221,15 @@ trait NameMatchGen { this: GenUtils =>
 
   implicit val trustNameMatchDetailsGen: Gen[TrustNameMatchDetails] = gen[TrustNameMatchDetails]
 
-  implicit val individualNameMatchDetailsGen: Gen[IndividualNameMatchDetails] = gen[IndividualNameMatchDetails]
+  implicit val individualSautrNameMatchDetailsGen: Gen[IndividualSautrNameMatchDetails] =
+    gen[IndividualSautrNameMatchDetails]
 
   implicit val individualUnsuccessfulNameMatchAttemptsGen
-    : Gen[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]] =
-    gen[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
+    : Gen[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]] =
+    gen[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]]
+
+  implicit val individualRepresenteeNameMatchDetailsGen: Gen[IndividualRepresenteeNameMatchDetails] =
+    gen[IndividualRepresenteeNameMatchDetails]
 
 }
 

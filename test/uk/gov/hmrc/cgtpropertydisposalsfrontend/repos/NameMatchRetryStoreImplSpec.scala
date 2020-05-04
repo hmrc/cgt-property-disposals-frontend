@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.onboarding
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.Eventually
@@ -23,12 +23,11 @@ import play.api.Configuration
 import play.api.libs.json.{JsObject, JsString}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cache.model.{Cache, Id}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualSautrNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.onboarding.BusinessPartnerRecordNameMatchRetryStoreSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.MongoSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.BusinessPartnerRecordNameMatchRetryStoreSpec._
 import uk.gov.hmrc.mongo.DatabaseUpdate
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,23 +46,19 @@ object BusinessPartnerRecordNameMatchRetryStoreSpec {
 
   class TestEnvironment {
     val ggCredId             = sample[GGCredId]
-    val unsuccessfulAttempts = sample[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
+    val unsuccessfulAttempts = sample[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]]
   }
 
 }
 
-class BusinessPartnerRecordNameMatchRetryStoreImplSpec
-    extends WordSpec
-    with Matchers
-    with MongoSupport
-    with Eventually {
+class NameMatchRetryStoreImplSpec extends WordSpec with Matchers with MongoSupport with Eventually {
 
-  val retryStore = new BusinessPartnerRecordNameMatchRetryStoreImpl(reactiveMongoComponent, config)
+  val retryStore = new NameMatchRetryStoreImpl(reactiveMongoComponent, config)
 
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(5.seconds, 500.millis)
 
-  "BusinessPartnerRecordNameMatchRetryStoreImpl" must {
+  "NameMatchRetryStoreImpl" must {
 
     "be able to insert retry data into mongo and read it back" in new TestEnvironment {
       val result = retryStore.store(ggCredId, unsuccessfulAttempts)
@@ -78,7 +73,7 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec
     }
 
     "return no retry data if there is no data in mongo" in new TestEnvironment {
-      await(retryStore.get[IndividualNameMatchDetails](sample[GGCredId])) should be(Right(None))
+      await(retryStore.get[IndividualSautrNameMatchDetails](sample[GGCredId])) should be(Right(None))
     }
 
     "return an error" when {
@@ -87,8 +82,8 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec
         val invalidData = JsObject(Map("numberOfRetriesDone" -> JsString("1")))
         val create: Future[DatabaseUpdate[Cache]] =
           retryStore.cacheRepository.createOrUpdate(Id(ggCredId.value), retryStore.sessionKey, invalidData)
-        await(create).writeResult.inError                                  shouldBe false
-        await(retryStore.get[IndividualNameMatchDetails](ggCredId)).isLeft shouldBe true
+        await(create).writeResult.inError                                       shouldBe false
+        await(retryStore.get[IndividualSautrNameMatchDetails](ggCredId)).isLeft shouldBe true
       }
 
     }
@@ -97,19 +92,19 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec
 
 }
 
-class BusinessPartnerRecordNameMatchRetryStoreFailureSpec extends WordSpec with Matchers with MongoSupport {
+class NameMatchRetryStoreFailureSpec extends WordSpec with Matchers with MongoSupport {
 
-  val retryStore = new BusinessPartnerRecordNameMatchRetryStoreImpl(reactiveMongoComponent, config)
+  val retryStore = new NameMatchRetryStoreImpl(reactiveMongoComponent, config)
   reactiveMongoComponent.mongoConnector.helper.driver.close()
 
   val mongoIsBrokenAndAttemptingTo = new AfterWord("mongo is broken and attempting to")
 
-  "BusinessPartnerRecordNameMatchRetryStore" must {
+  "NameMatchRetryStore" must {
 
     "return an error" when mongoIsBrokenAndAttemptingTo {
 
       "insert a record" in new TestEnvironment {
-        await(retryStore.get[IndividualNameMatchDetails](ggCredId)).isLeft shouldBe true
+        await(retryStore.get[IndividualSautrNameMatchDetails](ggCredId)).isLeft shouldBe true
       }
 
       "read a record" in new TestEnvironment {

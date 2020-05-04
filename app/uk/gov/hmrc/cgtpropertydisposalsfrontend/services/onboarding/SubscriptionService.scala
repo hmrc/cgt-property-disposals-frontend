@@ -23,12 +23,14 @@ import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.{CONFLICT, NO_CONTENT, OK}
+import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService.GetSubscriptionResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -50,7 +52,7 @@ trait SubscriptionService {
 
   def getSubscribedDetails(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscribedDetails]
+  ): EitherT[Future, Error, Option[SubscribedDetails]]
 
   def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(
     implicit hc: HeaderCarrier
@@ -103,10 +105,12 @@ class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnecto
 
   override def getSubscribedDetails(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscribedDetails] =
+  ): EitherT[Future, Error, Option[SubscribedDetails]] =
     connector.getSubscribedDetails(cgtReference).subflatMap { response =>
       if (response.status === OK)
-        response.parseJSON[SubscribedDetails]().leftMap(Error(_))
+        response
+          .parseJSON[GetSubscriptionResponse]()
+          .bimap(Error(_), _.subscribedDetails)
       else
         Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
     }
@@ -120,5 +124,17 @@ class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnecto
       else
         Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
     }
+
+}
+
+object SubscriptionService {
+
+  final case class GetSubscriptionResponse(subscribedDetails: Option[SubscribedDetails])
+
+  object GetSubscriptionResponse {
+
+    implicit val reads: Reads[GetSubscriptionResponse] = Json.reads[GetSubscriptionResponse]
+
+  }
 
 }

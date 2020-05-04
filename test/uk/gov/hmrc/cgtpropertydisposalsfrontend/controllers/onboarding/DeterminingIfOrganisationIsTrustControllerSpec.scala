@@ -22,7 +22,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.libs.json.{Reads, Writes}
+import play.api.libs.json.Reads
 import play.api.mvc.{Request, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
@@ -36,16 +36,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AlreadySubs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.NameMatchError.TooManyUnsuccessfulAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NameMatchServiceError.TooManyUnsuccessfulAttempts
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, NameMatchServiceError, SessionData, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordNameMatchRetryService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 class DeterminingIfOrganisationIsTrustControllerSpec
     extends ControllerSpec
     with AuthSupport
@@ -53,11 +53,11 @@ class DeterminingIfOrganisationIsTrustControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val mockBprNameMatchService = mock[BusinessPartnerRecordNameMatchRetryService]
+  val mockBprNameMatchService = mock[NameMatchRetryService]
 
   override val overrideBindings =
     List[GuiceableModule](
-      bind[BusinessPartnerRecordNameMatchRetryService].toInstance(mockBprNameMatchService),
+      bind[NameMatchRetryService].toInstance(mockBprNameMatchService),
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore)
     )
@@ -76,17 +76,19 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
   def sessionDataWithStatus(journeyStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
+
   def mockGetNumberOfUnsuccessfulAttempts(
     ggCredId: GGCredId
   )(
-    result: Either[NameMatchError[TrustNameMatchDetails], Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]]
+    result: Either[NameMatchServiceError[TrustNameMatchDetails], Option[
+      UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
+    ]]
   ) =
     (mockBprNameMatchService
       .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](_: GGCredId)(
-        _: Reads[TrustNameMatchDetails],
-        _: ExecutionContext
+        _: Reads[TrustNameMatchDetails]
       ))
-      .expects(ggCredId, *, *)
+      .expects(ggCredId, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAttemptNameMatch(
@@ -94,21 +96,19 @@ class DeterminingIfOrganisationIsTrustControllerSpec
     name: TrustName,
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
-  )(result: Either[NameMatchError[TrustNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])]) =
+  )(result: Either[NameMatchServiceError[TrustNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])]) =
     (
       mockBprNameMatchService
-        .attemptBusinessPartnerRecordNameMatch[TrustNameMatchDetails](
+        .attemptBusinessPartnerRecordNameMatch(
           _: TrustNameMatchDetails,
           _: GGCredId,
           _: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
         )(
-          _: Writes[TrustNameMatchDetails],
-          _: ExecutionContext,
           _: HeaderCarrier,
           _: Request[_]
         )
       )
-      .expects(TrustNameMatchDetails(name, trn), ggCredId, previousUnsuccessfulNameMatchAttempts, *, *, *, *)
+      .expects(TrustNameMatchDetails(name, trn), ggCredId, previousUnsuccessfulNameMatchAttempts, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   val ggCredId = sample[GGCredId]
@@ -600,7 +600,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
               )
             )
-            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchServiceError.BackendError(Error(""))))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -751,7 +751,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Left(
-                  NameMatchError.NameMatchFailed(
+                  NameMatchServiceError.NameMatchFailed(
                     UnsuccessfulNameMatchAttempts(2, 3, TrustNameMatchDetails(validTrustName, validTrn))
                   )
                 )
@@ -771,7 +771,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchServiceError.BackendError(Error(""))))
             }
 
             val result = performAction()
@@ -785,7 +785,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-                Left(NameMatchError.BackendError(Error("")))
+                Left(NameMatchServiceError.BackendError(Error("")))
               )
             }
 
@@ -875,7 +875,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchServiceError.TooManyUnsuccessfulAttempts()))
             }
 
             checkIsRedirect(
@@ -891,7 +891,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-                Left(NameMatchError.TooManyUnsuccessfulAttempts())
+                Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
               )
             }
 
@@ -943,7 +943,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(expectedSessionData)
-            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchServiceError.BackendError(Error(""))))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -955,7 +955,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchServiceError.TooManyUnsuccessfulAttempts()))
             }
 
             val result = performAction()
