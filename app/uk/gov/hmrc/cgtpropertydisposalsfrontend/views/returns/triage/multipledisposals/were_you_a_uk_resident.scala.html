@@ -54,6 +54,13 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
   else if (isATrust) ".trust"
   else ""
 }
+@userErrorKey = @{
+  if (representativeType.exists(_.isLeft)) "personalRep."
+  else if (representativeType.exists(_.isRight)) "capacitor."
+  else if (isAgent) "agent."
+    else if (isATrust) "trust."
+      else ""
+}
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -72,7 +79,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
             fieldId = key,
             label = pageHeading(title),
             labelAsHeading = true,
-            errorKey = form.error(s"$key$userKey").map(e => e.message),
+            errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
             helpText = Some(Html(messages(s"$key.helpText")))
