@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, ExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -212,7 +213,13 @@ class ExemptionAndLossesController @Inject() (
               c => inYearLossesForm.fill(c.inYearLosses.inPounds())
             )
           )(
-            page = inYearLossesPage(_, _, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
+            page = inYearLossesPage(
+              _,
+              _,
+              disposalDate,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(draftReturn)
+            )
           )(
             _ => Some(()),
             controllers.returns.routes.TaskListController.taskList()
@@ -231,7 +238,13 @@ class ExemptionAndLossesController @Inject() (
             draftReturn,
             answers
           )(form = inYearLossesForm)(
-            page = inYearLossesPage(_, _, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
+            page = inYearLossesPage(
+              _,
+              _,
+              disposalDate,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(draftReturn)
+            )
           )(
             _ => Some(()),
             controllers.returns.routes.TaskListController.taskList()
@@ -258,7 +271,13 @@ class ExemptionAndLossesController @Inject() (
             c => previousYearsLossesForm.fill(c.previousYearsLosses.inPounds())
           )
         )(
-          page = previousYearsLossesPage(_, _, wasAukResident, fillingOutReturn.subscribedDetails.isATrust)
+          page = previousYearsLossesPage(
+            _,
+            _,
+            wasAukResident,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(draftReturn)
+          )
         )(
           requiredPreviousAnswer = _.fold(
             _.inYearLosses,
@@ -278,7 +297,13 @@ class ExemptionAndLossesController @Inject() (
           draftReturn,
           answers
         )(form = previousYearsLossesForm)(
-          page = previousYearsLossesPage(_, _, wasAUkResident, fillingOutReturn.subscribedDetails.isATrust)
+          page = previousYearsLossesPage(
+            _,
+            _,
+            wasAUkResident,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(draftReturn)
+          )
         )(
           requiredPreviousAnswer = _.fold(
             _.inYearLosses,
@@ -307,7 +332,13 @@ class ExemptionAndLossesController @Inject() (
             c => emptyForm.fill(c.annualExemptAmount.inPounds())
           )
         })(
-          page = annualExemptAmountPage(_, _, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
+          page = annualExemptAmountPage(
+            _,
+            _,
+            disposalDate,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(draftReturn)
+          )
         )(
           requiredPreviousAnswer = _.fold(
             _.previousYearsLosses,
@@ -340,7 +371,13 @@ class ExemptionAndLossesController @Inject() (
                 )
               )
             )
-            annualExemptAmountPage(updatedForm, backlink, disposalDate, fillingOutReturn.subscribedDetails.isATrust)
+            annualExemptAmountPage(
+              updatedForm,
+              backlink,
+              disposalDate,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(draftReturn)
+            )
           }
         )(
           requiredPreviousAnswer = _.fold(
@@ -363,7 +400,14 @@ class ExemptionAndLossesController @Inject() (
       withDisposalDate(draftReturn) { disposalDate =>
         answers match {
           case c: CompleteExemptionAndLossesAnswers =>
-            Ok(checkYourAnswersPage(c, disposalDate, fillingOutReturn.subscribedDetails.isATrust))
+            Ok(
+              checkYourAnswersPage(
+                c,
+                disposalDate,
+                fillingOutReturn.subscribedDetails.isATrust,
+                representativeType(draftReturn)
+              )
+            )
 
           case IncompleteExemptionAndLossesAnswers(None, _, _) =>
             Redirect(routes.ExemptionAndLossesController.inYearLosses())
@@ -404,7 +448,15 @@ class ExemptionAndLossesController @Inject() (
                 logger.warn("Could not update the session", e)
                 errorHandler.errorResult()
               },
-              _ => Ok(checkYourAnswersPage(completeAnswers, disposalDate, fillingOutReturn.subscribedDetails.isATrust))
+              _ =>
+                Ok(
+                  checkYourAnswersPage(
+                    completeAnswers,
+                    disposalDate,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    representativeType(draftReturn)
+                  )
+                )
             )
         }
       }
@@ -422,6 +474,14 @@ class ExemptionAndLossesController @Inject() (
 }
 
 object ExemptionAndLossesController {
+
+  def representativeType(
+    draftReturn: DraftReturn
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    draftReturn.fold(
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType()
+    )
 
   val inYearLossesForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("inYearLosses", "inYearLossesValue")
