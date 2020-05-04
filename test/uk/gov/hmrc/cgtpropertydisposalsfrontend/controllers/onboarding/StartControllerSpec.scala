@@ -106,7 +106,7 @@ class StartControllerSpec
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetSubscribedDetails(cgtReference: CgtReference)(response: Either[Error, SubscribedDetails]) =
+  def mockGetSubscribedDetails(cgtReference: CgtReference)(response: Either[Error, Option[SubscribedDetails]]) =
     (mockSubscriptionService
       .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
@@ -1520,6 +1520,24 @@ class StartControllerSpec
               checkIsTechnicalErrorPage(performAction())
             }
 
+            "the call to get subscription details yields no details" in {
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L200,
+                  Some(AffinityGroup.Individual),
+                  None,
+                  None,
+                  None,
+                  Set(cgtEnrolment),
+                  Some(retrievedGGCredId)
+                )
+                mockGetSession(SessionData.empty)
+                mockGetSubscribedDetails(cgtReference)(Right(None))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
             "the call to get draft returns fails" in {
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -1532,7 +1550,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockGetSession(SessionData.empty)
-                mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+                mockGetSubscribedDetails(cgtReference)(Right(Some(subscribedDetails)))
                 mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
                 mockGetDraftReturns(cgtReference, sentReturns)(Left(Error("")))
               }
@@ -1552,7 +1570,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockGetSession(SessionData.empty)
-                mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+                mockGetSubscribedDetails(cgtReference)(Right(Some(subscribedDetails)))
                 mockGetReturnsList(subscribedDetails.cgtReference)(Left(Error("")))
               }
 
@@ -1571,7 +1589,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockGetSession(SessionData.empty)
-                mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+                mockGetSubscribedDetails(cgtReference)(Right(Some(subscribedDetails)))
                 mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
                 mockGetDraftReturns(cgtReference, sentReturns)(Right(draftReturns))
                 mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Left(Error("")))
@@ -1595,7 +1613,7 @@ class StartControllerSpec
                 Some(retrievedGGCredId)
               )
               mockGetSession(SessionData.empty)
-              mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+              mockGetSubscribedDetails(cgtReference)(Right(Some(subscribedDetails)))
               mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
               mockGetDraftReturns(cgtReference, sentReturns)(Right(draftReturns))
               mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Right(()))

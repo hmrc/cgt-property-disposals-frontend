@@ -246,9 +246,16 @@ class StartController @Inject() (
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val result = for {
-      subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
-      sentReturns       <- returnsService.listReturns(cgtReference)
-      draftReturns      <- returnsService.getDraftReturns(cgtReference, sentReturns)
+      subscribedDetails <- subscriptionService
+                            .getSubscribedDetails(cgtReference)
+                            .subflatMap(
+                              Either.fromOption(
+                                _,
+                                Error(s"Could not find subscribed details for cgt reference ${cgtReference.value}")
+                              )
+                            )
+      sentReturns  <- returnsService.listReturns(cgtReference)
+      draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(

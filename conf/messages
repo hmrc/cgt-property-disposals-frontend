@@ -2450,3 +2450,8 @@ confirmed.error.required=Select yes to confirm this is the person you are repres
 representeeNameMatchError.title=The details you entered did not match our records
 representeeNameMatchError.p1=The reference number and name you entered for the person did not match the details we hold.
 representeeNameMatchError.p2=Check you have the correct details for the person and try again.
+
+representeeTooManyNameMatchFailures.title=You’ll need to wait and try again
+representeeTooManyNameMatchFailures.p1=You have entered the wrong details too many times.
+representeeTooManyNameMatchFailures.p2=The reference number you entered does not match the name of the person.
+representeeTooManyNameMatchFailures.p3=You’ll need to wait 2 hours and try again.

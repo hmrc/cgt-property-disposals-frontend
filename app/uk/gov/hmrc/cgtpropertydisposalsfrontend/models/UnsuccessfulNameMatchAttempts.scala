@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
 import play.api.libs.json.{Json, OFormat, Reads, Writes}
-import UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{SAUTR, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
 
 final case class UnsuccessfulNameMatchAttempts[+A <: NameMatchDetails](
   unsuccessfulAttempts: Int,
@@ -34,19 +35,24 @@ object UnsuccessfulNameMatchAttempts {
 
   object NameMatchDetails {
 
-    final case class IndividualNameMatchDetails(name: IndividualName, sautr: SAUTR) extends NameMatchDetails
+    final case class IndividualSautrNameMatchDetails(name: IndividualName, sautr: SAUTR) extends NameMatchDetails
 
     final case class TrustNameMatchDetails(name: TrustName, trn: TRN) extends NameMatchDetails
 
+    final case class IndividualRepresenteeNameMatchDetails(name: IndividualName, id: RepresenteeReferenceId)
+        extends NameMatchDetails
+
     implicit val eq: Eq[NameMatchDetails] = Eq.fromUniversalEquals
 
-    implicit val individualNameMatchDetailsFormat: OFormat[IndividualNameMatchDetails] =
-      Json.format[IndividualNameMatchDetails]
+    implicit val individualSaUtrNameMatchDetailsFormat: OFormat[IndividualSautrNameMatchDetails] =
+      Json.format[IndividualSautrNameMatchDetails]
 
     implicit val trustNameMatchDetailsFormat: OFormat[TrustNameMatchDetails] = Json.format[TrustNameMatchDetails]
 
-  }
+    implicit val individualRepresenteeNameMatchDetailsFormat: OFormat[IndividualRepresenteeNameMatchDetails] =
+      Json.format[IndividualRepresenteeNameMatchDetails]
 
+  }
   implicit def unsuccessfulNameMatchAttemptsReads[A <: NameMatchDetails: Reads]
     : Reads[UnsuccessfulNameMatchAttempts[A]] =
     Json.reads[UnsuccessfulNameMatchAttempts[A]]
