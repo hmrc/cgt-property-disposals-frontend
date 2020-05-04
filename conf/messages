@@ -1868,7 +1868,6 @@ checkAllAnswers.title=Check your answers before sending the return
 checkAllAnswers.declaration=Declaration
 checkAllAnswers.declaration.p1=By continuing you are confirming that, to the best of your knowledge, the details you are providing are correct.
 checkAllAnswers.declaration.p2=You may have to pay financial penalties and face prosecution if you give incorrect information.
-
 confirmationOfSubmission.title=Return sent
 confirmationOfSubmission.taxOwed=Tax owed
 confirmationOfSubmission.returnReference=Return reference number
@@ -1877,12 +1876,27 @@ confirmationOfSubmission.propertyAddress=Property address
 confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due by
-confirmationOfSubmission.printPage=Print or save this page as a PDF
+confirmationOfSubmission.printPage=<a href="{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.capacitor.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
+confirmationOfSubmission.capacitor.noId.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRep.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
 confirmationOfSubmission.whatNext=What you need to do next
+confirmationOfSubmission.capacitor.whatNext=What happens next
 confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
-confirmationOfSubmission.howToPay=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.capacitor.warning=The person must pay their Capital Gains Tax on UK property by {0}. The person may be charged interest on late payments.
+confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.howToPay.heading=How to pay
+
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
+confirmationOfSubmission.capacitor.ifSa=Self Assessment
+confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
+
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
+confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment return, they will need to provide details from this return in their next Self Assessment tax return.
+confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details from this return in the person’s Self Assessment tax return.
+
 confirmationOfSubmission.returnToAccount=Go to your <a href="{0}">Capital Gains Tax on UK property account</a>.
 confirmationOfSubmission.organisationNameLine=Trust: {0}
 confirmationOfSubmission.agentNameLine=Client: {0}
