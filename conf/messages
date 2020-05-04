@@ -661,6 +661,8 @@ disposalMethod.personalRep.error.invalid=Select if the person sold it, gave it a
 
 disposalMethod.cyaChange=how the property was sold or disposed of
 
+disposalMethod.cyaChange=how the property was sold or disposed of
+
 wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
 wereYouAUKResident.agent.title=Was your client a UK resident on the day contracts were exchanged?
 wereYouAUKResident.trust.title=Was the trust resident in the UK on the day contracts were exchanged?
@@ -1544,6 +1546,9 @@ inYearLossesValue.personalRep.label=Amount of losses from this tax year
 inYearLosses.cyaChange=if Capital Gains Tax losses made in the tax year {0} to {1} are being included
 inYearLossesValue.cyaChange=the amount of Capital Gains Tax losses in the tax year {0} to {1} that are included
 
+inYearLosses.cyaChange=if Capital Gains Tax losses made in the tax year {0} to {1} are being included
+inYearLossesValue.cyaChange=the amount of Capital Gains Tax losses in the tax year {0} to {1} that are included
+
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.trust.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
@@ -2342,10 +2347,11 @@ upload-supporting-evidence.check-your-answers.title=Check your answers
 upload-supporting-evidence.check-your-answers.caption=Supporting evidence
 upload-supporting-evidence.check-your-answers.file-label=Supporting evidence file {0}
 upload-supporting-evidence.check-your-answers.do-you-want-to-upload-documents=Do you want to upload any supporting evidence?
-upload-supporting-evidence.check-your-answers.cya-change=Change
-upload-supporting-evidence.check-your-answers.assistive=the file named {0}
 upload-supporting-evidence.check-your-answers.cya-delete=Delete
 upload-supporting-evidence.check-your-answers.add-another-file=Add another file
+
+upload-supporting-evidence.cyaChange=if you want to upload any supporting evidence
+upload-supporting-evidence.file.cyaChange=the file named {0}
 
 upload-supporting-evidence.expired.title=For your security, we deleted these documents
 upload-supporting-evidence.expired.p1=We save documents for 7 days.
