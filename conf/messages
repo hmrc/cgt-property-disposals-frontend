@@ -661,8 +661,6 @@ disposalMethod.personalRep.error.invalid=Select if the person sold it, gave it a
 
 disposalMethod.cyaChange=how the property was sold or disposed of
 
-disposalMethod.cyaChange=how the property was sold or disposed of
-
 wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
 wereYouAUKResident.agent.title=Was your client a UK resident on the day contracts were exchanged?
 wereYouAUKResident.trust.title=Was the trust resident in the UK on the day contracts were exchanged?
@@ -1542,9 +1540,6 @@ inYearLossesValue.agent.label=Amount of losses from this tax year
 inYearLossesValue.trust.label=Amount of losses from this tax year
 inYearLossesValue.capacitor.label=Amount of losses from this tax year
 inYearLossesValue.personalRep.label=Amount of losses from this tax year
-
-inYearLosses.cyaChange=if Capital Gains Tax losses made in the tax year {0} to {1} are being included
-inYearLossesValue.cyaChange=the amount of Capital Gains Tax losses in the tax year {0} to {1} that are included
 
 inYearLosses.cyaChange=if Capital Gains Tax losses made in the tax year {0} to {1} are being included
 inYearLossesValue.cyaChange=the amount of Capital Gains Tax losses in the tax year {0} to {1} that are included
