@@ -1379,6 +1379,9 @@ privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief mus
 privateResidentsReliefValue.agent.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 privateResidentsReliefValue.trust.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 
+privateResidentsRelief.cyaChange=if Private Residence Relief is being claimed
+privateResidentsReliefValue.cyaChange=the amount of Private Residence Relief
+
 lettingsRelief.title=Are you entitled to claim Letting Relief?
 lettingsRelief.agent.title=Is your client entitled to claim Letting Relief?
 lettingsRelief.trust.title=Is the trust entitled to claim Letting Relief?
@@ -1397,6 +1400,10 @@ lettingsReliefValue.error.invalid=Amount of Letting Relief must be an amount of 
 lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new window)
 lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be an amount of money between 1 and {0}
 lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than the Private Residence Relief
+
+lettingsRelief.cyaChange=if Letting Relief is being claimed
+lettingsReliefValue.cyaChange=the amount of Letting Relief
+
 otherReliefs.title=Do you want to claim any other reliefs?
 otherReliefs.agent.title=Does your client want to claim any other reliefs?
 otherReliefs.trust.title=Does the trust want to claim any other reliefs?
@@ -1438,14 +1445,11 @@ otherReliefsAmount.error.invalid=Amount of other reliefs must be an amount of mo
 otherReliefsAmount.agent.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 otherReliefsAmount.trust.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 
+otherReliefs.cyaChange=if other reliefs are being claimed
+otherReliefsName.cyaChange=the names of other reliefs being claimed
+otherReliefsAmount.cyaChange=the amount of other reliefs being claimed
+
 reliefDetails.cya.title=Check your answers
-reliefDetails.cyaLabel.privateResidentsRelief=Entitled to Private Residence Relief?
-reliefDetails.cyaLabel.lettingsRelief=Apply Letting Relief?
-reliefDetails.cyaLabel.otherReliefs=Apply other reliefs?
-reliefDetails.cyaChange.privateResidentsReliefValue=Amount of Private Residence Relief
-reliefDetails.cyaChange.lettingsReliefValue=Amount of Lettings Relief
-reliefDetails.cyaChange.otherReliefsName=Other reliefs names
-reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
 
 exemptionAndLosses.caption=Losses and exemptions
 
@@ -1492,6 +1496,9 @@ inYearLossesValue.agent.error.required=Enter an amount of Capital Gains Tax loss
 inYearLossesValue.label=Amount of losses from this tax year
 inYearLossesValue.agent.label=Amount of losses from this tax year
 inYearLossesValue.trust.label=Amount of losses from this tax year
+
+inYearLosses.cyaChange=if Capital Gains Tax losses made in the tax year {0} to {1} are being included
+inYearLossesValue.cyaChange=the amount of Capital Gains Tax losses in the tax year {0} to {1} that are included
 
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
@@ -1540,6 +1547,8 @@ previousYearsLossesValue.error.required=Enter an amount of Capital Gains Tax los
 previousYearsLossesValue.agent.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 previousYearsLossesValue.trust.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 
+previousYearsLosses.cyaChange=if losses made from previous tax years are being included
+previousYearsLossesValue.cyaChange=the amount of losses from previous tax years
 
 annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
 annualExemptAmount.agent.title=How much of your client’s Capital Gains Tax Annual Exempt Amount do they want to use?
@@ -1576,6 +1585,7 @@ annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decima
 annualExemptAmount.agent.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 annualExemptAmount.trust.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 
+annualExemptAmount.cyaChange=how much Annual Exempt Amount is being used
 
 taxableGainOrLoss.title=Did you make an overall gain or loss on the property sale or disposal?
 taxableGainOrLoss.multiple.title=Did you make an overall gain or loss on the property sales or disposals in this return?
@@ -1672,11 +1682,6 @@ netLoss.trust.multiple.error.tooManyDecimals=Overall loss must be an amount of m
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
 exemptionsAndLosses.cya.title=Check your answers
-
-exemptionsAndLosses.cyaChange.inYearLosses=your in year losses
-exemptionsAndLosses.cyaChange.inYearLossesValue=the amount of in year losses
-exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
-exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous years losses
 
 ytdLiability.caption=Tax amount owed
 
@@ -2147,6 +2152,8 @@ multipleDisposalsDisposalDate-month.error.monthAndYearRequired=Contract exchange
 multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
+multipleDisposalsDisposalDate.cyaChange=the contract exchange date
+
 multipleDisposalsDisposalPrice.title=What was the disposal value of the property?
 multipleDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
@@ -2158,6 +2165,8 @@ multipleDisposalsDisposalPrice.error.required=Enter the disposal value of the pr
 multipleDisposalsDisposalPrice.error.invalid=Amount must be a number
 multipleDisposalsDisposalPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
 multipleDisposalsDisposalPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
+
+multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
 multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
@@ -2176,6 +2185,8 @@ multipleDisposalsAcquisitionPrice.error.invalid=Amount must be a number
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86
 multipleDisposalsAcquisitionPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
 multipleDisposalsAcquisitionPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
+
+multipleDisposalsAcquisitionPrice.cyaChange=the acquisition value of the property
 
 submitReturnError.title=Sorry, there is a problem with the service
 submitReturnError.p1=Your return might not have been sent to HMRC.
