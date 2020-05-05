@@ -1585,8 +1585,8 @@ annualExemptAmount.personalRep.title=How much of the person’s Capital Gains Ta
 annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.agent.helpText=In the tax year {0} to {1}, your client only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount. <br/> <br/>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
-annualExemptAmount.capacitor.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {2}.
-annualExemptAmount.personalRep.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {2}.
+annualExemptAmount.capacitor.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
+annualExemptAmount.personalRep.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
 
 annualExemptAmount.details.1.header=What is the Annual Exempt Amount?
 annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
