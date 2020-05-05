@@ -1643,17 +1643,17 @@ annualExemptAmount.trust.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.capacitor.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.personalRep.error.tooLarge=Annual Exempt Amount must be {0} or less
 
-annualExemptAmount.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,000
-annualExemptAmount.agent.error.required=Enter how much of your client’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,000
-annualExemptAmount.trust.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,000
+annualExemptAmount.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,300
+annualExemptAmount.agent.error.required=Enter how much of your client’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
+annualExemptAmount.trust.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,300
 annualExemptAmount.capacitor.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
 annualExemptAmount.personalRep.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
 
-annualExemptAmount.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
-annualExemptAmount.agent.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
-annualExemptAmount.trust.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
-annualExemptAmount.capacitor.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
-annualExemptAmount.personalRep.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
+annualExemptAmount.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
+annualExemptAmount.agent.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
+annualExemptAmount.trust.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
+annualExemptAmount.capacitor.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
+annualExemptAmount.personalRep.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
 
 annualExemptAmount.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.agent.error.tooSmall=Annual Exempt Amount must be 0 or more
