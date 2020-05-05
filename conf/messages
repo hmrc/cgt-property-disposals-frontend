@@ -66,7 +66,7 @@ landingPage.howTo.list2.bullet2=non-residential UK property or land
 landingPage.howTo.p4=If you’re a non-resident, you must report all sales or disposals of UK property, even if you have no tax to pay or have made a loss.
 landingPage.startButton=Start
 landingPage.beforeYouStart.h2=Before you start
-landingPage.beforeYouStart.p1=To use this service, you’ll need a <a href="{0}">Government Gateway user ID and password</a>. If you do not have a user ID, you can create one.
+landingPage.beforeYouStart.p1=To use this service, you’ll need a Government Gateway user ID and password. If you do not have a user ID, you can create one.
 landingPage.beforeYouStart.p2=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
 landingPage.beforeYouStart.p3=Get the following information ready:
 landingPage.beforeYouStart.list1.bullet1=property address and postcode
