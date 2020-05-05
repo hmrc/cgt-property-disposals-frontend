@@ -319,6 +319,8 @@ nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbe
 countryCode.error.required=Select a country from the options presented as you type
 countryCode.error.notFound=Select a country from the options presented as you type
 
+countryOfResidence.cyaChange=country of residence
+
 address-select.title=Select your contact address
 address-select.agent.title=Select your contact address
 address-select.trust.title=Select your contact address
@@ -596,6 +598,8 @@ individualUserType.agent.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
+individualUserType.cyaChange=who you are reporting the tax for
+
 capacitorsPersonalRepresentativesNotHandled.title=You cannot use this service
 capacitorsPersonalRepresentativesNotHandled.cannotUse=You cannot use this online service to report Capital Gains Tax on UK property for:
 capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet1=someone else
@@ -626,6 +630,9 @@ numberOfProperties.trust.details.p1=<a href="{0}" target="_blank">The completion
 numberOfProperties.error.invalid=Select how many UK properties you are including in this return
 numberOfProperties.error.required=Select how many UK properties you are including in this return
 
+numberOfProperties.cyaChange=how many properties you want to include in this return
+
+
 disposalMethod.title=How did you sell or dispose of the UK property?
 disposalMethod.agent.title=How did your client sell or dispose of the UK property?
 disposalMethod.trust.title=How did the trust sell or dispose of the UK property?
@@ -647,6 +654,8 @@ disposalMethod.agent.error.invalid=Select if your client sold it, gave it away o
 disposalMethod.trust.error.invalid=Select if the trust sold it, gave it away or other
 disposalMethod.capacitor.error.invalid=Select if the person sold it, gave it away or other
 disposalMethod.personalRep.error.invalid=Select if the person sold it, gave it away or other
+
+disposalMethod.cyaChange=how the property was sold or disposed of
 
 wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
 wereYouAUKResident.agent.title=Was your client a UK resident on the day contracts were exchanged?
@@ -672,6 +681,8 @@ wereYouAUKResident.capacitor.error.required=Select yes if the person was a UK re
 wereYouAUKResident.capacitor.error.boolean=Select yes if the person was a UK resident on the day contracts were exchanged
 wereYouAUKResident.personalRep.error.required=Select yes if the person was a UK resident on the day they died or on the contract exchange date
 wereYouAUKResident.personalRep.error.boolean=Select yes if the person was a UK resident on the day they died or on the contract exchange date
+
+wereYouAUKResident.cyaChange=UK residence status
 
 triage.enterCountry.title=What was your country of residence on the day you ‘exchanged’ contracts?
 triage.enterCountry.agent.title=What country was your client a resident of when they exchanged contracts?
@@ -732,6 +743,8 @@ assetTypeForNonUkResidents.trust.error.invalid=Select the type of property or as
 assetTypeForNonUkResidents.capacitor.error.invalid=Select the type of property or asset the person sold or disposed of
 assetTypeForNonUkResidents.personalRep.error.invalid=Select the type of property or asset the person sold or disposed of
 
+assetTypeForNonUkResidents.cyaChange=the type of property or asset disposed of
+
 sharesDisposalDate.title=What was the date of disposal of the shares?
 sharesDisposalDate.helpText=For example, 25 4 2020.
 sharesDisposalDate.error.required=Enter the date of disposal
@@ -775,6 +788,8 @@ didYouDisposeOfResidentialProperty.capacitor.error.boolean=Select yes if the per
 didYouDisposeOfResidentialProperty.personalRep.error.required=Select yes if the person disposed of a UK residential property
 didYouDisposeOfResidentialProperty.personalRep.error.boolean=Select yes if the person disposed of a UK residential property
 
+didYouDisposeOfResidentialProperty.cyaChange=whether UK residential property was disposed of
+
 ukResidentCanOnlyReportResidential.title=You cannot use this service
 ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
 ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
@@ -808,6 +823,8 @@ disposalDate-month.error.monthAndYearRequired=Contract exchange date must includ
 disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
+disposalDate.cyaChange=the contract exchange date
+
 completionDate.title=What was the completion date when you sold or disposed of the property?
 completionDate.agent.title=When the property was disposed of what was the completion date?
 completionDate.trust.title=When the property was disposed of what was the completion date?
@@ -836,6 +853,8 @@ completionDate-month.error.monthAndYearRequired=Completion date must include a m
 completionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
 completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
+completionDate.cyaChange=the completion date
+
 disposalDateTooEarly.non-uk.title=You cannot use this service
 disposalDateTooEarly.non-uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
 disposalDateTooEarly.non-uk.p2=If an indirect disposal was made, it’s because the shares were sold before 6 April 2020.
@@ -847,10 +866,6 @@ disposalDateTooEarly.uk.p1=This is because when the property was sold or dispose
 disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
 
 triage.check-your-answers.title=Check your answers
-triage.cyaChange.individualUserType=who you are reporting the tax for
-triage.cyaChange.numberOfProperties=how many properties you want to include in this return
-triage.cyaChange.disposalMethod=how you sold or disposed of the property
-triage.cyaChange.wereYouAUKResident=whether you were a UK resident when you exchanged contracts when selling the property
 triage.cyaChange.countryOfResidence=your country of residence on the day you ‘exchanged’ contracts
 triage.cyaChange.assetTypeForNonUkResidents=the type of property or asset you sold
 triage.cyaChange.propertyType=whether you sold or disposed of a residential property
@@ -965,6 +980,8 @@ shareOfProperty.trust.error.required=Select how much of the property the trust o
 shareOfProperty.personalRep.error.required=Select how much of the property the person owned
 shareOfProperty.capacitor.error.required=Select how much of the property the person owned
 
+shareOfProperty.cyaChange=how much of the property was owned
+
 returns.shareOfProperty.Full=100%
 returns.shareOfProperty.Half=50%
 returns.shareOfProperty.Other=Other share
@@ -1059,8 +1076,6 @@ disposalPrice.trust.SoldOther.error.invalid=How much the trust sold the property
 disposalPrice.personalRep.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
 
-
-
 disposalPrice.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.agent.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.trust.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
@@ -1091,6 +1106,8 @@ disposalPrice.agent.SoldOther.error.tooManyDecimals=How much your client sold th
 disposalPrice.trust.SoldOther.error.tooManyDecimals=How much the trust sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.personalRep.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.capacitor.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+disposalPrice.cyaChange=the disposal amount
 
 disposalFees.title=What were your additional costs when you sold or disposed of the property?
 disposalFees.agent.title=What were your client’s additional disposal costs?
@@ -1128,6 +1145,7 @@ disposalFees.trust.error.tooManyDecimals=How much the trust paid for the additio
 disposalFees.personalRep.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.capacitor.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
+disposalFees.cyaChange=the amount of additional costs
 
 returns.disposal-details.cya.title=Check your answers
 
@@ -1143,6 +1161,8 @@ returns.acquisitionMethod.Other=Other
 returns.otherAcquisitionMethod.label=How you got the property
 returns.otherAcquisitionMethod.agent.label=How your client acquired the property
 returns.otherAcquisitionMethod.trust.label=How the trust acquired the property
+
+acquisitionMethod.cyaChange=how the property was acquired
 
 acquisitionMethod.error.required=Select how you got the property
 acquisitionMethod.agent.error.required=Select how your client acquired the property
@@ -1204,6 +1224,8 @@ acquisitionDate-day.error.dayAndMonthRequired=The date you got the property must
 acquisitionDate-day.agent.error.dayAndMonthRequired=The date your client acquired the property must include a day and a month
 acquisitionDate-day.trust.error.dayAndMonthRequired=The date the trust acquired the property must include a day and a month
 
+acquisitionDate.cyaChange=the date the property was acquired
+
 acquisitionPriceBought.title=How much did you pay for the property?
 acquisitionPriceBought.agent.title=How much did your client pay for the property?
 acquisitionPriceBought.trust.title=How much did the trust pay for the property?
@@ -1247,6 +1269,9 @@ acquisitionPriceNotBought.error.tooManyDecimals=The market value must be an amou
 acquisitionPriceNotBought.agent.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceNotBought.trust.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
+acquisitionPriceBought.cyaChange=how much was paid for the property
+acquisitionPriceNotBought.cyaChange=the market value of the property on {0}
+
 improvementCosts.title=Do you want to claim any improvement costs?
 improvementCosts.agent.title=Were there any improvement costs?
 improvementCosts.trust.title=Were there any improvement costs?
@@ -1271,6 +1296,9 @@ improvementCostsValue.label=Amount spent on improvements
 improvementCosts.details.summary=What are improvements?
 improvementCosts.details.p1=Improvements include adding an extension or replacing a basic kitchen with a luxury one.
 
+improvementCosts.cyaChange=if there were any improvement costs
+improvementCostsValue.cyaChange=the amount spent on improvements
+
 acquisitionFees.title=Do you want to claim any additional costs you paid when you got the property?
 acquisitionFees.rebased.title=Do you want to claim any additional costs you paid when you rebased the property?
 acquisitionFees.agent.title=Were there any additional acquisition costs?
@@ -1294,6 +1322,9 @@ acquisitionFees.trust.details.p2=To work out the trust’s gain or loss, you mus
 acquisitionFees.details.p3=This process is called rebasing.
 acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
 
+acquisitionFees.cyaChange=if there were any additional acquisition costs
+acquisitionFees.rebased.cyaChange=if there were any additional rebasing costs
+
 acquisitionFees.error.required=Select yes if there are additional costs
 acquisitionFeesValue.label=Amount of additional costs
 acquisitionFeesValue.error.required=Enter how much was paid in additional costs
@@ -1302,15 +1333,7 @@ acquisitionFeesValue.error.tooSmall=Additional costs must be an amount of money 
 acquisitionFeesValue.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
 acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 1,480 or 900.50
 
-acquisitionDetails.cya.title=Check your answers
-acquisitionDetails.cyaChange.acquisitionMethod=acquisition method
-acquisitionDetails.cyaChange.acquisitionDate=acquisition date
-acquisitionDetails.cyaChange.acquisitionPrice=acquisition price
-acquisitionDetails.cyaChange.rebasedAcquisitionPrice=rebased acquisition price
-acquisitionDetails.cyaChange.improvementCosts=improvements costs
-acquisitionDetails.cyaChange.acquisitionFees=acquisition fees
-acquisitionDetails.rebased.cyaChange.acquisitionFees=rebasing fees
-acquisitionDetails.cyaChange.shouldUseRebase=whether you are using the rebased value in your calculation
+acquisitionFeesValue.cyaChange=the amount of additional costs
 
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
 rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
@@ -1335,9 +1358,15 @@ rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check 
 rebaseAcquisitionPrice.agent.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so your client can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 rebaseAcquisitionPrice.trust.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so the trust can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 
+rebaseAcquisitionPrice.cyaChange=the market value of the property on {0}
+
 shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
 shouldUseRebase.helpText=You can use the rebased value or the actual cost of the property in your workings out. The amount you use could mean your gain or loss is lower.
 shouldUseRebase.error.required=Select whether you are using the rebased valued in your calculation
+
+shouldUseRebase.cyaChange=whether you are using the rebased value in your calculation
+
+acquisitionDetails.cya.title=Check your answers
 
 reliefDetails.caption=Reliefs
 
@@ -1368,6 +1397,9 @@ privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief mus
 privateResidentsReliefValue.agent.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 privateResidentsReliefValue.trust.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 
+privateResidentsRelief.cyaChange=if Private Residence Relief is being claimed
+privateResidentsReliefValue.cyaChange=the amount of Private Residence Relief
+
 lettingsRelief.title=Are you entitled to claim Letting Relief?
 lettingsRelief.agent.title=Is your client entitled to claim Letting Relief?
 lettingsRelief.trust.title=Is the trust entitled to claim Letting Relief?
@@ -1386,6 +1418,10 @@ lettingsReliefValue.error.invalid=Amount of Letting Relief must be an amount of 
 lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new window)
 lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be an amount of money between 1 and {0}
 lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than the Private Residence Relief
+
+lettingsRelief.cyaChange=if Letting Relief is being claimed
+lettingsReliefValue.cyaChange=the amount of Letting Relief
+
 otherReliefs.title=Do you want to claim any other reliefs?
 otherReliefs.agent.title=Does your client want to claim any other reliefs?
 otherReliefs.trust.title=Does the trust want to claim any other reliefs?
@@ -1427,14 +1463,11 @@ otherReliefsAmount.error.invalid=Amount of other reliefs must be an amount of mo
 otherReliefsAmount.agent.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 otherReliefsAmount.trust.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 
+otherReliefs.cyaChange=if other reliefs are being claimed
+otherReliefsName.cyaChange=the names of other reliefs being claimed
+otherReliefsAmount.cyaChange=the amount of other reliefs being claimed
+
 reliefDetails.cya.title=Check your answers
-reliefDetails.cyaLabel.privateResidentsRelief=Entitled to Private Residence Relief?
-reliefDetails.cyaLabel.lettingsRelief=Apply Letting Relief?
-reliefDetails.cyaLabel.otherReliefs=Apply other reliefs?
-reliefDetails.cyaChange.privateResidentsReliefValue=Amount of Private Residence Relief
-reliefDetails.cyaChange.lettingsReliefValue=Amount of Lettings Relief
-reliefDetails.cyaChange.otherReliefsName=Other reliefs names
-reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
 
 exemptionAndLosses.caption=Losses and exemptions
 
@@ -1503,6 +1536,9 @@ inYearLossesValue.agent.label=Amount of losses from this tax year
 inYearLossesValue.trust.label=Amount of losses from this tax year
 inYearLossesValue.capacitor.label=Amount of losses from this tax year
 inYearLossesValue.personalRep.label=Amount of losses from this tax year
+
+inYearLosses.cyaChange=if Capital Gains Tax losses made in the tax year {0} to {1} are being included
+inYearLossesValue.cyaChange=the amount of Capital Gains Tax losses in the tax year {0} to {1} that are included
 
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
@@ -1575,6 +1611,8 @@ previousYearsLossesValue.trust.error.required=Enter an amount of Capital Gains T
 previousYearsLossesValue.capacitor.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 previousYearsLossesValue.personalRep.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 
+previousYearsLosses.cyaChange=if losses made from previous tax years are being included
+previousYearsLossesValue.cyaChange=the amount of losses from previous tax years
 
 annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
 annualExemptAmount.agent.title=How much of your client’s Capital Gains Tax Annual Exempt Amount do they want to use?
@@ -1625,6 +1663,7 @@ annualExemptAmount.trust.error.tooManyDecimals=Annual Exempt Amount must have 2 
 annualExemptAmount.capacitor.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 annualExemptAmount.personalRep.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 
+annualExemptAmount.cyaChange=how much Annual Exempt Amount is being used
 
 taxableGainOrLoss.title=Did you make an overall gain or loss on the property sale or disposal?
 taxableGainOrLoss.multiple.title=Did you make an overall gain or loss on the property sales or disposals in this return?
@@ -1648,9 +1687,12 @@ taxableGainOrLoss.agent.multiple.error.invalid=Select yes if your client made an
 taxableGainOrLoss.trust.error.invalid=Select yes if the trust made an overall gain on the property sale or disposal
 taxableGainOrLoss.trust.multiple.error.invalid=Select yes if the trust made an overall gain on the property sales or disposals in this return
 
+taxableGainOrLoss.cyaChange=if an overall gain or loss was made on the property sale or disposal
+
 taxableGainOrLoss.gain.label=Yes, I made an overall gain
 taxableGainOrLoss.agent.gain.label=Yes, my client made an overall gain
 taxableGainOrLoss.trust.gain.label=Yes, the trust made an overall gain
+
 taxableGain.label=Amount of overall gain
 taxableGain.error.required=Enter the amount of overall gain
 taxableGain.multiple.error.required=Enter the amount of overall gain
@@ -1722,11 +1764,6 @@ taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
 exemptionsAndLosses.cya.title=Check your answers
 
-exemptionsAndLosses.cyaChange.inYearLosses=your in year losses
-exemptionsAndLosses.cyaChange.inYearLossesValue=the amount of in year losses
-exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
-exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous years losses
-
 ytdLiability.caption=Tax amount owed
 
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
@@ -1759,6 +1796,8 @@ estimatedIncome.agent.error.tooManyDecimals=Estimated income must be an amount o
 estimatedIncome.non-resident.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 estimatedIncome.agent.non-resident.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
+estimatedIncome.cyaChange=estimated gross income
+
 personalAllowance.title=What is your Personal Allowance for tax year {0} to {1}?
 personalAllowance.agent.title=What is your client’s Personal Allowance for tax year {0} to {1}?
 personalAllowance.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
@@ -1777,6 +1816,8 @@ personalAllowance.agent.error.tooLarge=Personal allowance must be an amount of m
 personalAllowance.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
 personalAllowance.agent.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
 
+personalAllowance.cyaChange=Personal Allowance
+
 hasEstimatedDetails.title=Have any of the amounts in this return been estimated?
 hasEstimatedDetails.helpText=If you estimated any amounts, you’ll need to provide the final amounts to HMRC later. For example, the property’s value.
 hasEstimatedDetails.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
@@ -1784,6 +1825,8 @@ hasEstimatedDetails.agent.yes.content=The amounts will need to be confirmed with
 hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
+
+hasEstimatedDetails.cyaChange=if any of the amounts in the return have been estimated
 
 taxDue.title=Enter the Capital Gains Tax due for this return
 taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
@@ -1804,6 +1847,8 @@ taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for examp
 taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
 taxDue.error.tooLarge=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
 taxDue.error.tooManyDecimals=Amount of Capital Gains Tax due must have 2 decimal places or less, for example 493 or 2,040.59
+
+taxDue.cyaChange=the Capital Gains Tax due for this return
 
 calculator.showWorkings=Show workings
 calculator.disposalPrice=Property disposal amount
@@ -1860,21 +1905,21 @@ calculator.total.amountDueAtHigherRate=Amount of tax due at the higher rate
 calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
-mandatoryEvidence.title=Upload a document showing how the Capital gains Tax due was worked out
+mandatoryEvidence.title=Upload a document showing how the Capital Gains Tax due was worked out
 mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 7 days.
+
+mandatoryEvidence.cyaChange=the document showing how the Capital Gains Tax due was worked out
 
 mandatoryEvidenceExpired.title=Your uploaded file has expired
 mandatoryEvidenceExpired.p1=Uploaded files can only be kept for 7 days before they expire. You must either upload the file again or replace it with another before you can continue.
 mandatoryEvidenceExpired.label=Supporting file
 mandatoryEvidenceExpired.cyaChange=the file or upload it again
 
-ytdLiability.cya.title=Check your answers
-ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
-ytdLiability.cyaChange.mandatoryEvidence=your supporting file
-
 ytdLiability.cyaChange.annualExemptAmount=your annual exempt amount
 ytdLiability.cyaChange.taxableGainOrLoss=your taxable gain or net loss
 ytdLiability.cyaChange.nonCalculatedTaxDue=your tax due
+
+ytdLiability.cya.title=Check your answers
 
 checkAllAnswers.title=Check your answers before sending the return
 checkAllAnswers.declaration=Declaration
@@ -2004,6 +2049,8 @@ multipleDisposalsNumberOfProperties.error.required=Enter the number of disposals
 multipleDisposalsNumberOfProperties.error.tooSmall=Number of disposals must be 2 or more
 multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 999 or less
 
+multipleDisposalsNumberOfProperties.cyaChange=how many disposals
+
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange‘ dates?
@@ -2027,6 +2074,8 @@ multipleDisposalsWereYouAUKResident.capacitor.error.boolean=Select yes if the pe
 multipleDisposalsWereYouAUKResident.personalRep.error.required=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.personalRep.error.boolean=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
 
+multipleDisposalsWereYouAUKResident.cyaChange=UK residence status on all of the contract exchange dates
+
 multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
 multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 multipleDisposalsWereAllPropertiesResidential.link=What residential property includes
@@ -2036,6 +2085,8 @@ multipleDisposalsWereAllPropertiesResidential.details.li2=a building that is bei
 multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 
 multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
+
+multipleDisposalsWereAllPropertiesResidential.cyaChange=whether all the properties were residential properties
 
 multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
 multipleDisposalsCountryOfResidence.agent.title=What country was your client a resident of when they exchanged contracts?
@@ -2076,7 +2127,7 @@ initialGainOrLoss.details.example.title=Example
 initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent’s fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
 initialGainOrLoss.summary.hint=Click on the link to change your answers
-initialGainOrLoss.cya.hint=whether you made an initial gain, a loss, or no gain or loss
+initialGainOrLoss.cyaChange=whether you made an initial gain, a loss, or no gain or loss
 
 gain.error.required=Enter the initial gain amount
 gain.error.invalid=Initial gain amount must only include numbers, like 2,908 or 740.50
@@ -2098,6 +2149,8 @@ multipleDisposalsTaxYear.before=Before 6 April 2020
 multipleDisposalsTaxYear.after=After 6 April 2020
 multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
+
+multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
 
 multipleDisposalsAssetTypeForNonUkResidents.title=What types of property or assets did you dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property or assets did your client dispose of?
@@ -2131,6 +2184,8 @@ multipleDisposalsAssetTypeForNonUkResidents.trust.error.invalid=Select the types
 multipleDisposalsAssetTypeForNonUkResidents.capacitor.error.invalid=Select the types of property or assets the person disposed of
 multipleDisposalsAssetTypeForNonUkResidents.personalRep.error.invalid=Select the types of property or assets the person disposed of
 
+multipleDisposalsAssetTypeForNonUkResidents.cyaChange=the types of property or assets included in this return
+
 multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
 multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
 multipleDisposalsCompletionDate.details.summary=What happens on the ‘completion’ date?
@@ -2148,15 +2203,10 @@ multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Completion date
 multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
 multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
+multipleDisposalsCompletionDate.cyaChange=the completion date for all properties
+
 multipleDisposals.triage.cya.title=Check your answers
 multipleDisposals.triage.cya.guidanceLink=Help completing this section
-multipleDisposals.triage.cyaChange.numberOfProperties=the number of properties exchanges in the same tax year
-multipleDisposals.triage.cyaChange.wereYouAUKResident=whether you were a UK resident on all the dates when you exchanged contracts
-multipleDisposals.triage.cyaChange.countryOfResidence=your country of residence
-multipleDisposals.triage.cyaChange.assetTypes=the types of property included in this return
-multipleDisposals.triage.cyaChange.wereAllPropertiesResidential=whether all the properties were residential properties
-multipleDisposals.triage.cyaChange.taxYear=when the contracts were exchanged on all the properties
-multipleDisposals.triage.cyaChange.completionDate=the completion date for all the properties
 
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
@@ -2165,6 +2215,8 @@ nonCalculatedTaxDue.error.tooSmall=The amount of Capital Gains Tax due must be 0
 nonCalculatedTaxDue.error.tooLarge=The amount of Capital Gains Tax due must be an amount of money 50,000,000,000 or less
 nonCalculatedTaxDue.error.invalid=The amount of Capital Gains Tax due must be an amount of money, like 493 or 2,040.59
 nonCalculatedTaxDue.error.tooManyDecimals=The amount of Capital Gains Tax due must be an amount of money with pence as 2 decimal places or less, like 493 or 2,040.59
+
+nonCalculatedTaxDue.cyaChange=the amount of Capital Gains Tax due for this return
 
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
@@ -2193,6 +2245,8 @@ multipleDisposalsDisposalDate-month.error.monthAndYearRequired=Contract exchange
 multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
+multipleDisposalsDisposalDate.cyaChange=the contract exchange date
+
 multipleDisposalsDisposalPrice.title=What was the disposal value of the property?
 multipleDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
@@ -2204,6 +2258,8 @@ multipleDisposalsDisposalPrice.error.required=Enter the disposal value of the pr
 multipleDisposalsDisposalPrice.error.invalid=Amount must be a number
 multipleDisposalsDisposalPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
 multipleDisposalsDisposalPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
+
+multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
 multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
@@ -2222,6 +2278,8 @@ multipleDisposalsAcquisitionPrice.error.invalid=Amount must be a number
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86
 multipleDisposalsAcquisitionPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
 multipleDisposalsAcquisitionPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
+
+multipleDisposalsAcquisitionPrice.cyaChange=the acquisition value of the property
 
 submitReturnError.title=Sorry, there is a problem with the service
 submitReturnError.p1=Your return might not have been sent to HMRC.
@@ -2380,7 +2438,7 @@ representee.cyaChange.whoFor=who you are submitting for
 representee.cyaLabel.personRepresented=Person represented
 representee.cyaChange.personRepresented=the person you are representing
 representee.cyaLabel.dateOfDeath=Date of death
-representee.cyaChange.dateOfDeath=the date person died
+representee.cyaChange.dateOfDeath=the date the person died
 representee.cyaLabel.contactName=Contact name for person represented
 representee.cyaChange.contactName=the contact name for person represented
 representee.cyaLabel.address=Contact address for person represented

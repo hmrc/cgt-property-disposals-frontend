@@ -42,20 +42,29 @@
     @cyaRow(
       messages(s"privateResidentsRelief$userKey.title"),
       Html(messages("generic.no")),
-      Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsReliefValue"), routes.ReliefDetailsController.privateResidentsRelief().url)),
+      Some(cyaChange(
+        messages("privateResidentsRelief.cyaChange"),
+        routes.ReliefDetailsController.privateResidentsRelief().url
+      )),
       "privateResidentsReliefValue"
     )
   } else {
     @cyaRow(
       messages(s"privateResidentsRelief$userKey.title"),
       Html(messages("generic.yes")),
-      Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url)),
+      Some(cyaChange(
+        messages("privateResidentsRelief.cyaChange"),
+        routes.ReliefDetailsController.privateResidentsRelief().url
+      )),
       "privateResidentsRelief"
     )
     @cyaRow(
       messages(s"privateResidentsReliefValue$userKey.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.privateResidentsRelief.inPounds())),
-      Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url)),
+      Some(cyaChange(
+        messages("privateResidentsReliefValue.cyaChange"),
+        routes.ReliefDetailsController.privateResidentsRelief().url
+      )),
       "privateResidentsReliefValue"
     )
   }
@@ -65,20 +74,29 @@
       @cyaRow(
         messages(s"lettingsRelief$userKey.title"),
         Html(messages("generic.no")),
-        Some(cyaChange(messages("reliefDetails.cyaChange.lettingsReliefValue"), routes.ReliefDetailsController.lettingsRelief().url)),
+        Some(cyaChange(
+          messages("lettingsRelief.cyaChange"),
+          routes.ReliefDetailsController.lettingsRelief().url
+        )),
         "lettingsReliefValue"
       )
     } else {
       @cyaRow(
         messages(s"lettingsRelief$userKey.title"),
         Html(messages("generic.yes")),
-        Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url)),
+        Some(cyaChange(
+          messages("lettingsRelief.cyaChange"),
+          routes.ReliefDetailsController.lettingsRelief().url
+        )),
         "lettingsRelief"
       )
       @cyaRow(
         messages("lettingsReliefValue.label"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.lettingsRelief.inPounds())),
-        Some(cyaChange(messages("reliefDetails.cyaChange.lettingsReliefValue"), routes.ReliefDetailsController.lettingsRelief().url)),
+        Some(cyaChange(
+          messages("lettingsReliefValue.cyaChange"),
+          routes.ReliefDetailsController.lettingsRelief().url
+        )),
         "lettingsReliefValue"
       )
     }
@@ -89,7 +107,7 @@
       @cyaRow(
         messages(s"otherReliefs$userKey.title"),
         Html(messages("generic.no")),
-        Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url)),
+        Some(cyaChange(messages("otherReliefs.cyaChange"), routes.ReliefDetailsController.otherReliefs().url)),
         "otherReliefs"
       )
     }
@@ -98,20 +116,20 @@
       @cyaRow(
         messages(s"otherReliefs$userKey.title"),
         Html(messages("generic.yes")),
-        Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url)),
+        Some(cyaChange(messages("otherReliefs.cyaChange"), routes.ReliefDetailsController.otherReliefs().url)),
         "otherReliefs"
       )
 
       @cyaRow(
         messages(s"otherReliefsName$userKey.label"),
         Html(name),
-        Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url)),
+        Some(cyaChange(messages("otherReliefsName.cyaChange"), routes.ReliefDetailsController.otherReliefs().url)),
         "otherReliefsName"
       )
       @cyaRow(
         messages(s"otherReliefsAmount$userKey.label"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds())),
-        Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url)),
+        Some(cyaChange(messages("otherReliefsAmount.cyaChange"), routes.ReliefDetailsController.otherReliefs().url)),
         "otherReliefsAmount"
       )
     }
