@@ -47,14 +47,13 @@ error.summary.heading=There’s a problem
 landingPage.title=Report and pay Capital Gains Tax on UK property
 landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
 landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
-landingPage.createAccount.h2=Create a Capital Gains Tax on UK property account
-landingPage.createAccount.p1=Before 6 April 2020, you’ll be able sign in to this service using your Government Gateway user ID and password to:
-landingPage.createAccount.bullet1=create a Capital Gains Tax on UK property account
-landingPage.createAccount.bullet2=update your contact details in your Capital Gains Tax on UK property account once you have created one
-landingPage.createAccount.p2=If you do not have a Government Gateway user ID, you can create one.
+
+landingPage.warning=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
+landingPage.covid.p1=Due to coronavirus (COVID-19), you will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
+landingPage.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
+landingPage.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
 
 landingPage.howTo.h2=How to report and pay the tax
-landingPage.warning=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
 landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property account before you can report and pay the tax using this service.
 landingPage.howTo.p2=If you’re a resident or representing a trust, you can use this service to:
 landingPage.howTo.list1.bullet1=report the disposal of UK residential property or land made from 6 April 2020
@@ -107,10 +106,12 @@ agentsLandingPage.contents.list1.ordered6=<a href="{0}">Ways your client can pay
 agentsLandingPage.report.h3=Who needs to report Capital Gains Tax on UK property
 agentsLandingPage.report.uk-residents.h4=UK residents
 agentsLandingPage.report.uk-residents.p1=For UK residential property disposals made from 6 April 2020, UK residents have 30 days after the property’s completion date to report and pay Capital Gains Tax on the disposals.
+agentsLandingPage.report.uk-residents.covid.p1=Due to coronavirus (COVID-19), UK residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
+agentsLandingPage.report.uk-residents.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
+agentsLandingPage.report.uk-residents.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
 agentsLandingPage.report.uk-residents.p2=<a href="{0}">Check if your client needs to report and pay Capital Gains Tax on UK property</a>
 agentsLandingPage.report.uk-residents.p3=For UK residential property disposals made from 6 April 2020, UK residents must report their Capital Gains Tax online. You can do this for your clients through their Capital Gains Tax on UK property account.
 agentsLandingPage.report.uk-residents.p4=If your client is a resident who is an individual or a trust, you can use this service to:
-
 agentsLandingPage.report.uk-residents.list1.bullet1=report your client’s UK residential property disposals made from 6 April 2020
 agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay any tax they might owe for that disposal
 agentsLandingPage.report.uk-residents.list1.bullet3=view your client’s previous and current returns
@@ -118,6 +119,9 @@ agentsLandingPage.report.what-residents-cannot-do.h4=What residents cannot do
 agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use the online service for your client to report UK property disposals for someone who has died - you’ll need to <a href="{0}">contact HMRC</a>.
 agentsLandingPage.report.non-residents.h4=Non-residents
 agentsLandingPage.report.non-residents.p1=Non-residents must report all sales or disposals of UK property within 30 days of the completion date, even if they have no tax to pay or have made a loss.
+agentsLandingPage.report.non-uk-residents.covid.p1=Due to coronavirus (COVID-19), non-residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
+agentsLandingPage.report.non-uk-residents.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
+agentsLandingPage.report.non-uk-residents.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
 agentsLandingPage.report.non-residents.p2=If your client is a non-resident use this service to report their UK property disposals of:
 agentsLandingPage.report.non-residents.list1.bullet1=residential UK property or land made from 6 April 2020
 agentsLandingPage.report.non-residents.list1.bullet2=non-residential UK property or land made from 6 April 2020
