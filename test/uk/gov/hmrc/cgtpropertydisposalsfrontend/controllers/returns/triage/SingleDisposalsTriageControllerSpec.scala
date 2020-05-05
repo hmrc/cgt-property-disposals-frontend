@@ -155,7 +155,10 @@ class SingleDisposalsTriageControllerSpec
     "handling requests to display how did you dispose of your property page" must {
 
       val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
+        IncompleteSingleDisposalTriageAnswers.empty.copy(
+          hasConfirmedSingleDisposal = true,
+          individualUserType         = Some(Self)
+        )
 
       def performAction(): Future[Result] = controller.howDidYouDisposeOfProperty()(FakeRequest())
 
@@ -181,10 +184,71 @@ class SingleDisposalsTriageControllerSpec
         _.select("#disposalMethod-0").attr("checked") shouldBe "checked"
       )
 
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(individualUserType = Some(Capacitor)),
+        requiredPreviousAnswers.copy(
+          disposalMethod     = Some(DisposalMethod.Sold),
+          individualUserType = Some(Capacitor)
+        )
+      )(
+        "disposalMethod.capacitor.title",
+        checkContent(_, routes.CommonTriageQuestionsController.howManyProperties()),
+        _.select("#disposalMethod-0").attr("checked") shouldBe "checked"
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(individualUserType = Some(PersonalRepresentative)),
+        requiredPreviousAnswers.copy(
+          disposalMethod     = Some(DisposalMethod.Sold),
+          individualUserType = Some(PersonalRepresentative)
+        )
+      )(
+        "disposalMethod.personalRep.title",
+        checkContent(_, routes.CommonTriageQuestionsController.howManyProperties()),
+        _.select("#disposalMethod-0").attr("checked") shouldBe "checked"
+      )
+
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(sample[CompleteSingleDisposalTriageAnswers].copy(disposalMethod = DisposalMethod.Gifted))(
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          disposalMethod     = DisposalMethod.Gifted,
+          individualUserType = Some(Self)
+        )
+      )(
         "disposalMethod.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          disposalMethod     = DisposalMethod.Gifted,
+          individualUserType = Some(Capacitor)
+        )
+      )(
+        "disposalMethod.capacitor.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          disposalMethod     = DisposalMethod.Gifted,
+          individualUserType = Some(PersonalRepresentative)
+        )
+      )(
+        "disposalMethod.personalRep.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
         }
@@ -192,8 +256,24 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
         performAction
-      )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
+      )(
+        requiredPreviousAnswers.copy(
+          disposalMethod = Some(DisposalMethod.Sold)
+        )
+      )(
         "disposalMethod.agent.title",
+        doc => checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          disposalMethod     = Some(DisposalMethod.Sold),
+          individualUserType = Some(PersonalRepresentative)
+        )
+      )(
+        "disposalMethod.personalRep.title",
         doc => checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
       )
 
@@ -234,8 +314,10 @@ class SingleDisposalsTriageControllerSpec
           supportingEvidenceAnswers  = None
         )
 
-      val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
+      val requiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
+        hasConfirmedSingleDisposal = true,
+        individualUserType         = Some(Self)
+      )
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
@@ -249,7 +331,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      "show a form error" when {
+      "show a form error with self type" when {
 
         def test(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "disposalMethod.title")(formData, expectedErrorKey, requiredPreviousAnswers)
@@ -260,6 +342,48 @@ class SingleDisposalsTriageControllerSpec
 
         "the option is not recognised" in {
           test(List("disposalMethod" -> "3"), "disposalMethod.error.invalid")
+        }
+
+      }
+
+      "show a form error with capacitor type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "disposalMethod.capacitor.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(Capacitor)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "disposalMethod.capacitor.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("disposalMethod" -> "3"), "disposalMethod.capacitor.error.invalid")
+        }
+
+      }
+
+      "show a form error with personal representative" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "disposalMethod.personalRep.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(PersonalRepresentative)
+            )
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "disposalMethod.personalRep.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("disposalMethod" -> "3"), "disposalMethod.personalRep.error.invalid")
         }
 
       }
@@ -1084,7 +1208,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswersUkResident =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(sample[IndividualUserType]),
+          individualUserType         = Some(Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod             = Some(DisposalMethod.Gifted),
           wasAUKResident             = Some(true),
@@ -1111,7 +1235,9 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(
         requiredPreviousAnswersUkResident,
-        requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)),
+        requiredPreviousAnswersUkResident.copy(
+          disposalDate = Some(disposalDate)
+        ),
         Some("the user was a uk resident")
       )(
         "disposalDate.title",
@@ -1119,20 +1245,106 @@ class SingleDisposalsTriageControllerSpec
         checkPrepopulatedContent(_, disposalDate)
       )
 
-      {
-        val answers = requiredPreviousAnswersUkResident.copy(
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident.copy(
+          individualUserType = Some(Capacitor)
+        ),
+        requiredPreviousAnswersUkResident.copy(
+          disposalDate       = Some(disposalDate),
+          individualUserType = Some(Capacitor)
+        ),
+        Some("the user was a uk resident")
+      )(
+        "disposalDate.capacitor.title",
+        checkContent(_, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()),
+        checkPrepopulatedContent(_, disposalDate)
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident.copy(
+          individualUserType = Some(PersonalRepresentative)
+        ),
+        requiredPreviousAnswersUkResident.copy(
+          disposalDate       = Some(disposalDate),
+          individualUserType = Some(PersonalRepresentative)
+        ),
+        Some("the user was a uk resident")
+      )(
+        "disposalDate.personalRep.title",
+        checkContent(_, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()),
+        checkPrepopulatedContent(_, disposalDate)
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident.copy(
           wasAUKResident     = Some(false),
           countryOfResidence = Some(sample[Country]),
           assetType          = Some(AssetType.Residential)
-        )
-        behave like displayIndividualTriagePageBehaviorIncompleteJourney(
-          performAction
-        )(answers, answers.copy(disposalDate = Some(disposalDate)), Some("the user was not a uk resident"))(
-          "disposalDate.title",
-          checkContent(_, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
-          checkPrepopulatedContent(_, disposalDate)
-        )
-      }
+        ),
+        requiredPreviousAnswersUkResident.copy(
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country]),
+          assetType          = Some(AssetType.Residential),
+          disposalDate       = Some(disposalDate)
+        ),
+        Some("the user was not a uk resident")
+      )(
+        "disposalDate.title",
+        checkContent(_, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
+        checkPrepopulatedContent(_, disposalDate)
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident.copy(
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country]),
+          assetType          = Some(AssetType.Residential),
+          individualUserType = Some(Capacitor)
+        ),
+        requiredPreviousAnswersUkResident.copy(
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country]),
+          assetType          = Some(AssetType.Residential),
+          disposalDate       = Some(disposalDate),
+          individualUserType = Some(Capacitor)
+        ),
+        Some("the user was not a uk resident")
+      )(
+        "disposalDate.capacitor.title",
+        checkContent(_, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
+        checkPrepopulatedContent(_, disposalDate)
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident.copy(
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country]),
+          assetType          = Some(AssetType.Residential),
+          individualUserType = Some(PersonalRepresentative)
+        ),
+        requiredPreviousAnswersUkResident.copy(
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country]),
+          assetType          = Some(AssetType.Residential),
+          disposalDate       = Some(disposalDate),
+          individualUserType = Some(PersonalRepresentative)
+        ),
+        Some("the user was not a uk resident")
+      )(
+        "disposalDate.personalRep.title",
+        checkContent(_, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
+        checkPrepopulatedContent(_, disposalDate)
+      )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
@@ -1146,13 +1358,83 @@ class SingleDisposalsTriageControllerSpec
         checkPrepopulatedContent(_, disposalDate)
       )
 
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident.copy(
+          individualUserType = Some(Capacitor)
+        ),
+        requiredPreviousAnswersUkResident.copy(
+          tooEarlyDisposalDate = Some(disposalDate.value),
+          individualUserType   = Some(Capacitor)
+        ),
+        Some("the user had not disposed of their property in a valid tax year")
+      )(
+        "disposalDate.capacitor.title",
+        checkContent(_, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()),
+        checkPrepopulatedContent(_, disposalDate)
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident.copy(
+          individualUserType = Some(PersonalRepresentative)
+        ),
+        requiredPreviousAnswersUkResident.copy(
+          tooEarlyDisposalDate = Some(disposalDate.value),
+          individualUserType   = Some(PersonalRepresentative)
+        ),
+        Some("the user had not disposed of their property in a valid tax year")
+      )(
+        "disposalDate.personalRep.title",
+        checkContent(_, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()),
+        checkPrepopulatedContent(_, disposalDate)
+      )
+
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(
-        sample[CompleteSingleDisposalTriageAnswers]
-          .copy(countryOfResidence = Country.uk, assetType = AssetType.Residential, disposalDate = disposalDate)
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          countryOfResidence = Country.uk,
+          assetType          = AssetType.Residential,
+          disposalDate       = disposalDate,
+          individualUserType = Some(Self)
+        )
       )(
         "disposalDate.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          checkPrepopulatedContent(doc, disposalDate)
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          countryOfResidence = Country.uk,
+          assetType          = AssetType.Residential,
+          disposalDate       = disposalDate,
+          individualUserType = Some(Capacitor)
+        )
+      )(
+        "disposalDate.capacitor.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          checkPrepopulatedContent(doc, disposalDate)
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          countryOfResidence = Country.uk,
+          assetType          = AssetType.Residential,
+          disposalDate       = disposalDate,
+          individualUserType = Some(PersonalRepresentative)
+        )
+      )(
+        "disposalDate.personalRep.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           checkPrepopulatedContent(doc, disposalDate)
         }
@@ -1162,6 +1444,18 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)))(
         "disposalDate.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident.copy(
+          disposalDate       = Some(disposalDate),
+          individualUserType = Some(PersonalRepresentative)
+        )
+      )(
+        "disposalDate.personalRep.title",
         doc => checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
       )
 
@@ -1238,7 +1532,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(sample[IndividualUserType]),
+          individualUserType         = Some(Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod             = Some(DisposalMethod.Gifted),
           wasAUKResident             = Some(true),
@@ -1269,10 +1563,84 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      "show a form error" when {
+      "show a form error with self type" when {
 
         def test(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "disposalDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
+
+        "the date is invalid" in {
+          dateErrorScenarios("disposalDate", "").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val formData = List(
+                "disposalDate-day"   -> scenario.dayInput,
+                "disposalDate-month" -> scenario.monthInput,
+                "disposalDate-year"  -> scenario.yearInput
+              ).collect { case (id, Some(input)) => id -> input }
+              test(formData, scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+        "the disposal date is in the future" in {
+          DateErrorScenario(
+            Some(tomorrow.getDayOfMonth.toString),
+            Some(tomorrow.getMonthValue.toString),
+            Some(tomorrow.getYear.toString),
+            "disposalDate.error.tooFarInFuture"
+          )
+
+          test(formData(tomorrow), "disposalDate.error.tooFarInFuture")
+        }
+
+      }
+
+      "show a form error with capacitor type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "disposalDate.capacitor.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(Capacitor)
+            )
+          )
+
+        "the date is invalid" in {
+          dateErrorScenarios("disposalDate", "").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val formData = List(
+                "disposalDate-day"   -> scenario.dayInput,
+                "disposalDate-month" -> scenario.monthInput,
+                "disposalDate-year"  -> scenario.yearInput
+              ).collect { case (id, Some(input)) => id -> input }
+              test(formData, scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+        "the disposal date is in the future" in {
+          DateErrorScenario(
+            Some(tomorrow.getDayOfMonth.toString),
+            Some(tomorrow.getMonthValue.toString),
+            Some(tomorrow.getYear.toString),
+            "disposalDate.error.tooFarInFuture"
+          )
+
+          test(formData(tomorrow), "disposalDate.error.tooFarInFuture")
+        }
+
+      }
+
+      "show a form error with personal representative type" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "disposalDate.personalRep.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(PersonalRepresentative)
+            )
+          )
 
         "the date is invalid" in {
           dateErrorScenarios("disposalDate", "").foreach { scenario =>
@@ -1431,7 +1799,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(sample[IndividualUserType]),
+          individualUserType         = Some(Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod             = Some(DisposalMethod.Gifted),
           wasAUKResident             = Some(true),
@@ -1462,15 +1830,78 @@ class SingleDisposalsTriageControllerSpec
         checkPrepopulatedContent(_, disposalDate.value)
       )
 
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          individualUserType = Some(Capacitor)
+        ),
+        requiredPreviousAnswers.copy(
+          completionDate     = Some(CompletionDate(disposalDate.value)),
+          individualUserType = Some(Capacitor)
+        )
+      )(
+        "completionDate.capacitor.title",
+        checkContent(_, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
+        checkPrepopulatedContent(_, disposalDate.value)
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          individualUserType = Some(PersonalRepresentative)
+        ),
+        requiredPreviousAnswers.copy(
+          completionDate     = Some(CompletionDate(disposalDate.value)),
+          individualUserType = Some(PersonalRepresentative)
+        )
+      )(
+        "completionDate.personalRep.title",
+        checkContent(_, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
+        checkPrepopulatedContent(_, disposalDate.value)
+      )
+
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(
         sample[CompleteSingleDisposalTriageAnswers].copy(
-          assetType      = AssetType.Residential,
-          completionDate = CompletionDate(disposalDate.value)
+          assetType          = AssetType.Residential,
+          completionDate     = CompletionDate(disposalDate.value),
+          individualUserType = Some(Self)
         )
       )(
         "completionDate.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          checkPrepopulatedContent(doc, disposalDate.value)
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          assetType          = AssetType.Residential,
+          completionDate     = CompletionDate(disposalDate.value),
+          individualUserType = Some(Capacitor)
+        )
+      )(
+        "completionDate.capacitor.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          checkPrepopulatedContent(doc, disposalDate.value)
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(
+        sample[CompleteSingleDisposalTriageAnswers].copy(
+          assetType          = AssetType.Residential,
+          completionDate     = CompletionDate(disposalDate.value),
+          individualUserType = Some(PersonalRepresentative)
+        )
+      )(
+        "completionDate.personalRep.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           checkPrepopulatedContent(doc, disposalDate.value)
         }
@@ -1480,6 +1911,18 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))))(
         "completionDate.agent.title",
+        doc => checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
+      )
+
+      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+        performAction
+      )(
+        requiredPreviousAnswers.copy(
+          completionDate     = Some(CompletionDate(disposalDate.value)),
+          individualUserType = Some(PersonalRepresentative)
+        )
+      )(
+        "completionDate.personalRep.title",
         doc => checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
       )
 
@@ -1556,7 +1999,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType         = Some(sample[IndividualUserType]),
+          individualUserType         = Some(Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod             = Some(DisposalMethod.Gifted),
           wasAUKResident             = Some(true),
@@ -1572,10 +2015,78 @@ class SingleDisposalsTriageControllerSpec
         { case (i, d) => i.copy(disposalDate = d) }
       )
 
-      "show a form error" when {
+      "show a form error with self" when {
 
         def test(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "completionDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
+
+        "the date is invalid" in {
+          dateErrorScenarios("completionDate", "").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val formData = List(
+                "completionDate-day"   -> scenario.dayInput,
+                "completionDate-month" -> scenario.monthInput,
+                "completionDate-year"  -> scenario.yearInput
+              ).collect { case (id, Some(input)) => id -> input }
+              test(formData, scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+        "the completion date is in the future" in {
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+        }
+
+        "the completion date is before the disposal date" in {
+          test(formData(dayBeforeDisposalDate), "completionDate.error.tooFarInPast")
+        }
+
+      }
+
+      "show a form error with capacitor" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "completionDate.capacitor.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(Capacitor)
+            )
+          )
+
+        "the date is invalid" in {
+          dateErrorScenarios("completionDate", "").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val formData = List(
+                "completionDate-day"   -> scenario.dayInput,
+                "completionDate-month" -> scenario.monthInput,
+                "completionDate-year"  -> scenario.yearInput
+              ).collect { case (id, Some(input)) => id -> input }
+              test(formData, scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+        "the completion date is in the future" in {
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+        }
+
+        "the completion date is before the disposal date" in {
+          test(formData(dayBeforeDisposalDate), "completionDate.error.tooFarInPast")
+        }
+
+      }
+
+      "show a form error with personal representative" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "completionDate.personalRep.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers.copy(
+              individualUserType = Some(PersonalRepresentative)
+            )
+          )
 
         "the date is invalid" in {
           dateErrorScenarios("completionDate", "").foreach { scenario =>
@@ -2446,7 +2957,7 @@ class SingleDisposalsTriageControllerSpec
 
     }
 
-    "handling submitted answers to the shrare disposal date for non uk residents page" must {
+    "handling submitted answers to the share disposal date for non uk residents page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))

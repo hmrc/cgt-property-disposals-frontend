@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit
 
 import play.api.libs.json.{Json, OWrites}
 
-final case class BusinessPartnerRecordNameMatchAttemptEvent(
+final case class CgtAccountNameMatchAttemptEvent(
   attemptsMade: Int,
   maxAttempts: Int,
-  nameMatchDetails: BusinessPartnerRecordNameMatchAuditDetails
+  firstName: String,
+  lastName: String,
+  cgtReference: String
 )
 
-object BusinessPartnerRecordNameMatchAttemptEvent {
-  implicit val writes: OWrites[BusinessPartnerRecordNameMatchAttemptEvent] =
-    Json.writes[BusinessPartnerRecordNameMatchAttemptEvent]
+object CgtAccountNameMatchAttemptEvent {
+
+  implicit val writes: OWrites[CgtAccountNameMatchAttemptEvent] =
+    Json.writes[CgtAccountNameMatchAttemptEvent]
 }

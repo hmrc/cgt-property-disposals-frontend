@@ -104,7 +104,7 @@ class AgentVerifierMatchRetryStoreImplFailureSpec extends WordSpec with Matchers
 
   val mongoIsBrokenAndAttemptingTo = new AfterWord("mongo is broken and attempting to")
 
-  "BusinessPartnerRecordNameMatchRetryStore" must {
+  "NameMatchRetryStore" must {
 
     "return an error" when mongoIsBrokenAndAttemptingTo {
 

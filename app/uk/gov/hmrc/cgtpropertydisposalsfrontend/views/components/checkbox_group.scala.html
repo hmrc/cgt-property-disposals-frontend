@@ -45,16 +45,19 @@ List(hintIdWithHintText.map(_._1), errorIdWithError.map(_._1)).collect{ case Som
 
 <div class="@classes">
     <fieldset id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-        <legend>
-            @label
-        </legend>
+
+      <legend>
+        @label
+      </legend>
+
         @hintIdWithHintText.map { case (id, text) =>
-        <span id="@id" class="form-hint">
-    @text
-    </span>
+          <span id="@id" class="form-hint">
+            @text
+          </span>
         }
+
         @errorIdWithError.map { case (id, e) =>
-        @errorInline(id, messages(s"$fieldId.${e.message}", e.args))
+          @errorInline(id, messages(s"$fieldId.${e.message}", e.args))
         }
 
         @options.zipWithIndex.map{ case (option, index) =>
