@@ -1311,16 +1311,6 @@ acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of
 
 acquisitionFeesValue.cyaChange=the amount of additional costs
 
-acquisitionDetails.cya.title=Check your answers
-acquisitionDetails.cyaChange.acquisitionMethod=acquisition method
-acquisitionDetails.cyaChange.acquisitionDate=acquisition date
-acquisitionDetails.cyaChange.acquisitionPrice=acquisition price
-acquisitionDetails.cyaChange.rebasedAcquisitionPrice=rebased acquisition price
-acquisitionDetails.cyaChange.improvementCosts=improvements costs
-acquisitionDetails.cyaChange.acquisitionFees=acquisition fees
-acquisitionDetails.rebased.cyaChange.acquisitionFees=rebasing fees
-acquisitionDetails.cyaChange.shouldUseRebase=whether you are using the rebased value in your calculation
-
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
 rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
 rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
@@ -1349,6 +1339,10 @@ rebaseAcquisitionPrice.cyaChange=the market value of the property on {0}
 shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
 shouldUseRebase.helpText=You can use the rebased value or the actual cost of the property in your workings out. The amount you use could mean your gain or loss is lower.
 shouldUseRebase.error.required=Select whether you are using the rebased valued in your calculation
+
+shouldUseRebase.cyaChange=whether you are using the rebased value in your calculation
+
+acquisitionDetails.cya.title=Check your answers
 
 reliefDetails.caption=Reliefs
 
@@ -1615,7 +1609,6 @@ taxableGainOrLoss.gain.label=Yes, I made an overall gain
 taxableGainOrLoss.agent.gain.label=Yes, my client made an overall gain
 taxableGainOrLoss.trust.gain.label=Yes, the trust made an overall gain
 
-
 taxableGain.label=Amount of overall gain
 taxableGain.error.required=Enter the amount of overall gain
 taxableGain.multiple.error.required=Enter the amount of overall gain
@@ -1838,13 +1831,11 @@ mandatoryEvidenceExpired.p1=Uploaded files can only be kept for 7 days before th
 mandatoryEvidenceExpired.label=Supporting file
 mandatoryEvidenceExpired.cyaChange=the file or upload it again
 
-ytdLiability.cya.title=Check your answers
-ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
-ytdLiability.cyaChange.mandatoryEvidence=your supporting file
-
 ytdLiability.cyaChange.annualExemptAmount=your annual exempt amount
 ytdLiability.cyaChange.taxableGainOrLoss=your taxable gain or net loss
 ytdLiability.cyaChange.nonCalculatedTaxDue=your tax due
+
+ytdLiability.cya.title=Check your answers
 
 checkAllAnswers.title=Check your answers before sending the return
 checkAllAnswers.declaration=Declaration

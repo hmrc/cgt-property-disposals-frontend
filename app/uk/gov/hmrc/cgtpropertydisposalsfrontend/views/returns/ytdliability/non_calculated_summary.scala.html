@@ -84,7 +84,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     )
   @if(showFiles) {
     @cyaRow(
-      messages("ytdLiability.cyaLabel.mandatoryEvidence"),
+      messages("mandatoryEvidence.title"),
       Html(answers.mandatoryEvidence.fileName),
       Some(cyaChange(messages("mandatoryEvidence.cyaChange"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
       "mandatoryEvidence-value"
