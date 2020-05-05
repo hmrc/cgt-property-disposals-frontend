@@ -43,6 +43,7 @@
 @inYearLossesValueKey = @{ "inYearLossesValue" }
 @previousYearLossesValueKey = @{ "previousYearsLossesValue" }
 @annualExemptAmountKey = @{ "annualExemptAmount" }
+
 @taxYearStart = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
 @taxYearEnd = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -59,7 +60,7 @@
   @if(answers.inYearLosses.value === 0L) {
     @cyaRow(
       messages(
-        "inYearLosses.title",
+        s"inYearLosses$userKey.title",
         taxYearStart,
         taxYearEnd
       ),
@@ -77,7 +78,7 @@
   } else {
     @cyaRow(
       messages(
-        "inYearLosses.title",
+        s"inYearLosses$userKey.title",
         taxYearStart,
         taxYearEnd
       ),
@@ -109,7 +110,7 @@
 
   @if(answers.previousYearsLosses.value === 0L) {
     @cyaRow(
-      messages("previousYearsLosses.title"),
+      messages(s"previousYearsLosses$userKey.title"),
       Html(messages("generic.no")),
       Some(cyaChange(
         messages("previousYearsLosses.cyaChange"),
@@ -119,7 +120,7 @@
     )
   } else {
     @cyaRow(
-      messages("previousYearsLosses.title"),
+      messages(s"previousYearsLosses$userKey.title"),
       Html(messages("generic.yes")),
       Some(cyaChange(
         messages("previousYearsLosses.cyaChange"),
