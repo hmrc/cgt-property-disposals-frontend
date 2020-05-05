@@ -1338,9 +1338,9 @@ class ExemptionAndLossesControllerSpec
 
       "show a form error" when {
 
-        def test(
-          data: (String, String)*
-        )(expectedErrorKey: String)(userType: UserType, individualUserType: IndividualUserType): Unit = {
+        def test(data: (String, String)*)(
+          expectedErrorKey: String
+        )(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit = {
 
           val session = sessionWithSingleDisposalState(
             sample[CompleteExemptionAndLossesAnswers],
@@ -1348,8 +1348,6 @@ class ExemptionAndLossesControllerSpec
             userType,
             Some(individualUserType)
           )._1
-
-          val userKey = userMessageKey(individualUserType, userType)
 
           testFormError(data: _*)(
             key,
@@ -1361,9 +1359,10 @@ class ExemptionAndLossesControllerSpec
         "the amount of money is invalid" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              amountOfMoneyErrorScenarios(key = key, errorContext = Some(s"$key")).foreach { scenario =>
+              val userKey = userMessageKey(individualUserType, userType)
+              amountOfMoneyErrorScenarios(key = key, errorContext = Some(s"$key$userKey")).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(userType, individualUserType)
+                  test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(userType, individualUserType, userKey)
                 }
               }
           }

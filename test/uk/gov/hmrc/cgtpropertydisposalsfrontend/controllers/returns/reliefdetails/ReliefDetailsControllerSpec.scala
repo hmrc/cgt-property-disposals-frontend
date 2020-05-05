@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails
 
 import org.jsoup.nodes.Document
+import org.scalacheck.Gen
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -40,6 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
@@ -81,19 +83,15 @@ class ReliefDetailsControllerSpec
       }
     )
 
-  def userMessageKey(userType: UserType): String = userType match {
-    case UserType.Individual   => ""
-    case UserType.Organisation => ".trust"
-    case UserType.Agent        => ".agent"
-    case other                 => sys.error(s"User type '$other' not handled")
-  }
-
-  def userTypeClue(userType: UserType): String = userType match {
-    case UserType.Individual   => "an individual"
-    case UserType.Organisation => "a trust"
-    case UserType.Agent        => "an agent"
-    case other                 => sys.error(s"User type '$other' not handled")
-  }
+  def userMessageKey(individualUserType: IndividualUserType, userType: UserType): String =
+    (individualUserType, userType) match {
+      case (Capacitor, _)              => ".capacitor"
+      case (PersonalRepresentative, _) => ".personalRep"
+      case (_, UserType.Individual)    => ""
+      case (_, UserType.Organisation)  => ".trust"
+      case (_, UserType.Agent)         => ".agent"
+      case other                       => sys.error(s"User type '$other' not handled")
+    }
 
   def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
     case UserType.Agent => Some(sample[AgentReferenceNumber])
@@ -107,31 +105,36 @@ class ReliefDetailsControllerSpec
 
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: Option[ReliefDetailsAnswers],
-    userType: UserType
+    userType: UserType,
+    individualUserType: IndividualUserType
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       reliefDetailsAnswers = reliefDetailsAnswers,
-      triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(disposalDate =
-        sample[DisposalDate]
-          .copy(taxYear = sample[TaxYear].copy(maxLettingsReliefAmount = maxLettingsReliefValue))
+      triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+        disposalDate = sample[DisposalDate].copy(
+          taxYear = sample[TaxYear].copy(
+            maxLettingsReliefAmount = maxLettingsReliefValue
+          )
+        ),
+        individualUserType = Some(individualUserType)
       )
     )
 
     val journey = sample[FillingOutReturn].copy(
       agentReferenceNumber = setAgentReferenceNumber(userType),
       draftReturn          = draftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(
+      subscribedDetails    = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
       )
     )
-    (
-      SessionData.empty.copy(
-        userType      = Some(userType),
-        journeyStatus = Some(journey)
-      ),
-      journey,
-      draftReturn
+
+    val sessionData =  SessionData.empty.copy(
+      userType      = Some(userType),
+      journeyStatus = Some(journey)
     )
+
+    (sessionData, journey, draftReturn)
   }
 
   def sessionWithReliefDetailsAnswers(
@@ -142,14 +145,20 @@ class ReliefDetailsControllerSpec
     disposalDate: DisposalDate,
     completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
     taxYear: TaxYear,
-    userType: UserType
+    userType: UserType,
+    individualUserType: IndividualUserType
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+
     val draftReturn = singleDisposalDraftReturn.copy(
       reliefDetailsAnswers      = reliefDetailsAnswers,
       exemptionAndLossesAnswers = exemptionAndLossesAnswers,
-      triageAnswers = completeSingleDisposalTriageAnswers.copy(disposalDate =
-        disposalDate
-          .copy(taxYear = taxYear.copy(maxLettingsReliefAmount = maxLettingsReliefValue))
+      triageAnswers = completeSingleDisposalTriageAnswers.copy(
+        disposalDate = disposalDate.copy(
+          taxYear = taxYear.copy(
+            maxLettingsReliefAmount = maxLettingsReliefValue
+          )
+        ),
+        individualUserType = Some(individualUserType)
       )
     )
 
@@ -160,25 +169,35 @@ class ReliefDetailsControllerSpec
         name = setNameForUserType(userType)
       )
     )
-    (
-      SessionData.empty.copy(
-        userType      = Some(userType),
-        journeyStatus = Some(journey)
-      ),
-      journey,
-      draftReturn
+
+    val sessionData = SessionData.empty.copy(
+      userType      = Some(userType),
+      journeyStatus = Some(journey)
     )
+
+    (sessionData, journey, draftReturn)
   }
 
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: ReliefDetailsAnswers,
-    userType: UserType
+    userType: UserType,
+    individualUserType: IndividualUserType
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
-    sessionWithReliefDetailsAnswers(Some(reliefDetailsAnswers), userType)
+    sessionWithReliefDetailsAnswers(Some(reliefDetailsAnswers), userType, individualUserType)
+
+  val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
+    case UserType.Agent | UserType.Organisation | UserType.Individual => true
+    case _                                                            => false
+  }
+
+  val acceptedIndividualUserTypeGen: Gen[IndividualUserType] = individualUserTypeGen.filter {
+    case Self | Capacitor | PersonalRepresentative => true
+    case _                                         => false
+  }
 
   "ReliefDetailsController" when {
 
-    "handling requests to display the private residence relief page for an individual" must {
+    "handling requests to display the private residence relief page" must {
 
       def performAction(): Future[Result] = controller.privateResidentsRelief()(FakeRequest())
 
@@ -187,184 +206,76 @@ class ReliefDetailsControllerSpec
       "display the page" when {
 
         "the user has not answered the question before" in {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithReliefDetailsAnswers(None, UserType.Individual)._1)
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithReliefDetailsAnswers(None, userType, individualUserType)._1)
+            }
+
+            val userKey = userMessageKey(individualUserType, userType)
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(s"privateResidentsRelief$userKey.title")
+            )
           }
-
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("privateResidentsRelief.title"))
         }
 
         "the user has answered the question before but has " +
           "not completed the relief detail section" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithReliefDetailsAnswers(
-                IncompleteReliefDetailsAnswers.empty.copy(
-                  privateResidentsRelief = Some(AmountInPence.fromPounds(12.34))
-                ),
-                UserType.Individual
-              )._1
-            )
-          }
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithReliefDetailsAnswers(
+                    IncompleteReliefDetailsAnswers.empty.copy(
+                      privateResidentsRelief = Some(AmountInPence.fromPounds(12.34))
+                    ),
+                    userType,
+                    individualUserType
+                  )._1
+                )
+              }
 
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(s"privateResidentsRelief.title"),
-            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-          )
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(s"privateResidentsRelief.title"),
+                doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
+              )
+          }
         }
 
         "the user has answered the question before but has " +
           "completed the relief detail section" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithReliefDetailsAnswers(
-                sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(12.34)),
-                UserType.Individual
-              )._1
-            )
-          }
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithReliefDetailsAnswers(
+                    sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(12.34)),
+                    userType,
+                    individualUserType
+                  )._1
+                )
+              }
 
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("privateResidentsRelief.title"),
-            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-          )
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("privateResidentsRelief.title"),
+                doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
+              )
+          }
         }
 
       }
 
     }
 
-    "handling requests to display the private residence relief page for an agent" must {
-
-      def performAction(): Future[Result] = controller.privateResidentsRelief()(FakeRequest())
-
-      behave like redirectToStartBehaviour(performAction)
-
-      "display the page" when {
-
-        "the user has not answered the question before" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithReliefDetailsAnswers(None, UserType.Agent)._1)
-          }
-
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("privateResidentsRelief.agent.title"))
-        }
-
-        "the user has answered the question before but has " +
-          "not completed the relief detail section" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithReliefDetailsAnswers(
-                IncompleteReliefDetailsAnswers.empty.copy(
-                  privateResidentsRelief = Some(AmountInPence.fromPounds(12.34))
-                ),
-                UserType.Agent
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(s"privateResidentsRelief.agent.title"),
-            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-          )
-        }
-
-        "the user has answered the question before but has " +
-          "completed the relief detail section" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithReliefDetailsAnswers(
-                sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(12.34)),
-                UserType.Agent
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("privateResidentsRelief.agent.title"),
-            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-          )
-        }
-
-      }
-
-    }
-
-    "handling requests to display the private residence relief page for a trust" must {
-
-      def performAction(): Future[Result] = controller.privateResidentsRelief()(FakeRequest())
-
-      behave like redirectToStartBehaviour(performAction)
-
-      "display the page" when {
-
-        "the user has not answered the question before" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithReliefDetailsAnswers(None, UserType.Organisation)._1)
-          }
-
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("privateResidentsRelief.trust.title"))
-        }
-
-        "the user has answered the question before but has " +
-          "not completed the relief detail section" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithReliefDetailsAnswers(
-                IncompleteReliefDetailsAnswers.empty.copy(
-                  privateResidentsRelief = Some(AmountInPence.fromPounds(12.34))
-                ),
-                UserType.Organisation
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(s"privateResidentsRelief.trust.title"),
-            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-          )
-        }
-
-        "the user has answered the question before but has " +
-          "completed the relief detail section" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithReliefDetailsAnswers(
-                sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(12.34)),
-                UserType.Organisation
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("privateResidentsRelief.trust.title"),
-            doc => doc.select("#privateResidentsReliefValue").attr("value") shouldBe "12.34"
-          )
-        }
-
-      }
-
-    }
-
-    "handling submitted answers to the private residence relief page for an individual" must {
+    "handling submitted answers to the private residence relief page" must {
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.privateResidentsReliefSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
@@ -375,24 +286,30 @@ class ReliefDetailsControllerSpec
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
+      val key = "privateResidentsRelief"
+      val valueKey = "privateResidentsReliefValue"
+
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
       "show a form error" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+        def test(data: (String, String)*)(expectedErrorMessageKey: String
+        )(userType: UserType, individualUserType: IndividualUserType) = {
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithReliefDetailsAnswers(
                 sample[CompleteReliefDetailsAnswers],
-                UserType.Individual
+                userType,
+                individualUserType
               )._1
             )
           }
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("privateResidentsRelief.title"),
+            messageFromMessageKey(s"$key.title"),
             doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
@@ -402,11 +319,15 @@ class ReliefDetailsControllerSpec
         }
 
         "the data is invalid" in {
-          amountOfMoneyErrorScenarios("privateResidentsReliefValue").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data = ("privateResidentsRelief" -> "0") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
-            }
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              val userKey = userMessageKey(individualUserType, userType)
+              amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
+                withClue(s"For $scenario: ") {
+                  val data = (key -> "0") :: scenario.formData
+                  test(data: _*)(scenario.expectedErrorMessageKey)
+                }
+              }
           }
         }
 
@@ -414,23 +335,28 @@ class ReliefDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers =
-          sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(1d))
-        val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(currentAnswers, UserType.Individual)
-        val newPrivateResidentsRelief       = AmountInPence.fromPounds(10d)
-        val newDraftReturn = updateDraftReturn(
-          draftReturn,
-          IncompleteReliefDetailsAnswers(Some(newPrivateResidentsRelief), None, currentAnswers.otherReliefs)
+        val currentAnswers = sample[CompleteReliefDetailsAnswers].copy(
+          privateResidentsRelief = AmountInPence.fromPounds(1d)
         )
+
+        val (session, journey, draftReturn) =
+          sessionWithReliefDetailsAnswers(currentAnswers, UserType.Individual)
+        val newPrivateResidentsRelief       = AmountInPence.fromPounds(10d)
+        val incompleteReliefDetailsAnswers  =
+          IncompleteReliefDetailsAnswers(Some(newPrivateResidentsRelief), None, currentAnswers.otherReliefs)
+
+        val newDraftReturn = updateDraftReturn(draftReturn,incompleteReliefDetailsAnswers)
 
         "there is an error updating the draft return" in {
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
-              Left(Error(""))
-            )
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(

@@ -52,21 +52,21 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     @cyaRow(
         messages(s"multipleDisposalsDisposalDate$userKey.title"),
         Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
-        Some(cyaChange(messages("returns.property-address.cyaChange.disposal-date"), returns.address.routes.PropertyDetailsController.disposalDate().url)),
+        Some(cyaChange(messages("multipleDisposalsDisposalDate.cyaChange"), returns.address.routes.PropertyDetailsController.disposalDate().url)),
         "multipleDisposalsDisposalDate"
     )
 
     @cyaRow(
         messages("multipleDisposalsDisposalPrice.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
-        Some(cyaChange(messages("returns.property-address.cyaChange.disposal-price"), returns.address.routes.PropertyDetailsController.disposalPrice().url)),
+        Some(cyaChange(messages("multipleDisposalsDisposalPrice.cyaChange"), returns.address.routes.PropertyDetailsController.disposalPrice().url)),
         "multipleDisposalsDisposalPrice"
     )
 
     @cyaRow(
         messages("multipleDisposalsAcquisitionPrice.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
-        Some(cyaChange(messages("returns.property-address.cyaChange.acquisition-price"), returns.address.routes.PropertyDetailsController.acquisitionPrice().url)),
+        Some(cyaChange(messages("multipleDisposalsAcquisitionPrice.cyaChange"), returns.address.routes.PropertyDetailsController.acquisitionPrice().url)),
         "multipleDisposalsAcquisitionPrice"
     )
 
