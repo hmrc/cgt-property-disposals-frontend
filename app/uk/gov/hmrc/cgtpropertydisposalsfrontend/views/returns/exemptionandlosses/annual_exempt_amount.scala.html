@@ -82,7 +82,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$key$userKey"))
     }
 
     @caption(messages("exemptionAndLosses.caption"))
@@ -101,7 +101,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             aspect = "left",
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds"),
-            customErrorKey = Some(key)
+            customErrorKey = Some(s"$key$userKey")
         )
 
         @if(isATrust) {
