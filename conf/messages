@@ -1609,9 +1609,13 @@ taxableGainOrLoss.agent.multiple.error.invalid=Select yes if your client made an
 taxableGainOrLoss.trust.error.invalid=Select yes if the trust made an overall gain on the property sale or disposal
 taxableGainOrLoss.trust.multiple.error.invalid=Select yes if the trust made an overall gain on the property sales or disposals in this return
 
+taxableGainOrLoss.cyaChange=if an overall gain or loss was made on the property sale or disposal
+
 taxableGainOrLoss.gain.label=Yes, I made an overall gain
 taxableGainOrLoss.agent.gain.label=Yes, my client made an overall gain
 taxableGainOrLoss.trust.gain.label=Yes, the trust made an overall gain
+
+
 taxableGain.label=Amount of overall gain
 taxableGain.error.required=Enter the amount of overall gain
 taxableGain.multiple.error.required=Enter the amount of overall gain
@@ -1715,6 +1719,8 @@ estimatedIncome.agent.error.tooManyDecimals=Estimated income must be an amount o
 estimatedIncome.non-resident.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 estimatedIncome.agent.non-resident.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
+estimatedIncome.cyaChange=estimated gross income
+
 personalAllowance.title=What is your Personal Allowance for tax year {0} to {1}?
 personalAllowance.agent.title=What is your client’s Personal Allowance for tax year {0} to {1}?
 personalAllowance.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
@@ -1733,6 +1739,8 @@ personalAllowance.agent.error.tooLarge=Personal allowance must be an amount of m
 personalAllowance.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
 personalAllowance.agent.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
 
+personalAllowance.cyaChange=Personal Allowance
+
 hasEstimatedDetails.title=Have any of the amounts in this return been estimated?
 hasEstimatedDetails.helpText=If you estimated any amounts, you’ll need to provide the final amounts to HMRC later. For example, the property’s value.
 hasEstimatedDetails.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
@@ -1740,6 +1748,8 @@ hasEstimatedDetails.agent.yes.content=The amounts will need to be confirmed with
 hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
+
+hasEstimatedDetails.cyaChange=if any of the amounts in the return have been estimated
 
 taxDue.title=Enter the Capital Gains Tax due for this return
 taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
@@ -1760,6 +1770,8 @@ taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for examp
 taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
 taxDue.error.tooLarge=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
 taxDue.error.tooManyDecimals=Amount of Capital Gains Tax due must have 2 decimal places or less, for example 493 or 2,040.59
+
+taxDue.cyaChange=the Capital Gains Tax due for this return
 
 calculator.showWorkings=Show workings
 calculator.disposalPrice=Property disposal amount
@@ -1816,8 +1828,10 @@ calculator.total.amountDueAtHigherRate=Amount of tax due at the higher rate
 calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
-mandatoryEvidence.title=Upload a document showing how the Capital gains Tax due was worked out
+mandatoryEvidence.title=Upload a document showing how the Capital Gains Tax due was worked out
 mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 7 days.
+
+mandatoryEvidence.cyaChange=the document showing how the Capital Gains Tax due was worked out
 
 mandatoryEvidenceExpired.title=Your uploaded file has expired
 mandatoryEvidenceExpired.p1=Uploaded files can only be kept for 7 days before they expire. You must either upload the file again or replace it with another before you can continue.
@@ -2036,7 +2050,7 @@ initialGainOrLoss.details.example.title=Example
 initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent’s fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
 initialGainOrLoss.summary.hint=Click on the link to change your answers
-initialGainOrLoss.cya.hint=whether you made an initial gain, a loss, or no gain or loss
+initialGainOrLoss.cyaChange=whether you made an initial gain, a loss, or no gain or loss
 
 gain.error.required=Enter the initial gain amount
 gain.error.invalid=Initial gain amount must only include numbers, like 2,908 or 740.50
@@ -2124,6 +2138,8 @@ nonCalculatedTaxDue.error.tooSmall=The amount of Capital Gains Tax due must be 0
 nonCalculatedTaxDue.error.tooLarge=The amount of Capital Gains Tax due must be an amount of money 50,000,000,000 or less
 nonCalculatedTaxDue.error.invalid=The amount of Capital Gains Tax due must be an amount of money, like 493 or 2,040.59
 nonCalculatedTaxDue.error.tooManyDecimals=The amount of Capital Gains Tax due must be an amount of money with pence as 2 decimal places or less, like 493 or 2,040.59
+
+nonCalculatedTaxDue.cyaChange=the amount of Capital Gains Tax due for this return
 
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
@@ -2345,7 +2361,7 @@ representee.cyaChange.whoFor=who you are submitting for
 representee.cyaLabel.personRepresented=Person represented
 representee.cyaChange.personRepresented=the person you are representing
 representee.cyaLabel.dateOfDeath=Date of death
-representee.cyaChange.dateOfDeath=the date person died
+representee.cyaChange.dateOfDeath=the date the person died
 representee.cyaLabel.contactName=Contact name for person represented
 representee.cyaChange.contactName=the contact name for person represented
 representee.cyaLabel.address=Contact address for person represented

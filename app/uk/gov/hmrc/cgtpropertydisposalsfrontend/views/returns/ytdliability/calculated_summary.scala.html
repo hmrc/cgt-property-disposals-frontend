@@ -37,27 +37,27 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     @cyaRow(
         messages("estimatedIncome.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
-        Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityController.estimatedIncome().url)),
+        Some(cyaChange(messages("estimatedIncome.cyaChange"), routes.YearToDateLiabilityController.estimatedIncome().url)),
         "estimatedIncome-value"
     )
     @answers.personalAllowance.map { personalAllowance =>
         @cyaRow(
             messages("personalAllowance.title", taxYearStartYear, taxYearEndYear),
             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
-            Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityController.personalAllowance().url)),
+            Some(cyaChange(messages("personalAllowance.cyaChange"), routes.YearToDateLiabilityController.personalAllowance().url)),
             "personalAllowance-value"
         )
     }
     @cyaRow(
         messages("hasEstimatedDetails.title"),
         Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
-        Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
+        Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
         "hasEstimatedDetails-value"
     )
     @cyaRow(
         messages("taxDue.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
-        Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityController.taxDue().url)),
+        Some(cyaChange(messages("taxDue.cyaChange"), routes.YearToDateLiabilityController.taxDue().url)),
         "taxDue-value"
     )
     @if(showFiles) {
@@ -65,7 +65,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         @cyaRow(
           messages("ytdLiability.cyaLabel.mandatoryEvidence"),
           Html(mandatoryEvidence.fileName),
-          Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+          Some(cyaChange(messages("mandatoryEvidence.cyaChange"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
           "mandatoryEvidence-value"
         )
       }

@@ -56,7 +56,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     @cyaRow(
     messages(s"taxableGainOrLoss$userKey$multipleKey.title"),
     Html(messages(taxableGainOrLossLabelWithAmount._1)),
-    Some(cyaChange(messages("ytdLiability.cyaChange.taxableGainOrLoss"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
+    Some(cyaChange(messages("taxableGainOrLoss.cyaChange"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
     "taxableGainOrLossAnswer"
     )
 
@@ -64,7 +64,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         @cyaRow(
             messages(label),
             Html(amount),
-            Some(cyaChange(messages("ytdLiability.cyaChange.taxableGainOrLoss"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
+            Some(cyaChange(messages(label), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
             "taxableGainOrLossAmount"
         )
     }
@@ -72,21 +72,21 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     @cyaRow(
         messages("hasEstimatedDetails.title"),
         Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
-        Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
+        Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
         "hasEstimatedDetails-value"
     )
 
     @cyaRow(
         messages("nonCalculatedTaxDue.title"),
         Html( MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
-        Some(cyaChange(messages("ytdLiability.cyaChange.nonCalculatedTaxDue"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
+        Some(cyaChange(messages("nonCalculatedTaxDue.cyaChange"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
         "nonCalculatedTaxDue-value"
     )
   @if(showFiles) {
     @cyaRow(
       messages("ytdLiability.cyaLabel.mandatoryEvidence"),
       Html(answers.mandatoryEvidence.fileName),
-      Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+      Some(cyaChange(messages("mandatoryEvidence.cyaChange"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
       "mandatoryEvidence-value"
     )
   }
