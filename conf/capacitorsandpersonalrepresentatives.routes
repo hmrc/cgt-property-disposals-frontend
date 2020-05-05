@@ -22,6 +22,8 @@ POST  /about-person/check-your-answers       uk.gov.hmrc.cgtpropertydisposalsfro
 GET  /about-person/enter-different-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.changeContactName()
 POST /about-person/enter-different-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.changeContactNameSubmit()
 
+GET  /about-person/try-again-reference-number        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.tooManyNameMatchAttempts()
+
 ## Address
 GET  /about-person/is-uk-contact-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.isUk()
 POST /about-person/is-uk-contact-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.ChangeRepresenteeContactAddressController.isUkSubmit()

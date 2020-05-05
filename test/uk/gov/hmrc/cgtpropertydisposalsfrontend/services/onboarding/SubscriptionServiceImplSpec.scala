@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
 import cats.data.EitherT
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsNumber, Json}
+import play.api.libs.json.{JsNumber, JsObject, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
@@ -238,9 +238,18 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         "body of the response can be parsed" in {
         val subscribedDetails = sample[SubscribedDetails]
 
-        mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(200, Some(Json.toJson(subscribedDetails)))))
+        mockGetSusbcribedDetails(cgtReference)(
+          Right(HttpResponse(200, Some(JsObject(Map("subscribedDetails" -> Json.toJson(subscribedDetails))))))
+        )
 
-        await(service.getSubscribedDetails(cgtReference).value) shouldBe Right(subscribedDetails)
+        await(service.getSubscribedDetails(cgtReference).value) shouldBe Right(Some(subscribedDetails))
+      }
+
+      "return None if the call comes back with status 200 and the JSON " +
+        "body of the response doesn't contain subscribed details" in {
+        mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(200, Some(Json.parse("{}")))))
+
+        await(service.getSubscribedDetails(cgtReference).value) shouldBe Right(None)
       }
 
     }

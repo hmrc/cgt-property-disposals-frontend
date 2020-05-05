@@ -113,6 +113,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
             helpText = Some(Html(messages(s"$key.helpText"))),
             label = pageHeading(title),
             labelAsHeading = true,
+            error = form.error(key),
             hasErrors = hasErrors
         )
 

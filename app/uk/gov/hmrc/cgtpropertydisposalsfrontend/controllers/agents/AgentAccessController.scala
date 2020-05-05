@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
+import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
@@ -32,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.{AgentSupplyingClientDetails, VerifierMatchingDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
@@ -254,7 +256,15 @@ class AgentAccessController @Inject() (
         )
 
         val result = for {
-          details <- subscriptionService.getSubscribedDetails(cgtReference)
+          details <- subscriptionService
+                      .getSubscribedDetails(cgtReference)
+                      .subflatMap(
+                        Either.fromOption(
+                          _,
+                          Error(s"Could not find subscribed details for cgt reference ${cgtReference.value}")
+                        )
+                      )
+
           _ <- EitherT(
                 updateSession(sessionStore, request)(
                   _.copy(
