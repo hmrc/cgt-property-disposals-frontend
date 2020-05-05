@@ -107,7 +107,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, None, s"$userKey")
+        @errorSummary(form, None, userKey)
     }
 
     @caption(messages("exemptionAndLosses.caption"))
