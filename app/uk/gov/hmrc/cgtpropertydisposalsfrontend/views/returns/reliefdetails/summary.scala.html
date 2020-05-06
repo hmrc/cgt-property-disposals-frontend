@@ -25,18 +25,29 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 @this(
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+      cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+      cyaRow:     uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+      cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: CompleteReliefDetailsAnswers, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(
+  answers: CompleteReliefDetailsAnswers,
+  isATrust: Boolean,
+  representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 
+@userKey = @{
+  if (representativeType.exists(_.isLeft)) ".personalRep"
+  else if (representativeType.exists(_.isRight)) ".capacitor"
+  else if (isAgent) ".agent"
+  else if (isATrust) ".trust"
+  else ""
+}
 @cyaSection() {
   @if(answers.privateResidentsRelief.value === 0L) {
     @cyaRow(
