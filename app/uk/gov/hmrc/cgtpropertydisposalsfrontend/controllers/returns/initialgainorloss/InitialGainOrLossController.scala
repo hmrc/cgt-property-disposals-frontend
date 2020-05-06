@@ -32,7 +32,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -58,11 +59,17 @@ class InitialGainOrLossController @Inject() (
     with Logging {
 
   def enterInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _, answer) =>
+    withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answer) =>
+      val isATrust           = journeyStatus.subscribedDetails.isATrust
+      val representativeType = draftSingleDisposalReturn.triageAnswers.representativeType()
       Ok(
         initialGainOrLossesPage(
-          answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())),
-          getBackLink(answer)
+          answer.fold(initialGainOrLossForm(isATrust, representativeType))(value =>
+            initialGainOrLossForm(isATrust, representativeType).fill(value.inPounds())
+          ),
+          getBackLink(answer),
+          isATrust,
+          representativeType
         )
       )
     }
@@ -71,11 +78,14 @@ class InitialGainOrLossController @Inject() (
   def submitInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) {
       case (fillingOutReturn, draftReturn, answers) =>
-        val backLink = getBackLink(answers)
-        initialGainOrLossForm
+        val backLink           = getBackLink(answers)
+        val isATrust           = fillingOutReturn.subscribedDetails.isATrust
+        val representativeType = draftReturn.triageAnswers.representativeType()
+        initialGainOrLossForm(isATrust, representativeType)
           .bindFromRequest()
           .fold(
-            formWithErrors => BadRequest(initialGainOrLossesPage(formWithErrors, backLink)),
+            formWithErrors =>
+              BadRequest(initialGainOrLossesPage(formWithErrors, backLink, isATrust, representativeType)),
             value =>
               if (answers.map(_.inPounds()).contains(value))
                 Redirect(routes.InitialGainOrLossController.checkYourAnswers())
@@ -155,7 +165,20 @@ class InitialGainOrLossController @Inject() (
 
 object InitialGainOrLossController {
 
-  val initialGainOrLossForm: Form[BigDecimal] = {
+  def initialGainOrLossForm(
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+  )(implicit request: RequestWithSessionData[_]): Form[BigDecimal] = {
+
+    val isAgent = request.userType.contains(UserType.Agent)
+
+    val userKey =
+      if (representativeType.exists(_.isLeft)) ".personalRep"
+      else if (isAgent) ".agent"
+      else if (isATrust) ".trust"
+      else if (representativeType.exists(_.isRight)) ".capacitor"
+      else ""
+
     val (outerId, gainId, lossId) = ("initialGainOrLoss", "gain", "loss")
 
     def innerOption(id: String): InnerOption[BigDecimal] =
@@ -174,7 +197,7 @@ object InitialGainOrLossController {
           }
       }
 
-    val formatter = ConditionalRadioUtils.formatter("initialGainOrLoss")(
+    val formatter = ConditionalRadioUtils.formatter(s"initialGainOrLoss", Some(s"initialGainOrLoss$userKey"))(
       List(
         Left(innerOption(gainId)),
         Left(innerOption(lossId).map(_ * -1)),

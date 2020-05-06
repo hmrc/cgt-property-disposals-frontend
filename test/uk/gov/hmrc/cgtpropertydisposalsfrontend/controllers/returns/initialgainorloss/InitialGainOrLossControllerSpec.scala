@@ -34,8 +34,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -92,7 +96,7 @@ class InitialGainOrLossControllerSpec
 
         "initialGainOrLoss is not present in draftReturn" in {
           val draftReturn      = sample[DraftSingleDisposalReturn].copy(initialGainOrLoss = None)
-          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn                = draftReturn, subscribedDetails = generateIndividualSubscribedDetails())
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -107,9 +111,11 @@ class InitialGainOrLossControllerSpec
             messageFromMessageKey(
               "initialGainOrLoss.title"
             ), { doc =>
-              doc.select(".govuk-caption-xl").html()  should include("Initial gain or loss")
-              doc.select("#initialGainOrLoss").html() should include("Did you make an initial gain or loss?")
-              doc.select("#back").attr("href")        shouldBe returns.routes.TaskListController.taskList().url
+              doc.select(".govuk-caption-xl").html() should include("Initial gain or loss")
+              doc.select("#initialGainOrLoss").html() should include(
+                messageFromMessageKey(s"initialGainOrLoss.title")
+              )
+              doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
                 .submitInitialGainOrLoss()
                 .url
@@ -124,35 +130,85 @@ class InitialGainOrLossControllerSpec
         "initialGainOrLoss is present in returnDraft" in {
           val draftReturn = sample[DraftSingleDisposalReturn]
             .copy(initialGainOrLoss = Some(AmountInPence(300L)))
-          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturn)
-              )
-            )
-          }
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "initialGainOrLoss.title"
-            ), { doc =>
-              doc.select(".govuk-caption-xl").html()                          should include("Initial gain or loss")
-              doc.select("#initialGainOrLoss").html()                         should include("Did you make an initial gain or loss?")
-              doc.select("#initialGainOrLoss-0-content > div > label").text() should be("Initial gain amount")
-              doc.select("#initialGainOrLoss-1-content > div > label").text() should be("Initial loss amount")
-              doc.select("#back").attr("href")                                shouldBe routes.InitialGainOrLossController.checkYourAnswers().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
-                .submitInitialGainOrLoss()
-                .url
-            }
+          val fillingOutReturn      = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+          val trustFillingOutReturn = fillingOutReturn.copy(subscribedDetails   = generateTrustSubscribedDetails())
+          val individualFillingOutReturn = fillingOutReturn.copy(
+            subscribedDetails = generateIndividualSubscribedDetails(),
+            draftReturn       = draftReturn.copy(triageAnswers = getTriageAnswersWithSelf())
           )
+          val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
+            draftReturn.copy(triageAnswers = getTriageAnswersWithPersonalRepresentative())
+          )
+          val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
+            draftReturn.copy(triageAnswers = getTriageAnswersWithCapacitor())
+          )
+
+          val testData = List(
+            ("", individualFillingOutReturn, false),
+            (".trust", trustFillingOutReturn, false),
+            (".personalRep", personalRepresentativeFillingOutReturn, false),
+            (".capacitor", capacitorFillingOutReturn, false),
+            (".agent", individualFillingOutReturn, true)
+          )
+          testData.map(keyWithReturn => test(keyWithReturn._1, keyWithReturn._2, keyWithReturn._3))
         }
       }
 
+      def test(key: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean) = {
+        val session =
+          if (isAgent) SessionData.empty.copy(userType = Some(UserType.Agent), journeyStatus = Some(fillingOutReturn))
+          else
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            session
+          )
+        }
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(
+            s"initialGainOrLoss.title$key"
+          ), { doc =>
+            doc.select(".govuk-caption-xl").html() should include("Initial gain or loss")
+            doc.select("#initialGainOrLoss").html() should include(
+              messageFromMessageKey(s"initialGainOrLoss.title$key")
+            )
+            doc.select("#initialGainOrLoss-0-content > div > label").text() should be("Initial gain amount")
+            doc.select("#initialGainOrLoss-1-content > div > label").text() should be("Initial loss amount")
+            doc.select("#back").attr("href")                                shouldBe routes.InitialGainOrLossController.checkYourAnswers().url
+            doc.select("#content > article > form > details > div> ol > li:nth-child(2)").text() should include(
+              messageFromMessageKey(s"initialGainOrLoss.details.li2$key")
+            )
+            doc.select("#content > article > form > details > div> p").text() should startWith(
+              messageFromMessageKey(s"initialGainOrLoss.details.olTitle$key")
+            )
+            doc.select("#initialGainOrLoss-form-hint").text() should be(messageFromMessageKey(s"initialGainOrLoss.helpText$key"))
+            doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
+              .submitInitialGainOrLoss()
+              .url
+          }
+        )
+      }
     }
+    def generateTrustSubscribedDetails() =
+      sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
+
+    def generateIndividualSubscribedDetails() =
+      sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+
+    def getTriageAnswersWithPersonalRepresentative() =
+      sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative))
+
+    def getTriageAnswersWithCapacitor() =
+      sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor))
+
+    def getTriageAnswersWithSelf() =
+      sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
 
     "submitting initial gain or loss" must {
 
@@ -209,21 +265,50 @@ class InitialGainOrLossControllerSpec
       }
 
       "show a form error" when {
+        val draftReturn = sample[DraftSingleDisposalReturn]
+          .copy(initialGainOrLoss = Some(AmountInPence(300L)))
+
+        val fillingOutReturn      = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val trustFillingOutReturn = fillingOutReturn.copy(subscribedDetails   = generateTrustSubscribedDetails())
+        val individualFillingOutReturn = fillingOutReturn.copy(
+          subscribedDetails = generateIndividualSubscribedDetails(),
+          draftReturn       = draftReturn.copy(triageAnswers = getTriageAnswersWithSelf())
+        )
+        val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
+          draftReturn.copy(triageAnswers = getTriageAnswersWithPersonalRepresentative())
+        )
+        val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
+          draftReturn.copy(triageAnswers = getTriageAnswersWithCapacitor())
+        )
+
+        val testData = List(
+          ("", individualFillingOutReturn, false),
+          (".trust", trustFillingOutReturn, false),
+          (".personalRep", personalRepresentativeFillingOutReturn, false),
+          (".capacitor", capacitorFillingOutReturn, false),
+          (".agent", individualFillingOutReturn, true)
+        )
 
         def checkIfValueExistsForKey(expectedErrorMessageKey: String) = {
           (messages(expectedErrorMessageKey) === expectedErrorMessageKey) shouldBe false
           messages(expectedErrorMessageKey).trim().isEmpty                shouldBe false
         }
 
-        def testFormError(
-          data: (String, String)*
-        )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
+        def testFormError(key: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean, data: (String, String)*)(
+          expectedErrorMessageKey: String,
+          errorArgs: String*
+        )(pageTitleKey: String, titleArgs: String*)(
           performAction: Seq[(String, String)] => Future[Result]
         ): Unit = {
 
           checkIfValueExistsForKey(expectedErrorMessageKey)
 
-          val session = sessionWithState(None)._1
+          val session =
+            if (isAgent) SessionData.empty.copy(userType = Some(UserType.Agent), journeyStatus = Some(fillingOutReturn))
+            else
+              SessionData.empty.copy(
+                journeyStatus = Some(fillingOutReturn)
+              )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -242,42 +327,58 @@ class InitialGainOrLossControllerSpec
           )
         }
 
-        def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(
+        def test(key: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean, data: (String, String)*)(
+          expectedErrorKey: String
+        ): Unit =
+          testFormError(key, fillingOutReturn, isAgent, data: _*)(
             expectedErrorKey
-          )("initialGainOrLoss.title")(performAction)
+          )(s"initialGainOrLoss.title$key")(performAction)
 
         "no option is selected" in {
-          test(
-            "initialGainOrLoss" -> "",
-            "loss"              -> "",
-            "gain"              -> ""
-          )("initialGainOrLoss.error.required")
+          testData.map(keyWithReturn =>
+            test(
+              keyWithReturn._1,
+              keyWithReturn._2,
+              keyWithReturn._3,
+              "initialGainOrLoss" -> "",
+              "loss"              -> "",
+              "gain"              -> ""
+            )(s"initialGainOrLoss${keyWithReturn._1}.error.required")
+          )
         }
 
         "the amount of gain is invalid" in {
-          amountOfMoneyErrorScenarios("gain").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data = ("initialGainOrLoss" -> "0") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+          testData.map(keyWithReturn => {
+            amountOfMoneyErrorScenarios("gain").foreach { scenario =>
+              withClue(s"For $scenario: ") {
+                val data = ("initialGainOrLoss" -> "0") :: scenario.formData
+                test(keyWithReturn._1,
+                  keyWithReturn._2,
+                  keyWithReturn._3, data: _*)(scenario.expectedErrorMessageKey)
+              }
             }
-          }
+          })
         }
 
         "the amount of loss is invalid" in {
-          amountOfMoneyErrorScenarios("loss").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data = ("initialGainOrLoss" -> "1") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+          testData.map(keyWithReturn => {
+            amountOfMoneyErrorScenarios("loss").foreach { scenario =>
+              withClue(s"For $scenario: ") {
+                val data = ("initialGainOrLoss" -> "1") :: scenario.formData
+                test(keyWithReturn._1,
+                  keyWithReturn._2,
+                  keyWithReturn._3, data: _*)(scenario.expectedErrorMessageKey)
+              }
             }
-          }
+          })
         }
 
         "the amount of gain is zero" in {
-          test(
-            "initialGainOrLoss" -> "0",
-            "gain"              -> "0"
-          )("gain.error.tooSmall")
+          testData.map(keyWithReturn => {
+            test(keyWithReturn._1,
+              keyWithReturn._2,
+              keyWithReturn._3, "initialGainOrLoss" -> "0", "gain" -> "0")("gain.error.tooSmall")
+          })
         }
       }
 
