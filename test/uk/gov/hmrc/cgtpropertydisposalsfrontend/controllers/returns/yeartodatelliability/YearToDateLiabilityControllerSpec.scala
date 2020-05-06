@@ -34,7 +34,6 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.UserTypeDisplay
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorScenarios, AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -2611,7 +2610,7 @@ class YearToDateLiabilityControllerSpec
             checkPageIsDisplayed(
               result,
               messageFromMessageKey("ytdLiability.cya.title"),
-              doc => validateNonCalculatedYearToDateLiabilityPage(completeAnswers, doc, Some(UserType.Individual))
+              doc => validateNonCalculatedYearToDateLiabilityPage(completeAnswers, doc, Some(UserType.Individual), None)
             )
 
           "the user has just answered all the questions in the section and all updates are successful" in {
@@ -4390,12 +4389,19 @@ object YearToDateLiabilityControllerSpec extends Matchers {
   def validateNonCalculatedYearToDateLiabilityPage(
     answers: CompleteNonCalculatedYTDAnswers,
     doc: Document,
-    userType: Option[UserType]
+    userType: Option[UserType],
+    individualUserType: Option[IndividualUserType]
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    val userKey = userType match {
-      case Some(UserType.Agent)        => ".agent"
-      case Some(UserType.Organisation) => ".trust"
-      case _                           => ""
+    val userKey = individualUserType match {
+      case Some(PersonalRepresentative) => ".personalRep"
+      case Some(Capacitor)              => ".capacitor"
+      case _ =>
+        userType match {
+          case Some(UserType.Individual)   => ""
+          case Some(UserType.Organisation) => ".trust"
+          case Some(UserType.Agent)        => ".agent"
+          case _                           => ""
+        }
     }
     if (answers.taxableGainOrLoss < AmountInPence.zero) {
       doc.select("#taxableGainOrLossAnswer-answer").text shouldBe messages(s"taxableGainOrLoss$userKey.loss.label")

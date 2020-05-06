@@ -1020,12 +1020,11 @@ object CheckAllAnswersAndSubmitControllerSpec {
         userType.contains(UserType.Agent),
         individualUserType
       )
+      completeReturn.yearToDateLiabilityAnswers.fold(
+        validateNonCalculatedYearToDateLiabilityPage(_, doc, userType, Some(individualUserType)),
+        validateCalculatedYearToDateLiabilityPage(_, doc)
+      )
     }
-
-    completeReturn.yearToDateLiabilityAnswers.fold(
-      validateNonCalculatedYearToDateLiabilityPage(_, doc, userType),
-      validateCalculatedYearToDateLiabilityPage(_, doc)
-    )
   }
 
   def validateMultipleDisposalsCheckAllYourAnswersSections(
@@ -1057,9 +1056,14 @@ object CheckAllAnswersAndSubmitControllerSpec {
         userType.contains(UserType.Agent),
         individualUserType
       )
+      validateNonCalculatedYearToDateLiabilityPage(
+        completeReturn.yearToDateLiabilityAnswers,
+        doc,
+        userType,
+        Some(individualUserType)
+      )
     }
 
-    validateNonCalculatedYearToDateLiabilityPage(completeReturn.yearToDateLiabilityAnswers, doc, userType)
   }
 
 }
