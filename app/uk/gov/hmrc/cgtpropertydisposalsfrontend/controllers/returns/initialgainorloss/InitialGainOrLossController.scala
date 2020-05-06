@@ -124,10 +124,12 @@ class InitialGainOrLossController @Inject() (
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _, answers) =>
+    withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answers) =>
+      val isATrust           = journeyStatus.subscribedDetails.isATrust
+      val representativeType = draftSingleDisposalReturn.triageAnswers.representativeType()
       answers match {
         case Some(completeInitialGainOrLossAnswers) =>
-          Ok(checkYourAnswersPage(completeInitialGainOrLossAnswers))
+          Ok(checkYourAnswersPage(completeInitialGainOrLossAnswers, isATrust, representativeType))
 
         case None =>
           Redirect(routes.InitialGainOrLossController.enterInitialGainOrLoss())
@@ -172,13 +174,6 @@ object InitialGainOrLossController {
 
     val isAgent = request.userType.contains(UserType.Agent)
 
-    val userKey =
-      if (representativeType.exists(_.isLeft)) ".personalRep"
-      else if (isAgent) ".agent"
-      else if (isATrust) ".trust"
-      else if (representativeType.exists(_.isRight)) ".capacitor"
-      else ""
-
     val (outerId, gainId, lossId) = ("initialGainOrLoss", "gain", "loss")
 
     def innerOption(id: String): InnerOption[BigDecimal] =
@@ -197,7 +192,7 @@ object InitialGainOrLossController {
           }
       }
 
-    val formatter = ConditionalRadioUtils.formatter(s"initialGainOrLoss", Some(s"initialGainOrLoss$userKey"))(
+    val formatter = ConditionalRadioUtils.formatter(s"initialGainOrLoss")(
       List(
         Left(innerOption(gainId)),
         Left(innerOption(lossId).map(_ * -1)),

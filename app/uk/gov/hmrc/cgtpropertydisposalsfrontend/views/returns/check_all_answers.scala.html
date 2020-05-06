@@ -97,7 +97,7 @@
 
      @s.initialGainOrLoss.map{ initialGainOrLoss =>
       <h2 class="heading-medium">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
-     @initialGainOrLossSummary(initialGainOrLoss)
+     @initialGainOrLossSummary(initialGainOrLoss, isATrust, representativeType)
      }
 
      <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>

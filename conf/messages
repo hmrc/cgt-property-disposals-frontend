@@ -2313,10 +2313,10 @@ assetTypeNotYetImplemented.h2=What you’ll need to do next
 assetTypeNotYetImplemented.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Captial Gains Tax on UK property or land form</a>.
 
 initialGainOrLoss.title=Did you make an initial gain or loss?
-initialGainOrLoss.title.agent=Did your client make an initial gain or loss?
-initialGainOrLoss.title.trust=Did the trust make an initial gain or loss?
-initialGainOrLoss.title.capacitor=Did the person make an initial gain or loss?
-initialGainOrLoss.title.personalRep=Was an initial gain or loss made?
+initialGainOrLoss.agent.title=Did your client make an initial gain or loss?
+initialGainOrLoss.trust.title=Did the trust make an initial gain or loss?
+initialGainOrLoss.capacitor.title=Did the person make an initial gain or loss?
+initialGainOrLoss.personalRep.title=Was an initial gain or loss made?
 initialGainOrLoss.caption=Initial gain or loss
 initialGainOrLoss.error.required=Select if you made a gain, loss, or no gain or loss
 initialGainOrLoss.agent.error.required=Select if your client made a gain, loss, or no gain or loss
@@ -2330,38 +2330,38 @@ initialGainOrLoss.gain.label=Gain
 initialGainOrLoss.loss.label=Loss
 initialGainOrLoss.details.summary=How to work out your initial gain or loss
 initialGainOrLoss.helpText=If you made an initial gain or loss, you’ll need to enter the amount.
-initialGainOrLoss.helpText.agent=If your client made an initial gain or loss, you’ll need to enter the amount.	
-initialGainOrLoss.helpText.trust=If the trust made an initial gain or loss, you’ll need to enter the amount.
-initialGainOrLoss.helpText.capacitor=If the person made an initial gain or loss, you’ll need to enter the amount.
-initialGainOrLoss.helpText.personalRep=If the person made an initial gain or loss, you’ll need to enter the amount
+initialGainOrLoss.agent.helpText=If your client made an initial gain or loss, you’ll need to enter the amount.	
+initialGainOrLoss.trust.helpText=If the trust made an initial gain or loss, you’ll need to enter the amount.
+initialGainOrLoss.capacitor.helpText=If the person made an initial gain or loss, you’ll need to enter the amount.
+initialGainOrLoss.personalRep.helpText=If the person made an initial gain or loss, you’ll need to enter the amount
 
 initialGainOrLoss.cya.title=Check your answers
 
 initialGainOrLoss.details.olTitle=To work out your initial gain:
-initialGainOrLoss.details.olTitle.agent=To work out your client’s initial gain:
-initialGainOrLoss.details.olTitle.trust=To work out the trust’s initial gain:
-initialGainOrLoss.details.olTitle.capacitor=To work out the person’s initial gain:
-initialGainOrLoss.details.olTitle.personalRep=To work out the person’s initial gain:
+initialGainOrLoss.agent.details.olTitle=To work out your client’s initial gain:
+initialGainOrLoss.trust.details.olTitle=To work out the trust’s initial gain:
+initialGainOrLoss.capacitor.details.olTitle=To work out the person’s initial gain:
+initialGainOrLoss.personalRep.details.olTitle=To work out the person’s initial gain:
 
 initialGainOrLoss.details.li1=1. Subtract the amount you purchased, or acquired, the property for from the amount you sold, or disposed of, it for.
 initialGainOrLoss.details.li2=2. Subtract any money you spent on making improvements to the property.
-initialGainOrLoss.details.li2.agent=2. Subtract any money your client spent on making improvements to the property.
-initialGainOrLoss.details.li2.trust=2. Subtract any money the trust spent on making improvements to the property.
-initialGainOrLoss.details.li2.capacitor=2. Subtract any money the person spent on making improvements to the property.
-initialGainOrLoss.details.li2.personalRep=2. Subtract any money the person spent on making improvements to the property.
+initialGainOrLoss.agent.details.li2=2. Subtract any money your client spent on making improvements to the property.
+initialGainOrLoss.trust.details.li2=2. Subtract any money the trust spent on making improvements to the property.
+initialGainOrLoss.capacitor.details.li2=2. Subtract any money the person spent on making improvements to the property.
+initialGainOrLoss.personalRep.details.li2=2. Subtract any money the person spent on making improvements to the property.
 
 initialGainOrLoss.details.li3=3. Subtract any money you spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
-initialGainOrLoss.details.li3.agent=3. Subtract any money your client spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
-initialGainOrLoss.details.li3.trust=3. Subtract any money the trust spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
-initialGainOrLoss.details.li3.capacitor=3. Subtract any money the person spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
-initialGainOrLoss.details.li3.personalRep=3. Subtract any money the person spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
+initialGainOrLoss.agent.details.li3=3. Subtract any money your client spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
+initialGainOrLoss.trust.details.li3=3. Subtract any money the trust spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
+initialGainOrLoss.capacitor.details.li3=3. Subtract any money the person spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
+initialGainOrLoss.personalRep.details.li3=3. Subtract any money the person spent on disposing of the property, such as on legal fees or for estate agents, as well as any acquisition costs.
 initialGainOrLoss.details.li4=4. This will give you the amount of the initial gain or loss.
 initialGainOrLoss.details.example.title=Example
 initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when it was acquired was £120,000. You paid £5,000 in legal fees when you inherited the property. You spent £10,000 on making improvements to the property. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and real estate agent’s fees. This gave an initial gain of £10,000.
-initialGainOrLoss.details.example.details.agent=Your client inherited a property. The market value of the property when it was acquired was £120,000. Your client paid £5,000 in legal fees when they inherited the property. Your client spent £10,000 on making improvements to the property. After 10 years, your client sold the property for £150,000. Your client paid £5,000 for legal and real estate agent’s fees. This gave an initial gain of £10,000.
-initialGainOrLoss.details.example.details.trust=The trust inherited a property. The market value of the property when it was acquired was £120,000. The trust paid £5,000 in legal fees when it inherited the property. The trust spent £10,000 on making improvements to the property. After 10 years, the trust sold the property for £150,000. The trust paid £5,000 for legal and real estate agent’s fees. This gave an initial gain of £10,000.
-initialGainOrLoss.details.example.details.capacitor=The person inherited a property. The market value of the property when it was acquired was £120,000. The person paid £5,000 in legal fees when they inherited the property. The person spent £10,000 on making improvements to the property. After 10 years, the person sold the property for £150,000. The person paid £5,000 for legal and real estate agent’s fees. This gave an initial gain of £10,000.
-initialGainOrLoss.details.example.details.personalRep=The person inherited a property. The market value of the property when it was acquired was £120,000. The person paid £5,000 in legal fees when they inherited the property. The person spent £10,000 on making improvements to the property. After 10 years, the person sold the property for £150,000. The legal and real estate agent’s fees were £5,000. This gave an initial gain of £10,000.
+initialGainOrLoss.agent.details.example.details=Your client inherited a property. The market value of the property when it was acquired was £120,000. Your client paid £5,000 in legal fees when they inherited the property. Your client spent £10,000 on making improvements to the property. After 10 years, your client sold the property for £150,000. Your client paid £5,000 for legal and real estate agent’s fees. This gave an initial gain of £10,000.
+initialGainOrLoss.trust.details.example.details=The trust inherited a property. The market value of the property when it was acquired was £120,000. The trust paid £5,000 in legal fees when it inherited the property. The trust spent £10,000 on making improvements to the property. After 10 years, the trust sold the property for £150,000. The trust paid £5,000 for legal and real estate agent’s fees. This gave an initial gain of £10,000.
+initialGainOrLoss.capacitor.details.example.details=The person inherited a property. The market value of the property when it was acquired was £120,000. The person paid £5,000 in legal fees when they inherited the property. The person spent £10,000 on making improvements to the property. After 10 years, the person sold the property for £150,000. The person paid £5,000 for legal and real estate agent’s fees. This gave an initial gain of £10,000.
+initialGainOrLoss.personalRep.details.example.details=The person inherited a property. The market value of the property when it was acquired was £120,000. The person paid £5,000 in legal fees when they inherited the property. The person spent £10,000 on making improvements to the property. After 10 years, the person sold the property for £150,000. The legal and real estate agent’s fees were £5,000. This gave an initial gain of £10,000.
 
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
 initialGainOrLoss.summary.hint=Click on the link to change your answers

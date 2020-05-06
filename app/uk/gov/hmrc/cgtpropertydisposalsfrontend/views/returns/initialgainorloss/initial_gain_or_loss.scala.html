@@ -38,6 +38,7 @@
         unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
         radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
         details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
@@ -107,20 +108,29 @@
 
 
 @title = @{
-    messages(s"$key.title$userKey")
+    messages(s"$key$userKey.title")
 }
 
-@mainTemplate(title = title, userType = request.userType) {@backLinkComponent(backLink)@caption(messages("initialGainOrLoss.caption"))@if(hasErrors) {
-    @errorSummary(form)
-}@formWrapper(routes.InitialGainOrLossController.submitInitialGainOrLoss(), 'novalidate -> "novalidate") {
+@mainTemplate(title = title, userType = request.userType) {
+    @backLinkComponent(backLink)
+    @caption(messages("initialGainOrLoss.caption"))
+
+    @if(hasErrors) {
+        @errorSummary(form, form.errors.headOption.map(x => x.key match {
+            case "initialGainOrLoss" => s"${x.key}$userKey"
+            case _ => x.key
+        }))
+    }
+    @formWrapper(routes.InitialGainOrLossController.submitInitialGainOrLoss(), 'novalidate -> "novalidate") {
     @radioGroupConditional(
         fieldId = key,
         label = pageHeading(title),
         selected = selectedIndex,
         hasErrors = false,
         options = options,
-        helpText = Some(Html(messages(s"initialGainOrLoss.helpText$userKey"))))
-    @details(messages(s"$key.details.summary"), Html(s"<p>${messages(s"$key.details.olTitle$userKey")}<ol><li>${messages(s"$key.details.li1")}</li><li>${messages(s"$key.details.li2$userKey")}</li><li>${messages(s"$key.details.li3$userKey")}</li><li>${messages(s"$key.details.li4")}</li></ol></p><p><strong class='bold'>${messages(s"$key.details.example.title")}</strong><br>${messages(s"$key.details.example.details$userKey")}</br></p>"))
+        customErrorKey = form.error(key).map(e => s"$key$userKey${e.message}"),
+        helpText = Some(Html(messages(s"initialGainOrLoss$userKey.helpText"))))
+    @details(messages(s"$key.details.summary"), Html(s"<p>${messages(s"$key$userKey.details.olTitle")}<ol><li>${messages(s"$key.details.li1")}</li><li>${messages(s"$key$userKey.details.li2")}</li><li>${messages(s"$key$userKey.details.li3")}</li><li>${messages(s"$key.details.li4")}</li></ol></p><p><strong class='bold'>${messages(s"$key.details.example.title")}</strong><br>${messages(s"$key$userKey.details.example.details")}</br></p>"))
     @submitButton(messages("button.saveAndContinue"))
 }
 }
