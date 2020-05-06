@@ -24,6 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{ PersonalRepresentative, Capacitor }
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -32,13 +33,22 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteNonCalculatedYTDAnswers, showFiles: Boolean, isMultiple: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(
+        answers: CompleteNonCalculatedYTDAnswers,
+        showFiles: Boolean,
+        isMultiple: Boolean,
+        isATrust: Boolean,
+        representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
-@userKey = @{request.userType match {
-  case Some(UserType.Agent) => ".agent"
-  case Some(UserType.Organisation) => ".trust"
-  case _ => ""
-}}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{
+  if (representativeType.exists(_.isLeft)) ".personalRep"
+  else if (representativeType.exists(_.isRight)) ".capacitor"
+  else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+      else ""
+}
 
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
 

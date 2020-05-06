@@ -34,6 +34,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.UserTypeDisplay
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorScenarios, AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -48,8 +49,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
@@ -96,12 +99,18 @@ class YearToDateLiabilityControllerSpec
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  def userMessageKey(userType: UserType): String = userType match {
-    case UserType.Individual   => ""
-    case UserType.Organisation => ".trust"
-    case UserType.Agent        => ".agent"
-    case other                 => sys.error(s"User type '$other' not handled")
-  }
+  def userMessageKey(userType: UserType, individualUserType: Option[IndividualUserType] = None): String =
+    individualUserType match {
+      case Some(PersonalRepresentative) => ".personalRep"
+      case Some(Capacitor)              => ".capacitor"
+      case _ =>
+        userType match {
+          case UserType.Individual   => ""
+          case UserType.Organisation => ".trust"
+          case UserType.Agent        => ".agent"
+          case other                 => sys.error(s"User type '$other' not handled")
+        }
+    }
 
   def multipleMessageKey(isMultiple: Boolean): String = if (isMultiple) ".multiple" else ""
 
@@ -114,6 +123,17 @@ class YearToDateLiabilityControllerSpec
     case UserType.Organisation => Left(sample[TrustName])
     case _                     => Right(sample[IndividualName])
   }
+
+  def setIndividualUserType(
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+  ): Option[IndividualUserType] =
+    if (representativeType.exists(_.isLeft)) {
+      Some(PersonalRepresentative)
+    } else if (representativeType.exists(_.isRight)) {
+      Some(Capacitor)
+    } else {
+      Some(Self)
+    }
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
@@ -130,11 +150,12 @@ class YearToDateLiabilityControllerSpec
     wasUkResident: Boolean,
     reliefDetailsAnswers: Option[ReliefDetailsAnswers] = Some(
       sample[CompleteReliefDetailsAnswers].copy(otherReliefs = None)
-    )
+    ),
+    individualUserType: Option[IndividualUserType] = Some(IndividualUserType.Self)
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
-        individualUserType         = Some(IndividualUserType.Self),
+        individualUserType         = individualUserType,
         hasConfirmedSingleDisposal = true,
         disposalMethod             = Some(sample[DisposalMethod]),
         assetType                  = Some(AssetType.Residential),
@@ -142,6 +163,12 @@ class YearToDateLiabilityControllerSpec
         countryOfResidence         = if (wasUkResident) Some(Country.uk) else Some(sample[Country]),
         disposalDate               = disposalDate
       ),
+      representeeAnswers = individualUserType match {
+        case Some(PersonalRepresentative) =>
+          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
+        case Some(Capacitor) => Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+        case _               => None
+      },
       reliefDetailsAnswers       = reliefDetailsAnswers,
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
@@ -173,10 +200,12 @@ class YearToDateLiabilityControllerSpec
   def sessionWithMultipleDisposalsState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     userType: UserType,
-    wasUkResident: Boolean
+    wasUkResident: Boolean,
+    individualUserType: Option[IndividualUserType] = None
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
       triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+        individualUserType = individualUserType,
         countryOfResidence = if (wasUkResident) Country.uk else sample[Country]
       ),
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
@@ -293,7 +322,8 @@ class YearToDateLiabilityControllerSpec
                 Some(sample[DisposalDate]),
                 UserType.Individual,
                 wasUkResident = true,
-                Some(completeReliefDetailsAnswersWithNoOtherReliefs)
+                Some(completeReliefDetailsAnswersWithNoOtherReliefs),
+                None
               )._1
             )
           }
@@ -322,7 +352,8 @@ class YearToDateLiabilityControllerSpec
                 Some(sample[DisposalDate]),
                 UserType.Agent,
                 wasUkResident = true,
-                Some(completeReliefDetailsAnswersWithNoOtherReliefs)
+                Some(completeReliefDetailsAnswersWithNoOtherReliefs),
+                None
               )._1
             )
           }
@@ -330,6 +361,66 @@ class YearToDateLiabilityControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("estimatedIncome.agent.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.YearToDateLiabilityController
+                .estimatedIncomeSubmit()
+                .url
+            }
+          )
+
+        }
+
+        "a capacitor user has not answered the question before" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                None,
+                Some(sample[DisposalDate]),
+                UserType.Individual,
+                wasUkResident = true,
+                Some(completeReliefDetailsAnswersWithNoOtherReliefs),
+                Some(Capacitor)
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("estimatedIncome.capacitor.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.YearToDateLiabilityController
+                .estimatedIncomeSubmit()
+                .url
+            }
+          )
+
+        }
+
+        "a personal representative user has not answered the question before" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithSingleDisposalState(
+                None,
+                Some(sample[DisposalDate]),
+                UserType.Individual,
+                wasUkResident = true,
+                Some(completeReliefDetailsAnswersWithNoOtherReliefs),
+                Some(PersonalRepresentative)
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("estimatedIncome.personalRep.title"), { doc =>
               doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
               doc
                 .select("#content > article > form")

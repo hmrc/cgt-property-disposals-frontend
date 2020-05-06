@@ -1759,27 +1759,43 @@ taxableGainOrLoss.agent.title=Did your client make an overall gain or loss on th
 taxableGainOrLoss.agent.multiple.title=Did your client make an overall gain or loss on the property sales or disposals in this return?
 taxableGainOrLoss.trust.title=Did the trust make an overall gain or loss on the property sale or disposal?
 taxableGainOrLoss.trust.multiple.title=Did the trust make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.capacitor.title=Did the person make an overall gain or loss on the property sale or disposal?
+taxableGainOrLoss.capacitor.multiple.title=Did the person make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.personalRep.title=Was an overall gain or loss made on the property sale or disposal?
+taxableGainOrLoss.personalRep.multiple.title=Was an overall gain or loss made on the property sales or disposals in this return?
 taxableGainOrLoss.helpText=To work out if you made an overall gain or loss, you’ll need to take your initial gain or loss and subtract any reliefs, losses, or other allowances you are entitled to.
 taxableGainOrLoss.agent.helpText=To work out if your client made an overall gain or loss, you’ll need to take your client’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
 taxableGainOrLoss.trust.helpText=To work out if the trust made an overall gain or loss, you’ll need to take the trust’s initial gain or loss and subtract any reliefs, losses, or other allowances it is entitled to.
+taxableGainOrLoss.capacitor.helpText=To work out if the person made an overall gain or loss, you’ll need to take the person’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
+taxableGainOrLoss.personalRep.helpText=To work out if there was an overall gain or loss, you’ll need to take the initial gain or loss and subtract any reliefs, losses, or other allowances the person was entitled to.
 taxableGainOrLoss.error.required=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.multiple.error.required=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.agent.error.required=Select yes if your client made an overall gain on the property sale or disposal
 taxableGainOrLoss.agent.multiple.error.required=Select yes if your client made an overall gain on the property sales or disposals in this return
 taxableGainOrLoss.trust.error.required=Select yes if the trust made an overall gain on the property sale or disposal
 taxableGainOrLoss.trust.multiple.error.required=Select yes if the trust made an overall gain on the property sales or disposals in this return
+taxableGainOrLoss.capacitor.error.required=Select yes if the person made an overall gain
+taxableGainOrLoss.capacitor.multiple.error.required=Select yes if the person made an overall gain
+taxableGainOrLoss.personalRep.error.required=Select yes if the person made an overall gain
+taxableGainOrLoss.personalRep.multiple.error.required=Select yes if the person made an overall gain
 taxableGainOrLoss.error.invalid=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.error.multiple.invalid=Select yes if you made an overall gain on the property sales or disposals in this return
 taxableGainOrLoss.agent.error.invalid=Select yes if your client made an overall gain on the property sale or disposal
 taxableGainOrLoss.agent.multiple.error.invalid=Select yes if your client made an overall gain on the property sales or disposals in this return
 taxableGainOrLoss.trust.error.invalid=Select yes if the trust made an overall gain on the property sale or disposal
 taxableGainOrLoss.trust.multiple.error.invalid=Select yes if the trust made an overall gain on the property sales or disposals in this return
+taxableGainOrLoss.capacitor.error.invalid=Select yes if the person made an overall gain
+taxableGainOrLoss.capacitor.multiple.error.invalid=Select yes if the person made an overall gain
+taxableGainOrLoss.personalRep.error.invalid=Select yes if the person made an overall gain
+taxableGainOrLoss.personalRep.multiple.error.invalid=Select yes if the person made an overall gain
 
 taxableGainOrLoss.cyaChange=if an overall gain or loss was made on the property sale or disposal
 
 taxableGainOrLoss.gain.label=Yes, I made an overall gain
 taxableGainOrLoss.agent.gain.label=Yes, my client made an overall gain
 taxableGainOrLoss.trust.gain.label=Yes, the trust made an overall gain
+taxableGainOrLoss.capacitor.gain.label=Yes, the person made an overall gain
+taxableGainOrLoss.personalRep.gain.label=Yes, the person made an overall gain
 
 taxableGain.label=Amount of overall gain
 taxableGain.error.required=Enter the amount of overall gain
@@ -1788,65 +1804,117 @@ taxableGain.agent.error.required=Enter the amount of overall gain
 taxableGain.agent.multiple.error.required=Enter the amount of overall gain
 taxableGain.trust.error.required=Enter the amount of overall gain
 taxableGain.trust.multiple.error.required=Enter the amount of overall gain
+taxableGain.capacitor.error.required=Enter the amount of overall gain
+taxableGain.capacitor.multiple.error.required=Enter the amount of overall gain
+taxableGain.personalRep.error.required=Enter the amount of overall gain
+taxableGain.personalRep.multiple.error.required=Enter the amount of overall gain
+
 taxableGain.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.agent.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.agent.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.trust.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.trust.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.capacitor.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.capacitor.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.personalRep.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.personalRep.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+
 taxableGain.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.agent.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.agent.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.trust.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.trust.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.capacitor.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.capacitor.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRep.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRep.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+
 taxableGain.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.agent.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.agent.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.trust.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.trust.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+axableGain.capacitor.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.capacitor.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRep.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRep.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+
 taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.agent.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.agent.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.trust.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.trust.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.capacitor.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.capacitor.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.personalRep.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.personalRep.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
 taxableGainOrLoss.trust.loss.label=No, the trust made an overall loss
+taxableGainOrLoss.capacitor.loss.label=No, the person made an overall loss
+taxableGainOrLoss.personalRep.loss.label=No, the person made an overall loss
+
 netLoss.label=Amount of overall loss
+
 netLoss.error.required=Enter the amount of overall loss
 netLoss.multiple.error.required=Enter the amount of overall loss
 netLoss.agent.error.required=Enter the amount of overall loss
 netLoss.agent.multiple.error.required=Enter the amount of overall loss
 netLoss.trust.error.required=Enter the amount of overall loss
 netLoss.trust.multiple.error.required=Enter the amount of overall loss
+netLoss.capacitor.error.required=Enter the amount of overall loss
+netLoss.capacitor.multiple.error.required=Enter the amount of overall loss
+netLoss.personalRep.error.required=Enter the amount of overall loss
+netLoss.personalRep.multiple.error.required=Enter the amount of overall loss
+
 netLoss.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.agent.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.agent.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.trust.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.trust.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.capacitor.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.capacitor.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.personalRep.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.personalRep.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+
 netLoss.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.agent.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.agent.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.trust.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.trust.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.capacitor.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.capacitor.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRep.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRep.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+
 netLoss.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.agent.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.agent.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.trust.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.trust.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.capacitor.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.capacitor.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRep.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRep.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+
 netLoss.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.agent.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.agent.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.trust.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.trust.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.capacitor.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.capacitor.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.personalRep.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.personalRep.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
@@ -1856,53 +1924,98 @@ ytdLiability.caption=Tax amount owed
 
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
 estimatedIncome.agent.title=What does your client believe their gross income will be in this tax year?
+estimatedIncome.capacitor.title=What does the person believe their gross income will be in this tax year?
+estimatedIncome.personalRep.title=What was the person’s gross income for this tax year?
 estimatedIncome.non-resident.title=What do you believe your gross income liable to UK tax will be in this tax year?
 estimatedIncome.agent.non-resident.title=What does your client believe their gross income liable to UK tax will be in this tax year?
+estimatedIncome.capacitor.non-resident.title=What does the person believe their gross income liable to UK tax will be in this tax year?
+estimatedIncome.personalRep.non-resident.title=What was the person’s gross income liable to UK tax for this tax year?
 estimatedIncome.helpText=The amount should be your total income liable to UK income tax for the tax year {0} to {1}. It’s your gross income before any deductions, like tax or National Insurance.
 estimatedIncome.agent.helpText=The amount should be their income liable to UK income tax for the tax year {0} to {1}. It’s their gross income before any deductions, like tax or National Insurance.
+estimatedIncome.capacitor.helpText=The amount should be their income liable to UK income tax for the tax year {0} to {1}. It’s their gross income before any deductions, like tax or National Insurance.
+estimatedIncome.personalRep.helpText=The amount should be their income liable to UK income tax for the tax year {0} to {1}. It’s their gross income before any deductions, like tax or National Insurance.
 estimatedIncome.details.summary=What should not be included
 estimatedIncome.details.p1=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.agent.details.p1=Do not include the money they made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
+estimatedIncome.capacitor.details.p1=Do not include the money they made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
+estimatedIncome.personalRep.details.p1=Do not include the money they made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.error.required=Enter your estimated income liable for UK tax in this tax year
 estimatedIncome.agent.error.required=Enter what your client believes their gross income will be in this tax year
+estimatedIncome.capacitor.error.required=Enter what the person believes their gross income will be in this tax year
+estimatedIncome.personalRep.error.required=Enter the person’s gross income for this tax year
 estimatedIncome.non-resident.error.required=Enter estimated income liable to UK tax
 estimatedIncome.agent.non-resident.error.required=Enter estimated income liable to UK tax
+estimatedIncome.capacitor.non-resident.error.required=Enter what the person believes their gross income liable to UK tax will be in this tax year
+estimatedIncome.personalRep.non-resident.error.required=Enter the person’s gross income liable to UK tax for this tax year
 estimatedIncome.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
 estimatedIncome.agent.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
+estimatedIncome.capacitor.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
+estimatedIncome.personalRep.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
 estimatedIncome.non-resident.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
 estimatedIncome.agent.non-resident.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
+estimatedIncome.capacitor.non-resident.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
+estimatedIncome.personalRep.non-resident.error.invalid=Estimated income must be an amount of money, like 160,000 or 23,040.50
 estimatedIncome.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.agent.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
+estimatedIncome.capacitor.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
+estimatedIncome.personalRep.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.non-resident.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.agent.non-resident.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
+estimatedIncome.capacitor.non-resident.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
+estimatedIncome.personalRep.non-resident.error.tooSmall=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.agent.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
+estimatedIncome.capacitor.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
+estimatedIncome.personalRep.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.non-resident.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.agent.non-resident.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
+estimatedIncome.capacitor.non-resident.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
+estimatedIncome.personalRep.non-resident.error.tooLarge=Estimated income must be an amount of money between 0 and 50,000,000,000
 estimatedIncome.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 estimatedIncome.agent.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+estimatedIncome.capacitor.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+estimatedIncome.personalRep.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 estimatedIncome.non-resident.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 estimatedIncome.agent.non-resident.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+estimatedIncome.capacitor.non-resident.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+estimatedIncome.personalRep.non-resident.error.tooManyDecimals=Estimated income must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 estimatedIncome.cyaChange=estimated gross income
+estimatedIncome.non-resident.cyaChange=estimated gross income liable to UK tax
 
 personalAllowance.title=What is your Personal Allowance for tax year {0} to {1}?
 personalAllowance.agent.title=What is your client’s Personal Allowance for tax year {0} to {1}?
+personalAllowance.capacitor.title=What is the person’s Personal Allowance for tax year {0} to {1}?
+personalAllowance.personalRep.title=What was the person’s Personal Allowance for tax year {0} to {1}?
 personalAllowance.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
 personalAllowance.agent.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>Your client’s Personal Allowance may be more than this if they receive Marriage Allowance or Blind Person’s Allowance. It will be less if their income is over {3}.
+personalAllowance.capacitor.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>The person’s Personal Allowance may be more than this if they receive Marriage Allowance or Blind Person’s Allowance. It will be less if their income is over {3}.
+personalAllowance.personalRep.helpText=We’ll use this amount to work out the rate of Capital Gains Tax that should be paid. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>The person’s Personal Allowance may be more than this if they received Marriage Allowance or Blind Person’s Allowance. It will be less if their income was over {3}.
 personalAllowance.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay.<br/><br/>You’ll need to check the double tax agreement for the country you are resident in and the UK. This will tell you if you are entitled to a Personal Allowance.
 personalAllowance.agent.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay.<br/><br/>You’ll need to check the double tax agreement for the country your client is resident in and the UK. This will tell you if they are entitled to a Personal Allowance.
+personalAllowance.capacitor.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay.<br/><br/>The person will need to check the double tax agreement for the country the person is resident in and the UK. This will tell the person if they are entitled to a Personal Allowance.
+personalAllowance.personalRep.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax that should be paid.<br/><br/>You will need to check the double tax agreement for the country the person was resident in and the UK. This will tell you if the person was entitled to a Personal Allowance.
 personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.agent.error.required=Enter your client’s Personal Allowance for the tax year
+personalAllowance.capacitor.error.required=Enter the person’s Personal Allowance for the tax year
+personalAllowance.personalRep.error.required=Enter the person’s Personal Allowance for the tax year
 personalAllowance.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
 personalAllowance.agent.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
+personalAllowance.capacitor.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
+personalAllowance.personalRep.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
 personalAllowance.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.agent.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
+personalAllowance.capacitor.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
+personalAllowance.personalRep.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.agent.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
+personalAllowance.capacitor.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
+personalAllowance.personalRep.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
 personalAllowance.agent.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
+personalAllowance.capacitor.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
+personalAllowance.personalRep.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
 
 personalAllowance.cyaChange=Personal Allowance
 
@@ -1911,6 +2024,8 @@ hasEstimatedDetails.helpText=If you estimated any amounts, you’ll need to prov
 hasEstimatedDetails.yes.content=You can confirm the amounts through this service. Or if you need to complete a Self Assessment tax return you can do it through your next return.
 hasEstimatedDetails.agent.yes.content=The amounts will need to be confirmed with HMRC when they become available. If your client needs to complete a Self Assessment tax return this can be done in their next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
+hasEstimatedDetails.capacitor.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the person needs to complete a Self Assessment tax return this can be done in their next Self Assessment return. If not, it can be done through this service.
+hasEstimatedDetails.personalRep.yes.content=The amounts will need to be confirmed with HMRC when they become available. If you need to complete a Self Assessment tax return for the person this can be done in through their Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
@@ -1926,6 +2041,10 @@ taxDue.gainAfterLosses=Gain after losses
 taxDue.taxableGain=Taxable gain
 taxDue.amountOfTaxDue=Capital Gains Tax due for this return
 taxDue.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
+taxDue.agent.helpText.p1=If your client agrees with these workings enter <strong class="bold">{0}</strong>.
+taxDue.trust.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
+taxDue.capacitor.helpText.p1=If the person agrees with these workings enter <strong class="bold">{0}</strong>.
+taxDue.personalRep.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
 taxDue.helpText.p2=If you want to enter a different amount you will be asked to upload a file later showing your workings.
 taxDue.helpText.p3=If the trust is for vulnerable beneficiaries, you’ll need to work out and enter the amount of tax due.
 taxDue.trustDetails.label=Help for trusts for vulnerable beneficiaries
@@ -1955,17 +2074,17 @@ calculator.total.initialGainOrLoss=Initial gain or loss
 calculator.privateResidenceRelief=Private Residence Relief
 calculator.lettingRelief=Letting Relief
 calculator.total.reliefs=Total reliefs
-calculator.reliefsLossIntro=You made an initial loss, this means we will only apply Private Residence Relief to reduce your loss.
+calculator.reliefsLossIntro=There is an initial loss, this means we will only apply Private Residence Relief to reduce the loss.
 
 calculator.total.gainOrLossAfterReliefs=Gain or loss after reliefs
 
 calculator.inYearLosses=Losses from this tax year
 calculator.total.gainAfterInYearLosses=Gain after losses from this tax year
-calculator.cannotUsePrevYearsLosses=You cannot use losses from previous tax years in this return. This is because you did not make a gain after applying losses from this tax year.
+calculator.cannotUsePrevYearsLosses=You cannot use losses from previous tax years in this return. This is because there is no gain after applying losses from this tax year.
 calculator.prevYearLosses=Losses from previous tax years
 calculator.total.gainAfterLosses=Gain after all losses
 
-calculator.cannotApplyAEA=You cannot use any of your Annual Exempt Amount. This is because you did not make a gain.
+calculator.cannotApplyAEA=You cannot use any of the Annual Exempt Amount. This is because there is no gain.
 calculator.annualExemptAmount=Amount of Annual Exempt Amount used
 calculator.total.taxableGain=Taxable gain
 
@@ -1973,8 +2092,7 @@ calculator.annualIncome=Gross annual income
 calculator.personalAllowance=Amount of Personal Allowance used
 calculator.total.taxableIncome=Taxable income
 
-calculator.incomeAboveThreshold=The amount of your taxable gain to be charged at basic rate is 0. This means all of your taxable gain will be charged at the higher rate. This is because your taxable income is higher than the UK threshold for basic rate tax of {0}.
-calculator.agent.incomeAboveThreshold=The amount of your client’s taxable gain to be charged at basic rate is 0. This means all of their taxable gain will be charged at the higher rate. This is because their taxable income is higher than the UK threshold for basic rate tax of {0}.
+calculator.incomeAboveThreshold=The amount of taxable gain to be charged at basic rate is 0. This means all of the taxable gain will be charged at the higher rate. This is because the taxable income is higher than the UK threshold for basic rate tax of {0}.
 
 calculator.trustRateInfo.p1=Most trusts disposing of this property type pay taxable gains at {0}.
 calculator.trustRateInfo.p2=Trusts for vulnerable beneficiaries get special tax treatment. If you’re a trustee of this type of trust you’ll need to work out the amount of tax due.
