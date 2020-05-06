@@ -40,6 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, M
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
@@ -87,6 +88,14 @@ class YearToDateLiabilityController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
+
+  def representativeType(
+    draftReturn: DraftReturn
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    draftReturn.fold(
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType()
+    )
 
   private def withFillingOutReturnAndYTDLiabilityAnswers(
     request: RequestWithSessionData[_]
@@ -391,7 +400,13 @@ class YearToDateLiabilityController @Inject() (
                   c => estimatedIncomeForm.fill(c.estimatedIncome.inPounds())
                 )
               )(
-                page = estimatedIncomePage(_, _, disposalDate, wasUkResident)
+                page = estimatedIncomePage(
+                  _,
+                  _,
+                  disposalDate,
+                  wasUkResident,
+                  representativeType(draftReturn)
+                )
               )(
                 requiredPreviousAnswer = _ => Some(()),
                 controllers.returns.routes.TaskListController.taskList()
@@ -416,7 +431,15 @@ class YearToDateLiabilityController @Inject() (
               commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
                 form = estimatedIncomeForm
               )(
-                page = { (form, backLink) => estimatedIncomePage(form, backLink, disposalDate, wasUkResident) }
+                page = { (form, backLink) =>
+                  estimatedIncomePage(
+                    form,
+                    backLink,
+                    disposalDate,
+                    wasUkResident,
+                    representativeType(draftReturn)
+                  )
+                }
               )(
                 requiredPreviousAnswer               = _ => Some(()),
                 redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
