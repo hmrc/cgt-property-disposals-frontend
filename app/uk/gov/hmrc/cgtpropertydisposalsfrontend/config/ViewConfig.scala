@@ -81,7 +81,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val equalityCommissionForNorthenIrelandUrl: String = getString("external-url.equality-commission-for-northen-ireland")
   val digitalAccessibilityCentretUrl: String         = getString("external-url.digital-accessibility-centre")
   val reportAccessibilityProblemUrl: String          = s"${getString("external-url.report-accessibility-problem")}?service=cgtpd"
-  val governmentGatewayUserIdAndPassword             = getString("external-url.government-gateway-user-id-and-password")
   val contactHmrc                                    = getString("external-url.contact-hmrc")
 
   val personalRepresentative = getString("external-url.personal-representative")
