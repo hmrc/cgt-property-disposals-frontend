@@ -114,9 +114,9 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
-      behave like displayEnterUkAddressPage(UserType.Organisation, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Organisation, None, performAction)
 
     }
 
@@ -163,9 +163,9 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, performAction)
-      behave like enterPostcodePage(UserType.Agent, performAction)
-      behave like enterPostcodePage(UserType.Organisation, performAction)
+      behave like enterPostcodePage(UserType.Individual, None, performAction)
+      behave like enterPostcodePage(UserType.Agent, None, performAction)
+      behave like enterPostcodePage(UserType.Organisation, None, performAction)
 
     }
 
@@ -192,18 +192,21 @@ class SubscribedChangeAddressControllerSpec
 
       behave like displaySelectAddress(
         UserType.Individual,
+        None,
         performAction,
         controllers.accounts.routes.AccountController.manageYourDetails()
       )
 
       behave like displaySelectAddress(
         UserType.Agent,
+        None,
         performAction,
         controllers.accounts.routes.AccountController.manageYourDetails()
       )
 
       behave like displaySelectAddress(
         UserType.Organisation,
+        None,
         performAction,
         controllers.accounts.routes.AccountController.manageYourDetails()
       )

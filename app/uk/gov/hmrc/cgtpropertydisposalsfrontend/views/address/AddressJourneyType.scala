@@ -20,7 +20,7 @@ import cats.Eq
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresenteeAnswers, RepresenteeContactDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers, RepresenteeContactDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, FillingOutReturnAddressJourney}
 
 sealed trait AddressJourneyType extends Product with Serializable
@@ -55,7 +55,10 @@ object AddressJourneyType {
 
   object Returns {
 
-    final case class FillingOutReturnAddressJourney(journey: FillingOutReturn) extends Returns
+    final case class FillingOutReturnAddressJourney(
+      journey: FillingOutReturn,
+      individualUserType: Option[IndividualUserType]
+    ) extends Returns
 
     final case class ChangingRepresenteeContactAddressJourney(
       journey: Either[StartingNewDraftReturn, FillingOutReturn],

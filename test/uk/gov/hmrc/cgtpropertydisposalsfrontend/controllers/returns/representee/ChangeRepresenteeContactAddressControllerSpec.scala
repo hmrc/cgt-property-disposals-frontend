@@ -156,8 +156,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
 
     }
 
@@ -203,7 +203,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Individual, None, performAction)
 
     }
 
@@ -230,6 +230,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like displaySelectAddress(
         UserType.Individual,
+        None,
         performAction,
         routes.RepresenteeController.checkYourAnswers()
       )
