@@ -495,7 +495,7 @@ class YearToDateLiabilityController @Inject() (
                       )
                     }
                   )(
-                    page = personalAllowancePage(_, _, disposalDate, wasUkResident)
+                    page = personalAllowancePage(_, _, disposalDate, wasUkResident, representativeType(draftReturn))
                   )(
                     requiredPreviousAnswer = _.fold(_.estimatedIncome, c => Some(c.estimatedIncome)),
                     routes.YearToDateLiabilityController.estimatedIncome()
@@ -524,7 +524,16 @@ class YearToDateLiabilityController @Inject() (
                 if (estimatedIncome.value > 0L) {
                   commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
                     form = personalAllowanceForm(disposalDate)
-                  )(page = (form, backLink) => personalAllowancePage(form, backLink, disposalDate, wasUkResident))(
+                  )(page =
+                    (form, backLink) =>
+                      personalAllowancePage(
+                        form,
+                        backLink,
+                        disposalDate,
+                        wasUkResident,
+                        representativeType(draftReturn)
+                      )
+                  )(
                     requiredPreviousAnswer = _.fold(_.estimatedIncome, c => Some(c.estimatedIncome)),
                     routes.YearToDateLiabilityController.estimatedIncome()
                   ) { (p, draftReturn) =>

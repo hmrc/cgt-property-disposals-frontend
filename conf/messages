@@ -1832,21 +1832,37 @@ estimatedIncome.cyaChange=estimated gross income
 
 personalAllowance.title=What is your Personal Allowance for tax year {0} to {1}?
 personalAllowance.agent.title=What is your client’s Personal Allowance for tax year {0} to {1}?
+personalAllowance.capacitor.title=What is the person’s Personal Allowance for tax year {0} to {1}?
+personalAllowance.personalRep.title=What was the person’s Personal Allowance for tax year {0} to {1}?
 personalAllowance.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>Your Personal Allowance may be more than this if you receive Marriage Allowance or Blind Person’s Allowance. It will be less if your income is over {3}.
 personalAllowance.agent.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>Your client’s Personal Allowance may be more than this if they receive Marriage Allowance or Blind Person’s Allowance. It will be less if their income is over {3}.
+personalAllowance.capacitor.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>The person’s Personal Allowance may be more than this if they receive Marriage Allowance or Blind Person’s Allowance. It will be less if their income is over {3}.
+personalAllowance.personalRep.helpText=We’ll use this amount to work out the rate of Capital Gains Tax that should be paid. The UK Personal Allowance in tax year {0} to {1} is {2}.<br/><br/>The person’s Personal Allowance may be more than this if they received Marriage Allowance or Blind Person’s Allowance. It will be less if their income was over {3}.
 personalAllowance.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax you should pay.<br/><br/>You’ll need to check the double tax agreement for the country you are resident in and the UK. This will tell you if you are entitled to a Personal Allowance.
 personalAllowance.agent.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay.<br/><br/>You’ll need to check the double tax agreement for the country your client is resident in and the UK. This will tell you if they are entitled to a Personal Allowance.
+personalAllowance.capacitor.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay.<br/><br/>The person will need to check the double tax agreement for the country the person is resident in and the UK. This will tell the person if they are entitled to a Personal Allowance.
+personalAllowance.personalRep.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax that should be paid.<br/><br/>You will need to check the double tax agreement for the country the person was resident in and the UK. This will tell you if the person was entitled to a Personal Allowance.
 personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.agent.error.required=Enter your client’s Personal Allowance for the tax year
+personalAllowance.capacitor.error.required=Enter the person’s Personal Allowance for the tax year
+personalAllowance.personalRep.error.required=Enter the person’s Personal Allowance for the tax year
 personalAllowance.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
 personalAllowance.agent.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
+personalAllowance.capacitor.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
+personalAllowance.personalRep.error.invalid=Personal allowance must be an amount of money, like 12,500 or 207.50
 personalAllowance.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.agent.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
+personalAllowance.capacitor.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
+personalAllowance.personalRep.error.tooSmall=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.agent.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
+personalAllowance.capacitor.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
+personalAllowance.personalRep.error.tooLarge=Personal allowance must be an amount of money between 0 and {0}
 personalAllowance.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
 personalAllowance.agent.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
+personalAllowance.capacitor.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
+personalAllowance.personalRep.error.tooManyDecimals=Personal allowance must be an amount of money with pence as 2 decimal places or less, like 12,500 or 200.50
 
 personalAllowance.cyaChange=Personal Allowance
 
