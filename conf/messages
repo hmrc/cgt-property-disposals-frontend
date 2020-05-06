@@ -1489,7 +1489,7 @@ otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens
 otherReliefs.agent.furtherInfoLink=Find out about reliefs your client might qualify for (opens in a new window)
 otherReliefs.trust.furtherInfoLink=Find out about reliefs the trust might qualify for (opens in a new window)
 otherReliefs.capacitor.furtherInfoLink=Find out about reliefs the person might qualify for (opens in a new window)
-otherReliefs.personalRep.furtherInfoLink=Find out about reliefs the person might qualify for (opens in a new window)
+otherReliefs.personalRep.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new window)
 
 otherReliefs.error.required=Select yes if you are claiming other reliefs
 otherReliefs.agent.error.required=Select yes if your client is claiming other reliefs
