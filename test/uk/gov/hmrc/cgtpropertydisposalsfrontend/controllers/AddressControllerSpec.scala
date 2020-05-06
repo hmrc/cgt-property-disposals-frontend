@@ -30,6 +30,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, IndividualUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
@@ -87,12 +91,26 @@ trait AddressControllerSpec[A <: AddressJourneyType]
   lazy val sessionWithValidJourneyStatus =
     SessionData.empty.copy(journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)))
 
-  def userMessageKey(userType: UserType): String = userType match {
-    case UserType.Individual   => ""
-    case UserType.Organisation => ".trust"
-    case UserType.Agent        => ".agent"
-    case other                 => sys.error(s"User type '$other' not handled")
-  }
+  def userMessageKey(individualUserType: Option[IndividualUserType], userType: UserType): String =
+    (individualUserType, userType) match {
+      case (Some(PersonalRepresentative), _) => ".personalRep"
+      case (Some(Capacitor), _)              => ".capacitor"
+      case (_, UserType.Individual)          => ""
+      case (_, UserType.Organisation)        => ".trust"
+      case (_, UserType.Agent)               => ".agent"
+      case other                             => sys.error(s"User type '$other' not handled")
+    }
+
+  def getUserClue(userType: UserType, individualUserType: Option[IndividualUserType]): String =
+    s"${individualUserTypeClue(individualUserType)} acting on behalf of ${userTypeClue(userType)}"
+
+  def individualUserTypeClue(individualUserType: Option[IndividualUserType]): String =
+    individualUserType match {
+      case Some(Capacitor)              => "a capacitor"
+      case Some(PersonalRepresentative) => "a personal representative"
+      case _                            => "other"
+
+    }
 
   def userTypeClue(userType: UserType): String = userType match {
     case UserType.Individual   => "an individual"
@@ -221,16 +239,20 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     }
   }
 
-  def displayEnterUkAddressPage(userType: UserType, performAction: () => Future[Result])(
+  def displayEnterUkAddressPage(
+    userType: UserType,
+    individualUserType: Option[IndividualUserType],
+    performAction: () => Future[Result]
+  )(
     implicit messagesApi: MessagesApi
   ): Unit =
-    s"display the enter UK address page for ${userTypeClue(userType)}" when {
+    s"display the enter UK address page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedTitleMessageKey =
         validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             f.journey.draftReturn.fold(
               _ => "address.uk.returns.multipleDisposals.title",
-              _ => s"address.uk.returns${userMessageKey(userType)}.singleDisposal.title"
+              _ => s"address.uk.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
             )
           case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
             "address.uk.representee.title"
@@ -245,7 +267,17 @@ trait AddressControllerSpec[A <: AddressJourneyType]
               journeyStatus = Some(
                 f.journey.copy(
                   subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
-                  agentReferenceNumber = setAgentReferenceNumber(userType)
+                  agentReferenceNumber = setAgentReferenceNumber(userType),
+                  draftReturn = f.journey.draftReturn.fold(
+                    _ =>
+                      sample[DraftMultipleDisposalsReturn].copy(triageAnswers =
+                        sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = individualUserType)
+                      ),
+                    _ =>
+                      sample[DraftSingleDisposalReturn].copy(triageAnswers =
+                        sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType)
+                      )
+                  )
                 )
               ),
               addressLookupResult = Some(addressLookupResult)
@@ -567,16 +599,20 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     }
   }
 
-  def enterPostcodePage(userType: UserType, performAction: () => Future[Result])(
+  def enterPostcodePage(
+    userType: UserType,
+    individualUserType: Option[IndividualUserType],
+    performAction: () => Future[Result]
+  )(
     implicit messagesApi: MessagesApi
   ): Unit =
-    s"display the enter postcode page for ${userTypeClue(userType)}" when {
+    s"display the enter postcode page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedTitleMessageKey =
         validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             f.journey.draftReturn.fold(
               _ => "enterPostcode.returns.multipleDisposals.title",
-              _ => s"enterPostcode.returns${userMessageKey(userType)}.singleDisposal.title"
+              _ => s"enterPostcode.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
             )
 
           case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
@@ -832,12 +868,17 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
   }
 
-  def displaySelectAddress(userType: UserType, performAction: () => Future[Result], whenNoAddressLookupResult: Call)(
+  def displaySelectAddress(
+    userType: UserType,
+    individualUserType: Option[IndividualUserType],
+    performAction: () => Future[Result],
+    whenNoAddressLookupResult: Call
+  )(
     implicit messagesApi: MessagesApi
   ): Unit = {
     s"redirect to ${whenNoAddressLookupResult.url}" when {
 
-      s"there is not address lookup result in session for ${userTypeClue(userType)}" in {
+      s"there is not address lookup result in session for ${getUserClue(userType, individualUserType)}" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
@@ -849,12 +890,12 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
     }
 
-    s"display the select address page for ${userTypeClue(userType)}" when {
+    s"display the select address page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedMessageTitleKey = validJourneyStatus match {
         case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
           f.journey.draftReturn.fold(
             _ => "address-select.returns.multipleDisposals.title",
-            _ => s"address-select.returns${userMessageKey(userType)}.singleDisposal.title"
+            _ => s"address-select.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
           )
 
         case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
@@ -863,7 +904,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         case _ => "address-select.title"
       }
 
-      s"there is an address lookup result in session for ${userTypeClue(userType)}" in {
+      s"there is an address lookup result in session for ${getUserClue(userType, individualUserType)}" in {
         val session = validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             SessionData.empty.copy(
