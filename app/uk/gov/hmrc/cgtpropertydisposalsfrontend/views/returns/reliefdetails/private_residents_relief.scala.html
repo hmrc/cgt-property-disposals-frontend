@@ -58,6 +58,7 @@
   else if (isATrust) ".trust"
   else ""
 }
+
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{if(form.error(valueKey).nonEmpty) s"$valueKey$userKey" else s"$key$userKey"}
