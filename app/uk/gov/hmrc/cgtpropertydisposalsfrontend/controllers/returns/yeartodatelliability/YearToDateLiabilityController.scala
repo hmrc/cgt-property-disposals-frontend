@@ -578,7 +578,12 @@ class YearToDateLiabilityController @Inject() (
               c => hasEstimatedDetailsForm.fill(c.hasEstimatedDetails)
             )
           )(
-            page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn))
+            page = hasEstimatedDetailsPage(
+              _,
+              _,
+              isATrust(fillingOutReturn),
+              representativeType(fillingOutReturn.draftReturn)
+            )
           )(
             requiredPreviousAnswer = answers =>
               if (isATrust(fillingOutReturn)) {
@@ -615,7 +620,7 @@ class YearToDateLiabilityController @Inject() (
         c => hasEstimatedDetailsForm.fill(c.hasEstimatedDetails)
       )
     )(
-      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn))
+      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn), representativeType(fillingOutReturn.draftReturn))
     )(
       requiredPreviousAnswer = { a =>
         estimatedIncome match {
@@ -669,7 +674,7 @@ class YearToDateLiabilityController @Inject() (
     commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
       form = hasEstimatedDetailsForm
     )(
-      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn))
+      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn), representativeType(draftReturn))
     )(
       requiredPreviousAnswer = { a =>
         estimatedIncome match {
@@ -710,7 +715,7 @@ class YearToDateLiabilityController @Inject() (
     commonSubmitBehaviour(fillingOutReturn, draftReturn, nonCalculatedAnswers)(
       form = hasEstimatedDetailsForm
     )(
-      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn))
+      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn), representativeType(draftReturn))
     )(
       requiredPreviousAnswer = answers =>
         if (isATrust(fillingOutReturn)) Some(AmountInPence(0))
@@ -798,7 +803,8 @@ class YearToDateLiabilityController @Inject() (
                 estimatedIncome,
                 personalAllowance,
                 calculatedTaxDue,
-                fillingOutReturn.subscribedDetails.isATrust
+                fillingOutReturn.subscribedDetails.isATrust,
+                representativeType(draftReturn)
               )
             )(
               _.fold(
@@ -868,7 +874,8 @@ class YearToDateLiabilityController @Inject() (
                 estimatedIncome,
                 personalAllowance,
                 calculatedTaxDue,
-                fillingOutReturn.subscribedDetails.isATrust
+                fillingOutReturn.subscribedDetails.isATrust,
+                representativeType(draftReturn)
               )
             )(
               _.fold(
@@ -1295,7 +1302,17 @@ class YearToDateLiabilityController @Inject() (
     withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
       (answers, fillingOutReturn.draftReturn) match {
         case (c: CalculatedYTDAnswers, s: DraftSingleDisposalReturn) =>
-          withDisposalDate(s)(disposalDate => checkYourAnswersHandleCalculated(c, fillingOutReturn, s, disposalDate))
+          withAssetTypeAndResidentialStatus(s)((_, wasUkResident) =>
+            withDisposalDate(s)(disposalDate =>
+              checkYourAnswersHandleCalculated(
+                c,
+                fillingOutReturn,
+                s,
+                disposalDate,
+                wasUkResident
+              )
+            )
+          )
 
         case (n: NonCalculatedYTDAnswers, d) =>
           checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d)
@@ -1367,7 +1384,9 @@ class YearToDateLiabilityController @Inject() (
                 fillingOutReturn.draftReturn match {
                   case _: DraftMultipleDisposalsReturn => true
                   case _: DraftSingleDisposalReturn    => false
-                }
+                },
+                fillingOutReturn.subscribedDetails.isATrust,
+                representativeType(draftReturn)
               )
             )
         )
@@ -1379,7 +1398,9 @@ class YearToDateLiabilityController @Inject() (
             fillingOutReturn.draftReturn match {
               case _: DraftMultipleDisposalsReturn => true
               case _: DraftSingleDisposalReturn    => false
-            }
+            },
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(draftReturn)
           )
         )
 
@@ -1391,11 +1412,20 @@ class YearToDateLiabilityController @Inject() (
     answers: CalculatedYTDAnswers,
     fillingOutReturn: FillingOutReturn,
     draftReturn: DraftSingleDisposalReturn,
-    disposalDate: DisposalDate
+    disposalDate: DisposalDate,
+    wasUkResident: Boolean
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
       case c: CompleteCalculatedYTDAnswers =>
-        Ok(calculatedCheckYouAnswersPage(c, disposalDate))
+        Ok(
+          calculatedCheckYouAnswersPage(
+            c,
+            disposalDate,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(draftReturn),
+            wasUkResident
+          )
+        )
 
       case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, Some(expiredEvidence), _) =>
         Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
@@ -1447,10 +1477,22 @@ class YearToDateLiabilityController @Inject() (
           c,
           t,
           m,
-          disposalDate
+          disposalDate,
+          wasUkResident
         )
       case IncompleteCalculatedYTDAnswers(Some(e), p, Some(h), Some(c), Some(t), m, _, _) =>
-        fromIncompleteToCompleteCalculatedYTDAnswers(fillingOutReturn, draftReturn, e, p, h, c, t, m, disposalDate)
+        fromIncompleteToCompleteCalculatedYTDAnswers(
+          fillingOutReturn,
+          draftReturn,
+          e,
+          p,
+          h,
+          c,
+          t,
+          m,
+          disposalDate,
+          wasUkResident
+        )
     }
 
   private def fromIncompleteToCompleteCalculatedYTDAnswers(
@@ -1462,7 +1504,8 @@ class YearToDateLiabilityController @Inject() (
     c: CalculatedTaxDue,
     t: AmountInPence,
     m: Option[MandatoryEvidence],
-    disposalDate: DisposalDate
+    disposalDate: DisposalDate,
+    wasUkResident: Boolean
   )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val completeAnswers = CompleteCalculatedYTDAnswers(e, p, h, c, t, m)
     val newDraftReturn =
@@ -1481,10 +1524,22 @@ class YearToDateLiabilityController @Inject() (
           )
     } yield ()
 
-    result.fold({ e =>
-      logger.warn("Could not update session", e)
-      errorHandler.errorResult()
-    }, _ => Ok(calculatedCheckYouAnswersPage(completeAnswers, disposalDate)))
+    result.fold(
+      { e =>
+        logger.warn("Could not update session", e)
+        errorHandler.errorResult()
+      },
+      _ =>
+        Ok(
+          calculatedCheckYouAnswersPage(
+            completeAnswers,
+            disposalDate,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(draftReturn),
+            wasUkResident
+          )
+        )
+    )
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
