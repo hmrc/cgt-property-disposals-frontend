@@ -38,7 +38,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
@@ -57,13 +56,13 @@ class SingleDisposalPropertyDetailsControllerSpec
   val draftReturn: DraftSingleDisposalReturn =
     sample[DraftSingleDisposalReturn].copy(
       triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-        .copy(assetType = AssetType.Residential, individualUserType = Some(Self)),
+        .copy(assetType = AssetType.Residential, individualUserType = None),
       propertyAddress = Some(ukAddress(1))
     )
 
   val validJourneyStatus = FillingOutReturnAddressJourney(
     FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn),
-    Option(Self)
+    None
   )
 
   override def overrideBindings: List[GuiceableModule] =
@@ -108,9 +107,9 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, Self, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, Self, performAction)
-      behave like displayEnterUkAddressPage(UserType.Organisation, Self, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Organisation, None, performAction)
     }
 
     "handling submitted addresses from enter UK address page" must {
@@ -133,9 +132,9 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, Self, performAction)
-      behave like enterPostcodePage(UserType.Agent, Self, performAction)
-      behave like enterPostcodePage(UserType.Organisation, Self, performAction)
+      behave like enterPostcodePage(UserType.Individual, None, performAction)
+      behave like enterPostcodePage(UserType.Agent, None, performAction)
+      behave like enterPostcodePage(UserType.Organisation, None, performAction)
 
     }
 
@@ -159,21 +158,21 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like displaySelectAddress(
         UserType.Individual,
-        Self,
+        None,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )
 
       behave like displaySelectAddress(
         UserType.Agent,
-        Self,
+        None,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )
 
       behave like displaySelectAddress(
         UserType.Organisation,
-        Self,
+        None,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )

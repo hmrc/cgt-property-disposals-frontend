@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, IndividualUserType}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
@@ -91,23 +91,24 @@ trait AddressControllerSpec[A <: AddressJourneyType]
   lazy val sessionWithValidJourneyStatus =
     SessionData.empty.copy(journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)))
 
-  def userMessageKey(individualUserType: IndividualUserType, userType: UserType): String =
+  def userMessageKey(individualUserType: Option[IndividualUserType], userType: UserType): String =
     (individualUserType, userType) match {
-      case (_, UserType.Individual)   => ""
-      case (_, UserType.Organisation) => ".trust"
-      case (_, UserType.Agent)        => ".agent"
-      case other                      => sys.error(s"User type '$other' not handled")
+      case (Some(PersonalRepresentative), _) => ".personalRep"
+      case (Some(Capacitor), _)              => ".capacitor"
+      case (_, UserType.Individual)          => ""
+      case (_, UserType.Organisation)        => ".trust"
+      case (_, UserType.Agent)               => ".agent"
+      case other                             => sys.error(s"User type '$other' not handled")
     }
 
-  def getUserClue(userType: UserType, individualUserType: IndividualUserType): String =
+  def getUserClue(userType: UserType, individualUserType: Option[IndividualUserType]): String =
     s"${individualUserTypeClue(individualUserType)} acting on behalf of ${userTypeClue(userType)}"
 
-  def individualUserTypeClue(individualUserType: IndividualUserType): String =
+  def individualUserTypeClue(individualUserType: Option[IndividualUserType]): String =
     individualUserType match {
-      case Capacitor              => "a capacitor"
-      case PersonalRepresentative => "a personal representative"
-      case Self                   => "self"
-      case other                  => sys.error(s"User type '$other' not handled")
+      case Some(Capacitor)              => "a capacitor"
+      case Some(PersonalRepresentative) => "a personal representative"
+      case _                            => "other"
 
     }
 
@@ -240,7 +241,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
   def displayEnterUkAddressPage(
     userType: UserType,
-    individualUserType: IndividualUserType,
+    individualUserType: Option[IndividualUserType],
     performAction: () => Future[Result]
   )(
     implicit messagesApi: MessagesApi
@@ -270,11 +271,11 @@ trait AddressControllerSpec[A <: AddressJourneyType]
                   draftReturn = f.journey.draftReturn.fold(
                     _ =>
                       sample[DraftMultipleDisposalsReturn].copy(triageAnswers =
-                        sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self))
+                        sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = individualUserType)
                       ),
                     _ =>
                       sample[DraftSingleDisposalReturn].copy(triageAnswers =
-                        sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+                        sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType)
                       )
                   )
                 )
@@ -295,7 +296,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         }
 
         val result = performAction()
-        status(result) shouldBe OK
+        status(result)          shouldBe OK
         contentAsString(result) should include(messageFromMessageKey(expectedTitleMessageKey))
       }
     }
@@ -600,7 +601,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
   def enterPostcodePage(
     userType: UserType,
-    individualUserType: IndividualUserType,
+    individualUserType: Option[IndividualUserType],
     performAction: () => Future[Result]
   )(
     implicit messagesApi: MessagesApi
@@ -869,7 +870,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
   def displaySelectAddress(
     userType: UserType,
-    individualUserType: IndividualUserType,
+    individualUserType: Option[IndividualUserType],
     performAction: () => Future[Result],
     whenNoAddressLookupResult: Call
   )(

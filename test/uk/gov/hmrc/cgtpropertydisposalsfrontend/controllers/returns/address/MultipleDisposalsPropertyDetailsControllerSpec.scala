@@ -878,14 +878,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
     }
 
-    //DO this
     "handling requests to display the enter UK address page" must {
 
       def performAction(): Future[Result] = controller.enterUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, Self, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
 
     }
 
@@ -909,7 +908,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      List(Capacitor, PersonalRepresentative, Self).foreach { individualUserType =>
+      List(Some(Capacitor), Some(PersonalRepresentative), None).foreach { individualUserType =>
         behave like enterPostcodePage(UserType.Individual, individualUserType, performAction)
         behave like enterPostcodePage(UserType.Agent, individualUserType, performAction)
         behave like enterPostcodePage(UserType.Organisation, individualUserType, performAction)
@@ -935,7 +934,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      List(Capacitor, PersonalRepresentative, Self).foreach { individualUserType =>
+      List(Some(Capacitor), Some(PersonalRepresentative), None).foreach { individualUserType =>
         behave like displaySelectAddress(
           UserType.Individual,
           individualUserType,
