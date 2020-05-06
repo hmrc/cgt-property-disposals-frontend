@@ -1003,7 +1003,8 @@ class YearToDateLiabilityController @Inject() (
               fillingOutReturn.draftReturn match {
                 case _: DraftMultipleDisposalsReturn => true
                 case _: DraftSingleDisposalReturn    => false
-              }
+              },
+              representativeType(fillingOutReturn.draftReturn)
             )
           )(
             requiredPreviousAnswer               = _ => Some(()),
@@ -1032,7 +1033,8 @@ class YearToDateLiabilityController @Inject() (
               fillingOutReturn.draftReturn match {
                 case _: DraftMultipleDisposalsReturn => true
                 case _: DraftSingleDisposalReturn    => false
-              }
+              },
+              representativeType(fillingOutReturn.draftReturn)
             )
           )(
             requiredPreviousAnswer               = _ => Some(()),
