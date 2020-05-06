@@ -967,8 +967,8 @@ address-select.returns.capacitor.singleDisposal.title=Select the address of the 
 address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
 address.uk.returns.agent.singleDisposal.title=Enter the address of the UK property your client disposed of
 address.uk.returns.trust.singleDisposal.title=Enter the address of the UK property the trust disposed of
-address.uk.returns.personalRep.singleDisposal.title=Select the address of the UK property that was disposed of
-address.uk.returns.capacitor.singleDisposal.title=Select the address of the UK property that was disposed of
+address.uk.returns.personalRep.singleDisposal.title=Enter the address of the UK property that was disposed of
+address.uk.returns.capacitor.singleDisposal.title=Enter the address of the UK property that was disposed of
 
 
 enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK property disposals
