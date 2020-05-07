@@ -32,7 +32,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -58,11 +59,17 @@ class InitialGainOrLossController @Inject() (
     with Logging {
 
   def enterInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _, answer) =>
+    withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answer) =>
+      val isATrust           = journeyStatus.subscribedDetails.isATrust
+      val representativeType = draftSingleDisposalReturn.triageAnswers.representativeType()
       Ok(
         initialGainOrLossesPage(
-          answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())),
-          getBackLink(answer)
+          answer.fold(initialGainOrLossForm(isATrust, representativeType))(value =>
+            initialGainOrLossForm(isATrust, representativeType).fill(value.inPounds())
+          ),
+          getBackLink(answer),
+          isATrust,
+          representativeType
         )
       )
     }
@@ -71,11 +78,14 @@ class InitialGainOrLossController @Inject() (
   def submitInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) {
       case (fillingOutReturn, draftReturn, answers) =>
-        val backLink = getBackLink(answers)
-        initialGainOrLossForm
+        val backLink           = getBackLink(answers)
+        val isATrust           = fillingOutReturn.subscribedDetails.isATrust
+        val representativeType = draftReturn.triageAnswers.representativeType()
+        initialGainOrLossForm(isATrust, representativeType)
           .bindFromRequest()
           .fold(
-            formWithErrors => BadRequest(initialGainOrLossesPage(formWithErrors, backLink)),
+            formWithErrors =>
+              BadRequest(initialGainOrLossesPage(formWithErrors, backLink, isATrust, representativeType)),
             value =>
               if (answers.map(_.inPounds()).contains(value))
                 Redirect(routes.InitialGainOrLossController.checkYourAnswers())
@@ -114,10 +124,12 @@ class InitialGainOrLossController @Inject() (
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _, answers) =>
+    withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answers) =>
+      val isATrust           = journeyStatus.subscribedDetails.isATrust
+      val representativeType = draftSingleDisposalReturn.triageAnswers.representativeType()
       answers match {
         case Some(completeInitialGainOrLossAnswers) =>
-          Ok(checkYourAnswersPage(completeInitialGainOrLossAnswers))
+          Ok(checkYourAnswersPage(completeInitialGainOrLossAnswers, isATrust, representativeType))
 
         case None =>
           Redirect(routes.InitialGainOrLossController.enterInitialGainOrLoss())
@@ -155,7 +167,11 @@ class InitialGainOrLossController @Inject() (
 
 object InitialGainOrLossController {
 
-  val initialGainOrLossForm: Form[BigDecimal] = {
+  def initialGainOrLossForm(
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+  )(implicit request: RequestWithSessionData[_]): Form[BigDecimal] = {
+
     val (outerId, gainId, lossId) = ("initialGainOrLoss", "gain", "loss")
 
     def innerOption(id: String): InnerOption[BigDecimal] =

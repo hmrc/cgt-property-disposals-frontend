@@ -23,6 +23,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Capacitor
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentative
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -35,13 +38,25 @@
         unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
         radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
         details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
-@(form: Form[BigDecimal], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
+@(form: Form[BigDecimal], backLink: Call, isATrust: Boolean,
+        representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 @key = @{ "initialGainOrLoss" }
 @gainKey = @{ "gain" }
 @lossKey = @{ "loss" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@isAgent = @{request.userType.contains(UserType.Agent)}
+
+@userKey = @{
+    if(representativeType.exists(_.isLeft)) ".personalRep"
+    else if(isAgent) ".agent"
+    else if(isATrust) ".trust"
+        else if(representativeType.exists(_.isRight)) ".capacitor"
+            else ""
+}
 
 @options = @{List(
     RadioOption(
@@ -92,28 +107,30 @@
 }
 
 
-
-@title = @{messages(s"$key.title")}
-
-@mainTemplate(title = title, userType = request.userType) {
-@backLinkComponent(backLink)
-@caption(messages("initialGainOrLoss.caption"))
-@if(hasErrors) {
-    @errorSummary(form)
+@title = @{
+    messages(s"$key$userKey.title")
 }
 
-@formWrapper(routes.InitialGainOrLossController.submitInitialGainOrLoss(), 'novalidate -> "novalidate") {
+@mainTemplate(title = title, userType = request.userType) {
+    @backLinkComponent(backLink)
+    @caption(messages("initialGainOrLoss.caption"))
+
+    @if(hasErrors) {
+        @errorSummary(form, form.errors.headOption.map(x => x.key match {
+            case "initialGainOrLoss" => s"${x.key}$userKey"
+            case _ => x.key
+        }))
+    }
+    @formWrapper(routes.InitialGainOrLossController.submitInitialGainOrLoss(), 'novalidate -> "novalidate") {
     @radioGroupConditional(
         fieldId = key,
         label = pageHeading(title),
         selected = selectedIndex,
         hasErrors = false,
         options = options,
-        helpText = None)
-
-@details(messages(s"$key.details.summary"), Html(s"<p>${messages(s"$key.details.olTitle")}<ol><li>${messages(s"$key.details.li1")}</li><li>${messages(s"$key.details.li2")}</li><li>${messages(s"$key.details.li3")}</li><li>${messages(s"$key.details.li4")}</li><li>${messages(s"$key.details.li5")}</li></ol></p><p><strong class='bold'>${messages(s"$key.details.example.title")}</strong><br>${messages(s"$key.details.example.details")}</br></p>"))
-
-@submitButton(messages("button.saveAndContinue"))
+        customErrorKey = form.error(key).map(e => s"$key$userKey${e.message}"),
+        helpText = Some(Html(messages(s"initialGainOrLoss$userKey.helpText"))))
+    @details(messages(s"$key.details.summary"), Html(s"<p>${messages(s"$key$userKey.details.olTitle")}<ol><li>${messages(s"$key.details.li1")}</li><li>${messages(s"$key$userKey.details.li2")}</li><li>${messages(s"$key$userKey.details.li3")}</li><li>${messages(s"$key.details.li4")}</li></ol></p><p><strong class='bold'>${messages(s"$key.details.example.title")}</strong><br>${messages(s"$key$userKey.details.example.details")}</br></p>"))
+    @submitButton(messages("button.saveAndContinue"))
 }
-
 }
