@@ -29,24 +29,34 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+    addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display
 )
 
 @(
-        answers: CompleteAcquisitionDetailsAnswers,
-        cutoffDate: LocalDate,
-        isUk: Boolean,
-        canRebase: Boolean,
-        isATrust: Boolean
+    answers: CompleteAcquisitionDetailsAnswers,
+    cutoffDate: LocalDate,
+    isUk: Boolean,
+    canRebase: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
+@userKey = @{
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else ""
+}
+
 @rebasingKey = @{if(canRebase && answers.shouldUseRebase) ".rebased" else ""}
 @acquisitionDate = @{TimeUtils.govDisplayFormat(answers.acquisitionDate.value)}
 @rebasingDate = @{TimeUtils.govDisplayFormat(cutoffDate)}
+
 @acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
     case AcquisitionMethod.Bought => (
