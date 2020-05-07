@@ -469,7 +469,9 @@ class InitialGainOrLossControllerSpec
           (".capacitor", capacitorFillingOutReturn, false),
           (".agent", individualFillingOutReturn, true)
         )
-        testData.foreach(keyWithJourneyStatus => test(keyWithJourneyStatus._1, keyWithJourneyStatus._2, keyWithJourneyStatus._3))
+        testData.foreach(keyWithJourneyStatus =>
+          test(keyWithJourneyStatus._1, keyWithJourneyStatus._2, keyWithJourneyStatus._3)
+        )
       }
 
       def test(userKey: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean) = {
@@ -490,7 +492,9 @@ class InitialGainOrLossControllerSpec
             "initialGainOrLoss.cya.title"
           ), { doc =>
             doc.select("body").html() should include(Messages("initialGainOrLoss.cya.title"))
-            doc.select("#initialGainOrLoss-question").text() should include(Messages(s"initialGainOrLoss$userKey.title"))
+            doc.select("#initialGainOrLoss-question").text() should include(
+              Messages(s"initialGainOrLoss$userKey.title")
+            )
             doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
               .checkYourAnswersSubmit()
               .url
