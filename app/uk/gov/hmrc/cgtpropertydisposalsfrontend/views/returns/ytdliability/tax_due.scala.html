@@ -31,6 +31,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{ PersonalRepresentative, Capacitor }
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -62,7 +64,8 @@
   estimatedIncome: AmountInPence,
   personalAllowance: AmountInPence,
   calculatedTax: CalculatedTaxDue,
-  isATrust: Boolean
+  isATrust: Boolean,
+  representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{ "taxDue" }
@@ -70,6 +73,14 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{ triageAnswers.disposalDate.taxYear }
 @assetType = @{ triageAnswers.assetType }
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{
+  if (representativeType.exists(_.isLeft)) ".personalRep"
+  else if (representativeType.exists(_.isRight)) ".capacitor"
+  else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+      else ""
+}
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
 
@@ -118,12 +129,12 @@
             value = form.data.getOrElse(key, ""),
             formError = form.error(key),
             hasErrors = form.error(key).nonEmpty,
-            label = Html(messages("taxDue.title")),
+            label = Html(title),
             labelClass = Some("govuk-label--m"),
             labelAsHeading = false,
             extraContent = Some(Html(
               s"""
-                | <p>${messages("taxDue.helpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds()))}</p>
+                | <p>${messages(s"$key$userKey.helpText.p1", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds()))}</p>
                 | <p>${messages(s"$key.helpText.p2")}</p>
                 | ${if(isATrust) "<p>" + messages(s"$key.helpText.p3") + "</p>" else ""}
                 |""".stripMargin
@@ -144,6 +155,4 @@
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 
-
 }
-
