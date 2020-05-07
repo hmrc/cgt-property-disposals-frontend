@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NameMatchServiceError, SessionData, TimeUtils, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -498,13 +498,18 @@ class RepresenteeControllerSpec
         val newName = IndividualName("Max", "Cax")
         val (session, journey, draftReturn) =
           sessionWithFillingOutReturn(sample[CompleteRepresenteeAnswers], Right(Capacitor))
-        val newDraftReturn = draftReturn.copy(
-          representeeAnswers = Some(
-            IncompleteRepresenteeAnswers.empty.copy(
-              name = Some(newName)
+
+        val newDraftReturn =
+          DraftSingleDisposalReturn.newDraftReturn(
+            draftReturn.id,
+            IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(Capacitor)),
+            representeeAnswers = Some(
+              IncompleteRepresenteeAnswers.empty.copy(
+                name = Some(newName)
+              )
             )
           )
-        )
+
         val newJourney = journey.copy(draftReturn = newDraftReturn)
 
         "there is an error updating the draft return" in {
@@ -595,13 +600,18 @@ class RepresenteeControllerSpec
           "the section is incomplete" in {
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(IncompleteRepresenteeAnswers.empty, Right(Capacitor))
-            val newDraftReturn = draftReturn.copy(
-              representeeAnswers = Some(
-                IncompleteRepresenteeAnswers.empty.copy(
-                  name = Some(newName)
+
+            val newDraftReturn =
+              DraftSingleDisposalReturn.newDraftReturn(
+                draftReturn.id,
+                IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(Capacitor)),
+                representeeAnswers = Some(
+                  IncompleteRepresenteeAnswers.empty.copy(
+                    name = Some(newName)
+                  )
                 )
               )
-            )
+
             val newJourney = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
@@ -622,13 +632,18 @@ class RepresenteeControllerSpec
           "the section is complete" in {
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(sample[CompleteRepresenteeAnswers], Right(Capacitor))
-            val newDraftReturn = draftReturn.copy(
-              representeeAnswers = Some(
-                IncompleteRepresenteeAnswers.empty.copy(
-                  name = Some(newName)
+
+            val newDraftReturn =
+              DraftSingleDisposalReturn.newDraftReturn(
+                draftReturn.id,
+                IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(Capacitor)),
+                representeeAnswers = Some(
+                  IncompleteRepresenteeAnswers.empty.copy(
+                    name = Some(newName)
+                  )
                 )
               )
-            )
+
             val newJourney = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
@@ -800,9 +815,18 @@ class RepresenteeControllerSpec
         val newDate    = DateOfDeath(LocalDate.now().minusDays(1))
         val (session, journey, draftReturn) =
           sessionWithFillingOutReturn(oldAnswers, Left(PersonalRepresentative))
-        val newDraftReturn = draftReturn.copy(
-          representeeAnswers = Some(oldAnswers.copy(dateOfDeath = Some(newDate)))
-        )
+
+        val newDraftReturn =
+          DraftSingleDisposalReturn.newDraftReturn(
+            draftReturn.id,
+            IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(PersonalRepresentative)),
+            representeeAnswers = Some(
+              IncompleteRepresenteeAnswers.empty.copy(
+                name        = Some(oldAnswers.name),
+                dateOfDeath = Some(newDate)
+              )
+            )
+          )
 
         val newJourney = journey.copy(draftReturn = newDraftReturn)
 
@@ -875,11 +899,16 @@ class RepresenteeControllerSpec
         "the user hasn't started a draft return yet and" when {
 
           "the section is incomplete" in {
+            val name = sample[IndividualName]
             val (session, journey) =
-              sessionWithStartingNewDraftReturn(IncompleteRepresenteeAnswers.empty, Left(PersonalRepresentative))
+              sessionWithStartingNewDraftReturn(
+                IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
+                Left(PersonalRepresentative)
+              )
             val newJourney = journey.copy(
               representeeAnswers = Some(
                 IncompleteRepresenteeAnswers.empty.copy(
+                  name        = Some(name),
                   dateOfDeath = Some(dateOfDeath)
                 )
               )
@@ -900,7 +929,12 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(data, Left(PersonalRepresentative))
             val newJourney = journey.copy(
-              representeeAnswers = Some(data.copy(dateOfDeath = Some(newDate)))
+              representeeAnswers = Some(
+                IncompleteRepresenteeAnswers.empty.copy(
+                  name        = Some(data.name),
+                  dateOfDeath = Some(newDate)
+                )
+              )
             )
 
             inSequence {
@@ -920,15 +954,25 @@ class RepresenteeControllerSpec
         "the user has started a draft return and" when {
 
           "the section is incomplete" in {
+            val name = sample[IndividualName]
             val (session, journey, draftReturn) =
-              sessionWithFillingOutReturn(IncompleteRepresenteeAnswers.empty, Left(PersonalRepresentative))
-            val newDraftReturn = draftReturn.copy(
-              representeeAnswers = Some(
-                IncompleteRepresenteeAnswers.empty.copy(
-                  dateOfDeath = Some(dateOfDeath)
+              sessionWithFillingOutReturn(
+                IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
+                Left(PersonalRepresentative)
+              )
+
+            val newDraftReturn =
+              DraftSingleDisposalReturn.newDraftReturn(
+                draftReturn.id,
+                IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(
+                  IncompleteRepresenteeAnswers.empty.copy(
+                    name        = Some(name),
+                    dateOfDeath = Some(dateOfDeath)
+                  )
                 )
               )
-            )
+
             val newJourney = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
@@ -946,16 +990,21 @@ class RepresenteeControllerSpec
           }
 
           "the section is complete" in {
-            val oldData = sample[IncompleteRepresenteeAnswers]
+            val oldData = sample[CompleteRepresenteeAnswers]
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(oldData, Left(PersonalRepresentative))
-            val newDraftReturn = draftReturn.copy(
-              representeeAnswers = Some(
-                oldData.copy(
-                  dateOfDeath = Some(dateOfDeath)
+
+            val newDraftReturn =
+              DraftSingleDisposalReturn.newDraftReturn(
+                draftReturn.id,
+                IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(
+                  IncompleteRepresenteeAnswers.empty.copy(
+                    name        = Some(oldData.name),
+                    dateOfDeath = Some(dateOfDeath)
+                  )
                 )
               )
-            )
             val newJourney = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
@@ -1350,7 +1399,16 @@ class RepresenteeControllerSpec
           )
 
           val newSndr =
-            sndr.copy(representeeAnswers = Some(requiredPreviousAnswers.copy(hasConfirmedPerson = true)))
+            sndr.copy(representeeAnswers =
+              Some(
+                requiredPreviousAnswers.copy(
+                  hasConfirmedPerson         = true,
+                  hasConfirmedContactDetails = false,
+                  contactDetails             = None
+                )
+              )
+            )
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
@@ -1462,9 +1520,13 @@ class RepresenteeControllerSpec
 
         val (session, journey, draftReturn) =
           sessionWithFillingOutReturn(answers, Right(Capacitor))
-        val newDraftReturn = draftReturn.copy(
-          representeeAnswers = Some(answers.copy(id = Some(cgtRef)))
-        )
+        val newDraftReturn =
+          DraftSingleDisposalReturn.newDraftReturn(
+            draftReturn.id,
+            IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(Capacitor)),
+            representeeAnswers = Some(answers.copy(id = Some(cgtRef)))
+          )
+
         val newJourney = journey.copy(draftReturn = newDraftReturn)
 
         "there is an error getting the previous name match attempts" in {
@@ -1602,16 +1664,20 @@ class RepresenteeControllerSpec
 
         "all updates are successful and" when {
 
-          "the user has submitted a valid cgt reference" ignore {
+          "the user has submitted a valid cgt reference" in {
             val name    = sample[IndividualName]
             val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
             val cgtRef  = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(answers, Right(Capacitor))
-            val newDraftReturn = draftReturn.copy(
-              representeeAnswers = Some(answers.copy(id = Some(cgtRef)))
-            )
+            val newDraftReturn =
+              DraftSingleDisposalReturn.newDraftReturn(
+                draftReturn.id,
+                IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(Capacitor)),
+                representeeAnswers = Some(answers.copy(id = Some(cgtRef)))
+              )
+
             val newJourney = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
@@ -1641,7 +1707,9 @@ class RepresenteeControllerSpec
 
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
-            val newDraftReturn = draftReturn.copy(
+            val newDraftReturn = DraftSingleDisposalReturn.newDraftReturn(
+              draftReturn.id,
+              IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(PersonalRepresentative)),
               representeeAnswers = Some(answers.copy(id = Some(nino)))
             )
             val newJourney = journey.copy(draftReturn = newDraftReturn)
@@ -1743,9 +1811,13 @@ class RepresenteeControllerSpec
             contactDetails             = Some(contactDetails),
             hasConfirmedContactDetails = false
           )
-          val newDraftReturn = draftReturn.copy(
-            representeeAnswers = Some(newAnswers)
-          )
+          val newDraftReturn =
+            DraftSingleDisposalReturn.newDraftReturn(
+              draftReturn.id,
+              IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(PersonalRepresentative)),
+              Some(newAnswers)
+            )
+
           val newJourney = journey.copy(draftReturn = newDraftReturn)
 
           "there is an error updating the draft return" in {
@@ -1878,9 +1950,13 @@ class RepresenteeControllerSpec
               contactDetails             = Some(contactDetails),
               hasConfirmedContactDetails = false
             )
-            val newDraftReturn = draftReturn.copy(
-              representeeAnswers = Some(newAnswers)
-            )
+            val newDraftReturn =
+              DraftSingleDisposalReturn.newDraftReturn(
+                draftReturn.id,
+                IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(PersonalRepresentative)),
+                Some(newAnswers)
+              )
+
             val newJourney = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
