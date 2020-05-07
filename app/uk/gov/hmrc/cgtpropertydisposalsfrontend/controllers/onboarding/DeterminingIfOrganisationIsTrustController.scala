@@ -337,7 +337,8 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
     case NameMatchServiceError.BackendError(error) =>
       logger.warn("Could not get BPR with entered TRN", error)
-      errorHandler.errorResult()
+      // errorHandler.errorResult()
+      errorHandler.tmpErrorResult()
 
     case NameMatchServiceError.NameMatchFailed(unsuccessfulAttempts) =>
       val form = enterTrnAndNameForm

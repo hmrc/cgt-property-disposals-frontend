@@ -22,7 +22,7 @@
 @this(govUkWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.govuk_wrapper)
 
 
-@(userType: Option[UserType], pageTitle: String, heading: String, message: String)(implicit messages: Messages, appConfig: ViewConfig)
+@(userType: Option[UserType], pageTitle: String, heading: String, message: String, extraMessage: Option[String] = None)(implicit messages: Messages, appConfig: ViewConfig)
 
 @contentHeader = {
   <h1>@heading</h1>
@@ -30,6 +30,9 @@
 
 @mainContent = {
   <p>@message</p>
+
+  @extraMessage.map{m => <p>@m</p>}
+
 }
 
 @govUkWrapper(appConfig = appConfig, title = pageTitle, contentHeader = Some(contentHeader), mainContent = mainContent, withAccount = false, userType = userType)

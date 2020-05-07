@@ -46,6 +46,17 @@ class ErrorHandler @Inject() (val messagesApi: MessagesApi, error_template: view
       )
     )
 
+  def tmpErrorResult()(implicit request: Request[_]): Result =
+    InternalServerError(
+      error_template(
+        None,
+        Messages("tmpCustomError.title"),
+        Messages("tmpCustomError.heading"),
+        Messages("tmpCustomError.p1"),
+        Some(Messages("tmpCustomError.p2"))
+      )
+    )
+
   def errorResult()(implicit request: RequestWithSessionData[_]): Result =
     errorResult(request.userType)
 
