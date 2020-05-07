@@ -101,25 +101,45 @@
     <ul class="calc-rows with-bottom-margin">
       <li>
         @calcRow(calculatedTax.initialGainOrLoss.amount, messages(s"$key.initialGainOrLoss"), showGainType = true)
-        @details(messages("calculator.showWorkings"), initialGainOrLossWorkings(disposalDetails, acquisitionDetails, calculatedTax))
+        @details(
+          messages("calculator.showWorkings"),
+          initialGainOrLossWorkings(disposalDetails, acquisitionDetails, calculatedTax),
+          Some(s"for ${messages(s"$key.initialGainOrLoss")}")
+        )
       </li>
       <li>
         @calcRow(calculatedTax.gainOrLossAfterReliefs, messages(s"$key.gainOrLossAfterReliefs"), showGainType = true)
-        @details(messages("calculator.showWorkings"), gainOrLossAfterReliefsWorkings(reliefDetails, calculatedTax))
+        @details(
+          messages("calculator.showWorkings"),
+          gainOrLossAfterReliefsWorkings(reliefDetails, calculatedTax),
+          Some(s"for ${messages(s"$key.gainOrLossAfterReliefs")}")
+        )
       </li>
       @if(!calculatedTax.initialGainOrLoss.amount.isNegative) {
         <li>
           @calcRow(calculatedTax.gainOrLossAfterLosses, messages(s"$key.gainAfterLosses"), showGainType = true)
-          @details(messages("calculator.showWorkings"), gainAfterLossesWorkings(exemptionsAndLossesDetails, calculatedTax))
+          @details(
+            messages("calculator.showWorkings"),
+            gainAfterLossesWorkings(exemptionsAndLossesDetails, calculatedTax),
+            Some(s"for ${messages(s"$key.gainAfterLosses")}")
+          )
         </li>
         <li>
           @calcRow(calculatedTax.taxableGainOrNetLoss, messages(s"$key.taxableGain"), showGainType = true)
-          @details(messages("calculator.showWorkings"), taxableGainWorkings(exemptionsAndLossesDetails, calculatedTax))
+          @details(
+            messages("calculator.showWorkings"),
+            taxableGainWorkings(exemptionsAndLossesDetails, calculatedTax),
+            Some(s"for ${messages(s"$key.taxableGain")}")
+          )
         </li>
       }
       <li>
         @calcRow(calculatedTax.amountOfTaxDue, messages(s"$key.amountOfTaxDue"), showGainType = false)
-        @details(messages("calculator.showWorkings"), taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, assetType, isATrust))
+        @details(
+          messages("calculator.showWorkings"),
+          taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, assetType, isATrust),
+          Some(s"for ${messages(s"$key.amountOfTaxDue")}")
+        )
       </li>
     </ul>
 
