@@ -115,7 +115,7 @@ class InitialGainOrLossControllerSpec
             ), { doc =>
               doc.select(".govuk-caption-xl").html() should include("Initial gain or loss")
               doc.select("#initialGainOrLoss").html() should include(
-                messageFromMessageKey(s"initialGainOrLoss.title")
+                messageFromMessageKey("initialGainOrLoss.title")
               )
               doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
@@ -153,7 +153,7 @@ class InitialGainOrLossControllerSpec
             (".capacitor", capacitorFillingOutReturn, false),
             (".agent", individualFillingOutReturn, true)
           )
-          testData.map(keyWithReturn => test(keyWithReturn._1, keyWithReturn._2, keyWithReturn._3))
+          testData.foreach(keyWithReturn => test(keyWithReturn._1, keyWithReturn._2, keyWithReturn._3))
         }
       }
 
@@ -339,7 +339,7 @@ class InitialGainOrLossControllerSpec
           )(s"initialGainOrLoss$userKey.title")(performAction)
 
         "no option is selected" in {
-          testData.map(keyWithReturn =>
+          testData.foreach(keyWithReturn =>
             test(
               keyWithReturn._1,
               keyWithReturn._2,
@@ -352,7 +352,7 @@ class InitialGainOrLossControllerSpec
         }
 
         "the amount of gain is invalid" in {
-          testData.map { keyWithReturn =>
+          testData.foreach { keyWithReturn =>
             amountOfMoneyErrorScenarios("gain").foreach { scenario =>
               withClue(s"For $scenario: ") {
                 val data = ("initialGainOrLoss" -> "0") :: scenario.formData
@@ -363,7 +363,7 @@ class InitialGainOrLossControllerSpec
         }
 
         "the amount of loss is invalid" in {
-          testData.map { keyWithReturn =>
+          testData.foreach { keyWithReturn =>
             amountOfMoneyErrorScenarios("loss").foreach { scenario =>
               withClue(s"For $scenario: ") {
                 val data = ("initialGainOrLoss" -> "1") :: scenario.formData
@@ -374,7 +374,7 @@ class InitialGainOrLossControllerSpec
         }
 
         "the amount of gain is zero" in {
-          testData.map { keyWithReturn =>
+          testData.foreach { keyWithReturn =>
             test(keyWithReturn._1, keyWithReturn._2, keyWithReturn._3, "initialGainOrLoss" -> "0", "gain" -> "0")(
               "gain.error.tooSmall"
             )
@@ -469,7 +469,7 @@ class InitialGainOrLossControllerSpec
           (".capacitor", capacitorFillingOutReturn, false),
           (".agent", individualFillingOutReturn, true)
         )
-        testData.map(keyWithJourneyStatus => test(keyWithJourneyStatus._1, keyWithJourneyStatus._2, keyWithJourneyStatus._3))
+        testData.foreach(keyWithJourneyStatus => test(keyWithJourneyStatus._1, keyWithJourneyStatus._2, keyWithJourneyStatus._3))
       }
 
       def test(userKey: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean) = {
