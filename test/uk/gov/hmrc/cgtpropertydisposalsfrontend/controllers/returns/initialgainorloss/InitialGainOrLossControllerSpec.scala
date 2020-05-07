@@ -133,8 +133,11 @@ class InitialGainOrLossControllerSpec
           val draftReturn = sample[DraftSingleDisposalReturn]
             .copy(initialGainOrLoss = Some(AmountInPence(300L)))
 
-          val fillingOutReturn      = sample[FillingOutReturn].copy(draftReturn = draftReturn)
-          val trustFillingOutReturn = fillingOutReturn.copy(subscribedDetails   = generateTrustSubscribedDetails())
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+          val trustFillingOutReturn = fillingOutReturn.copy(
+            subscribedDetails = generateTrustSubscribedDetails(),
+            draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
+          )
           val individualFillingOutReturn = fillingOutReturn.copy(
             subscribedDetails = generateIndividualSubscribedDetails(),
             draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
@@ -213,6 +216,9 @@ class InitialGainOrLossControllerSpec
 
     def generateTriageAnswersWithSelf() =
       sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+
+    def generateTriageAnswersForTrust() =
+      sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = None)
 
     "submitting initial gain or loss" must {
 
