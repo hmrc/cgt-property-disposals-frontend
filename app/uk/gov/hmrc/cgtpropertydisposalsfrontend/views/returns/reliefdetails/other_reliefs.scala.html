@@ -61,10 +61,10 @@
 }
 
 @userErrorKey = @{
-    if (representativeType.exists(_.isLeft)) ".personalRep"
-    else if (representativeType.exists(_.isRight)) ".capacitor"
-    else if (isAgent) ".agent"
-    else if (isATrust) ".trust"
+    if (representativeType.exists(_.isLeft)) "personalRep."
+    else if (representativeType.exists(_.isRight)) "capacitor."
+    else if (isAgent) "agent."
+    else if (isATrust) "trust."
     else ""
 }
 
