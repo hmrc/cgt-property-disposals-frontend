@@ -2166,7 +2166,7 @@ confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this retu
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details from this return in the person’s Self Assessment tax return.
 
-confirmationOfSubmission.returnToAccount=Go to your <a href="{0}">Capital Gains Tax on UK property account</a>.
+confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
 confirmationOfSubmission.organisationNameLine=Trust: {0}
 confirmationOfSubmission.agentNameLine=Client: {0}
 
