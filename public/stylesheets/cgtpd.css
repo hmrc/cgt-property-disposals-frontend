@@ -149,6 +149,7 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 .autocomplete__wrapper input[type="text"],
 .custom-input-wrapper input[type="text"] {
     width: 100%;
+    min-width: 10em;
 }
 
 .multiple-choice + .panel-indent .custom-input-wrapper .form-control {
@@ -620,7 +621,7 @@ input:focus + .hmcts-currency-input__symbol.form-control--error {
 .calc-total {
     font-family: "nta", Arial, sans-serif;
     position: absolute;
-    top: 8px;
+    top: 0;
     right: 0;
     font-weight: bold;
 }
@@ -777,5 +778,11 @@ h1 > .sub-heading {
 
 .cya-extra-action {
     padding-left: 1em;
+}
+
+@media only screen and (max-width: 930px) {
+    .calc-total {
+        position: relative;
+    }
 }
 
