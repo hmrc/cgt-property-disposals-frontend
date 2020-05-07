@@ -446,9 +446,42 @@ class InitialGainOrLossControllerSpec
       }
 
       "have proper contents" in {
+        val draftReturn = sample[DraftSingleDisposalReturn]
+          .copy(initialGainOrLoss = Some(AmountInPence(1L)))
+
+        val fillingOutReturn      = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val trustFillingOutReturn = fillingOutReturn.copy(subscribedDetails   = generateTrustSubscribedDetails())
+        val individualFillingOutReturn = fillingOutReturn.copy(
+          subscribedDetails = generateIndividualSubscribedDetails(),
+          draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
+        )
+        val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
+          draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
+        )
+        val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
+          draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
+        )
+
+        val testData = List(
+          ("", individualFillingOutReturn, false),
+          (".trust", trustFillingOutReturn, false),
+          (".personalRep", personalRepresentativeFillingOutReturn, false),
+          (".capacitor", capacitorFillingOutReturn, false),
+          (".agent", individualFillingOutReturn, true)
+        )
+        testData.map(keyWithJourneyStatus => test(keyWithJourneyStatus._1, keyWithJourneyStatus._2, keyWithJourneyStatus._3))
+      }
+
+      def test(userKey: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean) = {
+        val session =
+          if (isAgent) SessionData.empty.copy(userType = Some(UserType.Agent), journeyStatus = Some(fillingOutReturn))
+          else
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
+          mockGetSession(session)
         }
 
         checkPageIsDisplayed(
@@ -457,6 +490,7 @@ class InitialGainOrLossControllerSpec
             "initialGainOrLoss.cya.title"
           ), { doc =>
             doc.select("body").html() should include(Messages("initialGainOrLoss.cya.title"))
+            doc.select("#initialGainOrLoss-question").text() should include(Messages(s"initialGainOrLoss$userKey.title"))
             doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
               .checkYourAnswersSubmit()
               .url

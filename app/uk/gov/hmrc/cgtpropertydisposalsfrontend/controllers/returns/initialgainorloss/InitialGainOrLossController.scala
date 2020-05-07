@@ -172,8 +172,6 @@ object InitialGainOrLossController {
     representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
   )(implicit request: RequestWithSessionData[_]): Form[BigDecimal] = {
 
-    val isAgent = request.userType.contains(UserType.Agent)
-
     val (outerId, gainId, lossId) = ("initialGainOrLoss", "gain", "loss")
 
     def innerOption(id: String): InnerOption[BigDecimal] =
@@ -192,7 +190,7 @@ object InitialGainOrLossController {
           }
       }
 
-    val formatter = ConditionalRadioUtils.formatter(s"initialGainOrLoss")(
+    val formatter = ConditionalRadioUtils.formatter("initialGainOrLoss")(
       List(
         Left(innerOption(gainId)),
         Left(innerOption(lossId).map(_ * -1)),
