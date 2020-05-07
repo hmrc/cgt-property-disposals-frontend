@@ -85,12 +85,15 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  def messageKey(userType: UserType) = userType match {
-    case Individual   => ""
-    case Organisation => ".trust"
-    case Agent        => ".agent"
-    case other        => sys.error(s"User type '$other' not handled")
-  }
+  def messageKey(userType: UserType, individualUserType: Option[IndividualUserType]) =
+    (userType, individualUserType) match {
+      case (_, Some(Capacitor))              => ".capacitor"
+      case (_, Some(PersonalRepresentative)) => ".personalRep"
+      case (Individual, _)                   => ""
+      case (Organisation, _)                 => ".trust"
+      case (Agent, _)                        => ".agent"
+      case other                             => sys.error(s"User type '$other' not handled")
+    }
 
   override def updateAddress(journey: FillingOutReturnAddressJourney, address: Address): FillingOutReturn =
     address match {
@@ -187,6 +190,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
           }
 
+          val individualUserType = draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType)
+
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("property-details.multiple-disposals.guidance.title"), { doc =>
@@ -197,10 +202,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 .multipleDisposalsGuidanceSubmit()
                 .url
               doc.select("#content > article > p:nth-child(4)").text() shouldBe messageFromMessageKey(
-                s"property-details.multiple-disposals.guidance${messageKey(userType)}.p1"
+                s"property-details.multiple-disposals.guidance${messageKey(userType, individualUserType)}.p1"
               )
               doc.select("#content > article > p:nth-child(7)").text() shouldBe messageFromMessageKey(
-                s"property-details.multiple-disposals.guidance${messageKey(userType)}.p3"
+                s"property-details.multiple-disposals.guidance${messageKey(userType, individualUserType)}.p3"
               )
             }
           )
@@ -209,7 +214,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "individual user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             controllers.returns.routes.TaskListController.taskList(),
             Individual
@@ -219,7 +225,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "trust user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             controllers.returns.routes.TaskListController.taskList(),
             Organisation
@@ -228,7 +235,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "agent user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             controllers.returns.routes.TaskListController.taskList(),
             Agent
@@ -238,7 +246,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "individual user has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers]),
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             controllers.returns.routes.TaskListController.taskList(),
             Individual
@@ -248,7 +257,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "trust user has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers]),
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             controllers.returns.routes.TaskListController.taskList(),
             Organisation
@@ -258,7 +268,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "agent user has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers]),
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             controllers.returns.routes.TaskListController.taskList(),
             Agent
@@ -268,7 +279,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "individual user has completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Individual
@@ -278,7 +290,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "trust user has completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Organisation
@@ -288,7 +301,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "agent user has completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Agent
@@ -1062,7 +1076,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        val triageAnswersWithTaxYear = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear)
+        val triageAnswersWithTaxYear =
+          sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear, individualUserType = None)
 
         def test(
           draftReturn: DraftMultipleDisposalsReturn,
@@ -1087,12 +1102,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
           }
 
+          val individualUserType = draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType)
+
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"multipleDisposalsDisposalDate${messageKey(userType)}.title"),
+            messageFromMessageKey(s"multipleDisposalsDisposalDate${messageKey(userType, individualUserType)}.title"),
             doc =>
               doc.select("#multipleDisposalsDisposalDate-form-hint").text() shouldBe messageFromMessageKey(
-                s"multipleDisposalsDisposalDate${messageKey(userType)}.helpText"
+                s"multipleDisposalsDisposalDate${messageKey(userType, individualUserType)}.helpText"
               )
           )
         }
@@ -1592,6 +1609,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
           }
 
+          val individualUserType = draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType)
+
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(s"multipleDisposalsDisposalPrice.title"), { doc =>
@@ -1602,7 +1621,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 .disposalPriceSubmit()
                 .url
               doc.select("#multipleDisposalsDisposalPrice-form-hint").text() shouldBe messageFromMessageKey(
-                s"multipleDisposalsDisposalPrice${messageKey(userType)}.helpText"
+                s"multipleDisposalsDisposalPrice${messageKey(userType, individualUserType)}.helpText"
               )
             }
           )
@@ -1611,7 +1630,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "individual user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalDate(),
             Individual
@@ -1621,7 +1641,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "trust user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalDate(),
             Organisation
@@ -1631,7 +1652,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "agent user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalDate(),
             Agent
@@ -1645,7 +1667,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = None
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalDate(),
             Individual
@@ -1659,7 +1682,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = None
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalDate(),
             Organisation
@@ -1673,7 +1697,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = None
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalDate(),
             Agent
@@ -1687,7 +1712,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = sample[AmountInPence]
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Individual
@@ -1701,7 +1727,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = sample[AmountInPence]
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Organisation
@@ -1715,7 +1742,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = sample[AmountInPence]
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Agent
@@ -1961,6 +1989,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
           }
 
+          val individualUserType = draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType)
+
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(s"multipleDisposalsAcquisitionPrice.title"), { doc =>
@@ -1971,7 +2001,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 .acquisitionPriceSubmit()
                 .url
               doc.select("#multipleDisposalsAcquisitionPrice-form-hint").text() shouldBe messageFromMessageKey(
-                s"multipleDisposalsAcquisitionPrice${messageKey(userType)}.helpText"
+                s"multipleDisposalsAcquisitionPrice${messageKey(userType, individualUserType)}.helpText"
               )
             }
           )
@@ -1980,7 +2010,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "individual user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalPrice(),
             Individual
@@ -1990,7 +2021,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "trust user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalPrice(),
             Organisation
@@ -2000,10 +2032,34 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "agent user has not started this section before" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
-              examplePropertyDetailsAnswers = None
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalPrice(),
             Agent
+          )
+        }
+
+        "capacitor user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = None,
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Capacitor))
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Individual
+          )
+        }
+
+        "personal representative user has not started this section before" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = None,
+              triageAnswers =
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative))
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Individual
           )
         }
 
@@ -2028,7 +2084,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = None
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalPrice(),
             Organisation
@@ -2042,10 +2099,42 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = None
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.disposalPrice(),
             Agent
+          )
+        }
+
+        "capacitor user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Capacitor))
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Individual
+          )
+        }
+
+        "personal representative user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              ),
+              triageAnswers =
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative))
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Individual
           )
         }
 
@@ -2056,7 +2145,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = sample[AmountInPence]
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Individual
@@ -2070,7 +2160,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = sample[AmountInPence]
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Organisation
@@ -2084,10 +2175,41 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = sample[AmountInPence]
                 )
-              )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None)
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Agent
+          )
+        }
+
+        "capacitor user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Capacitor))
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+        "personal representative user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers =
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative))
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Individual
           )
         }
 

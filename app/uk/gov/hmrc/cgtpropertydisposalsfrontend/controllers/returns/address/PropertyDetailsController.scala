@@ -36,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, SessionData, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -348,7 +349,13 @@ class PropertyDetailsController @Inject() (
                 _ => controllers.returns.routes.TaskListController.taskList(),
                 _ => routes.PropertyDetailsController.checkYourAnswers()
               )
-          Ok(multipleDisposalsGuidancePage(backLink, r.journey.subscribedDetails.isATrust))
+          Ok(
+            multipleDisposalsGuidancePage(
+              backLink,
+              r.journey.subscribedDetails.isATrust,
+              extractIndividualUserType(r)
+            )
+          )
       }
     }
   }
@@ -493,7 +500,14 @@ class PropertyDetailsController @Inject() (
 
           val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
 
-          Ok(multipleDisposalsDisposalPricePage(form, backLink, r.journey.subscribedDetails.isATrust))
+          Ok(
+            multipleDisposalsDisposalPricePage(
+              form,
+              backLink,
+              r.journey.subscribedDetails.isATrust,
+              extractIndividualUserType(r)
+            )
+          )
       }
     }
   }
@@ -512,7 +526,12 @@ class PropertyDetailsController @Inject() (
             .fold(
               formWithErrors =>
                 BadRequest(
-                  multipleDisposalsDisposalPricePage(formWithErrors, backLink, r.journey.subscribedDetails.isATrust)
+                  multipleDisposalsDisposalPricePage(
+                    formWithErrors,
+                    backLink,
+                    r.journey.subscribedDetails.isATrust,
+                    extractIndividualUserType(r)
+                  )
                 ),
               disposalPrice =>
                 if (answers
@@ -571,7 +590,14 @@ class PropertyDetailsController @Inject() (
 
           val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
 
-          Ok(multipleDisposalsAcquisitionPricePage(form, backLink, r.journey.subscribedDetails.isATrust))
+          Ok(
+            multipleDisposalsAcquisitionPricePage(
+              form,
+              backLink,
+              r.journey.subscribedDetails.isATrust,
+              extractIndividualUserType(r)
+            )
+          )
       }
     }
   }
@@ -590,7 +616,12 @@ class PropertyDetailsController @Inject() (
             .fold(
               formWithErrors =>
                 BadRequest(
-                  multipleDisposalsAcquisitionPricePage(formWithErrors, backLink, r.journey.subscribedDetails.isATrust)
+                  multipleDisposalsAcquisitionPricePage(
+                    formWithErrors,
+                    backLink,
+                    r.journey.subscribedDetails.isATrust,
+                    extractIndividualUserType(r)
+                  )
                 ),
               acquisitionPrice =>
                 if (answers
@@ -680,7 +711,8 @@ class PropertyDetailsController @Inject() (
                       multipleDisposalsCheckYourAnswersPage(
                         completeAnswers,
                         shouldAskIfPostcodeExists(assetTypes),
-                        r.journey.subscribedDetails.isATrust
+                        r.journey.subscribedDetails.isATrust,
+                        extractIndividualUserType(r)
                       )
                     )
                 )
@@ -690,7 +722,8 @@ class PropertyDetailsController @Inject() (
                   multipleDisposalsCheckYourAnswersPage(
                     c,
                     shouldAskIfPostcodeExists(assetTypes),
-                    r.journey.subscribedDetails.isATrust
+                    r.journey.subscribedDetails.isATrust,
+                    extractIndividualUserType(r)
                   )
                 )
 
@@ -725,6 +758,15 @@ class PropertyDetailsController @Inject() (
     disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }
 
+  private def extractIndividualUserType(
+    f: FillingOutReturnAddressJourney
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    f.individualUserType match {
+      case Some(IndividualUserType.Capacitor) => Some(Right(IndividualUserType.Capacitor))
+      case Some(IndividualUserType.PersonalRepresentative) =>
+        Some(Left(IndividualUserType.PersonalRepresentative))
+      case _ => None
+    }
   private def disposalPriceBackLink(answers: ExamplePropertyDetailsAnswers): Call =
     answers
       .fold(

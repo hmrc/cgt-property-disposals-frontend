@@ -944,6 +944,8 @@ property-details.multiple-disposals.guidance.title=You’ll need to enter detail
 property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.
 property-details.multiple-disposals.guidance.agent.p1=You should enter the details of the property that gave your client the largest gain or the smallest loss.
 property-details.multiple-disposals.guidance.trust.p1=You should enter the details of the property that gave the trust the largest gain or the smallest loss.
+property-details.multiple-disposals.guidance.capacitor.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss.
+property-details.multiple-disposals.guidance.personalRep.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss.
 property-details.multiple-disposals.guidance.p2=For that one property, you’ll need to enter:
 property-details.multiple-disposals.guidance.li1=property’s UK address
 property-details.multiple-disposals.guidance.li2=contract exchange date
@@ -952,6 +954,8 @@ property-details.multiple-disposals.guidance.li4=acquisition amount, plus improv
 property-details.multiple-disposals.guidance.p3=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.agent.p3=Contract exchange usually happens when your client and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.trust.p3=Contract exchange usually happens when the trust and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.personalRep.p3=Contract exchange usually happens when the person and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.capacitor.p3=Contract exchange usually happens when the person and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
 
 enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
@@ -2313,9 +2317,13 @@ hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any sup
 multipleDisposalsDisposalDate.title=What date did you exchange contracts when disposing of the property?
 multipleDisposalsDisposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
 multipleDisposalsDisposalDate.trust.title=When the property was disposed of, what date were contracts exchanged?
+multipleDisposalsDisposalDate.capacitor.title=When the property was disposed of, what date were contracts exchanged?
+multipleDisposalsDisposalDate.personalRep.title=When the property was disposed of, what date were contracts exchanged?
 multipleDisposalsDisposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
 multipleDisposalsDisposalDate.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 multipleDisposalsDisposalDate.trust.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
+multipleDisposalsDisposalDate.capacitor.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
+multipleDisposalsDisposalDate.personalRep.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 
 multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 
@@ -2339,6 +2347,8 @@ multipleDisposalsDisposalPrice.title=What was the disposal value of the property
 multipleDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.trust.helpText=This is the amount the trust got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.capacitor.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.personalRep.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
 
@@ -2353,14 +2363,22 @@ multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the pr
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
 multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.capacitor.helpText= This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+
 multipleDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
 multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if they built an extension or replaced a basic kitchen with a luxury one. They cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. The trust cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.capacitor.details.p1=The person can include the cost of improvements that added value to the property. For example, if the person built an extension or replaced a basic kitchen with a luxury one. They cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.personalRep.details.p1=The cost of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
+
 multipleDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
 multipleDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
 multipleDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of the costs, they can only claim their share.
 multipleDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, it can only claim its share.
+multipleDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
+multipleDisposalsAcquisitionPrice.personalRep.details.p3=If the person shared any of the costs, you can only include the person’s share.
 
 multipleDisposalsAcquisitionPrice.error.invalid=Amount must be a number
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86
