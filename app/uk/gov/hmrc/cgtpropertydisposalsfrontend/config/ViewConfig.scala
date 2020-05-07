@@ -81,11 +81,12 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val equalityCommissionForNorthenIrelandUrl: String = getString("external-url.equality-commission-for-northen-ireland")
   val digitalAccessibilityCentretUrl: String         = getString("external-url.digital-accessibility-centre")
   val reportAccessibilityProblemUrl: String          = s"${getString("external-url.report-accessibility-problem")}?service=cgtpd"
-  val contactHmrc                                    = getString("external-url.contact-hmrc")
+  val contactHmrc: String                            = getString("external-url.contact-hmrc")
 
-  val personalRepresentative = getString("external-url.personal-representative")
-  val calculateCgt           = getString("external-url.calculate-cgt")
-  val payYourTax             = getString("external-url.pay-your-tax")
+  val personalRepresentative: String      = getString("external-url.personal-representative")
+  val calculateCgt: String                = getString("external-url.calculate-cgt")
+  val payYourTax: String                  = getString("external-url.pay-your-tax")
+  val returnsForSomeoneWhoHasDied: String = getString("external-url.returns-for-someone-who-has-died")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"

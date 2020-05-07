@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorSc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -46,6 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
@@ -2297,7 +2299,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       val currentDraftReturn =
         sample[DraftMultipleDisposalsReturn].copy(
           triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
-          examplePropertyDetailsAnswers = Some(allQuestionsAnswered)
+          examplePropertyDetailsAnswers = Some(allQuestionsAnswered),
+          representeeAnswers            = None
         )
       val currentJourney     = sample[FillingOutReturn].copy(draftReturn             = currentDraftReturn)
       val updatedDraftReturn = currentDraftReturn.copy(examplePropertyDetailsAnswers = Some(completeAnswers))
@@ -2382,6 +2385,47 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(),
             routes.PropertyDetailsController.disposalDate()
           )
+        }
+
+      }
+
+      "redirect to the period of admin not handled page" when {
+
+        def test(dateOfDeath: DateOfDeath): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(journeyStatus =
+                Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = currentDraftReturn.copy(
+                      examplePropertyDetailsAnswers = Some(allQuestionsAnswered),
+                      representeeAnswers = Some(
+                        sample[CompleteRepresenteeAnswers]
+                          .copy(dateOfDeath = Some(dateOfDeath))
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            triageRoutes.CommonTriageQuestionsController.periodOfAdministrationNotHandled()
+          )
+        }
+
+        "the disposal date is on a given date of death" in {
+          test(DateOfDeath(completeAnswers.disposalDate.value))
+        }
+
+        "the disposal date is before a given date of death" in {
+          test(DateOfDeath(completeAnswers.disposalDate.value.minusDays(1L)))
         }
 
       }

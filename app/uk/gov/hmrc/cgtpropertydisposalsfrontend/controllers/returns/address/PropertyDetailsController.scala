@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.eq._
+import cats.syntax.order._
 import com.google.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of, optional, text}
@@ -29,8 +29,10 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => addressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
@@ -637,6 +639,8 @@ class PropertyDetailsController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
       withAssetTypes(r.journey.draftReturn) { assetTypes =>
+        lazy val representeeAnswers = r.journey.draftReturn.fold(_.representeeAnswers, _.representeeAnswers)
+
         r.journey.draftReturn match {
           case m: DraftMultipleDisposalsReturn =>
             m.examplePropertyDetailsAnswers.fold[Future[Result]](
@@ -647,6 +651,12 @@ class PropertyDetailsController @Inject() (
 
               case IncompleteExamplePropertyDetailsAnswers(_, None, _, _) =>
                 Redirect(routes.PropertyDetailsController.disposalDate())
+
+              case IncompleteExamplePropertyDetailsAnswers(_, Some(disposalDate), _, _)
+                  if (representeeAnswers
+                    .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+                    .exists(_.value <= disposalDate.value)) =>
+                Redirect(triageRoutes.CommonTriageQuestionsController.periodOfAdministrationNotHandled())
 
               case IncompleteExamplePropertyDetailsAnswers(_, _, None, _) =>
                 Redirect(routes.PropertyDetailsController.disposalPrice())

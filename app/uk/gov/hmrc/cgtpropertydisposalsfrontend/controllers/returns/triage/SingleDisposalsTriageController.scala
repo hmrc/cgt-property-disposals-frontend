@@ -801,6 +801,12 @@ class SingleDisposalsTriageController @Inject() (
         case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, None, _, None) =>
           Redirect(routes.SingleDisposalsTriageController.whenWasDisposalDate())
 
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, Some(disposalDate), _, None)
+            if (representeeAnswers
+              .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+              .exists(_.value <= disposalDate.value)) =>
+          Redirect(routes.CommonTriageQuestionsController.periodOfAdministrationNotHandled())
+
         case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, _, None, None) =>
           Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
 

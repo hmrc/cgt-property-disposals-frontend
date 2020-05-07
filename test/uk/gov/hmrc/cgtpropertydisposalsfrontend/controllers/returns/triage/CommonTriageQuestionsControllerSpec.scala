@@ -24,6 +24,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
@@ -1752,6 +1753,49 @@ class CommonTriageQuestionsControllerSpec
           )
         }
 
+      }
+
+    }
+
+    "handling requests to display the period of admin not handled page" must {
+
+      def performAction(): Future[Result] =
+        controller.periodOfAdministrationNotHandled()(FakeRequest())
+
+      "display the page" when {
+
+        def checkPage(result: Future[Result], expectedBackLink: Call): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey("periodOfAdminNotHandled.title"),
+            doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
+          )
+
+        "the user is on a single disposal journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(sample[CompleteSingleDisposalTriageAnswers]),
+                Right(sample[IndividualName])
+              )._1
+            )
+
+            checkPage(performAction(), routes.SingleDisposalsTriageController.whenWasDisposalDate())
+          }
+        }
+
+        "the user is on a multiple disposal journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(sample[IncompleteMultipleDisposalsTriageAnswers])._1
+            )
+
+            checkPage(performAction(), controllers.returns.address.routes.PropertyDetailsController.disposalDate())
+          }
+
+        }
       }
 
     }
