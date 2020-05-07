@@ -41,6 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAtte
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference, RepresenteeNino, RepresenteeSautr}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, RepresenteeAnswers, RepresenteeReferenceId, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, NameMatchServiceError, TimeUtils, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -196,8 +197,6 @@ class RepresenteeController @Inject() (
 
   def confirmPerson(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
-      val backLink = routes.RepresenteeController.enterId()
-
       answers match {
         case IncompleteRepresenteeAnswers(Some(name), Some(id), _, None, false, false) =>
           Ok(
@@ -207,7 +206,7 @@ class RepresenteeController @Inject() (
               representativeType,
               journey.isRight,
               confirmPersonForm,
-              backLink
+              routes.RepresenteeController.enterId()
             )
           )
 
@@ -219,53 +218,46 @@ class RepresenteeController @Inject() (
   def confirmPersonSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
-        val backLink = routes.RepresenteeController.enterId()
-
-        def updateSessionAndCYA(updatedAnswers: IncompleteRepresenteeAnswers): Future[Result] =
-          updateDraftReturnAndSession(
-            updatedAnswers,
-            journey
-          ).fold({ e =>
-            logger.warn("Could not update draft return", e)
-            errorHandler.errorResult()
-          }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
-
-        def handleForm(
-          id: RepresenteeReferenceId,
-          name: IndividualName,
-          incompleteRepresenteeAnswers: IncompleteRepresenteeAnswers
-        ): Future[Result] =
-          confirmPersonForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
-                BadRequest(
-                  confirmPersonPage(
-                    id,
-                    name,
-                    representativeType,
-                    journey.isRight,
-                    formWithErrors,
-                    backLink
-                  )
-                ),
-              isYes =>
-                if (isYes)
-                  updateSessionAndCYA(incompleteRepresenteeAnswers.copy(hasConfirmedPerson = true))
-                else
-                  updateSessionAndCYA(IncompleteRepresenteeAnswers.empty)
-            )
-
         answers match {
           case incompleteRepresenteeAnswers @ IncompleteRepresenteeAnswers(
                 Some(name),
                 Some(id),
                 _,
-                None,
-                false,
-                false
+                _,
+                _,
+                _
               ) =>
-            handleForm(id, name, incompleteRepresenteeAnswers)
+            confirmPersonForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    confirmPersonPage(
+                      id,
+                      name,
+                      representativeType,
+                      journey.isRight,
+                      formWithErrors,
+                      routes.RepresenteeController.enterId()
+                    )
+                  ), { isYes =>
+                  val newAnswers =
+                    if (isYes)
+                      incompleteRepresenteeAnswers.copy(
+                        hasConfirmedPerson         = true,
+                        hasConfirmedContactDetails = false,
+                        contactDetails             = None
+                      )
+                    else IncompleteRepresenteeAnswers.empty
+
+                  updateDraftReturnAndSession(newAnswers, journey)
+                    .fold({ e =>
+                      logger.warn("Could not update draft return", e)
+                      errorHandler.errorResult()
+                    }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+                }
+              )
+
           case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
 
         }
@@ -324,7 +316,11 @@ class RepresenteeController @Inject() (
                                   .leftMap(ServiceError)
                             )
               _ <- updateDraftReturnAndSession(
-                    answers.fold(_.copy(id = Some(matchedId), hasConfirmedPerson = false), _.copy(id = matchedId)),
+                    IncompleteRepresenteeAnswers.empty.copy(
+                      name        = answers.fold(_.name, c => Some(c.name)),
+                      dateOfDeath = answers.fold(_.dateOfDeath, _.dateOfDeath),
+                      id          = Some(matchedId)
+                    ),
                     journey
                   ).leftMap[NameMatchError](e => ServiceError(NameMatchServiceError.BackendError(e)))
             } yield ()
@@ -384,9 +380,9 @@ class RepresenteeController @Inject() (
                   Redirect(routes.RepresenteeController.checkYourAnswers())
                 else {
                   val newAnswers =
-                    answers.fold(
-                      _.copy(dateOfDeath = Some(dateOfDeath)),
-                      _.copy(dateOfDeath = Some(dateOfDeath))
+                    IncompleteRepresenteeAnswers.empty.copy(
+                      name        = answers.fold(_.name, c => Some(c.name)),
+                      dateOfDeath = Some(dateOfDeath)
                     )
                   updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
                     logger.warn("Could not update draft return", e)
@@ -447,7 +443,7 @@ class RepresenteeController @Inject() (
                       false
                     )
                 )
-              updateDraftReturnAndSession(newAnswers, journey).fold({ e =>
+              updateDraftReturnAndSession(newAnswers, journey, clearDraftReturn = false).fold({ e =>
                 logger.warn("Could not update draft return", e)
                 errorHandler.errorResult()
               }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
@@ -495,10 +491,11 @@ class RepresenteeController @Inject() (
     withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
       answers match {
         case i @ IncompleteRepresenteeAnswers(_, _, _, Some(_), _, false) =>
-          updateDraftReturnAndSession(i.copy(hasConfirmedContactDetails = true), journey).fold({ e =>
-            logger.warn("Could not update draft return or session", e)
-            errorHandler.errorResult()
-          }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
+          updateDraftReturnAndSession(i.copy(hasConfirmedContactDetails = true), journey, clearDraftReturn = false)
+            .fold({ e =>
+              logger.warn("Could not update draft return or session", e)
+              errorHandler.errorResult()
+            }, _ => Redirect(routes.RepresenteeController.checkYourAnswers()))
 
         case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
       }
@@ -517,18 +514,35 @@ class RepresenteeController @Inject() (
 
   private def updateDraftReturnAndSession(
     newAnswers: RepresenteeAnswers,
-    currentJourney: Either[StartingNewDraftReturn, FillingOutReturn]
+    currentJourney: Either[StartingNewDraftReturn, FillingOutReturn],
+    clearDraftReturn: Boolean = true
   )(implicit request: RequestWithSessionData[_]): EitherT[Future, Error, Unit] = {
     val newJourney =
       currentJourney.bimap(
         _.copy(representeeAnswers = Some(newAnswers)),
-        fillingOutReturn =>
-          fillingOutReturn.copy(draftReturn =
-            fillingOutReturn.draftReturn.fold(
-              _.copy(representeeAnswers = Some(newAnswers)),
-              _.copy(representeeAnswers = Some(newAnswers))
-            )
+        fillingOutReturn => {
+          val individualUserType = fillingOutReturn.draftReturn.fold(
+            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
+            _.triageAnswers.fold(_.individualUserType, _.individualUserType)
           )
+
+          val newDraftReturn =
+            if (clearDraftReturn)
+              DraftSingleDisposalReturn.newDraftReturn(
+                fillingOutReturn.draftReturn.id,
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType = individualUserType
+                ),
+                Some(newAnswers)
+              )
+            else
+              fillingOutReturn.draftReturn.fold(
+                _.copy(representeeAnswers = Some(newAnswers)),
+                _.copy(representeeAnswers = Some(newAnswers))
+              )
+
+          fillingOutReturn.copy(draftReturn = newDraftReturn)
+        }
       )
     for {
       _ <- newJourney.fold(
@@ -568,7 +582,7 @@ class RepresenteeController @Inject() (
         case IncompleteRepresenteeAnswers(Some(name), Some(id), dateOfDeath, Some(contactDetails), true, true) =>
           val completeAnswers = CompleteRepresenteeAnswers(name, id, dateOfDeath, contactDetails)
 
-          updateDraftReturnAndSession(completeAnswers, journey).fold(
+          updateDraftReturnAndSession(completeAnswers, journey, clearDraftReturn = false).fold(
             { e =>
               logger.warn("Could not update draft return or session", e)
               errorHandler.errorResult()
