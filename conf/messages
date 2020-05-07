@@ -2037,10 +2037,15 @@ taxDue.p1=We used the details that were entered into this return to work out the
 taxDue.p2=You may need to enter these figures when you complete future returns.
 taxDue.printLink=Print or save a copy of this page
 taxDue.initialGainOrLoss=Initial gain or loss
+taxDue.assistive.initialGainOrLoss=for initial gain or loss
 taxDue.gainOrLossAfterReliefs=Gain or loss after reliefs
+taxDue.assistive.gainOrLossAfterReliefs=for gain or loss after reliefs
 taxDue.gainAfterLosses=Gain after losses
+taxDue.assistive.gainAfterLosses=for gain after losses
 taxDue.taxableGain=Taxable gain
+taxDue.assistive.taxableGain=for taxable gain
 taxDue.amountOfTaxDue=Capital Gains Tax due for this return
+taxDue.assistive.amountOfTaxDue=for Capital Gains Tax due for this return
 taxDue.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
 taxDue.agent.helpText.p1=If your client agrees with these workings enter <strong class="bold">{0}</strong>.
 taxDue.trust.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.

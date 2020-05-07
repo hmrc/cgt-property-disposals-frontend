@@ -104,7 +104,7 @@
         @details(
           messages("calculator.showWorkings"),
           initialGainOrLossWorkings(disposalDetails, acquisitionDetails, calculatedTax),
-          Some(s"${messages("generic.for")} ${messages(s"$key.initialGainOrLoss")}")
+          Some(messages(s"$key.assistive.initialGainOrLoss"))
         )
       </li>
       <li>
@@ -112,7 +112,7 @@
         @details(
           messages("calculator.showWorkings"),
           gainOrLossAfterReliefsWorkings(reliefDetails, calculatedTax),
-          Some(s"${messages("generic.for")} ${messages(s"$key.gainOrLossAfterReliefs")}")
+          Some(messages(s"$key.assistive.gainOrLossAfterReliefs"))
         )
       </li>
       @if(!calculatedTax.initialGainOrLoss.amount.isNegative) {
@@ -121,7 +121,7 @@
           @details(
             messages("calculator.showWorkings"),
             gainAfterLossesWorkings(exemptionsAndLossesDetails, calculatedTax),
-            Some(s"${messages("generic.for")} ${messages(s"$key.gainAfterLosses")}")
+            Some(messages(s"$key.assistive.gainAfterLosses"))
           )
         </li>
         <li>
@@ -129,7 +129,7 @@
           @details(
             messages("calculator.showWorkings"),
             taxableGainWorkings(exemptionsAndLossesDetails, calculatedTax),
-            Some(s"${messages("generic.for")} ${messages(s"$key.taxableGain")}")
+            Some(messages(s"$key.assistive.taxableGain"))
           )
         </li>
       }
@@ -138,7 +138,7 @@
         @details(
           messages("calculator.showWorkings"),
           taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, assetType, isATrust),
-          Some(s"${messages("generic.for")} ${messages(s"$key.amountOfTaxDue")}")
+          Some(messages(s"$key.assistive.amountOfTaxDue"))
         )
       </li>
     </ul>
