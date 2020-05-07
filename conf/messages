@@ -32,6 +32,7 @@ generic.errorPrefix=Error:
 generic.loss=loss
 generic.gain=gain
 generic.on=on
+generic.for=for
 yesNo.true=Yes
 yesNo.false=No
 
