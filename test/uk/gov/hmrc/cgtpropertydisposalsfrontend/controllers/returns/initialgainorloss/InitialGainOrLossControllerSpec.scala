@@ -134,17 +134,21 @@ class InitialGainOrLossControllerSpec
             .copy(initialGainOrLoss = Some(AmountInPence(300L)))
 
           val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
           val trustFillingOutReturn = fillingOutReturn.copy(
             subscribedDetails = generateTrustSubscribedDetails(),
             draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
           )
+
           val individualFillingOutReturn = fillingOutReturn.copy(
             subscribedDetails = generateIndividualSubscribedDetails(),
             draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
           )
+
           val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
             draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
           )
+
           val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
             draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
           )
@@ -170,9 +174,7 @@ class InitialGainOrLossControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            session
-          )
+          mockGetSession(session)
         }
         checkPageIsDisplayed(
           performAction(),
@@ -202,23 +204,6 @@ class InitialGainOrLossControllerSpec
         )
       }
     }
-    def generateTrustSubscribedDetails() =
-      sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
-
-    def generateIndividualSubscribedDetails() =
-      sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
-
-    def generateTriageAnswersWithPersonalRepresentative() =
-      sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative))
-
-    def generateTriageAnswersWithCapacitor() =
-      sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor))
-
-    def generateTriageAnswersWithSelf() =
-      sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
-
-    def generateTriageAnswersForTrust() =
-      sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = None)
 
     "submitting initial gain or loss" must {
 
@@ -278,15 +263,22 @@ class InitialGainOrLossControllerSpec
         val draftReturn = sample[DraftSingleDisposalReturn]
           .copy(initialGainOrLoss = Some(AmountInPence(300L)))
 
-        val fillingOutReturn      = sample[FillingOutReturn].copy(draftReturn = draftReturn)
-        val trustFillingOutReturn = fillingOutReturn.copy(subscribedDetails   = generateTrustSubscribedDetails())
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+        val trustFillingOutReturn = fillingOutReturn.copy(
+          subscribedDetails = generateTrustSubscribedDetails(),
+          draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
+        )
+
         val individualFillingOutReturn = fillingOutReturn.copy(
           subscribedDetails = generateIndividualSubscribedDetails(),
           draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
         )
+
         val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
           draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
         )
+
         val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
           draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
         )
@@ -455,15 +447,22 @@ class InitialGainOrLossControllerSpec
         val draftReturn = sample[DraftSingleDisposalReturn]
           .copy(initialGainOrLoss = Some(AmountInPence(1L)))
 
-        val fillingOutReturn      = sample[FillingOutReturn].copy(draftReturn = draftReturn)
-        val trustFillingOutReturn = fillingOutReturn.copy(subscribedDetails   = generateTrustSubscribedDetails())
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+        val trustFillingOutReturn = fillingOutReturn.copy(
+          subscribedDetails = generateTrustSubscribedDetails(),
+          draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
+        )
+
         val individualFillingOutReturn = fillingOutReturn.copy(
           subscribedDetails = generateIndividualSubscribedDetails(),
           draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
         )
+
         val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
           draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
         )
+
         val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
           draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
         )
@@ -523,5 +522,23 @@ class InitialGainOrLossControllerSpec
       }
     }
   }
+
+  def generateTrustSubscribedDetails() =
+    sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
+
+  def generateIndividualSubscribedDetails() =
+    sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+
+  def generateTriageAnswersWithPersonalRepresentative() =
+    sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative))
+
+  def generateTriageAnswersWithCapacitor() =
+    sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor))
+
+  def generateTriageAnswersWithSelf() =
+    sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+
+  def generateTriageAnswersForTrust() =
+    sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = None)
 
 }

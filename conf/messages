@@ -2774,6 +2774,7 @@ confirmEmail.verified.representee.p1=We’ll use this address to contact you abo
 representeeContactName.change.title=Change contact name
 representeeContactName.change.help=The contact name used for other government services will not change.
 representeeConfirmPerson.title=Check the details we hold for the person
+representeeConfirmPerson.warning=You cannot use this service if a Capital Gains Tax on UK property return has already been sent for this person this tax year. You’ll need to contact HMRC to find out how to report the tax.
 representeeConfirmPerson.summaryLine1=Name
 representeeConfirmPerson.summaryLine2.cgtReferenceId=Capital Gains Tax on UK property account number
 representeeConfirmPerson.formTitle=Is this the person you’re completing this return for?
@@ -2793,3 +2794,8 @@ periodOfAdminNotHandled.p1=This is because the disposal was made within a period
 periodOfAdminNotHandled.p2=The disposal is in this period because the person died before the property was disposed of.
 periodOfAdminNotHandled.p3=The disposal date is the property’s contract exchange date. If the person made an indirect disposal of shares it’s the date they were sold.
 periodOfAdminNotHandled.p4=Find out how to report and pay Capital Gains Tax on UK property <a href="{0}">during a period of administration</a>.
+
+tmpCustomError.title=Sorry, we are experiencing technical difficulties - 500
+tmpCustomError.heading=Sorry, we’re experiencing technical difficulties
+tmpCustomError.p1=In order for us to resolve the issue, please click on the ‘get help with this page’ link.
+tmpCustomError.p2=We apologise for the inconvenience and thank you for your patience while we resolve the issue.
