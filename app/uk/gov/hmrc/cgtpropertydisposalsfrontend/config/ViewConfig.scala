@@ -30,8 +30,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   private val contactFormServiceIdentifier = "CGTPD"
 
   val assetsPrefix: String   = getString("assets.url") + getString("assets.version")
-  val analyticsToken: String = getString("google-analytics.token")
-  val analyticsHost: String  = getString("google-analytics.host")
   val reportAProblemPartialUrl: String =
     s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   val reportAProblemNonJSUrl: String =
@@ -106,7 +104,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
       .signedOut()
       .url
-  val gaUserTypeDimension: String = getString("google-analytics.user-type-dimension")
   val hmrcTelephone: String       = getString("telephone-numbers.hmrc-helpline")
   val outsideUkPhone: String      = getString("telephone-numbers.outside-uk")
   val agentDedicatedLine: String  = getString("telephone-numbers.agent-dedicated-line")

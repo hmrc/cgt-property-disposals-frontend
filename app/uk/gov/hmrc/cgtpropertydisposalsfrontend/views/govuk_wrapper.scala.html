@@ -62,21 +62,8 @@
       };
       window.jsConfig = window.jsConfig || {};
       window.jsConfig.lang = window.getCookie("PLAY_LANG") || "en";
-      window.jsConfig.gaCustomDimensions = [];
     </script>
 
-    @if(appConfig.gaUserTypeDimension.nonEmpty) {
-      <script>
-        window.jsConfig.gaCustomDimensions.push({
-          name: "@{appConfig.gaUserTypeDimension}",
-          value: "@{userType match {
-            case Some(UserType.Individual) => "individual"
-            case Some(UserType.Organisation) => "organisation"
-            case _ => "anonymous"
-          }}"
-        })
-      </script>
-    }
     @if(withSignOutLink || withAccount) {
         <script>
               window.jsConfig.timeoutEnabled = true;
@@ -121,8 +108,8 @@
 
 @bodyEnd = {
     @uiFooter(
-      analyticsToken = Some(appConfig.analyticsToken),
-      analyticsHost = appConfig.analyticsHost,
+      analyticsToken = None,
+      analyticsHost = "",
       ssoUrl = None,
       scriptElem = Some(withCustomJS),
       gaCalls = None)
