@@ -2789,6 +2789,12 @@ representeeTooManyNameMatchFailures.p1=You have entered the wrong details too ma
 representeeTooManyNameMatchFailures.p2=The reference number you entered does not match the name of the person.
 representeeTooManyNameMatchFailures.p3=You’ll need to wait 2 hours and try again.
 
+periodOfAdminNotHandled.title=You cannot use this service
+periodOfAdminNotHandled.p1=This is because the disposal was made within a period of administration.
+periodOfAdminNotHandled.p2=The disposal is in this period because the person died before the property was disposed of.
+periodOfAdminNotHandled.p3=The disposal date is the property’s contract exchange date. If the person made an indirect disposal of shares it’s the date they were sold.
+periodOfAdminNotHandled.p4=Find out how to report and pay Capital Gains Tax on UK property <a href="{0}">during a period of administration</a>.
+
 tmpCustomError.title=Sorry, we are experiencing technical difficulties - 500
 tmpCustomError.heading=Sorry, we’re experiencing technical difficulties
 tmpCustomError.p1=In order for us to resolve the issue, please click on the ‘get help with this page’ link.

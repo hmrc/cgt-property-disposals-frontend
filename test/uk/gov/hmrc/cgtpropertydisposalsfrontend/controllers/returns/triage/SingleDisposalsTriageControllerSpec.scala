@@ -45,7 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, Tru
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
@@ -3352,12 +3352,68 @@ class SingleDisposalsTriageControllerSpec
 
         "a question has not yet been answered and a draft return has not been created" in {
           test(
-            sessionDataWithStartingNewDraftReturn(_, _, representeeAnswers = sample[IncompleteRepresenteeAnswers])._1
+            sessionDataWithStartingNewDraftReturn(
+              _,
+              _,
+              representeeAnswers = sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None)
+            )._1
           )
         }
 
         "a question has not yet been answered and a draft return has been created" in {
-          test(sessionDataWithFillingOutReturn(_, _, representeeAnswers = sample[IncompleteRepresenteeAnswers])._1)
+          test(
+            sessionDataWithFillingOutReturn(
+              _,
+              _,
+              representeeAnswers = sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None)
+            )._1
+          )
+        }
+
+        "redirect to the period of admin not handled exit page" when {
+
+          "the disposal date given is after or on a given date of death" when {
+
+            "a draft return has not been created" in {
+              val session = sessionDataWithStartingNewDraftReturn(
+                allQuestionsAnswered,
+                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath =
+                  Some(DateOfDeath(completeTriageQuestions.disposalDate.value))
+                )
+              )._1
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.CommonTriageQuestionsController.periodOfAdministrationNotHandled()
+              )
+            }
+
+            "a draft return has been created" in {
+              val session = sessionDataWithFillingOutReturn(
+                allQuestionsAnswered,
+                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath =
+                  Some(DateOfDeath(completeTriageQuestions.disposalDate.value.minusDays(1L)))
+                )
+              )._1
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.CommonTriageQuestionsController.periodOfAdministrationNotHandled()
+              )
+            }
+
+          }
+
         }
 
       }
@@ -3369,7 +3425,8 @@ class SingleDisposalsTriageControllerSpec
             sessionDataWithStartingNewDraftReturn(
               allQuestionsAnswered.copy(
                 assetType = Some(AssetType.MixedUse)
-              )
+              ),
+              representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
             )._1
           )
         }
@@ -3382,9 +3439,12 @@ class SingleDisposalsTriageControllerSpec
       "show an error page" when {
 
         "all the questions have now been answered but the session data cannot be updated" in {
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
-          val updatedJourney     = journey.copy(newReturnTriageAnswers = Right(completeTriageQuestions))
-          val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(
+            allQuestionsAnswered,
+            representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+          )
+          val updatedJourney = journey.copy(newReturnTriageAnswers = Right(completeTriageQuestions))
+          val updatedSession = session.copy(journeyStatus          = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3411,9 +3471,12 @@ class SingleDisposalsTriageControllerSpec
           )
 
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
-          val updatedJourney     = journey.copy(newReturnTriageAnswers = Right(completeTriageQuestions))
-          val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(
+            allQuestionsAnswered,
+            representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+          )
+          val updatedJourney = journey.copy(newReturnTriageAnswers = Right(completeTriageQuestions))
+          val updatedSession = session.copy(journeyStatus          = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3430,7 +3493,10 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "all the questions have now been answered and the session is updated when a draft return has been created" in {
-          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(allQuestionsAnswered)
+          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
+            allQuestionsAnswered,
+            representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+          )
           val updatedJourney =
             journey.copy(draftReturn = draftReturn.copy(triageAnswers = completeTriageQuestions))
           val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
@@ -3452,7 +3518,12 @@ class SingleDisposalsTriageControllerSpec
         "all the questions have already been answered and a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions)._1)
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                completeTriageQuestions,
+                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+              )._1
+            )
           }
 
           testIsCheckYourAnswers(
@@ -3466,7 +3537,12 @@ class SingleDisposalsTriageControllerSpec
         "all the questions have already been answered and a draft return has been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithFillingOutReturn(completeTriageQuestions)._1)
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                completeTriageQuestions,
+                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+              )._1
+            )
           }
 
           testIsCheckYourAnswers(
@@ -3481,7 +3557,10 @@ class SingleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionDataWithFillingOutReturn(completeTriageQuestions)._1.copy(userType = Some(UserType.Agent))
+              sessionDataWithFillingOutReturn(
+                completeTriageQuestions,
+                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+              )._1.copy(userType = Some(UserType.Agent))
             )
           }
 
