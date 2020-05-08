@@ -1121,7 +1121,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
       )
       completeReturn.yearToDateLiabilityAnswers.fold(
         validateNonCalculatedYearToDateLiabilityPage(_, doc, userType, Some(individualUserType)),
-        validateCalculatedYearToDateLiabilityPage(_, doc)
+        validateCalculatedYearToDateLiabilityPage(_, isATrust, doc)
       )
     }
   }
