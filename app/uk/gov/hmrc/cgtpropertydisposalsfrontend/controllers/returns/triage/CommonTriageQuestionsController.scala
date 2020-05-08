@@ -499,22 +499,26 @@ class CommonTriageQuestionsController @Inject() (
 
   private def getNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
-  ): Option[NumberOfProperties] =
+  ): Option[NumberOfProperties] = {
+    def numberOfProperties(singleDisposalTriageAnswers: SingleDisposalTriageAnswers) =
+      singleDisposalTriageAnswers.fold(
+        incomplete =>
+          if (incomplete.hasConfirmedSingleDisposal) Some(NumberOfProperties.One)
+          else None,
+        _ => Some(NumberOfProperties.One)
+      )
+
     state.fold(
       _.newReturnTriageAnswers.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
-        _.fold(
-          incomplete =>
-            if (incomplete.hasConfirmedSingleDisposal) Some(NumberOfProperties.One)
-            else None,
-          _ => Some(NumberOfProperties.One)
-        )
+        numberOfProperties
       ),
       _.draftReturn.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
-        _ => Some(NumberOfProperties.One)
+        s => numberOfProperties(s.triageAnswers)
       )
     )
+  }
 
   private def triageAnswersFomState(
     state: Either[StartingNewDraftReturn, FillingOutReturn]

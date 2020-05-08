@@ -265,15 +265,12 @@ trait UserTypeGen { this: GenUtils =>
 
 }
 
-trait TriageQuestionsGen { this: GenUtils =>
+trait TriageQuestionsGen extends LowerPriorityTriageQuestionsGen { this: GenUtils =>
 
   implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = gen[SingleDisposalTriageAnswers]
 
   implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
     gen[CompleteSingleDisposalTriageAnswers]
-
-  implicit val incompleteSingleDisposalTriageAnswersGen: Gen[IncompleteSingleDisposalTriageAnswers] =
-    gen[IncompleteSingleDisposalTriageAnswers]
 
   implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] =
     gen[CompleteMultipleDisposalsTriageAnswers]
@@ -290,6 +287,13 @@ trait TriageQuestionsGen { this: GenUtils =>
   implicit val completionDateGen: Gen[CompletionDate] = gen[CompletionDate]
 
   implicit val assetTypeGen: Gen[AssetType] = gen[AssetType]
+
+}
+
+trait LowerPriorityTriageQuestionsGen { this: GenUtils =>
+
+  implicit val incompleteSingleDisposalTriageAnswersGen: Gen[IncompleteSingleDisposalTriageAnswers] =
+    gen[IncompleteSingleDisposalTriageAnswers]
 
 }
 
