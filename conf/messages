@@ -2774,6 +2774,7 @@ confirmEmail.verified.representee.p1=We’ll use this address to contact you abo
 representeeContactName.change.title=Change contact name
 representeeContactName.change.help=The contact name used for other government services will not change.
 representeeConfirmPerson.title=Check the details we hold for the person
+representeeConfirmPerson.warning=You cannot use this service if a Capital Gains Tax on UK property return has already been sent for this person this tax year. You’ll need to contact HMRC to find out how to report the tax.
 representeeConfirmPerson.summaryLine1=Name
 representeeConfirmPerson.summaryLine2.cgtReferenceId=Capital Gains Tax on UK property account number
 representeeConfirmPerson.formTitle=Is this the person you’re completing this return for?
