@@ -459,7 +459,8 @@ class CommonTriageQuestionsController @Inject() (
         newReturnTriageAnswers = answers.bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
           updateMultipleDisposalAnswers,
           updateSingleDisposalAnswers
-        )
+        ),
+        representeeAnswers = None
       ),
       r =>
         r.copy(

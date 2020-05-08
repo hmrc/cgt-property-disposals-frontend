@@ -442,7 +442,8 @@ class CommonTriageQuestionsControllerSpec
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
               ),
-              routes.SingleDisposalsTriageController.checkYourAnswers()
+              routes.SingleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
           }
 
@@ -458,7 +459,8 @@ class CommonTriageQuestionsControllerSpec
                 IncompleteSingleDisposalTriageAnswers.empty
                   .copy(individualUserType = Some(IndividualUserType.Capacitor))
               ),
-              routes.SingleDisposalsTriageController.checkYourAnswers()
+              routes.SingleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
           }
 
@@ -485,7 +487,8 @@ class CommonTriageQuestionsControllerSpec
               Right(sample[IndividualName])
             )(
               Right(newAnswers),
-              routes.SingleDisposalsTriageController.checkYourAnswers()
+              routes.SingleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
           }
 
@@ -501,7 +504,8 @@ class CommonTriageQuestionsControllerSpec
                 IncompleteMultipleDisposalsTriageAnswers.empty
                   .copy(individualUserType = Some(IndividualUserType.Capacitor))
               ),
-              routes.MultipleDisposalsTriageController.checkYourAnswers()
+              routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
           }
 
@@ -529,7 +533,8 @@ class CommonTriageQuestionsControllerSpec
               Right(sample[IndividualName])
             )(
               Left(newAnswers),
-              routes.MultipleDisposalsTriageController.checkYourAnswers()
+              routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
 
           }
@@ -1811,10 +1816,14 @@ class CommonTriageQuestionsControllerSpec
     name: Either[TrustName, IndividualName]
   )(
     updatedAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
-    expectedRedirect: Call
+    expectedRedirect: Call,
+    updateRepresenteeAnswers: Option[RepresenteeAnswers] => Option[RepresenteeAnswers] = identity
   ): Unit = {
     val (session, journey) = sessionDataWithStartingNewDraftReturn(answers, name)
-    val updatedJourney     = journey.copy(newReturnTriageAnswers = updatedAnswers)
+    val updatedJourney = journey.copy(
+      newReturnTriageAnswers = updatedAnswers,
+      representeeAnswers     = updateRepresenteeAnswers(journey.representeeAnswers)
+    )
 
     inSequence {
       mockAuthWithNoRetrievals()
