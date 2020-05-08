@@ -1082,9 +1082,12 @@ class CommonTriageQuestionsControllerSpec
         "the user is filling in a return and" when {
 
           "they are on a single disposal journey and change the answer to more than one property" in {
-            forAll { c: CompleteSingleDisposalTriageAnswers =>
-              val answers = c.copy(
-                individualUserType = Some(IndividualUserType.Self)
+            forAll { c: SingleDisposalTriageAnswers =>
+              val answers = c.fold(
+                _.copy(individualUserType = Some(IndividualUserType.Self)),
+                _.copy(
+                  individualUserType = Some(IndividualUserType.Self)
+                )
               )
 
               testSuccessfulUpdateFillingOutReturn(
