@@ -2340,7 +2340,7 @@ class YearToDateLiabilityControllerSpec
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey("ytdLiability.cya.title"),
-                doc => validateCalculatedYearToDateLiabilityPage(completeAnswers, doc)
+                doc => validateCalculatedYearToDateLiabilityPage(completeAnswers, isATrust = false, doc)
               )
             }
           }
@@ -4366,14 +4366,20 @@ class YearToDateLiabilityControllerSpec
 object YearToDateLiabilityControllerSpec extends Matchers {
   def validateCalculatedYearToDateLiabilityPage(
     completeYearToDateLiabilityAnswers: CompleteCalculatedYTDAnswers,
+    isATrust: Boolean,
     doc: Document
   ): Unit = {
-    doc.select("#estimatedIncome-value-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
-      completeYearToDateLiabilityAnswers.estimatedIncome.inPounds()
+
+    doc.select("#estimatedIncome-value-answer").text() shouldBe (
+      if (isATrust) ""
+      else formatAmountOfMoneyWithPoundSign(completeYearToDateLiabilityAnswers.estimatedIncome.inPounds())
     )
 
     completeYearToDateLiabilityAnswers.personalAllowance.foreach(f =>
-      doc.select("#personalAllowance-value-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(f.inPounds())
+      doc.select("#personalAllowance-value-answer").text() shouldBe (
+        if (isATrust) ""
+        else formatAmountOfMoneyWithPoundSign(f.inPounds())
+      )
     )
 
     if (completeYearToDateLiabilityAnswers.hasEstimatedDetails)
