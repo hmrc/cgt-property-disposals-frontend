@@ -127,7 +127,7 @@
        @multipleDisposalsTriageSummary(m.triageAnswers, isATrust)
 
        <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
-       @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust)
+       @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust, representativeType)
 
        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
        @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, isATrust, representativeType)

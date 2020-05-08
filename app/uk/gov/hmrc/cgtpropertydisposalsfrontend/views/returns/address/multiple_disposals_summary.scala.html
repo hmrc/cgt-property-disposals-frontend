@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -33,13 +34,24 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteExamplePropertyDetailsAnswers, shouldAskIfPostcodeExists: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(
+    answers: CompleteExamplePropertyDetailsAnswers,
+    shouldAskIfPostcodeExists: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userKey = @{
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else ""
+}
 
 @cyaSection() {
-    @cyaRow(
+@cyaRow(
         messages("returns.property-address.cyaLabel.property-address"),
         addressDisplay(answers.address, DisplayFormat.Block),
         Some(cyaChange(messages("returns.property-address.cyaChange.property-address"),
