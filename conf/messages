@@ -1487,10 +1487,6 @@ acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of
 acquisitionFeesValue.cyaChange=the amount of additional costs
 
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
-rebaseAcquisitionPrice.agent.title=What was the market value of the property on {0}?
-rebaseAcquisitionPrice.trust.title=What was the market value of the property on {0}?
-rebaseAcquisitionPrice.capacitor.title=What was the market value of the property on {0}?
-rebaseAcquisitionPrice.personalRep.title=What was the market value of the property on {0}?
 
 rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
 rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
