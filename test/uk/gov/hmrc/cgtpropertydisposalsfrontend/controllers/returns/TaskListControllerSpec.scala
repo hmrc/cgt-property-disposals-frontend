@@ -762,7 +762,7 @@ class TaskListControllerSpec
               ),
               initialGainOrLoss = None
             ),
-            TaskListStatus.InProgress
+            TaskListStatus.ToDo
           )
         }
 
