@@ -441,7 +441,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           representeeAnswers = None
         )
         val hasAttachments =
-          r.supportingDocumentAnswers.evidences.nonEmpty || r.yearToDateLiabilityAnswers.isLeft
+          r.supportingDocumentAnswers.evidences.nonEmpty || r.yearToDateLiabilityAnswers
+            .fold(_ => true, _.mandatoryEvidence.isDefined)
 
         r.copy(hasAttachments = hasAttachments) -> hasAttachments
       }
