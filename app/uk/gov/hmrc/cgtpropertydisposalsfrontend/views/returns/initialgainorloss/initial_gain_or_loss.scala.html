@@ -19,6 +19,8 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
+@import cats.instances.string._
+@import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -58,7 +60,15 @@
             else ""
 }
 
-@options = @{List(
+@customErrorKey = @{
+    form.errors.headOption.map(e =>
+        if(e.key === key) s"$key$userKey"
+        else e.key
+    )
+ }
+
+@options = @{
+    List(
     RadioOption(
         label = messages(s"initialGainOrLoss.gain.label"),
         content = Some(unitInput(
@@ -66,7 +76,7 @@
             value = form.data.getOrElse(gainKey, ""),
             label = Html(messages(s"$gainKey.label")),
             formError = form.error(gainKey),
-            hasErrors = false,
+            hasErrors = form.error(gainKey).nonEmpty,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
@@ -82,7 +92,7 @@
             value = form.data.getOrElse(lossKey, ""),
             label = Html(messages(s"$lossKey.label")),
             formError = form.error(lossKey),
-            hasErrors = false,
+            hasErrors = form.error(lossKey).nonEmpty,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
@@ -112,25 +122,50 @@
 }
 
 @mainTemplate(title = title, userType = request.userType) {
+
     @backLinkComponent(backLink)
+
     @caption(messages("initialGainOrLoss.caption"))
 
     @if(hasErrors) {
-        @errorSummary(form, form.errors.headOption.map(x => x.key match {
-            case "initialGainOrLoss" => s"${x.key}$userKey"
-            case _ => x.key
-        }))
+        @errorSummary(form, customErrorKey)
     }
+
     @formWrapper(routes.InitialGainOrLossController.submitInitialGainOrLoss(), 'novalidate -> "novalidate") {
-    @radioGroupConditional(
+      @radioGroupConditional(
         fieldId = key,
         label = pageHeading(title),
         selected = selectedIndex,
-        hasErrors = false,
+        hasErrors = form.error(key).isDefined,
+        error = form.error(key),
         options = options,
-        customErrorKey = form.error(key).map(e => s"$key$userKey${e.message}"),
-        helpText = Some(Html(messages(s"initialGainOrLoss$userKey.helpText"))))
-    @details(messages(s"$key.details.summary"), Html(s"<p>${messages(s"$key$userKey.details.olTitle")}<ol><li>${messages(s"$key.details.li1")}</li><li>${messages(s"$key$userKey.details.li2")}</li><li>${messages(s"$key$userKey.details.li3")}</li><li>${messages(s"$key.details.li4")}</li></ol></p><p><strong class='bold'>${messages(s"$key.details.example.title")}</strong><br>${messages(s"$key$userKey.details.example.details")}</br></p>"))
+        customErrorKey = customErrorKey,
+        helpText = Some(Html(messages(s"initialGainOrLoss$userKey.helpText")))
+      )
+
+    @details(
+        messages(s"$key.details.summary"),
+        Html(
+            s"""
+                |<p>${messages(s"$key$userKey.details.olTitle")}
+                |  <ol>
+                |    <li>${messages(s"$key.details.li1")}</li>
+                |    <li>${messages(s"$key$userKey.details.li2")}</li>
+                |    <li>${messages(s"$key$userKey.details.li3")}</li>
+                |   <li>${messages(s"$key.details.li4")}</li>
+                |  </ol>
+                |</p>
+                |<p>
+                |  <strong class='bold'>${messages(s"$key.details.example.title")}</strong>
+                |  <br>
+                |  ${messages(s"$key$userKey.details.example.details")}
+                |  </br>
+                |</p>
+            """.stripMargin
+        )
+    )
+
     @submitButton(messages("button.saveAndContinue"))
-}
+    }
+
 }
