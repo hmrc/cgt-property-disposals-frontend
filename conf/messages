@@ -1317,8 +1317,8 @@ acquisitionPriceBought.personalRep.title=How much did the person pay for the pro
 acquisitionPriceBought.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
 acquisitionPriceBought.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your client’s share.
 acquisitionPriceBought.trust.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the trust’s share.
-acquisitionPriceBought.capacitor.helpText=You'll be able to enter any buying costs, like solicitor's or surveyor's fees later. If the ownership of the property was shared only enter the person's share.
-acquisitionPriceBought.personalRep.helpText=You'll be able to enter any buying costs, like solicitor's or surveyor's fees later. If the ownership of the property was shared only enter the person's share.
+acquisitionPriceBought.capacitor.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
+acquisitionPriceBought.personalRep.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
 
 acquisitionPriceBought.error.required=Enter how much you paid for your share of the property
 acquisitionPriceBought.agent.error.required=Enter how much your client paid for the property
@@ -1487,6 +1487,10 @@ acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of
 acquisitionFeesValue.cyaChange=the amount of additional costs
 
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
+rebaseAcquisitionPrice.agent.title=What was the market value of the property on {0}?
+rebaseAcquisitionPrice.trust.title=What was the market value of the property on {0}?
+rebaseAcquisitionPrice.capacitor.title=What was the market value of the property on {0}?
+rebaseAcquisitionPrice.personalRep.title=What was the market value of the property on {0}?
 
 rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
 rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
@@ -1511,8 +1515,8 @@ rebaseAcquisitionPrice.personalRep.dropdown.p1=The person owned the property on 
 rebaseAcquisitionPrice.dropdown.p2=This means when you work out your gain or loss. You must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.agent.dropdown.p2=To work out your client’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.trust.dropdown.p2=To work out the trust’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
-rebaseAcquisitionPrice.capacitor.dropdown.p2=To work out the person's gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
-rebaseAcquisitionPrice.personalRep.dropdown.p2=To work out the person's gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+rebaseAcquisitionPrice.capacitor.dropdown.p2=To work out the person’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+rebaseAcquisitionPrice.personalRep.dropdown.p2=To work out the person’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 
 rebaseAcquisitionPrice.dropdown.p3=This process is called rebasing.
 rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.
@@ -1520,8 +1524,8 @@ rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to
 rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check a property’s market value. This means you should enter an estimate now and if you need to amend the amount do it later using this service. Or if you already complete a Self Assessment tax return you can provide the correct market value in your next Self Assessment.
 rebaseAcquisitionPrice.agent.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so your client can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 rebaseAcquisitionPrice.trust.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so the trust can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
-rebaseAcquisitionPrice.capacitor.dropdown.p5=It can take 3 months or more for HMRC to check a property's market value. This means an estimate can be entered so the person can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
-rebaseAcquisitionPrice.personalRep.dropdown.p5=It can take 3 months or more for HMRC to check a property's market value. This means an estimate can be entered so you can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
+rebaseAcquisitionPrice.capacitor.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so the person can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
+rebaseAcquisitionPrice.personalRep.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so you can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 
 rebaseAcquisitionPrice.cyaChange=the market value of the property on {0}
 
