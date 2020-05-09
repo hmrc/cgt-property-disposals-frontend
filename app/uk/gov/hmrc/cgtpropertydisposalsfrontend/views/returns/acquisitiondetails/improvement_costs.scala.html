@@ -55,8 +55,6 @@
 @valueKey = @{ "improvementCostsValue" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-
 @userKey = @{
     if (representativeType.exists(_.isLeft)) ".personalRep"
     else if (representativeType.exists(_.isRight)) ".capacitor"

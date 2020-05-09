@@ -86,10 +86,11 @@
 
 <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
      @acquisitionDetailsSummary(s.acquisitionDetails,
-      rebasingEligibilityUtil.getDisplayRebasingCutOffDate(s),
-      rebasingEligibilityUtil.isUk(s),
-      rebasingEligibilityUtil.isEligibleForRebase(s),
-      isATrust
+        rebasingEligibilityUtil.getDisplayRebasingCutOffDate(s),
+        rebasingEligibilityUtil.isUk(s),
+        rebasingEligibilityUtil.isEligibleForRebase(s),
+        isATrust,
+        representativeType
       )
 
      <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>

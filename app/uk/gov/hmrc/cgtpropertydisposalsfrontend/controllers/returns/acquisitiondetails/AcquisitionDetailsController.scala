@@ -211,14 +211,19 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionMethod(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, _, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.acquisitionMethod.fold(acquisitionMethodForm)(acquisitionMethodForm.fill),
             c => acquisitionMethodForm.fill(c.acquisitionMethod)
           )
         )(
-          page = acquisitionMethodPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+          page = acquisitionMethodPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            draftReturn.triageAnswers.representativeType()
+          )
         )(
           requiredPreviousAnswer = _ => Some(()).isDefined,
           controllers.returns.routes.TaskListController.taskList()
@@ -235,7 +240,14 @@ class AcquisitionDetailsController @Inject() (
           answers
         )(
           acquisitionMethodForm
-        )(acquisitionMethodPage(_, _, fillingOutReturn.subscribedDetails.isATrust))(
+        )(
+          acquisitionMethodPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            draftReturn.triageAnswers.representativeType()
+          )
+        )(
           requiredPreviousAnswer = _ => noAnswersRequired,
           controllers.returns.routes.TaskListController.taskList()
         )(
@@ -269,7 +281,12 @@ class AcquisitionDetailsController @Inject() (
               c => form.fill(c.acquisitionDate)
             )
           )(
-            page = acquisitionDatePage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+            page = acquisitionDatePage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              draftReturn.triageAnswers.representativeType()
+            )
           )(
             requiredPreviousAnswer = _.fold(
               _.acquisitionMethod,
@@ -291,7 +308,14 @@ class AcquisitionDetailsController @Inject() (
             answers
           )(
             form = acquisitionDateForm(disposalDate.value)
-          )(acquisitionDatePage(_, _, fillingOutReturn.subscribedDetails.isATrust))(
+          )(
+            acquisitionDatePage(
+              _,
+              _,
+              fillingOutReturn.subscribedDetails.isATrust,
+              draftReturn.triageAnswers.representativeType()
+            )
+          )(
             requiredPreviousAnswer = _.fold(
               _.acquisitionMethod,
               c => Some(c.acquisitionMethod)
@@ -325,7 +349,7 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, _, answers) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       withAcquisitionDate(answers) { acquisitionDate =>
         withAcquisitionMethod(answers) { acquisitionMethod =>
           commonDisplayBehaviour(answers)(
@@ -339,7 +363,8 @@ class AcquisitionDetailsController @Inject() (
               _,
               acquisitionMethod,
               acquisitionDate,
-              fillingOutReturn.subscribedDetails.isATrust
+              fillingOutReturn.subscribedDetails.isATrust,
+              draftReturn.triageAnswers.representativeType()
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -364,7 +389,14 @@ class AcquisitionDetailsController @Inject() (
           )(
             acquisitionPriceForm
           )(page =
-            acquisitionPricePage(_, _, acquisitionMethod, acquisitionDate, fillingOutReturn.subscribedDetails.isATrust)
+            acquisitionPricePage(
+              _,
+              _,
+              acquisitionMethod,
+              acquisitionDate,
+              fillingOutReturn.subscribedDetails.isATrust,
+              draftReturn.triageAnswers.representativeType()
+            )
           )(
             requiredPreviousAnswer = _.fold(
               _.acquisitionDate,
@@ -410,7 +442,8 @@ class AcquisitionDetailsController @Inject() (
                   _,
                   _,
                   rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
-                  fillingOutReturn.subscribedDetails.isATrust
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  draftReturn.triageAnswers.representativeType()
                 )
               )(
                 requiredPreviousAnswer = answers =>
@@ -443,7 +476,13 @@ class AcquisitionDetailsController @Inject() (
                       form.errors
                         .map(_.copy(args = Seq(TimeUtils.govDisplayFormat(rebaseDate))))
                     )
-                    rebasedAcquisitionPricePage(p, backLink, rebaseDate, fillingOutReturn.subscribedDetails.isATrust)
+                    rebasedAcquisitionPricePage(
+                      p,
+                      backLink,
+                      rebaseDate,
+                      fillingOutReturn.subscribedDetails.isATrust,
+                      draftReturn.triageAnswers.representativeType()
+                    )
                   }
                 )(
                   requiredPreviousAnswer = answers => {
@@ -505,7 +544,8 @@ class AcquisitionDetailsController @Inject() (
               _,
               fillingOutReturn.subscribedDetails.isATrust,
               answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
+              draftReturn.triageAnswers.representativeType()
             )
           )(
             requiredPreviousAnswer = { a =>
@@ -543,7 +583,8 @@ class AcquisitionDetailsController @Inject() (
               _,
               fillingOutReturn.subscribedDetails.isATrust,
               answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
+              draftReturn.triageAnswers.representativeType()
             )
           )(
             requiredPreviousAnswer = { answers =>
@@ -654,7 +695,8 @@ class AcquisitionDetailsController @Inject() (
             fillingOutReturn.subscribedDetails.isATrust,
             answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
             rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
-            wasUkResident
+            wasUkResident,
+            draftReturn.triageAnswers.representativeType()
           )
         )(
           requiredPreviousAnswer = _.fold(
@@ -683,7 +725,8 @@ class AcquisitionDetailsController @Inject() (
             fillingOutReturn.subscribedDetails.isATrust,
             answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
             rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
-            wasUkResident
+            wasUkResident,
+            draftReturn.triageAnswers.representativeType()
           )
         )(
           requiredPreviousAnswer = _.fold(
@@ -720,7 +763,8 @@ class AcquisitionDetailsController @Inject() (
                 rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasAUkResident),
                 wasAUkResident,
                 rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident, assetType, c.acquisitionDate.value),
-                fillingOutReturn.subscribedDetails.isATrust
+                fillingOutReturn.subscribedDetails.isATrust,
+                draftReturn.triageAnswers.representativeType()
               )
             )
 
@@ -782,7 +826,8 @@ class AcquisitionDetailsController @Inject() (
                     wasAUkResident,
                     rebasingEligibilityUtil
                       .isEligibleForRebase(wasAUkResident, assetType, completeAnswers.acquisitionDate.value),
-                    fillingOutReturn.subscribedDetails.isATrust
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    draftReturn.triageAnswers.representativeType()
                   )
                 )
             )
@@ -806,6 +851,7 @@ class AcquisitionDetailsController @Inject() (
     } else if (!wasUkResident) {
       acquisitionDetailsAnswers.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice)).isDefined
     } else true
+
 }
 
 object AcquisitionDetailsController {
