@@ -17,8 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails
 
 import java.time.LocalDate
-
-import javax.naming.directory.InitialDirContext
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatest.Matchers
@@ -29,7 +27,6 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
@@ -309,7 +306,7 @@ class AcquisitionDetailsControllerSpec
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val userKey = userMessageKey(individualUserType, userType)
-                test(key -> "3")(s"$otherKey.error.required")(userType, individualUserType, userKey)
+                test(key -> "3")(s"$otherKey$userKey.error.required")(userType, individualUserType, userKey)
             }
           }
 
@@ -317,7 +314,11 @@ class AcquisitionDetailsControllerSpec
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val userKey = userMessageKey(individualUserType, userType)
-                test(key -> "3", otherKey -> "")(s"$otherKey.error.required")(userType, individualUserType, userKey)
+                test(key -> "3", otherKey -> "")(s"$otherKey$userKey.error.required")(
+                  userType,
+                  individualUserType,
+                  userKey
+                )
             }
           }
 
@@ -326,7 +327,7 @@ class AcquisitionDetailsControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val userKey = userMessageKey(individualUserType, userType)
                 test(key -> "3", otherKey -> "1,234")(
-                  s"$otherKey.error.invalid"
+                  s"$otherKey$userKey.error.invalid"
                 )(userType, individualUserType, userKey)
             }
           }
@@ -336,7 +337,7 @@ class AcquisitionDetailsControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val userKey = userMessageKey(individualUserType, userType)
                 test(key -> "3", otherKey -> ("a" * 36))(
-                  s"$otherKey.error.tooLong"
+                  s"$otherKey$userKey.error.tooLong"
                 )(userType, individualUserType, userKey)
             }
           }
@@ -1667,7 +1668,7 @@ class AcquisitionDetailsControllerSpec
           checkPageIsDisplayed(
             performAction(data: _*),
             messageFromMessageKey(
-              s"$key$userKey.title",
+              s"$key.title",
               formattedRebaseDate
             ),
             doc =>
@@ -1684,7 +1685,7 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
               test("rebaseAcquisitionPrice" -> "0")(userType, individualUserType, userKey)(
-                s"$key$userKey.error.tooSmall"
+                s"$key.error.tooSmall"
               )
           }
         }
@@ -2241,7 +2242,7 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test()(userType, individualUserType, userKey)(s"$key$userKey.error.required")
+              test()(userType, individualUserType, userKey)(s"$key.error.required")
           }
         }
 
@@ -2249,7 +2250,7 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "2")(userType, individualUserType, userKey)(s"$key$userKey.error.invalid")
+              test(key -> "2")(userType, individualUserType, userKey)(s"$key.error.invalid")
           }
         }
 
@@ -2271,7 +2272,7 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
               test(key -> "0", valueKey -> "0")(userType, individualUserType, userKey)(
-                s"$valueKey$userKey.error.tooSmall"
+                s"$valueKey.error.tooSmall"
               )
           }
         }
@@ -2744,7 +2745,7 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test()(userType, individualUserType, userKey)(s"$key$userKey.error.required")
+              test()(userType, individualUserType, userKey)(s"$key.error.required")
           }
         }
 
@@ -2752,7 +2753,7 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "2")(userType, individualUserType, userKey)(s"$key$userKey.error.invalid")
+              test(key -> "2")(userType, individualUserType, userKey)(s"$key.error.invalid")
           }
         }
 
@@ -2774,7 +2775,7 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
               test(key -> "0", valueKey -> "0")(userType, individualUserType, userKey)(
-                s"$valueKey$userKey.error.tooSmall"
+                s"$valueKey.error.tooSmall"
               )
           }
         }
@@ -3601,19 +3602,20 @@ class AcquisitionDetailsControllerSpec
             val date = LocalDate.now()
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
+                val userKey = userMessageKey(individualUserType, userType)
                 List(
-                  (AcquisitionMethod.Bought, messages("acquisitionPriceBought.title")),
+                  (AcquisitionMethod.Bought, messages(s"acquisitionPriceBought$userKey.title")),
                   (
                     AcquisitionMethod.Inherited,
-                    messages("acquisitionPriceNotBought.title", TimeUtils.govDisplayFormat(date))
+                    messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(date))
                   ),
                   (
                     AcquisitionMethod.Gifted,
-                    messages("acquisitionPriceNotBought.title", TimeUtils.govDisplayFormat(date))
+                    messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(date))
                   ),
                   (
                     AcquisitionMethod.Other("test"),
-                    messages("acquisitionPriceNotBought.title", TimeUtils.govDisplayFormat(date))
+                    messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(date))
                   )
                 ).foreach {
                   case (method, expectedTitle) =>

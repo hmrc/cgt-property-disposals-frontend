@@ -1214,7 +1214,7 @@ otherAcquisitionMethod.personalRep.error.invalid=How the person acquired the pro
 otherAcquisitionMethod.error.tooLong=How you got the property must be 35 characters or less
 otherAcquisitionMethod.agent.error.tooLong=How your client acquired the property must be 35 characters or less
 otherAcquisitionMethod.trust.error.tooLong=How the trust acquired the property must be 35 characters or less
-otherAcquisitionMethod.capacitor.error.tooLong=How the person acquired the property  must be 35 characters or less
+otherAcquisitionMethod.capacitor.error.tooLong=How the person acquired the property must be 35 characters or less
 otherAcquisitionMethod.personalRep.error.tooLong=How the person acquired the property must be 35 characters or less
 
 acquisitionDate.title=What date did you get the property?
