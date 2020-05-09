@@ -98,7 +98,7 @@
 
      @s.initialGainOrLoss.map{ initialGainOrLoss =>
       <h2 class="heading-medium">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
-     @initialGainOrLossSummary(initialGainOrLoss)
+     @initialGainOrLossSummary(initialGainOrLoss, isATrust, representativeType)
      }
 
      <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
@@ -106,8 +106,8 @@
 
      <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
      @s.yearToDateLiabilityAnswers.fold(
-      nonCalculatedYearToDateLiabilitySummary(_, showFiles = true, isMultiple = false),
-      calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = true)
+      nonCalculatedYearToDateLiabilitySummary(_, showFiles = true, isMultiple = false, isATrust, representativeType),
+      calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = true, isATrust, representativeType, s.triageAnswers.countryOfResidence.isUk())
      )
 
      <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
@@ -128,13 +128,13 @@
        @multipleDisposalsTriageSummary(m.triageAnswers, isATrust)
 
        <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
-       @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust)
+       @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust, representativeType)
 
        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
        @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, isATrust, representativeType)
 
        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-       @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true)
+       @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType)
 
        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
         @uploadSummary(m.supportingDocumentAnswers)

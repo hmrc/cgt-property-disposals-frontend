@@ -62,11 +62,10 @@
 @canSeeInitialGainOrLoss = @{
 
     def shouldSeeSection(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
-        val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
         (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
             case (_, _, _) if countryOfResidence.isUk() => false
             case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
-                if acquisitionDate.isBefore(residentialBeforeDate) => true
+                if acquisitionDate.isBefore(RebasingCutoffDates.nonUkResidentsResidentialProperty) => true
             case (_, _, _) => false
         }
     }
@@ -84,7 +83,7 @@
 @initialGainOrLossState = @{
     (acquistionDetailsState, disposalDetailsState) match {
         case (Complete, Complete) =>
-            draftReturn.initialGainOrLoss.fold[TaskListStatus](InProgress)(_ => Complete)
+            draftReturn.initialGainOrLoss.fold[TaskListStatus](ToDo)(_ => Complete)
         case _ => TaskListStatus.CannotStart
     }
 }

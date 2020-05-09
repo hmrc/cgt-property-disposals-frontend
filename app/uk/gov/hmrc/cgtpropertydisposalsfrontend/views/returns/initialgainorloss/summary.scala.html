@@ -21,15 +21,27 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Capacitor
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentative
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: AmountInPence)(implicit messages: Messages)
+@(answers: AmountInPence, isATrust: Boolean, representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]])(implicit request: RequestWithSessionData[_], messages: Messages)
+@isAgent = @{request.userType.contains(UserType.Agent)}
 
+@userKey = @{
+    if(representativeType.exists(_.isLeft)) ".personalRep"
+    else if(isAgent) ".agent"
+    else if(isATrust) ".trust"
+        else if(representativeType.exists(_.isRight)) ".capacitor"
+            else ""
+}
 @initialGainOrLossLabelWithAmount = @{
   Some(answers).map { answer =>
     if(answer > AmountInPence.zero)
@@ -47,7 +59,7 @@
   @initialGainOrLossLabelWithAmount.map{ labelsAndAmount =>
 
     @cyaRow(
-      messages("initialGainOrLoss.title"),
+      messages(s"initialGainOrLoss$userKey.title"),
       Html(messages(labelsAndAmount._1)),
       Some(cyaChange(messages("initialGainOrLoss.cyaChange"), routes.InitialGainOrLossController.enterInitialGainOrLoss().url)),
       "initialGainOrLoss"

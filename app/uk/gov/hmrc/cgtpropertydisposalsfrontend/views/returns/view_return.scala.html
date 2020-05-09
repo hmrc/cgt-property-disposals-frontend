@@ -135,8 +135,8 @@
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @s.yearToDateLiabilityAnswers.fold(
-              nonCalculatedYearToDateLiabilitySummary(_, showFiles = false, isMultiple = false),
-              calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = false)
+              nonCalculatedYearToDateLiabilitySummary(_, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType),
+              calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = false, subscribedDetails.isATrust, representativeType, s.triageAnswers.countryOfResidence.isUk())
           )
 
           @if(s.hasAttachments) {
@@ -149,13 +149,13 @@
           @multipleDisposalsTriageSummary(m.triageAnswers, subscribedDetails.isATrust)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
-          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust)
+          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust, representativeType)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
           @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-          @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true)
+          @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType)
 
           @if(m.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>

@@ -57,10 +57,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{C
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
@@ -440,7 +441,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           representeeAnswers = None
         )
         val hasAttachments =
-          r.supportingDocumentAnswers.evidences.nonEmpty || r.yearToDateLiabilityAnswers.isLeft
+          r.supportingDocumentAnswers.evidences.nonEmpty || r.yearToDateLiabilityAnswers
+            .fold(_ => true, _.mandatoryEvidence.isDefined)
 
         r.copy(hasAttachments = hasAttachments) -> hasAttachments
       }
@@ -688,7 +690,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           prefix: String,
           submissionLine: String,
           tableLines: List[(String, String, String)],
-          name: Either[TrustName, IndividualName]
+          name: Either[TrustName, IndividualName],
+          individualUserType: Option[IndividualUserType]
         )
 
         val scenarios = Seq(
@@ -699,7 +702,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Right(IndividualName("John", "Doe"))
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
           ),
           TestScenario(
             "user with tax due",
@@ -708,7 +712,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Right(IndividualName("John", "Doe"))
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
           ),
           TestScenario(
             "agent for individual with no tax due",
@@ -717,7 +722,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Client: ",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Right(IndividualName("John", "Doe"))
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
           ),
           TestScenario(
             "agent for individual with tax due",
@@ -726,30 +732,82 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Client: ",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Right(IndividualName("John", "Doe"))
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
           ),
           TestScenario(
-            "organisation representing individual with no tax due",
+            "organisation with no tax due",
             UserType.Organisation,
             AmountInPence(0),
             "Trust: ",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Right(IndividualName("John", "Doe"))
+            Left(TrustName("trust")),
+            None
           ),
           TestScenario(
-            "organisation representing individual with tax due",
+            "organisation with tax due",
             UserType.Organisation,
             AmountInPence(10000),
             "Trust: ",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Right(IndividualName("John", "Doe"))
+            Left(TrustName("trust")),
+            None
+          ),
+          TestScenario(
+            "capacitor with no tax due",
+            UserType.Individual,
+            AmountInPence(0),
+            "",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe")),
+            Some(Capacitor)
+          ),
+          TestScenario(
+            "capacitor with tax due",
+            UserType.Individual,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            Right(IndividualName("John", "Doe")),
+            Some(Capacitor)
+          ),
+          TestScenario(
+            "personal representative with no tax due",
+            UserType.Individual,
+            AmountInPence(0),
+            "",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe")),
+            Some(PersonalRepresentative)
+          ),
+          TestScenario(
+            "personal representative with tax due",
+            UserType.Individual,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            Right(IndividualName("John", "Doe")),
+            Some(PersonalRepresentative)
           )
         )
 
         scenarios.foreach {
-          case TestScenario(description, userType, taxOwed, namePrefix, reference, expectedTable, name) => {
+          case TestScenario(
+              description,
+              userType,
+              taxOwed,
+              namePrefix,
+              reference,
+              expectedTable,
+              name,
+              individualUserType
+              ) =>
             withClue(description) {
               val address = sample[UkAddress].copy(
                 line1    = "123 fake street",
@@ -758,25 +816,47 @@ class CheckAllAnswersAndSubmitControllerSpec
                 county   = None,
                 postcode = Postcode("abc123")
               )
-              val processingDate = LocalDate.of(2020, 2, 2)
-              val dueDate        = LocalDate.of(2020, 1, 1)
+              val processingDate  = LocalDate.of(2020, 2, 2)
+              val dueDate         = LocalDate.of(2020, 1, 1)
+              val chargeReference = "charge ref"
               val returnResponse = sample[SubmitReturnResponse].copy(
                 formBundleId   = "form bundle id",
                 processingDate = LocalDateTime.of(processingDate, LocalTime.of(1, 1)),
                 charge = Some(
                   sample[ReturnCharge].copy(
                     amount          = taxOwed,
-                    chargeReference = "charge ref",
+                    chargeReference = chargeReference,
                     dueDate         = dueDate
                   )
                 )
               )
+              val representeeAnswers = individualUserType match {
+                case Some(PersonalRepresentative) =>
+                  Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
+                case Some(Capacitor) =>
+                  Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+
+                case _ => None
+              }
+              val triageAnswers =
+                sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType)
+
               val justSubmittedReturn = sample[JustSubmittedReturn].copy(
-                submissionResponse   = returnResponse,
-                subscribedDetails    = sample[SubscribedDetails].copy(name = name),
-                completeReturn       = sample[CompleteSingleDisposalReturn].copy(propertyAddress = address),
+                submissionResponse = returnResponse,
+                subscribedDetails  = sample[SubscribedDetails].copy(name = name),
+                completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                  propertyAddress    = address,
+                  triageAnswers      = triageAnswers,
+                  representeeAnswers = representeeAnswers
+                ),
                 agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None
               )
+
+              val userKey = individualUserType match {
+                case Some(PersonalRepresentative) => ".personalRep"
+                case Some(Capacitor)              => ".capacitor"
+                case _                            => ""
+              }
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -786,7 +866,12 @@ class CheckAllAnswersAndSubmitControllerSpec
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey("confirmationOfSubmission.title"), { doc =>
-                  doc.select("#user-details-name").text() shouldBe namePrefix + "John Doe"
+                  val expectedName =
+                    representeeAnswers
+                      .map(_.name.makeSingleName())
+                      .getOrElse(namePrefix + name.fold(_.value, _.makeSingleName()))
+
+                  doc.select("#user-details-name").text() shouldBe expectedName
                   doc.select("#ref-id").text()            shouldBe reference
 
                   expectedTable.map { tableDetails =>
@@ -794,11 +879,26 @@ class CheckAllAnswersAndSubmitControllerSpec
                     doc.select(s"#${tableDetails._1}-answer").text()   shouldBe tableDetails._3
                   }
 
-                  doc.select("#content > article > div > p > a").attr("href") shouldBe viewConfig.selfAssessmentUrl
+                  doc.select("#printPage").html() shouldBe messageFromMessageKey(
+                    if (individualUserType.contains(Capacitor) && representeeAnswers
+                          .exists(_.fold(_.id, c => Some(c.id)).contains(NoReferenceId)))
+                      s"confirmationOfSubmission.capacitor.noId.printPage"
+                    else
+                      s"confirmationOfSubmission$userKey.printPage",
+                    "JavaScript: window.print();"
+                  )
+
+                  doc.select("#howToPay").html() shouldBe messageFromMessageKey(
+                    s"confirmationOfSubmission$userKey.howToPay.p1",
+                    chargeReference
+                  )
+
+                  doc.select("#ifSaHeading").text() shouldBe messageFromMessageKey(
+                    s"confirmationOfSubmission$userKey.ifSa"
+                  )
                 }
               )
             }
-          }
         }
       }
 
@@ -1020,12 +1120,11 @@ object CheckAllAnswersAndSubmitControllerSpec {
         userType.contains(UserType.Agent),
         individualUserType
       )
+      completeReturn.yearToDateLiabilityAnswers.fold(
+        validateNonCalculatedYearToDateLiabilityPage(_, doc, userType, Some(individualUserType)),
+        validateCalculatedYearToDateLiabilityPage(_, isATrust, doc)
+      )
     }
-
-    completeReturn.yearToDateLiabilityAnswers.fold(
-      validateNonCalculatedYearToDateLiabilityPage(_, doc, userType),
-      validateCalculatedYearToDateLiabilityPage(_, doc)
-    )
   }
 
   def validateMultipleDisposalsCheckAllYourAnswersSections(
@@ -1057,9 +1156,14 @@ object CheckAllAnswersAndSubmitControllerSpec {
         userType.contains(UserType.Agent),
         individualUserType
       )
+      validateNonCalculatedYearToDateLiabilityPage(
+        completeReturn.yearToDateLiabilityAnswers,
+        doc,
+        userType,
+        Some(individualUserType)
+      )
     }
 
-    validateNonCalculatedYearToDateLiabilityPage(completeReturn.yearToDateLiabilityAnswers, doc, userType)
   }
 
 }

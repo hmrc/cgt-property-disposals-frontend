@@ -27,6 +27,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -41,6 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => triagePages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -60,7 +62,8 @@ class CommonTriageQuestionsController @Inject() (
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
-  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented
+  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented,
+  periodOfAdminNotHandledPage: pages.period_of_admin_not_handled
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -298,6 +301,21 @@ class CommonTriageQuestionsController @Inject() (
     }
   }
 
+  def periodOfAdministrationNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withState(request) { (_, state) =>
+        val isMultipleDisposal = state.fold(
+          _.newReturnTriageAnswers.isLeft,
+          _.draftReturn.fold(_ => true, _ => false)
+        )
+        val backLink =
+          if (isMultipleDisposal) controllers.returns.address.routes.PropertyDetailsController.disposalDate()
+          else routes.SingleDisposalsTriageController.whenWasDisposalDate()
+
+        Ok(periodOfAdminNotHandledPage(backLink))
+      }
+  }
+
   private def redirectToCheckYourAnswers(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
     triageAnswersFomState(state).fold(
       _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
@@ -441,7 +459,8 @@ class CommonTriageQuestionsController @Inject() (
         newReturnTriageAnswers = answers.bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
           updateMultipleDisposalAnswers,
           updateSingleDisposalAnswers
-        )
+        ),
+        representeeAnswers = None
       ),
       r =>
         r.copy(
@@ -481,22 +500,26 @@ class CommonTriageQuestionsController @Inject() (
 
   private def getNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
-  ): Option[NumberOfProperties] =
+  ): Option[NumberOfProperties] = {
+    def numberOfProperties(singleDisposalTriageAnswers: SingleDisposalTriageAnswers) =
+      singleDisposalTriageAnswers.fold(
+        incomplete =>
+          if (incomplete.hasConfirmedSingleDisposal) Some(NumberOfProperties.One)
+          else None,
+        _ => Some(NumberOfProperties.One)
+      )
+
     state.fold(
       _.newReturnTriageAnswers.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
-        _.fold(
-          incomplete =>
-            if (incomplete.hasConfirmedSingleDisposal) Some(NumberOfProperties.One)
-            else None,
-          _ => Some(NumberOfProperties.One)
-        )
+        numberOfProperties
       ),
       _.draftReturn.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
-        _ => Some(NumberOfProperties.One)
+        s => numberOfProperties(s.triageAnswers)
       )
     )
+  }
 
   private def triageAnswersFomState(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
