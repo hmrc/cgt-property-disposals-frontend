@@ -64,9 +64,7 @@ class InitialGainOrLossController @Inject() (
       val representativeType = draftSingleDisposalReturn.triageAnswers.representativeType()
       Ok(
         initialGainOrLossesPage(
-          answer.fold(initialGainOrLossForm(isATrust, representativeType))(value =>
-            initialGainOrLossForm(isATrust, representativeType).fill(value.inPounds())
-          ),
+          answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())),
           getBackLink(answer),
           isATrust,
           representativeType
@@ -81,7 +79,7 @@ class InitialGainOrLossController @Inject() (
         val backLink           = getBackLink(answers)
         val isATrust           = fillingOutReturn.subscribedDetails.isATrust
         val representativeType = draftReturn.triageAnswers.representativeType()
-        initialGainOrLossForm(isATrust, representativeType)
+        initialGainOrLossForm
           .bindFromRequest()
           .fold(
             formWithErrors =>
@@ -167,11 +165,7 @@ class InitialGainOrLossController @Inject() (
 
 object InitialGainOrLossController {
 
-  def initialGainOrLossForm(
-    isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
-  )(implicit request: RequestWithSessionData[_]): Form[BigDecimal] = {
-
+  val initialGainOrLossForm: Form[BigDecimal] = {
     val (outerId, gainId, lossId) = ("initialGainOrLoss", "gain", "loss")
 
     def innerOption(id: String): InnerOption[BigDecimal] =
@@ -190,7 +184,7 @@ object InitialGainOrLossController {
           }
       }
 
-    val formatter = ConditionalRadioUtils.formatter("initialGainOrLoss")(
+    val formatter = ConditionalRadioUtils.formatter(outerId)(
       List(
         Left(innerOption(gainId)),
         Left(innerOption(lossId).map(_ * -1)),
