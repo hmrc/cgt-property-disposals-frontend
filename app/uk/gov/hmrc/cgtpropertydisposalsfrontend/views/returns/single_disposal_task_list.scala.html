@@ -83,7 +83,7 @@
 @initialGainOrLossState = @{
     (acquistionDetailsState, disposalDetailsState) match {
         case (Complete, Complete) =>
-            draftReturn.initialGainOrLoss.fold[TaskListStatus](InProgress)(_ => Complete)
+            draftReturn.initialGainOrLoss.fold[TaskListStatus](ToDo)(_ => Complete)
         case _ => TaskListStatus.CannotStart
     }
 }
