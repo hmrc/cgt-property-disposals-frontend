@@ -263,11 +263,6 @@ class RepresenteeControllerSpec
       def formDataForContactName(contactName: ContactName): Seq[(String, String)] =
         Seq("contactName" -> contactName.value)
 
-      val incompleteRepresenteeAnswers = sample[IncompleteRepresenteeAnswers]
-
-      val (session, journey, draftReturn) =
-        sessionWithFillingOutReturn(incompleteRepresenteeAnswers, Right(Capacitor))
-
       behave like nonCapacitorOrPersonalRepBehaviour(() => performAction(Seq.empty))
 
       behave like contactNameFormValidationTests(
@@ -275,34 +270,76 @@ class RepresenteeControllerSpec
         () =>
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(session)
+            mockGetSession(sessionWithFillingOutReturn(sample[CompleteRepresenteeAnswers], Right(Capacitor))._1)
           }
       )
 
       "redirect to check your answers page" when {
 
-        "the user enters a valid contact name" in {
-          val contactDetails        = incompleteRepresenteeAnswers.contactDetails
-          val newContactName        = ContactName("First Last")
-          val updatedContactDetails = contactDetails.map(_.copy(contactName = newContactName))
-          val updatedRepresenteeAnswers = incompleteRepresenteeAnswers
-            .copy(contactDetails = updatedContactDetails, hasConfirmedContactDetails = false)
-          val updatedDraftReturn = draftReturn.copy(representeeAnswers = Some(updatedRepresenteeAnswers))
-          val updatedSession     = session.copy(journeyStatus          = Some(journey.copy(draftReturn = updatedDraftReturn)))
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
-            mockStoreSession(updatedSession)(Right(()))
+        "the user enters a valid contact name" when {
+
+          "the section is incomplete" in {
+            val contactDetails = sample[RepresenteeContactDetails]
+            val incompleteRepresenteeAnswers =
+              sample[IncompleteRepresenteeAnswers].copy(contactDetails = Some(contactDetails))
+
+            val (session, journey, draftReturn) =
+              sessionWithFillingOutReturn(incompleteRepresenteeAnswers, Right(Capacitor))
+
+            val newContactName        = ContactName("First Last")
+            val updatedContactDetails = contactDetails.copy(contactName = newContactName)
+            val updatedRepresenteeAnswers = incompleteRepresenteeAnswers
+              .copy(contactDetails = Some(updatedContactDetails), hasConfirmedContactDetails = false)
+            val updatedDraftReturn = draftReturn.copy(representeeAnswers = Some(updatedRepresenteeAnswers))
+            val updatedSession     = session.copy(journeyStatus          = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(updatedSession)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(formDataForContactName(newContactName)),
+              routes.RepresenteeController.checkYourAnswers()
+            )
           }
-          checkIsRedirect(
-            performAction(formDataForContactName(ContactName("First Last"))),
-            routes.RepresenteeController.checkYourAnswers()
-          )
+
+          "the section is complete" in {
+            val answers = sample[CompleteRepresenteeAnswers]
+            val (session, journey) =
+              sessionWithStartingNewDraftReturn(answers, Right(Capacitor))
+            val newContactName = ContactName("First Last")
+            val newRepresenteeAnswers =
+              IncompleteRepresenteeAnswers(
+                Some(answers.name),
+                Some(answers.id),
+                answers.dateOfDeath,
+                Some(answers.contactDetails.copy(contactName = newContactName)),
+                true,
+                false
+              )
+
+            val updatedSession =
+              session.copy(journeyStatus = Some(journey.copy(representeeAnswers = Some(newRepresenteeAnswers))))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(updatedSession)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(formDataForContactName(newContactName)),
+              routes.RepresenteeController.checkYourAnswers()
+            )
+          }
+
         }
       }
     }
