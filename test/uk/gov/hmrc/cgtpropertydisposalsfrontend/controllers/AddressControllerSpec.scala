@@ -250,7 +250,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       lazy val expectedTitleMessageKey =
         validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-            f.journey.draftReturn.fold(
+            f.draftReturn.fold(
               _ => "address.uk.returns.multipleDisposals.title",
               _ => s"address.uk.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
             )
@@ -268,7 +268,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
                 f.journey.copy(
                   subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
                   agentReferenceNumber = setAgentReferenceNumber(userType),
-                  draftReturn = f.journey.draftReturn.fold(
+                  draftReturn = f.draftReturn.fold(
                     _ =>
                       sample[DraftMultipleDisposalsReturn].copy(triageAnswers =
                         sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = individualUserType)
@@ -610,7 +610,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       lazy val expectedTitleMessageKey =
         validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-            f.journey.draftReturn.fold(
+            f.draftReturn.fold(
               _ => "enterPostcode.returns.multipleDisposals.title",
               _ => s"enterPostcode.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
             )
@@ -893,7 +893,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     s"display the select address page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedMessageTitleKey = validJourneyStatus match {
         case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-          f.journey.draftReturn.fold(
+          f.draftReturn.fold(
             _ => "address-select.returns.multipleDisposals.title",
             _ => s"address-select.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
           )

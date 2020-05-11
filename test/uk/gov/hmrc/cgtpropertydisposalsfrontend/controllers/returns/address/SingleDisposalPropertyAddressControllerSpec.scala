@@ -62,6 +62,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
   val validJourneyStatus = FillingOutReturnAddressJourney(
     FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn),
+    Right(draftReturn),
     None
   )
 

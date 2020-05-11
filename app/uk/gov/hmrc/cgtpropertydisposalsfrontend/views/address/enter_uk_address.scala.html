@@ -58,7 +58,7 @@
 
 @title = @{ addressJourneyType match {
   case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-    f.journey.draftReturn.fold(
+    f.draftReturn.fold(
       _ => messages("address.uk.returns.multipleDisposals.title"),
       _ => messages(s"address.uk.returns$userKey.singleDisposal.title")
     )

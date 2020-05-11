@@ -73,40 +73,50 @@ class AcquisitionDetailsController @Inject() (
     with Logging
     with SessionUpdates {
 
+  type JourneyState = Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn]
+
   private def withFillingOutReturnAndAcquisitionDetailsAnswers(
     request: RequestWithSessionData[_]
   )(
     f: (
       SessionData,
       FillingOutReturn,
-      DraftSingleDisposalReturn,
+      JourneyState,
       AcquisitionDetailsAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
-          f(s, r, d, IncompleteAcquisitionDetailsAnswers.empty)
-        )(f(s, r, d, _))
+          f(s, r, Right(d), IncompleteAcquisitionDetailsAnswers.empty)
+        )(f(s, r, Right(d), _))
+
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleIndirectDisposalReturn))) =>
+        d.acquisitionDetailsAnswers.fold[Future[Result]](
+          f(s, r, Left(d), IncompleteAcquisitionDetailsAnswers.empty)
+        )(f(s, r, Left(d), _))
+
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def withAssetTypeAndResidentialStatus(
-    draftReturn: DraftSingleDisposalReturn,
-    answers: AcquisitionDetailsAnswers
+    state: JourneyState
   )(f: (AssetType, Boolean) => Future[Result]): Future[Result] =
-    draftReturn.triageAnswers.fold(
-      i => i.assetType       -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
-    ) match {
+    state
+      .fold(_.triageAnswers, _.triageAnswers)
+      .fold(
+        i => i.assetType       -> i.wasAUKResident,
+        c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
+      ) match {
       case (Some(a), Some(w)) => f(a, w)
       case _                  => Redirect(controllers.returns.routes.TaskListController.taskList())
     }
 
   private def withDisposalDate(
-    draftReturn: DraftSingleDisposalReturn
+    state: JourneyState
   )(f: DisposalDate => Future[Result]): Future[Result] =
-    draftReturn.triageAnswers
+    state
+      .fold(_.triageAnswers, _.triageAnswers)
       .fold(_.disposalDate, c => Some(c.disposalDate))
       .fold[Future[Result]](
         Redirect(controllers.returns.routes.TaskListController.taskList())
@@ -151,7 +161,7 @@ class AcquisitionDetailsController @Inject() (
 
   private def commonSubmitBehaviour[A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
-    currentDraftReturn: DraftSingleDisposalReturn,
+    currentState: JourneyState,
     currentAnswers: AcquisitionDetailsAnswers
   )(form: Form[A])(
     page: (Form[A], Call) => P
@@ -159,7 +169,7 @@ class AcquisitionDetailsController @Inject() (
     requiredPreviousAnswer: AcquisitionDetailsAnswers => Boolean,
     redirectToIfNoRequiredPreviousAnswer: Call
   )(
-    updateState: (A, AcquisitionDetailsAnswers, DraftSingleDisposalReturn) => DraftSingleDisposalReturn
+    updateState: (A, AcquisitionDetailsAnswers, JourneyState) => JourneyState
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
@@ -172,19 +182,19 @@ class AcquisitionDetailsController @Inject() (
         .bindFromRequest()
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
-            val newDraftReturn = updateState(value, currentAnswers, currentDraftReturn)
+            val newDraftReturn = updateState(value, currentAnswers, currentState)
 
             val result = for {
-              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
+              _ <- if (newDraftReturn.merge === currentState.merge) EitherT.pure(())
                   else
                     returnsService.storeDraftReturn(
-                      newDraftReturn,
+                      newDraftReturn.merge,
                       currentFillingOutReturn.subscribedDetails.cgtReference,
                       currentFillingOutReturn.agentReferenceNumber
                     )
               _ <- EitherT(
                     updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
+                      _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn.merge)))
                     )
                   )
             } yield ()
@@ -199,19 +209,33 @@ class AcquisitionDetailsController @Inject() (
       Redirect(redirectToIfNoRequiredPreviousAnswer)
     }
 
-  private def commonUpdateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: AcquisitionDetailsAnswers) =
-    d.copy(
-      acquisitionDetailsAnswers = Some(newAnswers),
-      initialGainOrLoss         = None,
-      reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-        _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
-      ),
-      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+  private def commonUpdateDraftReturn(d: JourneyState, newAnswers: AcquisitionDetailsAnswers) =
+    d.bimap(
+      i =>
+        i.copy(
+          acquisitionDetailsAnswers  = Some(newAnswers),
+          yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+        ),
+      s =>
+        s.copy(
+          acquisitionDetailsAnswers = Some(newAnswers),
+          initialGainOrLoss         = None,
+          reliefDetailsAnswers = s.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
+          ),
+          yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+        )
+    )
+
+  private def representativeType(state: JourneyState) =
+    state.fold(
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType()
     )
 
   def acquisitionMethod(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, draftReturn, answers) =>
+      case (_, fillingOutReturn, state, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.acquisitionMethod.fold(acquisitionMethodForm)(acquisitionMethodForm.fill),
@@ -222,7 +246,7 @@ class AcquisitionDetailsController @Inject() (
             _,
             _,
             fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.triageAnswers.representativeType()
+            representativeType(state)
           )
         )(
           requiredPreviousAnswer = _ => Some(()).isDefined,
@@ -233,10 +257,10 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionMethodSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, draftReturn, answers) =>
+      case (_, fillingOutReturn, state, answers) =>
         commonSubmitBehaviour(
           fillingOutReturn,
-          draftReturn,
+          state,
           answers
         )(
           acquisitionMethodForm
@@ -245,7 +269,7 @@ class AcquisitionDetailsController @Inject() (
             _,
             _,
             fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.triageAnswers.representativeType()
+            representativeType(state)
           )
         )(
           requiredPreviousAnswer = _ => noAnswersRequired,
@@ -271,8 +295,8 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, draftReturn, answers) =>
-        withDisposalDate(draftReturn) { disposalDate =>
+      case (_, fillingOutReturn, state, answers) =>
+        withDisposalDate(state) { disposalDate =>
           val form = acquisitionDateForm(disposalDate.value)
 
           commonDisplayBehaviour(answers)(
@@ -285,7 +309,7 @@ class AcquisitionDetailsController @Inject() (
               _,
               _,
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.triageAnswers.representativeType()
+              representativeType(state)
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -300,11 +324,11 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, draftReturn, answers) =>
-        withDisposalDate(draftReturn) { disposalDate =>
+      case (_, fillingOutReturn, state, answers) =>
+        withDisposalDate(state) { disposalDate =>
           commonSubmitBehaviour(
             fillingOutReturn,
-            draftReturn,
+            state,
             answers
           )(
             form = acquisitionDateForm(disposalDate.value)
@@ -313,7 +337,7 @@ class AcquisitionDetailsController @Inject() (
               _,
               _,
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.triageAnswers.representativeType()
+              representativeType(state)
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -349,7 +373,7 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
       withAcquisitionDate(answers) { acquisitionDate =>
         withAcquisitionMethod(answers) { acquisitionMethod =>
           commonDisplayBehaviour(answers)(
@@ -364,7 +388,7 @@ class AcquisitionDetailsController @Inject() (
               acquisitionMethod,
               acquisitionDate,
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.triageAnswers.representativeType()
+              representativeType(state)
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -379,12 +403,12 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def acquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
       withAcquisitionDate(answers) { acquisitionDate =>
         withAcquisitionMethod(answers) { acquisitionMethod =>
           commonSubmitBehaviour(
             fillingOutReturn,
-            draftReturn,
+            state,
             answers
           )(
             acquisitionPriceForm
@@ -395,7 +419,7 @@ class AcquisitionDetailsController @Inject() (
               acquisitionMethod,
               acquisitionDate,
               fillingOutReturn.subscribedDetails.isATrust,
-              draftReturn.triageAnswers.representativeType()
+              representativeType(state)
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -422,8 +446,8 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def rebasedAcquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           rebasingEligibilityUtil
             .invalidForRebasing(acquisitionDate, assetType, wasUkResident)
@@ -443,11 +467,11 @@ class AcquisitionDetailsController @Inject() (
                   _,
                   rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.triageAnswers.representativeType()
+                  representativeType(state)
                 )
               )(
-                requiredPreviousAnswer = answers =>
-                  shouldRedirectFromRebaseAcquisitionQuestions(wasUkResident, assetType, answers, acquisitionDate),
+                requiredPreviousAnswer =
+                  answers => shouldRedirectFromRebaseAcquisitionQuestions(wasUkResident, answers, acquisitionDate),
                 redirectToIfNoRequiredPreviousAnswer =
                   if (wasUkResident) routes.AcquisitionDetailsController.acquisitionDate()
                   else routes.AcquisitionDetailsController.acquisitionPrice()
@@ -460,15 +484,15 @@ class AcquisitionDetailsController @Inject() (
 
   def rebasedAcquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-        withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+        withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           withAcquisitionDate(answers) { acquisitionDate =>
             rebasingEligibilityUtil
               .invalidForRebasing(acquisitionDate, assetType, wasUkResident)
               .fold[Future[Result]](
                 Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
               ) { rebaseDate =>
-                commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
+                commonSubmitBehaviour(fillingOutReturn, state, answers)(
                   form = rebasedAcquisitionPriceForm
                 )(
                   page = { (form, backLink) =>
@@ -481,7 +505,7 @@ class AcquisitionDetailsController @Inject() (
                       backLink,
                       rebaseDate,
                       fillingOutReturn.subscribedDetails.isATrust,
-                      draftReturn.triageAnswers.representativeType()
+                      representativeType(state)
                     )
                   }
                 )(
@@ -529,8 +553,8 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def improvementCosts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           val rebaseDate = rebasingEligibilityUtil.rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
           commonDisplayBehaviour(answers)(
@@ -545,7 +569,7 @@ class AcquisitionDetailsController @Inject() (
               fillingOutReturn.subscribedDetails.isATrust,
               answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
               rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
-              draftReturn.triageAnswers.representativeType()
+              representativeType(state)
             )
           )(
             requiredPreviousAnswer = { a =>
@@ -567,13 +591,13 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def improvementCostsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           val rebaseDate = rebasingEligibilityUtil.rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
           commonSubmitBehaviour(
             fillingOutReturn,
-            draftReturn,
+            state,
             answers
           )(
             improvementCostsForm
@@ -584,7 +608,7 @@ class AcquisitionDetailsController @Inject() (
               fillingOutReturn.subscribedDetails.isATrust,
               answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
               rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
-              draftReturn.triageAnswers.representativeType()
+              representativeType(state)
             )
           )(
             requiredPreviousAnswer = { answers =>
@@ -619,8 +643,8 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def shouldUseRebase(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, draftReturn, answers) =>
-      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasAUkResident) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, state, answers) =>
+      withAssetTypeAndResidentialStatus(state) { (assetType, wasAUkResident) =>
         if (wasAUkResident) {
           Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
         } else {
@@ -637,8 +661,8 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def shouldUseRebaseSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           rebasingEligibilityUtil
             .invalidForRebasing(acquisitionDate, assetType, wasUkResident)
@@ -647,7 +671,7 @@ class AcquisitionDetailsController @Inject() (
             ) { _ =>
               commonSubmitBehaviour(
                 fillingOutReturn,
-                draftReturn,
+                state,
                 answers
               )(
                 shouldUseRebaseForm
@@ -681,11 +705,11 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def acquisitionFees(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
-            _.acquisitionFees.fold(acquisitionFeesForm)(p => acquisitionFeesForm.fill(p.inPounds)),
+            _.acquisitionFees.fold(acquisitionFeesForm)(p => acquisitionFeesForm.fill(p.inPounds())),
             c => acquisitionFeesForm.fill(c.acquisitionFees.inPounds())
           )
         )(
@@ -696,7 +720,7 @@ class AcquisitionDetailsController @Inject() (
             answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
             rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
             wasUkResident,
-            draftReturn.triageAnswers.representativeType()
+            representativeType(state)
           )
         )(
           requiredPreviousAnswer = _.fold(
@@ -710,11 +734,11 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def acquisitionFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasUkResident) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
         commonSubmitBehaviour(
           fillingOutReturn,
-          draftReturn,
+          state,
           answers
         )(
           acquisitionFeesForm
@@ -726,7 +750,7 @@ class AcquisitionDetailsController @Inject() (
             answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
             rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident),
             wasUkResident,
-            draftReturn.triageAnswers.representativeType()
+            representativeType(state)
           )
         )(
           requiredPreviousAnswer = _.fold(
@@ -753,8 +777,8 @@ class AcquisitionDetailsController @Inject() (
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
-      withAssetTypeAndResidentialStatus(draftReturn, answers) { (assetType, wasAUkResident) =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
+      withAssetTypeAndResidentialStatus(state) { (assetType, wasAUkResident) =>
         answers match {
           case c: CompleteAcquisitionDetailsAnswers =>
             Ok(
@@ -764,7 +788,7 @@ class AcquisitionDetailsController @Inject() (
                 wasAUkResident,
                 rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident, assetType, c.acquisitionDate.value),
                 fillingOutReturn.subscribedDetails.isATrust,
-                draftReturn.triageAnswers.representativeType()
+                representativeType(state)
               )
             )
 
@@ -798,7 +822,10 @@ class AcquisitionDetailsController @Inject() (
             val completeAnswers =
               CompleteAcquisitionDetailsAnswers(m, d, p.getOrElse(i), r, i, f, b.getOrElse(false))
             val newDraftReturn =
-              draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+              state.fold(
+                _.copy(acquisitionDetailsAnswers = Some(completeAnswers)),
+                _.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+              )
 
             val result = for {
               _ <- returnsService.storeDraftReturn(
@@ -827,7 +854,7 @@ class AcquisitionDetailsController @Inject() (
                     rebasingEligibilityUtil
                       .isEligibleForRebase(wasAUkResident, assetType, completeAnswers.acquisitionDate.value),
                     fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.triageAnswers.representativeType()
+                    representativeType(state)
                   )
                 )
             )
@@ -842,7 +869,6 @@ class AcquisitionDetailsController @Inject() (
 
   private def shouldRedirectFromRebaseAcquisitionQuestions(
     wasUkResident: Boolean,
-    assetType: AssetType,
     acquisitionDetailsAnswers: AcquisitionDetailsAnswers,
     acquisitionDate: AcquisitionDate
   ): Boolean =

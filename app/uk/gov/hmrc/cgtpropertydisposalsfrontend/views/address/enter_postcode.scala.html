@@ -61,7 +61,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @postcodeFilterKey = @{"filter"}
 @title = @{ addressJourneyType match {
  case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-  f.journey.draftReturn.fold(
+  f.draftReturn.fold(
     _ => messages(s"$returnsKey.multipleDisposals.title"),
     _ => messages(s"$returnsKey$userKey.singleDisposal.title")
   )
