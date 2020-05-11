@@ -66,6 +66,15 @@ h1 > span.heading-medium,
     border-bottom: none;
 }
 
+#content .heading-xlarge .heading-secondary,
+#content .govuk-caption-xl {
+    color: #626a6e;
+}
+
+#content .form-hint {
+    color: #515A5C;
+}
+
 div>p.lede,
 .form-hint {
     margin-bottom: 15px;
@@ -133,23 +142,23 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 
 .autocomplete__wrapper {
     width: 75%;
-    min-width: 85px;
+    min-width: 9em;
 }
 
 .custom-input-wrapper {
     width: 50%;
-    min-width: 85px;
+    min-width: 9em;
 }
 
 .custom-input-wrapper.small {
     width: 33%;
-    min-width: 85px;
+    min-width: 9em;
 }
 
 .autocomplete__wrapper input[type="text"],
 .custom-input-wrapper input[type="text"] {
     width: 100%;
-    min-width: 10em;
+    min-width: 9em;
 }
 
 .multiple-choice + .panel-indent .custom-input-wrapper .form-control {
@@ -317,7 +326,6 @@ details {
     line-height: 1.11111;
     display: block;
     margin-bottom: 5px;
-    color: #6f777b;
     padding-top: 20px;
 }
 
@@ -670,7 +678,7 @@ details dl.govuk-check-your-answers {
 .charge .caption {
     font-size: 16px;
     margin-bottom: 0;
-    color: #6f777b;
+    color: #515A5C;
     display: block;
     font-weight: normal;
 }
@@ -734,7 +742,7 @@ h1 > .sub-heading {
     }
 
     tr {
-        border: 1px solid #ccc;
+        border: 1px solid #cccccc;
     }
     td {
         border: none;
