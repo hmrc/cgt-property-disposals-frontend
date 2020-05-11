@@ -15,6 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
@@ -27,41 +28,42 @@
 @key = @{draftReturn.id}
 @completionDate =  @{draftReturn.fold(
     _.triageAnswers.fold(
-  _.completionDate.map(_.value),
-  c => Some(c.completionDate.value)
-),
+      _.completionDate.map(_.value),
+      c => Some(c.completionDate.value)
+    ),
     _.triageAnswers.fold(
         _.completionDate.map(_.value),
         c => Some(c.completionDate.value)
     )
-)
+  )}
+@draftLabel = @{
+  draftReturn.fold(
+    _.examplePropertyDetailsAnswers.flatMap(
+      _.fold(_.address, c => Some(c.address))
+    ).fold(
+        completionDate.map(f => TimeUtils.govShortDisplayFormat(f)) -> "completionDate"
+      )(
+        a => Some(s"${a.line1}, ${a.postcode.value}") -> "propertyAddress"
+      ),
+    _.propertyAddress.fold(
+      completionDate.map(f => TimeUtils.govShortDisplayFormat(f)) -> "completionDate"
+      )(
+        a => Some(s"${a.line1}, ${a.postcode.value}") -> "propertyAddress"
+      )
+  )
 }
 @dueDate = @{completionDate.map(d => d.plusDays(30L))}
 
 <li class="single-return form-bundle">
   <div class="grid-row">
     <div id="draftReturn-@key" class="column-three-quarters submission-summary">
+      <h3>
+        <span class="caption">@messages(s"drafts.list.${draftLabel._2}")</span>
+        @draftLabel._1
+      </h3>
       <span id="draftReturnLastUpdatedDate-@key" class="caption">
         @messages("drafts.list.lastUpdated", TimeUtils.govShortDisplayFormat(draftReturn.lastUpdatedDate))
       </span>
-      @completionDate.map(f => {
-          <h4>
-          {
-          draftReturn.fold(
-              _.examplePropertyDetailsAnswers.flatMap(
-                  _.fold(_.address, c => Some(c.address))
-              ).fold(
-                  TimeUtils.govShortDisplayFormat(f))(
-                  a => s"${a.line1}, ${a.postcode.value}"
-              ),
-            _.propertyAddress.fold(
-                TimeUtils.govShortDisplayFormat(f))(
-                a => s"${a.line1}, ${a.postcode.value}"
-            )
-          )
-          }
-          </h4>
-      })
     </div>
     <div id="draftReturnsendAndPayBy-@key" class="column-one-quarter financial-summary">
       @dueDate.map(f => {
@@ -71,8 +73,8 @@
         </h4>
       })
     </div>
-    <div class="column-full">
-      <a id="resumeDraftReturn-@key" href="@{controllers.accounts.homepage.routes.HomePageController.resumeDraftReturn(key)}">
+    <div class="column-full with-top-margin">
+      <a id="resumeDraftReturn-@key" class="button" href="@{controllers.accounts.homepage.routes.HomePageController.resumeDraftReturn(key)}">
         @messages("drafts.list.resume")
       </a>
     </div>

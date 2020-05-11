@@ -106,6 +106,10 @@ fieldset .form-hint {
     margin-bottom: 1.875em;
 }
 
+.with-top-margin {
+    margin-top: 1em;
+}
+
 /*
     Assets Frontend does not render focus styles accessibly
  */
@@ -689,10 +693,7 @@ details dl.govuk-check-your-answers {
     margin-top: 0;
 }
 
-.return-list li h3 {
-    font-size: 36px;
-}
-
+.return-list li h3,
 .return-list li h4 {
     font-size: 24px;
 }
