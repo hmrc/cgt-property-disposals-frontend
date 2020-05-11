@@ -36,7 +36,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
 )
 
-@(form: Form[ShareDisposalDate], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[ShareDisposalDate], backLink: Call, displayReturnToSummaryLink: Boolean, submit: Call)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{ "sharesDisposalDate" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -52,7 +52,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @errorSummary(form)
 }
 
-@formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit(), 'novalidate -> "novalidate") {
+@formWrapper(submit, 'novalidate -> "novalidate") {
  @dateInput(
   fieldId = key,
   label = pageHeading(title, Some(messages("triage.caption"))),

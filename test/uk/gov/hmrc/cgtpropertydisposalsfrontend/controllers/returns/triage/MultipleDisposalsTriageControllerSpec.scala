@@ -24,6 +24,7 @@ import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.Configuration
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -32,6 +33,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{SelectorAndValue, TagAttributePairAndValue, UserTypeDisplay}
@@ -43,6 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
@@ -93,6 +96,13 @@ class MultipleDisposalsTriageControllerSpec
   lazy val controller = instanceOf[MultipleDisposalsTriageController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
+  def mockGetTaxYear(date: LocalDate)(response: Either[Error, Option[TaxYear]]) =
+    (mockTaxYearService
+      .taxYear(_: LocalDate)(_: HeaderCarrier))
+      .expects(date, *)
+      .returning(EitherT.fromEither[Future](response))
+
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean = journeyStatus match {
     case r: StartingNewDraftReturn if (r.newReturnTriageAnswers.isLeft) => true
@@ -1487,12 +1497,6 @@ class MultipleDisposalsTriageControllerSpec
     }
 
     "handling submits on the tax year exchanged page" must {
-
-      def mockGetTaxYear(date: LocalDate)(response: Either[Error, Option[TaxYear]]) =
-        (mockTaxYearService
-          .taxYear(_: LocalDate)(_: HeaderCarrier))
-          .expects(date, *)
-          .returning(EitherT.fromEither[Future](response))
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.whenWereContractsExchangedSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
@@ -2964,6 +2968,186 @@ class MultipleDisposalsTriageControllerSpec
       }
     }
 
+    "handling requests to display the share disposal page for non uk residents page" must {
+
+      val requiredPreviousAnswers =
+        IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+          individualUserType = Some(sample[IndividualUserType]),
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country])
+        )
+
+      def performAction(): Future[Result] = controller.disposalDateOfShares()(FakeRequest())
+
+      "Page is displayed correctly" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithFillingOutReturn(
+              requiredPreviousAnswers.copy(
+                assetTypes = Some(List(AssetType.IndirectDisposal))
+              )
+            )._1
+          )
+        }
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("sharesDisposalDate.title"),
+          doc => {
+            doc.select("#sharesDisposalDate-form-hint").text() shouldBe messageFromMessageKey(
+              "sharesDisposalDate.helpText"
+            )
+            doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+              .assetTypeForNonUkResidents()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController.disposalDateOfSharesSubmit().url
+          }
+        )
+
+      }
+
+    }
+
+    "handling submitted disposal of shares date" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.disposalDateOfSharesSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      def formData(d: LocalDate): List[(String, String)] = List(
+          "sharesDisposalDate-day"   -> d.getDayOfMonth().toString,
+          "sharesDisposalDate-month" -> d.getMonthValue().toString,
+          "sharesDisposalDate-year"  -> d.getYear().toString
+        )
+
+      def updateDraftReturn(d: DraftMultipleDisposalsReturn, newAnswers: MultipleDisposalsTriageAnswers) =
+        d.copy(
+          triageAnswers = newAnswers,
+          examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
+            _.unset(_.disposalDate)
+          ),
+          yearToDateLiabilityAnswers = None
+        )
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
+
+      "show a form error" when {
+
+        def testFormError(formData: List[(String, String)])(expectedErrorMessageKey: String) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1)
+          }
+
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey("sharesDisposalDate.title"),
+            doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+        }
+
+        "the date entered is invalid" in {
+          DateErrorScenarios
+            .dateErrorScenarios(
+              "sharesDisposalDate",
+              ""
+            )
+            .foreach { scenario =>
+              withClue(s"For date error scenario $scenario: ") {
+                val data = List(
+                  "sharesDisposalDate-day"   -> scenario.dayInput,
+                  "sharesDisposalDate-month" -> scenario.monthInput,
+                  "sharesDisposalDate-year"  -> scenario.yearInput
+                ).collect { case (key, Some(value)) => key -> value }
+
+                testFormError(data)(scenario.expectedErrorMessageKey)
+              }
+            }
+        }
+
+        "the date entered is later than today" in {
+          testFormError(formData(TimeUtils.today().plusDays(1L)))(
+            "sharesDisposalDate.error.tooFarInFuture"
+          )
+        }
+
+      }
+
+      "show an error page" when {
+
+        "there is an error updating the session" in {
+          val taxYear = sample[TaxYear]
+          val today = TimeUtils.today()
+          val answers =
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = Some(CompletionDate(today)))
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          val newCompletionDate = CompletionDate(today.minusDays(1))
+          val updatedJourney =
+            journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = Some(newCompletionDate), taxYear = Some(taxYear))))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetTaxYear(newCompletionDate.value)(Right(Some(taxYear)))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(newCompletionDate.value): _*))
+        }
+
+      }
+
+      "redirect to the check your answers page" when {
+
+        "redirect to exit page" when {
+
+          "redirect when date is before 6/4/2020" in {
+            val answers            = sample[CompleteMultipleDisposalsTriageAnswers]
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+            }
+
+            checkIsRedirect(
+              performAction(
+                formData(RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)): _*
+              ),
+              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
+            )
+          }
+        }
+      }
+
+      "not perform any updates" when {
+
+        "the date submitted is the same as one that already exists in session" in {
+          val answers =
+            sample[CompleteMultipleDisposalsTriageAnswers]
+              .copy(completionDate = CompletionDate(TimeUtils.today()))
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(formData(answers.completionDate.value): _*),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =
@@ -3100,18 +3284,11 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the asset types not implemented page" when {
 
-        "the user was not a non uk resident and they have selected asset types that are not supported" in {
-          List(
-            List(AssetType.IndirectDisposal),
-            List(AssetType.MixedUse),
-            List(AssetType.IndirectDisposal, AssetType.MixedUse),
-            List(AssetType.MixedUse, AssetType.IndirectDisposal)
-          ).foreach { assetTypes =>
-            testRedirectWhenIncomplete(
-              allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)),
-              routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
-            )
-          }
+        "the user was not a non uk resident and they have selected mixed asset types" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredNonUk.copy(assetTypes = Some(List(AssetType.MixedUse))),
+            routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+          )
         }
 
       }
@@ -3189,7 +3366,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the tax year too early page" when {
 
-        "the user indicated that the tax year was before 6th Aprial 2020" in {
+        "the user indicated that the tax year was before 6th April 2020" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(taxYearAfter6April2020 = Some(false)),
             routes.CommonTriageQuestionsController.disposalDateTooEarly()
@@ -3347,6 +3524,36 @@ class MultipleDisposalsTriageControllerSpec
 
           }
 
+        }
+
+        "non uk resident selects indirect disposal" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                completeAnswersNonUk.copy(assetTypes = List(IndirectDisposal)),
+                userType = UserType.Agent
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
+              doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                .guidance()
+                .url
+              doc.select("#completionDate-question").text shouldBe messageFromMessageKey(
+                "sharesDisposalDate.title"
+              )
+
+              MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
+                completeAnswersNonUk.copy(assetTypes = List(IndirectDisposal)),
+                Some(UserType.Agent),
+                doc
+              )
+            }
+          )
         }
 
         "the user has just answered all the question in the section and" when {
@@ -3612,4 +3819,126 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     doc.select("#completionDate-answer").text() shouldBe TimeUtils.govDisplayFormat(answers.completionDate.value)
   }
 
+}
+
+class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with ScalaCheckDrivenPropertyChecks
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
+
+  val mockTaxYearService = mock[TaxYearService]
+
+  val mockUUIDGenerator = mock[UUIDGenerator]
+
+  val trustDisplay      = UserTypeDisplay(UserType.Organisation, None, Left(sample[TrustName]))
+  val agentDisplay      = UserTypeDisplay(UserType.Agent, None, Right(sample[IndividualName]))
+  val individualDisplay = UserTypeDisplay(UserType.Individual, None, Right(sample[IndividualName]))
+  val personalRepDisplay =
+    UserTypeDisplay(
+      UserType.Individual,
+      Some(Left(PersonalRepresentative)),
+      Right(sample[IndividualName])
+    )
+  val capacitorDisplay =
+    UserTypeDisplay(UserType.Individual, Some(Right(Capacitor)), Right(sample[IndividualName]))
+
+  override val overrideBindings =
+    List[GuiceableModule](
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[TaxYearService].toInstance(mockTaxYearService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator),
+      bind[ReturnsService].toInstance(mockReturnsService)
+    )
+
+  lazy val controller = instanceOf[MultipleDisposalsTriageController]
+
+  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
+  override lazy val additionalConfig = Configuration(
+    "indirect-disposals.enabled" -> false
+  )
+
+  def performAction(): Future[Result] =
+    controller.checkYourAnswers()(FakeRequest())
+
+  val completeAnswersNonUk = CompleteMultipleDisposalsTriageAnswers(
+    Some(IndividualUserType.Self),
+    2,
+    sample[Country],
+    List(AssetType.Residential),
+    sample[TaxYear],
+    sample[CompletionDate]
+  )
+
+  val allQuestionsAnsweredNonUk = IncompleteMultipleDisposalsTriageAnswers(
+    completeAnswersNonUk.individualUserType,
+    Some(completeAnswersNonUk.numberOfProperties),
+    Some(false),
+    Some(completeAnswersNonUk.countryOfResidence),
+    None,
+    Some(completeAnswersNonUk.assetTypes),
+    Some(true),
+    Some(completeAnswersNonUk.taxYear),
+    Some(completeAnswersNonUk.completionDate)
+  )
+
+  "redirect to the asset types not implemented page" when {
+    "the user was not a non uk resident and they have selected asset types that are not supported" in {
+      List(
+        List(AssetType.MixedUse),
+        List(AssetType.IndirectDisposal, AssetType.MixedUse),
+        List(AssetType.MixedUse, AssetType.IndirectDisposal)
+      ).foreach { assetTypes =>
+        testRedirectWhenIncomplete(
+          allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)),
+          routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+        )
+      }
+    }
+
+  }
+
+  def testRedirectWhenIncomplete(
+    answers: IncompleteMultipleDisposalsTriageAnswers,
+    expectedRedirect: Call
+  ): Unit = {
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(
+        sessionDataWithStartingNewDraftReturn(
+          answers,
+          Right(sample[IndividualName])
+        )._1
+      )
+    }
+
+    checkIsRedirect(performAction(), expectedRedirect)
+
+  }
+
+  def sessionDataWithStartingNewDraftReturn(
+    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
+    name: Either[TrustName, IndividualName]                                         = Right(sample[IndividualName]),
+    userType: UserType                                                              = UserType.Individual,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]] = None
+  ): (SessionData, StartingNewDraftReturn) = {
+    val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
+      newReturnTriageAnswers = Left(multipleDisposalsAnswers),
+      subscribedDetails      = sample[SubscribedDetails].copy(name = name),
+      agentReferenceNumber   = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
+      representeeAnswers = if (representativeType.exists(_.isLeft)) {
+        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
+      } else if (representativeType.exists(_.isRight)) {
+        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+      } else None
+    )
+    SessionData.empty.copy(
+      journeyStatus = Some(startingNewDraftReturn),
+      userType      = Some(userType)
+    ) -> startingNewDraftReturn
+  }
 }

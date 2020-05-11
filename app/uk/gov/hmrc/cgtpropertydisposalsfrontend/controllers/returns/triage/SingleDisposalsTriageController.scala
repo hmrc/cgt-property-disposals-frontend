@@ -31,6 +31,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
@@ -51,7 +52,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{singledisposals => triagePages}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, singledisposals => triagePages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -73,7 +74,7 @@ class SingleDisposalsTriageController @Inject() (
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
   countryOfResidencePage: triagePages.country_of_residence,
   assetTypeForNonUkResidentsPage: triagePages.asset_type_for_non_uk_residents,
-  disposalDateOfSharesForNonUk: triagePages.disposal_date_of_shares,
+  disposalDateOfSharesForNonUk: disposal_date_of_shares,
   didYouDisposeOfResidentialPropertyPage: triagePages.did_you_dispose_of_residential_property,
   disposalDatePage: triagePages.disposal_date,
   completionDatePage: triagePages.completion_date,
@@ -651,7 +652,8 @@ class SingleDisposalsTriageController @Inject() (
         disposalDateOfSharesForNonUk(
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
-          isDraftReturn
+          isDraftReturn,
+          routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit()
         )
     )
   }
@@ -668,7 +670,8 @@ class SingleDisposalsTriageController @Inject() (
                   disposalDateOfSharesForNonUk(
                     formWithErrors,
                     backLink(triageAnswers, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
-                    state.isRight
+                    state.isRight,
+                    routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit()
                   )
                 ), { date =>
                 val result = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate)) match {
@@ -1112,23 +1115,5 @@ object SingleDisposalsTriageController {
       )
     )(identity)(Some(_))
   )
-
-  val sharesDisposalDateForm: Form[ShareDisposalDate] = {
-    val key = "sharesDisposalDate"
-    Form(
-      mapping(
-        "" -> of(
-          TimeUtils.dateFormatter(
-            Some(LocalDate.now()),
-            None,
-            s"$key-day",
-            s"$key-month",
-            s"$key-year",
-            key
-          )
-        )
-      )(ShareDisposalDate(_))(d => Some(d.value))
-    )
-  }
 
 }
