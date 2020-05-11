@@ -72,7 +72,7 @@ h1 > span.heading-medium,
 }
 
 #content .form-hint {
-    color: #51585C;
+    color: #515A5C;
 }
 
 div>p.lede,
@@ -678,7 +678,7 @@ details dl.govuk-check-your-answers {
 .charge .caption {
     font-size: 16px;
     margin-bottom: 0;
-    color: #51585C;
+    color: #515A5C;
     display: block;
     font-weight: normal;
 }
