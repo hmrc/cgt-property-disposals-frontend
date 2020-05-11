@@ -66,9 +66,13 @@ h1 > span.heading-medium,
     border-bottom: none;
 }
 
-#content .form-hint,
-#content .heading-xlarge .heading-secondary {
-    color: #4f5456;
+#content .heading-xlarge .heading-secondary,
+#content .govuk-caption-xl {
+    color: #626a6e;
+}
+
+#content .form-hint {
+    color: #51585C;
 }
 
 div>p.lede,
@@ -322,7 +326,6 @@ details {
     line-height: 1.11111;
     display: block;
     margin-bottom: 5px;
-    color: #4f5456;
     padding-top: 20px;
 }
 
@@ -675,7 +678,7 @@ details dl.govuk-check-your-answers {
 .charge .caption {
     font-size: 16px;
     margin-bottom: 0;
-    color: #4f5456;
+    color: #51585C;
     display: block;
     font-weight: normal;
 }
