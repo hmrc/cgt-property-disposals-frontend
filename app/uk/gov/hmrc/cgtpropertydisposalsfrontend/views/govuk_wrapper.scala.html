@@ -62,18 +62,15 @@
       };
       window.jsConfig = window.jsConfig || {};
       window.jsConfig.lang = window.getCookie("PLAY_LANG") || "en";
+      @if(withSignOutLink || withAccount) {
+        window.jsConfig.timeoutEnabled = true;
+        window.jsConfig.timeout = @{appConfig.ggTimeoutSeconds};
+        window.jsConfig.countdown = @{appConfig.ggCountdownSeconds};
+        window.jsConfig.keep_alive_url = "@{appConfig.ggKeepAliveUrl}";
+        window.jsConfig.timed_out_url = "@{appConfig.ggTimedOutUrl}";
+        window.jsConfig.logout_url = "@{if(withAccount) appConfig.accountSignOutUrl else appConfig.ggSignOut}";
+      }
     </script>
-
-    @if(withSignOutLink || withAccount) {
-        <script>
-              window.jsConfig.timeoutEnabled = true;
-              window.jsConfig.timeout = @{appConfig.ggTimeoutSeconds};
-              window.jsConfig.countdown = @{appConfig.ggCountdownSeconds};
-              window.jsConfig.keep_alive_url = "@{appConfig.ggKeepAliveUrl}";
-              window.jsConfig.timed_out_url = "@{appConfig.ggTimedOutUrl}";
-              window.jsConfig.logout_url = "@{if(withAccount) appConfig.accountSignOutUrl else appConfig.ggSignOut}";
-        </script>
-    }
     @uiHead(
       linkElem = None,
       headScripts = None)
