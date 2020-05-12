@@ -694,8 +694,18 @@ details dl.govuk-check-your-answers {
 }
 
 .return-list li h3,
-.return-list li h4 {
+.return-list li h4,
+.return-list li h5 {
     font-size: 24px;
+}
+
+.return-list li .financial-summary h5,
+.submission-meta {
+    text-align: right;
+}
+
+.return-list li h4.cgt-liability {
+    font-size: 36px;
 }
 
 .form-bundle {
@@ -777,6 +787,15 @@ h1 > .sub-heading {
 
     .cya-change.cya-extra-action {
         position: relative;
+    }
+
+    .return-list li .financial-summary h5,
+    .submission-meta {
+        text-align: left;
+    }
+
+    .submission-meta {
+        margin-top: 1em;
     }
 
 }
