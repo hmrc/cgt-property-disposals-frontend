@@ -225,7 +225,9 @@ class HomePageControllerSpec
               messages("drafts.list.lastUpdated", govShortDisplayFormat(sampleDraftReturn.lastUpdatedDate))
             doc.select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4").text() shouldBe
               messages("drafts.list.sendAndPayBy") + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
-            doc.select(s"#draftReturn-${sampleDraftReturn.id} > h4").text() shouldBe govShortDisplayFormat(
+            doc.select(s"#draftReturn-${sampleDraftReturn.id} > h3").text() shouldBe messages(
+              "drafts.list.completionDate"
+            ) + " " + govShortDisplayFormat(
               completionDate
             )
           }
@@ -268,8 +270,8 @@ class HomePageControllerSpec
             doc.select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4").text() shouldBe
               messages("drafts.list.sendAndPayBy") + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
             doc
-              .select(s"#draftReturn-${sampleDraftReturn.id} > h4")
-              .text() shouldBe propertyAddress.line1 + ", " + propertyAddress.postcode.value
+              .select(s"#draftReturn-${sampleDraftReturn.id} > h3")
+              .text() shouldBe messages("drafts.list.propertyAddress") + " " + propertyAddress.line1 + ", " + propertyAddress.postcode.value
           }
         )
       }

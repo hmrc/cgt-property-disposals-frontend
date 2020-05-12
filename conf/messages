@@ -2402,10 +2402,13 @@ returns.list.noTaxDue=You did not owe any tax for this return
 returns.list.leftToPay=Total left to pay
 returns.list.taxOwed=Tax owed for return
 returns.list.sentDate=Sent to HMRC on {0}
+returns.list.propertyAddress=Property address
 returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
 
 drafts.list.title=Draft returns
-drafts.list.lastUpdated=Last saved on {0}
+drafts.list.completionDate=Property completion date
+drafts.list.propertyAddress=Property address
+drafts.list.lastUpdated=Draft last saved on {0}
 drafts.list.sendAndPayBy=Send and pay by
 drafts.list.resume=Complete return
 

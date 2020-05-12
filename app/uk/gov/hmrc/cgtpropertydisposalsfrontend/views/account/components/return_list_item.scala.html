@@ -35,29 +35,29 @@
 <li class="single-return form-bundle">
   <div class="grid-row">
     <div class="column-three-quarters submission-summary">
-      <span id="sentDate-@sentReturn.submissionId" class="caption">
-        @messages("returns.list.sentDate", TimeUtils.govShortDisplayFormat(sentReturn.submissionDate))
-      </span>
-      <h4>
+      <h3>
+        <span class="caption">@messages("returns.list.propertyAddress")</span>
         @sentReturn.propertyAddress.line1, @sentReturn.propertyAddress.postcode.value
-      </h4>
-      <h3 id="taxOwed-@sentReturn.submissionId" class="cgt-liability">
+      </h3>
+      <h4 id="taxOwed-@sentReturn.submissionId" class="cgt-liability">
         <span class="caption">@messages("returns.list.taxOwed")</span>
         @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.mainReturnChargeAmount.withFloorZero.inPounds())
-      </h3>
-
+      </h4>
     </div>
     <div class="column-one-quarter financial-summary">
-
       @if(sentReturn.mainReturnChargeAmount.withFloorZero.isZero) {
-        <span class="caption">
-          @messages("returns.list.noTaxDue")
-        </span>
+        <h5>
+          <span class="caption">
+            @messages("returns.list.noTaxDue")
+          </span>
+        </h5>
       } else {
-        <h4 id="leftToPay-@sentReturn.submissionId">
+        <h5 id="leftToPay-@sentReturn.submissionId">
           <span class="caption">@messages("returns.list.leftToPay")</span>
-          @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
-        </h4>
+          <strong class="bold">
+            @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
+          </strong>
+        </h5>
         @if(!totalOutstanding.isZero) {
           <h5>
             <span class="caption">@messages(if(numberOfOutstandingCharges > 1) "returns.list.nextPaymentDue" else "returns.list.paymentDue")</span>
@@ -67,18 +67,30 @@
           </h5>
         }
       }
-    </div>
-    <div class="column-full">
-      <p class="caption">
-        @messages("returns.list.ref") @sentReturn.submissionId
-      </p>
-      <a id="viewSentReturn-@sentReturn.submissionId" href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
-        @if(!totalOutstanding.isZero) {
-          @messages("returns.list.viewAndPay")
-        } else {
-          @messages("returns.list.view")
-        }
-      </a>
+
     </div>
   </div>
+  <div class="grid-row">
+    <div class="column-three-quarters">
+      <a role="button" class="button" id="viewSentReturn-@sentReturn.submissionId" href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
+      @if(!totalOutstanding.isZero) {
+        @messages("returns.list.viewAndPay")
+      } else {
+        @messages("returns.list.view")
+      }
+      </a>
+    </div>
+
+    <div class="column-one-quarter">
+      <div class="submission-meta">
+        <span class="caption">
+          @messages("returns.list.ref") @sentReturn.submissionId
+        </span>
+        <span id="sentDate-@sentReturn.submissionId" class="caption">
+        @messages("returns.list.sentDate", TimeUtils.govShortDisplayFormat(sentReturn.submissionDate))
+        </span>
+      </div>
+    </div>
+  </div>
+
 </li>
