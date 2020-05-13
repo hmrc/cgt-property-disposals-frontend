@@ -807,6 +807,10 @@ h1 > .sub-heading {
         text-align: left;
     }
 
+    .govuk-check-your-answers.cya-questions-long .sum-part > .cya-question {
+        color: #515A5C;
+    }
+
 }
 
 .add-another-file {
