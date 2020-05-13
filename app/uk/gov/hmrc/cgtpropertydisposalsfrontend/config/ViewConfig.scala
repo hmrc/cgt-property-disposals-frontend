@@ -84,6 +84,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val personalRepresentative: String      = getString("external-url.personal-representative")
   val calculateCgt: String                = getString("external-url.calculate-cgt")
   val payYourTax: String                  = getString("external-url.pay-your-tax")
+  val payTheirTaxBill: String             = getString("external-url.pay-their-tax-bill")
   val returnsForSomeoneWhoHasDied: String = getString("external-url.returns-for-someone-who-has-died")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"

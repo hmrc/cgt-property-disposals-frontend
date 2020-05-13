@@ -47,6 +47,10 @@
 
 @key=@{"confirmationOfSubmission"}
 @title = @{ messages(s"$key.title") }
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
+
 @representativeType = @{
     justSubmittedReturn.completeReturn.fold(
         _.triageAnswers.individualUserType, _.triageAnswers.individualUserType
@@ -56,6 +60,7 @@
         case _ => None
     }
 }
+
 @representeeAnswers = @{
     justSubmittedReturn.completeReturn.fold(
         _.representeeAnswers,
@@ -64,11 +69,11 @@
 }
 
 @userKey = @{
-    representativeType match {
-        case Some(Left(PersonalRepresentative)) => ".personalRep"
-        case Some(Right(Capacitor))             => ".capacitor"
-        case None                               => ""
-    }
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else ""
 }
 
 @name = @{
@@ -103,26 +108,26 @@
            )
          }
      </p>
-     <h1 class="heading-xlarge">@title</h1>
-  <span class="heading-large" style="font-weight: normal;">
-    @messages(s"$key.taxOwed")
-    <strong style="display:block; font-weight: bold;">
-     @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
-    </strong>
-  </span>
-  <span class="heading-large" style="font-weight: normal;">
+    <h1 class="heading-xlarge">@title</h1>
+    <span class="heading-large" style="font-weight: normal;">
+      @messages(s"$key.taxOwed")
+      <strong style="display:block; font-weight: bold;">
+        @{{formatAmountOfMoneyWithPoundSign(amountOwed)}}
+      </strong>
+    </span>
+    <span class="heading-large" style="font-weight: normal;">
       <div id="ref-id">
        @{if(amountOwed.equals(BigDecimal(0))) messages(s"$key.returnReference") else messages(s"$key.paymentReference")}
-   <strong style="display:block; font-weight: bold;">
+    <strong style="display:block; font-weight: bold;">
        @{if(amountOwed.equals(BigDecimal(0))) justSubmittedReturn.submissionResponse.formBundleId else chargeReference}
        </strong>
       </div>
-  </span>
- </div>
+    </span>
+    </div>
 
-  <p>
-   @Html(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
-  </p>
+    <p>
+     @Html(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
+    </p>
 
     <p id="printPage">
     @Html({
@@ -170,51 +175,65 @@
         }
     }
 
-      @justSubmittedReturn.submissionResponse.charge.map { charge =>
-          @representativeType match {
-              case Some(Left(PersonalRepresentative)) => {
-                  <h2 class="heading-medium">@messages(s"$key.howToPay.heading")</h2>
+    @justSubmittedReturn.submissionResponse.charge.map { charge =>
+      @representativeType match {
+          case Some(Left(PersonalRepresentative)) => {
+              <h2 class="heading-medium">@messages(s"$key.howToPay.heading")</h2>
 
-                  <p id="howToPay">@Html(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference))</p>
+              <p id="howToPay">@Html(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference))</p>
 
-                  @payNowButton
-              }
-
-              case Some(Right(Capacitor)) => {
-                  <h2 class="heading-medium">@messages(s"$key.capacitor.whatNext")</h2>
-
-                  @warning(messages(s"$key.capacitor.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
-
-                  <h3 class="heading-medium">@messages(s"$key.howToPay.heading")</h3>
-
-                  <p id="howToPay">@Html(messages(s"$key.capacitor.howToPay.p1", charge.chargeReference))</p>
-
-                  @payNowButton
-              }
-
-              case None => {
-                  <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
-
-                  @warning(messages(s"$key.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
-
-                  <p id="howToPay">@Html(messages(s"$key.howToPay.p1", charge.chargeReference))</p>
-
-                  @payNowButton
-              }
+              @payNowButton
           }
+
+          case Some(Right(Capacitor)) => {
+              <h2 class="heading-medium">@messages(s"$key.capacitor.whatNext")</h2>
+
+              @warning(messages(s"$key.capacitor.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+
+              <h3 class="heading-medium">@messages(s"$key.howToPay.heading")</h3>
+
+              <p id="howToPay">@Html(messages(s"$key.capacitor.howToPay.p1", charge.chargeReference))</p>
+
+              @payNowButton
+          }
+
+          case None => {
+              <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
+
+              @warning(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+
+            @{if (isAgent)
+                  Html(s"""<p id="howToPay">${messages(s"$key.agent.howToPay.heading.p1", viewConfig.payTheirTaxBill)}</p>""")
+
+                else
+                  Html(s"""<h3 class="heading-medium">${messages(s"$key.howToPay.heading")}</h3>""")
+            }
+
+              <p id="howToPay">@Html(messages(s"$key$userKey.howToPay.p1", charge.chargeReference))</p>
+
+            @{if (!isAgent) payNowButton }
+          }
+      }
     }
 
- <div class="panel panel-border-wide">
-   <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
-   <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
- </div>
+    <div class="panel panel-border-wide">
+        <h2 class="heading-medium" id="ifSaHeading">@messages(s"$key$userKey.ifSa")</h2>
+        <p>@Html(messages(s"$key$userKey.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
+    </div>
 
-    @justSubmittedReturn.submissionResponse.charge.fold{
-        @buttonLink(messages("button.accountHome"), accountRoutes.HomePageController.homepage().url)
-    }{ _ =>
-        <p>
-            @Html(messages(s"$key.returnToAccountHome", accountRoutes.HomePageController.homepage().url))
-        </p>
+    @{
+      if(isAgent)
+        buttonLink(messages("button.clients.accountHome"), accountRoutes.HomePageController.homepage().url)
+      else
+        justSubmittedReturn.submissionResponse.charge.fold(
+            buttonLink(messages("button.accountHome"), accountRoutes.HomePageController.homepage().url)
+        )( _ =>
+           if(isATrust)
+             Html(s"""<p>${messages(s"$key.trust.returnToAccountHome", accountRoutes.HomePageController.homepage().url)}</p>""")
+           else
+             Html(s"""<p>${messages(s"$key.returnToAccountHome", accountRoutes.HomePageController.homepage().url)}</p>""")
+
+        )
     }
 
  @exitSurveyLink(viewConfig.returnsExitSurveyUrl)
