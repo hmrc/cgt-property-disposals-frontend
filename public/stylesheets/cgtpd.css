@@ -798,6 +798,15 @@ h1 > .sub-heading {
         margin-top: 1em;
     }
 
+    .govuk-check-your-answers.cya-questions-long .sum-part > .cya-question,
+    .govuk-check-your-answers.cya-questions-long .sum-part > .cya-change,
+    .govuk-check-your-answers.cya-questions-long .sum-total > .cya-question,
+    .govuk-check-your-answers.cya-questions-long .sum-total > .cya-change {
+        min-width: 100%;
+        position: relative;
+        text-align: left;
+    }
+
 }
 
 .add-another-file {
