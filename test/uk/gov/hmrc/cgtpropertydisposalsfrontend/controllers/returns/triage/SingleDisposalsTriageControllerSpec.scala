@@ -69,8 +69,6 @@ class SingleDisposalsTriageControllerSpec
 
   val mockUUIDGenerator = mock[UUIDGenerator]
 
-  implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
-
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
@@ -3556,7 +3554,8 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "display shares disposal date in case of indirect disposal" in {
-          val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions.copy(assetType = AssetType.IndirectDisposal, countryOfResidence = Country("TR", Some("Turkey")))
+          val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions
+            .copy(assetType = AssetType.IndirectDisposal, countryOfResidence = Country("TR", Some("Turkey")))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -4079,7 +4078,10 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
     completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
     userType: Option[UserType],
     doc: Document
-  )(implicit messagesApi: MessagesApi, messages: Messages, lang: Lang): Unit = {
+  )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
+
+    implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
+
     completeSingleDisposalTriageAnswers.individualUserType.foreach { individualUserType =>
       doc.select("#individualUserType-answer").text() shouldBe messages(
         if (userType.contains(UserType.Agent)) s"individualUserType.agent.$individualUserType"
@@ -4103,15 +4105,21 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
         case IndirectDisposal => doc.select("#propertyType-answer").text() shouldBe ""
         case MixedUse         => doc.select("#propertyType-answer").text() shouldBe ""
       }
-    val isSingleDateDisplay: Boolean = completeSingleDisposalTriageAnswers match {
+    val isIndirectDisposal: Boolean = completeSingleDisposalTriageAnswers match {
       case CompleteSingleDisposalTriageAnswers(_, _, _, AssetType.IndirectDisposal, _, _) => true
-      case _ => false
+      case _                                                                              => false
     }
-    if (isSingleDateDisplay)
-      doc.select("#disposalDateOfShares-answer").text shouldBe TimeUtils.govDisplayFormat(completeSingleDisposalTriageAnswers.disposalDate.value)
+    if (isIndirectDisposal)
+      doc.select("#disposalDateOfShares-answer").text shouldBe TimeUtils.govDisplayFormat(
+        completeSingleDisposalTriageAnswers.disposalDate.value
+      )
     else {
-      doc.select("#disposalDate-answer").text shouldBe TimeUtils.govDisplayFormat(completeSingleDisposalTriageAnswers.disposalDate.value)
-      doc.select("#completionDate-answer").text shouldBe TimeUtils.govDisplayFormat(completeSingleDisposalTriageAnswers.completionDate.value)
+      doc.select("#disposalDate-answer").text shouldBe TimeUtils.govDisplayFormat(
+        completeSingleDisposalTriageAnswers.disposalDate.value
+      )
+      doc.select("#completionDate-answer").text shouldBe TimeUtils.govDisplayFormat(
+        completeSingleDisposalTriageAnswers.completionDate.value
+      )
     }
   }
 }

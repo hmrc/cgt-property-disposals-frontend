@@ -770,7 +770,7 @@ sharesDisposalDate-month.error.monthAndYearRequired=Date of disposal must includ
 sharesDisposalDate-day.error.dayAndYearRequired=Date of disposal must include a day and a year
 sharesDisposalDate-day.error.dayAndMonthRequired=Date of disposal must include a day and a month
 sharesDisposalDate.error.tooFarInFuture=The date you disposed of the shares cannot be in the future
-sharesDisposalDate.cyaChange=the shares disposal date
+sharesDisposalDate.cyaChange=when the shares were sold
 
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.agent.title=Did your client dispose of a UK residential property?

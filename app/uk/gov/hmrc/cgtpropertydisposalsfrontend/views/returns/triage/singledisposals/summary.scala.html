@@ -52,12 +52,11 @@
             else ""
 }
 
-@isSingleDateDisplay = @{
-    val isSingleDateDisplay: Boolean = answers match {
+@isIndirecDisposal = @{
+    answers match {
         case CompleteSingleDisposalTriageAnswers(_, _, _, AssetType.IndirectDisposal, _, _) => true
         case _ => false
     }
-    isSingleDateDisplay
 }
 
 @cyaSection() {
@@ -110,9 +109,9 @@
         )
     }
 
-    @if(isSingleDateDisplay) {
+    @if(isIndirecDisposal) {
         @cyaRow(
-            messages(s"sharesDisposalDate.title"),
+            messages("sharesDisposalDate.title"),
             Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
             Some(cyaChange(messages("sharesDisposalDate.cyaChange"), routes.SingleDisposalsTriageController.disposalDateOfShares.url)),
             "disposalDateOfShares"
