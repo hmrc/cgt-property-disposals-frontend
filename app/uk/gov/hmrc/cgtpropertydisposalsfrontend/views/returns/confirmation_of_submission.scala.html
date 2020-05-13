@@ -202,16 +202,16 @@
 
               @warning(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
 
-            @{if (isAgent)
-                  Html(s"""<p id="howToPay">${messages(s"$key.agent.howToPay.heading.p1", viewConfig.payTheirTaxBill)}</p>""")
-
+              @{
+                if (isAgent)
+                  Html(s"""<p id="howToPay-heading">${messages(s"$key.agent.howToPay.heading.p1", viewConfig.payTheirTaxBill)}</p>""")
                 else
                   Html(s"""<h3 class="heading-medium">${messages(s"$key.howToPay.heading")}</h3>""")
-            }
+              }
 
               <p id="howToPay">@Html(messages(s"$key$userKey.howToPay.p1", charge.chargeReference))</p>
 
-            @{if (!isAgent) payNowButton }
+              @{if (!isAgent) payNowButton }
           }
       }
     }

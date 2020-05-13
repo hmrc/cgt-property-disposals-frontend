@@ -2326,7 +2326,6 @@ confirmationOfSubmission.trust.inset.heading=<strong class="bold">If the trust n
 confirmationOfSubmission.agent.inset.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.trust.inset.p1=If the trust needs to send a Self Assessment tax return
 
-
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
 confirmationOfSubmission.agent.ifSa=Self Assessment
 confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment tax return
