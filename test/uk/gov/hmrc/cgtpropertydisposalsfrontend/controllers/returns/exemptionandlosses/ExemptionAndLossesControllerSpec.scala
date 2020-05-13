@@ -1862,6 +1862,11 @@ class ExemptionAndLossesControllerSpec
               s.copy(
                 exemptionAndLossesAnswers  = Some(newAnswers),
                 yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+              ),
+            i =>
+              i.copy(
+                exemptionAndLossesAnswers  = Some(newAnswers),
+                yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
               )
           )
           inSequence {

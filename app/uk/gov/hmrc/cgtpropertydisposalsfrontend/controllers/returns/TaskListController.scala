@@ -53,7 +53,8 @@ class TaskListController @Inject() (
   returnsService: ReturnsService,
   cc: MessagesControllerComponents,
   singleDisposalTaskListPage: views.html.returns.single_disposal_task_list,
-  multipleDisposalsTaskListPage: views.html.returns.multiple_disposals_task_list
+  multipleDisposalsTaskListPage: views.html.returns.multiple_disposals_task_list,
+  singleIndirectDisposalTaskListPage: views.html.returns.single_indirect_disposal_task_list
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -76,7 +77,8 @@ class TaskListController @Inject() (
           },
           _.fold(
             m => Ok(multipleDisposalsTaskListPage(m)),
-            s => Ok(singleDisposalTaskListPage(s))
+            s => Ok(singleDisposalTaskListPage(s)),
+            i => Ok(singleIndirectDisposalTaskListPage(i))
           )
         )
 
@@ -134,6 +136,12 @@ class TaskListController @Inject() (
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(s.yearToDateLiabilityAnswers)(Some(_)),
             supportingEvidenceAnswers =
               updatedUploadSupportingEvidenceAnswers.fold(s.supportingEvidenceAnswers)(Some(_))
+          ),
+        i =>
+          i.copy(
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(i.yearToDateLiabilityAnswers)(Some(_)),
+            supportingEvidenceAnswers =
+              updatedUploadSupportingEvidenceAnswers.fold(i.supportingEvidenceAnswers)(Some(_))
           )
       )
 
@@ -157,7 +165,7 @@ class TaskListController @Inject() (
     draftReturn: DraftReturn
   ): Option[(NonEmptyList[SupportingEvidence], SupportingEvidenceAnswers)] =
     draftReturn
-      .fold(_.supportingEvidenceAnswers, _.supportingEvidenceAnswers)
+      .fold(_.supportingEvidenceAnswers, _.supportingEvidenceAnswers, _.supportingEvidenceAnswers)
       .flatMap { answers =>
         val supportingEvidence = answers.fold(_.evidences, _.evidences)
         supportingEvidence.filter(f => fileHasExpired(f.uploadedOn)) match {
@@ -170,7 +178,7 @@ class TaskListController @Inject() (
     draftReturn: DraftReturn
   ): Option[(MandatoryEvidence, YearToDateLiabilityAnswers)] =
     draftReturn
-      .fold(_.yearToDateLiabilityAnswers, _.yearToDateLiabilityAnswers)
+      .fold(_.yearToDateLiabilityAnswers, _.yearToDateLiabilityAnswers, _.yearToDateLiabilityAnswers)
       .flatMap { answers =>
         val mandatoryEvidence = answers match {
           case c: CalculatedYTDAnswers    => c.fold(_.mandatoryEvidence, _.mandatoryEvidence)

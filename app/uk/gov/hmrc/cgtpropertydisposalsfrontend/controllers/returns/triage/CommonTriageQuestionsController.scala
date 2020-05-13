@@ -304,9 +304,10 @@ class CommonTriageQuestionsController @Inject() (
   def periodOfAdministrationNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withState(request) { (_, state) =>
+        // TODO: fix for indirect disposals
         val isMultipleDisposal = state.fold(
           _.newReturnTriageAnswers.isLeft,
-          _.draftReturn.fold(_ => true, _ => false)
+          _.draftReturn.fold(_ => true, _ => false, _ => false)
         )
         val backLink =
           if (isMultipleDisposal) controllers.returns.address.routes.PropertyDetailsController.disposalDate()
@@ -404,7 +405,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers)
+                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
               )
             )
         )
@@ -422,7 +423,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers)
+                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
               )
             )
         )
@@ -484,6 +485,16 @@ class CommonTriageQuestionsController @Inject() (
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss          = None,
                 supportingEvidenceAnswers  = None
+              ),
+            i =>
+              i.copy(
+                triageAnswers              = updateSingleDisposalAnswers(i.triageAnswers),
+                representeeAnswers         = None,
+                companyAddress             = None,
+                disposalDetailsAnswers     = None,
+                acquisitionDetailsAnswers  = None,
+                yearToDateLiabilityAnswers = None,
+                supportingEvidenceAnswers  = None
               )
           )
         )
@@ -516,6 +527,7 @@ class CommonTriageQuestionsController @Inject() (
       ),
       _.draftReturn.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
+        s => numberOfProperties(s.triageAnswers),
         s => numberOfProperties(s.triageAnswers)
       )
     )
@@ -530,6 +542,7 @@ class CommonTriageQuestionsController @Inject() (
         r =>
           r.draftReturn.fold(
             m => Left(m.triageAnswers),
+            s => Right(s.triageAnswers),
             s => Right(s.triageAnswers)
           )
       )

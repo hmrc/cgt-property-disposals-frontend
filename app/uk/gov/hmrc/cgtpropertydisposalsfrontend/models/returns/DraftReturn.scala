@@ -23,6 +23,7 @@ import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
@@ -94,13 +95,53 @@ object DraftMultipleDisposalsReturn {
 
 }
 
+final case class DraftSingleIndirectDisposalReturn(
+  id: UUID,
+  triageAnswers: SingleDisposalTriageAnswers,
+  companyAddress: Option[Address],
+  disposalDetailsAnswers: Option[DisposalDetailsAnswers],
+  acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers],
+  exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
+  yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+  supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
+  representeeAnswers: Option[RepresenteeAnswers],
+  lastUpdatedDate: LocalDate
+) extends DraftReturn
+
+object DraftSingleIndirectDisposalReturn {
+
+  def newDraftReturn(
+    id: UUID,
+    triageAnswers: SingleDisposalTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): DraftSingleIndirectDisposalReturn =
+    DraftSingleIndirectDisposalReturn(
+      id,
+      triageAnswers,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      representeeAnswers,
+      TimeUtils.today()
+    )
+
+}
+
 object DraftReturn {
 
   implicit class DraftReturnOps(private val d: DraftReturn) extends AnyVal {
-    def fold[A](whenMultiple: DraftMultipleDisposalsReturn => A, whenSingle: DraftSingleDisposalReturn => A): A =
+    def fold[A](
+      whenMultiple: DraftMultipleDisposalsReturn => A,
+      whenSingle: DraftSingleDisposalReturn => A,
+      whenSingleIndirect: DraftSingleIndirectDisposalReturn => A
+    ): A =
       d match {
-        case m: DraftMultipleDisposalsReturn => whenMultiple(m)
-        case s: DraftSingleDisposalReturn    => whenSingle(s)
+        case m: DraftMultipleDisposalsReturn      => whenMultiple(m)
+        case s: DraftSingleDisposalReturn         => whenSingle(s)
+        case s: DraftSingleIndirectDisposalReturn => whenSingleIndirect(s)
       }
   }
 

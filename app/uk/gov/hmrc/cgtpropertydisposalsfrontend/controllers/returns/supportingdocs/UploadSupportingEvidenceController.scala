@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, SupportingEvidenceAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUploadStatus.Uploaded
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
@@ -107,10 +107,16 @@ class SupportingEvidenceController @Inject() (
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
               f(i, c.cgtReference, s, r, IncompleteSupportingEvidenceAnswers.empty)
             )(f(i, c.cgtReference, s, r, _))
+
           case DraftMultipleDisposalsReturn(i, _, _, _, _, maybeSupportingDocumentsAnswers, _, _) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
               f(i, c.cgtReference, s, r, IncompleteSupportingEvidenceAnswers.empty)
             )(f(i, c.cgtReference, s, r, _))
+
+          case i: DraftSingleIndirectDisposalReturn =>
+            i.supportingEvidenceAnswers.fold[Future[Result]](
+              f(i.id, c.cgtReference, s, r, IncompleteSupportingEvidenceAnswers.empty)
+            )(f(i.id, c.cgtReference, s, r, _))
         }
       case _ => Redirect(controllers.routes.StartController.start())
     }
@@ -206,8 +212,9 @@ class SupportingEvidenceController @Inject() (
               }
 
               val newDraftReturn = fillingOutReturn.draftReturn match {
-                case s: DraftSingleDisposalReturn    => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-                case m: DraftMultipleDisposalsReturn => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
               }
 
               val result = for {
@@ -235,6 +242,7 @@ class SupportingEvidenceController @Inject() (
                 _ => CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty)
               )
               val newDraftReturn = fillingOutReturn.draftReturn.fold(
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
               )
@@ -365,6 +373,7 @@ class SupportingEvidenceController @Inject() (
 
     val newDraftReturn = fillingOutReturn.draftReturn.fold(
       _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
       _.copy(supportingEvidenceAnswers = Some(newAnswers))
     )
 
@@ -410,8 +419,9 @@ class SupportingEvidenceController @Inject() (
         )
 
         val newDraftReturn = fillingOutReturn.draftReturn match {
-          case s: DraftSingleDisposalReturn    => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case m: DraftMultipleDisposalsReturn => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
         }
 
         val result = for {
@@ -470,8 +480,9 @@ class SupportingEvidenceController @Inject() (
             CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingDocumentAnswer, supportingDocuments)
         }
         val newDraftReturn = fillingOutReturn.draftReturn match {
-          case s: DraftSingleDisposalReturn    => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case m: DraftMultipleDisposalsReturn => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
         }
 
         val result = for {
@@ -564,6 +575,7 @@ class SupportingEvidenceController @Inject() (
                 )
             )
             val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
+              _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
             )
