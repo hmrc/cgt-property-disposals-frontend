@@ -640,7 +640,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def disposalDateOfShares(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayTriagePage(
-      _.fold(_.assetType, c => Some(c.assetType).filterNot(e => e === IndirectDisposal)),
+      _.fold(_.assetType, c => Some(c.assetType).filter(e => e === IndirectDisposal)),
       _ => routes.SingleDisposalsTriageController.countryOfResidence()
     )(_ => sharesDisposalDateForm)(
       _.fold(
