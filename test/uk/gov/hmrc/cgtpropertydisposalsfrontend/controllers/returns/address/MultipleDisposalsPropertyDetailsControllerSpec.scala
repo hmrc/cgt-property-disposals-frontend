@@ -77,7 +77,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
   override val validJourneyStatus = FillingOutReturnAddressJourney(
     FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn),
-    Option(Self)
+    Left(draftReturn),
+    Some(Self)
   )
 
   override def overrideBindings: List[GuiceableModule] =

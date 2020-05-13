@@ -482,6 +482,7 @@ object ReliefDetailsController {
   ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
     draftReturn.fold(
       _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType()
     )
 

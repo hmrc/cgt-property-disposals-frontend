@@ -70,7 +70,7 @@ class ExemptionAndLossesController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(_, _, _, d))) =>
         val answers = d
-          .fold(_.exemptionAndLossesAnswers, _.exemptionAndLossesAnswers)
+          .fold(_.exemptionAndLossesAnswers, _.exemptionAndLossesAnswers, _.exemptionAndLossesAnswers)
           .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
         f(s, r, d, answers)
       case _ =>
@@ -90,6 +90,10 @@ class ExemptionAndLossesController @Inject() (
       _.triageAnswers.fold(
         _.disposalDate,
         c => Some(c.disposalDate)
+      ),
+      _.triageAnswers.fold(
+        _.disposalDate,
+        c => Some(c.disposalDate)
       )
     )
 
@@ -100,16 +104,22 @@ class ExemptionAndLossesController @Inject() (
   }
 
   private def withWasAUkResident(draftReturn: DraftReturn)(f: Boolean => Future[Result]): Future[Result] = {
-    val wasUk = draftReturn.fold(
-      _.triageAnswers.fold(
-        _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-        c => Some(c.countryOfResidence.isUk())
-      ),
-      _.triageAnswers.fold(
-        _.wasAUKResident,
-        c => Some(c.countryOfResidence.isUk())
+    val wasUk = {
+      draftReturn.fold(
+        _.triageAnswers.fold(
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+          c => Some(c.countryOfResidence.isUk())
+        ),
+        _.triageAnswers.fold(
+          _.wasAUKResident,
+          c => Some(c.countryOfResidence.isUk())
+        ),
+        _.triageAnswers.fold(
+          _.wasAUKResident,
+          c => Some(c.countryOfResidence.isUk())
+        )
       )
-    )
+    }
 
     wasUk match {
       case Some(d) => f(d)
@@ -174,6 +184,11 @@ class ExemptionAndLossesController @Inject() (
                   s.copy(
                     exemptionAndLossesAnswers  = Some(newAnswers),
                     yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+                  ),
+                i =>
+                  i.copy(
+                    exemptionAndLossesAnswers  = Some(newAnswers),
+                    yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
                   )
               )
 
@@ -423,6 +438,7 @@ class ExemptionAndLossesController @Inject() (
             val newDraftReturn =
               draftReturn.fold(
                 _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
+                _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
                 _.copy(exemptionAndLossesAnswers = Some(completeAnswers))
               )
 
@@ -479,6 +495,7 @@ object ExemptionAndLossesController {
     draftReturn: DraftReturn
   ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
     draftReturn.fold(
+      _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType()
     )

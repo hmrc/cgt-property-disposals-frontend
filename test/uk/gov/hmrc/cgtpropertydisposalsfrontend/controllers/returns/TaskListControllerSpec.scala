@@ -50,7 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
@@ -1115,6 +1115,475 @@ class TaskListControllerSpec
 
       }
 
+    }
+
+    "handling requests to display the single indirect disposal task list page" must {
+
+      def performAction(): Future[Result] = controller.taskList()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: FillingOutReturn => true
+          case _                   => false
+        }
+      )
+
+      def testStateOfSection(draftReturn: DraftSingleIndirectDisposalReturn)(
+        sectionLinkId: String,
+        sectionLinkText: String,
+        sectionLinkHref: Call,
+        sectionsStatus: TaskListStatus,
+        extraChecks: Document => Unit = _ => ()
+      ): Unit = {
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+          draftReturn.copy(
+            supportingEvidenceAnswers  = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
+          )
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("service.title"), { doc =>
+            sectionsStatus match {
+              case TaskListStatus.CannotStart =>
+                doc.select(s"li#$sectionLinkId > span").text shouldBe sectionLinkText
+
+              case _ =>
+                doc.select(s"li#$sectionLinkId > a").text         shouldBe sectionLinkText
+                doc.select(s"li#$sectionLinkId > a").attr("href") shouldBe sectionLinkHref.url
+            }
+
+            doc.select(s"li#$sectionLinkId > strong").text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+            extraChecks(doc)
+          }
+        )
+      }
+
+      "display the page with the proper person represented section status" when {
+
+        "the individual user type is personal representative or capacitor and" when {
+
+          "the section has not been started" in {
+            val draftReturn =
+              sample[DraftSingleIndirectDisposalReturn].copy(
+                triageAnswers =
+                  sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = None
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.ToDo,
+              _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is incomplete" in {
+            val draftReturn =
+              sample[DraftSingleIndirectDisposalReturn].copy(
+                triageAnswers =
+                  sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[IncompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.InProgress,
+              _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is complete" in {
+            val draftReturn =
+              sample[DraftSingleIndirectDisposalReturn].copy(
+                triageAnswers =
+                  sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.Complete
+            )
+          }
+
+        }
+
+      }
+
+      "display the page with the proper single disposal triage section status" when {
+
+        "the session data indicates that they are filling in a return and the triage section is incomplete" in {
+          val incompleteTriage =
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = None)
+            )
+          testStateOfSection(
+            incompleteTriage
+          )(
+            "canTheyUseOurService",
+            messageFromMessageKey("task-list.triage.link"),
+            triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the triage section is complete" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn]
+              .copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None))
+          )(
+            "canTheyUseOurService",
+            messageFromMessageKey("task-list.triage.link"),
+            triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+        }
+
+      }
+
+      "display the page with the proper Enter company details section status" when {
+
+        "the session data indicates that they are filling in a return and enter company details is todo" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn]
+              .copy(
+                triageAnswers  = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+                companyAddress = None
+              )
+          )(
+            "companyDetails",
+            messageFromMessageKey("task-list.enter-company-details.link"),
+            Call("", "#"),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that they are filling in a return and enter property address is complete" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers  = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress = Some(sample[Address])
+            )
+          )(
+            "companyDetails",
+            messageFromMessageKey("task-list.enter-company-details.link"),
+            Call("", "#"),
+            TaskListStatus.Complete
+          )
+        }
+
+      }
+
+      "display the page with the proper disposal details section status" when {
+
+        "the session data indicates that they are filling in a return and the section has not been started yet is todo" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn]
+              .copy(
+                triageAnswers          = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+                disposalDetailsAnswers = None
+              )
+          )(
+            "disposalDetails",
+            messageFromMessageKey("task-list.disposals-details.link"),
+            disposaldetails.routes.DisposalDetailsController.checkYourAnswers(),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn]
+              .copy(
+                triageAnswers          = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+                disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])
+              )
+          )(
+            "disposalDetails",
+            messageFromMessageKey("task-list.disposals-details.link"),
+            disposaldetails.routes.DisposalDetailsController.checkYourAnswers(),
+            TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have completed the section" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers          = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers])
+            )
+          )(
+            "disposalDetails",
+            messageFromMessageKey("task-list.disposals-details.link"),
+            disposaldetails.routes.DisposalDetailsController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+        }
+
+      }
+
+      "display the page with the proper acquisition details section status" when {
+
+        "the session data indicates that they are filling in a return and the section has not been started yet is todo" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn]
+              .copy(
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+                acquisitionDetailsAnswers = None
+              )
+          )(
+            "acquisitionDetails",
+            messageFromMessageKey("task-list.acquisition-details.link"),
+            acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers(),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn]
+              .copy(
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+                acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])
+              )
+          )(
+            "acquisitionDetails",
+            messageFromMessageKey("task-list.acquisition-details.link"),
+            acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers(),
+            TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have completed the section" in {
+          testStateOfSection(
+            sample[DraftSingleIndirectDisposalReturn]
+              .copy(
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
+              )
+          )(
+            "acquisitionDetails",
+            messageFromMessageKey("task-list.acquisition-details.link"),
+            acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+        }
+
+      }
+
+      "display the page with the proper exemptions and losses section status" when {
+
+        def test(draftReturn: DraftSingleIndirectDisposalReturn, expectedStatus: TaskListStatus) =
+          testStateOfSection(draftReturn)(
+            "exemptionsAndLosses",
+            messageFromMessageKey("task-list.exemptions-and-losses.link"),
+            exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers(),
+            expectedStatus
+          )
+
+        "the session data indicates that the disposal details and acquisition details have not yet been completed" in {
+          List(
+            None                                           -> None,
+            Some(sample[IncompleteDisposalDetailsAnswers]) -> None,
+            None                                           -> Some(sample[IncompleteAcquisitionDetailsAnswers]),
+            Some(sample[IncompleteDisposalDetailsAnswers]) -> Some(sample[IncompleteAcquisitionDetailsAnswers]),
+            Some(sample[IncompleteDisposalDetailsAnswers]) -> Some(sample[CompleteAcquisitionDetailsAnswers]),
+            Some(sample[CompleteDisposalDetailsAnswers])   -> Some(sample[IncompleteAcquisitionDetailsAnswers])
+          ).foreach {
+            case (disposalDetailsAnswers, acquisitionDetailsAnswers) =>
+              withClue(s"For $disposalDetailsAnswers and $acquisitionDetailsAnswers:") {
+                test(
+                  sample[DraftSingleIndirectDisposalReturn].copy(
+                    triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+                    companyAddress            = None,
+                    disposalDetailsAnswers    = disposalDetailsAnswers,
+                    acquisitionDetailsAnswers = acquisitionDetailsAnswers,
+                    exemptionAndLossesAnswers = None
+                  ),
+                  TaskListStatus.CannotStart
+                )
+              }
+          }
+
+        }
+
+        "the disposal details and acquisition details sections have been completed and the section has not been started yet" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress            = None,
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers = None
+            ),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress            = None,
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])
+            ),
+            TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have completed the section" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress            = None,
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
+            ),
+            TaskListStatus.Complete
+          )
+        }
+
+      }
+
+      "display the page with the proper year to date liability section status" when {
+
+        def test(draftReturn: DraftSingleIndirectDisposalReturn, expectedStatus: TaskListStatus) =
+          testStateOfSection(draftReturn)(
+            "enterCgtLiability",
+            messageFromMessageKey("task-list.enter-cgt-liability.link"),
+            yeartodatelliability.routes.YearToDateLiabilityController.checkYourAnswers(),
+            expectedStatus
+          )
+
+        "the session data indicates that the exemptions and losses section has not yet been started" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress             = None,
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers  = None,
+              yearToDateLiabilityAnswers = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the session data indicates that the exemptions and losses section has not yet been completed" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress             = None,
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers  = Some(sample[IncompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the losses and exemption section has been completed and the section has not been started yet" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress             = None,
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = None
+            ),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress             = None,
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYTDAnswers])
+            ),
+            TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have completed the section" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress             = None,
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers])
+            ),
+            TaskListStatus.Complete
+          )
+        }
+      }
+
+      "display the page with Save and come back later link" when {
+
+        "the session data indicates that they are filling in a return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(draftReturn =
+                    sample[DraftSingleIndirectDisposalReturn].copy(
+                      supportingEvidenceAnswers  = None,
+                      yearToDateLiabilityAnswers = None
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+
+          val doc: Document = parse(contentAsString(result))
+          doc.select("h1").text shouldBe messageFromMessageKey("service.title")
+          doc
+            .select("a#saveAndComeBackLater")
+            .attr("href") shouldBe routes.DraftReturnSavedController.draftReturnSaved().url
+        }
+
+      }
     }
 
   }

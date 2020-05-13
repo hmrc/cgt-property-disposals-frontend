@@ -48,8 +48,9 @@ class DraftReturnSavedController @Inject() (
 
   def draftReturnSaved(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(subscribedDetails, _, agentReferenceNumber, draftReturn)) => {
+      case Some(FillingOutReturn(subscribedDetails, _, agentReferenceNumber, draftReturn)) =>
         val draftReturnWithLastUpdated = draftReturn.fold(
+          _.copy(lastUpdatedDate = TimeUtils.today()),
           _.copy(lastUpdatedDate = TimeUtils.today()),
           _.copy(lastUpdatedDate = TimeUtils.today())
         )
@@ -66,7 +67,7 @@ class DraftReturnSavedController @Inject() (
           },
           _ => Ok(returnSavedPage(draftReturnWithLastUpdated, subscribedDetails.isATrust))
         )
-      }
+
       case _ =>
         Future.successful(Redirect(baseRoutes.StartController.start()))
     }

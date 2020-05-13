@@ -18,6 +18,8 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
 @this()
@@ -29,37 +31,51 @@
     _.triageAnswers.fold(
       _.completionDate.map(_.value),
       c => Some(c.completionDate.value)
-    ),
+    ) -> "completionDate",
     _.triageAnswers.fold(
         _.completionDate.map(_.value),
         c => Some(c.completionDate.value)
-    )
-  )}
-@draftLabel = @{
-  draftReturn.fold(
-    _.examplePropertyDetailsAnswers.flatMap(
-      _.fold(_.address, c => Some(c.address))
-    ).fold(
-        completionDate.map(f => TimeUtils.govShortDisplayFormat(f)) -> "completionDate"
-      )(
-        a => Some(s"${a.line1}, ${a.postcode.value}") -> "propertyAddress"
-      ),
-    _.propertyAddress.fold(
-      completionDate.map(f => TimeUtils.govShortDisplayFormat(f)) -> "completionDate"
-      )(
-        a => Some(s"${a.line1}, ${a.postcode.value}") -> "propertyAddress"
-      )
-  )
+    ) -> "completionDate",
+    _.triageAnswers.fold(
+        _.disposalDate.map(_.value),
+        c => Some(c.disposalDate.value)
+    ) -> "shareDisposalDate"
+)
 }
-@dueDate = @{completionDate.map(d => d.plusDays(30L))}
+
+@draftLabel = @{
+
+    val addressLines =
+        draftReturn.fold(
+            _.examplePropertyDetailsAnswers.flatMap{
+                _.fold(_.address, c => Some(c.address)).map(getAddressLines)
+            }
+            ,
+            _.propertyAddress.map(getAddressLines),
+            _.companyAddress.map(getAddressLines)
+        )
+
+    addressLines.map(_ -> "propertyAddress")
+            .orElse(completionDate._1.map{ date => TimeUtils.govShortDisplayFormat(date) -> completionDate._2})
+}
+@dueDate = @{completionDate._1.map(d => d.plusDays(30L))}
+
+@getAddressLines(a: Address) = @{
+    a match {
+        case u: UkAddress => s"${u.line1}, ${u.postcode.value}"
+        case n: NonUkAddress => s"${n.line1}, ${n.country.name.getOrElse("")}"
+    }
+}
 
 <li class="single-return form-bundle">
   <div class="grid-row">
     <div id="draftReturn-@key" class="column-three-quarters submission-summary">
+      @draftLabel.map{ case (value, label) =>
       <h3>
-        <span class="caption">@messages(s"drafts.list.${draftLabel._2}")</span>
-        @draftLabel._1
+          <span class="caption">@messages(s"drafts.list.$label")</span>
+          @value
       </h3>
+      }
       <span id="draftReturnLastUpdatedDate-@key" class="caption">
         @messages("drafts.list.lastUpdated", TimeUtils.govShortDisplayFormat(draftReturn.lastUpdatedDate))
       </span>

@@ -61,7 +61,7 @@ representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
 }}
 @title = @{ addressJourneyType match {
  case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-  f.journey.draftReturn.fold(
+  f.draftReturn.fold(
    _ => messages(s"$key.returns.multipleDisposals.title"),
    _ => messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
   )

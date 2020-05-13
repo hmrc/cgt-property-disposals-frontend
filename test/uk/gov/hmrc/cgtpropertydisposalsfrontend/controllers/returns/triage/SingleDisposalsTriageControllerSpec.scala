@@ -25,7 +25,7 @@ import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -2878,14 +2878,55 @@ class SingleDisposalsTriageControllerSpec
             testSuccessfulUpdateFillingOutReturn(
               performAction,
               requiredPreviousAnswers,
-              List("assetTypeForNonUkResidents" -> "3"),
+              List("assetTypeForNonUkResidents" -> "1"),
               updateDraftReturn(
                 _,
-                requiredPreviousAnswers.copy(assetType = Some(AssetType.IndirectDisposal))
+                requiredPreviousAnswers.copy(assetType = Some(AssetType.NonResidential))
               ),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
+
+          "the asset type has changed from indirect disposal to not indirect disposal" in {
+            val answers = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = IndirectDisposal)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(Residential))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              sample[DraftSingleIndirectDisposalReturn].copy(triageAnswers = answers),
+              List("assetTypeForNonUkResidents" -> "0")
+            )(
+              oldDraftReturn =>
+                DraftSingleDisposalReturn
+                  .newDraftReturn(oldDraftReturn.id, newAnswers, oldDraftReturn.representeeAnswers),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+            )
+          }
+
+          "the asset type has changed from not indirect disposal to indirect disposal" in {
+            val answers = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = NonResidential)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(IndirectDisposal))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              sample[DraftSingleDisposalReturn].copy(triageAnswers = answers),
+              List("assetTypeForNonUkResidents" -> "3")
+            )(
+              oldDraftReturn =>
+                DraftSingleIndirectDisposalReturn
+                  .newDraftReturn(oldDraftReturn.id, newAnswers, oldDraftReturn.representeeAnswers),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+            )
+          }
+
         }
       }
 
@@ -3553,6 +3594,27 @@ class SingleDisposalsTriageControllerSpec
           )
         }
 
+        "display shares disposal date in case of indirect disposal" in {
+          val completeTriageQuestionsWithIndirectDisposal = completeTriageQuestions
+            .copy(assetType = AssetType.IndirectDisposal, countryOfResidence = Country("TR", Some("Turkey")))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                completeTriageQuestionsWithIndirectDisposal,
+                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+              )._1
+            )
+          }
+
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestionsWithIndirectDisposal,
+            "triage.check-your-answers.title",
+            None
+          )
+        }
+
         "the user is an agent" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3581,7 +3643,7 @@ class SingleDisposalsTriageControllerSpec
       def performAction() =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
+      val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.Residential)
 
       val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(newReturnTriageAnswers = Right(completeAnswers))
 
@@ -4050,6 +4112,33 @@ class SingleDisposalsTriageControllerSpec
     checkNextResult(performAction(formData))
   }
 
+  def testSuccessfulUpdateFillingOutReturn[A, D <: DraftReturn](
+    performAction: Seq[(String, String)] => Future[Result],
+    currentDraftReturn: D,
+    formData: Seq[(String, String)]
+  )(
+    updateDraftReturn: D => DraftReturn,
+    checkNextResult: Future[Result] => Unit
+  ): Unit = {
+    val updatedDraftReturn = updateDraftReturn(currentDraftReturn)
+
+    val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = currentDraftReturn)
+    val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn         = updatedDraftReturn)
+
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
+      mockStoreDraftReturn(
+        updatedDraftReturn,
+        fillingOutReturn.subscribedDetails.cgtReference,
+        fillingOutReturn.agentReferenceNumber
+      )(Right(()))
+      mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Right(()))
+    }
+
+    checkNextResult(performAction(formData))
+  }
+
 }
 
 object SingleDisposalsTriageControllerSpec extends Matchers {
@@ -4057,7 +4146,10 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
     completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
     userType: Option[UserType],
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
+
+    implicit lazy val messages: Messages = MessagesImpl(lang, messagesApi)
+
     completeSingleDisposalTriageAnswers.individualUserType.foreach { individualUserType =>
       doc.select("#individualUserType-answer").text() shouldBe messages(
         if (userType.contains(UserType.Agent)) s"individualUserType.agent.$individualUserType"
@@ -4081,6 +4173,22 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
         case IndirectDisposal => doc.select("#propertyType-answer").text() shouldBe ""
         case MixedUse         => doc.select("#propertyType-answer").text() shouldBe ""
       }
+    val isIndirectDisposal: Boolean = completeSingleDisposalTriageAnswers match {
+      case CompleteSingleDisposalTriageAnswers(_, _, _, AssetType.IndirectDisposal, _, _) => true
+      case _                                                                              => false
+    }
+    if (isIndirectDisposal)
+      doc.select("#disposalDateOfShares-answer").text shouldBe TimeUtils.govDisplayFormat(
+        completeSingleDisposalTriageAnswers.disposalDate.value
+      )
+    else {
+      doc.select("#disposalDate-answer").text shouldBe TimeUtils.govDisplayFormat(
+        completeSingleDisposalTriageAnswers.disposalDate.value
+      )
+      doc.select("#completionDate-answer").text shouldBe TimeUtils.govDisplayFormat(
+        completeSingleDisposalTriageAnswers.completionDate.value
+      )
+    }
   }
 }
 
