@@ -23,7 +23,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, MessagesRequest, Request, Result}
@@ -97,8 +97,6 @@ class CheckAllAnswersAndSubmitControllerSpec
   lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
-
-  implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   val rebasingEligibilityUtil = new RebasingEligibilityUtil()
 
@@ -1086,7 +1084,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
     isUk: Boolean,
     isRebasing: Boolean,
     isATrust: Boolean
-  )(implicit messagesApi: MessagesApi, messages: Messages, lang: Lang): Unit = {
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     completeReturn.representeeAnswers.foreach(
       RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
