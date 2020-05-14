@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import java.time.LocalDate
 
 import cats.data.EitherT
+import cats.instances.boolean._
 import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.order._
@@ -672,13 +673,21 @@ class SingleDisposalsTriageController @Inject() (
           if (answers.fold(_.assetType, c => Some(c.assetType)).contains(assetType)) {
             state.map(_._2)
           } else {
+            val wasIndirectDisposal   = answers.fold(_.assetType, c => Some(c.assetType)).contains(IndirectDisposal)
             val isNowIndirectDisposal = assetType === IndirectDisposal
 
             val newAnswers =
-              answers.fold(
-                _.copy(assetType = Some(assetType)),
-                _.copy(assetType = assetType)
-              )
+              if (wasIndirectDisposal === isNowIndirectDisposal)
+                answers.fold(
+                  _.copy(assetType = Some(assetType)),
+                  _.copy(assetType = assetType)
+                )
+              else
+                answers
+                  .unset(_.disposalDate)
+                  .unset(_.completionDate)
+                  .unset(_.tooEarlyDisposalDate)
+                  .copy(assetType = Some(assetType))
 
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)), {
@@ -687,7 +696,7 @@ class SingleDisposalsTriageController @Inject() (
                     r.copy(
                       draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
                         d.id,
-                        newAnswers.unset(_.disposalDate).unset(_.completionDate).unset(_.tooEarlyDisposalDate),
+                        newAnswers,
                         d.representeeAnswers
                       )
                     )
@@ -710,7 +719,7 @@ class SingleDisposalsTriageController @Inject() (
                   r.copy(
                     draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                       d.id,
-                      newAnswers.unset(_.disposalDate).unset(_.completionDate).unset(_.tooEarlyDisposalDate),
+                      newAnswers,
                       d.representeeAnswers
                     )
                   )
