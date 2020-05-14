@@ -1003,6 +1003,11 @@ shareOfProperty.agent.error.required=Select how much of the property your client
 shareOfProperty.trust.error.required=Select how much of the property the trust owned
 shareOfProperty.personalRep.error.required=Select how much of the property the person owned
 shareOfProperty.capacitor.error.required=Select how much of the property the person owned
+shareOfProperty.error.invalid=Select how much of the property you owned
+shareOfProperty.agent.error.invalid=Select how much of the property your client owned
+shareOfProperty.trust.error.invalid=Select how much of the property the trust owned
+shareOfProperty.personalRep.error.invalid=Select how much of the property the person owned
+shareOfProperty.capacitor.error.invalid=Select how much of the property the person owned
 
 shareOfProperty.cyaChange=how much of the property was owned
 
@@ -1479,6 +1484,7 @@ acquisitionFees.cyaChange=if there were any additional acquisition costs
 acquisitionFees.rebased.cyaChange=if there were any additional rebasing costs
 
 acquisitionFees.error.required=Select yes if there are additional costs
+acquisitionFees.error.invalid=Select yes if there are additional costs
 acquisitionFeesValue.label=Amount of additional costs
 acquisitionFeesValue.error.required=Enter how much was paid in additional costs
 acquisitionFeesValue.error.invalid=Additional costs must be an amount of money, like 1,480 or 900.50
@@ -1587,6 +1593,12 @@ privateResidentsReliefValue.trust.error.invalid=Amount of Private Residence Reli
 privateResidentsReliefValue.capacitor.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 privateResidentsReliefValue.personalRep.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 
+privateResidentsReliefValue.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
+privateResidentsReliefValue.agent.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
+privateResidentsReliefValue.trust.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
+privateResidentsReliefValue.capacitor.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
+privateResidentsReliefValue.personalRep.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
+
 privateResidentsRelief.cyaChange=if Private Residence Relief is being claimed
 privateResidentsReliefValue.cyaChange=the amount of Private Residence Relief
 
@@ -1616,6 +1628,7 @@ lettingsReliefValue.error.required=Enter an amount of Letting Relief, like 108 o
 lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be an amount of money between 1 and {0}
 lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be an amount of money between 1 and {0}
 lettingsReliefValue.error.invalid=Amount of Letting Relief must be an amount of money, like 108 or 2,940.54
+lettingsReliefValue.error.tooManyDecimals=Amount of Letting Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
 lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be an amount of money between 1 and {0}
 lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than the Private Residence Relief
 
@@ -1700,6 +1713,12 @@ otherReliefsAmount.agent.error.invalid=Amount of other reliefs must be an amount
 otherReliefsAmount.trust.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 otherReliefsAmount.capacitor.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 otherReliefsAmount.personalRep.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
+
+otherReliefsAmount.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+otherReliefsAmount.agent.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+otherReliefsAmount.trust.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+otherReliefsAmount.capacitor.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+otherReliefsAmount.personalRep.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 otherReliefs.cyaChange=if other reliefs are being claimed
 otherReliefsName.cyaChange=the names of other reliefs being claimed
@@ -2698,9 +2717,12 @@ multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
 
 multipleDisposalsDisposalPrice.error.required=Enter the disposal value of the property, for example, 20,520.86
-multipleDisposalsDisposalPrice.error.invalid=Amount must be a number
-multipleDisposalsDisposalPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
-multipleDisposalsDisposalPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
+multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50 
+multipleDisposalsDisposalPrice.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000 
+multipleDisposalsDisposalPrice.error.tooManyDecimals=multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50 
+multipleDisposalsDisposalPrice.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000 
 
 multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
@@ -2725,10 +2747,11 @@ multipleDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of th
 multipleDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
 multipleDisposalsAcquisitionPrice.personalRep.details.p3=If the person shared any of the costs, you can only include the person’s share.
 
-multipleDisposalsAcquisitionPrice.error.invalid=Amount must be a number
+multipleDisposalsAcquisitionPrice.error.invalid=The acquisition value must be an amount of money
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86
-multipleDisposalsAcquisitionPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
-multipleDisposalsAcquisitionPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
+multipleDisposalsAcquisitionPrice.error.tooLarge=The acquisition value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsAcquisitionPrice.error.tooSmall=The acquisition value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 multipleDisposalsAcquisitionPrice.cyaChange=the acquisition value of the property
 
