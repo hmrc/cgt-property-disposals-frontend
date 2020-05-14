@@ -18,8 +18,11 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 
+@import cats.syntax.eq._
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 
 @this(
@@ -37,12 +40,26 @@
 
 @key = @{"isUk"}
 @journeyErrorKey = @{ addressJourneyType match {
-    case f: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney=> ".representee."
+    case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => ".representee"
+
+    case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
+      if(c.representativeType.exists(_.isLeft))       ".companyDetails.personalRep."
+      else if(c.representativeType.exists(_.isRight)) ".companyDetails.capacitor."
+      else if(c.isATrust)                             ".companyDetails.trust."
+      else if(request.userType.exists(_ === Agent))   ".companyDetails.agent."
+      else                                            ".companyDetails."
+
     case _ => ""
 }}
 @title = @{
   addressJourneyType match {
       case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => messages("isUk.representee.title")
+      case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
+          if(c.representativeType.exists(_.isLeft))       messages("companyDetails.isUk.personalRep.title")
+          else if(c.representativeType.exists(_.isRight)) messages("companyDetails.isUk.capacitor.title")
+          else if(c.isATrust)                             messages("companyDetails.isUk.trust.title")
+          else if(request.userType.exists(_ === Agent))   messages("companyDetails.isUk.agent.title")
+          else                                            messages("companyDetails.isUk.title")
       case _ => messages("subscription.isUk.title")
   }
 }

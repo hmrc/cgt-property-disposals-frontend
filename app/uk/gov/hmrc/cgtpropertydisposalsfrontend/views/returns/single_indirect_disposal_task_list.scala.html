@@ -131,7 +131,7 @@
                 <li id="companyDetails" class="app-task-list__item">
                 @taskLink(
                     messages("task-list.enter-company-details.link"),
-                    "#",
+                    returns.address.routes.CompanyDetailsController.checkYourAnswers().url,
                     companyDetailsState
                 )
                 </li>

@@ -1278,7 +1278,7 @@ class TaskListControllerSpec
           )(
             "companyDetails",
             messageFromMessageKey("task-list.enter-company-details.link"),
-            Call("", "#"),
+            address.routes.CompanyDetailsController.checkYourAnswers(),
             TaskListStatus.ToDo
           )
         }
@@ -1292,7 +1292,7 @@ class TaskListControllerSpec
           )(
             "companyDetails",
             messageFromMessageKey("task-list.enter-company-details.link"),
-            Call("", "#"),
+            address.routes.CompanyDetailsController.checkYourAnswers(),
             TaskListStatus.Complete
           )
         }

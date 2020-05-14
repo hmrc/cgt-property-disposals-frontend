@@ -19,7 +19,10 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
+@import cats.syntax.eq._
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
@@ -51,10 +54,25 @@
 @line3Key = @{s"$key-line3"}
 @line4Key = @{s"$key-line4"}
 @countryCodeKey = @{"countryCode"}
+
+@journeyErrorKey = @{
+    addressJourneyType match {
+        case _: AddressJourneyType.Returns.EnteringCompanyDetails => ".companyDetails."
+        case _ => ""
+    }
+}
+
 @title = @{
   addressJourneyType match {
       case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
           messages(s"$key.representee.title")
+
+      case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
+          if(c.representativeType.exists(_.isLeft))       messages("nonUkAddress.companyDetails.personalRep.title")
+          else if(c.representativeType.exists(_.isRight)) messages("nonUkAddress.companyDetails.capacitor.title")
+          else if(c.isATrust)                             messages("nonUkAddress.companyDetails.trust.title")
+          else if(request.userType.exists(_ === Agent))   messages("nonUkAddress.companyDetails.agent.title")
+          else                                            messages("nonUkAddress.companyDetails.title")
       case _ =>
           messages(s"$key.title")
   }
@@ -68,7 +86,7 @@
   @backLinkComponent(backLink)
 
   @if(hasErrors) {
-    @errorSummary(form)
+    @errorSummary(form, userKeyOnly = journeyErrorKey.stripSuffix("."))
   }
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
@@ -78,8 +96,8 @@
       </legend>
       @textInput(
         fieldId = line1Key,
-        label = Html(messages(s"${key}.line1.label")),
-        errorKey = form.error(line1Key).map(e => e.message),
+        label = Html(messages(s"$key${journeyErrorKey.stripSuffix(".")}.line1.label")),
+        errorKey = form.error(line1Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line1Key, ""),
         hasErrors = form.error(line1Key).nonEmpty,
         inputClass = Some("form-control-3-4"),
@@ -87,8 +105,8 @@
       )
       @textInput(
         fieldId = line2Key,
-        label = Html(messages(s"${key}.line2.label")),
-        errorKey = form.error(line2Key).map(e => e.message),
+        label = Html(messages(s"$key${journeyErrorKey.stripSuffix(".")}.line2.label")),
+        errorKey = form.error(line2Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line2Key, ""),
         hasErrors = form.error(line2Key).nonEmpty,
         inputClass = Some("form-control-3-4"),
@@ -97,7 +115,7 @@
       @textInput(
         fieldId = line3Key,
         label = Html(messages(s"${key}.line3.label")),
-        errorKey = form.error(line3Key).map(e => e.message),
+        errorKey = form.error(line3Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line3Key, ""),
         hasErrors = form.error(line3Key).nonEmpty,
         inputClass = Some("form-control-3-4"),
@@ -106,7 +124,7 @@
       @textInput(
         fieldId = line4Key,
         label = Html(messages(s"${key}.line4.label")),
-        errorKey = form.error(line4Key).map(e => e.message),
+        errorKey = form.error(line4Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line4Key, ""),
         hasErrors = form.error(line4Key).nonEmpty,
         inputClass = Some("form-control-3-4"),
@@ -118,7 +136,7 @@
         selected = form.data.get(countryCodeKey),
         label = messages(s"${countryCodeKey}.label"),
         hasErrors = form.error(countryCodeKey).nonEmpty,
-        errorKey = form.error(countryCodeKey).map(e => e.message),
+        errorKey = form.error(countryCodeKey).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         autoComplete = AutoCompleteType.Country
       )
     </fieldset>

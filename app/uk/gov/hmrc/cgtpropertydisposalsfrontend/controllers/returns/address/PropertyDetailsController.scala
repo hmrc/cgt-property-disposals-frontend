@@ -808,11 +808,11 @@ class PropertyDetailsController @Inject() (
       )
 
   // the following aren't used for the returns journey - the returns journey only handles uk addresses
-  protected lazy val isUkCall: Call                    = enterPostcodeCall
-  protected lazy val isUkSubmitCall: Call              = enterPostcodeCall
-  protected lazy val enterNonUkAddressCall: Call       = enterPostcodeCall
-  protected lazy val enterNonUkAddressSubmitCall: Call = enterPostcodeCall
-  protected lazy val backLinkCall: Call                = enterPostcodeCall
+  protected lazy val isUkCall: Call                                       = enterPostcodeCall
+  protected lazy val isUkSubmitCall: Call                                 = enterPostcodeCall
+  protected lazy val enterNonUkAddressCall: Call                          = enterPostcodeCall
+  protected lazy val enterNonUkAddressSubmitCall: Call                    = enterPostcodeCall
+  protected lazy val backLinkCall: FillingOutReturnAddressJourney => Call = _ => enterPostcodeCall
 
 }
 
