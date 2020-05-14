@@ -1223,7 +1223,7 @@ class ExemptionAndLossesControllerSpec
                       s"$key$userKey.helpText"
                     )
                     doc.select("#content > article > form > p > a").text() contains messageFromMessageKey(
-                      s"$key$userKey.link"
+                      s"$key.link"
                     )
                   }
                 )
