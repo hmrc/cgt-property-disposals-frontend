@@ -140,6 +140,16 @@ class CheckAllAnswersAndSubmitControllerSpec
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
+  def userMessageKey(individualUserType: Option[IndividualUserType], userType: UserType): String =
+    (individualUserType, userType) match {
+      case (Some(Capacitor), _)              => ".capacitor"
+      case (Some(PersonalRepresentative), _) => ".personalRep"
+      case (_, UserType.Individual)          => ""
+      case (_, UserType.Organisation)        => ".trust"
+      case (_, UserType.Agent)               => ".agent"
+      case other                             => sys.error(s"User type '$other' not handled")
+    }
+
   "CheckAllAnswersAndSubmitController" when {
 
     "handling requests to display the check all answers page" when {
@@ -852,11 +862,7 @@ class CheckAllAnswersAndSubmitControllerSpec
                 agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None
               )
 
-              val userKey = individualUserType match {
-                case Some(PersonalRepresentative) => ".personalRep"
-                case Some(Capacitor)              => ".capacitor"
-                case _                            => ""
-              }
+              val userKey = userMessageKey(individualUserType, userType)
 
               inSequence {
                 mockAuthWithNoRetrievals()

@@ -19,6 +19,7 @@ button.manageAccount=Manage account
 button.acceptAndSend=Accept and send
 button.payNow=Pay now
 button.accountHome=Account home
+button.clients.accountHome=Client’s account home
 
 generic.warning=Warning
 generic.day=Day
@@ -2290,31 +2291,56 @@ confirmationOfSubmission.taxOwed=Tax owed
 confirmationOfSubmission.returnReference=Return reference number
 confirmationOfSubmission.paymentReference=Payment reference number
 confirmationOfSubmission.propertyAddress=Property address
-confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>
+confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due by
+
 confirmationOfSubmission.printPage=<a href="{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.agent.printPage=<a href="{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.trust.printPage=<a href="{0}">Print or save this page as a PDF</a>
 confirmationOfSubmission.capacitor.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
 confirmationOfSubmission.capacitor.noId.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
 confirmationOfSubmission.personalRep.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+
 confirmationOfSubmission.whatNext=What you need to do next
+confirmationOfSubmission.agent.whatNext=What happens next
+confirmationOfSubmission.trust.whatNext=What happens next
 confirmationOfSubmission.capacitor.whatNext=What happens next
+
 confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
+confirmationOfSubmission.agent.warning=Your client must pay their Capital Gains Tax on UK property by {0}. Your client may be charged interest on late payments.
+confirmationOfSubmission.trust.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
 confirmationOfSubmission.capacitor.warning=The person must pay their Capital Gains Tax on UK property by {0}. The person may be charged interest on late payments.
+
+confirmationOfSubmission.howToPay.heading=How to pay
+confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a href="{0}"><strong class="bold">pay their tax bill</strong></a>.
+
 confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number {0}.
+confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.howToPay.heading=How to pay
+
+confirmationOfSubmission.agent.inset.heading=<strong class="bold">Self Assessment</strong>
+confirmationOfSubmission.trust.inset.heading=<strong class="bold">If the trust needs to send a Self Assessment tax return</strong>
+confirmationOfSubmission.agent.inset.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
+confirmationOfSubmission.trust.inset.p1=If the trust needs to send a Self Assessment tax return
 
 confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
+confirmationOfSubmission.agent.ifSa=Self Assessment
+confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment tax return
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
 
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
+confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
+confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from this return in the trust’s next Self Assessment tax return.
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details from this return in the person’s Self Assessment tax return.
 
 confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
+confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="{0}">Capital Gains Tax on UK property account home</a>.
+
 confirmationOfSubmission.organisationNameLine=Trust: {0}
 confirmationOfSubmission.agentNameLine=Client: {0}
 
