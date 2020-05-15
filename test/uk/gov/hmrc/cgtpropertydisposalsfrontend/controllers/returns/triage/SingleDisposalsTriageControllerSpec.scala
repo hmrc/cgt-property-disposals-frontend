@@ -2855,6 +2855,38 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
+          "the asset type has changed from indirect disposal to not indirect disposal" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers.copy(assetType = Some(IndirectDisposal)),
+              List("assetTypeForNonUkResidents" -> "0"),
+              requiredPreviousAnswers.copy(
+                assetType            = Some(AssetType.Residential),
+                disposalDate         = None,
+                completionDate       = None,
+                tooEarlyDisposalDate = None
+              ),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+            )
+          }
+
+          "the asset type has changed from not indirect disposal to indirect disposal" in {
+            val answers = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = NonResidential)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(IndirectDisposal))
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              answers,
+              List("assetTypeForNonUkResidents" -> "3"),
+              newAnswers,
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+            )
+          }
+
         }
 
         "the user is filling out a draft return and" when {

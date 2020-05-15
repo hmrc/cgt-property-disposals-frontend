@@ -111,10 +111,21 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     Some(cyaChange(messages("multipleDisposalsTaxYear.cyaChange"), routes.MultipleDisposalsTriageController.whenWereContractsExchanged().url)),
       "taxYear"
   )
-  @cyaRow(
-    messages("multipleDisposalsCompletionDate.title"),
-    Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
-    Some(cyaChange(messages("multipleDisposalsCompletionDate.cyaChange"), routes.MultipleDisposalsTriageController.completionDate().url)),
+
+
+  @if(answers.assetTypes === List(AssetType.IndirectDisposal)) {
+    @cyaRow(
+      messages("sharesDisposalDate.title"),
+      Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
+      Some(cyaChange(messages("multipleDisposalsCompletionDate.cyaChange"), routes.MultipleDisposalsTriageController.disposalDateOfShares().url)),
       "completionDate"
-  )
+    )
+  } else {
+    @cyaRow(
+      messages("multipleDisposalsCompletionDate.title"),
+      Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
+      Some(cyaChange(messages("multipleDisposalsCompletionDate.cyaChange"), routes.MultipleDisposalsTriageController.completionDate().url)),
+        "completionDate"
+    )
+  }
 }

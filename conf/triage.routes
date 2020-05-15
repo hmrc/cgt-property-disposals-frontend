@@ -63,6 +63,9 @@ POST /multiple-disposals/property-types                     uk.gov.hmrc.cgtprope
 GET  /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDate()
 POST /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDateSubmit()
 
+GET /multiple-disposals/disposal-date-shares                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.disposalDateOfShares()
+POST /multiple-disposals/disposal-date-shares                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.disposalDateOfSharesSubmit()
+
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()
 POST /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswersSubmit()
 
