@@ -30,7 +30,7 @@ import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms}
 import play.api.mvc._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, RebasingCutoffDates, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
@@ -610,8 +610,6 @@ class MultipleDisposalsTriageController @Inject() (
     answers: MultipleDisposalsTriageAnswers
   ): Either[Error, MultipleDisposalsTriageAnswers] =
     taxYear match {
-      case None =>
-        Left(Error("Could not find tax year"))
       case _ =>
         Right(
           answers
@@ -683,51 +681,50 @@ class MultipleDisposalsTriageController @Inject() (
             )
           },
           shareDisposalDate =>
-            if (shareDisposalDate.value.isBefore(RebasingCutoffDates.nonUkResidentsNonResidentialProperty)) {
-              Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
-            } else if (answers
-                         .fold(_.completionDate, c => Some(c.completionDate))
-                         .contains(CompletionDate(shareDisposalDate.value))) {
+            if (answers
+                  .fold(_.completionDate, c => Some(c.completionDate))
+                  .contains(CompletionDate(shareDisposalDate.value))) {
               Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
             } else {
-              if (shareDisposalDate.value.isBefore(RebasingCutoffDates.nonUkResidentsNonResidentialProperty)) {
-                Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
-              } else {
+              val result =
+                for {
+                  taxYear <- taxYearService.taxYear(shareDisposalDate.value)
+                  updatedAnswers <- EitherT
+                                     .fromEither[Future](updateTaxYearToAnswers(shareDisposalDate, taxYear, answers))
+                  newState = updateState(
+                    state,
+                    updatedAnswers,
+                    d =>
+                      d.copy(
+                        examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(_.unset(_.disposalDate)),
+                        yearToDateLiabilityAnswers    = None
+                      )
+                  )
+                  _ <- newState.fold(
+                        _ => EitherT.pure[Future, Error](()),
+                        r =>
+                          returnsService.storeDraftReturn(
+                            r.draftReturn,
+                            r.subscribedDetails.cgtReference,
+                            r.agentReferenceNumber
+                          )
+                      )
+                  _ <- EitherT(
+                        updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState.merge)))
+                      )
+                } yield taxYear
 
-                val result =
-                  for {
-                    taxYear <- taxYearService.taxYear(shareDisposalDate.value)
-                    updatedAnswers <- EitherT.fromEither[Future](updateTaxYearToAnswers(shareDisposalDate, taxYear, answers))
-                    newState = updateState(
-                      state,
-                      updatedAnswers,
-                      d =>
-                        d.copy(examplePropertyDetailsAnswers =
-                          d.examplePropertyDetailsAnswers.map(_.unset(_.disposalDate))
-                        )
-                    )
-                    _ <- newState.fold(
-                          _ => EitherT.pure[Future, Error](()),
-                          r =>
-                            returnsService.storeDraftReturn(
-                              r.draftReturn,
-                              r.subscribedDetails.cgtReference,
-                              r.agentReferenceNumber
-                            )
-                        )
-                    _ <- EitherT(
-                          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState.merge)))
-                        )
-                  } yield ()
-
-                result.fold(
-                  { e =>
-                    logger.warn("Could not find tax year or update session", e)
-                    errorHandler.errorResult()
-                  },
-                  _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                )
-              }
+              result.fold(
+                { e =>
+                  logger.warn("Could not find tax year or update session", e)
+                  errorHandler.errorResult()
+                },
+                taxYear =>
+                  if (taxYear.isEmpty)
+                    Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
+                  else
+                    Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+              )
             }
         )
     }
@@ -795,6 +792,10 @@ class MultipleDisposalsTriageController @Inject() (
         case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, Some(false), _, _, _, _) =>
           Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
 
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _, None)
+            if assetTypes === List(IndirectDisposal) && indirectDisposalsEnabled =>
+          Redirect(routes.MultipleDisposalsTriageController.disposalDateOfShares())
+
         case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, None, _, _) =>
           Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
 
@@ -804,10 +805,6 @@ class MultipleDisposalsTriageController @Inject() (
         case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, Some(true), None, _) =>
           logger.warn("No tax year was found when we expected one")
           errorHandler.errorResult()
-
-        case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _, None)
-            if assetTypes === List(IndirectDisposal) && indirectDisposalsEnabled =>
-          Redirect(routes.MultipleDisposalsTriageController.disposalDateOfShares())
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, _, _, None) =>
           Redirect(routes.MultipleDisposalsTriageController.completionDate())

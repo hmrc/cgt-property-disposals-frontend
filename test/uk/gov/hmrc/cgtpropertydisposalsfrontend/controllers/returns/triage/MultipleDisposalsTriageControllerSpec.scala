@@ -33,7 +33,6 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.{SelectorAndValue, TagAttributePairAndValue, UserTypeDisplay}
@@ -102,7 +101,6 @@ class MultipleDisposalsTriageControllerSpec
       .taxYear(_: LocalDate)(_: HeaderCarrier))
       .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
-
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean = journeyStatus match {
     case r: StartingNewDraftReturn if (r.newReturnTriageAnswers.isLeft) => true
@@ -3016,10 +3014,12 @@ class MultipleDisposalsTriageControllerSpec
         controller.disposalDateOfSharesSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       def formData(d: LocalDate): List[(String, String)] = List(
-          "sharesDisposalDate-day"   -> d.getDayOfMonth().toString,
-          "sharesDisposalDate-month" -> d.getMonthValue().toString,
-          "sharesDisposalDate-year"  -> d.getYear().toString
-        )
+        "sharesDisposalDate-day"   -> d.getDayOfMonth().toString,
+        "sharesDisposalDate-month" -> d.getMonthValue().toString,
+        "sharesDisposalDate-year"  -> d.getYear().toString
+      )
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       def updateDraftReturn(d: DraftMultipleDisposalsReturn, newAnswers: MultipleDisposalsTriageAnswers) =
         d.copy(
@@ -3029,8 +3029,6 @@ class MultipleDisposalsTriageControllerSpec
           ),
           yearToDateLiabilityAnswers = None
         )
-
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       "show a form error" when {
 
@@ -3082,14 +3080,16 @@ class MultipleDisposalsTriageControllerSpec
 
         "there is an error updating the session" in {
           val taxYear = sample[TaxYear]
-          val today = TimeUtils.today()
+          val today   = TimeUtils.today()
           val answers =
             sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = Some(CompletionDate(today)))
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
           val newCompletionDate = CompletionDate(today.minusDays(1))
           val updatedJourney =
-            journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = Some(newCompletionDate), taxYear = Some(taxYear))))
+            journey.copy(newReturnTriageAnswers =
+              Left(answers.copy(completionDate = Some(newCompletionDate), taxYear = Some(taxYear)))
+            )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3107,18 +3107,31 @@ class MultipleDisposalsTriageControllerSpec
 
         "redirect to exit page" when {
 
-          "redirect when date is before 6/4/2020" in {
-            val answers            = sample[CompleteMultipleDisposalsTriageAnswers]
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          "redirect when tax service returns empty" in {
+            val tooEarlyDate = LocalDate.of(2020, 1, 1)
+            val answers      = sample[IncompleteMultipleDisposalsTriageAnswers]
+
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+            val updatedAnswers     = answers.copy(completionDate = Some(CompletionDate(tooEarlyDate)), taxYear = None)
+            val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
+            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
+              mockGetTaxYear(tooEarlyDate)(Right(None))
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
             }
 
             checkIsRedirect(
               performAction(
-                formData(RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)): _*
+                formData(tooEarlyDate): _*
               ),
               routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
             )
