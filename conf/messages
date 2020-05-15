@@ -2717,12 +2717,10 @@ multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
 
 multipleDisposalsDisposalPrice.error.required=Enter the disposal value of the property, for example, 20,520.86
-multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50 
+multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
-multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000 
-multipleDisposalsDisposalPrice.error.tooManyDecimals=multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50 
-multipleDisposalsDisposalPrice.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
-multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000 
+multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
