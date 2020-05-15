@@ -157,7 +157,9 @@ class ChangeRepresenteeContactAddressController @Inject() (
     )
   }
 
-  protected lazy val backLinkCall: Call       = routes.RepresenteeController.checkYourAnswers()
+  protected lazy val backLinkCall: ChangingRepresenteeContactAddressJourney => Call =
+    _ => routes.RepresenteeController.checkYourAnswers()
+
   protected lazy val isUkCall: Call           = routes.ChangeRepresenteeContactAddressController.isUk()
   protected lazy val isUkSubmitCall: Call     = routes.ChangeRepresenteeContactAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call = routes.ChangeRepresenteeContactAddressController.enterUkAddress()

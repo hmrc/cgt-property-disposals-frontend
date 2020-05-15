@@ -3038,3 +3038,63 @@ tmpCustomError.title=Sorry, we are experiencing technical difficulties - 500
 tmpCustomError.heading=Sorry, we’re experiencing technical difficulties
 tmpCustomError.p1=In order for us to resolve the issue, please click on the ‘get help with this page’ link.
 tmpCustomError.p2=We apologise for the inconvenience and thank you for your patience while we resolve the issue.
+
+companyDetails.caption=Company details
+
+companyDetails.isUk.title=Did the company you held shares in have a UK address?
+companyDetails.isUk.agent.title=Did the company your client held shares in have a UK address?
+companyDetails.isUk.trust.title=Did the company the trust held shares in have a UK address?
+companyDetails.isUk.capacitor.title=Did the company the person held shares in have a UK address?
+companyDetails.isUk.personalRep.title=Did the company the person held shares in have a UK address?
+
+isUk.companyDetails.error.required=Select yes if the company you held shares in had a UK address
+isUk.companyDetails.agent.error.required=Select yes if the company your client held shares in had a UK address
+isUk.companyDetails.trust.error.required=Select yes if the company the trust held shares in had a UK address
+isUk.companyDetails.capacitor.error.required=Select yes if the company the person held shares in had a UK address
+isUk.companyDetails.personalRep.error.required=Select yes if the company the person held shares in had a UK address
+
+address.uk.companyDetails.title=Enter the name and address of the company you held shares in
+address.uk.companyDetails.agent.title=Enter the name and address of the company your client held shares in
+address.uk.companyDetails.trust.title=Enter the name and address of the company the trust held shares in
+address.uk.companyDetails.capacitor.title=Enter the name and address of the company the person held shares in
+address.uk.companyDetails.personalRep.title=Enter the name and address of the company the person held shares in
+address.uk.companyDetails.helpText=This should be the company’s registered address
+address.uk.companyDetails.line1.label=Company name
+address.uk.companyDetails.line2.label=Street address
+address-line1.companyDetails.error.required=Enter a company name
+address-line1.companyDetails.error.tooLong=Company name must be 35 characters or less
+address-line1.companyDetails.error.pattern=Company name must only include letters a to z, spaces and number
+address-line2.companyDetails.error.tooLong=Street address must be 35 characters or less
+address-line2.companyDetails.error.pattern=Street address must only include letters a to z, spaces and number
+address-town.companyDetails.error.tooLong=Town or city must be 35 characters or fewer
+address-town.companyDetails.error.pattern=Town or city must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+address-county.companyDetails.error.tooLong=County must be 35 characters or fewer
+address-county.companyDetails.error.pattern=County must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+postcode.companyDetails.error.tooLong=Postcode must be 8 characters or fewer
+postcode.companyDetails.error.required=Enter a postcode
+postcode.companyDetails.error.invalidCharacters=Postcode must only include letters, numbers and spaces
+postcode.companyDetails.error.pattern=Enter a real postcode
+
+nonUkAddress.companyDetails.title=Enter the name and address of the company you held shares in
+nonUkAddress.companyDetails.agent.title=Enter the name and address of the company your client held shares in
+nonUkAddress.companyDetails.trust.title=Enter the name and address of the company the trust held shares in
+nonUkAddress.companyDetails.capacitor.title=Enter the name and address of the company the person held shares in
+nonUkAddress.companyDetails.personalRep.title=Enter the name and address of the company the person held shares in
+nonUkAddress.companyDetails.line1.label=Company name
+nonUkAddress.companyDetails.line2.label=Street address
+nonUkAddress-line1.companyDetails.error.required=Enter a company name
+nonUkAddress-line1.companyDetails.error.tooLong=Company name must be 35 characters or fewer
+nonUkAddress-line2.companyDetails.error.tooLong=Street address must be 35 characters or fewer
+nonUkAddress-line3.companyDetails.error.tooLong=Address line 3 must be 35 characters or fewer
+nonUkAddress-line4.companyDetails.error.tooLong=Address line 4 must be 35 characters or fewer
+nonUkAddress-line1.companyDetails.error.pattern=Company name must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line2.companyDetails.error.pattern=Street address must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line3.companyDetails.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line4.companyDetails.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+countryCode.companyDetails.error.required=Select a country from the options presented as you type
+countryCode.companyDetails.error.notFound=Select a country from the options presented as you type
+
+companyDetails.cya.title=Check your answers
+companyDetails.cyaLabel.company-address=Company name and address
+companyDetails.cyaChange.company-address=the company name and address
+

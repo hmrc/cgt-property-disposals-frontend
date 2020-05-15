@@ -20,8 +20,9 @@ import cats.Eq
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, FillingOutReturnAddressJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, EnteringCompanyDetails, FillingOutReturnAddressJourney}
 
 sealed trait AddressJourneyType extends Product with Serializable
 
@@ -67,6 +68,13 @@ object AddressJourneyType {
       contactDetails: RepresenteeContactDetails
     ) extends Returns
 
+    final case class EnteringCompanyDetails(
+      journey: FillingOutReturn,
+      draftReturn: DraftSingleIndirectDisposalReturn,
+      representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+      isATrust: Boolean
+    ) extends Returns
+
   }
 
   implicit val eq: Eq[AddressJourneyType] = Eq.fromUniversalEquals[AddressJourneyType]
@@ -85,6 +93,7 @@ object AddressJourneyType {
           _ => "returns.property-details.multipleDisposals.caption",
           _ => "returns.property-address.singleDisposal.caption"
         )
+      case _: EnteringCompanyDetails                   => "companyDetails.caption"
       case _: ChangingRepresenteeContactAddressJourney => "representee.caption"
     }
 

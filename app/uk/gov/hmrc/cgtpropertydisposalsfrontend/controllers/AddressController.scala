@@ -64,7 +64,7 @@ trait AddressController[A <: AddressJourneyType] {
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus]
 
-  protected def backLinkCall: Call
+  protected def backLinkCall: A => Call
   protected val isUkCall: Call
   protected val isUkSubmitCall: Call
   protected val enterUkAddressCall: Call
@@ -94,10 +94,10 @@ trait AddressController[A <: AddressJourneyType] {
                 logger.warn(s"Could not clear addressLookupResult", e)
                 errorHandler.errorResult()
               case Right(_) =>
-                Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, journey))
+                Ok(isUkPage(Address.isUkForm, backLinkCall(journey), isUkSubmitCall, journey))
             }
           } else {
-            Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, journey))
+            Ok(isUkPage(Address.isUkForm, backLinkCall(journey), isUkSubmitCall, journey))
           }
       }
     }
@@ -109,7 +109,7 @@ trait AddressController[A <: AddressJourneyType] {
           Address.isUkForm
             .bindFromRequest()
             .fold[Future[Result]](
-              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall, journey)), {
+              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall(journey), isUkSubmitCall, journey)), {
                 case true  => Redirect(enterPostcodeCall)
                 case false => Redirect(enterNonUkAddressCall)
               }
@@ -124,7 +124,7 @@ trait AddressController[A <: AddressJourneyType] {
           Ok(
             enterUkAddressPage(
               Address.ukAddressForm,
-              backLinkCall,
+              backLinkCall(journey),
               enterUkAddressSubmitCall,
               enterPostcodeCall,
               journey,
@@ -146,7 +146,7 @@ trait AddressController[A <: AddressJourneyType] {
                 BadRequest(
                   enterUkAddressPage(
                     formWithErrors,
-                    backLinkCall,
+                    backLinkCall(journey),
                     enterUkAddressSubmitCall,
                     enterPostcodeCall,
                     journey,
@@ -289,7 +289,7 @@ trait AddressController[A <: AddressJourneyType] {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
             case None =>
-              Redirect(backLinkCall)
+              Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
               val form = Address.addressSelectForm(addresses)
@@ -315,7 +315,7 @@ trait AddressController[A <: AddressJourneyType] {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
             case None =>
-              Redirect(backLinkCall)
+              Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
               Address

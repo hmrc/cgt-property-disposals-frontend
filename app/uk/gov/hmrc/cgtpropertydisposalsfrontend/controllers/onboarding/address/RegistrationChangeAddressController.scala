@@ -90,7 +90,9 @@ class RegistrationChangeAddressController @Inject() (
     )
   }
 
-  protected lazy val backLinkCall: Call   = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
+  protected lazy val backLinkCall: RegistrationReadyAddressJourney => Call =
+    _ => controllers.onboarding.routes.RegistrationController.checkYourAnswers()
+
   protected lazy val isUkCall: Call       = routes.RegistrationChangeAddressController.isUk()
   protected lazy val isUkSubmitCall: Call = routes.RegistrationChangeAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call =

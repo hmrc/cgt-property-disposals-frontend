@@ -100,7 +100,9 @@ class SubscribedChangeAddressController @Inject() (
     }
   }
 
-  protected lazy val backLinkCall: Call   = controllers.accounts.routes.AccountController.manageYourDetails()
+  protected lazy val backLinkCall: SubscribedAddressJourney => Call =
+    _ => controllers.accounts.routes.AccountController.manageYourDetails()
+
   protected lazy val isUkCall: Call       = routes.SubscribedChangeAddressController.isUk()
   protected lazy val isUkSubmitCall: Call = routes.SubscribedChangeAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call =

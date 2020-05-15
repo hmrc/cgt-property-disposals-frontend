@@ -102,7 +102,9 @@ class SubscriptionAddressController @Inject() (
     )
   }
 
-  protected lazy val backLinkCall: Call                = controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+  protected lazy val backLinkCall: SubscriptionReadyAddressJourney => Call =
+    _ => controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+
   protected lazy val isUkCall: Call                    = routes.SubscriptionAddressController.isUk()
   protected lazy val isUkSubmitCall: Call              = routes.SubscriptionAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call          = routes.SubscriptionAddressController.enterUkAddress()
