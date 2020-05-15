@@ -3113,7 +3113,11 @@ class MultipleDisposalsTriageControllerSpec
 
             val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
 
-            val updatedAnswers     = answers.copy(completionDate = Some(CompletionDate(tooEarlyDate)), taxYear = None, taxYearAfter6April2020 = Some(false))
+            val updatedAnswers = answers.copy(
+              completionDate         = Some(CompletionDate(tooEarlyDate)),
+              taxYear                = None,
+              taxYearAfter6April2020 = Some(false)
+            )
             val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
             val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 

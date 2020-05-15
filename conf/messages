@@ -2335,7 +2335,7 @@ confirmationOfSubmission.howToPay.heading=How to pay
 confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a href="{0}"><strong class="bold">pay their tax bill</strong></a>.
 
 confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number {0}.
+confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number <strong class="bold">{0}</strong>.
 confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
