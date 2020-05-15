@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
@@ -37,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -267,8 +269,7 @@ class CommonTriageQuestionsController @Inject() (
     withState(request) { (_, state) =>
       val triageAnswers = triageAnswersFomState(state)
       lazy val backLink = triageAnswers.fold(
-        _ =>
-          routes.MultipleDisposalsTriageController.countryOfResidence(), //TODO placeholder for multiple version of page
+        _ => routes.MultipleDisposalsTriageController.disposalDateOfShares(),
         _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
       )
       Ok(disposalDateTooEarlyNonUkResidents(backLink))
@@ -582,4 +583,23 @@ object CommonTriageQuestionsController {
       "numberOfProperties" -> of(FormUtils.radioFormFormatter("numberOfProperties", List(One, MoreThanOne)))
     )(identity)(Some(_))
   )
+
+  val sharesDisposalDateForm: Form[ShareDisposalDate] = {
+    val key = "sharesDisposalDate"
+    Form(
+      mapping(
+        "" -> of(
+          TimeUtils.dateFormatter(
+            Some(LocalDate.now()),
+            None,
+            s"$key-day",
+            s"$key-month",
+            s"$key-year",
+            key
+          )
+        )
+      )(ShareDisposalDate(_))(d => Some(d.value))
+    )
+  }
+
 }
