@@ -55,6 +55,15 @@ landingPage.covid.p1=Due to coronavirus (COVID-19), you will not get a late fili
 landingPage.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
 landingPage.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
 
+landingPage.contents.h2=Contents
+landingPage.intro.h2=Overview
+landingPage.contents.list.bullet1=<a href="{0}">Overview</a>
+landingPage.contents.list.bullet2=<a href="{0}">How to report and pay the tax</a>
+landingPage.contents.list.bullet3=<a href="{0}">Before you start</a>
+landingPage.contents.list.bullet4=<a href="{0}">If you’re an agent</a>
+landingPage.contents.list.bullet5=<a href="{0}">If you’re representing a trust</a>
+landingPage.contents.list.bullet6=<a href="{0}">If you’re a capacitor or personal representative</a>
+
 landingPage.howTo.h2=How to report and pay the tax
 landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property account before you can report and pay the tax using this service.
 landingPage.howTo.p2=If you’re a resident or representing a trust, you can use this service to:
@@ -89,7 +98,26 @@ landingPage.reportingDisposals.h2=If you’re reporting indirect disposals or di
 landingPage.reportingDisposals.p1=Use the <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 landingPage.capasitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
 landingPage.capasitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
-landingPage.capasitorOrPersonalRepresentative.p2=<a href="{0}">Contact HMRC</a> and ask for a paper version of the return to be posted to you.
+landingPage.capasitorOrPersonalRepresentative.p2=If the disposal was made by the deceased’s estate during the period of administration, <a href="{0}">you’ll need to report and pay the tax another way</a>.
+landingPage.capasitorOrPersonalRepresentative.p3=To use this service for another person, where the the disposal was not made within a period of administration, you’ll need to:
+landingPage.capasitorOrPersonalRepresentative.p4=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
+landingPage.capasitorOrPersonalRepresentative.p5=The details you provide must match the details we hold about the person.
+landingPage.capasitorOrPersonalRepresentative.p6=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
+landingPage.capasitorOrPersonalRepresentative.p7=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
+landingPage.capasitorOrPersonalRepresentative.p8=You’ll need to call HMRC to amend a return that has been sent.
+landingPage.capasitorOrPersonalRepresentative.example.title=<strong class="bold">Example</strong>
+landingPage.capasitorOrPersonalRepresentative.p9=Mr Andrews died on 20 April 2020. Mr Smith is the personal representative for Mr Andrews’ estate. Before he died Mr Andrews had agreed to sell his UK residential investment property.
+landingPage.capasitorOrPersonalRepresentative.p10=Mr Andrews exchanged contracts on 15 April 2020 before he died. After he died Mr Smith completed the property sale. Capital Gains Tax was due.
+landingPage.capasitorOrPersonalRepresentative.p11=To report and pay the tax, Mr Smith signed into his own Capital Gains Tax on UK property account. Mr Smith started a new return and selected he was completing the return for someone who had died. Mr Smith entered the details, checked and sent the return, and paid the Capital Gains Tax due.
+landingPage.capasitorOrPersonalRepresentative.list1.bullet1=sign in to your own Capital Gains Tax on UK property account or create one if you do not have one
+landingPage.capasitorOrPersonalRepresentative.list1.bullet2=start a new return from your account
+landingPage.capasitorOrPersonalRepresentative.list1.bullet3=select that you’re completing the return for someone else or someone who has died
+landingPage.capasitorOrPersonalRepresentative.list1.bullet4=enter the person’s full name
+landingPage.capasitorOrPersonalRepresentative.list1.bullet5=provide evidence that you have the authority to act on their behalf, for example a <a href="{0}">lasting power of attorney (LPA)</a> document
+landingPage.capasitorOrPersonalRepresentative.list2.bullet1=National Insurance number
+landingPage.capasitorOrPersonalRepresentative.list2.bullet2=Self Assessment Unique Taxpayer Reference
+landingPage.capasitorOrPersonalRepresentative.list2.bullet3=Capital Gains Tax on UK property account number
+
 landingPage.sidebar.title=Related content
 landingPage.sidebar.1=Calculate Capital Gains Tax
 landingPage.sidebar.2=Capital Gains Tax
