@@ -102,6 +102,20 @@ fieldset .form-hint {
     margin-bottom: 5px;
 }
 
+.list-item--dashed {
+    position: relative;
+    padding-left: 25px;
+    padding-right: 25px;
+}
+
+.list-item--dashed:before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    width: 20px;
+    overflow: hidden;
+}
+
 .with-bottom-margin {
     margin-bottom: 1.875em;
 }
@@ -826,4 +840,3 @@ h1 > .sub-heading {
         position: relative;
     }
 }
-
