@@ -605,23 +605,6 @@ class MultipleDisposalsTriageController @Inject() (
   }
 
   private def updateTaxYearToAnswers(
-    shareDisposalDate: ShareDisposalDate,
-    taxYear: Option[TaxYear],
-    answers: MultipleDisposalsTriageAnswers
-  ): Either[Error, MultipleDisposalsTriageAnswers] =
-    taxYear match {
-      case _ =>
-        Right(
-          answers
-            .unset(_.completionDate)
-            .copy(
-              taxYear        = taxYear,
-              completionDate = Some(CompletionDate(shareDisposalDate.value))
-            )
-        )
-    }
-
-  private def updateTaxYearToAnswers(
     taxYearAfter6April2020: Boolean,
     taxYear: Option[TaxYear],
     answers: MultipleDisposalsTriageAnswers
@@ -690,7 +673,17 @@ class MultipleDisposalsTriageController @Inject() (
                 for {
                   taxYear <- taxYearService.taxYear(shareDisposalDate.value)
                   updatedAnswers <- EitherT
-                                     .fromEither[Future](updateTaxYearToAnswers(shareDisposalDate, taxYear, answers))
+                                     .fromEither[Future](
+                                       Right(
+                                         answers
+                                           .unset(_.completionDate)
+                                           .copy(
+                                             taxYear                = taxYear,
+                                             completionDate         = Some(CompletionDate(shareDisposalDate.value)),
+                                             taxYearAfter6April2020 = Some(taxYear.isDefined)
+                                           )
+                                       )
+                                     )
                   newState = updateState(
                     state,
                     updatedAnswers,
