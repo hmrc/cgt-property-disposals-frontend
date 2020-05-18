@@ -99,6 +99,10 @@ class SupportingEvidenceController @Inject() (
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
               f(s, r, IncompleteSupportingEvidenceAnswers.empty)
             )(f(s, r, _))
+          case DraftSingleIndirectDisposalReturn(_, _, _, _, _, _, _, maybeSupportingDocumentsAnswers, _, _) =>
+            maybeSupportingDocumentsAnswers.fold[Future[Result]](
+              f(s, r, IncompleteSupportingEvidenceAnswers.empty)
+            )(f(s, r, _))
         }
       case _ => Redirect(controllers.routes.StartController.start())
     }
