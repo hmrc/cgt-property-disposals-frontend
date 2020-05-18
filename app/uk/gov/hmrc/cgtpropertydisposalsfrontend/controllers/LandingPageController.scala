@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
+import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -25,14 +26,20 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 @Singleton
 class LandingPageController @Inject() (
   cc: MessagesControllerComponents,
+  config: Configuration,
   landing_page: views.html.landing_page,
   agents_landing_page: views.html.agents_landing_page
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
-  def landingPage(): Action[AnyContent] = Action(implicit request => Ok(landing_page()))
+  val capacitorsAndPersonalRepresentativesJourneyEnabled: Boolean =
+    config.underlying.getBoolean("capacitors-and-personal-representatives.enabled")
 
-  def agentsLandingPage(): Action[AnyContent] = Action(implicit request => Ok(agents_landing_page()))
+  def landingPage(): Action[AnyContent] =
+    Action(implicit request => Ok(landing_page(capacitorsAndPersonalRepresentativesJourneyEnabled)))
+
+  def agentsLandingPage(): Action[AnyContent] =
+    Action(implicit request => Ok(agents_landing_page(capacitorsAndPersonalRepresentativesJourneyEnabled)))
 
   def signInPage(): Action[AnyContent] =
     Action(_ => Redirect(routes.LandingPageController.landingPage()))

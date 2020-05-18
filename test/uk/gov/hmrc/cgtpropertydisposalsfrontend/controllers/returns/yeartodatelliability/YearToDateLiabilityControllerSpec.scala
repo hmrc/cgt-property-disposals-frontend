@@ -59,7 +59,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload, UpscanUploadStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
@@ -331,14 +331,6 @@ class YearToDateLiabilityControllerSpec
     (mockUpscanService
       .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
       .expects(uploadReference, *)
-      .returning(EitherT.fromEither(result))
-
-  def mockUpdateUpscanUpload(uploadReference: UploadReference, upscanUpload: UpscanUpload)(
-    result: Either[Error, Unit]
-  ) =
-    (mockUpscanService
-      .updateUpscanUpload(_: UploadReference, _: UpscanUpload)(_: HeaderCarrier))
-      .expects(uploadReference, upscanUpload, *)
       .returning(EitherT.fromEither(result))
 
   def setTaxDue(calculatedTaxDue: CalculatedTaxDue, taxDue: AmountInPence): CalculatedTaxDue =
@@ -3429,8 +3421,7 @@ class YearToDateLiabilityControllerSpec
       "show an error page" when {
 
         val upscanUpload = sample[UpscanUpload].copy(
-          upscanUploadStatus = UpscanUploadStatus.Initiated,
-          upscanCallBack     = None
+          upscanCallBack = None
         )
 
         val answers = IncompleteNonCalculatedYTDAnswers(
@@ -3444,10 +3435,8 @@ class YearToDateLiabilityControllerSpec
         val (session, journey, draftReturn) =
           sessionWithMultipleDisposalsState(answers, sample[UserType], wasUkResident = sample[Boolean])
 
-        val callback = sample[UpscanFailure]
-        val newAnswers = answers.copy(pendingUpscanUpload =
-          Some(upscanUpload.copy(upscanCallBack = Some(callback), upscanUploadStatus = UpscanUploadStatus.Uploaded))
-        )
+        val callback       = sample[UpscanFailure]
+        val newAnswers     = answers.copy(pendingUpscanUpload = Some(upscanUpload.copy(upscanCallBack = Some(callback))))
         val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
 
         "there is an error getting the upscan upload" in {
@@ -3460,29 +3449,11 @@ class YearToDateLiabilityControllerSpec
           checkIsTechnicalErrorPage(performAction())
         }
 
-        "there is an error updating the upscan upload status to uploaded" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload))
-            mockUpdateUpscanUpload(
-              upscanUpload.uploadReference,
-              upscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded)
-            )(Left(Error("")))
-          }
-
-          checkIsTechnicalErrorPage(performAction())
-        }
-
         "there is an error updating the draft return with a callback" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload.copy(upscanCallBack = Some(callback))))
-            mockUpdateUpscanUpload(
-              upscanUpload.uploadReference,
-              upscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded, upscanCallBack = Some(callback))
-            )(Right(()))
             mockStoreDraftReturn(
               newDraftReturn,
               journey.subscribedDetails.cgtReference,
@@ -3500,8 +3471,7 @@ class YearToDateLiabilityControllerSpec
             mockGetUpscanUpload(upscanUpload.uploadReference)(
               Right(
                 upscanUpload.copy(
-                  upscanCallBack     = Some(callback),
-                  upscanUploadStatus = UpscanUploadStatus.Uploaded
+                  upscanCallBack = Some(callback)
                 )
               )
             )
@@ -3523,10 +3493,7 @@ class YearToDateLiabilityControllerSpec
       "show that the scan is still in progress" when {
 
         "there is no callback yet" in {
-          val upscanUpload = sample[UpscanUpload].copy(
-            upscanCallBack     = None,
-            upscanUploadStatus = UpscanUploadStatus.Uploaded
-          )
+          val upscanUpload = sample[UpscanUpload].copy(upscanCallBack = None)
 
           val answers = sample[IncompleteCalculatedYTDAnswers].copy(
             pendingUpscanUpload = Some(upscanUpload)
@@ -3576,8 +3543,7 @@ class YearToDateLiabilityControllerSpec
           )
 
         val upscanUpload = sample[UpscanUpload].copy(
-          upscanUploadStatus = UpscanUploadStatus.Initiated,
-          upscanCallBack     = None
+          upscanCallBack = None
         )
 
         val answers = IncompleteNonCalculatedYTDAnswers(
@@ -3591,22 +3557,16 @@ class YearToDateLiabilityControllerSpec
         val (session, journey, draftReturn) =
           sessionWithMultipleDisposalsState(answers, sample[UserType], wasUkResident = sample[Boolean])
 
-        val callback = sample[UpscanFailure]
-        val newAnswers = answers.copy(pendingUpscanUpload =
-          Some(upscanUpload.copy(upscanCallBack = Some(callback), upscanUploadStatus = UpscanUploadStatus.Uploaded))
-        )
+        val callback       = sample[UpscanFailure]
+        val newAnswers     = answers.copy(pendingUpscanUpload = Some(upscanUpload.copy(upscanCallBack = Some(callback))))
         val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-        val updatedSession = session.copy(journeyStatus                  = Some(journey.copy(draftReturn = newDraftReturn)))
+        val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
 
         "the callback indicates that the scan has failed and all updates are successful" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload.copy(upscanCallBack = Some(callback))))
-            mockUpdateUpscanUpload(
-              upscanUpload.uploadReference,
-              upscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded, upscanCallBack = Some(callback))
-            )(Right(()))
             mockStoreDraftReturn(
               newDraftReturn,
               journey.subscribedDetails.cgtReference,
@@ -3632,8 +3592,7 @@ class YearToDateLiabilityControllerSpec
 
       "redirect to the check your answers page" when {
         val upscanUpload = sample[UpscanUpload].copy(
-          upscanUploadStatus = UpscanUploadStatus.Initiated,
-          upscanCallBack     = None
+          upscanCallBack = None
         )
 
         val answers = IncompleteNonCalculatedYTDAnswers(
@@ -3676,10 +3635,6 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockGetUpscanUpload(upscanUpload.uploadReference)(Right(upscanUpload.copy(upscanCallBack = Some(callback))))
-            mockUpdateUpscanUpload(
-              upscanUpload.uploadReference,
-              upscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded, upscanCallBack = Some(callback))
-            )(Right(()))
             mockStoreDraftReturn(
               newDraftReturn,
               journey.subscribedDetails.cgtReference,

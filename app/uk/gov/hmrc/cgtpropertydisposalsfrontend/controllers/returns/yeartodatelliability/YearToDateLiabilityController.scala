@@ -24,14 +24,13 @@ import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText, of}
+import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.FileUpload
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -48,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanUpload, UpscanUploadStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
@@ -923,7 +922,7 @@ class YearToDateLiabilityController @Inject() (
             logger.warn("Could not initiate upscan", e)
             errorHandler.errorResult()
           },
-          upscanUpload => Ok(mandatoryEvidencePage(mandatoryEvidenceForm, upscanUpload, backLink))
+          upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink))
         )
       }
 
@@ -1161,18 +1160,10 @@ class YearToDateLiabilityController @Inject() (
         ): Future[Result] = {
           val result = for {
             newUpscanUpload <- upscanService.getUpscanUpload(pendingUpscanUpload.uploadReference)
-            updatedUpscanUpload <- if (newUpscanUpload.upscanUploadStatus === UpscanUploadStatus.Uploaded)
-                                    EitherT.pure[Future, Error](newUpscanUpload)
-                                  else {
-                                    val updated = newUpscanUpload.copy(upscanUploadStatus = UpscanUploadStatus.Uploaded)
-                                    upscanService
-                                      .updateUpscanUpload(newUpscanUpload.uploadReference, updated)
-                                      .map(_ => updated)
-                                  }
-            _ <- updatedUpscanUpload.upscanCallBack match {
+            _ <- newUpscanUpload.upscanCallBack match {
                   case None => EitherT.pure[Future, Error](())
                   case Some(callback) =>
-                    storeUpscanSuccessOrFailure(updatedUpscanUpload, callback, answers, fillingOutReturn)
+                    storeUpscanSuccessOrFailure(newUpscanUpload, callback, answers, fillingOutReturn)
                 }
           } yield newUpscanUpload
 
@@ -1611,14 +1602,6 @@ object YearToDateLiabilityController {
       mapping(
         "taxDue" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
-    )
-
-  val mandatoryEvidenceForm: Form[FileUpload] =
-    Form(
-      mapping(
-        "mandatoryEvidence" -> nonEmptyText,
-        "reference"         -> nonEmptyText
-      )(FileUpload.apply)(FileUpload.unapply)
     )
 
   val taxableGainOrLossForm: Form[BigDecimal] = {

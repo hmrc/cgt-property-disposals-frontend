@@ -17,7 +17,7 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
 
 @this(
@@ -28,7 +28,7 @@
 
 @(answers: CompleteSupportingEvidenceAnswers)(implicit messages: Messages)
 
-    @key = @{"upload-supporting-evidence.check-your-answers"}
+    @key = @{"supporting-evidence.check-your-answers"}
 
     @hasSupportingDocs = @{
         answers.doYouWantToUploadSupportingEvidence match {
@@ -40,9 +40,9 @@
     @cyaSection(None, Some("cya-questions-short")) {
 
         @cyaRow(
-            messages("upload-supporting-evidence.check-your-answers.do-you-want-to-upload-documents"),
+            messages(s"$key.do-you-want-to-upload-evidence"),
             Html(hasSupportingDocs),
-            Some(cyaChange(messages("upload-supporting-evidence.cyaChange"), routes.SupportingEvidenceController.doYouWantToUploadSupportingDocuments().url)),
+            Some(cyaChange(messages(s"$key.cya-change"), routes.SupportingEvidenceController.doYouWantToUploadSupportingDocuments().url)),
             "do-you-want-to-upload-supporting-evidence-value"
         )
 

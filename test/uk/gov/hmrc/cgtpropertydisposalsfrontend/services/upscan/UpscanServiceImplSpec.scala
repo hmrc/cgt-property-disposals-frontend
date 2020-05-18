@@ -77,26 +77,6 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
         }
       }
 
-      "updating upscan" when {
-        "Response is OK" in {
-          val response = Right(HttpResponse(OK))
-          (mockConnector
-            .updateUpscanUpload(_: UploadReference, _: UpscanUpload)(_: HeaderCarrier))
-            .expects(reference, upload, *)
-            .returning(EitherT.fromEither[Future](response))
-          await(service.updateUpscanUpload(reference, upload).value).isRight shouldBe true
-        }
-
-        "Internal server error" in {
-          val response = Right(HttpResponse(INTERNAL_SERVER_ERROR))
-          (mockConnector
-            .updateUpscanUpload(_: UploadReference, _: UpscanUpload)(_: HeaderCarrier))
-            .expects(reference, upload, *)
-            .returning(EitherT.fromEither[Future](response))
-          await(service.updateUpscanUpload(reference, upload).value).isRight shouldBe true
-        }
-      }
-
       "initialising" when {
         "initialise" in {
           val mockSuccess = Call("GET", "/mock-success")

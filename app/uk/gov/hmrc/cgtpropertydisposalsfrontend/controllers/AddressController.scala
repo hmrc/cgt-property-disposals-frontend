@@ -77,7 +77,8 @@ trait AddressController[A <: AddressJourneyType] {
   protected val selectAddressSubmitCall: Call
   protected val continueCall: Call
 
-  protected val enterPostcodePageBackLink: A => Call = _ => isUkCall
+  protected val enterUkAddressBackLinkCall: A => Call = backLinkCall
+  protected val enterPostcodePageBackLink: A => Call  = _ => isUkCall
 
   protected def withValidJourney(request: RequestWithSessionData[_])(
     f: (SessionData, A) => Future[Result]
@@ -124,7 +125,7 @@ trait AddressController[A <: AddressJourneyType] {
           Ok(
             enterUkAddressPage(
               Address.ukAddressForm,
-              backLinkCall(journey),
+              enterUkAddressBackLinkCall(journey),
               enterUkAddressSubmitCall,
               enterPostcodeCall,
               journey,
@@ -146,7 +147,7 @@ trait AddressController[A <: AddressJourneyType] {
                 BadRequest(
                   enterUkAddressPage(
                     formWithErrors,
-                    backLinkCall(journey),
+                    enterUkAddressBackLinkCall(journey),
                     enterUkAddressSubmitCall,
                     enterPostcodeCall,
                     journey,
