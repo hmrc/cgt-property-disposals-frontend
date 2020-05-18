@@ -3088,7 +3088,13 @@ class MultipleDisposalsTriageControllerSpec
           val newCompletionDate = CompletionDate(today.minusDays(1))
           val updatedJourney =
             journey.copy(newReturnTriageAnswers =
-              Left(answers.copy(completionDate = Some(newCompletionDate), taxYear = Some(taxYear)))
+              Left(
+                answers.copy(
+                  completionDate         = Some(newCompletionDate),
+                  taxYear                = Some(taxYear),
+                  taxYearAfter6April2020 = Some(true)
+                )
+              )
             )
 
           inSequence {
