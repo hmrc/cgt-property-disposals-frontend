@@ -77,8 +77,8 @@ trait AddressController[A <: AddressJourneyType] {
   protected val selectAddressSubmitCall: Call
   protected val continueCall: Call
 
-  protected lazy val enterUkAddressBackLinkCall: A => Call = backLinkCall
-  protected val enterPostcodePageBackLink: A => Call       = _ => isUkCall
+  protected val enterUkAddressBackLinkCall: A => Call = backLinkCall
+  protected val enterPostcodePageBackLink: A => Call  = _ => isUkCall
 
   protected def withValidJourney(request: RequestWithSessionData[_])(
     f: (SessionData, A) => Future[Result]
