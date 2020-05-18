@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
@@ -305,13 +306,24 @@ class CommonTriageQuestionsController @Inject() (
   def periodOfAdministrationNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withState(request) { (_, state) =>
-        // TODO: fix for indirect disposals
-        val isMultipleDisposal = state.fold(
-          _.newReturnTriageAnswers.isLeft,
-          _.draftReturn.fold(_ => true, _ => false, _ => false)
-        )
+        val triageAnswers = triageAnswersFomState(state)
+        val isIndirectDisposal = triageAnswers
+          .fold(
+            _.fold(_.assetTypes, c => Some(c.assetTypes)),
+            _.fold(_.assetType.map(List(_)), c => Some(List(c.assetType)))
+          )
+          .exists {
+            case List(IndirectDisposal) => true
+            case _                      => false
+          }
+
+        val isMultipleDisposal = triageAnswers.isLeft
+
         val backLink =
-          if (isMultipleDisposal) controllers.returns.address.routes.PropertyDetailsController.disposalDate()
+          if (isIndirectDisposal && isMultipleDisposal) routes.MultipleDisposalsTriageController.disposalDateOfShares()
+          else if (isIndirectDisposal && !isMultipleDisposal)
+            routes.SingleDisposalsTriageController.disposalDateOfShares()
+          else if (isMultipleDisposal) controllers.returns.address.routes.PropertyDetailsController.disposalDate()
           else routes.SingleDisposalsTriageController.whenWasDisposalDate()
 
         Ok(periodOfAdminNotHandledPage(backLink))
