@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorS
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
@@ -141,6 +141,58 @@ class YearToDateLiabilityControllerSpec
         case _                   => false
       }
     )
+
+  def sessionWithSingleIndirectDisposalState(
+    ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+    disposalDate: Option[DisposalDate] = Some(sample[DisposalDate]),
+    userType: UserType,
+    wasUkResident: Boolean,
+    address: Option[Address]                       = Some(sample[Address]),
+    individualUserType: Option[IndividualUserType] = Some(IndividualUserType.Self)
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+    val draftReturn = sample[DraftSingleIndirectDisposalReturn].copy(
+      triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
+        individualUserType         = individualUserType,
+        hasConfirmedSingleDisposal = true,
+        disposalMethod             = Some(sample[DisposalMethod]),
+        assetType                  = Some(AssetType.Residential),
+        wasAUKResident             = Some(wasUkResident),
+        countryOfResidence         = if (wasUkResident) Some(Country.uk) else Some(sample[Country]),
+        disposalDate               = disposalDate
+      ),
+      representeeAnswers = individualUserType match {
+        case Some(PersonalRepresentative) =>
+          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
+        case Some(Capacitor) => Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+        case _               => None
+      },
+      companyAddress             = address,
+      yearToDateLiabilityAnswers = ytdLiabilityAnswers
+    )
+    val journey = sample[FillingOutReturn].copy(
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      subscribedDetails = sample[SubscribedDetails].copy(
+        name = setNameForUserType(userType)
+      ),
+      draftReturn = draftReturn
+    )
+    (
+      SessionData.empty.copy(
+        userType      = Some(userType),
+        journeyStatus = Some(journey)
+      ),
+      journey,
+      draftReturn
+    )
+  }
+
+  def sessionWithSingleIndirectDisposalState(
+    ytdLiabilityAnswers: YearToDateLiabilityAnswers,
+    disposalDate: DisposalDate,
+    userType: UserType,
+    wasUkResident: Boolean
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
+    sessionWithSingleIndirectDisposalState(Some(ytdLiabilityAnswers), Some(disposalDate), userType, wasUkResident)
 
   def sessionWithSingleDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
@@ -510,6 +562,7 @@ class YearToDateLiabilityControllerSpec
           )
         }
       }
+
     }
 
     "handling submitted answers to the estimated income page" must {
@@ -2931,6 +2984,21 @@ class YearToDateLiabilityControllerSpec
           )
         }
 
+        "the user has not started this section yet and they are on a single indirect disposal journey and " +
+          "have selected to use other reliefs" in {
+          test(
+            sessionWithSingleIndirectDisposalState(
+              None,
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              address       = Some(sample[Address])
+            )._1,
+            returns.routes.TaskListController.taskList(),
+            "taxableGainOrLoss.title"
+          )
+        }
+
         "the user has already started this uncalculated section but have not completed it yet" in {
           test(
             sessionWithMultipleDisposalsState(
@@ -3205,7 +3273,21 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
+
+        "the user has answered this question before for single indirect disposal" in {
+          test(
+            sessionWithSingleIndirectDisposalState(
+              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true
+            )._1,
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+
       }
+
     }
 
     "handling submits on the non calculated enter tax due page" must {
@@ -3723,6 +3805,35 @@ class YearToDateLiabilityControllerSpec
             checkIsTechnicalErrorPage(performAction())
           }
 
+          "the user is in on a single indirect disposal journey" in {
+            val answers =
+              sample[IncompleteNonCalculatedYTDAnswers].copy(pendingUpscanUpload = Some(sample[UpscanUpload]))
+
+            val (session, journey, draftReturn) = sessionWithSingleIndirectDisposalState(
+              answers,
+              sample[DisposalDate],
+              sample[UserType],
+              wasUkResident = sample[Boolean]
+            )
+
+            val newAnswers     = answers.copy(pendingUpscanUpload            = None)
+            val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+            val newJourney     = journey.copy(draftReturn                    = newDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
           "the user is on a multiple disposal journey" in {
             val answers =
               sample[IncompleteNonCalculatedYTDAnswers].copy(pendingUpscanUpload = Some(sample[UpscanUpload]))
@@ -3752,6 +3863,7 @@ class YearToDateLiabilityControllerSpec
           }
 
         }
+
       }
 
     }
