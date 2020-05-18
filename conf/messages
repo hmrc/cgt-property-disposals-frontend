@@ -55,6 +55,15 @@ landingPage.covid.p1=Due to coronavirus (COVID-19), you will not get a late fili
 landingPage.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
 landingPage.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
 
+landingPage.contents.h2=Contents
+landingPage.intro.h2=Overview
+landingPage.contents.list.bullet1=<a href="{0}">Overview</a>
+landingPage.contents.list.bullet2=<a href="{0}">How to report and pay the tax</a>
+landingPage.contents.list.bullet3=<a href="{0}">Before you start</a>
+landingPage.contents.list.bullet4=<a href="{0}">If you’re an agent</a>
+landingPage.contents.list.bullet5=<a href="{0}">If you’re representing a trust</a>
+landingPage.contents.list.bullet6=<a href="{0}">If you’re a capacitor or personal representative</a>
+
 landingPage.howTo.h2=How to report and pay the tax
 landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property account before you can report and pay the tax using this service.
 landingPage.howTo.p2=If you’re a resident or representing a trust, you can use this service to:
@@ -89,7 +98,26 @@ landingPage.reportingDisposals.h2=If you’re reporting indirect disposals or di
 landingPage.reportingDisposals.p1=Use the <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 landingPage.capasitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
 landingPage.capasitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
-landingPage.capasitorOrPersonalRepresentative.p2=<a href="{0}">Contact HMRC</a> and ask for a paper version of the return to be posted to you.
+landingPage.capasitorOrPersonalRepresentative.p2=If the disposal was made by the deceased’s estate during the period of administration, <a href="{0}">you’ll need to report and pay the tax another way</a>.
+landingPage.capasitorOrPersonalRepresentative.p3=To use this service for another person, where the the disposal was not made within a period of administration, you’ll need to:
+landingPage.capasitorOrPersonalRepresentative.p4=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
+landingPage.capasitorOrPersonalRepresentative.p5=The details you provide must match the details we hold about the person.
+landingPage.capasitorOrPersonalRepresentative.p6=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
+landingPage.capasitorOrPersonalRepresentative.p7=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
+landingPage.capasitorOrPersonalRepresentative.p8=You’ll need to call HMRC to amend a return that has been sent.
+landingPage.capasitorOrPersonalRepresentative.example.title=<strong class="bold">Example</strong>
+landingPage.capasitorOrPersonalRepresentative.p9=Mr Andrews died on 20 April 2020. Mr Smith is the personal representative for Mr Andrews’ estate. Before he died Mr Andrews had agreed to sell his UK residential investment property.
+landingPage.capasitorOrPersonalRepresentative.p10=Mr Andrews exchanged contracts on 15 April 2020 before he died. After he died Mr Smith completed the property sale. Capital Gains Tax was due.
+landingPage.capasitorOrPersonalRepresentative.p11=To report and pay the tax, Mr Smith signed into his own Capital Gains Tax on UK property account. Mr Smith started a new return and selected he was completing the return for someone who had died. Mr Smith entered the details, checked and sent the return, and paid the Capital Gains Tax due.
+landingPage.capasitorOrPersonalRepresentative.list1.bullet1=sign in to your own Capital Gains Tax on UK property account or create one if you do not have one
+landingPage.capasitorOrPersonalRepresentative.list1.bullet2=start a new return from your account
+landingPage.capasitorOrPersonalRepresentative.list1.bullet3=select that you’re completing the return for someone else or someone who has died
+landingPage.capasitorOrPersonalRepresentative.list1.bullet4=enter the person’s full name
+landingPage.capasitorOrPersonalRepresentative.list1.bullet5=provide evidence that you have the authority to act on their behalf, for example a <a href="{0}">lasting power of attorney (LPA)</a> document
+landingPage.capasitorOrPersonalRepresentative.list2.bullet1=National Insurance number
+landingPage.capasitorOrPersonalRepresentative.list2.bullet2=Self Assessment Unique Taxpayer Reference
+landingPage.capasitorOrPersonalRepresentative.list2.bullet3=Capital Gains Tax on UK property account number
+
 landingPage.sidebar.title=Related content
 landingPage.sidebar.1=Calculate Capital Gains Tax
 landingPage.sidebar.2=Capital Gains Tax
@@ -2717,12 +2745,10 @@ multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
 
 multipleDisposalsDisposalPrice.error.required=Enter the disposal value of the property, for example, 20,520.86
-multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50 
+multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
-multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000 
-multipleDisposalsDisposalPrice.error.tooManyDecimals=multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50 
-multipleDisposalsDisposalPrice.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
-multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000 
+multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
@@ -3012,3 +3038,63 @@ tmpCustomError.title=Sorry, we are experiencing technical difficulties - 500
 tmpCustomError.heading=Sorry, we’re experiencing technical difficulties
 tmpCustomError.p1=In order for us to resolve the issue, please click on the ‘get help with this page’ link.
 tmpCustomError.p2=We apologise for the inconvenience and thank you for your patience while we resolve the issue.
+
+companyDetails.caption=Company details
+
+companyDetails.isUk.title=Did the company you held shares in have a UK address?
+companyDetails.isUk.agent.title=Did the company your client held shares in have a UK address?
+companyDetails.isUk.trust.title=Did the company the trust held shares in have a UK address?
+companyDetails.isUk.capacitor.title=Did the company the person held shares in have a UK address?
+companyDetails.isUk.personalRep.title=Did the company the person held shares in have a UK address?
+
+isUk.companyDetails.error.required=Select yes if the company you held shares in had a UK address
+isUk.companyDetails.agent.error.required=Select yes if the company your client held shares in had a UK address
+isUk.companyDetails.trust.error.required=Select yes if the company the trust held shares in had a UK address
+isUk.companyDetails.capacitor.error.required=Select yes if the company the person held shares in had a UK address
+isUk.companyDetails.personalRep.error.required=Select yes if the company the person held shares in had a UK address
+
+address.uk.companyDetails.title=Enter the name and address of the company you held shares in
+address.uk.companyDetails.agent.title=Enter the name and address of the company your client held shares in
+address.uk.companyDetails.trust.title=Enter the name and address of the company the trust held shares in
+address.uk.companyDetails.capacitor.title=Enter the name and address of the company the person held shares in
+address.uk.companyDetails.personalRep.title=Enter the name and address of the company the person held shares in
+address.uk.companyDetails.helpText=This should be the company’s registered address
+address.uk.companyDetails.line1.label=Company name
+address.uk.companyDetails.line2.label=Street address
+address-line1.companyDetails.error.required=Enter a company name
+address-line1.companyDetails.error.tooLong=Company name must be 35 characters or less
+address-line1.companyDetails.error.pattern=Company name must only include letters a to z, spaces and number
+address-line2.companyDetails.error.tooLong=Street address must be 35 characters or less
+address-line2.companyDetails.error.pattern=Street address must only include letters a to z, spaces and number
+address-town.companyDetails.error.tooLong=Town or city must be 35 characters or fewer
+address-town.companyDetails.error.pattern=Town or city must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+address-county.companyDetails.error.tooLong=County must be 35 characters or fewer
+address-county.companyDetails.error.pattern=County must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+postcode.companyDetails.error.tooLong=Postcode must be 8 characters or fewer
+postcode.companyDetails.error.required=Enter a postcode
+postcode.companyDetails.error.invalidCharacters=Postcode must only include letters, numbers and spaces
+postcode.companyDetails.error.pattern=Enter a real postcode
+
+nonUkAddress.companyDetails.title=Enter the name and address of the company you held shares in
+nonUkAddress.companyDetails.agent.title=Enter the name and address of the company your client held shares in
+nonUkAddress.companyDetails.trust.title=Enter the name and address of the company the trust held shares in
+nonUkAddress.companyDetails.capacitor.title=Enter the name and address of the company the person held shares in
+nonUkAddress.companyDetails.personalRep.title=Enter the name and address of the company the person held shares in
+nonUkAddress.companyDetails.line1.label=Company name
+nonUkAddress.companyDetails.line2.label=Street address
+nonUkAddress-line1.companyDetails.error.required=Enter a company name
+nonUkAddress-line1.companyDetails.error.tooLong=Company name must be 35 characters or fewer
+nonUkAddress-line2.companyDetails.error.tooLong=Street address must be 35 characters or fewer
+nonUkAddress-line3.companyDetails.error.tooLong=Address line 3 must be 35 characters or fewer
+nonUkAddress-line4.companyDetails.error.tooLong=Address line 4 must be 35 characters or fewer
+nonUkAddress-line1.companyDetails.error.pattern=Company name must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line2.companyDetails.error.pattern=Street address must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line3.companyDetails.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line4.companyDetails.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+countryCode.companyDetails.error.required=Select a country from the options presented as you type
+countryCode.companyDetails.error.notFound=Select a country from the options presented as you type
+
+companyDetails.cya.title=Check your answers
+companyDetails.cyaLabel.company-address=Company name and address
+companyDetails.cyaChange.company-address=the company name and address
+

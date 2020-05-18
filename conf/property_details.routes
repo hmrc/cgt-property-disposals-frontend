@@ -33,3 +33,20 @@ POST /details-one-disposal/enter-acquisition-value          uk.gov.hmrc.cgtprope
 
 GET  /confirm-property-address                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswers()
 POST /confirm-property-address                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswersSubmit()
+
+
+## Indirect disposals
+GET  /company-details/did-company-have-uk-address     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.isUk()
+POST /company-details/did-company-have-uk-address     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.isUkSubmit()
+GET  /company-details/find-uk-contact-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.enterPostcode()
+POST /company-details/find-uk-contact-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.enterPostcodeSubmit()
+GET  /company-details/select-contact-address          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.selectAddress()
+POST /company-details/select-contact-address          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.selectAddressSubmit()
+GET  /company-details/enter-uk-company-details        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.enterUkAddress()
+POST /company-details/enter-uk-company-details        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.enterUkAddressSubmit()
+GET  /company-details/enter-non-uk-company-details    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.enterNonUkAddress()
+POST /company-details/enter-non-uk-company-details    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.enterNonUkAddressSubmit()
+GET  /company-details/check-your-answers              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.checkYourAnswers()
+POST /company-details/check-your-answers              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController.checkYourAnswersSubmit()
+
+

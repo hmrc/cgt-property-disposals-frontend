@@ -86,9 +86,9 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val payYourTax: String                  = getString("external-url.pay-your-tax")
   val payTheirTaxBill: String             = getString("external-url.pay-their-tax-bill")
   val returnsForSomeoneWhoHasDied: String = getString("external-url.returns-for-someone-who-has-died")
-
-  val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
-  val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
+  val powerOfAttorney: String             = getString("external-url.power-of-attorney")
+  val onboardingExitSurveyUrl: String     = "/feedback/CGTPD-REG"
+  val returnsExitSurveyUrl: String        = "/feedback/CGTPD-RET"
   val ggCreateAccountUrl: String =
     "/bas-gateway?" +
       "accountType=individual&" +
