@@ -17,7 +17,7 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.SupportingEvidence
 
@@ -26,7 +26,7 @@
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.uploadsupportingdocs.upload_supporting_evidence_summary,
+    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary,
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
     cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
     cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
@@ -35,7 +35,7 @@
 
 @(expired: List[SupportingEvidence])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@key = @{"upload-supporting-evidence.expired"}
+@key = @{"supporting-evidence.expired"}
 @title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType) {

@@ -22,7 +22,6 @@ import configs.Configs
 import configs.syntax._
 import play.api.Configuration
 import play.api.http.HeaderNames.USER_AGENT
-import play.api.libs.ws.WSClient
 import play.api.mvc.Call
 import play.mvc.Http.Status
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
@@ -48,13 +47,6 @@ trait UpscanConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def updateUpscanUpload(
-    uploadReference: UploadReference,
-    updatedUpscanUpload: UpscanUpload
-  )(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
-
   def initiate(errorRedirect: Call, successRedirect: Call, uploadReference: UploadReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
@@ -64,7 +56,6 @@ trait UpscanConnector {
 @Singleton
 class UpscanConnectorImpl @Inject() (
   http: HttpClient,
-  wsClient: WSClient,
   config: Configuration,
   servicesConfig: ServicesConfig
 )(
@@ -168,31 +159,6 @@ class UpscanConnectorImpl @Inject() (
             case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR => {
               logger.warn("could not save upscan upload")
               Left(Error(s"failed to save upscan upload"))
-            }
-          }
-        }
-        .recover { case e => Left(Error(e)) }
-    )
-  }
-
-  def updateUpscanUpload(
-    uploadReference: UploadReference,
-    updatedUpscanUpload: UpscanUpload
-  )(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] = {
-
-    val url = backEndBaseUrl + s"/cgt-property-disposals/upscan/upload-reference/${uploadReference.value}"
-
-    EitherT[Future, Error, HttpResponse](
-      http
-        .put[UpscanUpload](url, updatedUpscanUpload)
-        .map { response =>
-          response.status match {
-            case Status.OK => Right(response)
-            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR => {
-              logger.warn("could not update upscan upload")
-              Left(Error(s"failed to update upscan upload"))
             }
           }
         }

@@ -24,7 +24,6 @@ final case class UpscanUpload(
   uploadReference: UploadReference,
   upscanUploadMeta: UpscanUploadMeta,
   uploadedOn: LocalDateTime,
-  upscanUploadStatus: UpscanUploadStatus,
   upscanCallBack: Option[UpscanCallBack]
 )
 

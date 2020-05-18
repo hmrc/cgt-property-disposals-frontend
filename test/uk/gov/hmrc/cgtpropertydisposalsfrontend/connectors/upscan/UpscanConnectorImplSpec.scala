@@ -63,9 +63,9 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
   )
 
   val connector =
-    new UpscanConnectorImpl(mockHttp, mockWsClient, config, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+    new UpscanConnectorImpl(mockHttp, config, new ServicesConfig(config, new RunMode(config, Mode.Test)))
 
-  "UpscanConnectorImpleSpec" when {
+  "UpscanConnectorImplSpec" when {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val reference                  = sample[UploadReference]
@@ -105,13 +105,6 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
       )
     }
 
-    "update upscan upload" when {
-      val expectedUrl = s"$baseUrl/upscan/upload-reference/${reference.value}"
-      behave like upscanConnectorBehaviour(
-        mockPut[UpscanUpload](expectedUrl, upload),
-        () => connector.updateUpscanUpload(reference, upload)
-      )
-    }
   }
 
   def upscanConnectorBehaviour(

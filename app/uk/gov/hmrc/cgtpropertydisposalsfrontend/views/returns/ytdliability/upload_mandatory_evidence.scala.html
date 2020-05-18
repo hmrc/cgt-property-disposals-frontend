@@ -14,15 +14,12 @@
  * limitations under the License.
  *@
 
-@import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 @import play.twirl.api.Html
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingdocs.SupportingEvidenceController.FileUpload
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
@@ -38,30 +35,25 @@
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form : Form[FileUpload], upscanUpload: UpscanUpload, backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(upscanUpload: UpscanUpload, backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
     @key = @{ "mandatoryEvidence" }
     @fieldId = @{ "file" }
     @title = @{messages(s"$key.title")}
-    @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
     @meta = @{upscanUpload.upscanUploadMeta.uploadRequest.fields}
     @href = @{upscanUpload.upscanUploadMeta.uploadRequest.href}
 
-    @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+    @mainTemplate(title = title, userType = request.userType, withSignOutLink = false) {
 
+        @backLinkComponent(backLink)
 
-    @backLinkComponent(backLink)
+        @caption(messages("ytdLiability.caption"))
 
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
+        <form action="@href" method="post" enctype="multipart/form-data">
+            @for((k,v) <- meta){
+                <input type="hidden" id="@k" name="@k" value="@v">
+            }
 
-    @caption(messages("ytdLiability.caption"))
-
-    <form action="@href" method="post" enctype="multipart/form-data">
-    @for((k,v) <- meta){
-        <input type="hidden" id="@k" name="@k" value="@v">
-    }
 
         @fileInput(
             fieldId = fieldId,
@@ -78,4 +70,4 @@
 
         @returnToSummaryLink(displayReturnToSummaryLink = true)
 
-        }
+    }
