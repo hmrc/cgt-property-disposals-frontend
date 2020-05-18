@@ -1335,8 +1335,9 @@ class YearToDateLiabilityController @Inject() (
           logger.warn("Found calculated year to date liability answers on a multiple disposals draft return")
           errorHandler.errorResult()
 
-        case (_, _: DraftSingleIndirectDisposalReturn) =>
-          sys.error("single indirect disposal not handled yet")
+        case (_: CalculatedYTDAnswers, _: DraftSingleIndirectDisposalReturn) =>
+          logger.warn("Found calculated year to date liability answers on a single indirect disposal draft return")
+          errorHandler.errorResult()
 
       }
     }
