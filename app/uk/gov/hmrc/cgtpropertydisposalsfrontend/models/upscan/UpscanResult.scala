@@ -15,7 +15,7 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
-
+//TODO: Take out - not used
 final case class UpscanResult(
   reference: String,
   fileStatus: String,

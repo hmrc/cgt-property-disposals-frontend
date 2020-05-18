@@ -24,6 +24,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
@@ -33,7 +34,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUploadStatus.Uploaded
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -68,13 +68,20 @@ class SupportingEvidenceControllerSpec
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  def mockUpscanInitiate(errorRedirect: Call)(
+  def mockUpscanInitiate(errorRedirectCall: Call, successRedirectCall: UploadReference => Call)(
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
       .initiate(_: Call, _: UploadReference => Call)(_: HeaderCarrier))
-      .expects(errorRedirect, *, *)
-      .returning(EitherT.fromEither[Future](result))
+      .expects(
+        where { (actualErrorRedirectCall: Call, actualSuccessRedirectCall: UploadReference => Call, _: HeaderCarrier) =>
+          val uploadReference = sample[UploadReference]
+          actualErrorRedirectCall                    shouldBe errorRedirectCall
+          actualSuccessRedirectCall(uploadReference) shouldBe successRedirectCall(uploadReference)
+          true
+        }
+      )
+      .returning(EitherT.fromEither(result))
 
   def mockGetUpscanUpload(uploadReference: UploadReference)(
     result: Either[Error, UpscanUpload]
@@ -82,14 +89,6 @@ class SupportingEvidenceControllerSpec
     (mockUpscanService
       .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
       .expects(uploadReference, *)
-      .returning(EitherT.fromEither[Future](result))
-
-  def mockUpdateUpscanUpload(uploadReference: UploadReference, upscanUpload: UpscanUpload)(
-    result: Either[Error, Unit]
-  ) =
-    (mockUpscanService
-      .updateUpscanUpload(_: UploadReference, _: UpscanUpload)(_: HeaderCarrier))
-      .expects(uploadReference, upscanUpload, *)
       .returning(EitherT.fromEither[Future](result))
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
@@ -220,7 +219,7 @@ class SupportingEvidenceControllerSpec
 
       "display the technical error page" when {
 
-        "an error occurs when storing the draft return and answer is true" in {
+        "an error occurs storing the draft return and the user wants to upload supporting evidence" in {
           val answers =
             IncompleteSupportingEvidenceAnswers.empty.copy(
               doYouWantToUploadSupportingEvidence = Some(true),
@@ -243,7 +242,7 @@ class SupportingEvidenceControllerSpec
           checkIsTechnicalErrorPage(performAction("supporting-evidence.do-you-want-to-upload" -> "true"))
         }
 
-        "an error occurs when storing the draft return and answer is false" in {
+        "an error occurs when storing the draft return and the user does not want to upload supporting evidence" in {
           val answers =
             IncompleteSupportingEvidenceAnswers.empty.copy(
               doYouWantToUploadSupportingEvidence = Some(false),
@@ -281,14 +280,14 @@ class SupportingEvidenceControllerSpec
             currentSession
           )
 
-        "a user has not chosen an answer" in {
+        "the user has not selected an answer to the question asking whether they want to upload supporting evidence" in {
           test()("supporting-evidence.do-you-want-to-upload.error.required")
         }
       }
 
-      "redirect to check your answers page" when {
+      "redirect to the check your answers page" when {
 
-        "the user has never answered question before and has answered yes and is on a single disposable journey" in {
+        "the user has never answered question before and wants to upload supporting evidence and is on a single disposable journey" in {
 
           val (session, journey, draftReturn) = sessionWithSingleDisposalState(None)
 
@@ -317,7 +316,7 @@ class SupportingEvidenceControllerSpec
           )
         }
 
-        "the user has answered yes to the question before and has answered no and is on a single disposable journey" in {
+        "the user has answered yes to the question before and has answered no this time and is on a single disposable journey" in {
 
           val answers =
             sample[IncompleteSupportingEvidenceAnswers].copy(doYouWantToUploadSupportingEvidence = Some(true))
@@ -355,7 +354,7 @@ class SupportingEvidenceControllerSpec
           )
         }
 
-        "the user has answered yes to the question before and has answered yes and is on a single disposable journey" in {
+        "the user has answered yes to the question before and has answered yes again and is on a single disposable journey" in {
 
           val answers =
             sample[IncompleteSupportingEvidenceAnswers].copy(doYouWantToUploadSupportingEvidence = Some(true))
@@ -380,7 +379,7 @@ class SupportingEvidenceControllerSpec
           )
         }
 
-        "the user has answered no to the question before and has answered yes and is on a single disposable journey" in {
+        "the user has answered no to the question before and has answered yes this time and is on a single disposable journey" in {
 
           val answers = IncompleteSupportingEvidenceAnswers(
             doYouWantToUploadSupportingEvidence = Some(false),
@@ -421,907 +420,1055 @@ class SupportingEvidenceControllerSpec
             routes.SupportingEvidenceController.checkYourAnswers()
           )
         }
-
-      }
-    }
-  }
-
-  "handling requests to upload supporting evidence" must {
-
-    "show check your answers page" when {
-
-      "the number of uploads has reached maximum allowed" in {
-
-        def performAction(): Future[Result] = controller.uploadSupportingEvidence()(FakeRequest())
-
-        val supportingEvidence = sample[SupportingEvidence]
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          evidences                           = List.fill(2)(supportingEvidence),
-          expiredEvidences                    = List.empty
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.SupportingEvidenceController.checkYourAnswers()
-        )
       }
     }
 
-    "show technical error page" when {
+    "handling requests to upload supporting evidence" must {
 
-      "upscan initiate call fails" in {
-        def performAction(): Future[Result] = controller.uploadSupportingEvidence()(FakeRequest())
+      def performAction(uploadReference: UploadReference): Future[Result] =
+        controller.uploadSupportingEvidence()(FakeRequest())
 
-        val supportingEvidence = sample[SupportingEvidence]
+      "show check your answers page" when {
 
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(false),
-          evidences                           = List.fill(0)(supportingEvidence),
-          expiredEvidences                    = List.empty
-        )
+        "the number of uploads have reached the maximum allowed" in {
+          val uploadReference = sample[UploadReference]
 
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+          val supportingEvidence = sample[SupportingEvidence]
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockUpscanInitiate(routes.SupportingEvidenceController.uploadSupportingEvidenceError())(
-            Left(Error("some upscan error"))
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences                           = List.fill(2)(supportingEvidence),
+            expiredEvidences                    = List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference),
+            routes.SupportingEvidenceController.checkYourAnswers()
           )
         }
-
-        checkIsTechnicalErrorPage(performAction())
-
       }
 
-    }
+      "show technical error page" when {
 
-    "show file upload page" when {
+        "upscan initiate call fails" in {
 
-      "number of uploads has not exceeded limit" in {
-        def performAction(): Future[Result] = controller.uploadSupportingEvidence()(FakeRequest())
+          val uploadReference = sample[UploadReference]
 
-        val supportingEvidence = sample[SupportingEvidence]
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(false),
+            evidences                           = List.empty,
+            expiredEvidences                    = List.empty
+          )
 
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(false),
-          evidences                           = List.fill(0)(supportingEvidence),
-          expiredEvidences                    = List.empty
-        )
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
 
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Left(Error("no upload entry in mongo with this upload reference")))
+            mockUpscanInitiate(
+              routes.SupportingEvidenceController.uploadSupportingEvidenceError(),
+              _ => routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(uploadReference)
+            )(
+              Left(Error("some upscan error"))
+            )
+          }
+          checkIsTechnicalErrorPage(performAction(uploadReference))
+        }
+      }
 
-        val upscanUpload = sample[UpscanUpload]
+      "show file upload page" when {
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockUpscanInitiate(routes.SupportingEvidenceController.uploadSupportingEvidenceError())(Right(upscanUpload))
+        "number of uploads has not exceeded limit" in {
+
+          val uploadReference = sample[UploadReference]
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(false),
+            evidences                           = List.empty,
+            expiredEvidences                    = List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          val upscanUpload = sample[UpscanUpload].copy(uploadReference = uploadReference)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Left(Error("no upload entry in mongo with this upload reference")))
+            mockUpscanInitiate(
+              routes.SupportingEvidenceController.uploadSupportingEvidenceError(),
+              _ => routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(uploadReference)
+            )(Right(upscanUpload))
+          }
+
+          checkPageIsDisplayed(
+            performAction(uploadReference),
+            messageFromMessageKey("supporting-evidence.upload.title"),
+            doc =>
+              doc.select("#back").attr("href") shouldBe routes.SupportingEvidenceController
+                .doYouWantToUploadSupportingDocuments()
+                .url
+          )
+        }
+      }
+
+      "show form error" when {
+
+        "file size is too big" in {
+
+          def performAction(uploadReference: UploadReference): Future[Result] =
+            controller.uploadSupportingEvidence()(
+              FakeRequest("GET", s"/supporting-evidence/upscan-error/${uploadReference.value}?errorCode=EntityTooLarge")
+            )
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val upscanUpload =
+            sample[UpscanUpload].copy(uploadReference = uploadReference)
+
+          val upscanFailure = UpscanFailure(
+            upscanUpload.upscanUploadMeta.reference,
+            "FAILED",
+            Map("failureReason" -> "REJECTED", "message" -> "EntityTooLarge")
+          )
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(upscanUpload.copy(upscanCallBack = Some(upscanFailure))))
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference),
+            routes.SupportingEvidenceController.uploadSupportingEvidence()
+          )
+        }
+      }
+
+      "show the technical error " when {
+
+        "there are no query parameters at all in the request" in {
+          def performAction(uploadReference: UploadReference): Future[Result] =
+            controller.uploadSupportingEvidenceError()(
+              FakeRequest("GET", s"/supporting-evidence/upscan-error/${uploadReference.value}")
+            )
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences                           = List.fill(2)(supportingEvidence),
+            expiredEvidences                    = List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsTechnicalErrorPage(performAction(uploadReference))
         }
 
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("supporting-evidence.upload.title"),
-          doc =>
-            doc.select("#back").attr("href") shouldBe routes.SupportingEvidenceController
-              .doYouWantToUploadSupportingDocuments()
-              .url
-        )
-      }
-
-    }
-
-  }
-
-  "handling upscan call back" must {
-
-    "show the technical error " when {
-
-      "the file upload failed" in {
-
-        def performAction(): Future[Result] = controller.uploadSupportingEvidenceError()(FakeRequest())
-
-        val supportingEvidence = sample[SupportingEvidence]
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          evidences                           = List.fill(2)(supportingEvidence),
-          expiredEvidences                    = List.empty
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsTechnicalErrorPage(performAction())
-      }
-    }
-  }
-
-  "handling expired evidence" must {
-
-    "show technical error page" when {
-
-      "update of draft fails" in {
-
-        def performAction(): Future[Result] = controller.supportingEvidenceExpiredSubmit()(FakeRequest())
-
-        val supportingEvidence = sample[SupportingEvidence]
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          evidences                           = List.fill(1)(supportingEvidence),
-          expiredEvidences                    = List(supportingEvidence)
-        )
-
-        val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(answers))
-
-        val updatedDraftReturn =
-          draftReturn.copy(supportingEvidenceAnswers =
-            Some(
-              answers.copy(
-                doYouWantToUploadSupportingEvidence = Some(true),
-                expiredEvidences                    = List.empty
+        "the error code query parameter is present but has an invalid code" in {
+          def performAction(uploadReference: UploadReference): Future[Result] =
+            controller.uploadSupportingEvidenceError()(
+              FakeRequest(
+                "GET",
+                s"/supporting-evidence/upscan-error/${uploadReference.value}?errorCode=some-unhandled-error-value"
               )
             )
+
+          val uploadReference = sample[UploadReference]
+
+          val supportingEvidence = sample[SupportingEvidence]
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences                           = List.fill(2)(supportingEvidence),
+            expiredEvidences                    = List.empty
           )
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            updatedDraftReturn,
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Left(Error("update failed")))
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsTechnicalErrorPage(performAction(uploadReference)) //TODO: double check
+
         }
 
-        checkIsTechnicalErrorPage(
-          performAction()
-        )
-      }
-    }
-
-    "redirect to check your answers" when {
-
-      "if answers are complete" in {
-        def performAction(): Future[Result] = controller.supportingEvidenceExpired()(FakeRequest())
-
-        val answers = CompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = false,
-          evidences                           = List.empty
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.SupportingEvidenceController.checkYourAnswers()
-        )
-      }
-    }
-
-    "display supporting evidence expired page" when {
-
-      "supporting evidence has expired" in {
-        def performAction(): Future[Result] = controller.supportingEvidenceExpired()(FakeRequest())
-
-        val supportingEvidence = sample[SupportingEvidence]
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          evidences                           = List.fill(0)(supportingEvidence),
-          expiredEvidences                    = List(supportingEvidence)
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("supporting-evidence.expired.title")
-        )
-      }
-    }
-
-    "redirect to check your answers " when {
-
-      "evidence has not expired" in {
-
-        def performAction(): Future[Result] = controller.supportingEvidenceExpiredSubmit()(FakeRequest())
-
-        val supportingEvidence = sample[SupportingEvidence]
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          evidences                           = List.fill(1)(supportingEvidence),
-          expiredEvidences                    = List.empty
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.SupportingEvidenceController.checkYourAnswers()
-        )
-      }
-
-      "evidence has expired" in {
-
-        def performAction(): Future[Result] = controller.supportingEvidenceExpiredSubmit()(FakeRequest())
-
-        val supportingEvidence = sample[SupportingEvidence]
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          evidences                           = List.fill(1)(supportingEvidence),
-          expiredEvidences                    = List(supportingEvidence)
-        )
-
-        val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(answers))
-
-        val updatedDraftReturn =
-          draftReturn.copy(supportingEvidenceAnswers =
-            Some(
-              answers.copy(
-                doYouWantToUploadSupportingEvidence = Some(true),
-                expiredEvidences                    = List.empty
+        "failed to process the error redirect request due to failure to find upscan record" in {
+          def performAction(uploadReference: UploadReference): Future[Result] =
+            controller.uploadSupportingEvidenceError()(
+              FakeRequest(
+                "GET",
+                s"/supporting-evidence/upscan-error/${uploadReference.value}?errorCode=EntityTooLarge"
               )
             )
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val upscanSuccess = sample[UpscanSuccess]
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
           )
 
-        val updatedSession: SessionData =
-          session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            updatedDraftReturn,
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Right(()))
-          mockStoreSession(updatedSession)(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.SupportingEvidenceController.checkYourAnswers()
-        )
-      }
-
-    }
-  }
-
-  "handling check your answer" must {
-
-    "display file upload page" when {
-
-      "the user has answered yes to adding supporting evidences" in {
-        def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
-
-        val supportingEvidence = sample[SupportingEvidence]
-
-        val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          List.empty,
-          List.empty
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.SupportingEvidenceController.uploadSupportingEvidence()
-        )
-      }
-    }
-
-    "display supporting do you want to upload supporting evidence page" when {
-
-      "the use has never answered this question" in {
-        def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
-
-        val answers = IncompleteSupportingEvidenceAnswers.empty
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.SupportingEvidenceController.doYouWantToUploadSupportingDocuments()
-        )
-      }
-    }
-
-    "display supporting evidence expired page" when {
-
-      "there are expired supporting evidences" in {
-        def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
-
-        val supportingEvidence = sample[SupportingEvidence]
-        val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
-          doYouWantToUploadSupportingEvidence = Some(false),
-          List(supportingEvidence),
-          List(supportingEvidence)
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.SupportingEvidenceController.supportingEvidenceExpired()
-        )
-      }
-    }
-
-    "display the check your answers page" when {
-
-      "has completed the supporting evidence section" in {
-        def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
-
-        val answers = CompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = false,
-          List.empty
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("supporting-evidence.check-your-answers.title")
-        )
-      }
-
-      "answered the do you want to upload a file question" in {
-        def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
-
-        val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
-          doYouWantToUploadSupportingEvidence = Some(false),
-          List.empty,
-          List.empty
-        )
-
-        val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("supporting-evidence.check-your-answers.title")
-        )
-      }
-    }
-
-    def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
-
-    behave like redirectToStartBehaviour(() => performAction())
-
-    "display the technical error page" when {
-
-      "an error occurs when storing the draft return" in {
-
-        val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
-          doYouWantToUploadSupportingEvidence = Some(false),
-          List.empty,
-          List.empty
-        )
-
-        val updatedAnswers = CompleteSupportingEvidenceAnswers(false, List.empty)
-
-        val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Left(Error("some error")))
-        }
-
-        checkIsTechnicalErrorPage(performAction())
-      }
-    }
-
-    "redirect to summary" when {
-
-      "the user accepts the check your answers and is on a single disposal journey" in {
-
-        val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
-          doYouWantToUploadSupportingEvidence = Some(false),
-          List.empty,
-          List.empty
-        )
-
-        val updatedAnswers = CompleteSupportingEvidenceAnswers(false, List.empty)
-
-        val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(answers))
-
-        val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        val updatedSession: SessionData =
-          session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Right(()))
-          mockStoreSession(updatedSession)(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction(),
-          returns.routes.TaskListController.taskList()
-        )
-
-      }
-
-      "the user accepts the check your answers and is on a multiple disposal journey" in {
-
-        val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
-          doYouWantToUploadSupportingEvidence = Some(false),
-          List.empty,
-          List.empty
-        )
-
-        val updatedAnswers = CompleteSupportingEvidenceAnswers(false, List.empty)
-
-        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
-
-        val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        val updatedSession: SessionData =
-          session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Right(()))
-          mockStoreSession(updatedSession)(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction(),
-          returns.routes.TaskListController.taskList()
-        )
-
-      }
-
-    }
-  }
-
-  "handling requests to delete supporting evidence" must {
-    def performAction(uploadReference: UploadReference, addNew: Boolean): Future[Result] =
-      controller.deleteSupportingEvidence(uploadReference, addNew)(FakeRequest())
-
-    "show technical error page" when {
-
-      "failed to update database" in {
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val answers = CompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = true,
-          List(supportingEvidence)
-        )
-
-        val updatedAnswers = IncompleteSupportingEvidenceAnswers(Some(true), List.empty, List.empty)
-
-        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Left(Error("update failed")))
-        }
-
-        checkIsTechnicalErrorPage(
-          performAction(uploadReference, false)
-        )
-
-      }
-
-    }
-
-    "return the user to the check your answers page" when {
-
-      "user has not completed the section and supporting evidence has been deleted and add new is false" in {
-
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          List(supportingEvidence),
-          List.empty
-        )
-
-        val updatedAnswers = IncompleteSupportingEvidenceAnswers(Some(true), List.empty, List.empty)
-
-        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
-
-        val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        val updatedSession: SessionData =
-          session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Right(()))
-          mockStoreSession(updatedSession)(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction(uploadReference, false),
-          routes.SupportingEvidenceController.checkYourAnswers()
-        )
-
-      }
-
-      "supporting evidence has been deleted and add new is false" in {
-
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val answers = CompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = true,
-          List(supportingEvidence)
-        )
-
-        val updatedAnswers = IncompleteSupportingEvidenceAnswers(Some(true), List.empty, List.empty)
-
-        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
-
-        val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        val updatedSession: SessionData =
-          session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Right(()))
-          mockStoreSession(updatedSession)(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction(uploadReference, false),
-          routes.SupportingEvidenceController.checkYourAnswers()
-        )
-
-      }
-
-      "supporting evidence has been deleted and add new is true" in {
-
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val answers = CompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = true,
-          List(supportingEvidence)
-        )
-
-        val updatedAnswers = IncompleteSupportingEvidenceAnswers(Some(true), List.empty, List.empty)
-
-        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
-
-        val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        val updatedSession: SessionData =
-          session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Right(()))
-          mockStoreSession(updatedSession)(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction(uploadReference, true),
-          routes.SupportingEvidenceController.uploadSupportingEvidence()
-        )
-      }
-    }
-  }
-
-  "handling requests to check the upload status of the supporting evidence" must {
-    def performAction(uploadReference: UploadReference): Future[Result] =
-      controller.uploadSupportingEvidenceVirusCheck(uploadReference)(FakeRequest())
-
-    "show technical error page" when {
-      "update of draft return fails" in {
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val upscanSuccess = sample[UpscanSuccess]
-        val updatedUpscanSuccess =
-          upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
-
-        val upscanUpload =
-          sample[UpscanUpload].copy(uploadReference = uploadReference, upscanCallBack = Some(updatedUpscanSuccess))
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          List(supportingEvidence),
-          List.empty
-        )
-
-        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
-
-        val newSupportingEvidence = SupportingEvidence(
-          upscanUpload.uploadReference,
-          upscanUpload.upscanUploadMeta,
-          upscanUpload.uploadedOn,
-          updatedUpscanSuccess,
-          updatedUpscanSuccess.fileName
-        )
-
-        val updatedAnswers = answers.copy(evidences = newSupportingEvidence :: answers.evidences)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
-          mockUpdateUpscanUpload(uploadReference, upscanUpload.copy(upscanUploadStatus = Uploaded))(Right(()))
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Left(Error("update failed")))
-        }
-
-        checkIsTechnicalErrorPage(
-          performAction(uploadReference)
-        )
-      }
-    }
-
-    "return the user to the check your answers page" when {
-
-      "the user has completed their upload of supporting evidences" in {
-
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val answers = CompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = true,
-          List(supportingEvidence)
-        )
-
-        val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsRedirect(
-          performAction(uploadReference),
-          routes.SupportingEvidenceController.checkYourAnswers()
-        )
-
-      }
-
-      "the upscan call back came back with a success status" in {
-
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val upscanSuccess = sample[UpscanSuccess]
-        val updatedUpscanSuccess =
-          upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
-
-        val upscanUpload =
-          sample[UpscanUpload].copy(uploadReference = uploadReference, upscanCallBack = Some(updatedUpscanSuccess))
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          List(supportingEvidence),
-          List.empty
-        )
-
-        val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
-
-        val newSupportingEvidence = SupportingEvidence(
-          upscanUpload.uploadReference,
-          upscanUpload.upscanUploadMeta,
-          upscanUpload.uploadedOn,
-          updatedUpscanSuccess,
-          updatedUpscanSuccess.fileName
-        )
-
-        val updatedAnswers = answers.copy(evidences = newSupportingEvidence :: answers.evidences)
-
-        val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        val updatedSession: SessionData =
-          session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
-          mockUpdateUpscanUpload(uploadReference, upscanUpload.copy(upscanUploadStatus = Uploaded))(Right(()))
-          mockStoreDraftReturn(
-            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-            journey.subscribedDetails.cgtReference,
-            journey.agentReferenceNumber
-          )(Right(()))
-          mockStoreSession(updatedSession)(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction(uploadReference),
-          routes.SupportingEvidenceController.checkYourAnswers()
-        )
-
-      }
-
-      "the upscan call back came back with a failed status" in {
-
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val upscanFailure = sample[UpscanFailure]
-
-        val upscanUpload =
-          sample[UpscanUpload].copy(uploadReference = uploadReference, upscanCallBack = Some(upscanFailure))
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          List(supportingEvidence),
-          List.empty
-        )
-
-        val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
-          mockUpdateUpscanUpload(uploadReference, upscanUpload.copy(upscanUploadStatus = Uploaded))(Right(()))
-        }
-
-        checkPageIsDisplayed(
-          performAction(uploadReference),
-          messageFromMessageKey("supporting-evidence.check-upscan-status.title")
-        )
-
-      }
-
-      "the upscan call back has not arrived" in {
-
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val upscanUpload =
-          sample[UpscanUpload].copy(uploadReference = uploadReference, upscanCallBack = None)
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          List(supportingEvidence),
-          List.empty
-        )
-
-        val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
-          mockUpdateUpscanUpload(uploadReference, upscanUpload.copy(upscanUploadStatus = Uploaded))(Right(()))
-        }
-
-        checkPageIsDisplayed(
-          performAction(uploadReference),
-          messageFromMessageKey("supporting-evidence.check-upscan-status.title")
-        )
-
-      }
-
-    }
-  }
-
-  "handling submit requests to check the upload status of the supporting evidence" must {
-    def performAction(uploadReference: UploadReference): Future[Result] =
-      controller.uploadSupportingEvidenceVirusCheckSubmit(uploadReference.toString)(FakeRequest())
-
-    "redirect the user to the virus check page" when {
-
-      "they click the submit button" in {
-
-        val uploadReference    = sample[UploadReference]
-        val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-        val answers = IncompleteSupportingEvidenceAnswers(
-          doYouWantToUploadSupportingEvidence = Some(true),
-          List(supportingEvidence),
-          List.empty
-        )
-
-        val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        checkIsRedirect(
-          performAction(uploadReference),
-          routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(
-            UploadReference(uploadReference.toString)
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Left(Error("some get error")))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction(uploadReference)
           )
-        )
+
+        }
+
+        "failed to process the error redirect request due to failure to update upscan record" in {
+          def performAction(uploadReference: UploadReference): Future[Result] =
+            controller.uploadSupportingEvidenceError()(
+              FakeRequest(
+                "GET",
+                s"/supporting-evidence/upscan-error/${uploadReference.value}?errorCode=EntityTooLarge"
+              )
+            )
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val upscanUpload =
+            sample[UpscanUpload].copy(uploadReference = uploadReference)
+
+          val upscanFailure = UpscanFailure(
+            upscanUpload.upscanUploadMeta.reference,
+            "FAILED",
+            Map("failureReason" -> "REJECTED", "message" -> "EntityTooLarge")
+          )
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction(uploadReference)
+          )
+        }
+      }
+    }
+
+    "handling expired evidence" must {
+
+      "show technical error page" when {
+
+        "update of draft fails" in {
+
+          def performAction(): Future[Result] = controller.supportingEvidenceExpiredSubmit()(FakeRequest())
+
+          val supportingEvidence = sample[SupportingEvidence]
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences                           = List.fill(1)(supportingEvidence),
+            expiredEvidences                    = List(supportingEvidence)
+          )
+
+          val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(answers))
+
+          val updatedDraftReturn =
+            draftReturn.copy(supportingEvidenceAnswers =
+              Some(
+                answers.copy(
+                  doYouWantToUploadSupportingEvidence = Some(true),
+                  expiredEvidences                    = List.empty
+                )
+              )
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("update failed")))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction()
+          )
+        }
+      }
+
+      "redirect to check your answers" when {
+
+        "if answers are complete" in {
+          def performAction(): Future[Result] = controller.supportingEvidenceExpired()(FakeRequest())
+
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = false,
+            evidences                           = List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.SupportingEvidenceController.checkYourAnswers()
+          )
+        }
+      }
+
+      "display supporting evidence expired page" when {
+
+        "supporting evidence has expired" in {
+          def performAction(): Future[Result] = controller.supportingEvidenceExpired()(FakeRequest())
+
+          val supportingEvidence = sample[SupportingEvidence]
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences                           = List.empty,
+            expiredEvidences                    = List(supportingEvidence)
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("supporting-evidence.expired.title")
+          )
+        }
+      }
+
+      "redirect to check your answers " when {
+
+        "evidence has not expired" in {
+
+          def performAction(): Future[Result] = controller.supportingEvidenceExpiredSubmit()(FakeRequest())
+
+          val supportingEvidence = sample[SupportingEvidence]
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences                           = List.fill(1)(supportingEvidence),
+            expiredEvidences                    = List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.SupportingEvidenceController.checkYourAnswers()
+          )
+        }
+
+        "evidence has expired" in {
+
+          def performAction(): Future[Result] = controller.supportingEvidenceExpiredSubmit()(FakeRequest())
+
+          val supportingEvidence = sample[SupportingEvidence]
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences                           = List.fill(1)(supportingEvidence),
+            expiredEvidences                    = List(supportingEvidence)
+          )
+
+          val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(answers))
+
+          val updatedDraftReturn =
+            draftReturn.copy(supportingEvidenceAnswers =
+              Some(
+                answers.copy(
+                  doYouWantToUploadSupportingEvidence = Some(true),
+                  expiredEvidences                    = List.empty
+                )
+              )
+            )
+
+          val updatedSession: SessionData =
+            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.SupportingEvidenceController.checkYourAnswers()
+          )
+        }
+
+      }
+    }
+
+    "handling actions on check your answer" must {
+
+      "display the file upload page" when {
+
+        "the user has already answered yes to adding supporting evidences and has not uploaded any evidences so far" in {
+
+          def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+
+          val uploadReference = sample[UploadReference]
+          val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List.empty,
+            List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          def stripUUID(endPoint: String): String = endPoint.split("/").dropRight(1).mkString("/")
+
+          val result              = performAction()
+          val expectedRedirectUrl = routes.SupportingEvidenceController.uploadSupportingEvidence().url
+
+          status(result)                                    shouldBe SEE_OTHER
+          redirectLocation(result).map(ep => stripUUID(ep)) shouldBe Some(stripUUID(expectedRedirectUrl))
+        }
+      }
+
+      "display the do you want to upload supporting evidence page" when {
+
+        def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+
+        "the use has never answered this question" in {
+
+          val answers = IncompleteSupportingEvidenceAnswers.empty
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.SupportingEvidenceController.doYouWantToUploadSupportingDocuments()
+          )
+        }
+      }
+
+      "display supporting evidence expired page" when {
+
+        def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+
+        "there are expired supporting evidences" in {
+
+          val supportingEvidence = sample[SupportingEvidence]
+          val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
+            doYouWantToUploadSupportingEvidence = Some(false),
+            List(supportingEvidence),
+            List(supportingEvidence)
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.SupportingEvidenceController.supportingEvidenceExpired()
+          )
+        }
+      }
+
+      "display the check your answers page" when {
+
+        def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+
+        "the user has completed the supporting evidence section" in {
+
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = false,
+            List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("supporting-evidence.check-your-answers.title")
+          )
+        }
+
+        "the user has answered the do you want to upload supporting evidence question" in {
+
+          val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
+            doYouWantToUploadSupportingEvidence = Some(false),
+            List.empty,
+            List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("supporting-evidence.check-your-answers.title")
+          )
+        }
+      }
+
+      "display the technical error page" when {
+
+        def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+        behave like redirectToStartBehaviour(() => performAction())
+
+        "an error occurs when storing the draft return" in {
+
+          val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
+            doYouWantToUploadSupportingEvidence = Some(false),
+            List.empty,
+            List.empty
+          )
+
+          val updatedAnswers = CompleteSupportingEvidenceAnswers(false, List.empty)
+
+          val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("some error")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+      }
+
+      "redirect to summary" when {
+
+        def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+        behave like redirectToStartBehaviour(() => performAction())
+
+        "the user accepts the check your answers and is on a single disposal journey" in {
+
+          val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
+            doYouWantToUploadSupportingEvidence = Some(false),
+            List.empty,
+            List.empty
+          )
+
+          val updatedAnswers = CompleteSupportingEvidenceAnswers(false, List.empty)
+
+          val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(answers))
+
+          val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedSession: SessionData =
+            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            returns.routes.TaskListController.taskList()
+          )
+
+        }
+
+        "the user accepts the check your answers and is on a multiple disposal journey" in {
+
+          val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
+            doYouWantToUploadSupportingEvidence = Some(false),
+            List.empty,
+            List.empty
+          )
+
+          val updatedAnswers = CompleteSupportingEvidenceAnswers(false, List.empty)
+
+          val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
+
+          val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedSession: SessionData =
+            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            returns.routes.TaskListController.taskList()
+          )
+
+        }
+
+      }
+    }
+
+    "handling requests to delete supporting evidence" must {
+      def performAction(uploadReference: UploadReference, addNew: Boolean): Future[Result] =
+        controller.deleteSupportingEvidence(uploadReference, addNew)(FakeRequest())
+
+      "show technical error page" when {
+
+        "failed to update database" in {
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = true,
+            List(supportingEvidence)
+          )
+
+          val updatedAnswers = IncompleteSupportingEvidenceAnswers(Some(true), List.empty, List.empty)
+
+          val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("update failed")))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction(uploadReference, false)
+          )
+        }
+      }
+
+      "return the user to the check your answers page" when {
+
+        "user has not completed the section and supporting evidence has been deleted and add new is false" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val updatedAnswers = IncompleteSupportingEvidenceAnswers(Some(true), List.empty, List.empty)
+
+          val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
+
+          val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedSession: SessionData =
+            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference, false),
+            routes.SupportingEvidenceController.checkYourAnswers()
+          )
+
+        }
+
+        "supporting evidence has been deleted and add new is false" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = true,
+            List(supportingEvidence)
+          )
+
+          val updatedAnswers = IncompleteSupportingEvidenceAnswers(Some(true), List.empty, List.empty)
+
+          val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
+
+          val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedSession: SessionData =
+            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference, false),
+            routes.SupportingEvidenceController.checkYourAnswers()
+          )
+
+        }
+
+        "supporting evidence has been deleted and add new is true" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = true,
+            List(supportingEvidence)
+          )
+
+          val updatedAnswers = IncompleteSupportingEvidenceAnswers(Some(true), List.empty, List.empty)
+
+          val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
+
+          val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedSession: SessionData =
+            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference, true),
+            routes.SupportingEvidenceController.uploadSupportingEvidence()
+          )
+        }
+      }
+    }
+
+    "handling requests to check the upload status of the supporting evidence" must {
+      def performAction(uploadReference: UploadReference): Future[Result] =
+        controller.uploadSupportingEvidenceVirusCheck(uploadReference)(FakeRequest())
+
+      "show technical error page" when {
+        "update of draft return fails" in {
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val upscanSuccess = sample[UpscanSuccess]
+          val updatedUpscanSuccess =
+            upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
+
+          val upscanUpload =
+            sample[UpscanUpload].copy(uploadReference = uploadReference, upscanCallBack = Some(updatedUpscanSuccess))
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
+
+          val newSupportingEvidence = SupportingEvidence(
+            upscanUpload.uploadReference,
+            upscanUpload.upscanUploadMeta,
+            upscanUpload.uploadedOn,
+            updatedUpscanSuccess,
+            updatedUpscanSuccess.fileName
+          )
+
+          val updatedAnswers = answers.copy(evidences = newSupportingEvidence :: answers.evidences)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("update failed")))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction(uploadReference)
+          )
+        }
+      }
+
+      "return the user to the check your answers page" when {
+
+        "the user has completed their upload of supporting evidences" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = true,
+            List(supportingEvidence)
+          )
+
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference),
+            routes.SupportingEvidenceController.checkYourAnswers()
+          )
+
+        }
+
+        "the upscan call back came back with a success status" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val upscanSuccess = sample[UpscanSuccess]
+          val updatedUpscanSuccess =
+            upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
+
+          val upscanUpload =
+            sample[UpscanUpload].copy(uploadReference = uploadReference, upscanCallBack = Some(updatedUpscanSuccess))
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(Some(answers))
+
+          val newSupportingEvidence = SupportingEvidence(
+            upscanUpload.uploadReference,
+            upscanUpload.upscanUploadMeta,
+            upscanUpload.uploadedOn,
+            updatedUpscanSuccess,
+            updatedUpscanSuccess.fileName
+          )
+
+          val updatedAnswers = answers.copy(evidences = newSupportingEvidence :: answers.evidences)
+
+          val updatedDraftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedSession: SessionData =
+            session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
+            mockStoreDraftReturn(
+              draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference),
+            routes.SupportingEvidenceController.checkYourAnswers()
+          )
+        }
+
+        "the upscan call back came back with a failed status" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val upscanFailure = sample[UpscanFailure]
+
+          val upscanUpload =
+            sample[UpscanUpload].copy(uploadReference = uploadReference, upscanCallBack = Some(upscanFailure))
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference),
+            routes.SupportingEvidenceController.uploadSupportingEvidence()
+          )
+
+        }
+
+        "the upscan call back has not arrived" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val upscanUpload =
+            sample[UpscanUpload].copy(uploadReference = uploadReference, upscanCallBack = None)
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
+          }
+
+          checkPageIsDisplayed(
+            performAction(uploadReference),
+            messageFromMessageKey("supporting-evidence.check-upscan-status.title")
+          )
+        }
+      }
+    }
+
+    "handling submit requests to check the upload status of the supporting evidence" must {
+      def performAction(uploadReference: UploadReference): Future[Result] =
+        controller.uploadSupportingEvidenceVirusCheckSubmit(uploadReference.toString)(FakeRequest())
+
+      "redirect the user to the virus check page" when {
+
+        "they click the submit button" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference),
+            routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(
+              UploadReference(uploadReference.toString)
+            )
+          )
+        }
       }
     }
   }

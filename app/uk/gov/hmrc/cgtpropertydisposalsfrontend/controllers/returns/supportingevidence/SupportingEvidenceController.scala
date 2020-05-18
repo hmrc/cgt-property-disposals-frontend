@@ -37,7 +37,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUploadStatus.Uploaded
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -266,15 +265,14 @@ class SupportingEvidenceController @Inject() (
           case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
             val result = for {
               upscanUpload <- upscanService.getUpscanUpload(uploadReference)
-              updatedUpscanUpload = upscanUpload.copy(upscanUploadStatus = Uploaded)
-              _ <- upscanService.updateUpscanUpload(uploadReference, updatedUpscanUpload)
+
               _ <- upscanUpload.upscanCallBack match {
                     case Some(s: UpscanSuccess) =>
-                      storeUpscanSuccess(updatedUpscanUpload, s, incompleteAnswers, fillingOutReturn)
+                      storeUpscanSuccess(upscanUpload, s, incompleteAnswers, fillingOutReturn)
                     case _ =>
                       EitherT.pure[Future, Error](())
                   }
-            } yield updatedUpscanUpload
+            } yield upscanUpload
 
             result.fold(
               e => {

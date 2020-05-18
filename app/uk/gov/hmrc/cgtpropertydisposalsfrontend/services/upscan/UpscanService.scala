@@ -28,7 +28,6 @@ import javax.inject.Inject
 import play.api.http.Status.OK
 import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUploadStatus.Initiated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload, UpscanUploadMeta}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
@@ -46,13 +45,6 @@ trait UpscanService {
   )(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, UpscanUpload]
-
-  def updateUpscanUpload(
-    uploadReference: UploadReference,
-    upscanUpload: UpscanUpload
-  )(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit]
 
   def getUpscanUpload(
     uploadReference: UploadReference
@@ -84,7 +76,7 @@ class UpscanServiceImpl @Inject() (
                            Error("could not parse upscan initiate response")
                          )
       upscanUpload <- EitherT.pure(
-                       UpscanUpload(uploadReference, upscanUploadMeta, TimeUtils.now(), Initiated, None)
+                       UpscanUpload(uploadReference, upscanUploadMeta, TimeUtils.now(), None)
                      )
       _ <- upscanConnector.saveUpscanUpload(upscanUpload)
     } yield upscanUpload
@@ -99,19 +91,6 @@ class UpscanServiceImpl @Inject() (
           .leftMap(Error(_))
       } else {
         Left(Error(s"call to get upscan upload failed ${response.status}"))
-      }
-    }
-
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
-  override def updateUpscanUpload(
-    uploadReference: UploadReference,
-    upscanUpload: UpscanUpload
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    upscanConnector.updateUpscanUpload(uploadReference, upscanUpload).map { response =>
-      if (response.status === OK) {
-        Right(Unit)
-      } else {
-        Left(Error(s"call to update upscan upload failed ${response.status}"))
       }
     }
 
