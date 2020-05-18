@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReliefDetailsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -163,7 +164,12 @@ class ReliefDetailsController @Inject() (
           c => privateResidentsReliefForm.fill(c.privateResidentsRelief.inPounds())
         )
       )(
-        page = privateResidentsReliefPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+        page = privateResidentsReliefPage(
+          _,
+          _,
+          fillingOutReturn.subscribedDetails.isATrust,
+          representativeType(fillingOutReturn.draftReturn)
+        )
       )(
         hasRequiredPreviousAnswer = _ => true,
         _ => controllers.returns.routes.TaskListController.taskList()
@@ -178,7 +184,12 @@ class ReliefDetailsController @Inject() (
           form = privateResidentsReliefForm
         )(
           page = { (form, backLink) =>
-            privateResidentsReliefPage(form, backLink, fillingOutReturn.subscribedDetails.isATrust)
+            privateResidentsReliefPage(
+              form,
+              backLink,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(fillingOutReturn.draftReturn)
+            )
           }
         )(
           hasRequiredPreviousAnswer            = _ => true,
@@ -218,7 +229,12 @@ class ReliefDetailsController @Inject() (
             c => lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount).fill(c.lettingsRelief.inPounds())
           )
         )(
-          page = lettingsReliefPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+          page = lettingsReliefPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(fillingOutReturn.draftReturn)
+          )
         )(
           hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
           redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
@@ -232,7 +248,14 @@ class ReliefDetailsController @Inject() (
       withTaxYear(draftReturn) { taxYear =>
         commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
-        )(page = lettingsReliefPage(_, _, fillingOutReturn.subscribedDetails.isATrust))(
+        )(page =
+          lettingsReliefPage(
+            _,
+            _,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(fillingOutReturn.draftReturn)
+          )
+        )(
           hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
           redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
         )(
@@ -283,7 +306,12 @@ class ReliefDetailsController @Inject() (
             )
         )
       )(
-        page = otherReliefsPage(_, _, fillingOutReturn.subscribedDetails.isATrust)
+        page = otherReliefsPage(
+          _,
+          _,
+          fillingOutReturn.subscribedDetails.isATrust,
+          representativeType(fillingOutReturn.draftReturn)
+        )
       )(
         hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
         redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
@@ -295,7 +323,14 @@ class ReliefDetailsController @Inject() (
     withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
         form = otherReliefsForm
-      )(page = otherReliefsPage(_, _, fillingOutReturn.subscribedDetails.isATrust))(
+      )(page =
+        otherReliefsPage(
+          _,
+          _,
+          fillingOutReturn.subscribedDetails.isATrust,
+          representativeType(fillingOutReturn.draftReturn)
+        )
+      )(
         hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
         redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
       )(
@@ -362,7 +397,13 @@ class ReliefDetailsController @Inject() (
     withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
       answers match {
         case c: CompleteReliefDetailsAnswers =>
-          Ok(checkYouAnswersPage(c, fillingOutReturn.subscribedDetails.isATrust))
+          Ok(
+            checkYouAnswersPage(
+              c,
+              fillingOutReturn.subscribedDetails.isATrust,
+              representativeType(fillingOutReturn.draftReturn)
+            )
+          )
 
         case IncompleteReliefDetailsAnswers(None, _, _) =>
           Redirect(routes.ReliefDetailsController.privateResidentsRelief())
@@ -415,7 +456,14 @@ class ReliefDetailsController @Inject() (
         logger.warn("Could not update session", e)
         errorHandler.errorResult()
       },
-      _ => Ok(checkYouAnswersPage(completeAnswers, fillingOutReturn.subscribedDetails.isATrust))
+      _ =>
+        Ok(
+          checkYouAnswersPage(
+            completeAnswers,
+            fillingOutReturn.subscribedDetails.isATrust,
+            representativeType(fillingOutReturn.draftReturn)
+          )
+        )
     )
   }
 
@@ -428,6 +476,15 @@ class ReliefDetailsController @Inject() (
 }
 
 object ReliefDetailsController {
+
+  def representativeType(
+    draftReturn: DraftReturn
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    draftReturn.fold(
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType()
+    )
 
   val privateResidentsReliefForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("privateResidentsRelief", "privateResidentsReliefValue")

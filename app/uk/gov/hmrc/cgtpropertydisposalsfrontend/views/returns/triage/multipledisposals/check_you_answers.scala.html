@@ -32,7 +32,12 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.mult
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteMultipleDisposalsTriageAnswers, hasCreatedDraftReturn: Boolean, isATrust: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(
+        answers: CompleteMultipleDisposalsTriageAnswers,
+        hasCreatedDraftReturn: Boolean,
+        isATrust: Boolean
+)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
 @title = @{messages("multipleDisposals.triage.cya.title")}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {

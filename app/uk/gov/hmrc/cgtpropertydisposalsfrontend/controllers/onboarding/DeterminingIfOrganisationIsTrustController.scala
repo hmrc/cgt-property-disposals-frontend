@@ -25,6 +25,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.NameMatchError.{ServiceError, ValidationError}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
@@ -32,13 +33,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySub
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.WrongGGAccountEvent
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, NameMatchServiceError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordNameMatchRetryService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -54,7 +56,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
   auditService: AuditService,
-  bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
+  bprNameMatchService: NameMatchRetryService,
   metrics: Metrics,
   doYouWantToReportForATrustPage: views.html.onboarding.subscription.do_you_want_to_report_for_a_trust,
   reportWithCorporateTaxPage: views.html.onboarding.subscription.report_with_corporate_tax,
@@ -192,7 +194,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
           bprNameMatchService
             .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](determiningIfOrganisationIsTrust.ggCredId)
             .fold(
-              handleNameMatchError,
+              handleNameMatchServiceError,
               _ =>
                 Ok(
                   enterTrnAndNamePage(
@@ -212,9 +214,11 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
         case Some(true) =>
           val result =
             for {
-              unsuccessfulAttempts <- bprNameMatchService.getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](
-                                       determiningIfOrganisationIsTrust.ggCredId
-                                     )
+              unsuccessfulAttempts <- bprNameMatchService
+                                       .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](
+                                         determiningIfOrganisationIsTrust.ggCredId
+                                       )
+                                       .leftMap(ServiceError(_))
               bprWithCgtReference <- {
                 enterTrnAndNameForm
                   .bindFromRequest()
@@ -223,21 +227,31 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     NameMatchError[TrustNameMatchDetails],
                     (BusinessPartnerRecord, Option[CgtReference])
                   ]](
-                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))),
+                    e => EitherT.fromEither[Future](Left(ValidationError(e))),
                     trustNameMatchDetails =>
                       attemptNameMatchAndUpdateSession(
                         trustNameMatchDetails,
                         determiningIfOrganisationIsTrust.ggCredId,
                         determiningIfOrganisationIsTrust.ggEmail,
                         unsuccessfulAttempts
-                      )
+                      ).leftMap(ServiceError(_))
                   )
               }
             } yield bprWithCgtReference
 
           result
             .fold(
-              handleNameMatchError, {
+              {
+                case ValidationError(formWithErrors) =>
+                  BadRequest(
+                    enterTrnAndNamePage(
+                      formWithErrors,
+                      routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+                    )
+                  )
+                case ServiceError(e) =>
+                  handleNameMatchServiceError(e)
+              }, {
                 case (_, maybeCgtReference) =>
                   Redirect(
                     maybeCgtReference.fold(controllers.routes.StartController.start()) { cgtReference =>
@@ -271,9 +285,9 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
         )
         .value
         .map {
-          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) => Ok(tooManyAttemptsPage())
-          case Left(otherNameMatchError)                          => handleNameMatchError(otherNameMatchError)
-          case Right(_)                                           => Redirect(routes.DeterminingIfOrganisationIsTrustController.enterTrn())
+          case Left(NameMatchServiceError.TooManyUnsuccessfulAttempts()) => Ok(tooManyAttemptsPage())
+          case Left(otherNameMatchError)                                 => handleNameMatchServiceError(otherNameMatchError)
+          case Right(_)                                                  => Redirect(routes.DeterminingIfOrganisationIsTrustController.enterTrn())
         }
     }
   }
@@ -286,7 +300,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   )(
     implicit hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, NameMatchError[TrustNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])] =
+  ): EitherT[Future, NameMatchServiceError[TrustNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])] =
     for {
       bprWithCgtReference <- bprNameMatchService
                               .attemptBusinessPartnerRecordNameMatch(
@@ -298,7 +312,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                 case (bpr, cgtReference) =>
                                   if (bpr.name.isRight) {
                                     Left(
-                                      NameMatchError
+                                      NameMatchServiceError
                                         .BackendError(Error("Found BPR for individual but expected one for a trust"))
                                     )
                                   } else {
@@ -315,32 +329,40 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                 )
               )
             )
-          ).leftMap[NameMatchError[TrustNameMatchDetails]](NameMatchError.BackendError)
+          ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](NameMatchServiceError.BackendError)
     } yield bprWithCgtReference
 
-  private def handleNameMatchError(
-    nameMatchError: NameMatchError[TrustNameMatchDetails]
+  private def handleNameMatchServiceError(
+    nameMatchError: NameMatchServiceError[TrustNameMatchDetails]
   )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
-    case NameMatchError.BackendError(error) =>
+    case NameMatchServiceError.BackendError(error) =>
       logger.warn("Could not get BPR with entered TRN", error)
-      errorHandler.errorResult()
+      // errorHandler.errorResult()
+      errorHandler.tmpErrorResult()
 
-    case NameMatchError.ValidationError(formWithErrors) =>
-      BadRequest(enterTrnAndNamePage(formWithErrors, routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))
-
-    case NameMatchError.NameMatchFailed(unsuccessfulAttempts) =>
+    case NameMatchServiceError.NameMatchFailed(unsuccessfulAttempts) =>
       val form = enterTrnAndNameForm
         .fill(unsuccessfulAttempts.lastDetailsTried)
         .withUnsuccessfulAttemptsError(unsuccessfulAttempts)
       BadRequest(enterTrnAndNamePage(form, routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))
 
-    case NameMatchError.TooManyUnsuccessfulAttempts() =>
+    case NameMatchServiceError.TooManyUnsuccessfulAttempts() =>
       Redirect(routes.DeterminingIfOrganisationIsTrustController.tooManyAttempts())
   }
 
 }
 
 object DeterminingIfOrganisationIsTrustController {
+
+  sealed trait NameMatchError[+A <: NameMatchDetails] extends Product with Serializable
+
+  object NameMatchError {
+
+    final case class ServiceError[A <: NameMatchDetails](error: NameMatchServiceError[A]) extends NameMatchError[A]
+
+    final case class ValidationError[A <: NameMatchDetails](formWithErrors: Form[A]) extends NameMatchError[A]
+
+  }
 
   val doYouWantToReportForATrustForm: Form[Boolean] =
     Form(

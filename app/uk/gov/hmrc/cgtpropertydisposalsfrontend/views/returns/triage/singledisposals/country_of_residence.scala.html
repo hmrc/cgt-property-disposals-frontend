@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -37,12 +38,26 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[Country], backLink: Call, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(
+    form: Form[Country],
+    backLink: Call,
+    displayReturnToSummaryLink: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"countryCode"}
 @messageKey = @{"triage.enterCountry"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
+@userKey = @{
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else ""
+}
+
 @title = @{messages(s"$messageKey$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 

@@ -28,6 +28,9 @@ import play.api.http.Status.OK
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCode
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
@@ -138,6 +141,11 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, auditService: A
     )
   }
 
+  private def extractCountryCodeOrPostcode(a: Address): Either[CountryCode, Postcode] = a match {
+    case u: UkAddress    => Right(u.postcode)
+    case n: NonUkAddress => Left(n.country.code)
+  }
+
   private def hasBeenSent(sentReturns: List[ReturnSummary])(draftReturn: DraftReturn): Boolean = {
     val (draftReturnTaxYear, draftReturnCompletionDate) = draftReturn.fold(
       _.triageAnswers.fold(
@@ -147,20 +155,25 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, auditService: A
       _.triageAnswers.fold(
         i => i.disposalDate.map(_.taxYear) -> i.completionDate,
         c => Some(c.disposalDate.taxYear)  -> Some(c.completionDate)
+      ),
+      _.triageAnswers.fold(
+        i => i.disposalDate.map(_.taxYear) -> i.completionDate,
+        c => Some(c.disposalDate.taxYear)  -> Some(c.completionDate)
       )
     )
 
-    val draftReturnPostcode = draftReturn.fold(
-      _.examplePropertyDetailsAnswers.flatMap(
-        _.fold(_.address.map(_.postcode), c => Some(c.address.postcode))
-      ),
-      _.propertyAddress.map(_.postcode)
+    val draftCountryOrPostcode = draftReturn.fold[Option[Either[CountryCode, Postcode]]](
+      _.examplePropertyDetailsAnswers
+        .flatMap(_.fold(_.address.map(_.postcode), c => Some(c.address.postcode)))
+        .map(Right(_)),
+      _.propertyAddress.map(a => Right(a.postcode)),
+      _.companyAddress.map(extractCountryCodeOrPostcode)
     )
 
     sentReturns.exists { r =>
       draftReturnTaxYear.map(_.startDateInclusive.getYear.toString).contains(r.taxYear) &&
       draftReturnCompletionDate.map(_.value).contains(r.completionDate) &&
-      draftReturnPostcode.contains(r.propertyAddress.postcode)
+      draftCountryOrPostcode.contains(extractCountryCodeOrPostcode(r.propertyAddress))
     }
   }
 

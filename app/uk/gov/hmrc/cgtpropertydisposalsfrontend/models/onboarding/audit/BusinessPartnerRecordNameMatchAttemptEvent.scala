@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, OWrites}
 
 final case class BusinessPartnerRecordNameMatchAttemptEvent(
   attemptsMade: Int,
   maxAttempts: Int,
-  nameMatchDetails: BusinessPartnerRecordNameMatchDetails
+  nameMatchDetails: BusinessPartnerRecordNameMatchAuditDetails
 )
 
 object BusinessPartnerRecordNameMatchAttemptEvent {
-  implicit val format: OFormat[BusinessPartnerRecordNameMatchAttemptEvent] =
-    Json.format[BusinessPartnerRecordNameMatchAttemptEvent]
+  implicit val writes: OWrites[BusinessPartnerRecordNameMatchAttemptEvent] =
+    Json.writes[BusinessPartnerRecordNameMatchAttemptEvent]
 }

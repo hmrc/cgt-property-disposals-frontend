@@ -56,18 +56,26 @@
 
     <h3 class="heading-medium">@messages("agentsLandingPage.contents.h4")</h3>
 
-    <ol class="list list-number">
-        <li>@Html(messages("agentsLandingPage.contents.list1.ordered1", "#who-needs-to-report-capital-gains-tax-on-uk-property"))</li>
-        <li>@Html(messages("agentsLandingPage.contents.list1.ordered2", "#how-to-ask-for-authorisation"))</li>
-        <li>@Html(messages("agentsLandingPage.contents.list1.ordered3", "#how-to-manage-your-clients-account"))</li>
-        <li>@Html(messages("agentsLandingPage.contents.list1.ordered4", "#send-a-capital-gains-tax-on-uk-property-return"))</li>
-        <li>@Html(messages("agentsLandingPage.contents.list1.ordered5", "#what-youll-need-to-complete-the-return"))</li>
-        <li>@Html(messages("agentsLandingPage.contents.list1.ordered6", "#ways-your-client-can-pay"))</li>
+    <ol>
+        <li class="list-item--dashed">@Html(messages("agentsLandingPage.contents.list1.ordered1", "#who-needs-to-report-capital-gains-tax-on-uk-property"))</li>
+        <li class="list-item--dashed">@Html(messages("agentsLandingPage.contents.list1.ordered2", "#how-to-ask-for-authorisation"))</li>
+        <li class="list-item--dashed">@Html(messages("agentsLandingPage.contents.list1.ordered3", "#how-to-manage-your-clients-account"))</li>
+        <li class="list-item--dashed">@Html(messages("agentsLandingPage.contents.list1.ordered4", "#send-a-capital-gains-tax-on-uk-property-return"))</li>
+        <li class="list-item--dashed">@Html(messages("agentsLandingPage.contents.list1.ordered5", "#what-youll-need-to-complete-the-return"))</li>
+        <li class="list-item--dashed">@Html(messages("agentsLandingPage.contents.list1.ordered6", "#ways-your-client-can-pay"))</li>
     </ol>
+
     <h3 id="who-needs-to-report-capital-gains-tax-on-uk-property" class="heading-medium">@messages("agentsLandingPage.report.h3")</h3>
+
     <h4 class="sub-heading">@messages("agentsLandingPage.report.uk-residents.h4")</h4>
     <p>@messages("agentsLandingPage.report.uk-residents.p1")</p>
+
+    <p>@messages("agentsLandingPage.report.uk-residents.covid.p1")</p>
+    <p>@messages("agentsLandingPage.report.uk-residents.covid.p2")</p>
+    <p>@messages("agentsLandingPage.report.uk-residents.covid.p3")</p>
+
     <p id="cgtUrl">@Html(messages("agentsLandingPage.report.uk-residents.p2", appConfig.cgtUrl))</p>
+
     <p>@messages("agentsLandingPage.report.uk-residents.p3")</p>
     <p>@messages("agentsLandingPage.report.uk-residents.p4")</p>
 
@@ -76,16 +84,24 @@
         <li>@messages("agentsLandingPage.report.uk-residents.list1.bullet2")</li>
         <li>@messages("agentsLandingPage.report.uk-residents.list1.bullet3")</li>
     </ul>
+
     <h4 class="sub-heading">@messages("agentsLandingPage.report.what-residents-cannot-do.h4")</h4>
     <p id="contact-hmrc-1">@Html(messages("agentsLandingPage.report.what-residents-cannot-do.p1", appConfig.contactHmrc))</p>
     <h4 class="sub-heading">@messages("agentsLandingPage.report.non-residents.h4")</h4>
     <p>@messages("agentsLandingPage.report.non-residents.p1")</p>
+
+    <p>@messages("agentsLandingPage.report.non-uk-residents.covid.p1")</p>
+    <p>@messages("agentsLandingPage.report.non-uk-residents.covid.p2")</p>
+    <p>@messages("agentsLandingPage.report.non-uk-residents.covid.p3")</p>
+
+
     <p>@messages("agentsLandingPage.report.non-residents.p2")</p>
 
     <ul class="list-bullet">
         <li>@messages("agentsLandingPage.report.non-residents.list1.bullet1")</li>
         <li>@messages("agentsLandingPage.report.non-residents.list1.bullet2")</li>
     </ul>
+
     <h4 class="sub-heading">@messages("agentsLandingPage.report.what-non-residents-cannot-do.h4")</h4>
     <p>@messages("agentsLandingPage.report.what-non-residents-cannot-do.p1")</p>
     <ul class="list-bullet">

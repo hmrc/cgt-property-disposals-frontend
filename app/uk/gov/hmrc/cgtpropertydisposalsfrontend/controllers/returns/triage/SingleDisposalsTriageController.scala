@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import java.time.LocalDate
 
 import cats.data.EitherT
+import cats.instances.boolean._
 import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.order._
@@ -31,6 +32,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
@@ -51,7 +53,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{singledisposals => triagePages}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, singledisposals => triagePages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -73,6 +75,7 @@ class SingleDisposalsTriageController @Inject() (
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
   countryOfResidencePage: triagePages.country_of_residence,
   assetTypeForNonUkResidentsPage: triagePages.asset_type_for_non_uk_residents,
+  disposalDateOfSharesForNonUk: disposal_date_of_shares,
   didYouDisposeOfResidentialPropertyPage: triagePages.did_you_dispose_of_residential_property,
   disposalDatePage: triagePages.disposal_date,
   completionDatePage: triagePages.completion_date,
@@ -85,7 +88,12 @@ class SingleDisposalsTriageController @Inject() (
 
   import SingleDisposalsTriageController._
 
-  type JourneyState = Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)]
+  type JourneyState = Either[
+    StartingNewDraftReturn,
+    (Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn], FillingOutReturn)
+  ]
+
+  private val indirectDisposalsEnabled: Boolean = config.underlying.getBoolean("indirect-disposals.enabled")
 
   def howDidYouDisposeOfProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayTriagePage(
@@ -100,7 +108,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.CommonTriageQuestionsController.howManyProperties()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -119,7 +128,8 @@ class SingleDisposalsTriageController @Inject() (
             form,
             backLink(currentAnswers, routes.CommonTriageQuestionsController.howManyProperties()),
             isDraftReturn,
-            isATrust
+            isATrust,
+            currentAnswers.representativeType()
           )
         },
         updateState = { (disposalMethod, state, answers) =>
@@ -131,7 +141,7 @@ class SingleDisposalsTriageController @Inject() (
 
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)), {
-                case (d, r) =>
+                case (Right(d), r) =>
                   r.copy(
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
@@ -141,6 +151,19 @@ class SingleDisposalsTriageController @Inject() (
                       ),
                       initialGainOrLoss          = None,
                       reliefDetailsAnswers       = None,
+                      exemptionAndLossesAnswers  = None,
+                      yearToDateLiabilityAnswers = None,
+                      supportingEvidenceAnswers  = None
+                    )
+                  )
+                case (Left(d), r) =>
+                  r.copy(
+                    draftReturn = d.copy(
+                      triageAnswers = newAnswers,
+                      disposalDetailsAnswers = d.disposalDetailsAnswers.map(
+                        _.unset(_.disposalPrice)
+                          .unset(_.disposalFees)
+                      ),
                       exemptionAndLossesAnswers  = None,
                       yearToDateLiabilityAnswers = None,
                       supportingEvidenceAnswers  = None
@@ -162,11 +185,13 @@ class SingleDisposalsTriageController @Inject() (
       page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
         val isATrust = journeyStatus
           .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
+
         wereYouAUKResidentPage(
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -180,11 +205,13 @@ class SingleDisposalsTriageController @Inject() (
       page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
         val isATrust = journeyStatus
           .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
+
         wereYouAUKResidentPage(
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       },
       updateState = { (wasAUKResident, state, answers) =>
@@ -198,7 +225,7 @@ class SingleDisposalsTriageController @Inject() (
 
           state.bimap(
             _.copy(newReturnTriageAnswers = Right(newAnswers)), {
-              case (d, r) =>
+              case (Right(d), r) =>
                 r.copy(draftReturn =
                   d.copy(
                     triageAnswers              = newAnswers,
@@ -207,6 +234,18 @@ class SingleDisposalsTriageController @Inject() (
                     acquisitionDetailsAnswers  = None,
                     initialGainOrLoss          = None,
                     reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                    exemptionAndLossesAnswers  = None,
+                    yearToDateLiabilityAnswers = None,
+                    supportingEvidenceAnswers  = None
+                  )
+                )
+              case (Left(d), r) =>
+                r.copy(draftReturn =
+                  d.copy(
+                    triageAnswers              = newAnswers,
+                    companyAddress             = None,
+                    disposalDetailsAnswers     = None,
+                    acquisitionDetailsAnswers  = None,
                     exemptionAndLossesAnswers  = None,
                     yearToDateLiabilityAnswers = None,
                     supportingEvidenceAnswers  = None
@@ -234,7 +273,8 @@ class SingleDisposalsTriageController @Inject() (
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
             isDraftReturn,
-            isATrust
+            isATrust,
+            currentAnswers.representativeType()
           )
         }
       )
@@ -253,7 +293,8 @@ class SingleDisposalsTriageController @Inject() (
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
             isDraftReturn,
-            isATrust
+            isATrust,
+            currentAnswers.representativeType()
           )
         },
         updateState = { (wasResidentialProperty, state, answers) =>
@@ -269,8 +310,15 @@ class SingleDisposalsTriageController @Inject() (
                 .copy(assetType = Some(assetType))
 
             state.bimap(
-              _.copy(newReturnTriageAnswers = Right(newAnswers)),
-              { case (d, r) => r.copy(draftReturn = d.copy(triageAnswers = newAnswers)) }
+              _.copy(newReturnTriageAnswers = Right(newAnswers)), {
+                case (d, r) =>
+                  r.copy(draftReturn =
+                    d.fold(
+                      _.copy(triageAnswers = newAnswers),
+                      _.copy(triageAnswers = newAnswers)
+                    )
+                  )
+              }
             )
           }
         }
@@ -302,7 +350,8 @@ class SingleDisposalsTriageController @Inject() (
           disposalDateBackLink(currentAnswers),
           isDraftReturn,
           assetType,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -325,7 +374,8 @@ class SingleDisposalsTriageController @Inject() (
                     disposalDateBackLink(triageAnswers),
                     state.isRight,
                     assetType,
-                    isATrust
+                    isATrust,
+                    triageAnswers.representativeType()
                   )
                 ), { date =>
                 val result = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate)) match {
@@ -373,24 +423,44 @@ class SingleDisposalsTriageController @Inject() (
   }
 
   private def updateDraftReturnForDisposalDate(
-    currentDraftReturn: DraftSingleDisposalReturn,
+    currentDraftReturn: Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn],
     newAnswers: IncompleteSingleDisposalTriageAnswers
-  ): DraftSingleDisposalReturn =
-    currentDraftReturn.copy(
-      triageAnswers = newAnswers,
-      acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
-        _.unset(_.acquisitionDate)
-          .unset(_.acquisitionPrice)
-          .unset(_.rebasedAcquisitionPrice)
-          .unset(_.shouldUseRebase)
-          .unset(_.improvementCosts)
-          .unset(_.acquisitionFees)
-      ),
-      initialGainOrLoss          = None,
-      reliefDetailsAnswers       = currentDraftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
-      yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
-      supportingEvidenceAnswers  = None
-    )
+  ): DraftReturn =
+    currentDraftReturn match {
+      case Right(currentDraftReturn: DraftSingleDisposalReturn) =>
+        currentDraftReturn.copy(
+          triageAnswers = newAnswers,
+          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
+            _.unset(_.acquisitionDate)
+              .unset(_.acquisitionPrice)
+              .unset(_.rebasedAcquisitionPrice)
+              .unset(_.shouldUseRebase)
+              .unset(_.improvementCosts)
+              .unset(_.acquisitionFees)
+          ),
+          initialGainOrLoss    = None,
+          reliefDetailsAnswers = currentDraftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+          yearToDateLiabilityAnswers =
+            currentDraftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+          supportingEvidenceAnswers = None
+        )
+
+      case Left(currentDraftReturn: DraftSingleIndirectDisposalReturn) =>
+        currentDraftReturn.copy(
+          triageAnswers = newAnswers,
+          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
+            _.unset(_.acquisitionDate)
+              .unset(_.acquisitionPrice)
+              .unset(_.rebasedAcquisitionPrice)
+              .unset(_.shouldUseRebase)
+              .unset(_.improvementCosts)
+              .unset(_.acquisitionFees)
+          ),
+          yearToDateLiabilityAnswers =
+            currentDraftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+          supportingEvidenceAnswers = None
+        )
+    }
 
   private def updateDisposalDate(
     d: LocalDate,
@@ -436,7 +506,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -454,7 +525,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       },
       updateState = { (date, state, answers) =>
@@ -465,7 +537,7 @@ class SingleDisposalsTriageController @Inject() (
 
           state.bimap(
             _.copy(newReturnTriageAnswers = Right(newAnswers)), {
-              case (d, r) =>
+              case (Right(d), r) =>
                 r.copy(
                   draftReturn = d.copy(
                     triageAnswers = newAnswers,
@@ -480,6 +552,8 @@ class SingleDisposalsTriageController @Inject() (
                     yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
                   )
                 )
+              case (Left(_), _) =>
+                sys.error("completion date page not handled for indirect disposals")
             }
           )
         }
@@ -500,7 +574,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -518,7 +593,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       },
       updateState = { (country, state, answers) =>
@@ -531,17 +607,23 @@ class SingleDisposalsTriageController @Inject() (
             _.copy(newReturnTriageAnswers = Right(newAnswers)), {
               case (d, r) =>
                 r.copy(
-                  draftReturn = d.copy(
-                    triageAnswers = newAnswers,
-                    yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-                      case _: CalculatedYTDAnswers => None
-                      case n: NonCalculatedYTDAnswers =>
-                        Some(
-                          n.unset(
-                            _.hasEstimatedDetails
-                          )
-                        )
-                    }
+                  draftReturn = d.fold(
+                    s =>
+                      s.copy(
+                        triageAnswers = newAnswers,
+                        yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap {
+                          case _: CalculatedYTDAnswers    => None
+                          case n: NonCalculatedYTDAnswers => Some(n.unset(_.hasEstimatedDetails))
+                        }
+                      ),
+                    i =>
+                      i.copy(
+                        triageAnswers = newAnswers,
+                        yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap {
+                          case _: CalculatedYTDAnswers    => None
+                          case n: NonCalculatedYTDAnswers => Some(n.unset(_.hasEstimatedDetails))
+                        }
+                      )
                   )
                 )
             }
@@ -564,7 +646,8 @@ class SingleDisposalsTriageController @Inject() (
           form,
           backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
           isDraftReturn,
-          isATrust
+          isATrust,
+          currentAnswers.representativeType()
         )
       }
     )
@@ -583,40 +666,152 @@ class SingleDisposalsTriageController @Inject() (
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
             isDraftReturn,
-            isATrust
+            isATrust,
+            currentAnswers.representativeType()
           )
         },
         updateState = { (assetType, state, answers) =>
           if (answers.fold(_.assetType, c => Some(c.assetType)).contains(assetType)) {
             state.map(_._2)
           } else {
+            val wasIndirectDisposal   = answers.fold(_.assetType, c => Some(c.assetType)).contains(IndirectDisposal)
+            val isNowIndirectDisposal = assetType === IndirectDisposal
+
             val newAnswers =
-              answers.fold(
-                _.copy(assetType = Some(assetType)),
-                _.copy(assetType = assetType)
-              )
+              if (wasIndirectDisposal === isNowIndirectDisposal)
+                answers.fold(
+                  _.copy(assetType = Some(assetType)),
+                  _.copy(assetType = assetType)
+                )
+              else
+                answers
+                  .unset(_.disposalDate)
+                  .unset(_.completionDate)
+                  .unset(_.tooEarlyDisposalDate)
+                  .copy(assetType = Some(assetType))
 
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)), {
-                case (d, r) =>
+                case (Right(d), r) =>
+                  if (isNowIndirectDisposal)
+                    r.copy(
+                      draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
+                        d.id,
+                        newAnswers,
+                        d.representeeAnswers
+                      )
+                    )
+                  else
+                    r.copy(
+                      draftReturn = d.copy(
+                        triageAnswers              = newAnswers,
+                        propertyAddress            = None,
+                        disposalDetailsAnswers     = None,
+                        acquisitionDetailsAnswers  = None,
+                        initialGainOrLoss          = None,
+                        reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                        yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
+                        supportingEvidenceAnswers  = None
+                      )
+                    )
+
+                case (Left(d), r) =>
+                  // if it was indirect, then we are now at not indirect since we've already checked for equality
                   r.copy(
-                    draftReturn = d.copy(
-                      triageAnswers              = newAnswers,
-                      propertyAddress            = None,
-                      disposalDetailsAnswers     = None,
-                      acquisitionDetailsAnswers  = None,
-                      initialGainOrLoss          = None,
-                      reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
-                      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails()),
-                      supportingEvidenceAnswers  = None
+                    draftReturn = DraftSingleDisposalReturn.newDraftReturn(
+                      d.id,
+                      newAnswers,
+                      d.representeeAnswers
                     )
                   )
               }
             )
-
           }
         }
       )
+  }
+
+  def disposalDateOfShares(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    displayTriagePage(
+      _.fold(_.assetType, c => Some(c.assetType).filter(e => e === IndirectDisposal)),
+      _ => routes.SingleDisposalsTriageController.countryOfResidence()
+    )(_ => sharesDisposalDateForm)(
+      _.fold(
+        _.disposalDate.map(d => ShareDisposalDate(d.value)),
+        e => Some(ShareDisposalDate(e.disposalDate.value))
+      ),
+      (_, currentAnswers, form, isDraftReturn, _) =>
+        disposalDateOfSharesForNonUk(
+          form,
+          backLink(currentAnswers, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
+          isDraftReturn,
+          routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit()
+        )
+    )
+  }
+
+  def disposalDateOfSharesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
+      triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
+        case Some(assetType) if (assetType === AssetType.IndirectDisposal) =>
+          sharesDisposalDateForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                BadRequest(
+                  disposalDateOfSharesForNonUk(
+                    formWithErrors,
+                    backLink(triageAnswers, routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()),
+                    state.isRight,
+                    routes.SingleDisposalsTriageController.disposalDateOfSharesSubmit()
+                  )
+                ), { date =>
+                val result = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate)) match {
+                  case Some(existingDisposalDate) if (existingDisposalDate.value === date.value) =>
+                    EitherT.pure(Some(existingDisposalDate.taxYear))
+                  case _ =>
+                    for {
+                      taxYear <- taxYearService.taxYear(date.value)
+                      updatedDisposalDate = updateDisposalDate(date.value, taxYear, triageAnswers)
+                      updatedDisposalAndCompletionDate = updatedDisposalDate
+                        .copy(completionDate = Some(CompletionDate(date.value)))
+                      newState = state.bimap(
+                        _.copy(newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)), {
+                          case (d, r) =>
+                            r.copy(draftReturn = updateDraftReturnForDisposalDate(d, updatedDisposalAndCompletionDate))
+                        }
+                      )
+                      _ <- newState.fold(
+                            _ => EitherT.pure(()),
+                            r =>
+                              returnsService.storeDraftReturn(
+                                r.draftReturn,
+                                r.subscribedDetails.cgtReference,
+                                r.agentReferenceNumber
+                              )
+                          )
+                      _ <- EitherT(
+                            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState.merge)))
+                          )
+                    } yield taxYear
+                }
+
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult()
+                  },
+                  taxYear =>
+                    if (taxYear.isEmpty)
+                      Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
+                    else
+                      Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
+                )
+              }
+            )
+        case _ => Redirect(disposalDateBackLink(triageAnswers))
+      }
+    }
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -627,7 +822,7 @@ class SingleDisposalsTriageController @Inject() (
       val representeeAnswers = state
         .fold(
           _.representeeAnswers,
-          _._1.representeeAnswers
+          _._1.fold(_.representeeAnswers, _.representeeAnswers)
         )
       val representeeAnswersIncomplete = !representeeAnswers.map(_.fold(_ => false, _ => true)).getOrElse(false)
 
@@ -639,9 +834,9 @@ class SingleDisposalsTriageController @Inject() (
               _._2.subscribedDetails.isATrust
             )
             .contains(true)
-          Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust))
+          Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust, c.representativeType()))
 
-        case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
+        case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, __) if isIndividual =>
           Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
         case IncompleteSingleDisposalTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _)
@@ -688,16 +883,26 @@ class SingleDisposalsTriageController @Inject() (
         case IncompleteSingleDisposalTriageAnswers(_, _, _, Some(true), _, Some(NonResidential), _, _, _) =>
           Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
 
-        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), _, _, _) =>
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), _, _, _)
+            if !indirectDisposalsEnabled =>
           Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
+
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), None, None, _) =>
+          Redirect(routes.SingleDisposalsTriageController.disposalDateOfShares())
 
         case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.MixedUse), _, _, _) =>
           Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
-        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, None, _, _) =>
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, None, _, None) =>
           Redirect(routes.SingleDisposalsTriageController.whenWasDisposalDate())
 
-        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, _, None, _) =>
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, Some(disposalDate), _, None)
+            if (representeeAnswers
+              .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+              .exists(_.value <= disposalDate.value)) =>
+          Redirect(routes.CommonTriageQuestionsController.periodOfAdministrationNotHandled())
+
+        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, _, None, None) =>
           Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
 
         case IncompleteSingleDisposalTriageAnswers(
@@ -738,13 +943,19 @@ class SingleDisposalsTriageController @Inject() (
   }
 
   private def updateAnswersAndShowCheckYourAnswersPage(
-    state: Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)],
+    state: JourneyState,
     newCompleteTriageAnswers: CompleteSingleDisposalTriageAnswers,
     displayReturnToSummaryLink: Boolean
   )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): Future[Result] = {
     val updatedJourney = state.fold(
       _.copy(newReturnTriageAnswers = Right(newCompleteTriageAnswers)), {
-        case (d, r) => r.copy(draftReturn = d.copy(triageAnswers = newCompleteTriageAnswers))
+        case (d, r) =>
+          r.copy(draftReturn =
+            d.fold(
+              _.copy(triageAnswers = newCompleteTriageAnswers),
+              _.copy(triageAnswers = newCompleteTriageAnswers)
+            )
+          )
       }
     )
 
@@ -761,7 +972,14 @@ class SingleDisposalsTriageController @Inject() (
           )
           .contains(true)
 
-        Ok(checkYourAnswersPage(newCompleteTriageAnswers, displayReturnToSummaryLink, isATrust))
+        Ok(
+          checkYourAnswersPage(
+            newCompleteTriageAnswers,
+            displayReturnToSummaryLink,
+            isATrust,
+            newCompleteTriageAnswers.representativeType()
+          )
+        )
     }
   }
 
@@ -775,8 +993,14 @@ class SingleDisposalsTriageController @Inject() (
           lazy val continueToTaskList = Redirect(returnsRoutes.TaskListController.taskList())
 
           def toFillingOurNewReturn(startingNewDraftReturn: StartingNewDraftReturn): Future[Result] = {
-            val newDraftReturn = DraftSingleDisposalReturn
-              .newDraftReturn(uuidGenerator.nextId(), complete, startingNewDraftReturn.representeeAnswers)
+            val newDraftReturn =
+              if (complete.assetType === IndirectDisposal)
+                DraftSingleIndirectDisposalReturn
+                  .newDraftReturn(uuidGenerator.nextId(), complete, startingNewDraftReturn.representeeAnswers)
+              else
+                DraftSingleDisposalReturn
+                  .newDraftReturn(uuidGenerator.nextId(), complete, startingNewDraftReturn.representeeAnswers)
+
             val result = for {
               _ <- returnsService.storeDraftReturn(
                     newDraftReturn,
@@ -828,7 +1052,7 @@ class SingleDisposalsTriageController @Inject() (
     page: (JourneyState, SingleDisposalTriageAnswers, Form[A], Boolean, R) => Page,
     updateState: (
       A,
-      Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)],
+      JourneyState,
       SingleDisposalTriageAnswers
     ) => Either[StartingNewDraftReturn, FillingOutReturn]
   )(
@@ -900,7 +1124,10 @@ class SingleDisposalsTriageController @Inject() (
   private def withSingleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (
       SessionData,
-      Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)],
+      Either[
+        StartingNewDraftReturn,
+        (Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn], FillingOutReturn)
+      ],
       SingleDisposalTriageAnswers
     ) => Future[Result]
   ): Future[Result] =
@@ -909,7 +1136,10 @@ class SingleDisposalsTriageController @Inject() (
         f(session, Left(s), t)
 
       case Some((session, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>
-        f(session, Right(d -> r), d.triageAnswers)
+        f(session, Right(Right(d) -> r), d.triageAnswers)
+
+      case Some((session, r @ FillingOutReturn(_, _, _, d: DraftSingleIndirectDisposalReturn))) =>
+        f(session, Right(Left(d) -> r), d.triageAnswers)
 
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())

@@ -91,11 +91,12 @@ class ChangeRepresenteeEmailController @Inject() (
 
       case Some((sessionData, f: FillingOutReturn)) =>
         Either.fromOption(
-          extractAnswersAndContactDetails(f.draftReturn.fold(_.representeeAnswers, _.representeeAnswers))
-            .map {
-              case (answers, contactDetails) =>
-                sessionData -> ChangingRepresenteeEmail(Right(f), answers, contactDetails)
-            },
+          extractAnswersAndContactDetails(
+            f.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
+          ).map {
+            case (answers, contactDetails) =>
+              sessionData -> ChangingRepresenteeEmail(Right(f), answers, contactDetails)
+          },
           Redirect(controllers.routes.StartController.start())
         )
 
@@ -138,12 +139,9 @@ class ChangeRepresenteeEmailController @Inject() (
         fillingOutReturn =>
           fillingOutReturn.copy(draftReturn =
             fillingOutReturn.draftReturn.fold(
-              _.copy(
-                representeeAnswers = Some(newAnswers)
-              ),
-              _.copy(
-                representeeAnswers = Some(newAnswers)
-              )
+              _.copy(representeeAnswers = Some(newAnswers)),
+              _.copy(representeeAnswers = Some(newAnswers)),
+              _.copy(representeeAnswers = Some(newAnswers))
             )
           )
       )

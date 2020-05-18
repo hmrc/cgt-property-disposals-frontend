@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.Mult
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
@@ -60,6 +61,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
@@ -138,6 +140,16 @@ class CheckAllAnswersAndSubmitControllerSpec
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
+  def userMessageKey(individualUserType: Option[IndividualUserType], userType: UserType): String =
+    (individualUserType, userType) match {
+      case (Some(Capacitor), _)              => ".capacitor"
+      case (Some(PersonalRepresentative), _) => ".personalRep"
+      case (_, UserType.Individual)          => ""
+      case (_, UserType.Organisation)        => ".trust"
+      case (_, UserType.Agent)               => ".agent"
+      case other                             => sys.error(s"User type '$other' not handled")
+    }
+
   "CheckAllAnswersAndSubmitController" when {
 
     "handling requests to display the check all answers page" when {
@@ -147,7 +159,8 @@ class CheckAllAnswersAndSubmitControllerSpec
       "the user is on a single disposal journey" must {
 
         val completeReturn = sample[CompleteSingleDisposalReturn].copy(
-          triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+          triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor)),
+          representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
         )
         val hasAttachments =
           completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
@@ -163,7 +176,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers.merge),
           completeReturn.initialGainOrLoss,
           Some(completeReturn.supportingDocumentAnswers),
-          None,
+          completeReturn.representeeAnswers,
           TimeUtils.today()
         )
 
@@ -292,7 +305,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeReturn = sample[CompleteMultipleDisposalsReturn]
           .copy(
-            triageAnswers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Capacitor)),
+            triageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
             representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
             hasAttachments     = true
           )
@@ -431,12 +445,17 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       def performAction(): Future[Result] = controller.checkAllAnswersSubmit()(FakeRequest())
 
-      val completeReturn = sample[CompleteSingleDisposalReturn].copy(
-        triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-        representeeAnswers = None
-      )
-      val hasAttachments =
-        completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
+      val (completeReturn, hasAttachments) = {
+        val r = sample[CompleteSingleDisposalReturn].copy(
+          triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+          representeeAnswers = None
+        )
+        val hasAttachments =
+          r.supportingDocumentAnswers.evidences.nonEmpty || r.yearToDateLiabilityAnswers
+            .fold(_ => true, _.mandatoryEvidence.isDefined)
+
+        r.copy(hasAttachments = hasAttachments) -> hasAttachments
+      }
 
       val completeDraftReturn = DraftSingleDisposalReturn(
         UUID.randomUUID(),
@@ -476,7 +495,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           cyaPge(
             completeReturn,
             instanceOf[RebasingEligibilityUtil],
-            completeFillingOutReturn.subscribedDetails.isATrust
+            completeFillingOutReturn.subscribedDetails.isATrust,
+            representativeType(completeReturn)
           ).toString
 
         SubmitReturnRequest(
@@ -680,7 +700,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           prefix: String,
           submissionLine: String,
           tableLines: List[(String, String, String)],
-          name: Either[TrustName, IndividualName]
+          name: Either[TrustName, IndividualName],
+          individualUserType: Option[IndividualUserType]
         )
 
         val scenarios = Seq(
@@ -691,7 +712,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Right(IndividualName("John", "Doe"))
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
           ),
           TestScenario(
             "user with tax due",
@@ -700,7 +722,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Right(IndividualName("John", "Doe"))
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
           ),
           TestScenario(
             "agent for individual with no tax due",
@@ -709,7 +732,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Client: ",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Right(IndividualName("John", "Doe"))
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
           ),
           TestScenario(
             "agent for individual with tax due",
@@ -718,30 +742,82 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Client: ",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Right(IndividualName("John", "Doe"))
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
           ),
           TestScenario(
-            "organisation representing individual with no tax due",
+            "organisation with no tax due",
             UserType.Organisation,
             AmountInPence(0),
             "Trust: ",
             noTaxDueRefLine,
             List(submissionLine, addressLine),
-            Right(IndividualName("John", "Doe"))
+            Left(TrustName("trust")),
+            None
           ),
           TestScenario(
-            "organisation representing individual with tax due",
+            "organisation with tax due",
             UserType.Organisation,
             AmountInPence(10000),
             "Trust: ",
             taxDueRefLine,
             List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
-            Right(IndividualName("John", "Doe"))
+            Left(TrustName("trust")),
+            None
+          ),
+          TestScenario(
+            "capacitor with no tax due",
+            UserType.Individual,
+            AmountInPence(0),
+            "",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe")),
+            Some(Capacitor)
+          ),
+          TestScenario(
+            "capacitor with tax due",
+            UserType.Individual,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            Right(IndividualName("John", "Doe")),
+            Some(Capacitor)
+          ),
+          TestScenario(
+            "personal representative with no tax due",
+            UserType.Individual,
+            AmountInPence(0),
+            "",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe")),
+            Some(PersonalRepresentative)
+          ),
+          TestScenario(
+            "personal representative with tax due",
+            UserType.Individual,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            Right(IndividualName("John", "Doe")),
+            Some(PersonalRepresentative)
           )
         )
 
         scenarios.foreach {
-          case TestScenario(description, userType, taxOwed, namePrefix, reference, expectedTable, name) => {
+          case TestScenario(
+              description,
+              userType,
+              taxOwed,
+              namePrefix,
+              reference,
+              expectedTable,
+              name,
+              individualUserType
+              ) =>
             withClue(description) {
               val address = sample[UkAddress].copy(
                 line1    = "123 fake street",
@@ -750,25 +826,43 @@ class CheckAllAnswersAndSubmitControllerSpec
                 county   = None,
                 postcode = Postcode("abc123")
               )
-              val processingDate = LocalDate.of(2020, 2, 2)
-              val dueDate        = LocalDate.of(2020, 1, 1)
+              val processingDate  = LocalDate.of(2020, 2, 2)
+              val dueDate         = LocalDate.of(2020, 1, 1)
+              val chargeReference = "charge ref"
               val returnResponse = sample[SubmitReturnResponse].copy(
                 formBundleId   = "form bundle id",
                 processingDate = LocalDateTime.of(processingDate, LocalTime.of(1, 1)),
                 charge = Some(
                   sample[ReturnCharge].copy(
                     amount          = taxOwed,
-                    chargeReference = "charge ref",
+                    chargeReference = chargeReference,
                     dueDate         = dueDate
                   )
                 )
               )
+              val representeeAnswers = individualUserType match {
+                case Some(PersonalRepresentative) =>
+                  Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
+                case Some(Capacitor) =>
+                  Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+
+                case _ => None
+              }
+              val triageAnswers =
+                sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType)
+
               val justSubmittedReturn = sample[JustSubmittedReturn].copy(
-                submissionResponse   = returnResponse,
-                subscribedDetails    = sample[SubscribedDetails].copy(name = name),
-                completeReturn       = sample[CompleteSingleDisposalReturn].copy(propertyAddress = address),
+                submissionResponse = returnResponse,
+                subscribedDetails  = sample[SubscribedDetails].copy(name = name),
+                completeReturn = sample[CompleteSingleDisposalReturn].copy(
+                  propertyAddress    = address,
+                  triageAnswers      = triageAnswers,
+                  representeeAnswers = representeeAnswers
+                ),
                 agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None
               )
+
+              val userKey = userMessageKey(individualUserType, userType)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -778,7 +872,12 @@ class CheckAllAnswersAndSubmitControllerSpec
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey("confirmationOfSubmission.title"), { doc =>
-                  doc.select("#user-details-name").text() shouldBe namePrefix + "John Doe"
+                  val expectedName =
+                    representeeAnswers
+                      .map(_.name.makeSingleName())
+                      .getOrElse(namePrefix + name.fold(_.value, _.makeSingleName()))
+
+                  doc.select("#user-details-name").text() shouldBe expectedName
                   doc.select("#ref-id").text()            shouldBe reference
 
                   expectedTable.map { tableDetails =>
@@ -786,11 +885,26 @@ class CheckAllAnswersAndSubmitControllerSpec
                     doc.select(s"#${tableDetails._1}-answer").text()   shouldBe tableDetails._3
                   }
 
-                  doc.select("#content > article > div > p > a").attr("href") shouldBe viewConfig.selfAssessmentUrl
+                  doc.select("#printPage").html() shouldBe messageFromMessageKey(
+                    if (individualUserType.contains(Capacitor) && representeeAnswers
+                          .exists(_.fold(_.id, c => Some(c.id)).contains(NoReferenceId)))
+                      s"confirmationOfSubmission.capacitor.noId.printPage"
+                    else
+                      s"confirmationOfSubmission$userKey.printPage",
+                    "JavaScript: window.print();"
+                  )
+
+                  doc.select("#howToPay").html() shouldBe messageFromMessageKey(
+                    s"confirmationOfSubmission$userKey.howToPay.p1",
+                    chargeReference
+                  )
+
+                  doc.select("#ifSaHeading").text() shouldBe messageFromMessageKey(
+                    s"confirmationOfSubmission$userKey.ifSa"
+                  )
                 }
               )
             }
-          }
         }
       }
 
@@ -961,6 +1075,14 @@ class CheckAllAnswersAndSubmitControllerSpec
 
 object CheckAllAnswersAndSubmitControllerSpec {
 
+  def representativeType(
+    completeReturn: CompleteReturn
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    completeReturn.fold(
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType()
+    )
+
   def validateSingleDisposalCheckAllYourAnswersSections(
     doc: Document,
     completeReturn: CompleteSingleDisposalReturn,
@@ -969,6 +1091,11 @@ object CheckAllAnswersAndSubmitControllerSpec {
     isRebasing: Boolean,
     isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
+
+    completeReturn.representeeAnswers.foreach(
+      RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
+    )
+
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
       userType,
@@ -991,17 +1118,19 @@ object CheckAllAnswersAndSubmitControllerSpec {
       doc
     )
 
-    validateExemptionAndLossesCheckYourAnswersPage(
-      completeReturn.exemptionsAndLossesDetails,
-      doc,
-      isATrust,
-      userType.contains(UserType.Agent)
-    )
-
-    completeReturn.yearToDateLiabilityAnswers.fold(
-      validateNonCalculatedYearToDateLiabilityPage(_, doc, userType),
-      validateCalculatedYearToDateLiabilityPage(_, doc)
-    )
+    completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>
+      validateExemptionAndLossesCheckYourAnswersPage(
+        completeReturn.exemptionsAndLossesDetails,
+        doc,
+        isATrust,
+        userType.contains(UserType.Agent),
+        individualUserType
+      )
+      completeReturn.yearToDateLiabilityAnswers.fold(
+        validateNonCalculatedYearToDateLiabilityPage(_, doc, userType, Some(individualUserType)),
+        validateCalculatedYearToDateLiabilityPage(_, isATrust, doc)
+      )
+    }
   }
 
   def validateMultipleDisposalsCheckAllYourAnswersSections(
@@ -1010,6 +1139,10 @@ object CheckAllAnswersAndSubmitControllerSpec {
     userType: Option[UserType],
     isATrust: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    completeReturn.representeeAnswers.foreach(
+      RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
+    )
+
     validateMultipleDisposalsTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
       userType,
@@ -1021,14 +1154,22 @@ object CheckAllAnswersAndSubmitControllerSpec {
       doc
     )
 
-    validateExemptionAndLossesCheckYourAnswersPage(
-      completeReturn.exemptionAndLossesAnswers,
-      doc,
-      isATrust,
-      userType.contains(UserType.Agent)
-    )
+    completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>
+      validateExemptionAndLossesCheckYourAnswersPage(
+        completeReturn.exemptionAndLossesAnswers,
+        doc,
+        isATrust,
+        userType.contains(UserType.Agent),
+        individualUserType
+      )
+      validateNonCalculatedYearToDateLiabilityPage(
+        completeReturn.yearToDateLiabilityAnswers,
+        doc,
+        userType,
+        Some(individualUserType)
+      )
+    }
 
-    validateNonCalculatedYearToDateLiabilityPage(completeReturn.yearToDateLiabilityAnswers, doc, userType)
   }
 
 }

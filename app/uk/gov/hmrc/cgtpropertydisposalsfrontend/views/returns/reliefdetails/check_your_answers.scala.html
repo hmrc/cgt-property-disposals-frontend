@@ -20,17 +20,22 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary
+  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+  summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary
 )
 
-@(answers: CompleteReliefDetailsAnswers, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(
+  answers: CompleteReliefDetailsAnswers,
+  isATrust: Boolean,
+  representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("reliefDetails.cya.title")}
 
@@ -38,10 +43,10 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetai
 
  @pageHeading(title, Some(messages("reliefDetails.caption")))
 
- @summary(answers, isATrust)
+ @summary(answers, isATrust, representativeType)
 
  @formWrapper(routes.ReliefDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
- @submitButton(messages("button.confirmAndContinue"))
+    @submitButton(messages("button.confirmAndContinue"))
  }
 
  @returnToSummaryLink(displayReturnToSummaryLink = true)

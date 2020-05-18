@@ -95,11 +95,12 @@ class ChangeRepresenteeContactAddressController @Inject() (
 
       case Some((sessionData, f: FillingOutReturn)) =>
         Either.fromOption(
-          extractAnswersAndContactDetails(f.draftReturn.fold(_.representeeAnswers, _.representeeAnswers))
-            .map {
-              case (answers, contactDetails) =>
-                sessionData -> ChangingRepresenteeContactAddressJourney(Right(f), answers, contactDetails)
-            },
+          extractAnswersAndContactDetails(
+            f.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
+          ).map {
+            case (answers, contactDetails) =>
+              sessionData -> ChangingRepresenteeContactAddressJourney(Right(f), answers, contactDetails)
+          },
           Redirect(controllers.routes.StartController.start())
         )
 
@@ -136,12 +137,9 @@ class ChangeRepresenteeContactAddressController @Inject() (
       fillingOutReturn =>
         fillingOutReturn.copy(draftReturn =
           fillingOutReturn.draftReturn.fold(
-            _.copy(
-              representeeAnswers = Some(newAnswers)
-            ),
-            _.copy(
-              representeeAnswers = Some(newAnswers)
-            )
+            _.copy(representeeAnswers = Some(newAnswers)),
+            _.copy(representeeAnswers = Some(newAnswers)),
+            _.copy(representeeAnswers = Some(newAnswers))
           )
         )
     )
@@ -159,7 +157,9 @@ class ChangeRepresenteeContactAddressController @Inject() (
     )
   }
 
-  protected lazy val backLinkCall: Call       = routes.RepresenteeController.checkYourAnswers()
+  protected lazy val backLinkCall: ChangingRepresenteeContactAddressJourney => Call =
+    _ => routes.RepresenteeController.checkYourAnswers()
+
   protected lazy val isUkCall: Call           = routes.ChangeRepresenteeContactAddressController.isUk()
   protected lazy val isUkSubmitCall: Call     = routes.ChangeRepresenteeContactAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call = routes.ChangeRepresenteeContactAddressController.enterUkAddress()

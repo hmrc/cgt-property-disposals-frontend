@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -32,64 +33,107 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate, isATrust: Boolean)(implicit messages: Messages, request: RequestWithSessionData[_])
+@(
+    answers: CompleteExemptionAndLossesAnswers,
+    disposalDate: DisposalDate,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit messages: Messages, request: RequestWithSessionData[_])
 
 @inYearLossesValueKey = @{ "inYearLossesValue" }
 @previousYearLossesValueKey = @{ "previousYearsLossesValue" }
 @annualExemptAmountKey = @{ "annualExemptAmount" }
-
+@taxYearStart = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
+@taxYearEnd = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
+@userKey = @{
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else ""
+}
 
 @cyaSection() {
   @if(answers.inYearLosses.value === 0L) {
     @cyaRow(
       messages(
-        "inYearLosses.title",
-        disposalDate.taxYear.startDateInclusive.getYear.toString,
-        disposalDate.taxYear.endDateExclusive.getYear.toString
+        s"inYearLosses$userKey.title",
+        taxYearStart,
+        taxYearEnd
       ),
       Html(messages("generic.no")),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url)),
+      Some(cyaChange(
+        messages(
+          "inYearLosses.cyaChange",
+          taxYearStart,
+          taxYearEnd
+        ),
+        routes.ExemptionAndLossesController.inYearLosses().url
+      )),
       "inYearLosses"
     )
   } else {
     @cyaRow(
       messages(
-        "inYearLosses.title",
-        disposalDate.taxYear.startDateInclusive.getYear.toString,
-        disposalDate.taxYear.endDateExclusive.getYear.toString
+        s"inYearLosses$userKey.title",
+        taxYearStart,
+        taxYearEnd
       ),
       Html(messages("generic.yes")),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url)),
+      Some(cyaChange(
+        messages(
+          "inYearLosses.cyaChange",
+          taxYearStart,
+          taxYearEnd
+        ),
+        routes.ExemptionAndLossesController.inYearLosses().url
+      )),
       "inYearLosses"
     )
     @cyaRow(
       messages(s"$inYearLossesValueKey.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.inYearLosses.inPounds())),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLossesValue"), routes.ExemptionAndLossesController.inYearLosses().url)),
+      Some(cyaChange(
+        messages(
+          "inYearLossesValue.cyaChange",
+          taxYearStart,
+          taxYearEnd
+        ),
+        routes.ExemptionAndLossesController.inYearLosses().url
+      )),
       inYearLossesValueKey
     )
   }
 
   @if(answers.previousYearsLosses.value === 0L) {
     @cyaRow(
-      messages("previousYearsLosses.title"),
+      messages(s"previousYearsLosses$userKey.title"),
       Html(messages("generic.no")),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
+      Some(cyaChange(
+        messages("previousYearsLosses.cyaChange"),
+        routes.ExemptionAndLossesController.previousYearsLosses().url
+      )),
       "previousYearsLosses"
     )
   } else {
     @cyaRow(
-      messages("previousYearsLosses.title"),
+      messages(s"previousYearsLosses$userKey.title"),
       Html(messages("generic.yes")),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
+      Some(cyaChange(
+        messages("previousYearsLosses.cyaChange"),
+        routes.ExemptionAndLossesController.previousYearsLosses().url
+      )),
       "previousYearsLosses"
     )
     @cyaRow(
       messages(s"$previousYearLossesValueKey.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.previousYearsLosses.inPounds())),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLossesValue"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
+      Some(cyaChange(
+        messages("previousYearsLossesValue.cyaChange"),
+        routes.ExemptionAndLossesController.previousYearsLosses().url
+      )),
       previousYearLossesValueKey
     )
   }
@@ -97,7 +141,10 @@
   @cyaRow(
     messages(s"$annualExemptAmountKey$userKey.title"),
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),
-    Some(cyaChange(messages("exemptionsAndLosses.cyaChange.annualExemptAmount"), routes.ExemptionAndLossesController.annualExemptAmount().url)),
+    Some(cyaChange(
+      messages("annualExemptAmount.cyaChange"),
+      routes.ExemptionAndLossesController.annualExemptAmount().url
+    )),
     annualExemptAmountKey
   )
 

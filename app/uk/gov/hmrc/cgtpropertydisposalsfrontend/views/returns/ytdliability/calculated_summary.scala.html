@@ -21,6 +21,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{ PersonalRepresentative, Capacitor }
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -29,43 +32,62 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteCalculatedYTDAnswers, disposalDate: DisposalDate, showFiles: Boolean)(implicit messages: Messages)
+@(
+        answers: CompleteCalculatedYTDAnswers,
+        disposalDate: DisposalDate,
+        showFiles: Boolean,
+        isATrust: Boolean,
+        representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]],
+        wasUkResident: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages)
+
 @taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{
+  if (representativeType.exists(_.isLeft)) ".personalRep"
+  else if (representativeType.exists(_.isRight)) ".capacitor"
+  else if (isAgent) ".agent"
+  else if (isATrust) ".trust"
+  else ""
+}
+@nrKey = @{ if(wasUkResident) "" else ".non-resident" }
 
 @cyaSection() {
-    @cyaRow(
-        messages("estimatedIncome.title"),
-        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
-        Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityController.estimatedIncome().url)),
-        "estimatedIncome-value"
-    )
-    @answers.personalAllowance.map { personalAllowance =>
+    @if(!isATrust) {
         @cyaRow(
-            messages("personalAllowance.title", taxYearStartYear, taxYearEndYear),
-            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
-            Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityController.personalAllowance().url)),
-            "personalAllowance-value"
+            messages(s"estimatedIncome$userKey$nrKey.title"),
+            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
+            Some(cyaChange(messages(s"estimatedIncome$nrKey.cyaChange"), routes.YearToDateLiabilityController.estimatedIncome().url)),
+            "estimatedIncome-value"
         )
+        @answers.personalAllowance.map { personalAllowance =>
+            @cyaRow(
+                messages(s"personalAllowance$userKey.title", taxYearStartYear, taxYearEndYear),
+                Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
+                Some(cyaChange(messages("personalAllowance.cyaChange"), routes.YearToDateLiabilityController.personalAllowance().url)),
+                "personalAllowance-value"
+            )
+        }
     }
     @cyaRow(
         messages("hasEstimatedDetails.title"),
         Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
-        Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
+        Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
         "hasEstimatedDetails-value"
     )
     @cyaRow(
         messages("taxDue.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
-        Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityController.taxDue().url)),
+        Some(cyaChange(messages("taxDue.cyaChange"), routes.YearToDateLiabilityController.taxDue().url)),
         "taxDue-value"
     )
     @if(showFiles) {
       @answers.mandatoryEvidence.map { mandatoryEvidence =>
         @cyaRow(
-          messages("ytdLiability.cyaLabel.mandatoryEvidence"),
+          messages("mandatoryEvidence.title"),
           Html(mandatoryEvidence.fileName),
-          Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+          Some(cyaChange(messages("mandatoryEvidence.cyaChange"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
           "mandatoryEvidence-value"
         )
       }

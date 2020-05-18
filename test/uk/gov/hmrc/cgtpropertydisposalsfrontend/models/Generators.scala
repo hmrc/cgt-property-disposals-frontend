@@ -32,8 +32,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualRepresenteeNameMatchDetails, IndividualSautrNameMatchDetails, TrustNameMatchDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
@@ -221,11 +221,15 @@ trait NameMatchGen { this: GenUtils =>
 
   implicit val trustNameMatchDetailsGen: Gen[TrustNameMatchDetails] = gen[TrustNameMatchDetails]
 
-  implicit val individualNameMatchDetailsGen: Gen[IndividualNameMatchDetails] = gen[IndividualNameMatchDetails]
+  implicit val individualSautrNameMatchDetailsGen: Gen[IndividualSautrNameMatchDetails] =
+    gen[IndividualSautrNameMatchDetails]
 
   implicit val individualUnsuccessfulNameMatchAttemptsGen
-    : Gen[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]] =
-    gen[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
+    : Gen[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]] =
+    gen[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]]
+
+  implicit val individualRepresenteeNameMatchDetailsGen: Gen[IndividualRepresenteeNameMatchDetails] =
+    gen[IndividualRepresenteeNameMatchDetails]
 
 }
 
@@ -261,15 +265,12 @@ trait UserTypeGen { this: GenUtils =>
 
 }
 
-trait TriageQuestionsGen { this: GenUtils =>
+trait TriageQuestionsGen extends LowerPriorityTriageQuestionsGen { this: GenUtils =>
 
   implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = gen[SingleDisposalTriageAnswers]
 
   implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
     gen[CompleteSingleDisposalTriageAnswers]
-
-  implicit val incompleteSingleDisposalTriageAnswersGen: Gen[IncompleteSingleDisposalTriageAnswers] =
-    gen[IncompleteSingleDisposalTriageAnswers]
 
   implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] =
     gen[CompleteMultipleDisposalsTriageAnswers]
@@ -286,6 +287,13 @@ trait TriageQuestionsGen { this: GenUtils =>
   implicit val completionDateGen: Gen[CompletionDate] = gen[CompletionDate]
 
   implicit val assetTypeGen: Gen[AssetType] = gen[AssetType]
+
+}
+
+trait LowerPriorityTriageQuestionsGen { this: GenUtils =>
+
+  implicit val incompleteSingleDisposalTriageAnswersGen: Gen[IncompleteSingleDisposalTriageAnswers] =
+    gen[IncompleteSingleDisposalTriageAnswers]
 
 }
 
@@ -315,6 +323,9 @@ trait LowerPriorityReturnGen { this: GenUtils =>
 
   implicit val completeMultipleDisposalsReturnGen: Gen[CompleteMultipleDisposalsReturn] =
     gen[CompleteMultipleDisposalsReturn]
+
+  implicit val singleIndirectDisposalDraftReturnGen: Gen[DraftSingleIndirectDisposalReturn] =
+    gen[DraftSingleIndirectDisposalReturn]
 
 }
 

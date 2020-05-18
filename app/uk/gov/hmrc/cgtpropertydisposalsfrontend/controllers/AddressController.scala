@@ -25,6 +25,8 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
@@ -32,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -61,7 +64,7 @@ trait AddressController[A <: AddressJourneyType] {
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus]
 
-  protected def backLinkCall: Call
+  protected def backLinkCall: A => Call
   protected val isUkCall: Call
   protected val isUkSubmitCall: Call
   protected val enterUkAddressCall: Call
@@ -91,10 +94,10 @@ trait AddressController[A <: AddressJourneyType] {
                 logger.warn(s"Could not clear addressLookupResult", e)
                 errorHandler.errorResult()
               case Right(_) =>
-                Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, journey))
+                Ok(isUkPage(Address.isUkForm, backLinkCall(journey), isUkSubmitCall, journey))
             }
           } else {
-            Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, journey))
+            Ok(isUkPage(Address.isUkForm, backLinkCall(journey), isUkSubmitCall, journey))
           }
       }
     }
@@ -106,7 +109,7 @@ trait AddressController[A <: AddressJourneyType] {
           Address.isUkForm
             .bindFromRequest()
             .fold[Future[Result]](
-              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall, journey)), {
+              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall(journey), isUkSubmitCall, journey)), {
                 case true  => Redirect(enterPostcodeCall)
                 case false => Redirect(enterNonUkAddressCall)
               }
@@ -121,11 +124,12 @@ trait AddressController[A <: AddressJourneyType] {
           Ok(
             enterUkAddressPage(
               Address.ukAddressForm,
-              backLinkCall,
+              backLinkCall(journey),
               enterUkAddressSubmitCall,
               enterPostcodeCall,
               journey,
-              isATrust(journey)
+              isATrust(journey),
+              extractRepresentitiveType(journey)
             )
           )
       }
@@ -142,11 +146,12 @@ trait AddressController[A <: AddressJourneyType] {
                 BadRequest(
                   enterUkAddressPage(
                     formWithErrors,
-                    backLinkCall,
+                    backLinkCall(journey),
                     enterUkAddressSubmitCall,
                     enterPostcodeCall,
                     journey,
-                    isATrust(journey)
+                    isATrust(journey),
+                    extractRepresentitiveType(journey)
                   )
                 ),
               storeAddress(continueCall, journey, true)
@@ -205,7 +210,8 @@ trait AddressController[A <: AddressJourneyType] {
               enterPostcodeSubmitCall,
               enterUkAddressCall,
               journey,
-              isATrust(journey)
+              isATrust(journey),
+              extractRepresentitiveType(journey)
             )
           )
       }
@@ -226,7 +232,8 @@ trait AddressController[A <: AddressJourneyType] {
                     enterPostcodeSubmitCall,
                     enterUkAddressCall,
                     journey,
-                    isATrust(journey)
+                    isATrust(journey),
+                    extractRepresentitiveType(journey)
                   )
                 ), {
                 case AddressLookupRequest(postcode, filter) =>
@@ -239,7 +246,8 @@ trait AddressController[A <: AddressJourneyType] {
                         enterPostcodeSubmitCall,
                         enterUkAddressCall,
                         journey,
-                        isATrust(journey)
+                        isATrust(journey),
+                        extractRepresentitiveType(journey)
                       )
                     )
                   }
@@ -281,7 +289,7 @@ trait AddressController[A <: AddressJourneyType] {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
             case None =>
-              Redirect(backLinkCall)
+              Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
               val form = Address.addressSelectForm(addresses)
@@ -293,7 +301,8 @@ trait AddressController[A <: AddressJourneyType] {
                   selectAddressSubmitCall,
                   enterUkAddressCall,
                   journey,
-                  isATrust(journey)
+                  isATrust(journey),
+                  extractRepresentitiveType(journey)
                 )
               )
           }
@@ -306,7 +315,7 @@ trait AddressController[A <: AddressJourneyType] {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
             case None =>
-              Redirect(backLinkCall)
+              Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
               Address
@@ -322,7 +331,8 @@ trait AddressController[A <: AddressJourneyType] {
                         selectAddressSubmitCall,
                         enterUkAddressCall,
                         journey,
-                        isATrust(journey)
+                        isATrust(journey),
+                        extractRepresentitiveType(journey)
                       )
                     ),
                   storeAddress(continueCall, journey, false)
@@ -358,5 +368,22 @@ trait AddressController[A <: AddressJourneyType] {
     )
 
   }
+
+  private def extractRepresentitiveType(
+    journey: AddressJourneyType
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    journey match {
+      case j: FillingOutReturnAddressJourney =>
+        j.individualUserType match {
+          case Some(value) =>
+            value match {
+              case IndividualUserType.Capacitor              => Some(Right(IndividualUserType.Capacitor))
+              case IndividualUserType.PersonalRepresentative => Some(Left(IndividualUserType.PersonalRepresentative))
+              case _                                         => None
+            }
+          case _ => None
+        }
+      case _ => None
+    }
 
 }

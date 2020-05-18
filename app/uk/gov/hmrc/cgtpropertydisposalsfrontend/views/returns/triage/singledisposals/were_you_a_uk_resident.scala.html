@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -35,17 +36,38 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+    form: Form[Boolean],
+    backLink: Call,
+    displayReturnToSummaryLink: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"wereYouAUKResident"}
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-@userTypeErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
+
+@userKey = @{
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else ""
+}
+
+@userTypeErrorPrefix = @{
+    if (representativeType.exists(_.isLeft)) "personalRep."
+    else if (isAgent) "agent."
+    else if (isATrust) "trust."
+    else if (representativeType.exists(_.isRight)) "capacitor."
+    else ""
+}
+
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 

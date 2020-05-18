@@ -165,6 +165,14 @@ object CompleteReturn {
     }
   }
 
+  implicit class CompleteReturnOps(private val c: CompleteReturn) extends AnyVal {
+    def fold[A](whenMultiple: CompleteMultipleDisposalsReturn => A, whenSingle: CompleteSingleDisposalReturn => A): A =
+      c match {
+        case m: CompleteMultipleDisposalsReturn => whenMultiple(m)
+        case s: CompleteSingleDisposalReturn    => whenSingle(s)
+      }
+  }
+
   private def validRepresenteeAnswers(
     individualUserType: Option[IndividualUserType],
     representeeAnswers: Option[RepresenteeAnswers]

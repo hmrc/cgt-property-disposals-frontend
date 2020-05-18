@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.list._
@@ -27,6 +29,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -36,11 +39,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => triagePages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -60,7 +64,8 @@ class CommonTriageQuestionsController @Inject() (
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
-  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented
+  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented,
+  periodOfAdminNotHandledPage: pages.period_of_admin_not_handled
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -260,6 +265,17 @@ class CommonTriageQuestionsController @Inject() (
     }
   }
 
+  def disposalsOfSharesTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withState(request) { (_, state) =>
+      val triageAnswers = triageAnswersFomState(state)
+      lazy val backLink = triageAnswers.fold(
+        _ => routes.MultipleDisposalsTriageController.disposalDateOfShares(),
+        _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
+      )
+      Ok(disposalDateTooEarlyNonUkResidents(backLink))
+    }
+  }
+
   def assetTypeNotYetImplemented(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withState(request) { (_, state) =>
       val triageAnswers = triageAnswersFomState(state)
@@ -284,6 +300,22 @@ class CommonTriageQuestionsController @Inject() (
           Redirect(redirectToCheckYourAnswers(state))
       }
     }
+  }
+
+  def periodOfAdministrationNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withState(request) { (_, state) =>
+        // TODO: fix for indirect disposals
+        val isMultipleDisposal = state.fold(
+          _.newReturnTriageAnswers.isLeft,
+          _.draftReturn.fold(_ => true, _ => false, _ => false)
+        )
+        val backLink =
+          if (isMultipleDisposal) controllers.returns.address.routes.PropertyDetailsController.disposalDate()
+          else routes.SingleDisposalsTriageController.whenWasDisposalDate()
+
+        Ok(periodOfAdminNotHandledPage(backLink))
+      }
   }
 
   private def redirectToCheckYourAnswers(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
@@ -374,7 +406,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers)
+                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
               )
             )
         )
@@ -392,7 +424,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers)
+                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
               )
             )
         )
@@ -429,7 +461,8 @@ class CommonTriageQuestionsController @Inject() (
         newReturnTriageAnswers = answers.bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
           updateMultipleDisposalAnswers,
           updateSingleDisposalAnswers
-        )
+        ),
+        representeeAnswers = None
       ),
       r =>
         r.copy(
@@ -453,6 +486,16 @@ class CommonTriageQuestionsController @Inject() (
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss          = None,
                 supportingEvidenceAnswers  = None
+              ),
+            i =>
+              i.copy(
+                triageAnswers              = updateSingleDisposalAnswers(i.triageAnswers),
+                representeeAnswers         = None,
+                companyAddress             = None,
+                disposalDetailsAnswers     = None,
+                acquisitionDetailsAnswers  = None,
+                yearToDateLiabilityAnswers = None,
+                supportingEvidenceAnswers  = None
               )
           )
         )
@@ -469,22 +512,27 @@ class CommonTriageQuestionsController @Inject() (
 
   private def getNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
-  ): Option[NumberOfProperties] =
+  ): Option[NumberOfProperties] = {
+    def numberOfProperties(singleDisposalTriageAnswers: SingleDisposalTriageAnswers) =
+      singleDisposalTriageAnswers.fold(
+        incomplete =>
+          if (incomplete.hasConfirmedSingleDisposal) Some(NumberOfProperties.One)
+          else None,
+        _ => Some(NumberOfProperties.One)
+      )
+
     state.fold(
       _.newReturnTriageAnswers.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
-        _.fold(
-          incomplete =>
-            if (incomplete.hasConfirmedSingleDisposal) Some(NumberOfProperties.One)
-            else None,
-          _ => Some(NumberOfProperties.One)
-        )
+        numberOfProperties
       ),
       _.draftReturn.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
-        _ => Some(NumberOfProperties.One)
+        s => numberOfProperties(s.triageAnswers),
+        s => numberOfProperties(s.triageAnswers)
       )
     )
+  }
 
   private def triageAnswersFomState(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
@@ -495,6 +543,7 @@ class CommonTriageQuestionsController @Inject() (
         r =>
           r.draftReturn.fold(
             m => Left(m.triageAnswers),
+            s => Right(s.triageAnswers),
             s => Right(s.triageAnswers)
           )
       )
@@ -534,4 +583,23 @@ object CommonTriageQuestionsController {
       "numberOfProperties" -> of(FormUtils.radioFormFormatter("numberOfProperties", List(One, MoreThanOne)))
     )(identity)(Some(_))
   )
+
+  val sharesDisposalDateForm: Form[ShareDisposalDate] = {
+    val key = "sharesDisposalDate"
+    Form(
+      mapping(
+        "" -> of(
+          TimeUtils.dateFormatter(
+            Some(LocalDate.now()),
+            None,
+            s"$key-day",
+            s"$key-month",
+            s"$key-year",
+            key
+          )
+        )
+      )(ShareDisposalDate(_))(d => Some(d.value))
+    )
+  }
+
 }

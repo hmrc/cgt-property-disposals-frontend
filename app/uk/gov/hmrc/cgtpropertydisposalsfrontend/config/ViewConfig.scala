@@ -29,9 +29,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   private val signOutUri: String           = getString("sign-out.uri")
   private val contactFormServiceIdentifier = "CGTPD"
 
-  val assetsPrefix: String   = getString("assets.url") + getString("assets.version")
-  val analyticsToken: String = getString("google-analytics.token")
-  val analyticsHost: String  = getString("google-analytics.host")
+  val assetsPrefix: String = getString("assets.url") + getString("assets.version")
   val reportAProblemPartialUrl: String =
     s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   val reportAProblemNonJSUrl: String =
@@ -81,15 +79,16 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val equalityCommissionForNorthenIrelandUrl: String = getString("external-url.equality-commission-for-northen-ireland")
   val digitalAccessibilityCentretUrl: String         = getString("external-url.digital-accessibility-centre")
   val reportAccessibilityProblemUrl: String          = s"${getString("external-url.report-accessibility-problem")}?service=cgtpd"
-  val governmentGatewayUserIdAndPassword             = getString("external-url.government-gateway-user-id-and-password")
-  val contactHmrc                                    = getString("external-url.contact-hmrc")
+  val contactHmrc: String                            = getString("external-url.contact-hmrc")
 
-  val personalRepresentative = getString("external-url.personal-representative")
-  val calculateCgt           = getString("external-url.calculate-cgt")
-  val payYourTax             = getString("external-url.pay-your-tax")
-
-  val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
-  val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
+  val personalRepresentative: String      = getString("external-url.personal-representative")
+  val calculateCgt: String                = getString("external-url.calculate-cgt")
+  val payYourTax: String                  = getString("external-url.pay-your-tax")
+  val payTheirTaxBill: String             = getString("external-url.pay-their-tax-bill")
+  val returnsForSomeoneWhoHasDied: String = getString("external-url.returns-for-someone-who-has-died")
+  val powerOfAttorney: String             = getString("external-url.power-of-attorney")
+  val onboardingExitSurveyUrl: String     = "/feedback/CGTPD-REG"
+  val returnsExitSurveyUrl: String        = "/feedback/CGTPD-RET"
   val ggCreateAccountUrl: String =
     "/bas-gateway?" +
       "accountType=individual&" +
@@ -106,9 +105,8 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.AccountController
       .signedOut()
       .url
-  val gaUserTypeDimension: String = getString("google-analytics.user-type-dimension")
-  val hmrcTelephone: String       = getString("telephone-numbers.hmrc-helpline")
-  val outsideUkPhone: String      = getString("telephone-numbers.outside-uk")
-  val agentDedicatedLine: String  = getString("telephone-numbers.agent-dedicated-line")
+  val hmrcTelephone: String      = getString("telephone-numbers.hmrc-helpline")
+  val outsideUkPhone: String     = getString("telephone-numbers.outside-uk")
+  val agentDedicatedLine: String = getString("telephone-numbers.agent-dedicated-line")
 
 }

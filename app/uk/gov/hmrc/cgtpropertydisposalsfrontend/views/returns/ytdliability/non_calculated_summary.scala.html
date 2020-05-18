@@ -24,6 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{ PersonalRepresentative, Capacitor }
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -32,13 +33,22 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteNonCalculatedYTDAnswers, showFiles: Boolean, isMultiple: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(
+        answers: CompleteNonCalculatedYTDAnswers,
+        showFiles: Boolean,
+        isMultiple: Boolean,
+        isATrust: Boolean,
+        representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 
-@userKey = @{request.userType match {
-  case Some(UserType.Agent) => ".agent"
-  case Some(UserType.Organisation) => ".trust"
-  case _ => ""
-}}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{
+  if (representativeType.exists(_.isLeft)) ".personalRep"
+  else if (representativeType.exists(_.isRight)) ".capacitor"
+  else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+      else ""
+}
 
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
 
@@ -56,7 +66,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     @cyaRow(
     messages(s"taxableGainOrLoss$userKey$multipleKey.title"),
     Html(messages(taxableGainOrLossLabelWithAmount._1)),
-    Some(cyaChange(messages("ytdLiability.cyaChange.taxableGainOrLoss"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
+    Some(cyaChange(messages("taxableGainOrLoss.cyaChange"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
     "taxableGainOrLossAnswer"
     )
 
@@ -64,7 +74,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         @cyaRow(
             messages(label),
             Html(amount),
-            Some(cyaChange(messages("ytdLiability.cyaChange.taxableGainOrLoss"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
+            Some(cyaChange(messages(label), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
             "taxableGainOrLossAmount"
         )
     }
@@ -72,21 +82,21 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     @cyaRow(
         messages("hasEstimatedDetails.title"),
         Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
-        Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
+        Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
         "hasEstimatedDetails-value"
     )
 
     @cyaRow(
         messages("nonCalculatedTaxDue.title"),
         Html( MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
-        Some(cyaChange(messages("ytdLiability.cyaChange.nonCalculatedTaxDue"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
+        Some(cyaChange(messages("nonCalculatedTaxDue.cyaChange"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
         "nonCalculatedTaxDue-value"
     )
   @if(showFiles) {
     @cyaRow(
-      messages("ytdLiability.cyaLabel.mandatoryEvidence"),
+      messages("mandatoryEvidence.title"),
       Html(answers.mandatoryEvidence.fileName),
-      Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
+      Some(cyaChange(messages("mandatoryEvidence.cyaChange"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
       "mandatoryEvidence-value"
     )
   }

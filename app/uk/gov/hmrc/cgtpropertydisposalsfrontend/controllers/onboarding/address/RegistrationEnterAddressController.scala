@@ -82,8 +82,9 @@ class RegistrationEnterAddressController @Inject() (
   ): EitherT[Future, Error, JourneyStatus] =
     EitherT.pure[Future, Error](journey.journey.copy(address = Some(address)))
 
-  protected lazy val backLinkCall: Call =
-    controllers.onboarding.name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
+  protected lazy val backLinkCall: IndividualSupplyingInformationAddressJourney => Call =
+    _ => controllers.onboarding.name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
+
   protected lazy val isUkCall: Call                 = routes.RegistrationEnterAddressController.isUk()
   protected lazy val isUkSubmitCall: Call           = routes.RegistrationEnterAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call       = routes.RegistrationEnterAddressController.enterUkAddress()

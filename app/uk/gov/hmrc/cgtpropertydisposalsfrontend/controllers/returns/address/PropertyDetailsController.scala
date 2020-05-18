@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.eq._
+import cats.syntax.order._
 import com.google.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of, optional, text}
@@ -29,13 +29,16 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => addressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, SessionData, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -90,19 +93,40 @@ class PropertyDetailsController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, FillingOutReturnAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: FillingOutReturn)) => Right(sessionData -> FillingOutReturnAddressJourney(r))
-      case _                                        => Left(Redirect(controllers.routes.StartController.start()))
+      case Some((sessionData, r: FillingOutReturn)) =>
+        val draftReturn = r.draftReturn.fold(
+          m => Some(Left(m)),
+          s => Some(Right(s)),
+          _ => None
+        )
+
+        draftReturn.fold[Either[Result, (SessionData, FillingOutReturnAddressJourney)]](
+          Left(Redirect(controllers.routes.StartController.start()))
+        ) { d =>
+          Right(
+            sessionData -> FillingOutReturnAddressJourney(
+              r,
+              d,
+              d.fold(
+                e => e.triageAnswers.fold(_.individualUserType, _.individualUserType),
+                e => e.triageAnswers.fold(_.individualUserType, _.individualUserType)
+              )
+            )
+          )
+        }
+
+      case _ => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   private def withAssetTypes(
-    draftReturn: DraftReturn
+    journey: FillingOutReturnAddressJourney
   )(f: Either[List[AssetType], AssetType] => Future[Result]): Future[Result] =
-    assetTypes(draftReturn).fold[Future[Result]](
+    assetTypes(journey).fold[Future[Result]](
       Redirect(controllers.returns.routes.TaskListController.taskList())
     )(f)
 
-  private def assetTypes(draftReturn: DraftReturn): Option[Either[List[AssetType], AssetType]] =
-    draftReturn.fold(
+  private def assetTypes(journey: FillingOutReturnAddressJourney): Option[Either[List[AssetType], AssetType]] =
+    journey.draftReturn.fold(
       _.triageAnswers.fold(_.assetTypes, c => Some(c.assetTypes)).map(Left(_)),
       _.triageAnswers.fold(_.assetType, c => Some(c.assetType)).map(Right(_))
     )
@@ -125,8 +149,8 @@ class PropertyDetailsController @Inject() (
       case _: NonUkAddress =>
         EitherT.leftT[Future, JourneyStatus](Error("Got non uk address in returns journey but expected uk address"))
       case a: UkAddress =>
-        journey.journey.draftReturn match {
-          case m: DraftMultipleDisposalsReturn =>
+        journey.draftReturn match {
+          case Left(m: DraftMultipleDisposalsReturn) =>
             val answers = m.examplePropertyDetailsAnswers.getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
             if (answers.fold(_.address, c => Some(c.address)).contains(a))
               EitherT.pure(journey.journey)
@@ -143,7 +167,7 @@ class PropertyDetailsController @Inject() (
                 .map(_ => journey.journey.copy(draftReturn = updatedDraftReturn))
             }
 
-          case d: DraftSingleDisposalReturn =>
+          case Right(d: DraftSingleDisposalReturn) =>
             if (d.propertyAddress.contains(a))
               EitherT.pure(journey.journey)
             else {
@@ -170,10 +194,10 @@ class PropertyDetailsController @Inject() (
   protected lazy val continueCall: Call            = addressRoutes.PropertyDetailsController.checkYourAnswers()
 
   override protected val enterPostcodePageBackLink: FillingOutReturnAddressJourney => Call = { fillingOutReturn =>
-    if (assetTypes(fillingOutReturn.journey.draftReturn).exists(shouldAskIfPostcodeExists))
+    if (assetTypes(fillingOutReturn).exists(shouldAskIfPostcodeExists))
       routes.PropertyDetailsController.singleDisposalHasUkPostcode()
     else
-      fillingOutReturn.journey.draftReturn.fold(
+      fillingOutReturn.draftReturn.fold(
         _.examplePropertyDetailsAnswers
           .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
           .fold(
@@ -187,11 +211,14 @@ class PropertyDetailsController @Inject() (
   }
 
   private def hasUkPostcodeBackLink(
-    fillingOutReturn: FillingOutReturn,
+    addressJourney: FillingOutReturnAddressJourney,
     isSingleDisposal: Boolean
   ): Call = {
-    val isComplete = fillingOutReturn.draftReturn
-      .fold(_.examplePropertyDetailsAnswers.exists(_.fold(_ => false, _ => true)), _.propertyAddress.isDefined)
+    val isComplete = addressJourney.draftReturn
+      .fold(
+        _.examplePropertyDetailsAnswers.exists(_.fold(_ => false, _ => true)),
+        _.propertyAddress.isDefined
+      )
     if (isComplete) routes.PropertyDetailsController.checkYourAnswers()
     else if (isSingleDisposal) controllers.returns.routes.TaskListController.taskList()
     else routes.PropertyDetailsController.multipleDisposalsGuidance()
@@ -207,13 +234,13 @@ class PropertyDetailsController @Inject() (
 
   private def commonHasUkPostcodeBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
-      withAssetTypes(fillingOutReturn.journey.draftReturn) { assetTypes =>
+      withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true, _ => true)
           Ok(
             hasValidPostcodePage(
               hasValidPostcodeForm,
-              hasUkPostcodeBackLink(fillingOutReturn.journey, isSingleDisposal),
+              hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
               isSingleDisposal
             )
           )
@@ -233,9 +260,9 @@ class PropertyDetailsController @Inject() (
 
   private def commonHasUkPostcodeSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
-      withAssetTypes(fillingOutReturn.journey.draftReturn) { assetTypes =>
+      withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true, _ => true)
 
           hasValidPostcodeForm
             .bindFromRequest()
@@ -244,7 +271,7 @@ class PropertyDetailsController @Inject() (
                 BadRequest(
                   hasValidPostcodePage(
                     formWithErrors,
-                    hasUkPostcodeBackLink(fillingOutReturn.journey, isSingleDisposal),
+                    hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
                     isSingleDisposal
                   )
                 ),
@@ -274,9 +301,9 @@ class PropertyDetailsController @Inject() (
 
   private def commonEnterLandUprnBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
-      withAssetTypes(fillingOutReturn.journey.draftReturn) { assetTypes =>
+      withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
           Ok(
             enterUPRNPage(
               enterUPRNForm,
@@ -300,9 +327,9 @@ class PropertyDetailsController @Inject() (
 
   private def commonEnterLandUprnSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
-      withAssetTypes(fillingOutReturn.journey.draftReturn) { assetTypes =>
+      withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
 
           enterUPRNForm
             .bindFromRequest()
@@ -329,9 +356,9 @@ class PropertyDetailsController @Inject() (
 
   def multipleDisposalsGuidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.journey.draftReturn match {
-        case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case m: DraftMultipleDisposalsReturn =>
+      r.draftReturn match {
+        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        case Left(m: DraftMultipleDisposalsReturn) =>
           val backLink =
             m.examplePropertyDetailsAnswers
               .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
@@ -339,7 +366,13 @@ class PropertyDetailsController @Inject() (
                 _ => controllers.returns.routes.TaskListController.taskList(),
                 _ => routes.PropertyDetailsController.checkYourAnswers()
               )
-          Ok(multipleDisposalsGuidancePage(backLink, r.journey.subscribedDetails.isATrust))
+          Ok(
+            multipleDisposalsGuidancePage(
+              backLink,
+              r.journey.subscribedDetails.isATrust,
+              extractIndividualUserType(r)
+            )
+          )
       }
     }
   }
@@ -347,10 +380,10 @@ class PropertyDetailsController @Inject() (
   def multipleDisposalsGuidanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withValidJourney(request) { (_, r) =>
-        withAssetTypes(r.journey.draftReturn) { assetTypes =>
-          r.journey.draftReturn match {
-            case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-            case m: DraftMultipleDisposalsReturn =>
+        withAssetTypes(r) { assetTypes =>
+          r.draftReturn match {
+            case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+            case Left(m: DraftMultipleDisposalsReturn) =>
               val redirectTo =
                 m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
@@ -370,9 +403,9 @@ class PropertyDetailsController @Inject() (
 
   def disposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.journey.draftReturn match {
-        case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case m: DraftMultipleDisposalsReturn =>
+      r.draftReturn match {
+        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        case Left(m: DraftMultipleDisposalsReturn) =>
           m.triageAnswers.fold(
             i => i.taxYear       -> i.completionDate,
             c => Some(c.taxYear) -> Some(c.completionDate)
@@ -395,9 +428,9 @@ class PropertyDetailsController @Inject() (
 
   def disposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.journey.draftReturn match {
-        case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case m: DraftMultipleDisposalsReturn =>
+      r.draftReturn match {
+        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        case Left(m: DraftMultipleDisposalsReturn) =>
           m.triageAnswers.fold(
             i => i.taxYear       -> i.completionDate,
             c => Some(c.taxYear) -> Some(c.completionDate)
@@ -471,9 +504,9 @@ class PropertyDetailsController @Inject() (
 
   def disposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.journey.draftReturn match {
-        case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case m: DraftMultipleDisposalsReturn =>
+      r.draftReturn match {
+        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        case Left(m: DraftMultipleDisposalsReturn) =>
           val answers = m.examplePropertyDetailsAnswers
             .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
@@ -484,16 +517,23 @@ class PropertyDetailsController @Inject() (
 
           val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
 
-          Ok(multipleDisposalsDisposalPricePage(form, backLink, r.journey.subscribedDetails.isATrust))
+          Ok(
+            multipleDisposalsDisposalPricePage(
+              form,
+              backLink,
+              r.journey.subscribedDetails.isATrust,
+              extractIndividualUserType(r)
+            )
+          )
       }
     }
   }
 
   def disposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.journey.draftReturn match {
-        case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case m: DraftMultipleDisposalsReturn =>
+      r.draftReturn match {
+        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        case Left(m: DraftMultipleDisposalsReturn) =>
           val answers = m.examplePropertyDetailsAnswers
             .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
           val backLink = disposalPriceBackLink(answers)
@@ -503,7 +543,12 @@ class PropertyDetailsController @Inject() (
             .fold(
               formWithErrors =>
                 BadRequest(
-                  multipleDisposalsDisposalPricePage(formWithErrors, backLink, r.journey.subscribedDetails.isATrust)
+                  multipleDisposalsDisposalPricePage(
+                    formWithErrors,
+                    backLink,
+                    r.journey.subscribedDetails.isATrust,
+                    extractIndividualUserType(r)
+                  )
                 ),
               disposalPrice =>
                 if (answers
@@ -549,9 +594,9 @@ class PropertyDetailsController @Inject() (
 
   def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.journey.draftReturn match {
-        case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case m: DraftMultipleDisposalsReturn =>
+      r.draftReturn match {
+        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        case Left(m: DraftMultipleDisposalsReturn) =>
           val answers = m.examplePropertyDetailsAnswers
             .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
@@ -562,16 +607,23 @@ class PropertyDetailsController @Inject() (
 
           val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
 
-          Ok(multipleDisposalsAcquisitionPricePage(form, backLink, r.journey.subscribedDetails.isATrust))
+          Ok(
+            multipleDisposalsAcquisitionPricePage(
+              form,
+              backLink,
+              r.journey.subscribedDetails.isATrust,
+              extractIndividualUserType(r)
+            )
+          )
       }
     }
   }
 
   def acquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      r.journey.draftReturn match {
-        case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case m: DraftMultipleDisposalsReturn =>
+      r.draftReturn match {
+        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+        case Left(m: DraftMultipleDisposalsReturn) =>
           val answers = m.examplePropertyDetailsAnswers
             .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
           val backLink = acquisitionPriceBackLink(answers)
@@ -581,7 +633,12 @@ class PropertyDetailsController @Inject() (
             .fold(
               formWithErrors =>
                 BadRequest(
-                  multipleDisposalsAcquisitionPricePage(formWithErrors, backLink, r.journey.subscribedDetails.isATrust)
+                  multipleDisposalsAcquisitionPricePage(
+                    formWithErrors,
+                    backLink,
+                    r.journey.subscribedDetails.isATrust,
+                    extractIndividualUserType(r)
+                  )
                 ),
               acquisitionPrice =>
                 if (answers
@@ -627,9 +684,12 @@ class PropertyDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) { (_, r) =>
-      withAssetTypes(r.journey.draftReturn) { assetTypes =>
-        r.journey.draftReturn match {
-          case m: DraftMultipleDisposalsReturn =>
+      withAssetTypes(r) { assetTypes =>
+        lazy val representeeAnswers =
+          r.journey.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
+
+        r.draftReturn match {
+          case Left(m: DraftMultipleDisposalsReturn) =>
             m.examplePropertyDetailsAnswers.fold[Future[Result]](
               Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
             ) {
@@ -638,6 +698,12 @@ class PropertyDetailsController @Inject() (
 
               case IncompleteExamplePropertyDetailsAnswers(_, None, _, _) =>
                 Redirect(routes.PropertyDetailsController.disposalDate())
+
+              case IncompleteExamplePropertyDetailsAnswers(_, Some(disposalDate), _, _)
+                  if (representeeAnswers
+                    .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+                    .exists(_.value <= disposalDate.value)) =>
+                Redirect(triageRoutes.CommonTriageQuestionsController.periodOfAdministrationNotHandled())
 
               case IncompleteExamplePropertyDetailsAnswers(_, _, None, _) =>
                 Redirect(routes.PropertyDetailsController.disposalPrice())
@@ -671,7 +737,8 @@ class PropertyDetailsController @Inject() (
                       multipleDisposalsCheckYourAnswersPage(
                         completeAnswers,
                         shouldAskIfPostcodeExists(assetTypes),
-                        r.journey.subscribedDetails.isATrust
+                        r.journey.subscribedDetails.isATrust,
+                        extractIndividualUserType(r)
                       )
                     )
                 )
@@ -681,13 +748,14 @@ class PropertyDetailsController @Inject() (
                   multipleDisposalsCheckYourAnswersPage(
                     c,
                     shouldAskIfPostcodeExists(assetTypes),
-                    r.journey.subscribedDetails.isATrust
+                    r.journey.subscribedDetails.isATrust,
+                    extractIndividualUserType(r)
                   )
                 )
 
             }
 
-          case s: DraftSingleDisposalReturn =>
+          case Right(s: DraftSingleDisposalReturn) =>
             s.propertyAddress.fold(
               Redirect(
                 if (shouldAskIfPostcodeExists(assetTypes))
@@ -716,6 +784,15 @@ class PropertyDetailsController @Inject() (
     disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }
 
+  private def extractIndividualUserType(
+    f: FillingOutReturnAddressJourney
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    f.individualUserType match {
+      case Some(IndividualUserType.Capacitor) => Some(Right(IndividualUserType.Capacitor))
+      case Some(IndividualUserType.PersonalRepresentative) =>
+        Some(Left(IndividualUserType.PersonalRepresentative))
+      case _ => None
+    }
   private def disposalPriceBackLink(answers: ExamplePropertyDetailsAnswers): Call =
     answers
       .fold(
@@ -731,11 +808,11 @@ class PropertyDetailsController @Inject() (
       )
 
   // the following aren't used for the returns journey - the returns journey only handles uk addresses
-  protected lazy val isUkCall: Call                    = enterPostcodeCall
-  protected lazy val isUkSubmitCall: Call              = enterPostcodeCall
-  protected lazy val enterNonUkAddressCall: Call       = enterPostcodeCall
-  protected lazy val enterNonUkAddressSubmitCall: Call = enterPostcodeCall
-  protected lazy val backLinkCall: Call                = enterPostcodeCall
+  protected lazy val isUkCall: Call                                       = enterPostcodeCall
+  protected lazy val isUkSubmitCall: Call                                 = enterPostcodeCall
+  protected lazy val enterNonUkAddressCall: Call                          = enterPostcodeCall
+  protected lazy val enterNonUkAddressSubmitCall: Call                    = enterPostcodeCall
+  protected lazy val backLinkCall: FillingOutReturnAddressJourney => Call = _ => enterPostcodeCall
 
 }
 

@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -30,10 +31,22 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
-@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(
+    answers: CompleteDisposalDetailsAnswers,
+    disposalMethod: DisposalMethod,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages: Messages)
+
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userKey = @{
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else ""
+}
 
 @disposalMethodKey = @{ disposalMethod match {
     case DisposalMethod.Gifted => ".Gifted"
@@ -49,19 +62,19 @@
   @cyaRow(
     shareOfPropertyTitle,
     Html(formatPercentage(answers.shareOfProperty.percentageValue)),
-    Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url)),
+    Some(cyaChange(messages("shareOfProperty.cyaChange"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url)),
       "propertyShare"
   )
   @cyaRow(
     disposalPriceTitle,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
-    Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url)),
+    Some(cyaChange(messages("disposalPrice.cyaChange"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url)),
       "disposalPrice"
   )
   @cyaRow(
     disposalFeesTitle,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalFees.inPounds())),
-    Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url)),
+    Some(cyaChange(messages("disposalFees.cyaChange"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url)),
       "disposalFees"
   )
 }

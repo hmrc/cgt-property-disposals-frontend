@@ -24,6 +24,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
@@ -441,7 +442,8 @@ class CommonTriageQuestionsControllerSpec
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
               ),
-              routes.SingleDisposalsTriageController.checkYourAnswers()
+              routes.SingleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
           }
 
@@ -457,7 +459,8 @@ class CommonTriageQuestionsControllerSpec
                 IncompleteSingleDisposalTriageAnswers.empty
                   .copy(individualUserType = Some(IndividualUserType.Capacitor))
               ),
-              routes.SingleDisposalsTriageController.checkYourAnswers()
+              routes.SingleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
           }
 
@@ -484,7 +487,8 @@ class CommonTriageQuestionsControllerSpec
               Right(sample[IndividualName])
             )(
               Right(newAnswers),
-              routes.SingleDisposalsTriageController.checkYourAnswers()
+              routes.SingleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
           }
 
@@ -500,7 +504,8 @@ class CommonTriageQuestionsControllerSpec
                 IncompleteMultipleDisposalsTriageAnswers.empty
                   .copy(individualUserType = Some(IndividualUserType.Capacitor))
               ),
-              routes.MultipleDisposalsTriageController.checkYourAnswers()
+              routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
           }
 
@@ -528,7 +533,8 @@ class CommonTriageQuestionsControllerSpec
               Right(sample[IndividualName])
             )(
               Left(newAnswers),
-              routes.MultipleDisposalsTriageController.checkYourAnswers()
+              routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              updateRepresenteeAnswers = _ => None
             )
 
           }
@@ -1081,9 +1087,12 @@ class CommonTriageQuestionsControllerSpec
         "the user is filling in a return and" when {
 
           "they are on a single disposal journey and change the answer to more than one property" in {
-            forAll { c: CompleteSingleDisposalTriageAnswers =>
-              val answers = c.copy(
-                individualUserType = Some(IndividualUserType.Self)
+            forAll { c: SingleDisposalTriageAnswers =>
+              val answers = c.fold(
+                _.copy(individualUserType = Some(IndividualUserType.Self)),
+                _.copy(
+                  individualUserType = Some(IndividualUserType.Self)
+                )
               )
 
               testSuccessfulUpdateFillingOutReturn(
@@ -1756,6 +1765,49 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
+    "handling requests to display the period of admin not handled page" must {
+
+      def performAction(): Future[Result] =
+        controller.periodOfAdministrationNotHandled()(FakeRequest())
+
+      "display the page" when {
+
+        def checkPage(result: Future[Result], expectedBackLink: Call): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey("periodOfAdminNotHandled.title"),
+            doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
+          )
+
+        "the user is on a single disposal journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(sample[CompleteSingleDisposalTriageAnswers]),
+                Right(sample[IndividualName])
+              )._1
+            )
+
+            checkPage(performAction(), routes.SingleDisposalsTriageController.whenWasDisposalDate())
+          }
+        }
+
+        "the user is on a multiple disposal journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(sample[IncompleteMultipleDisposalsTriageAnswers])._1
+            )
+
+            checkPage(performAction(), controllers.returns.address.routes.PropertyDetailsController.disposalDate())
+          }
+
+        }
+      }
+
+    }
+
   }
 
   def testSuccessfulUpdateStartingNewDraftReturn(
@@ -1764,10 +1816,14 @@ class CommonTriageQuestionsControllerSpec
     name: Either[TrustName, IndividualName]
   )(
     updatedAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
-    expectedRedirect: Call
+    expectedRedirect: Call,
+    updateRepresenteeAnswers: Option[RepresenteeAnswers] => Option[RepresenteeAnswers] = identity
   ): Unit = {
     val (session, journey) = sessionDataWithStartingNewDraftReturn(answers, name)
-    val updatedJourney     = journey.copy(newReturnTriageAnswers = updatedAnswers)
+    val updatedJourney = journey.copy(
+      newReturnTriageAnswers = updatedAnswers,
+      representeeAnswers     = updateRepresenteeAnswers(journey.representeeAnswers)
+    )
 
     inSequence {
       mockAuthWithNoRetrievals()

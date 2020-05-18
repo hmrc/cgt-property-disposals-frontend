@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, RepresenteeAnswers, RepresenteeContactDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, RepresenteeAnswers, RepresenteeContactDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney
@@ -86,6 +86,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
         ),
         _.copy(
           representeeAnswers = Some(answers)
+        ),
+        _.copy(
+          representeeAnswers = Some(answers)
         )
       )
     )
@@ -115,12 +118,19 @@ trait ChangeRepresenteeContactAddressControllerSpec
         case StartingNewDraftReturn(_, _, _, _, representeeAnswers)
             if isDefinedAndContainsContactDetails(representeeAnswers) =>
           true
+
         case FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn)
             if isDefinedAndContainsContactDetails(s.representeeAnswers) =>
           true
+
         case FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn)
             if isDefinedAndContainsContactDetails(m.representeeAnswers) =>
           true
+
+        case FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn)
+            if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
+          true
+
         case _ => false
       }
     )
@@ -156,8 +166,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
+      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
 
     }
 
@@ -203,7 +213,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, performAction)
+      behave like enterPostcodePage(UserType.Individual, None, performAction)
 
     }
 
@@ -230,6 +240,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
       behave like displaySelectAddress(
         UserType.Individual,
+        None,
         performAction,
         routes.RepresenteeController.checkYourAnswers()
       )

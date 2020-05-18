@@ -19,12 +19,16 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
+@import cats.syntax.eq._
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -38,27 +42,52 @@
   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"address"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-@line1Key = @{s"${key}-line1"}
-@line2Key = @{s"${key}-line2"}
-@line3Key = @{s"${key}-town"}
-@line4Key = @{s"${key}-county"}
+@userKey = @{
+  if (representativeType.exists(_.isLeft)) ".personalRep"
+  else if (representativeType.exists(_.isRight)) ".capacitor"
+  else if (isAgent) ".agent"
+  else if (isATrust) ".trust"
+  else ""
+}
+@journeyErrorKey = @{
+  addressJourneyType match {
+    case _: AddressJourneyType.Returns.EnteringCompanyDetails => ".companyDetails."
+    case _ => ""
+  }
+}
+
+@line1Key = @{s"$key-line1"}
+@line2Key = @{s"$key-line2"}
+@line3Key = @{s"$key-town"}
+@line4Key = @{s"$key-county"}
 @postcodeKey = @{"postcode"}
 
 @title = @{ addressJourneyType match {
   case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-    f.journey.draftReturn.fold(
+    f.draftReturn.fold(
       _ => messages("address.uk.returns.multipleDisposals.title"),
       _ => messages(s"address.uk.returns$userKey.singleDisposal.title")
     )
+  case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
+    if(c.representativeType.exists(_.isLeft))       messages("address.uk.companyDetails.personalRep.title")
+    else if(c.representativeType.exists(_.isRight)) messages("address.uk.companyDetails.capacitor.title")
+    else if(c.isATrust)                             messages("address.uk.companyDetails.trust.title")
+    else if(request.userType.exists(_ === Agent))   messages("address.uk.companyDetails.agent.title")
+    else                                            messages("address.uk.companyDetails.title")
   case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
     messages("address.uk.representee.title")
   case _ => messages("address.uk.title")
 }}
+
+@showFindAddressLink = @{ addressJourneyType match {
+  case _: AddressJourneyType.Returns.EnteringCompanyDetails => false
+  case _ => true
+}
+}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
@@ -68,7 +97,7 @@
   @backLinkComponent(backLink)
 
   @if(hasErrors) {
-    @errorSummary(form)
+    @errorSummary(form, userKeyOnly = journeyErrorKey.stripSuffix("."))
   }
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
@@ -78,8 +107,8 @@
       </legend>
       @textInput(
         fieldId = line1Key,
-        label = Html(messages("address.uk.line1.label")),
-        errorKey = form.error(line1Key).map(e => e.message),
+        label = Html(messages(s"address.uk.${journeyErrorKey.stripPrefix(".")}line1.label")),
+        errorKey = form.error(line1Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line1Key, ""),
         hasErrors = form.error(line1Key).nonEmpty,
         inputClass = Some("form-control-3-4"),
@@ -87,8 +116,8 @@
       )
       @textInput(
         fieldId = line2Key,
-        label = Html(messages("address.uk.line2.label")),
-        errorKey = form.error(line2Key).map(e => e.message),
+        label = Html(messages(s"address.uk.${journeyErrorKey.stripPrefix(".")}line2.label")),
+        errorKey = form.error(line2Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line2Key, ""),
         hasErrors = form.error(line2Key).nonEmpty,
         inputClass = Some("form-control-3-4"),
@@ -97,7 +126,7 @@
       @textInput(
         fieldId = line3Key,
         label = Html(messages("address.uk.line3.label")),
-        errorKey = form.error(line3Key).map(e => e.message),
+        errorKey = form.error(line3Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line3Key, ""),
         hasErrors = form.error(line3Key).nonEmpty,
         autoComplete = AutoCompleteType.AddressLevel2
@@ -105,7 +134,7 @@
       @textInput(
         fieldId = line4Key,
         label = Html(messages("address.uk.line4.label")),
-        errorKey = form.error(line4Key).map(e => e.message),
+        errorKey = form.error(line4Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line4Key, ""),
         hasErrors = form.error(line4Key).nonEmpty,
         autoComplete = AutoCompleteType.AddressLevel1
@@ -113,7 +142,7 @@
       @textInput(
         fieldId = postcodeKey,
         label = Html(messages("address.postcode.label")),
-        errorKey = form.error(postcodeKey).map(e => e.message),
+        errorKey = form.error(postcodeKey).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(postcodeKey, ""),
         hasErrors = form.error(postcodeKey).nonEmpty,
         inputClass = Some("form-control-1-4"),
@@ -121,9 +150,9 @@
       )
     </fieldset>
 
-    <p>
-      <a href="@{enterPostcode.url}">@messages("address.lookup.linkText")</a>
-    </p>
+    @if(showFindAddressLink) {
+      <p><a href="@{enterPostcode.url}">@messages("address.lookup.linkText")</a></p>
+    }
 
     @submitButton(messages(if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
   }

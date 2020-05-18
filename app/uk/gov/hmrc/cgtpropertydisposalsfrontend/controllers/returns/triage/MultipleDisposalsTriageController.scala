@@ -40,6 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.FormUtils.readValue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
@@ -49,7 +50,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{multipledisposals => triagePages}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -74,12 +76,15 @@ class MultipleDisposalsTriageController @Inject() (
   taxYearExchangedPage: triagePages.tax_year_exchanged,
   assetTypeForNonUkResidentsPage: triagePages.asset_type_for_non_uk_residents,
   completionDatePage: triagePages.completion_date,
+  disposalDateOfSharesForNonUk: disposal_date_of_shares,
   checkYourAnswersPage: triagePages.check_you_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
+
+  private val indirectDisposalsEnabled: Boolean = config.underlying.getBoolean("indirect-disposals.enabled")
 
   def guidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
@@ -88,7 +93,12 @@ class MultipleDisposalsTriageController @Inject() (
         _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
       )
       Ok(
-        guidancePage(backLink, state.isRight, state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust))
+        guidancePage(
+          backLink,
+          state.isRight,
+          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+          answers.representativeType()
+        )
       )
     }
 
@@ -189,7 +199,8 @@ class MultipleDisposalsTriageController @Inject() (
           form,
           backLink,
           state.isRight,
-          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+          answers.representativeType()
         )
       )
     }
@@ -211,7 +222,8 @@ class MultipleDisposalsTriageController @Inject() (
                 formWithErrors,
                 backLink,
                 state.isRight,
-                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+                answers.representativeType()
               )
             )
           },
@@ -320,7 +332,8 @@ class MultipleDisposalsTriageController @Inject() (
             form,
             backLink,
             state.isRight,
-            state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+            state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+            answers.representativeType()
           )
         )
       }
@@ -343,7 +356,8 @@ class MultipleDisposalsTriageController @Inject() (
                 formWithErrors,
                 backLink,
                 state.isRight,
-                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+                state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+                answers.representativeType()
               )
             )
           },
@@ -473,7 +487,8 @@ class MultipleDisposalsTriageController @Inject() (
           form,
           backLink,
           state.isRight,
-          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+          state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+          answers.representativeType()
         )
       )
     }
@@ -495,7 +510,8 @@ class MultipleDisposalsTriageController @Inject() (
                   formWithErrors,
                   backLink,
                   state.isRight,
-                  state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust)
+                  state.fold(_.subscribedDetails.isATrust, _._1.subscribedDetails.isATrust),
+                  answers.representativeType()
                 )
               )
             },
@@ -607,6 +623,106 @@ class MultipleDisposalsTriageController @Inject() (
         )
     }
 
+  def disposalDateOfShares(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      val backLink = answers.fold(
+        _ => routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents(),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      )
+      val form = answers.fold(_.completionDate, e => Some(e.completionDate)) match {
+        case Some(value) => sharesDisposalDateForm.fill(ShareDisposalDate(value.value))
+        case None        => sharesDisposalDateForm
+      }
+      Ok(
+        disposalDateOfSharesForNonUk(
+          form,
+          backLink,
+          state.isRight,
+          routes.MultipleDisposalsTriageController.disposalDateOfSharesSubmit()
+        )
+      )
+    }
+  }
+
+  def disposalDateOfSharesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
+      sharesDisposalDateForm
+        .bindFromRequest()
+        .fold(
+          { formWithErrors =>
+            val backLink = answers.fold(
+              _ => routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents(),
+              _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+            BadRequest(
+              disposalDateOfSharesForNonUk(
+                formWithErrors,
+                backLink,
+                state.isRight,
+                routes.MultipleDisposalsTriageController.disposalDateOfSharesSubmit()
+              )
+            )
+          },
+          shareDisposalDate =>
+            if (answers
+                  .fold(_.completionDate, c => Some(c.completionDate))
+                  .contains(CompletionDate(shareDisposalDate.value))) {
+              Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+            } else {
+              val result =
+                for {
+                  taxYear <- taxYearService.taxYear(shareDisposalDate.value)
+                  updatedAnswers <- EitherT
+                                     .fromEither[Future](
+                                       Right(
+                                         answers
+                                           .unset(_.completionDate)
+                                           .copy(
+                                             taxYear                = taxYear,
+                                             completionDate         = Some(CompletionDate(shareDisposalDate.value)),
+                                             taxYearAfter6April2020 = Some(taxYear.isDefined)
+                                           )
+                                       )
+                                     )
+                  newState = updateState(
+                    state,
+                    updatedAnswers,
+                    d =>
+                      d.copy(
+                        examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(_.unset(_.disposalDate)),
+                        yearToDateLiabilityAnswers    = None
+                      )
+                  )
+                  _ <- newState.fold(
+                        _ => EitherT.pure[Future, Error](()),
+                        r =>
+                          returnsService.storeDraftReturn(
+                            r.draftReturn,
+                            r.subscribedDetails.cgtReference,
+                            r.agentReferenceNumber
+                          )
+                      )
+                  _ <- EitherT(
+                        updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState.merge)))
+                      )
+                } yield taxYear
+
+              result.fold(
+                { e =>
+                  logger.warn("Could not find tax year or update session", e)
+                  errorHandler.errorResult()
+                },
+                taxYear =>
+                  if (taxYear.isEmpty)
+                    Redirect(routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly())
+                  else
+                    Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+              )
+            }
+        )
+    }
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
       val isIndividual = state.fold(_.subscribedDetails, _._1.subscribedDetails).userType().isRight
@@ -658,7 +774,9 @@ class MultipleDisposalsTriageController @Inject() (
           Redirect(routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents())
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _, _)
-            if assetTypes.forall(a => a === AssetType.IndirectDisposal || a === AssetType.MixedUse) =>
+            if assetTypes.forall(a =>
+              a === AssetType.MixedUse || (a === AssetType.IndirectDisposal && !indirectDisposalsEnabled)
+            ) =>
           Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, None, _, _, _, _) =>
@@ -666,6 +784,10 @@ class MultipleDisposalsTriageController @Inject() (
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(true), _, Some(false), _, _, _, _) =>
           Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
+
+        case IncompleteMultipleDisposalsTriageAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _, None)
+            if assetTypes === List(IndirectDisposal) && indirectDisposalsEnabled =>
+          Redirect(routes.MultipleDisposalsTriageController.disposalDateOfShares())
 
         case IncompleteMultipleDisposalsTriageAnswers(_, _, _, _, _, _, None, _, _) =>
           Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())

@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge}
 
 final case class ReturnSummary(
@@ -29,7 +29,7 @@ final case class ReturnSummary(
   lastUpdatedDate: Option[LocalDate],
   taxYear: String,
   mainReturnChargeAmount: AmountInPence,
-  propertyAddress: UkAddress,
+  propertyAddress: Address,
   charges: List[Charge]
 )
 
@@ -44,8 +44,6 @@ object ReturnSummary {
     def totalOutstanding(): AmountInPence = totalCharges() -- totalPaid()
 
   }
-
-  implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
 
   implicit val format: OFormat[ReturnSummary] = Json.format
 

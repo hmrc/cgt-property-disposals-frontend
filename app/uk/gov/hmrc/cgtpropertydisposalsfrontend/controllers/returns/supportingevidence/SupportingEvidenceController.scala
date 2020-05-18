@@ -28,14 +28,14 @@ import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc.{Result, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
@@ -45,7 +45,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{supportingevidence => pages}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -59,10 +58,8 @@ class SupportingEvidenceController @Inject() (
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
   upscanService: UpscanService,
-  upscanConnector: UpscanConnector,
   cc: MessagesControllerComponents,
   val configuration: Configuration,
-  error_template: views.html.error_template,
   doYouWantToUploadPage: pages.do_you_want_to_upload,
   uploadPage: pages.upload,
   expiredPage: pages.expired,
@@ -164,8 +161,9 @@ class SupportingEvidenceController @Inject() (
               }
 
               val newDraftReturn = fillingOutReturn.draftReturn match {
-                case s: DraftSingleDisposalReturn    => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-                case m: DraftMultipleDisposalsReturn => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
               }
 
               val result = for {
@@ -193,6 +191,7 @@ class SupportingEvidenceController @Inject() (
                 _ => CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty)
               )
               val newDraftReturn = fillingOutReturn.draftReturn.fold(
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
               )
@@ -265,7 +264,6 @@ class SupportingEvidenceController @Inject() (
           case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
             val result = for {
               upscanUpload <- upscanService.getUpscanUpload(uploadReference)
-
               _ <- upscanUpload.upscanCallBack match {
                     case Some(s: UpscanSuccess) =>
                       storeUpscanSuccess(upscanUpload, s, incompleteAnswers, fillingOutReturn)
@@ -323,6 +321,7 @@ class SupportingEvidenceController @Inject() (
 
     val newDraftReturn = fillingOutReturn.draftReturn.fold(
       _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
       _.copy(supportingEvidenceAnswers = Some(newAnswers))
     )
 
@@ -363,8 +362,9 @@ class SupportingEvidenceController @Inject() (
         )
 
         val newDraftReturn = fillingOutReturn.draftReturn match {
-          case s: DraftSingleDisposalReturn    => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case m: DraftMultipleDisposalsReturn => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
         }
 
         val result = for {
@@ -416,8 +416,9 @@ class SupportingEvidenceController @Inject() (
         }
 
         val newDraftReturn = fillingOutReturn.draftReturn match {
-          case s: DraftSingleDisposalReturn    => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case m: DraftMultipleDisposalsReturn => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
         }
 
         val result = for {
@@ -509,6 +510,7 @@ class SupportingEvidenceController @Inject() (
                 )
             )
             val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
+              _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
             )

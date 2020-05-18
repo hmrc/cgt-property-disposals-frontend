@@ -55,12 +55,15 @@ class SingleDisposalPropertyDetailsControllerSpec
 
   val draftReturn: DraftSingleDisposalReturn =
     sample[DraftSingleDisposalReturn].copy(
-      triageAnswers   = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.Residential),
+      triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+        .copy(assetType = AssetType.Residential, individualUserType = None),
       propertyAddress = Some(ukAddress(1))
     )
 
   val validJourneyStatus = FillingOutReturnAddressJourney(
-    FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
+    FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn),
+    Right(draftReturn),
+    None
   )
 
   override def overrideBindings: List[GuiceableModule] =
@@ -105,10 +108,9 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, performAction)
-      behave like displayEnterUkAddressPage(UserType.Agent, performAction)
-      behave like displayEnterUkAddressPage(UserType.Organisation, performAction)
-
+      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
+      behave like displayEnterUkAddressPage(UserType.Organisation, None, performAction)
     }
 
     "handling submitted addresses from enter UK address page" must {
@@ -131,9 +133,9 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like enterPostcodePage(UserType.Individual, performAction)
-      behave like enterPostcodePage(UserType.Agent, performAction)
-      behave like enterPostcodePage(UserType.Organisation, performAction)
+      behave like enterPostcodePage(UserType.Individual, None, performAction)
+      behave like enterPostcodePage(UserType.Agent, None, performAction)
+      behave like enterPostcodePage(UserType.Organisation, None, performAction)
 
     }
 
@@ -157,18 +159,21 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like displaySelectAddress(
         UserType.Individual,
+        None,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )
 
       behave like displaySelectAddress(
         UserType.Agent,
+        None,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )
 
       behave like displaySelectAddress(
         UserType.Organisation,
+        None,
         performAction,
         controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )

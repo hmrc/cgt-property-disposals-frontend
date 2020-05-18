@@ -50,7 +50,7 @@
         Html(s"""${
             answers.name.makeSingleName()}<br>
             ${answers.id match {
-                case RepresenteeCgtReference(cgtReference) => messages("representee.cyaLabel.cgtReference") + cgtReference.value
+                case RepresenteeCgtReference(cgtReference) => messages("representee.cyaLabel.cgtReference", cgtReference.value)
                 case _ => ""
             }}"""),
         Some(cyaChange(messages("representee.cyaChange.personRepresented"), routes.RepresenteeController.enterName().url)),
@@ -69,7 +69,7 @@
     @cyaRow(
         messages("representee.cyaLabel.contactName"),
         Html(answers.contactDetails.contactName.value),
-        Some(cyaChange(messages("representee.cyaChange.contactName"), "#")),
+        Some(cyaChange(messages("representee.cyaChange.contactName"), routes.RepresenteeController.changeContactName().url)),
         "contactName"
     )
     @cyaRow(

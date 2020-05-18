@@ -18,10 +18,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address
 
 import cats.Eq
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresenteeAnswers, RepresenteeContactDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, FillingOutReturnAddressJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, EnteringCompanyDetails, FillingOutReturnAddressJourney}
 
 sealed trait AddressJourneyType extends Product with Serializable
 
@@ -55,12 +56,23 @@ object AddressJourneyType {
 
   object Returns {
 
-    final case class FillingOutReturnAddressJourney(journey: FillingOutReturn) extends Returns
+    final case class FillingOutReturnAddressJourney(
+      journey: FillingOutReturn,
+      draftReturn: Either[DraftMultipleDisposalsReturn, DraftSingleDisposalReturn],
+      individualUserType: Option[IndividualUserType]
+    ) extends Returns
 
     final case class ChangingRepresenteeContactAddressJourney(
       journey: Either[StartingNewDraftReturn, FillingOutReturn],
       answers: RepresenteeAnswers,
       contactDetails: RepresenteeContactDetails
+    ) extends Returns
+
+    final case class EnteringCompanyDetails(
+      journey: FillingOutReturn,
+      draftReturn: DraftSingleIndirectDisposalReturn,
+      representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+      isATrust: Boolean
     ) extends Returns
 
   }
@@ -77,10 +89,11 @@ object AddressJourneyType {
       case _: Onboarding           => "subscription.caption"
       case _: ManagingSubscription => "account.caption"
       case f: FillingOutReturnAddressJourney =>
-        f.journey.draftReturn.fold(
+        f.draftReturn.fold(
           _ => "returns.property-details.multipleDisposals.caption",
           _ => "returns.property-address.singleDisposal.caption"
         )
+      case _: EnteringCompanyDetails                   => "companyDetails.caption"
       case _: ChangingRepresenteeContactAddressJourney => "representee.caption"
     }
 

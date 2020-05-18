@@ -472,10 +472,9 @@ class SupportingEvidenceControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockGetUpscanUpload(uploadReference)(Left(Error("no upload entry in mongo with this upload reference")))
             mockUpscanInitiate(
               routes.SupportingEvidenceController.uploadSupportingEvidenceError(),
-              _ => routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(uploadReference)
+              uploadReference => routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(uploadReference)
             )(
               Left(Error("some upscan error"))
             )
@@ -503,10 +502,9 @@ class SupportingEvidenceControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockGetUpscanUpload(uploadReference)(Left(Error("no upload entry in mongo with this upload reference")))
             mockUpscanInitiate(
               routes.SupportingEvidenceController.uploadSupportingEvidenceError(),
-              _ => routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(uploadReference)
+              uploadReference => routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(uploadReference)
             )(Right(upscanUpload))
           }
 
@@ -517,48 +515,6 @@ class SupportingEvidenceControllerSpec
               doc.select("#back").attr("href") shouldBe routes.SupportingEvidenceController
                 .doYouWantToUploadSupportingDocuments()
                 .url
-          )
-        }
-      }
-
-      "show form error" when {
-
-        "file size is too big" in {
-
-          def performAction(uploadReference: UploadReference): Future[Result] =
-            controller.uploadSupportingEvidence()(
-              FakeRequest("GET", s"/supporting-evidence/upscan-error/${uploadReference.value}?errorCode=EntityTooLarge")
-            )
-
-          val uploadReference    = sample[UploadReference]
-          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-          val upscanUpload =
-            sample[UpscanUpload].copy(uploadReference = uploadReference)
-
-          val upscanFailure = UpscanFailure(
-            upscanUpload.upscanUploadMeta.reference,
-            "FAILED",
-            Map("failureReason" -> "REJECTED", "message" -> "EntityTooLarge")
-          )
-
-          val answers = IncompleteSupportingEvidenceAnswers(
-            doYouWantToUploadSupportingEvidence = Some(true),
-            List(supportingEvidence),
-            List.empty
-          )
-
-          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockGetUpscanUpload(uploadReference)(Right(upscanUpload.copy(upscanCallBack = Some(upscanFailure))))
-          }
-
-          checkIsRedirect(
-            performAction(uploadReference),
-            routes.SupportingEvidenceController.uploadSupportingEvidence()
           )
         }
       }
@@ -620,79 +576,6 @@ class SupportingEvidenceControllerSpec
 
         }
 
-        "failed to process the error redirect request due to failure to find upscan record" in {
-          def performAction(uploadReference: UploadReference): Future[Result] =
-            controller.uploadSupportingEvidenceError()(
-              FakeRequest(
-                "GET",
-                s"/supporting-evidence/upscan-error/${uploadReference.value}?errorCode=EntityTooLarge"
-              )
-            )
-
-          val uploadReference    = sample[UploadReference]
-          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-          val upscanSuccess = sample[UpscanSuccess]
-
-          val answers = IncompleteSupportingEvidenceAnswers(
-            doYouWantToUploadSupportingEvidence = Some(true),
-            List(supportingEvidence),
-            List.empty
-          )
-
-          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockGetUpscanUpload(uploadReference)(Left(Error("some get error")))
-          }
-
-          checkIsTechnicalErrorPage(
-            performAction(uploadReference)
-          )
-
-        }
-
-        "failed to process the error redirect request due to failure to update upscan record" in {
-          def performAction(uploadReference: UploadReference): Future[Result] =
-            controller.uploadSupportingEvidenceError()(
-              FakeRequest(
-                "GET",
-                s"/supporting-evidence/upscan-error/${uploadReference.value}?errorCode=EntityTooLarge"
-              )
-            )
-
-          val uploadReference    = sample[UploadReference]
-          val supportingEvidence = sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-          val upscanUpload =
-            sample[UpscanUpload].copy(uploadReference = uploadReference)
-
-          val upscanFailure = UpscanFailure(
-            upscanUpload.upscanUploadMeta.reference,
-            "FAILED",
-            Map("failureReason" -> "REJECTED", "message" -> "EntityTooLarge")
-          )
-
-          val answers = IncompleteSupportingEvidenceAnswers(
-            doYouWantToUploadSupportingEvidence = Some(true),
-            List(supportingEvidence),
-            List.empty
-          )
-
-          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
-          }
-
-          checkIsTechnicalErrorPage(
-            performAction(uploadReference)
-          )
-        }
       }
     }
 
@@ -873,7 +756,6 @@ class SupportingEvidenceControllerSpec
 
           def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
 
-          val uploadReference = sample[UploadReference]
           val answers = IncompleteSupportingEvidenceAnswers.empty.copy(
             doYouWantToUploadSupportingEvidence = Some(true),
             List.empty,
@@ -1401,9 +1283,9 @@ class SupportingEvidenceControllerSpec
             mockGetUpscanUpload(uploadReference)(Right(upscanUpload))
           }
 
-          checkIsRedirect(
+          checkPageIsDisplayed(
             performAction(uploadReference),
-            routes.SupportingEvidenceController.uploadSupportingEvidence()
+            messageFromMessageKey("supporting-evidence.check-upscan-status.title")
           )
 
         }

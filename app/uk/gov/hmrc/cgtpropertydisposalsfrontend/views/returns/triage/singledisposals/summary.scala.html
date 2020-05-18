@@ -22,29 +22,49 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteSingleDisposalTriageAnswers, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(
+    answers: CompleteSingleDisposalTriageAnswers,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+
+@userKey = @{
+    if(representativeType.exists(_.isLeft)) ".personalRep"
+    else if(isAgent) ".agent"
+    else if(isATrust) ".trust"
+        else if(representativeType.exists(_.isRight)) ".capacitor"
+            else ""
+}
+
+@isIndirecDisposal = @{
+    answers match {
+        case CompleteSingleDisposalTriageAnswers(_, _, _, AssetType.IndirectDisposal, _, _) => true
+        case _ => false
+    }
+}
 
 @cyaSection() {
   @answers.individualUserType.map{ individualUserType =>
       @cyaRow(
           messages("who-are-you-reporting-for.title"),
           Html(messages(if(isAgent) s"individualUserType.agent.${individualUserType.toString}" else s"individualUserType.${individualUserType.toString}")),
-          Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
+          Some(cyaChange(messages("individualUserType.cyaChange"), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
           "individualUserType"
       )
   }
@@ -52,52 +72,62 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   @cyaRow(
     messages("numberOfProperties.title"),
     Html(messages(s"numberOfProperties.One")),
-    Some(cyaChange(messages("triage.cyaChange.numberOfProperties"), routes.CommonTriageQuestionsController.howManyProperties().url)),
+    Some(cyaChange(messages("numberOfProperties.cyaChange"), routes.CommonTriageQuestionsController.howManyProperties().url)),
       "numberOfProperties"
   )
   @cyaRow(
     messages(s"disposalMethod$userKey.title"),
     Html(messages(s"disposalMethod.${answers.disposalMethod.toString}")),
-    Some(cyaChange(messages("triage.cyaChange.disposalMethod"), routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty().url)),
+    Some(cyaChange(messages("disposalMethod.cyaChange"), routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty().url)),
       "disposalMethod"
   )
   @cyaRow(
     messages(s"wereYouAUKResident$userKey.title"),
     Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
-    Some(cyaChange(messages("triage.cyaChange.wereYouAUKResident"), routes.SingleDisposalsTriageController.wereYouAUKResident().url)),
+    Some(cyaChange(messages("wereYouAUKResident.cyaChange"), routes.SingleDisposalsTriageController.wereYouAUKResident().url)),
       "wereYouAUKResident"
   )
     @if(!answers.countryOfResidence.isUk()){
         @cyaRow(
             messages(s"triage.enterCountry$userKey.title"),
             Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
-            Some(cyaChange(messages("triage.cyaChange.countryOfResidence"), routes.SingleDisposalsTriageController.countryOfResidence().url)),
+            Some(cyaChange(messages("countryOfResidence.cyaChange"), routes.SingleDisposalsTriageController.countryOfResidence().url)),
             "countryOfResidence"
         )
         @cyaRow(
             messages(s"assetTypeForNonUkResidents$userKey.title"),
             Html(messages(s"assetTypeForNonUkResidents.${answers.assetType.toString}")),
-            Some(cyaChange(messages("triage.cyaChange.assetTypeForNonUkResidents"), routes.SingleDisposalsTriageController.assetTypeForNonUkResidents().url)),
+            Some(cyaChange(messages("assetTypeForNonUkResidents.cyaChange"), routes.SingleDisposalsTriageController.assetTypeForNonUkResidents().url)),
             "assetTypeForNonUkResidents"
         )
     } else {
         @cyaRow(
             messages(s"didYouDisposeOfResidentialProperty$userKey.title"),
             Html(messages(s"didYouDisposeOfResidentialProperty.${answers.assetType.toString}")),
-            Some(cyaChange(messages("triage.cyaChange.propertyType"), routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty().url)),
+            Some(cyaChange(messages("didYouDisposeOfResidentialProperty.cyaChange"), routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty().url)),
             "propertyType"
         )
     }
-  @cyaRow(
-    messages(s"disposalDate$userKey.title"),
-    Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
-    Some(cyaChange(messages("triage.cyaChange.disposalDate"), routes.SingleDisposalsTriageController.whenWasDisposalDate().url)),
-      "disposalDate"
-  )
-  @cyaRow(
-    messages(s"completionDate$userKey.title"),
-    Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
-    Some(cyaChange(messages("triage.cyaChange.completionDate"), routes.SingleDisposalsTriageController.whenWasCompletionDate().url)),
-      "completionDate"
-  )
+
+    @if(isIndirecDisposal) {
+        @cyaRow(
+            messages("sharesDisposalDate.title"),
+            Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
+            Some(cyaChange(messages("sharesDisposalDate.cyaChange"), routes.SingleDisposalsTriageController.disposalDateOfShares.url)),
+            "disposalDateOfShares"
+        )
+    } else {
+        @cyaRow(
+            messages(s"disposalDate$userKey.title"),
+            Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
+            Some(cyaChange(messages("disposalDate.cyaChange"), routes.SingleDisposalsTriageController.whenWasDisposalDate().url)),
+            "disposalDate"
+        )
+        @cyaRow(
+            messages(s"completionDate$userKey.title"),
+            Html(TimeUtils.govDisplayFormat(answers.completionDate.value)),
+            Some(cyaChange(messages("completionDate.cyaChange"), routes.SingleDisposalsTriageController.whenWasCompletionDate().url)),
+            "completionDate"
+        )
+    }
 }
