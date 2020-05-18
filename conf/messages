@@ -98,7 +98,8 @@ landingPage.reportingDisposals.h2=If you’re reporting indirect disposals or di
 landingPage.reportingDisposals.p1=Use the <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 landingPage.capasitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
 landingPage.capasitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
-landingPage.capasitorOrPersonalRepresentative.p2=If the disposal was made by the deceased’s estate during the period of administration, <a href="{0}">you’ll need to report and pay the tax another way</a>.
+landingPage.capasitorOrPersonalRepresentative.p2=<a href="{0}">Contact HMRC</a> and ask for a paper version of the return to be posted to you.
+landingPage.capasitorOrPersonalRepresentative.enabled.p2=If the disposal was made by the deceased’s estate during the period of administration, <a href="{0}">you’ll need to report and pay the tax another way</a>.
 landingPage.capasitorOrPersonalRepresentative.p3=To use this service for another person, where the the disposal was not made within a period of administration, you’ll need to:
 landingPage.capasitorOrPersonalRepresentative.p4=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
 landingPage.capasitorOrPersonalRepresentative.p5=The details you provide must match the details we hold about the person.
@@ -147,6 +148,7 @@ agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay 
 agentsLandingPage.report.uk-residents.list1.bullet3=view your client’s previous and current returns
 agentsLandingPage.report.what-residents-cannot-do.h4=What residents cannot do
 agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use the online service for your client to report UK property disposals for someone who has died - you’ll need to <a href="{0}">contact HMRC</a>.
+agentsLandingPage.report.what-residents-cannot-do.enabled.p1=You cannot use your client's online account to report a disposal made by a deceased's estate during the period of administration. You will need to <a href="{0}">report the tax another way</a> for your client.
 agentsLandingPage.report.non-residents.h4=Non-residents
 agentsLandingPage.report.non-residents.p1=Non-residents must report all sales or disposals of UK property within 30 days of the completion date, even if they have no tax to pay or have made a loss.
 agentsLandingPage.report.non-uk-residents.covid.p1=Due to coronavirus (COVID-19), non-residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
