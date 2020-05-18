@@ -41,6 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, Se
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, NonResidential, Residential}
 
 import scala.concurrent.Future
 
@@ -1784,7 +1785,7 @@ class CommonTriageQuestionsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Right(sample[CompleteSingleDisposalTriageAnswers]),
+                Right(sample[CompleteSingleDisposalTriageAnswers].copy(assetType = Residential)),
                 Right(sample[IndividualName])
               )._1
             )
@@ -1797,13 +1798,43 @@ class CommonTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionDataWithFillingOutReturn(sample[IncompleteMultipleDisposalsTriageAnswers])._1
+              sessionDataWithFillingOutReturn(
+                sample[IncompleteMultipleDisposalsTriageAnswers].copy(assetTypes = Some(List(NonResidential)))
+              )._1
             )
 
             checkPage(performAction(), controllers.returns.address.routes.PropertyDetailsController.disposalDate())
           }
 
         }
+
+        "the user is on a single indirect disposal journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = IndirectDisposal),
+                Right(sample[IndividualName])
+              )._1
+            )
+
+            checkPage(performAction(), routes.SingleDisposalsTriageController.disposalDateOfShares())
+          }
+        }
+
+        "the user is on a multiple indirect disposals journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(IndirectDisposal))
+              )._1
+            )
+
+            checkPage(performAction(), routes.MultipleDisposalsTriageController.disposalDateOfShares())
+          }
+        }
+
       }
 
     }
