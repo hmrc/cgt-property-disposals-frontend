@@ -130,6 +130,11 @@ class YearToDateLiabilityController @Inject() (
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(f(s, r, _))
 
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleIndirectDisposalReturn))) =>
+        d.yearToDateLiabilityAnswers.fold[Future[Result]](
+          f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
+        )(f(s, r, _))
+
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
