@@ -409,6 +409,11 @@ class SupportingEvidenceController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
         val updatedAnswers: SupportingEvidenceAnswers = answers match {
+          case IncompleteSupportingEvidenceAnswers(None, _, _) =>
+            sys.error(
+              "Could not find answer to 'do you want to upload?' question in incomplete supporting evidence answers"
+            )
+
           case IncompleteSupportingEvidenceAnswers(
               Some(doYouWantToUploadSupportingEvidence),
               evidences,

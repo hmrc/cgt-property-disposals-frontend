@@ -51,7 +51,7 @@ class LandingPageControllerSpec extends ControllerSpec {
             doc.select("#createAgentsAccountUrl > a").attr("href")  shouldBe viewConfig.createAgentsAccountUrl
             doc.select("#nrcgtReturn-1 > a").attr("href")           shouldBe viewConfig.nrcgtReturn
             doc.select("#nrcgtReturn-2 > a").attr("href")           shouldBe viewConfig.nrcgtReturn
-            doc.select("#contact-hmrc-1 > a").attr("href")          shouldBe viewConfig.contactHmrc
+            doc.select("#contact-hmrc-1 > a").attr("href")          shouldBe viewConfig.returnsForSomeoneWhoHasDied
             doc.select("#contact-hmrc-2 > a").attr("href")          shouldBe viewConfig.contactHmrc
             doc.select("#cgtUrl > a").attr("href")                  shouldBe viewConfig.cgtUrl
           }
