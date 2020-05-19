@@ -54,8 +54,8 @@
 @acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
 
 @exemptionsAndLossesState = @{
-    (disposalDetailsState, acquistionDetailsState) match {
-        case (Complete, Complete) =>
+    (companyDetailsState, disposalDetailsState, acquistionDetailsState) match {
+        case (Complete, Complete, Complete) =>
             draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
         case _ =>
             CannotStart

@@ -39,6 +39,7 @@ yesNo.false=No
 
 cya.change=Change
 cya.delete=Delete
+cya.remove=Remove
 cya.add=Add
 
 unit-input.assistive.pounds=do not enter the pound sign
@@ -146,7 +147,7 @@ agentsLandingPage.report.uk-residents.p4=If your client is a resident who is an 
 agentsLandingPage.report.uk-residents.list1.bullet1=report your client’s UK residential property disposals made from 6 April 2020
 agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay any tax they might owe for that disposal
 agentsLandingPage.report.uk-residents.list1.bullet3=view your client’s previous and current returns
-agentsLandingPage.report.what-residents-cannot-do.h4=What residents cannot do
+agentsLandingPage.report.what-residents-cannot-do.h4=What UK residents cannot do
 agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use the online service for your client to report UK property disposals for someone who has died - you’ll need to <a href="{0}">contact HMRC</a>.
 agentsLandingPage.report.what-residents-cannot-do.enabled.p1=You cannot use your client's online account to report a disposal made by a deceased's estate during the period of administration. You will need to <a href="{0}">report the tax another way</a> for your client.
 agentsLandingPage.report.non-residents.h4=Non-residents
@@ -2119,7 +2120,7 @@ taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
 exemptionsAndLosses.cya.title=Check your answers
 
-ytdLiability.caption=Tax amount owed
+ytdLiability.caption=Tax owed
 
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
 estimatedIncome.agent.title=What does your client believe their gross income will be in this tax year?
@@ -2838,7 +2839,7 @@ supporting-evidence.do-you-want-to-upload.help-text=Up to 2 documents can be upl
 
 supporting-evidence.check-your-answers.title=Check your answers
 supporting-evidence.check-your-answers.caption=Supporting evidence
-supporting-evidence.check-your-answers.file-label=Supporting evidence file {0}
+supporting-evidence.check-your-answers.file-label=Document {0}
 supporting-evidence.check-your-answers.do-you-want-to-upload-evidence=Do you want to upload any supporting evidence?
 supporting-evidence.check-your-answers.cya-change=Change
 supporting-evidence.check-your-answers.assistive=the file named {0}

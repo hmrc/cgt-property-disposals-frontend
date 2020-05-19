@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright 2020 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import java.time.LocalDate
@@ -690,7 +674,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              propertyAddress            = None,
+              propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
@@ -832,6 +816,7 @@ class TaskListControllerSpec
         }
 
       }
+
     }
 
     "handling requests to display the multiple disposal task list page" must {
@@ -1406,7 +1391,7 @@ class TaskListControllerSpec
             expectedStatus
           )
 
-        "the session data indicates that the disposal details and acquisition details have not yet been completed" in {
+        "the session data indicates that the company address details, disposal details and acquisition details have not yet been completed" in {
           List(
             None                                           -> None,
             Some(sample[IncompleteDisposalDetailsAnswers]) -> None,
@@ -1420,7 +1405,7 @@ class TaskListControllerSpec
                 test(
                   sample[DraftSingleIndirectDisposalReturn].copy(
                     triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-                    companyAddress            = None,
+                    companyAddress            = Some(sample[Address]),
                     disposalDetailsAnswers    = disposalDetailsAnswers,
                     acquisitionDetailsAnswers = acquisitionDetailsAnswers,
                     exemptionAndLossesAnswers = None
@@ -1429,14 +1414,13 @@ class TaskListControllerSpec
                 )
               }
           }
-
         }
 
-        "the disposal details and acquisition details sections have been completed and the section has not been started yet" in {
+        "the company address details, disposal details and acquisition details sections have been completed and the section has not been started yet" in {
           test(
             sample[DraftSingleIndirectDisposalReturn].copy(
               triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              companyAddress            = None,
+              companyAddress            = Some(sample[Address]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               exemptionAndLossesAnswers = None
@@ -1449,7 +1433,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleIndirectDisposalReturn].copy(
               triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              companyAddress            = None,
+              companyAddress            = Some(sample[Address]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])
@@ -1462,7 +1446,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleIndirectDisposalReturn].copy(
               triageAnswers             = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              companyAddress            = None,
+              companyAddress            = Some(sample[Address]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
@@ -1487,7 +1471,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleIndirectDisposalReturn].copy(
               triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              companyAddress             = None,
+              companyAddress             = Some(sample[Address]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               exemptionAndLossesAnswers  = None,
@@ -1501,10 +1485,24 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleIndirectDisposalReturn].copy(
               triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              companyAddress             = None,
+              companyAddress             = Some(sample[Address]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               exemptionAndLossesAnswers  = Some(sample[IncompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the losses and exemption section has not started yet so we cannot start the section" in {
+          test(
+            sample[DraftSingleIndirectDisposalReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+              companyAddress             = Some(sample[Address]),
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              exemptionAndLossesAnswers  = None,
               yearToDateLiabilityAnswers = None
             ),
             TaskListStatus.CannotStart
@@ -1515,7 +1513,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleIndirectDisposalReturn].copy(
               triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              companyAddress             = None,
+              companyAddress             = Some(sample[Address]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
@@ -1529,7 +1527,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleIndirectDisposalReturn].copy(
               triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              companyAddress             = None,
+              companyAddress             = Some(sample[Address]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
@@ -1543,7 +1541,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleIndirectDisposalReturn].copy(
               triageAnswers              = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
-              companyAddress             = None,
+              companyAddress             = Some(sample[Address]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
@@ -1552,6 +1550,7 @@ class TaskListControllerSpec
             TaskListStatus.Complete
           )
         }
+
       }
 
       "display the page with Save and come back later link" when {
@@ -1584,7 +1583,9 @@ class TaskListControllerSpec
         }
 
       }
+
     }
 
   }
+
 }
