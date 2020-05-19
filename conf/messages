@@ -39,6 +39,7 @@ yesNo.false=No
 
 cya.change=Change
 cya.delete=Delete
+cya.remove=Remove
 cya.add=Add
 
 unit-input.assistive.pounds=do not enter the pound sign
@@ -2119,7 +2120,7 @@ taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
 exemptionsAndLosses.cya.title=Check your answers
 
-ytdLiability.caption=Tax amount owed
+ytdLiability.caption=Tax owed
 
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
 estimatedIncome.agent.title=What does your client believe their gross income will be in this tax year?
@@ -2838,7 +2839,7 @@ supporting-evidence.do-you-want-to-upload.help-text=Up to 2 documents can be upl
 
 supporting-evidence.check-your-answers.title=Check your answers
 supporting-evidence.check-your-answers.caption=Supporting evidence
-supporting-evidence.check-your-answers.file-label=Supporting evidence file {0}
+supporting-evidence.check-your-answers.file-label=Document {0}
 supporting-evidence.check-your-answers.do-you-want-to-upload-evidence=Do you want to upload any supporting evidence?
 supporting-evidence.check-your-answers.cya-change=Change
 supporting-evidence.check-your-answers.assistive=the file named {0}
