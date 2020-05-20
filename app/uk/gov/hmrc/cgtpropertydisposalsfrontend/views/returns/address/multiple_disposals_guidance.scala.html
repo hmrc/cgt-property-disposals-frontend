@@ -34,7 +34,11 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(backLink: Call, isATrust: Boolean, representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+@(
+    backLink: Call,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    isMultipleIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"property-details.multiple-disposals.guidance"}
@@ -48,10 +52,16 @@
 }
 @title = @{messages(s"$key.title")}
 
+@captionMsg = @{
+    if(isMultipleIndirectDisposal)
+        messages("returns.indirect.property-details.multipleDisposals.caption")
+    else  messages("returns.property-details.multipleDisposals.caption")
+}
+
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
     @backLinkComponent(backLink)
 
-    @caption(messages("returns.property-details.multipleDisposals.caption"))
+    @caption(captionMsg)
 
     @pageHeading(title)
 

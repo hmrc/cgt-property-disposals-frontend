@@ -33,7 +33,12 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
 )
 
-@(form: Form[Boolean], backLink: Call, isSingleDisposal: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(
+    form: Form[Boolean],
+    backLink: Call,
+    isSingleDisposal: Boolean,
+    isMultipleIndirectDisposal: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"hasValidPostcode"}
 @journeyContext = @{ if(isSingleDisposal) "singleDisposal" else "multipleDisposals" }
@@ -41,6 +46,15 @@
 @submit = @{ if(isSingleDisposal) routes.PropertyDetailsController.singleDisposalHasUkPostcodeSubmit() else routes.PropertyDetailsController.multipleDisposalsHasUkPostcodeSubmit() }
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@captionMsg = @{
+    if(isSingleDisposal)
+        messages("returns.property-address.singleDisposal.caption")
+    else if (isMultipleIndirectDisposal)
+        messages("returns.indirect.property-details.multipleDisposals.caption")
+    else
+        messages("returns.property-details.multipleDisposals.caption")
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
@@ -50,7 +64,7 @@
         @errorSummary(form, Some(s"$key.$journeyContext"))
     }
 
-    @caption(messages(if(isSingleDisposal) "returns.property-address.singleDisposal.caption" else "returns.property-details.multipleDisposals.caption"))
+    @caption(captionMsg)
 
     @formWrapper(submit, 'novalidate -> "novalidate") {
         @yesNo(

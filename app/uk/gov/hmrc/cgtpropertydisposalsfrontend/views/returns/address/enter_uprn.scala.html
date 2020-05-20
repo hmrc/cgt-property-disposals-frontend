@@ -38,7 +38,12 @@
   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[UkAddress], backLink: Call, isSingleDisposal: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(
+    form: Form[UkAddress],
+    backLink: Call,
+    isSingleDisposal: Boolean,
+    isMultipleIndirectDisposal: Boolean
+)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"enterUPRN"}
 @line1Key = @{s"$key-line1"}
@@ -52,6 +57,12 @@
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
+@captionMsg = @{
+    if(isSingleDisposal) messages("returns.property-address.singleDisposal.caption")
+    else if (isMultipleIndirectDisposal) messages("returns.indirect.property-details.multipleDisposals.caption")
+    else messages("returns.property-details.multipleDisposals.caption")
+}
+
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
   @backLinkComponent(backLink)
@@ -60,7 +71,7 @@
     @errorSummary(form)
   }
 
-    @caption(messages(if(isSingleDisposal) "returns.property-address.singleDisposal.caption" else "returns.property-details.multipleDisposals.caption"))
+    @caption(captionMsg)
 
 @formWrapper(submit, 'novalidate -> "novalidate") {
     <fieldset id="@key" aria-describedby="address-hint">

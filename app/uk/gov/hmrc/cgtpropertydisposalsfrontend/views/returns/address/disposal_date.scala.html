@@ -37,7 +37,11 @@
  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[LocalDate], isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+  form: Form[LocalDate],
+  isATrust: Boolean,
+  isMultipleIndirectDisposal: Boolean
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsDisposalDate"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -46,13 +50,19 @@
 @title = @{messages(s"$key$userKey.title")}
 @errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
 
+@captionMsg = @{
+  if(isMultipleIndirectDisposal)
+       messages("returns.indirect.property-details.multipleDisposals.caption")
+  else messages("returns.property-details.multipleDisposals.caption")
+}
+
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
  @if(hasErrors) {
   @errorSummary(form)
  }
 
- @caption(messages("returns.property-details.multipleDisposals.caption"))
+ @caption(captionMsg)
 
  @formWrapper(address.routes.PropertyDetailsController.disposalDateSubmit(), 'novalidate -> "novalidate") {
   @dateInput(

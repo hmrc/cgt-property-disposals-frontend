@@ -968,11 +968,12 @@ task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax y
 task-list.check-and-send-return.link=Check and send return, pay any tax due
 task-list.upload-supporting-docs.link=Upload Your Supporting Documents
 
-
-task-list.enter-example-property-address.link=Enter details of one company
+task-list.enter-example-property-address.link=Enter details of one property
+task-list.indirect.enter-example-property-address.link=Enter details of one company
 
 returns.property-address.singleDisposal.caption=Property address
-returns.property-details.multipleDisposals.caption=Details of one company
+returns.property-details.multipleDisposals.caption=Details of one property disposal
+returns.indirect.property-details.multipleDisposals.caption=Details of one company
 
 property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
 property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.

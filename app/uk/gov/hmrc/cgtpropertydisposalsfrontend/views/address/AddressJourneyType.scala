@@ -85,12 +85,16 @@ object AddressJourneyType {
       case _: ManagingSubscription => true
       case _                       => false
     }
+
     def captionMessageKey(): String = a match {
       case _: Onboarding           => "subscription.caption"
       case _: ManagingSubscription => "account.caption"
       case f: FillingOutReturnAddressJourney =>
         f.draftReturn.fold(
-          _ => "returns.property-details.multipleDisposals.caption",
+          m =>
+            if (m.triageAnswers.isMultipleIndirectDisposal())
+              "returns.indirect.property-details.multipleDisposals.caption"
+            else "returns.property-details.multipleDisposals.caption",
           _ => "returns.property-address.singleDisposal.caption"
         )
       case _: EnteringCompanyDetails                   => "companyDetails.caption"

@@ -95,6 +95,16 @@ object MultipleDisposalsTriageAnswers {
         case Some(Capacitor)              => Some(Right(Capacitor))
         case _                            => None
       }
+
+    def isMultipleIndirectDisposal(): Boolean =
+      m.fold(
+        _.assetTypes,
+        c => Some(c.assetTypes)
+      ) match {
+        case Some(assetTypes) if assetTypes.contains(AssetType.IndirectDisposal) => true
+        case _                                                                   => false
+      }
+
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

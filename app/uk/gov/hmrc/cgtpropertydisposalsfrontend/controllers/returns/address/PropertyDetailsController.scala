@@ -241,7 +241,8 @@ class PropertyDetailsController @Inject() (
             hasValidPostcodePage(
               hasValidPostcodeForm,
               hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
-              isSingleDisposal
+              isSingleDisposal,
+              fillingOutReturn.journey.draftReturn.isMultipleIndirectDisposal()
             )
           )
         } else {
@@ -272,7 +273,8 @@ class PropertyDetailsController @Inject() (
                   hasValidPostcodePage(
                     formWithErrors,
                     hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
-                    isSingleDisposal
+                    isSingleDisposal,
+                    fillingOutReturn.journey.draftReturn.isMultipleIndirectDisposal()
                   )
                 ),
               hasValidPostcode =>
@@ -308,7 +310,8 @@ class PropertyDetailsController @Inject() (
             enterUPRNPage(
               enterUPRNForm,
               routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
-              isSingleDisposal
+              isSingleDisposal,
+              fillingOutReturn.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
             )
           )
         } else {
@@ -339,7 +342,8 @@ class PropertyDetailsController @Inject() (
                   enterUPRNPage(
                     formWithErrors,
                     routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
-                    isSingleDisposal
+                    isSingleDisposal,
+                    fillingOutReturn.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
                   )
                 ),
               storeAddress(
@@ -370,7 +374,8 @@ class PropertyDetailsController @Inject() (
             multipleDisposalsGuidancePage(
               backLink,
               r.journey.subscribedDetails.isATrust,
-              extractIndividualUserType(r)
+              extractIndividualUserType(r),
+              m.triageAnswers.isMultipleIndirectDisposal()
             )
           )
       }
@@ -418,7 +423,13 @@ class PropertyDetailsController @Inject() (
 
               val f    = getDisposalDateFrom(taxYear, completionDate)
               val form = disposalDate.fold(f)(c => f.fill(c.value))
-              Ok(multipleDisposalsDisposalDatePage(form, r.journey.subscribedDetails.isATrust))
+              Ok(
+                multipleDisposalsDisposalDatePage(
+                  form,
+                  r.journey.subscribedDetails.isATrust,
+                  r.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
+                )
+              )
 
             case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
           }
@@ -452,7 +463,8 @@ class PropertyDetailsController @Inject() (
                     BadRequest(
                       multipleDisposalsDisposalDatePage(
                         formWithErrors.copy(errors = updatedFormWithErrors),
-                        r.journey.subscribedDetails.isATrust
+                        r.journey.subscribedDetails.isATrust,
+                        r.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
                       )
                     )
                   }, { date =>
@@ -522,7 +534,8 @@ class PropertyDetailsController @Inject() (
               form,
               backLink,
               r.journey.subscribedDetails.isATrust,
-              extractIndividualUserType(r)
+              extractIndividualUserType(r),
+              r.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
             )
           )
       }
@@ -547,7 +560,8 @@ class PropertyDetailsController @Inject() (
                     formWithErrors,
                     backLink,
                     r.journey.subscribedDetails.isATrust,
-                    extractIndividualUserType(r)
+                    extractIndividualUserType(r),
+                    r.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
                   )
                 ),
               disposalPrice =>
@@ -612,7 +626,8 @@ class PropertyDetailsController @Inject() (
               form,
               backLink,
               r.journey.subscribedDetails.isATrust,
-              extractIndividualUserType(r)
+              extractIndividualUserType(r),
+              r.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
             )
           )
       }
@@ -637,7 +652,8 @@ class PropertyDetailsController @Inject() (
                     formWithErrors,
                     backLink,
                     r.journey.subscribedDetails.isATrust,
-                    extractIndividualUserType(r)
+                    extractIndividualUserType(r),
+                    r.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
                   )
                 ),
               acquisitionPrice =>
