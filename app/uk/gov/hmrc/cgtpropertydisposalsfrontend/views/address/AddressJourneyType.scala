@@ -92,7 +92,7 @@ object AddressJourneyType {
       case f: FillingOutReturnAddressJourney =>
         f.draftReturn.fold(
           m =>
-            if (m.triageAnswers.isMultipleIndirectDisposal())
+            if (f.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false))
               "returns.indirect.property-details.multipleDisposals.caption"
             else "returns.property-details.multipleDisposals.caption",
           _ => "returns.property-address.singleDisposal.caption"

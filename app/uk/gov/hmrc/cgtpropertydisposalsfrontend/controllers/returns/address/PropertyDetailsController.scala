@@ -375,7 +375,7 @@ class PropertyDetailsController @Inject() (
               backLink,
               r.journey.subscribedDetails.isATrust,
               extractIndividualUserType(r),
-              m.triageAnswers.isMultipleIndirectDisposal()
+              r.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false)
             )
           )
       }
