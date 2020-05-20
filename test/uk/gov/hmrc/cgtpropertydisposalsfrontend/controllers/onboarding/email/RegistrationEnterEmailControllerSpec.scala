@@ -42,7 +42,9 @@ class RegistrationEnterEmailControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override def toJourneyStatus(journeyType: EnteringRegistrationEmail): JourneyStatus = journeyType.journey.merge
+  override def toJourneyStatus(
+    journeyType: EnteringRegistrationEmail
+  ): JourneyStatus = journeyType.journey.merge
 
   val individualMissingEmail = sample[IndividualMissingEmail]
 
@@ -70,17 +72,24 @@ class RegistrationEnterEmailControllerSpec
       )
     )
 
-  override val mockUpdateEmail
-    : Option[(EnteringRegistrationEmail, EnteringRegistrationEmail, Either[Error, Unit]) => Unit] =
+  override val mockUpdateEmail: Option[
+    (
+      EnteringRegistrationEmail,
+      EnteringRegistrationEmail,
+      Either[Error, Unit]
+    ) => Unit
+  ] =
     None
 
-  override lazy val controller: RegistrationEnterEmailController = instanceOf[RegistrationEnterEmailController]
+  override lazy val controller: RegistrationEnterEmailController =
+    instanceOf[RegistrationEnterEmailController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: IndividualMissingEmail => true
         case _                         => false
       }
@@ -101,7 +110,9 @@ class RegistrationEnterEmailControllerSpec
     "handling submitted email addresses" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.enterEmailSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken)
+        controller.enterEmailSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -148,7 +159,8 @@ class RegistrationEnterEmailControllerSpec
         controller.emailVerified()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: RegistrationReady => true
           case _                    => false
         }

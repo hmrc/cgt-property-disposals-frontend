@@ -28,5 +28,6 @@ final case class SubscribedContactAddressChangedEvent(
 )
 
 object SubscribedContactAddressChangedEvent {
-  implicit val format: OFormat[SubscribedContactAddressChangedEvent] = Json.format[SubscribedContactAddressChangedEvent]
+  implicit val format: OFormat[SubscribedContactAddressChangedEvent] =
+    Json.format[SubscribedContactAddressChangedEvent]
 }

@@ -27,7 +27,9 @@ class ExemptionAndLossesAnswersSpec extends WordSpec with Matchers with ScalaChe
 
     "have a method which converts incomplete answers to complete answers" in {
       forAll { completeAnswers: CompleteExemptionAndLossesAnswers =>
-        IncompleteExemptionAndLossesAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteExemptionAndLossesAnswers(
+        IncompleteExemptionAndLossesAnswers.fromCompleteAnswers(
+          completeAnswers
+        ) shouldBe IncompleteExemptionAndLossesAnswers(
           Some(completeAnswers.inYearLosses),
           Some(completeAnswers.previousYearsLosses),
           Some(completeAnswers.annualExemptAmount)
@@ -40,7 +42,7 @@ class ExemptionAndLossesAnswersSpec extends WordSpec with Matchers with ScalaChe
 
       "have a method which unsets fields" when {
 
-        val completeAnswers = sample[CompleteExemptionAndLossesAnswers]
+        val completeAnswers   = sample[CompleteExemptionAndLossesAnswers]
         val incompleteAnswers =
           IncompleteExemptionAndLossesAnswers(
             Some(completeAnswers.inYearLosses),
@@ -48,15 +50,24 @@ class ExemptionAndLossesAnswersSpec extends WordSpec with Matchers with ScalaChe
             Some(completeAnswers.annualExemptAmount)
           )
         "given incomplete answers" in {
-          incompleteAnswers.unset(_.inYearLosses)        shouldBe incompleteAnswers.copy(inYearLosses        = None)
-          incompleteAnswers.unset(_.previousYearsLosses) shouldBe incompleteAnswers.copy(previousYearsLosses = None)
-          incompleteAnswers.unset(_.annualExemptAmount)  shouldBe incompleteAnswers.copy(annualExemptAmount  = None)
+          incompleteAnswers.unset(_.inYearLosses) shouldBe incompleteAnswers
+            .copy(inYearLosses = None)
+          incompleteAnswers.unset(
+            _.previousYearsLosses
+          )                                       shouldBe incompleteAnswers.copy(previousYearsLosses = None)
+          incompleteAnswers.unset(
+            _.annualExemptAmount
+          )                                       shouldBe incompleteAnswers.copy(annualExemptAmount = None)
         }
 
         "given complete answers" in {
-          completeAnswers.unset(_.inYearLosses)        shouldBe incompleteAnswers.copy(inYearLosses        = None)
-          completeAnswers.unset(_.previousYearsLosses) shouldBe incompleteAnswers.copy(previousYearsLosses = None)
-          completeAnswers.unset(_.annualExemptAmount)  shouldBe incompleteAnswers.copy(annualExemptAmount  = None)
+          completeAnswers.unset(_.inYearLosses)       shouldBe incompleteAnswers
+            .copy(inYearLosses = None)
+          completeAnswers.unset(
+            _.previousYearsLosses
+          )                                           shouldBe incompleteAnswers.copy(previousYearsLosses = None)
+          completeAnswers.unset(_.annualExemptAmount) shouldBe incompleteAnswers
+            .copy(annualExemptAmount = None)
         }
 
       }

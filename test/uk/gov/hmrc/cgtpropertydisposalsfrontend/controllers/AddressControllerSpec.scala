@@ -86,12 +86,15 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     val last = ukAddress(5)
     (head, last, 4, head :: ((2 to 4).map(ukAddress).toList ::: List(last)))
   }
-  val addressLookupResult = AddressLookupResult(postcode, None, addresses)
+  val addressLookupResult          = AddressLookupResult(postcode, None, addresses)
 
   lazy val sessionWithValidJourneyStatus =
     SessionData.empty.copy(journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)))
 
-  def userMessageKey(individualUserType: Option[IndividualUserType], userType: UserType): String =
+  def userMessageKey(
+    individualUserType: Option[IndividualUserType],
+    userType: UserType
+  ): String =
     (individualUserType, userType) match {
       case (Some(PersonalRepresentative), _) => ".personalRep"
       case (Some(Capacitor), _)              => ".capacitor"
@@ -101,10 +104,15 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       case other                             => sys.error(s"User type '$other' not handled")
     }
 
-  def getUserClue(userType: UserType, individualUserType: Option[IndividualUserType]): String =
+  def getUserClue(
+    userType: UserType,
+    individualUserType: Option[IndividualUserType]
+  ): String =
     s"${individualUserTypeClue(individualUserType)} acting on behalf of ${userTypeClue(userType)}"
 
-  def individualUserTypeClue(individualUserType: Option[IndividualUserType]): String =
+  def individualUserTypeClue(
+    individualUserType: Option[IndividualUserType]
+  ): String =
     individualUserType match {
       case Some(Capacitor)              => "a capacitor"
       case Some(PersonalRepresentative) => "a personal representative"
@@ -112,29 +120,37 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
     }
 
-  def userTypeClue(userType: UserType): String = userType match {
-    case UserType.Individual   => "an individual"
-    case UserType.Organisation => "a trust"
-    case UserType.Agent        => "an agent"
-    case other                 => sys.error(s"User type '$other' not handled")
-  }
+  def userTypeClue(userType: UserType): String =
+    userType match {
+      case UserType.Individual   => "an individual"
+      case UserType.Organisation => "a trust"
+      case UserType.Agent        => "an agent"
+      case other                 => sys.error(s"User type '$other' not handled")
+    }
 
-  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
-    case UserType.Agent => Some(sample[AgentReferenceNumber])
-    case _              => None
-  }
+  def setAgentReferenceNumber(
+    userType: UserType
+  ): Option[AgentReferenceNumber] =
+    userType match {
+      case UserType.Agent => Some(sample[AgentReferenceNumber])
+      case _              => None
+    }
 
-  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
-    case UserType.Organisation => Left(sample[TrustName])
-    case _                     => Right(sample[IndividualName])
-  }
+  def setNameForUserType(
+    userType: UserType
+  ): Either[TrustName, IndividualName] =
+    userType match {
+      case UserType.Organisation => Left(sample[TrustName])
+      case _                     => Right(sample[IndividualName])
+    }
 
   def displayIsUkBehaviour(
     performAction: () => Future[Result]
   )(implicit messagesApi: MessagesApi): Unit = {
 
     lazy val expectedTitleKey = validJourneyStatus match {
-      case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => "isUk.representee.title"
+      case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+        "isUk.representee.title"
       case _                                                                      => "subscription.isUk.title"
     }
 
@@ -154,8 +170,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey(expectedTitleKey))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey(expectedTitleKey)
+        )
       }
 
       "there are no address lookup results to clear from session" in {
@@ -167,8 +185,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey(expectedTitleKey))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey(expectedTitleKey)
+        )
       }
     }
     "display an error page" when {
@@ -203,7 +223,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         val expectedErrorKey = validJourneyStatus match {
           case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
             "isUk.representee.error.required"
-          case _ => "isUk.error.required"
+          case _                                                                      => "isUk.error.required"
         }
 
         inSequence {
@@ -211,8 +231,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result = performAction(Seq.empty)
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey(expectedErrorKey))
+        status(result)        shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey(expectedErrorKey)
+        )
       }
     }
 
@@ -243,20 +265,20 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     userType: UserType,
     individualUserType: Option[IndividualUserType],
     performAction: () => Future[Result]
-  )(
-    implicit messagesApi: MessagesApi
+  )(implicit
+    messagesApi: MessagesApi
   ): Unit =
     s"display the enter UK address page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedTitleMessageKey =
         validJourneyStatus match {
-          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney           =>
             f.draftReturn.fold(
               _ => "address.uk.returns.multipleDisposals.title",
               _ => s"address.uk.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
             )
           case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
             "address.uk.representee.title"
-          case _ => "address.uk.title"
+          case _                                                                      => "address.uk.title"
         }
 
       "the endpoint is requested" in {
@@ -266,26 +288,29 @@ trait AddressControllerSpec[A <: AddressJourneyType]
               userType = Some(userType),
               journeyStatus = Some(
                 f.journey.copy(
-                  subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+                  subscribedDetails = sample[SubscribedDetails]
+                    .copy(name = setNameForUserType(userType)),
                   agentReferenceNumber = setAgentReferenceNumber(userType),
                   draftReturn = f.draftReturn.fold(
                     _ =>
                       sample[DraftMultipleDisposalsReturn].copy(triageAnswers =
-                        sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = individualUserType)
+                        sample[IncompleteMultipleDisposalsTriageAnswers]
+                          .copy(individualUserType = individualUserType)
                       ),
                     _ =>
                       sample[DraftSingleDisposalReturn].copy(triageAnswers =
-                        sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType)
+                        sample[IncompleteSingleDisposalTriageAnswers]
+                          .copy(individualUserType = individualUserType)
                       )
                   )
                 )
               ),
               addressLookupResult = Some(addressLookupResult)
             )
-          case _ =>
+          case _                                                            =>
             SessionData.empty.copy(
-              userType            = Some(userType),
-              journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
+              userType = Some(userType),
+              journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)),
               addressLookupResult = Some(addressLookupResult)
             )
         }
@@ -296,13 +321,18 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey(expectedTitleMessageKey))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey(expectedTitleMessageKey)
+        )
       }
     }
 
-  def submitEnterUkAddress(performAction: Seq[(String, String)] => Future[Result], continue: Call)(
-    implicit messagesApi: MessagesApi
+  def submitEnterUkAddress(
+    performAction: Seq[(String, String)] => Future[Result],
+    continue: Call
+  )(implicit
+    messagesApi: MessagesApi
   ): Unit = {
     "return a form error" when {
       "address line 1 is empty" in {
@@ -311,8 +341,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result = performAction(Seq("postcode" -> "W1A2HV"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("address-line1.error.required"))
+        status(result)        shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("address-line1.error.required")
+        )
       }
       "address line 1 is too long" in {
         inSequence {
@@ -320,19 +352,31 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result = performAction(
-          Seq("address-line1" -> "1290b StreetWithAVeryLongNameForTestingTheMaxLength", "postcode" -> "W1A2HV")
+          Seq(
+            "address-line1" -> "1290b StreetWithAVeryLongNameForTestingTheMaxLength",
+            "postcode"      -> "W1A2HV"
+          )
         )
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("address-line1.error.tooLong"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("address-line1.error.tooLong")
+        )
       }
       "address line 1 is invalid" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
         }
-        val result = performAction(Seq("address-line1" -> "ContainsIllegal={%}=Characters", "postcode" -> "W1A2HV"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("address-line1.error.pattern"))
+        val result = performAction(
+          Seq(
+            "address-line1" -> "ContainsIllegal={%}=Characters",
+            "postcode"      -> "W1A2HV"
+          )
+        )
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("address-line1.error.pattern")
+        )
       }
       "address line 2 is too long" in {
         inSequence {
@@ -346,8 +390,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             "postcode"      -> "W1A2HV"
           )
         )
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("address-line2.error.tooLong"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("address-line2.error.tooLong")
+        )
       }
       "address postcode is empty" in {
         inSequence {
@@ -355,8 +401,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result = performAction(Seq("address-line1" -> "Some street"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("postcode.error.required"))
+        status(result)        shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("postcode.error.required")
+        )
       }
 
       "the address postcode contains invalid characters" in {
@@ -364,9 +412,13 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
         }
-        val result = performAction(Seq("address-line1" -> "Some street", "postcode" -> "W1A,2HV"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("postcode.error.invalidCharacters"))
+        val result = performAction(
+          Seq("address-line1" -> "Some street", "postcode" -> "W1A,2HV")
+        )
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("postcode.error.invalidCharacters")
+        )
       }
 
       "the address postcode does not have a valid format" in {
@@ -374,9 +426,13 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
         }
-        val result = performAction(Seq("address-line1" -> "Some street", "postcode" -> "ABC123"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("postcode.error.pattern"))
+        val result = performAction(
+          Seq("address-line1" -> "Some street", "postcode" -> "ABC123")
+        )
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("postcode.error.pattern")
+        )
       }
 
     }
@@ -384,19 +440,25 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
       "the address cannot be updated if updates are required" in {
         mockUpdateAddress.foreach { mockAddressUpdate =>
-          val newAddress = UkAddress("Test street", None, None, None, Postcode("W1A2HR"))
+          val newAddress =
+            UkAddress("Test street", None, None, None, Postcode("W1A2HR"))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithValidJourneyStatus)
             mockAddressUpdate(validJourneyStatus, newAddress, Left(Error("")))
           }
-          checkIsTechnicalErrorPage(performAction(Seq("address-line1" -> "Test street", "postcode" -> "W1A2HR")))
+          checkIsTechnicalErrorPage(
+            performAction(
+              Seq("address-line1" -> "Test street", "postcode" -> "W1A2HR")
+            )
+          )
         }
       }
 
       "the address cannot be stored in the session" in {
-        val newAddress = UkAddress("Test street", None, None, None, Postcode("W1A2HR"))
+        val newAddress     =
+          UkAddress("Test street", None, None, None, Postcode("W1A2HR"))
         val updatedSession = sessionWithValidJourneyStatus.copy(
           journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
@@ -404,17 +466,29 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
-          mockUpdateAddress.foreach(_(validJourneyStatus, newAddress, Right(())))
+          mockUpdateAddress.foreach(
+            _(validJourneyStatus, newAddress, Right(()))
+          )
           mockStoreSession(updatedSession)(Left(Error("")))
         }
-        checkIsTechnicalErrorPage(performAction(Seq("address-line1" -> "Test street", "postcode" -> "W1A2HR")))
+        checkIsTechnicalErrorPage(
+          performAction(
+            Seq("address-line1" -> "Test street", "postcode" -> "W1A2HR")
+          )
+        )
       }
     }
 
     s"redirect to ${continue.url}" when {
       "address has been stored in session" in {
-        val newAddress =
-          UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), Postcode("W1A2HR"))
+        val newAddress     =
+          UkAddress(
+            "Flat 1",
+            Some("The Street"),
+            Some("The Town"),
+            Some("Countyshire"),
+            Postcode("W1A2HR")
+          )
         val updatedSession = sessionWithValidJourneyStatus.copy(
           journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
@@ -422,7 +496,9 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
-          mockUpdateAddress.foreach(_(validJourneyStatus, newAddress, Right(())))
+          mockUpdateAddress.foreach(
+            _(validJourneyStatus, newAddress, Right(()))
+          )
           mockStoreSession(updatedSession)(Right(()))
         }
         val result = performAction(
@@ -439,16 +515,19 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     }
   }
 
-  def displayEnterNonUkPage(performAction: () => Future[Result])(implicit messagesApi: MessagesApi): Unit =
+  def displayEnterNonUkPage(
+    performAction: () => Future[Result]
+  )(implicit messagesApi: MessagesApi): Unit =
     "display the enter non UK address page" when {
       lazy val expectedTitleKey = validJourneyStatus match {
-        case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => "nonUkAddress.representee.title"
+        case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+          "nonUkAddress.representee.title"
         case _                                                                      => "nonUkAddress.title"
       }
 
       "the endpoint is requested" in {
         val session = SessionData.empty.copy(
-          journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
+          journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)),
           addressLookupResult = None
         )
         inSequence {
@@ -457,13 +536,18 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey(expectedTitleKey))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey(expectedTitleKey)
+        )
       }
     }
 
-  def submitEnterNonUkAddress(performAction: Seq[(String, String)] => Future[Result], continue: Call)(
-    implicit messagesApi: MessagesApi
+  def submitEnterNonUkAddress(
+    performAction: Seq[(String, String)] => Future[Result],
+    continue: Call
+  )(implicit
+    messagesApi: MessagesApi
   ): Unit = {
     "return a form error" when {
       "address line 1 is empty" in {
@@ -472,8 +556,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result = performAction(Seq("countryCode" -> "NZ"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("nonUkAddress-line1.error.required"))
+        status(result)        shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("nonUkAddress-line1.error.required")
+        )
       }
       "address line 1 is too long" in {
         inSequence {
@@ -481,10 +567,15 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result = performAction(
-          Seq("nonUkAddress-line1" -> "1290b StreetWithAVeryLongNameForTestingTheMaxLength", "countryCode" -> "NZ")
+          Seq(
+            "nonUkAddress-line1" -> "1290b StreetWithAVeryLongNameForTestingTheMaxLength",
+            "countryCode"        -> "NZ"
+          )
         )
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("nonUkAddress-line1.error.tooLong"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("nonUkAddress-line1.error.tooLong")
+        )
       }
       "address line 1 is invalid" in {
         inSequence {
@@ -492,9 +583,16 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result =
-          performAction(Seq("nonUkAddress-line1" -> "12 ContainsIllegal={%}=Characters", "countryCode" -> "NZ"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("nonUkAddress-line1.error.pattern"))
+          performAction(
+            Seq(
+              "nonUkAddress-line1" -> "12 ContainsIllegal={%}=Characters",
+              "countryCode"        -> "NZ"
+            )
+          )
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("nonUkAddress-line1.error.pattern")
+        )
       }
       "address line 2 is invalid" in {
         inSequence {
@@ -508,17 +606,22 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             "countryCode"        -> "NZ"
           )
         )
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("nonUkAddress-line2.error.pattern"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("nonUkAddress-line2.error.pattern")
+        )
       }
       "countryCode is empty" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
         }
-        val result = performAction(Seq("nonUkAddress-line1" -> "10 Some Street"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("countryCode.error.required"))
+        val result =
+          performAction(Seq("nonUkAddress-line1" -> "10 Some Street"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("countryCode.error.required")
+        )
       }
       "countryCode is invalid" in {
         inSequence {
@@ -526,8 +629,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(sessionWithValidJourneyStatus)
         }
         val result = performAction(Seq("countryCode" -> "XX"))
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey("countryCode.error.notFound"))
+        status(result)        shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey("countryCode.error.notFound")
+        )
       }
     }
 
@@ -535,18 +640,36 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
       "the address cannot be updated if updates are required" in {
         mockUpdateAddress.foreach { mockAddressUpdate =>
-          val newAddress = NonUkAddress("House 1", None, None, None, None, Country("NZ", Some("New Zealand")))
+          val newAddress = NonUkAddress(
+            "House 1",
+            None,
+            None,
+            None,
+            None,
+            Country("NZ", Some("New Zealand"))
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithValidJourneyStatus)
             mockAddressUpdate(validJourneyStatus, newAddress, Left(Error("")))
           }
-          checkIsTechnicalErrorPage(performAction(Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")))
+          checkIsTechnicalErrorPage(
+            performAction(
+              Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")
+            )
+          )
         }
       }
       "the address cannot be stored in the session" in {
-        val newAddress = NonUkAddress("House 1", None, None, None, None, Country("NZ", Some("New Zealand")))
+        val newAddress     = NonUkAddress(
+          "House 1",
+          None,
+          None,
+          None,
+          None,
+          Country("NZ", Some("New Zealand"))
+        )
         val updatedSession = sessionWithValidJourneyStatus.copy(
           journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
@@ -554,10 +677,16 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
-          mockUpdateAddress.foreach(_(validJourneyStatus, newAddress, Right(())))
+          mockUpdateAddress.foreach(
+            _(validJourneyStatus, newAddress, Right(()))
+          )
           mockStoreSession(updatedSession)(Left(Error("")))
         }
-        checkIsTechnicalErrorPage(performAction(Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")))
+        checkIsTechnicalErrorPage(
+          performAction(
+            Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")
+          )
+        )
       }
     }
 
@@ -578,7 +707,9 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
-          mockUpdateAddress.foreach(_(validJourneyStatus, newAddress, Right(())))
+          mockUpdateAddress.foreach(
+            _(validJourneyStatus, newAddress, Right(()))
+          )
 
           mockStoreSession(
             sessionWithValidJourneyStatus.copy(
@@ -603,13 +734,13 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     userType: UserType,
     individualUserType: Option[IndividualUserType],
     performAction: () => Future[Result]
-  )(
-    implicit messagesApi: MessagesApi
+  )(implicit
+    messagesApi: MessagesApi
   ): Unit =
     s"display the enter postcode page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedTitleMessageKey =
         validJourneyStatus match {
-          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney           =>
             f.draftReturn.fold(
               _ => "enterPostcode.returns.multipleDisposals.title",
               _ => s"enterPostcode.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
@@ -618,7 +749,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
             "enterPostcode.representee.title"
 
-          case _ => "enterPostcode.title"
+          case _                                                                      => "enterPostcode.title"
         }
 
       lazy val session = validJourneyStatus match {
@@ -627,16 +758,17 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             userType = Some(userType),
             journeyStatus = Some(
               f.journey.copy(
-                subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+                subscribedDetails = sample[SubscribedDetails]
+                  .copy(name = setNameForUserType(userType)),
                 agentReferenceNumber = setAgentReferenceNumber(userType)
               )
             ),
             addressLookupResult = Some(addressLookupResult)
           )
-        case _ =>
+        case _                                                            =>
           SessionData.empty.copy(
-            userType            = Some(userType),
-            journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
+            userType = Some(userType),
+            journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)),
             addressLookupResult = Some(addressLookupResult)
           )
       }
@@ -647,27 +779,31 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockGetSession(session)
         }
 
-        contentAsString(performAction()) should include(messageFromMessageKey(expectedTitleMessageKey))
+        contentAsString(performAction()) should include(
+          messageFromMessageKey(expectedTitleMessageKey)
+        )
       }
 
       "there is an address lookup result in session" in {
-        val addressLookupResult = AddressLookupResult(postcode, None, List.empty)
-        val session = validJourneyStatus match {
+        val addressLookupResult =
+          AddressLookupResult(postcode, None, List.empty)
+        val session             = validJourneyStatus match {
           case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
             SessionData.empty.copy(
               userType = Some(userType),
               journeyStatus = Some(
                 f.journey.copy(
-                  subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+                  subscribedDetails = sample[SubscribedDetails]
+                    .copy(name = setNameForUserType(userType)),
                   agentReferenceNumber = setAgentReferenceNumber(userType)
                 )
               ),
               addressLookupResult = Some(addressLookupResult)
             )
-          case _ =>
+          case _                                                            =>
             SessionData.empty.copy(
-              userType            = Some(userType),
-              journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
+              userType = Some(userType),
+              journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)),
               addressLookupResult = Some(addressLookupResult)
             )
         }
@@ -684,8 +820,11 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
     }
 
-  def submitEnterPostcode(performAction: Seq[(String, String)] => Future[Result], selectAddress: Call)(
-    implicit messagesApi: MessagesApi
+  def submitEnterPostcode(
+    performAction: Seq[(String, String)] => Future[Result],
+    selectAddress: Call
+  )(implicit
+    messagesApi: MessagesApi
   ): Unit = {
 
     behave like commonPostcodeFormValidationTests(
@@ -704,11 +843,16 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         mockAuthWithNoRetrievals()
         mockGetSession(sessionWithValidJourneyStatus)
         mockAddressLookup(p, None)(Right(addressLookupResult))
-        mockStoreSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))(Right(()))
+        mockStoreSession(
+          sessionWithValidJourneyStatus
+            .copy(addressLookupResult = Some(addressLookupResult))
+        )(Right(()))
       }
-      val result = performAction(Seq("postcode" -> p.value))
-      status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) should include(messageFromMessageKey("postcode.error.noResults"))
+      val result              = performAction(Seq("postcode" -> p.value))
+      status(result)        shouldBe BAD_REQUEST
+      contentAsString(result) should include(
+        messageFromMessageKey("postcode.error.noResults")
+      )
     }
 
     "show form errors when no results are found for a filter" in {
@@ -719,11 +863,16 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         mockAuthWithNoRetrievals()
         mockGetSession(sessionWithValidJourneyStatus)
         mockAddressLookup(p, Some(filter))(Right(addressLookupResult))
-        mockStoreSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))(Right(()))
+        mockStoreSession(
+          sessionWithValidJourneyStatus
+            .copy(addressLookupResult = Some(addressLookupResult))
+        )(Right(()))
       }
-      val result = performAction(Seq("postcode" -> p.value, "filter" -> filter))
-      status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) should include(messageFromMessageKey("filter.error.noResults"))
+      val result              = performAction(Seq("postcode" -> p.value, "filter" -> filter))
+      status(result)        shouldBe BAD_REQUEST
+      contentAsString(result) should include(
+        messageFromMessageKey("filter.error.noResults")
+      )
     }
 
     "show form errors when no results are found for a postcode within a stored search" in {
@@ -731,11 +880,16 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       val addressLookupResult = AddressLookupResult(p, None, List())
       inSequence {
         mockAuthWithNoRetrievals()
-        mockGetSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))
+        mockGetSession(
+          sessionWithValidJourneyStatus
+            .copy(addressLookupResult = Some(addressLookupResult))
+        )
       }
-      val result = performAction(Seq("postcode" -> p.value))
-      status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) should include(messageFromMessageKey("postcode.error.noResults"))
+      val result              = performAction(Seq("postcode" -> p.value))
+      status(result)        shouldBe BAD_REQUEST
+      contentAsString(result) should include(
+        messageFromMessageKey("postcode.error.noResults")
+      )
     }
 
     "show form errors when no results are found for a filter within a stored search" in {
@@ -744,11 +898,16 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       val addressLookupResult = AddressLookupResult(p, Some(filter), List())
       inSequence {
         mockAuthWithNoRetrievals()
-        mockGetSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))
+        mockGetSession(
+          sessionWithValidJourneyStatus
+            .copy(addressLookupResult = Some(addressLookupResult))
+        )
       }
-      val result = performAction(Seq("postcode" -> p.value, "filter" -> filter))
-      status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) should include(messageFromMessageKey("filter.error.noResults"))
+      val result              = performAction(Seq("postcode" -> p.value, "filter" -> filter))
+      status(result)        shouldBe BAD_REQUEST
+      contentAsString(result) should include(
+        messageFromMessageKey("filter.error.noResults")
+      )
     }
 
     "show an error page" when {
@@ -760,7 +919,9 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockAddressLookup(postcode, None)(Left(Error("Uh oh!")))
         }
 
-        checkIsTechnicalErrorPage(performAction(Seq("postcode" -> postcode.value)))
+        checkIsTechnicalErrorPage(
+          performAction(Seq("postcode" -> postcode.value))
+        )
       }
 
       "the address lookup result cannot be stored in session" in {
@@ -768,12 +929,17 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatus)
           mockAddressLookup(postcode, None)(Right(addressLookupResult))
-          mockStoreSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))(
+          mockStoreSession(
+            sessionWithValidJourneyStatus
+              .copy(addressLookupResult = Some(addressLookupResult))
+          )(
             Left(Error("Uh oh!"))
           )
         }
 
-        checkIsTechnicalErrorPage(performAction(Seq("postcode" -> postcode.value)))
+        checkIsTechnicalErrorPage(
+          performAction(Seq("postcode" -> postcode.value))
+        )
       }
 
     }
@@ -783,7 +949,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       "there is an address lookup result already in session for the same postcode" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))
+          mockGetSession(
+            sessionWithValidJourneyStatus
+              .copy(addressLookupResult = Some(addressLookupResult))
+          )
         }
 
         val result = performAction(Seq("postcode" -> postcode.value))
@@ -809,15 +978,24 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         "BFPO 123"
       ).foreach { postcode =>
         withClue(s"For postcode '$postcode': ") {
-          val formattedPostcode = Postcode(postcode.trim)
+          val formattedPostcode   = Postcode(postcode.trim)
           val addressLookupResult =
-            AddressLookupResult(formattedPostcode, None, List(sample[UkAddress]))
+            AddressLookupResult(
+              formattedPostcode,
+              None,
+              List(sample[UkAddress])
+            )
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithValidJourneyStatus)
-            mockAddressLookup(formattedPostcode, None)(Right(addressLookupResult))
-            mockStoreSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))(
+            mockAddressLookup(formattedPostcode, None)(
+              Right(addressLookupResult)
+            )
+            mockStoreSession(
+              sessionWithValidJourneyStatus
+                .copy(addressLookupResult = Some(addressLookupResult))
+            )(
               Right(())
             )
           }
@@ -835,7 +1013,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         mockAuthWithNoRetrievals()
         mockGetSession(sessionWithValidJourneyStatus)
         mockAddressLookup(postcode, None)(Right(addressLookupResult))
-        mockStoreSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))(Right(()))
+        mockStoreSession(
+          sessionWithValidJourneyStatus
+            .copy(addressLookupResult = Some(addressLookupResult))
+        )(Right(()))
       }
 
       val result = performAction(Seq("postcode" -> s"  ${postcode.value}  "))
@@ -848,9 +1029,13 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         mockAuthWithNoRetrievals()
         mockGetSession(sessionWithValidJourneyStatus)
         mockAddressLookup(postcode, None)(Right(addressLookupResult))
-        mockStoreSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))(Right(()))
+        mockStoreSession(
+          sessionWithValidJourneyStatus
+            .copy(addressLookupResult = Some(addressLookupResult))
+        )(Right(()))
       }
-      val result = performAction(Seq("filter" -> filter, "postcode" -> postcode.value))
+      val result =
+        performAction(Seq("filter" -> filter, "postcode" -> postcode.value))
       checkIsRedirect(result, selectAddress)
     }
 
@@ -860,9 +1045,13 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         mockAuthWithNoRetrievals()
         mockGetSession(sessionWithValidJourneyStatus)
         mockAddressLookup(postcode, Some(filter))(Right(addressLookupResult))
-        mockStoreSession(sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult)))(Right(()))
+        mockStoreSession(
+          sessionWithValidJourneyStatus
+            .copy(addressLookupResult = Some(addressLookupResult))
+        )(Right(()))
       }
-      val result = performAction(Seq("filter" -> filter, "postcode" -> postcode.value))
+      val result =
+        performAction(Seq("filter" -> filter, "postcode" -> postcode.value))
       checkIsRedirect(result, selectAddress)
     }
 
@@ -873,8 +1062,8 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     individualUserType: Option[IndividualUserType],
     performAction: () => Future[Result],
     whenNoAddressLookupResult: Call
-  )(
-    implicit messagesApi: MessagesApi
+  )(implicit
+    messagesApi: MessagesApi
   ): Unit = {
     s"redirect to ${whenNoAddressLookupResult.url}" when {
 
@@ -892,7 +1081,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
 
     s"display the select address page for ${getUserClue(userType, individualUserType)}" when {
       lazy val expectedMessageTitleKey = validJourneyStatus match {
-        case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+        case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney           =>
           f.draftReturn.fold(
             _ => "address-select.returns.multipleDisposals.title",
             _ => s"address-select.returns${userMessageKey(individualUserType, userType)}.singleDisposal.title"
@@ -901,7 +1090,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
           "address-select.representee.title"
 
-        case _ => "address-select.title"
+        case _                                                                      => "address-select.title"
       }
 
       s"there is an address lookup result in session for ${getUserClue(userType, individualUserType)}" in {
@@ -911,16 +1100,17 @@ trait AddressControllerSpec[A <: AddressJourneyType]
               userType = Some(userType),
               journeyStatus = Some(
                 f.journey.copy(
-                  subscribedDetails    = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+                  subscribedDetails = sample[SubscribedDetails]
+                    .copy(name = setNameForUserType(userType)),
                   agentReferenceNumber = setAgentReferenceNumber(userType)
                 )
               ),
               addressLookupResult = Some(addressLookupResult)
             )
-          case _ =>
+          case _                                                            =>
             SessionData.empty.copy(
-              userType            = Some(userType),
-              journeyStatus       = Some(controller.toJourneyStatus(validJourneyStatus)),
+              userType = Some(userType),
+              journeyStatus = Some(controller.toJourneyStatus(validJourneyStatus)),
               addressLookupResult = Some(addressLookupResult)
             )
         }
@@ -931,8 +1121,10 @@ trait AddressControllerSpec[A <: AddressJourneyType]
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey(expectedMessageTitleKey))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey(expectedMessageTitleKey)
+        )
       }
 
     }
@@ -974,12 +1166,16 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             withClue(s"For submitted data '$submitted': ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(sessionWithValidJourneyStatusAndAddressLookupResult)
+                mockGetSession(
+                  sessionWithValidJourneyStatusAndAddressLookupResult
+                )
               }
 
               val result = performAction(Seq("address-select" -> submitted))
-              status(result)          shouldBe BAD_REQUEST
-              contentAsString(result) should include(messageFromMessageKey(errorKey))
+              status(result)        shouldBe BAD_REQUEST
+              contentAsString(result) should include(
+                messageFromMessageKey(errorKey)
+              )
             }
         }
       }
@@ -996,23 +1192,30 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             mockAddressUpdate(validJourneyStatus, lastAddress, Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(Seq("address-select" -> s"$lastAddressIndex")))
+          checkIsTechnicalErrorPage(
+            performAction(Seq("address-select" -> s"$lastAddressIndex"))
+          )
         }
       }
 
       "the selected address cannot be stored in session" in {
-        val updatedSession = sessionWithValidJourneyStatusAndAddressLookupResult.copy(
-          journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress))
-        )
+        val updatedSession =
+          sessionWithValidJourneyStatusAndAddressLookupResult.copy(
+            journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress))
+          )
 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatusAndAddressLookupResult)
-          mockUpdateAddress.foreach(_(validJourneyStatus, lastAddress, Right(())))
+          mockUpdateAddress.foreach(
+            _(validJourneyStatus, lastAddress, Right(()))
+          )
           mockStoreSession(updatedSession)(Left(Error("")))
         }
 
-        checkIsTechnicalErrorPage(performAction(Seq("address-select" -> s"$lastAddressIndex")))
+        checkIsTechnicalErrorPage(
+          performAction(Seq("address-select" -> s"$lastAddressIndex"))
+        )
       }
 
     }
@@ -1020,18 +1223,22 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     "redirect to the continue endpoint" when {
 
       "the selected address is stored in session" in {
-        val updatedSession = sessionWithValidJourneyStatusAndAddressLookupResult.copy(
-          journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress))
-        )
+        val updatedSession =
+          sessionWithValidJourneyStatusAndAddressLookupResult.copy(
+            journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress))
+          )
 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithValidJourneyStatusAndAddressLookupResult)
-          mockUpdateAddress.foreach(_(validJourneyStatus, lastAddress, Right(())))
+          mockUpdateAddress.foreach(
+            _(validJourneyStatus, lastAddress, Right(()))
+          )
           mockStoreSession(updatedSession)(Right(()))
         }
 
-        val result = performAction(Seq("address-select" -> s"$lastAddressIndex"))
+        val result =
+          performAction(Seq("address-select" -> s"$lastAddressIndex"))
         checkIsRedirect(result, continue)
       }
 

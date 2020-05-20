@@ -32,7 +32,9 @@ class SingleDisposalTriageAnswersSpec extends WordSpec with Matchers with ScalaC
       forAll { c: CompleteSingleDisposalTriageAnswers =>
         val completeAnswers = c.copy(countryOfResidence = Country.uk)
 
-        IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteSingleDisposalTriageAnswers(
+        IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers(
+          completeAnswers
+        ) shouldBe IncompleteSingleDisposalTriageAnswers(
           completeAnswers.individualUserType,
           true,
           Some(completeAnswers.disposalMethod),
@@ -50,7 +52,9 @@ class SingleDisposalTriageAnswersSpec extends WordSpec with Matchers with ScalaC
       forAll { c: CompleteSingleDisposalTriageAnswers =>
         val completeAnswers = c.copy(countryOfResidence = sample[Country])
 
-        IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteSingleDisposalTriageAnswers(
+        IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers(
+          completeAnswers
+        ) shouldBe IncompleteSingleDisposalTriageAnswers(
           completeAnswers.individualUserType,
           true,
           Some(completeAnswers.disposalMethod),
@@ -71,7 +75,10 @@ class SingleDisposalTriageAnswersSpec extends WordSpec with Matchers with ScalaC
     "have a method which unsets fields" when {
 
       val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
-        .copy(individualUserType = Some(IndividualUserType.Self), countryOfResidence = sample[Country])
+        .copy(
+          individualUserType = Some(IndividualUserType.Self),
+          countryOfResidence = sample[Country]
+        )
 
       val incompleteAnswers = IncompleteSingleDisposalTriageAnswers(
         Some(IndividualUserType.Self),
@@ -86,26 +93,41 @@ class SingleDisposalTriageAnswersSpec extends WordSpec with Matchers with ScalaC
       )
 
       "given incomplete answers" in {
-        incompleteAnswers.unset(_.individualUserType) shouldBe incompleteAnswers.copy(individualUserType = None)
-        incompleteAnswers.unset(_.disposalMethod)     shouldBe incompleteAnswers.copy(disposalMethod     = None)
-        incompleteAnswers.unset(_.wasAUKResident)     shouldBe incompleteAnswers.copy(wasAUKResident     = None)
-        incompleteAnswers.unset(_.countryOfResidence) shouldBe incompleteAnswers.copy(countryOfResidence = None)
-        incompleteAnswers.unset(_.assetType)          shouldBe incompleteAnswers.copy(assetType          = None)
-        incompleteAnswers.unset(_.disposalDate)       shouldBe incompleteAnswers.copy(disposalDate       = None)
-        incompleteAnswers.unset(_.completionDate)     shouldBe incompleteAnswers.copy(completionDate     = None)
+        incompleteAnswers.unset(_.individualUserType) shouldBe incompleteAnswers
+          .copy(individualUserType = None)
+        incompleteAnswers.unset(_.disposalMethod)     shouldBe incompleteAnswers
+          .copy(disposalMethod = None)
+        incompleteAnswers.unset(_.wasAUKResident)     shouldBe incompleteAnswers
+          .copy(wasAUKResident = None)
+        incompleteAnswers.unset(_.countryOfResidence) shouldBe incompleteAnswers
+          .copy(countryOfResidence = None)
+        incompleteAnswers.unset(_.assetType)          shouldBe incompleteAnswers
+          .copy(assetType = None)
+        incompleteAnswers.unset(_.disposalDate)       shouldBe incompleteAnswers
+          .copy(disposalDate = None)
+        incompleteAnswers.unset(_.completionDate)     shouldBe incompleteAnswers
+          .copy(completionDate = None)
         incompleteAnswers
           .copy(tooEarlyDisposalDate = Some(LocalDate.MAX))
-          .unset(_.tooEarlyDisposalDate) shouldBe incompleteAnswers.copy(tooEarlyDisposalDate = None)
+          .unset(_.tooEarlyDisposalDate)              shouldBe incompleteAnswers
+          .copy(tooEarlyDisposalDate = None)
       }
 
       "given complete answers" in {
-        completeAnswers.unset(_.individualUserType) shouldBe incompleteAnswers.copy(individualUserType = None)
-        completeAnswers.unset(_.disposalMethod)     shouldBe incompleteAnswers.copy(disposalMethod     = None)
-        completeAnswers.unset(_.wasAUKResident)     shouldBe incompleteAnswers.copy(wasAUKResident     = None)
-        completeAnswers.unset(_.countryOfResidence) shouldBe incompleteAnswers.copy(countryOfResidence = None)
-        completeAnswers.unset(_.assetType)          shouldBe incompleteAnswers.copy(assetType          = None)
-        completeAnswers.unset(_.disposalDate)       shouldBe incompleteAnswers.copy(disposalDate       = None)
-        completeAnswers.unset(_.completionDate)     shouldBe incompleteAnswers.copy(completionDate     = None)
+        completeAnswers.unset(_.individualUserType) shouldBe incompleteAnswers
+          .copy(individualUserType = None)
+        completeAnswers.unset(_.disposalMethod)     shouldBe incompleteAnswers
+          .copy(disposalMethod = None)
+        completeAnswers.unset(_.wasAUKResident)     shouldBe incompleteAnswers
+          .copy(wasAUKResident = None)
+        completeAnswers.unset(_.countryOfResidence) shouldBe incompleteAnswers
+          .copy(countryOfResidence = None)
+        completeAnswers.unset(_.assetType)          shouldBe incompleteAnswers
+          .copy(assetType = None)
+        completeAnswers.unset(_.disposalDate)       shouldBe incompleteAnswers
+          .copy(disposalDate = None)
+        completeAnswers.unset(_.completionDate)     shouldBe incompleteAnswers
+          .copy(completionDate = None)
       }
 
     }

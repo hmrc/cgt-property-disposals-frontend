@@ -41,20 +41,24 @@ trait CgtCalculationService {
 }
 
 @Singleton
-class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: ExecutionContext)
-    extends CgtCalculationService {
+class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit
+  ec: ExecutionContext
+) extends CgtCalculationService {
 
   def calculateTaxDue(
     request: CalculateCgtTaxDueRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] =
     connector.calculateTaxDue(request).subflatMap { response =>
-      if (response.status === OK) {
+      if (response.status === OK)
         response
           .parseJSON[CalculatedTaxDue]()
           .leftMap(Error(_))
-      } else {
-        Left(Error(s"Call to calulate cgt tax due came back with status ${response.status}"))
-      }
+      else
+        Left(
+          Error(
+            s"Call to calulate cgt tax due came back with status ${response.status}"
+          )
+        )
     }
 
 }

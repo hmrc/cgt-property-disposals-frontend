@@ -28,18 +28,23 @@ object AmountInPence {
 
   val zero: AmountInPence = AmountInPence(0L)
 
-  def fromPounds(amount: BigDecimal): AmountInPence = AmountInPence((amount * BigDecimal("100")).toLong)
+  def fromPounds(amount: BigDecimal): AmountInPence =
+    AmountInPence((amount * BigDecimal("100")).toLong)
 
   implicit class AmountInPenceOps(private val a: AmountInPence) extends AnyVal {
     def inPounds(): BigDecimal = a.value / BigDecimal("100")
 
-    def ++(other: AmountInPence): AmountInPence = AmountInPence(a.value + other.value)
+    def ++(other: AmountInPence): AmountInPence =
+      AmountInPence(a.value + other.value)
 
-    def --(other: AmountInPence): AmountInPence = AmountInPence(a.value - other.value)
+    def --(other: AmountInPence): AmountInPence =
+      AmountInPence(a.value - other.value)
 
-    def withFloorZero: AmountInPence = if (a.value < 0L) AmountInPence.zero else a
+    def withFloorZero: AmountInPence =
+      if (a.value < 0L) AmountInPence.zero else a
 
-    def withCeilingZero: AmountInPence = if (a.value > 0L) AmountInPence.zero else a
+    def withCeilingZero: AmountInPence =
+      if (a.value > 0L) AmountInPence.zero else a
 
     def isNegative: Boolean = a < AmountInPence.zero
 
@@ -55,7 +60,8 @@ object AmountInPence {
     def total(): AmountInPence = AmountInPence(l.map(_.value).sum)
   }
 
-  implicit val order: Order[AmountInPence] = Order.by[AmountInPence, Long](_.value)
+  implicit val order: Order[AmountInPence] =
+    Order.by[AmountInPence, Long](_.value)
 
   implicit val format: Format[AmountInPence] =
     implicitly[Format[Long]].inmap(AmountInPence(_), _.value)

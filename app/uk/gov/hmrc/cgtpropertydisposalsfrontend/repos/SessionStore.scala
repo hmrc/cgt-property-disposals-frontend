@@ -30,15 +30,22 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[SessionStoreImpl])
 trait SessionStore {
 
-  def get()(implicit hc: HeaderCarrier): Future[Either[Error, Option[SessionData]]]
+  def get()(implicit
+    hc: HeaderCarrier
+  ): Future[Either[Error, Option[SessionData]]]
 
-  def store(sessionData: SessionData)(implicit hc: HeaderCarrier): Future[Either[Error, Unit]]
+  def store(sessionData: SessionData)(implicit
+    hc: HeaderCarrier
+  ): Future[Either[Error, Unit]]
 
 }
 
 @Singleton
-class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, configuration: Configuration)(
-  implicit ec: ExecutionContext
+class SessionStoreImpl @Inject() (
+  mongo: ReactiveMongoComponent,
+  configuration: Configuration
+)(implicit
+  ec: ExecutionContext
 ) extends SessionStore
     with Repo {
 
@@ -47,21 +54,36 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, configuration: 
       .get[FiniteDuration]("session-store.expiry-time")
       .value
 
-    new CacheMongoRepository("sessions", expireAfter.toSeconds)(mongo.mongoConnector.db, ec)
+    new CacheMongoRepository("sessions", expireAfter.toSeconds)(
+      mongo.mongoConnector.db,
+      ec
+    )
   }
 
   val sessionKey = "cgtpd-session"
 
-  def get()(implicit hc: HeaderCarrier): Future[Either[Error, Option[SessionData]]] =
+  def get()(implicit
+    hc: HeaderCarrier
+  ): Future[Either[Error, Option[SessionData]]] =
     hc.sessionId.map(_.value) match {
       case Some(sessionId) ⇒ get[SessionData](sessionId)
-      case None => Future.successful(Left(Error("no session id found in headers - cannot query mongo")))
+      case None =>
+        Future.successful(
+          Left(Error("no session id found in headers - cannot query mongo"))
+        )
     }
 
-  def store(sessionData: SessionData)(implicit hc: HeaderCarrier): Future[Either[Error, Unit]] =
+  def store(
+    sessionData: SessionData
+  )(implicit hc: HeaderCarrier): Future[Either[Error, Unit]] =
     hc.sessionId.map(_.value) match {
       case Some(sessionId) ⇒ store(sessionId, sessionData)
-      case None ⇒ Future.successful(Left(Error("no session id found in headers - cannot store data in mongo")))
+      case None ⇒
+        Future.successful(
+          Left(
+            Error("no session id found in headers - cannot store data in mongo")
+          )
+        )
     }
 
 }

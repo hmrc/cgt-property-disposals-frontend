@@ -48,7 +48,8 @@ trait RedirectToStartBehaviour {
       }
 
       "the journey status in session is not valid" in {
-        implicit val journeyStatusArb: Arbitrary[JourneyStatus] = arb(journeyStatusGen)
+        implicit val journeyStatusArb: Arbitrary[JourneyStatus] =
+          arb(journeyStatusGen)
 
         forAll { j: JourneyStatus =>
           whenever(!isValidJourneyStatus(j)) {

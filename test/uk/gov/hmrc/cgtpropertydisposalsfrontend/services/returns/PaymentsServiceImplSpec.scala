@@ -48,7 +48,13 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
     backUrl: Call
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .startPaymentJourney(_: CgtReference, _: Option[String], _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
+      .startPaymentJourney(
+        _: CgtReference,
+        _: Option[String],
+        _: AmountInPence,
+        _: Call,
+        _: Call
+      )(_: HeaderCarrier))
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -70,9 +76,25 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       "return an error" when {
 
         def test(response: Either[Error, HttpResponse]) = {
-          mockStartPaymentJourney(cgtReference, chargeReference, amount, returnCall, backCall)(response)
+          mockStartPaymentJourney(
+            cgtReference,
+            chargeReference,
+            amount,
+            returnCall,
+            backCall
+          )(response)
 
-          await(service.startPaymentJourney(cgtReference, chargeReference, amount, returnCall, backCall).value).isLeft shouldBe true
+          await(
+            service
+              .startPaymentJourney(
+                cgtReference,
+                chargeReference,
+                amount,
+                returnCall,
+                backCall
+              )
+              .value
+          ).isLeft shouldBe true
         }
 
         "the http call fails" in {
@@ -98,7 +120,13 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         "the http call came back with a 201 and the JSON " in {
           val response = PaymentsJourney("/next-url", "id")
 
-          mockStartPaymentJourney(cgtReference, chargeReference, amount, returnCall, backCall)(
+          mockStartPaymentJourney(
+            cgtReference,
+            chargeReference,
+            amount,
+            returnCall,
+            backCall
+          )(
             Right(
               HttpResponse(
                 CREATED,
@@ -112,7 +140,17 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             )
           )
 
-          await(service.startPaymentJourney(cgtReference, chargeReference, amount, returnCall, backCall).value) shouldBe Right(
+          await(
+            service
+              .startPaymentJourney(
+                cgtReference,
+                chargeReference,
+                amount,
+                returnCall,
+                backCall
+              )
+              .value
+          ) shouldBe Right(
             response
           )
         }

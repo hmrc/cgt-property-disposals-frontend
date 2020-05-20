@@ -91,22 +91,34 @@ class ViewReturnControllerSpec
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
     (mockPaymentsService
-      .startPaymentJourney(_: CgtReference, _: Option[String], _: AmountInPence, _: Call, _: Call)(
+      .startPaymentJourney(
+        _: CgtReference,
+        _: Option[String],
+        _: AmountInPence,
+        _: Call,
+        _: Call
+      )(
         _: HeaderCarrier,
         _: Request[_]
       ))
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
-    case UserType.Organisation => Left(sample[TrustName])
-    case _                     => Right(sample[IndividualName])
-  }
+  def setNameForUserType(
+    userType: UserType
+  ): Either[TrustName, IndividualName] =
+    userType match {
+      case UserType.Organisation => Left(sample[TrustName])
+      case _                     => Right(sample[IndividualName])
+    }
 
-  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
-    case UserType.Agent => Some(sample[AgentReferenceNumber])
-    case _              => None
-  }
+  def setAgentReferenceNumber(
+    userType: UserType
+  ): Option[AgentReferenceNumber] =
+    userType match {
+      case UserType.Agent => Some(sample[AgentReferenceNumber])
+      case _              => None
+    }
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
     case UserType.Agent | UserType.Organisation | UserType.Individual => true
@@ -122,52 +134,68 @@ class ViewReturnControllerSpec
 
       val ukResidentMainReturnChargeAmount: AmountInPence = AmountInPence(10000)
       val ukResidentReturnSentDate: LocalDate             = LocalDate.now()
-      val ukResidentMainReturnChargeDueDate: LocalDate    = LocalDate.now().plusMonths(1)
+      val ukResidentMainReturnChargeDueDate: LocalDate    =
+        LocalDate.now().plusMonths(1)
 
       val penaltyInterestChargeAmount: AmountInPence    = AmountInPence(10000)
-      val penaltyInterestChargeAmountDueDate: LocalDate = LocalDate.now().plusMonths(2)
+      val penaltyInterestChargeAmountDueDate: LocalDate =
+        LocalDate.now().plusMonths(2)
 
       val penaltyInterestCharge = sample[Charge].copy(
         chargeType = PenaltyInterest,
-        amount     = penaltyInterestChargeAmount,
-        dueDate    = penaltyInterestChargeAmountDueDate,
-        payments   = List.empty
+        amount = penaltyInterestChargeAmount,
+        dueDate = penaltyInterestChargeAmountDueDate,
+        payments = List.empty
       )
 
-      val fullPaymentForUkResidentMainReturnChargeDueDate: LocalDate = LocalDate.now().plusMonths(2)
+      val fullPaymentForUkResidentMainReturnChargeDueDate: LocalDate =
+        LocalDate.now().plusMonths(2)
 
       val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
-        amount       = ukResidentMainReturnChargeAmount,
-        method       = DirectDebit,
+        amount = ukResidentMainReturnChargeAmount,
+        method = DirectDebit,
         clearingDate = fullPaymentForUkResidentMainReturnChargeDueDate
       )
 
       val ukResidentReturnChargeFullPayment = sample[Charge].copy(
         chargeType = UkResidentReturn,
-        amount     = ukResidentMainReturnChargeAmount,
-        dueDate    = ukResidentMainReturnChargeDueDate,
-        payments   = List(fullPaymentForUkResidentReturnCharge)
+        amount = ukResidentMainReturnChargeAmount,
+        dueDate = ukResidentMainReturnChargeDueDate,
+        payments = List(fullPaymentForUkResidentReturnCharge)
       )
 
-      val chargesWithChargeRaiseAndFullPayment = List(ukResidentReturnChargeFullPayment, penaltyInterestCharge)
+      val chargesWithChargeRaiseAndFullPayment =
+        List(ukResidentReturnChargeFullPayment, penaltyInterestCharge)
 
       val sentReturn = sample[ReturnSummary].copy(
-        charges                = chargesWithChargeRaiseAndFullPayment,
+        charges = chargesWithChargeRaiseAndFullPayment,
         mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
-        submissionDate         = ukResidentReturnSentDate
+        submissionDate = ukResidentReturnSentDate
       )
 
-      def validatePaymentsSection(document: Document, viewingReturn: ViewingReturn): Unit = {
+      def validatePaymentsSection(
+        document: Document,
+        viewingReturn: ViewingReturn
+      ): Unit = {
         val paymentDetails = document
-          .select(s"#returnPaymentDetails-${viewingReturn.returnSummary.submissionId} > tr > td")
+          .select(
+            s"#returnPaymentDetails-${viewingReturn.returnSummary.submissionId} > tr > td"
+          )
           .eachText()
           .asScala
 
-        paymentDetails.headOption.fold(sys.error("Error"))(_.toString) should startWith("Tax payment")
-        paymentDetails(1)                                              shouldBe govShortDisplayFormat(ukResidentMainReturnChargeDueDate)
-        paymentDetails(2)                                              shouldBe formatAmountOfMoneyWithPoundSign(ukResidentMainReturnChargeAmount.inPounds())
+        paymentDetails.headOption.fold(sys.error("Error"))(
+          _.toString
+        )                   should startWith("Tax payment")
+        paymentDetails(1) shouldBe govShortDisplayFormat(
+          ukResidentMainReturnChargeDueDate
+        )
+        paymentDetails(2) shouldBe formatAmountOfMoneyWithPoundSign(
+          ukResidentMainReturnChargeAmount.inPounds()
+        )
         paymentDetails(3) shouldBe formatAmountOfMoneyWithPoundSign(
-          ukResidentMainReturnChargeAmount.inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
+          ukResidentMainReturnChargeAmount
+            .inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
         )
         paymentDetails(4) shouldBe "Paid"
 
@@ -175,24 +203,31 @@ class ViewReturnControllerSpec
           fullPaymentForUkResidentReturnCharge.amount.inPounds()
         )} direct debit payment received on ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
 
-        paymentDetails(6)  should startWith("Interest on penalties paid late")
-        paymentDetails(7)  shouldBe govShortDisplayFormat(penaltyInterestChargeAmountDueDate)
-        paymentDetails(8)  shouldBe formatAmountOfMoneyWithPoundSign(penaltyInterestChargeAmount.inPounds())
-        paymentDetails(9)  shouldBe formatAmountOfMoneyWithPoundSign(penaltyInterestChargeAmount.inPounds())
+        paymentDetails(6)    should startWith("Interest on penalties paid late")
+        paymentDetails(7)  shouldBe govShortDisplayFormat(
+          penaltyInterestChargeAmountDueDate
+        )
+        paymentDetails(8)  shouldBe formatAmountOfMoneyWithPoundSign(
+          penaltyInterestChargeAmount.inPounds()
+        )
+        paymentDetails(9)  shouldBe formatAmountOfMoneyWithPoundSign(
+          penaltyInterestChargeAmount.inPounds()
+        )
         paymentDetails(10) shouldBe "Pay now"
       }
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: ViewingReturn => true
           case _                => false
         }
       )
       val address = sample[UkAddress].copy(
-        line1    = "123 fake street",
-        line2    = None,
-        town     = None,
-        county   = None,
+        line1 = "123 fake street",
+        line2 = None,
+        town = None,
+        county = None,
         postcode = Postcode("abc123")
       )
 
@@ -204,26 +239,27 @@ class ViewReturnControllerSpec
           )
 
           val completeSingleDisposalReturn = c.copy(
-            triageAnswers      = c.triageAnswers.copy(individualUserType = None),
-            propertyAddress    = address,
+            triageAnswers = c.triageAnswers.copy(individualUserType = None),
+            propertyAddress = address,
             representeeAnswers = None
           )
 
           val sampleViewingReturn = sample[ViewingReturn]
             .copy(
-              completeReturn       = completeSingleDisposalReturn,
+              completeReturn = completeSingleDisposalReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails    = subscribedDetails
+              subscribedDetails = subscribedDetails
             )
 
-          val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
+          val viewingReturn =
+            sampleViewingReturn.copy(returnSummary = sentReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
                 journeyStatus = Some(viewingReturn),
-                userType      = Some(userType)
+                userType = Some(userType)
               )
             )
           }
@@ -231,28 +267,46 @@ class ViewReturnControllerSpec
           val result   = performAction()
           val document = Jsoup.parse(contentAsString(result))
 
-          document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
-          document.select("#date-sent-table-answer").text() shouldBe TimeUtils.govDisplayFormat(
-            sentReturn.submissionDate
-          )
-          document.select("#property-address-table-question").text() shouldBe "Property address"
-          document.select("#property-address-table-answer").text()   shouldBe "123 fake street, abc123"
-          document.select("#return-reference-table-question").text() shouldBe "Return reference number"
-          document.select("#return-reference-table-answer").text()   shouldBe sentReturn.submissionId
+          document
+            .select("#date-sent-table-question")
+            .text()                                         shouldBe "Return sent to HMRC"
+          document.select("#date-sent-table-answer").text() shouldBe TimeUtils
+            .govDisplayFormat(
+              sentReturn.submissionDate
+            )
+          document
+            .select("#property-address-table-question")
+            .text()                                         shouldBe "Property address"
+          document
+            .select("#property-address-table-answer")
+            .text()                                         shouldBe "123 fake street, abc123"
+          document
+            .select("#return-reference-table-question")
+            .text()                                         shouldBe "Return reference number"
+          document
+            .select("#return-reference-table-answer")
+            .text()                                         shouldBe sentReturn.submissionId
 
           document
-            .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
-            .text() shouldBe messageFromMessageKey(
+            .select(
+              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
+            )
+            .text()                                   shouldBe messageFromMessageKey(
             "viewReturn.title"
           )
-          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
-            document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
-          } else {
-            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
-          }
-          document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
-            viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
-          )
+          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
+            document
+              .select("#heading-reference")
+              .text()                                 shouldBe viewingReturn.subscribedDetails.cgtReference.value
+          else
+            document
+              .select("#heading-reference")
+              .text()                                 shouldBe viewingReturn.returnSummary.submissionId
+          document.select("#heading-tax-owed").text() shouldBe MoneyUtils
+            .formatAmountOfMoneyWithPoundSign(
+              viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero
+                .inPounds()
+            )
 
           validatePaymentsSection(document, viewingReturn)
           validateSingleDisposalCheckAllYourAnswersSections(
@@ -274,22 +328,23 @@ class ViewReturnControllerSpec
           )
 
           val completeMultipleDisposalsReturn = c.copy(
-            triageAnswers      = c.triageAnswers.copy(individualUserType = None),
+            triageAnswers = c.triageAnswers.copy(individualUserType = None),
             representeeAnswers = None
           )
 
           val sampleViewingReturn = sample[ViewingReturn]
             .copy(
-              completeReturn       = completeMultipleDisposalsReturn,
+              completeReturn = completeMultipleDisposalsReturn,
               agentReferenceNumber = setAgentReferenceNumber(userType),
-              subscribedDetails    = subscribedDetails
+              subscribedDetails = subscribedDetails
             )
 
-          val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
+          val viewingReturn =
+            sampleViewingReturn.copy(returnSummary = sentReturn)
 
           val sessionData = SessionData.empty.copy(
             journeyStatus = Some(viewingReturn),
-            userType      = Some(userType)
+            userType = Some(userType)
           )
 
           inSequence {
@@ -300,13 +355,22 @@ class ViewReturnControllerSpec
           val result   = performAction()
           val document = Jsoup.parse(contentAsString(result))
 
-          document.select("#date-sent-table-question").text() shouldBe "Return sent to HMRC"
-          document.select("#date-sent-table-answer").text() shouldBe TimeUtils.govDisplayFormat(
-            sentReturn.submissionDate
+          document
+            .select("#date-sent-table-question")
+            .text()                                         shouldBe "Return sent to HMRC"
+          document.select("#date-sent-table-answer").text() shouldBe TimeUtils
+            .govDisplayFormat(
+              sentReturn.submissionDate
+            )
+          val address = generateAddressLineForMultipleDisposals(
+            completeMultipleDisposalsReturn
           )
-          val address = generateAddressLineForMultipleDisposals(completeMultipleDisposalsReturn)
-          document.select("#property-address-table-question").text() shouldBe "Property address"
-          document.select("#property-address-table-answer").text()   shouldBe address
+          document
+            .select("#property-address-table-question")
+            .text() shouldBe "Property address"
+          document
+            .select("#property-address-table-answer")
+            .text() shouldBe address
           document
             .select("#return-reference-table-question")
             .text() shouldBe "Return reference number"
@@ -315,29 +379,37 @@ class ViewReturnControllerSpec
             .text() shouldBe sentReturn.submissionId
 
           document
-            .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
+            .select(
+              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
+            )
             .text() shouldBe messageFromMessageKey(
             "viewReturn.title"
           )
 
-          val expectedName = viewingReturn.subscribedDetails.name.fold(_.value, e => e.makeSingleName)
+          val expectedName = viewingReturn.subscribedDetails.name
+            .fold(_.value, e => e.makeSingleName)
           val actualName   = document.select("#user-details-name").text()
 
           if (subscribedDetails.isATrust)
-            actualName shouldBe s"Trust: $expectedName"
+            actualName                                shouldBe s"Trust: $expectedName"
           else if (Some(userType).contains(UserType.Agent))
             actualName shouldBe s"Client: $expectedName"
           else
             actualName shouldBe expectedName
 
-          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive) {
-            document.select("#heading-reference").text() shouldBe viewingReturn.subscribedDetails.cgtReference.value
-          } else {
-            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
-          }
-          document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
-            viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
-          )
+          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
+            document
+              .select("#heading-reference")
+              .text()                                 shouldBe viewingReturn.subscribedDetails.cgtReference.value
+          else
+            document
+              .select("#heading-reference")
+              .text()                                 shouldBe viewingReturn.returnSummary.submissionId
+          document.select("#heading-tax-owed").text() shouldBe MoneyUtils
+            .formatAmountOfMoneyWithPoundSign(
+              viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero
+                .inPounds()
+            )
 
           validatePaymentsSection(document, viewingReturn)
 
@@ -363,7 +435,8 @@ class ViewReturnControllerSpec
       )
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(""), {
+        () => performAction(""),
+        {
           case _: ViewingReturn => true
           case _                => false
         }
@@ -374,7 +447,9 @@ class ViewReturnControllerSpec
         "no charge can be found for the given charge reference" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn)))
+            mockGetSession(
+              SessionData.empty.copy(journeyStatus = Some(viewingReturn))
+            )
           }
 
           val result = performAction(s"${charge.chargeReference}123")
@@ -388,12 +463,15 @@ class ViewReturnControllerSpec
         "a charge can be found but there is an error starting the payments journey" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn)))
+            mockGetSession(
+              SessionData.empty.copy(journeyStatus = Some(viewingReturn))
+            )
             mockStartPaymentJourney(
               viewingReturn.subscribedDetails.cgtReference,
               Some(charge.chargeReference),
               charge.amount,
-              controllers.accounts.homepage.routes.HomePageController.homepage(),
+              controllers.accounts.homepage.routes.HomePageController
+                .homepage(),
               controllers.returns.routes.ViewReturnController.displayReturn()
             )(Left(Error("")))
           }
@@ -410,17 +488,23 @@ class ViewReturnControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn)))
+            mockGetSession(
+              SessionData.empty.copy(journeyStatus = Some(viewingReturn))
+            )
             mockStartPaymentJourney(
               viewingReturn.subscribedDetails.cgtReference,
               Some(charge.chargeReference),
               charge.amount,
-              controllers.accounts.homepage.routes.HomePageController.homepage(),
+              controllers.accounts.homepage.routes.HomePageController
+                .homepage(),
               controllers.returns.routes.ViewReturnController.displayReturn()
             )(Right(paymentsJourney))
           }
 
-          checkIsRedirect(performAction(charge.chargeReference), paymentsJourney.nextUrl)
+          checkIsRedirect(
+            performAction(charge.chargeReference),
+            paymentsJourney.nextUrl
+          )
         }
 
       }
@@ -433,11 +517,15 @@ class ViewReturnControllerSpec
     completeMultipleDisposalsReturn: CompleteMultipleDisposalsReturn
   ): String =
     List(
-      Some(completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line1),
+      Some(
+        completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line1
+      ),
       completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line2,
       completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.town,
       completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.county,
-      Some(completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.postcode.value)
+      Some(
+        completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.postcode.value
+      )
     ).collect { case Some(s) => s.trim }
       .mkString(", ")
 }

@@ -63,7 +63,8 @@ class AuthenticatedActionWithRetrievedData @Inject() (
   ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] = {
 
     implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+      HeaderCarrierConverter
+        .fromHeadersAndSession(request.headers, Some(request.session))
 
     auth
       .authorised()
@@ -79,10 +80,10 @@ class AuthenticatedActionWithRetrievedData @Inject() (
         case cl ~ affinityGroup ~ maybeNino ~ maybeSautr ~ maybeEmail ~ enrolments ~ creds =>
           withGGCredentials(creds, request) { ggCredId =>
             affinityGroup match {
-              case Some(AffinityGroup.Agent) =>
+              case Some(AffinityGroup.Agent)        =>
                 Future.successful(handleAgent(request, ggCredId, enrolments))
 
-              case Some(AffinityGroup.Individual) =>
+              case Some(AffinityGroup.Individual)   =>
                 handleIndividualOrOrganisation(
                   Right(AffinityGroup.Individual),
                   cl,
@@ -106,7 +107,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
                   request
                 )
 
-              case other =>
+              case other                            =>
                 logger.warn(s"User has usupported affinity group type $other")
                 Future.successful(Left(errorHandler.errorResult(None)(request)))
             }
@@ -115,7 +116,10 @@ class AuthenticatedActionWithRetrievedData @Inject() (
   }
 
   private def handleIndividualOrOrganisation[A](
-    affinityGroup: Either[AffinityGroup.Organisation.type, AffinityGroup.Individual.type],
+    affinityGroup: Either[
+      AffinityGroup.Organisation.type,
+      AffinityGroup.Individual.type
+    ],
     confidenceLevel: ConfidenceLevel,
     maybeNino: Option[String],
     maybeSautr: Option[String],
@@ -123,16 +127,18 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     enrolments: Enrolments,
     ggCredId: GGCredId,
     request: MessagesRequest[A]
-  )(implicit hc: HeaderCarrier): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
+  )(implicit
+    hc: HeaderCarrier
+  ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
     hasSubscribed(enrolments, request) map {
       case Left(errorResult) => Left(errorResult)
 
       case Right(Some(cgtReference)) =>
         handleSubscribedUser(cgtReference, ggCredId, affinityGroup, request)
 
-      case Right(None) =>
+      case Right(None)               =>
         (affinityGroup, confidenceLevel, maybeNino) match {
-          case (Right(AffinityGroup.Individual), cl, _) if cl < ConfidenceLevel.L200 =>
+          case (Right(AffinityGroup.Individual), cl, _) if cl < ConfidenceLevel.L200           =>
             Right(
               AuthenticatedRequestWithRetrievedData(
                 RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
@@ -159,24 +165,28 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               )
             )
 
-          case (Left(AffinityGroup.Organisation), _, _) =>
+          case (Left(AffinityGroup.Organisation), _, _)                                        =>
             handleOrganisation(request, enrolments, maybeEmail, ggCredId)
 
         }
     }
 
-  private def hasSubscribed[A](enrolments: Enrolments, request: MessagesRequest[A])(
-    implicit hc: HeaderCarrier
+  private def hasSubscribed[A](
+    enrolments: Enrolments,
+    request: MessagesRequest[A]
+  )(implicit
+    hc: HeaderCarrier
   ): Future[Either[Result, Option[CgtReference]]] =
     enrolments.getEnrolment(CgtEnrolment.key) match {
       case Some(cgtEnrolment) =>
         cgtEnrolment.getIdentifier(CgtEnrolment.cgtReferenceIdentifier) match {
-          case Some(cgtReference) => Future.successful(Right(Some(CgtReference(cgtReference.value))))
-          case None =>
+          case Some(cgtReference) =>
+            Future.successful(Right(Some(CgtReference(cgtReference.value))))
+          case None               =>
             logger.warn(s"CGT identifier value is missing from the enrolment")
             Future.successful(Left(errorHandler.errorResult(None)(request)))
         }
-      case None =>
+      case None               =>
         subscriptionService
           .hasFailedCgtEnrolment()
           .leftMap(_ => errorHandler.errorResult(None)(request))
@@ -186,18 +196,22 @@ class AuthenticatedActionWithRetrievedData @Inject() (
   private def handleSubscribedUser[A](
     cgtReference: CgtReference,
     ggCredId: GGCredId,
-    affinityGroup: Either[AffinityGroup.Organisation.type, AffinityGroup.Individual.type],
+    affinityGroup: Either[
+      AffinityGroup.Organisation.type,
+      AffinityGroup.Individual.type
+    ],
     request: MessagesRequest[A]
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
     def authenticatedRequest(userType: UserType) =
       AuthenticatedRequestWithRetrievedData(
-        RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
+        RetrievedUserType
+          .Subscribed(CgtReference(cgtReference.value), ggCredId),
         Some(userType),
         request
       )
 
     affinityGroup match {
-      case Right(AffinityGroup.Individual) =>
+      case Right(AffinityGroup.Individual)  =>
         Right(authenticatedRequest(UserType.Individual))
 
       case Left(AffinityGroup.Organisation) =>
@@ -206,22 +220,29 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     }
   }
 
-  private def withGGCredentials[A](credentials: Option[Credentials], request: MessagesRequest[A])(
-    f: GGCredId => Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]
+  private def withGGCredentials[A](
+    credentials: Option[Credentials],
+    request: MessagesRequest[A]
+  )(
+    f: GGCredId => Future[
+      Either[Result, AuthenticatedRequestWithRetrievedData[A]]
+    ]
   ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
     credentials match {
-      case None =>
+      case None                                       =>
         logger.warn("No credentials were retrieved")
         Future.successful(Left(errorHandler.errorResult(None)(request)))
 
       case Some(Credentials(id, "GovernmentGateway")) =>
         f(GGCredId(id))
 
-      case Some(Credentials(_, otherProvider)) =>
+      case Some(Credentials(_, otherProvider))        =>
         Future.successful(
           Right(
             AuthenticatedRequestWithRetrievedData(
-              RetrievedUserType.NonGovernmentGatewayRetrievedUser(otherProvider),
+              RetrievedUserType.NonGovernmentGatewayRetrievedUser(
+                otherProvider
+              ),
               Some(NonGovernmentGatewayUser),
               request
             )
@@ -253,7 +274,11 @@ class AuthenticatedActionWithRetrievedData @Inject() (
       },
       arn =>
         Right(
-          AuthenticatedRequestWithRetrievedData(RetrievedUserType.Agent(ggCredId, arn), Some(UserType.Agent), request)
+          AuthenticatedRequestWithRetrievedData(
+            RetrievedUserType.Agent(ggCredId, arn),
+            Some(UserType.Agent),
+            request
+          )
         )
     )
   }
@@ -266,10 +291,11 @@ class AuthenticatedActionWithRetrievedData @Inject() (
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
     // work out if it is an organisation or not
     enrolments.getEnrolment(TrustsEnrolment.key) match {
-      case None =>
+      case None                 =>
         Right(
           AuthenticatedRequestWithRetrievedData(
-            RetrievedUserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
+            RetrievedUserType
+              .OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
             Some(Organisation),
             request
           )

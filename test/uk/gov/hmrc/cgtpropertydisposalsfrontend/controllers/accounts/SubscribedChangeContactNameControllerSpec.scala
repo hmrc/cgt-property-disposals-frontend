@@ -41,30 +41,46 @@ class SubscribedChangeContactNameControllerSpec
     with ContactNameControllerSpec[Subscribed]
     with ScalaCheckDrivenPropertyChecks {
 
-  def mockSubscriptionUpdate(subscribedUpdateDetails: SubscribedUpdateDetails)(result: Either[Error, Unit]) =
+  def mockSubscriptionUpdate(
+    subscribedUpdateDetails: SubscribedUpdateDetails
+  )(result: Either[Error, Unit]) =
     (mockSubscriptionService
       .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
       .expects(subscribedUpdateDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
-  override val controller: SubscribedChangeContactNameController = instanceOf[SubscribedChangeContactNameController]
+  override val controller: SubscribedChangeContactNameController =
+    instanceOf[SubscribedChangeContactNameController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   override val validJourney: Subscribed = sample[Subscribed]
 
   override val mockUpdateContactName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
-    case (oldDetails: Subscribed, newDetails: Subscribed, r: Either[Error, Unit]) =>
-      mockSubscriptionUpdate(SubscribedUpdateDetails(newDetails.subscribedDetails, oldDetails.subscribedDetails))(r)
+    case (
+          oldDetails: Subscribed,
+          newDetails: Subscribed,
+          r: Either[Error, Unit]
+        ) =>
+      mockSubscriptionUpdate(
+        SubscribedUpdateDetails(
+          newDetails.subscribedDetails,
+          oldDetails.subscribedDetails
+        )
+      )(r)
   })
 
-  override def updateContactName(journey: Subscribed, contactName: ContactName): Subscribed =
+  override def updateContactName(
+    journey: Subscribed,
+    contactName: ContactName
+  ): Subscribed =
     journey.copy(subscribedDetails = journey.subscribedDetails.copy(contactName = contactName))
 
-  def isValidJourney(journey: JourneyStatus): Boolean = journey match {
-    case _: Subscribed => true
-    case _             => false
-  }
+  def isValidJourney(journey: JourneyStatus): Boolean =
+    journey match {
+      case _: Subscribed => true
+      case _             => false
+    }
 
   "SubscriptionEnterContactNameController" when {
 
@@ -74,7 +90,10 @@ class SubscribedChangeContactNameControllerSpec
 
     "handling submitted contact name" must {
       behave like enterContactNameSubmit(
-        data => controller.enterContactNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
+        data =>
+          controller.enterContactNameSubmit()(
+            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+          ),
         controllers.accounts.routes.AccountController.contactNameUpdated()
       )
     }

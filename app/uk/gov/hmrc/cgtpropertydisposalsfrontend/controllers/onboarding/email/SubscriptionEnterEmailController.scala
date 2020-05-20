@@ -65,7 +65,8 @@ class SubscriptionEnterEmailController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, EnteringSubscriptionEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: SubscriptionMissingData)) => Right(sessionData -> EnteringSubscriptionEmail(s))
+      case Some((sessionData, s: SubscriptionMissingData)) =>
+        Right(sessionData -> EnteringSubscriptionEmail(s))
       case _                                               => Left(Redirect(controllers.routes.StartController.start()))
     }
 
@@ -77,31 +78,54 @@ class SubscriptionEnterEmailController @Inject() (
   val subscriptionMissingDataEmailLens: Lens[SubscriptionMissingData, Option[Email]] =
     lens[SubscriptionMissingData].businessPartnerRecord.emailAddress
 
-  override def updateEmail(enteringSubscriptionEmail: EnteringSubscriptionEmail, email: Email)(
-    implicit hc: HeaderCarrier,
+  override def updateEmail(
+    enteringSubscriptionEmail: EnteringSubscriptionEmail,
+    email: Email
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] =
-    EitherT.rightT[Future, Error](subscriptionMissingDataEmailLens.set(enteringSubscriptionEmail.journey)(Some(email)))
+    EitherT.rightT[Future, Error](
+      subscriptionMissingDataEmailLens
+        .set(enteringSubscriptionEmail.journey)(Some(email))
+    )
 
-  override def auditEmailVerifiedEvent(enteringSubscriptionEmail: EnteringSubscriptionEmail, email: Email)(
-    implicit hc: HeaderCarrier,
+  override def auditEmailVerifiedEvent(
+    enteringSubscriptionEmail: EnteringSubscriptionEmail,
+    email: Email
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): Unit = ()
 
-  override def auditEmailChangeAttempt(enteringSubscriptionEmail: EnteringSubscriptionEmail, email: Email)(
-    implicit hc: HeaderCarrier,
+  override def auditEmailChangeAttempt(
+    enteringSubscriptionEmail: EnteringSubscriptionEmail,
+    email: Email
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): Unit = ()
 
-  override def name(enteringSubscriptionEmail: EnteringSubscriptionEmail): ContactName =
-    ContactName(enteringSubscriptionEmail.journey.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))
+  override def name(
+    enteringSubscriptionEmail: EnteringSubscriptionEmail
+  ): ContactName =
+    ContactName(
+      enteringSubscriptionEmail.journey.businessPartnerRecord.name
+        .fold(_.value, n => n.makeSingleName())
+    )
 
   override lazy protected val backLinkCall: Option[Call]      = None
-  override lazy protected val enterEmailCall: Call            = routes.SubscriptionEnterEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call      = routes.SubscriptionEnterEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call        = routes.SubscriptionEnterEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call   = routes.SubscriptionEnterEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call         = routes.SubscriptionEnterEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call = controllers.routes.StartController.start()
+  override lazy protected val enterEmailCall: Call            =
+    routes.SubscriptionEnterEmailController.enterEmail()
+  override lazy protected val enterEmailSubmitCall: Call      =
+    routes.SubscriptionEnterEmailController.enterEmailSubmit()
+  override lazy protected val checkYourInboxCall: Call        =
+    routes.SubscriptionEnterEmailController.checkYourInbox()
+  override lazy protected val verifyEmailCall: UUID => Call   =
+    routes.SubscriptionEnterEmailController.verifyEmail
+  override lazy protected val emailVerifiedCall: Call         =
+    routes.SubscriptionEnterEmailController.emailVerified()
+  override lazy protected val emailVerifiedContinueCall: Call =
+    controllers.routes.StartController.start()
 
 }

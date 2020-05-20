@@ -60,13 +60,22 @@ class RegistrationEnterAddressController @Inject() (
   val toJourneyStatus: IndividualSupplyingInformationAddressJourney => JourneyStatus = _.journey
 
   // trusts do not use this journey
-  def isATrust(journey: IndividualSupplyingInformationAddressJourney): Boolean = false
+  def isATrust(journey: IndividualSupplyingInformationAddressJourney): Boolean =
+    false
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, IndividualSupplyingInformationAddressJourney)] =
+  ): Either[
+    Result,
+    (SessionData, IndividualSupplyingInformationAddressJourney)
+  ] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _, _, _))) =>
+      case Some(
+            (
+              sessionData,
+              r @ IndividualSupplyingInformation(Some(_), None, _, _, _)
+            )
+          ) =>
         Right(sessionData -> IndividualSupplyingInformationAddressJourney(r))
       case _ =>
         Left(Redirect(controllers.routes.StartController.start()))
@@ -76,26 +85,38 @@ class RegistrationEnterAddressController @Inject() (
     journey: IndividualSupplyingInformationAddressJourney,
     address: Address,
     isManuallyEnteredAddress: Boolean
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] =
     EitherT.pure[Future, Error](journey.journey.copy(address = Some(address)))
 
   protected lazy val backLinkCall: IndividualSupplyingInformationAddressJourney => Call =
-    _ => controllers.onboarding.name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
+    _ =>
+      controllers.onboarding.name.routes.RegistrationEnterIndividualNameController
+        .enterIndividualName()
 
-  protected lazy val isUkCall: Call                 = routes.RegistrationEnterAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call           = routes.RegistrationEnterAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call       = routes.RegistrationEnterAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call = routes.RegistrationEnterAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call    = routes.RegistrationEnterAddressController.enterNonUkAddress()
+  protected lazy val isUkCall: Call                    =
+    routes.RegistrationEnterAddressController.isUk()
+  protected lazy val isUkSubmitCall: Call              =
+    routes.RegistrationEnterAddressController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call          =
+    routes.RegistrationEnterAddressController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call    =
+    routes.RegistrationEnterAddressController.enterUkAddressSubmit()
+  protected lazy val enterNonUkAddressCall: Call       =
+    routes.RegistrationEnterAddressController.enterNonUkAddress()
   protected lazy val enterNonUkAddressSubmitCall: Call =
     routes.RegistrationEnterAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call       = routes.RegistrationEnterAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call = routes.RegistrationEnterAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call       = routes.RegistrationEnterAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call = routes.RegistrationEnterAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call            = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
+  protected lazy val enterPostcodeCall: Call           =
+    routes.RegistrationEnterAddressController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call     =
+    routes.RegistrationEnterAddressController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call           =
+    routes.RegistrationEnterAddressController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call     =
+    routes.RegistrationEnterAddressController.selectAddressSubmit()
+  protected lazy val continueCall: Call                =
+    controllers.onboarding.routes.RegistrationController.checkYourAnswers()
 
 }

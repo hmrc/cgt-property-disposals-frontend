@@ -25,11 +25,17 @@ sealed trait BusinessPartnerRecordNameMatchAuditDetails extends Product with Ser
 
 object BusinessPartnerRecordNameMatchAuditDetails {
 
-  final case class IndividualNameWithSaUtrAuditDetails(firstName: String, lastName: String, sautr: String)
-      extends BusinessPartnerRecordNameMatchAuditDetails
+  final case class IndividualNameWithSaUtrAuditDetails(
+    firstName: String,
+    lastName: String,
+    sautr: String
+  ) extends BusinessPartnerRecordNameMatchAuditDetails
 
-  final case class IndividualNameWithNinoAuditDetails(firstName: String, lastName: String, nino: String)
-      extends BusinessPartnerRecordNameMatchAuditDetails
+  final case class IndividualNameWithNinoAuditDetails(
+    firstName: String,
+    lastName: String,
+    nino: String
+  ) extends BusinessPartnerRecordNameMatchAuditDetails
 
   final case class TrustNameWithTrnAuditDetails(trustName: String, trn: String)
       extends BusinessPartnerRecordNameMatchAuditDetails
@@ -38,19 +44,37 @@ object BusinessPartnerRecordNameMatchAuditDetails {
     nameMatchDetails: NameMatchDetails
   ): Option[BusinessPartnerRecordNameMatchAuditDetails] =
     nameMatchDetails match {
-      case IndividualSautrNameMatchDetails(name, sautr) =>
-        Some(IndividualNameWithSaUtrAuditDetails(name.firstName, name.lastName, sautr.value))
+      case IndividualSautrNameMatchDetails(name, sautr)    =>
+        Some(
+          IndividualNameWithSaUtrAuditDetails(
+            name.firstName,
+            name.lastName,
+            sautr.value
+          )
+        )
 
-      case TrustNameMatchDetails(name, trn) =>
+      case TrustNameMatchDetails(name, trn)                =>
         Some(TrustNameWithTrnAuditDetails(name.value, trn.value))
 
       case IndividualRepresenteeNameMatchDetails(name, id) =>
         id match {
-          case RepresenteeNino(nino) =>
-            Some(IndividualNameWithNinoAuditDetails(name.firstName, name.lastName, nino.value))
+          case RepresenteeNino(nino)   =>
+            Some(
+              IndividualNameWithNinoAuditDetails(
+                name.firstName,
+                name.lastName,
+                nino.value
+              )
+            )
           case RepresenteeSautr(sautr) =>
-            Some(IndividualNameWithSaUtrAuditDetails(name.firstName, name.lastName, sautr.value))
-          case _ => None
+            Some(
+              IndividualNameWithSaUtrAuditDetails(
+                name.firstName,
+                name.lastName,
+                sautr.value
+              )
+            )
+          case _                       => None
         }
 
     }
@@ -66,8 +90,10 @@ object BusinessPartnerRecordNameMatchAuditDetails {
       Json.writes[TrustNameWithTrnAuditDetails]
 
     OWrites[BusinessPartnerRecordNameMatchAuditDetails] {
-      case i: IndividualNameWithSaUtrAuditDetails => individualSautrWrites.writes(i)
-      case i: IndividualNameWithNinoAuditDetails  => individualNinoWrites.writes(i)
+      case i: IndividualNameWithSaUtrAuditDetails =>
+        individualSautrWrites.writes(i)
+      case i: IndividualNameWithNinoAuditDetails  =>
+        individualNinoWrites.writes(i)
       case t: TrustNameWithTrnAuditDetails        => trustWrites.writes(t)
     }
   }

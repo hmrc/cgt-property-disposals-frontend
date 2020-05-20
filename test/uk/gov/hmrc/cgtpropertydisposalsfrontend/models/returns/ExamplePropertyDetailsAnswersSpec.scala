@@ -27,7 +27,9 @@ class ExamplePropertyDetailsAnswersSpec extends WordSpec with Matchers with Scal
 
     "have a method which converts incomplete answers to complete answers" in {
       forAll { completeAnswers: CompleteExamplePropertyDetailsAnswers =>
-        IncompleteExamplePropertyDetailsAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteExamplePropertyDetailsAnswers(
+        IncompleteExamplePropertyDetailsAnswers.fromCompleteAnswers(
+          completeAnswers
+        ) shouldBe IncompleteExamplePropertyDetailsAnswers(
           Some(completeAnswers.address),
           Some(completeAnswers.disposalDate),
           Some(completeAnswers.disposalPrice),
@@ -42,7 +44,7 @@ class ExamplePropertyDetailsAnswersSpec extends WordSpec with Matchers with Scal
 
       "have a method which unsets fields" when {
 
-        val completeAnswers = sample[CompleteExamplePropertyDetailsAnswers]
+        val completeAnswers   = sample[CompleteExamplePropertyDetailsAnswers]
         val incompleteAnswers =
           IncompleteExamplePropertyDetailsAnswers(
             Some(completeAnswers.address),
@@ -52,18 +54,26 @@ class ExamplePropertyDetailsAnswersSpec extends WordSpec with Matchers with Scal
           )
 
         "given incomplete answers" in {
-          incompleteAnswers.unset(_.address)          shouldBe incompleteAnswers.copy(address          = None)
-          incompleteAnswers.unset(_.disposalDate)     shouldBe incompleteAnswers.copy(disposalDate     = None)
-          incompleteAnswers.unset(_.disposalPrice)    shouldBe incompleteAnswers.copy(disposalPrice    = None)
-          incompleteAnswers.unset(_.acquisitionPrice) shouldBe incompleteAnswers.copy(acquisitionPrice = None)
+          incompleteAnswers.unset(_.address)          shouldBe incompleteAnswers
+            .copy(address = None)
+          incompleteAnswers.unset(_.disposalDate)     shouldBe incompleteAnswers
+            .copy(disposalDate = None)
+          incompleteAnswers.unset(_.disposalPrice)    shouldBe incompleteAnswers
+            .copy(disposalPrice = None)
+          incompleteAnswers.unset(_.acquisitionPrice) shouldBe incompleteAnswers
+            .copy(acquisitionPrice = None)
 
         }
 
         "given complete answers" in {
-          completeAnswers.unset(_.address)          shouldBe incompleteAnswers.copy(address          = None)
-          completeAnswers.unset(_.disposalDate)     shouldBe incompleteAnswers.copy(disposalDate     = None)
-          completeAnswers.unset(_.disposalPrice)    shouldBe incompleteAnswers.copy(disposalPrice    = None)
-          completeAnswers.unset(_.acquisitionPrice) shouldBe incompleteAnswers.copy(acquisitionPrice = None)
+          completeAnswers.unset(_.address)          shouldBe incompleteAnswers
+            .copy(address = None)
+          completeAnswers.unset(_.disposalDate)     shouldBe incompleteAnswers
+            .copy(disposalDate = None)
+          completeAnswers.unset(_.disposalPrice)    shouldBe incompleteAnswers
+            .copy(disposalPrice = None)
+          completeAnswers.unset(_.acquisitionPrice) shouldBe incompleteAnswers
+            .copy(acquisitionPrice = None)
         }
 
       }

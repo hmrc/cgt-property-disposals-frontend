@@ -50,13 +50,19 @@ class SubscribedChangeEmailControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override def toJourneyStatus(journeyType: ChangingAccountEmail): JourneyStatus = journeyType.journey
+  override def toJourneyStatus(
+    journeyType: ChangingAccountEmail
+  ): JourneyStatus = journeyType.journey
 
-  override val validJourneyStatus: ChangingAccountEmail = ChangingAccountEmail(sample[Subscribed])
+  override val validJourneyStatus: ChangingAccountEmail = ChangingAccountEmail(
+    sample[Subscribed]
+  )
 
-  override val validVerificationCompleteJourneyStatus: ChangingAccountEmail = validJourneyStatus
+  override val validVerificationCompleteJourneyStatus: ChangingAccountEmail =
+    validJourneyStatus
 
-  override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
+  override lazy val controller: SubscribedChangeEmailController =
+    instanceOf[SubscribedChangeEmailController]
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -67,24 +73,38 @@ class SubscribedChangeEmailControllerSpec
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
-  def mockSubscriptionUpdate(subscribedUpdateDetails: SubscribedUpdateDetails)(result: Either[Error, Unit]) =
+  def mockSubscriptionUpdate(
+    subscribedUpdateDetails: SubscribedUpdateDetails
+  )(result: Either[Error, Unit]) =
     (mockSubscriptionService
       .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
       .expects(subscribedUpdateDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
-  override def updateEmail(changingAccountEmail: ChangingAccountEmail, email: Email): ChangingAccountEmail = {
+  override def updateEmail(
+    changingAccountEmail: ChangingAccountEmail,
+    email: Email
+  ): ChangingAccountEmail = {
     val journey = changingAccountEmail.journey
     ChangingAccountEmail(
       journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
     )
   }
 
-  override val mockUpdateEmail: Option[(ChangingAccountEmail, ChangingAccountEmail, Either[Error, Unit]) => Unit] =
+  override val mockUpdateEmail: Option[
+    (ChangingAccountEmail, ChangingAccountEmail, Either[Error, Unit]) => Unit
+  ] =
     Some({
-      case (oldDetails: ChangingAccountEmail, newDetails: ChangingAccountEmail, r: Either[Error, Unit]) =>
+      case (
+            oldDetails: ChangingAccountEmail,
+            newDetails: ChangingAccountEmail,
+            r: Either[Error, Unit]
+          ) =>
         mockSubscriptionUpdate(
-          SubscribedUpdateDetails(newDetails.journey.subscribedDetails, oldDetails.journey.subscribedDetails)
+          SubscribedUpdateDetails(
+            newDetails.journey.subscribedDetails,
+            oldDetails.journey.subscribedDetails
+          )
         )(r)
     })
 
@@ -92,7 +112,8 @@ class SubscribedChangeEmailControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: Subscribed => true
         case _             => false
       }
@@ -113,7 +134,9 @@ class SubscribedChangeEmailControllerSpec
     "handling submitted email addresses" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.enterEmailSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken)
+        controller.enterEmailSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -121,7 +144,8 @@ class SubscribedChangeEmailControllerSpec
         performAction,
         validJourneyStatus.journey.subscribedDetails.contactName,
         controllers.accounts.routes.SubscribedChangeEmailController.verifyEmail,
-        controllers.accounts.routes.SubscribedChangeEmailController.checkYourInbox()
+        controllers.accounts.routes.SubscribedChangeEmailController
+          .checkYourInbox()
       )
     }
 
@@ -134,8 +158,11 @@ class SubscribedChangeEmailControllerSpec
 
       behave like checkYourInboxPage(
         performAction,
-        controllers.accounts.routes.SubscribedChangeEmailController.enterEmail(),
-        controllers.accounts.routes.SubscribedChangeEmailController.enterEmail().url
+        controllers.accounts.routes.SubscribedChangeEmailController
+          .enterEmail(),
+        controllers.accounts.routes.SubscribedChangeEmailController
+          .enterEmail()
+          .url
       )
     }
 
@@ -148,8 +175,10 @@ class SubscribedChangeEmailControllerSpec
 
       behave like verifyEmail(
         performAction,
-        controllers.accounts.routes.SubscribedChangeEmailController.enterEmail(),
-        controllers.accounts.routes.SubscribedChangeEmailController.emailVerified()
+        controllers.accounts.routes.SubscribedChangeEmailController
+          .enterEmail(),
+        controllers.accounts.routes.SubscribedChangeEmailController
+          .emailVerified()
       )
 
     }

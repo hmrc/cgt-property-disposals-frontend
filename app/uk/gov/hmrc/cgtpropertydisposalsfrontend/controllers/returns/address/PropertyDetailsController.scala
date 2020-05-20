@@ -85,9 +85,11 @@ class PropertyDetailsController @Inject() (
 
   import PropertyDetailsController._
 
-  val toJourneyStatus: FillingOutReturnAddressJourney => JourneyStatus = _.journey
+  val toJourneyStatus: FillingOutReturnAddressJourney => JourneyStatus =
+    _.journey
 
-  def isATrust(journey: FillingOutReturnAddressJourney): Boolean = journey.journey.subscribedDetails.isATrust
+  def isATrust(journey: FillingOutReturnAddressJourney): Boolean =
+    journey.journey.subscribedDetails.isATrust
 
   def validJourney(
     request: RequestWithSessionData[_]
@@ -100,22 +102,27 @@ class PropertyDetailsController @Inject() (
           _ => None
         )
 
-        draftReturn.fold[Either[Result, (SessionData, FillingOutReturnAddressJourney)]](
-          Left(Redirect(controllers.routes.StartController.start()))
-        ) { d =>
-          Right(
-            sessionData -> FillingOutReturnAddressJourney(
-              r,
-              d,
-              d.fold(
-                e => e.triageAnswers.fold(_.individualUserType, _.individualUserType),
-                e => e.triageAnswers.fold(_.individualUserType, _.individualUserType)
+        draftReturn
+          .fold[Either[Result, (SessionData, FillingOutReturnAddressJourney)]](
+            Left(Redirect(controllers.routes.StartController.start()))
+          ) { d =>
+            Right(
+              sessionData -> FillingOutReturnAddressJourney(
+                r,
+                d,
+                d.fold(
+                  e =>
+                    e.triageAnswers
+                      .fold(_.individualUserType, _.individualUserType),
+                  e =>
+                    e.triageAnswers
+                      .fold(_.individualUserType, _.individualUserType)
+                )
               )
             )
-          )
-        }
+          }
 
-      case _ => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                        => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   private def withAssetTypes(
@@ -125,13 +132,17 @@ class PropertyDetailsController @Inject() (
       Redirect(controllers.returns.routes.TaskListController.taskList())
     )(f)
 
-  private def assetTypes(journey: FillingOutReturnAddressJourney): Option[Either[List[AssetType], AssetType]] =
+  private def assetTypes(
+    journey: FillingOutReturnAddressJourney
+  ): Option[Either[List[AssetType], AssetType]] =
     journey.draftReturn.fold(
       _.triageAnswers.fold(_.assetTypes, c => Some(c.assetTypes)).map(Left(_)),
       _.triageAnswers.fold(_.assetType, c => Some(c.assetType)).map(Right(_))
     )
 
-  private def shouldAskIfPostcodeExists(assetTypes: Either[List[AssetType], AssetType]): Boolean =
+  private def shouldAskIfPostcodeExists(
+    assetTypes: Either[List[AssetType], AssetType]
+  ): Boolean =
     assetTypes.fold(
       _.forall(a => a === AssetType.NonResidential || a === AssetType.IndirectDisposal),
       _ === AssetType.NonResidential
@@ -141,17 +152,21 @@ class PropertyDetailsController @Inject() (
     journey: FillingOutReturnAddressJourney,
     address: Address,
     isManuallyEnteredAddress: Boolean
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] =
     address match {
       case _: NonUkAddress =>
-        EitherT.leftT[Future, JourneyStatus](Error("Got non uk address in returns journey but expected uk address"))
-      case a: UkAddress =>
+        EitherT.leftT[Future, JourneyStatus](
+          Error("Got non uk address in returns journey but expected uk address")
+        )
+      case a: UkAddress    =>
         journey.draftReturn match {
           case Left(m: DraftMultipleDisposalsReturn) =>
-            val answers = m.examplePropertyDetailsAnswers.getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+            val answers = m.examplePropertyDetailsAnswers.getOrElse(
+              IncompleteExamplePropertyDetailsAnswers.empty
+            )
             if (answers.fold(_.address, c => Some(c.address)).contains(a))
               EitherT.pure(journey.journey)
             else {
@@ -167,7 +182,7 @@ class PropertyDetailsController @Inject() (
                 .map(_ => journey.journey.copy(draftReturn = updatedDraftReturn))
             }
 
-          case Right(d: DraftSingleDisposalReturn) =>
+          case Right(d: DraftSingleDisposalReturn)   =>
             if (d.propertyAddress.contains(a))
               EitherT.pure(journey.journey)
             else {
@@ -184,14 +199,21 @@ class PropertyDetailsController @Inject() (
 
     }
 
-  protected lazy val enterUkAddressCall: Call       = addressRoutes.PropertyDetailsController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call = addressRoutes.PropertyDetailsController.enterUkAddressSubmit()
+  protected lazy val enterUkAddressCall: Call       =
+    addressRoutes.PropertyDetailsController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call =
+    addressRoutes.PropertyDetailsController.enterUkAddressSubmit()
 
-  protected lazy val enterPostcodeCall: Call       = addressRoutes.PropertyDetailsController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call = addressRoutes.PropertyDetailsController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call       = addressRoutes.PropertyDetailsController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call = addressRoutes.PropertyDetailsController.selectAddressSubmit()
-  protected lazy val continueCall: Call            = addressRoutes.PropertyDetailsController.checkYourAnswers()
+  protected lazy val enterPostcodeCall: Call       =
+    addressRoutes.PropertyDetailsController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call =
+    addressRoutes.PropertyDetailsController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call       =
+    addressRoutes.PropertyDetailsController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call =
+    addressRoutes.PropertyDetailsController.selectAddressSubmit()
+  protected lazy val continueCall: Call            =
+    addressRoutes.PropertyDetailsController.checkYourAnswers()
 
   override protected val enterPostcodePageBackLink: FillingOutReturnAddressJourney => Call = { fillingOutReturn =>
     if (assetTypes(fillingOutReturn).exists(shouldAskIfPostcodeExists))
@@ -220,23 +242,29 @@ class PropertyDetailsController @Inject() (
         _.propertyAddress.isDefined
       )
     if (isComplete) routes.PropertyDetailsController.checkYourAnswers()
-    else if (isSingleDisposal) controllers.returns.routes.TaskListController.taskList()
+    else if (isSingleDisposal)
+      controllers.returns.routes.TaskListController.taskList()
     else routes.PropertyDetailsController.multipleDisposalsGuidance()
   }
 
-  def singleDisposalHasUkPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    commonHasUkPostcodeBehaviour()
-  }
+  def singleDisposalHasUkPostcode(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      commonHasUkPostcodeBehaviour()
+    }
 
-  def multipleDisposalsHasUkPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request => commonHasUkPostcodeBehaviour()
-  }
+  def multipleDisposalsHasUkPostcode(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      commonHasUkPostcodeBehaviour()
+    }
 
-  private def commonHasUkPostcodeBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+  private def commonHasUkPostcodeBehaviour()(implicit
+    request: RequestWithSessionData[_]
+  ): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true, _ => true)
+          val isSingleDisposal = fillingOutReturn.journey.draftReturn
+            .fold(_ => false, _ => true, _ => true)
           Ok(
             hasValidPostcodePage(
               hasValidPostcodeForm,
@@ -244,25 +272,29 @@ class PropertyDetailsController @Inject() (
               isSingleDisposal
             )
           )
-        } else {
+        } else
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        }
       }
     }
 
-  def singleDisposalHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request => commonHasUkPostcodeSubmitBehaviour()
-  }
+  def singleDisposalHasUkPostcodeSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      commonHasUkPostcodeSubmitBehaviour()
+    }
 
-  def multipleDisposalsHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request => commonHasUkPostcodeSubmitBehaviour()
-  }
+  def multipleDisposalsHasUkPostcodeSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      commonHasUkPostcodeSubmitBehaviour()
+    }
 
-  private def commonHasUkPostcodeSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+  private def commonHasUkPostcodeSubmitBehaviour()(implicit
+    request: RequestWithSessionData[_]
+  ): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.journey.draftReturn.fold(_ => false, _ => true, _ => true)
+          val isSingleDisposal = fillingOutReturn.journey.draftReturn
+            .fold(_ => false, _ => true, _ => true)
 
           hasValidPostcodeForm
             .bindFromRequest()
@@ -280,30 +312,36 @@ class PropertyDetailsController @Inject() (
                   if (hasValidPostcode)
                     routes.PropertyDetailsController.enterPostcode()
                   else if (isSingleDisposal)
-                    routes.PropertyDetailsController.singleDisposalEnterLandUprn()
+                    routes.PropertyDetailsController
+                      .singleDisposalEnterLandUprn()
                   else
-                    routes.PropertyDetailsController.multipleDisposalsEnterLandUprn()
+                    routes.PropertyDetailsController
+                      .multipleDisposalsEnterLandUprn()
                 )
             )
-        } else {
+        } else
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        }
       }
     }
 
-  def singleDisposalEnterLandUprn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    commonEnterLandUprnBehaviour()
-  }
+  def singleDisposalEnterLandUprn(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      commonEnterLandUprnBehaviour()
+    }
 
-  def multipleDisposalsEnterLandUprn(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request => commonEnterLandUprnBehaviour()
-  }
+  def multipleDisposalsEnterLandUprn(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      commonEnterLandUprnBehaviour()
+    }
 
-  private def commonEnterLandUprnBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+  private def commonEnterLandUprnBehaviour()(implicit
+    request: RequestWithSessionData[_]
+  ): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal =
+            fillingOutReturn.draftReturn.fold(_ => false, _ => true)
           Ok(
             enterUPRNPage(
               enterUPRNForm,
@@ -311,25 +349,29 @@ class PropertyDetailsController @Inject() (
               isSingleDisposal
             )
           )
-        } else {
+        } else
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        }
       }
     }
 
-  def singleDisposalEnterLandUprnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request => commonEnterLandUprnSubmitBehaviour()
-  }
+  def singleDisposalEnterLandUprnSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      commonEnterLandUprnSubmitBehaviour()
+    }
 
-  def multipleDisposalsEnterLandUprnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request => commonEnterLandUprnSubmitBehaviour()
-  }
+  def multipleDisposalsEnterLandUprnSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      commonEnterLandUprnSubmitBehaviour()
+    }
 
-  private def commonEnterLandUprnSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+  private def commonEnterLandUprnSubmitBehaviour()(implicit
+    request: RequestWithSessionData[_]
+  ): Future[Result] =
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+          val isSingleDisposal =
+            fillingOutReturn.draftReturn.fold(_ => false, _ => true)
 
           enterUPRNForm
             .bindFromRequest()
@@ -338,7 +380,8 @@ class PropertyDetailsController @Inject() (
                 BadRequest(
                   enterUPRNPage(
                     formWithErrors,
-                    routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
+                    routes.PropertyDetailsController
+                      .singleDisposalHasUkPostcode(),
                     isSingleDisposal
                   )
                 ),
@@ -348,41 +391,43 @@ class PropertyDetailsController @Inject() (
                 isManuallyEnteredAddress = true
               )
             )
-        } else {
+        } else
           Redirect(routes.PropertyDetailsController.checkYourAnswers())
+      }
+    }
+
+  def multipleDisposalsGuidance(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleDisposalsReturn) =>
+            val backLink =
+              m.examplePropertyDetailsAnswers
+                .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+                .fold(
+                  _ => controllers.returns.routes.TaskListController.taskList(),
+                  _ => routes.PropertyDetailsController.checkYourAnswers()
+                )
+            Ok(
+              multipleDisposalsGuidancePage(
+                backLink,
+                r.journey.subscribedDetails.isATrust,
+                extractIndividualUserType(r)
+              )
+            )
         }
       }
     }
 
-  def multipleDisposalsGuidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
-        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case Left(m: DraftMultipleDisposalsReturn) =>
-          val backLink =
-            m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-              .fold(
-                _ => controllers.returns.routes.TaskListController.taskList(),
-                _ => routes.PropertyDetailsController.checkYourAnswers()
-              )
-          Ok(
-            multipleDisposalsGuidancePage(
-              backLink,
-              r.journey.subscribedDetails.isATrust,
-              extractIndividualUserType(r)
-            )
-          )
-      }
-    }
-  }
-
-  def multipleDisposalsGuidanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def multipleDisposalsGuidanceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { (_, r) =>
         withAssetTypes(r) { assetTypes =>
           r.draftReturn match {
-            case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+            case Right(_: DraftSingleDisposalReturn)   =>
+              Redirect(routes.PropertyDetailsController.checkYourAnswers())
             case Left(m: DraftMultipleDisposalsReturn) =>
               val redirectTo =
                 m.examplePropertyDetailsAnswers
@@ -390,7 +435,8 @@ class PropertyDetailsController @Inject() (
                   .fold(
                     _ =>
                       if (shouldAskIfPostcodeExists(assetTypes))
-                        routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+                        routes.PropertyDetailsController
+                          .singleDisposalHasUkPostcode()
                       else routes.PropertyDetailsController.enterPostcode(),
                     _ => routes.PropertyDetailsController.checkYourAnswers()
                   )
@@ -399,381 +445,482 @@ class PropertyDetailsController @Inject() (
           }
         }
       }
-  }
-
-  def disposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
-        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case Left(m: DraftMultipleDisposalsReturn) =>
-          m.triageAnswers.fold(
-            i => i.taxYear       -> i.completionDate,
-            c => Some(c.taxYear) -> Some(c.completionDate)
-          ) match {
-            case (Some(taxYear), Some(completionDate)) =>
-              val answers = m.examplePropertyDetailsAnswers
-                .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-
-              val disposalDate = answers.fold(_.disposalDate, c => Some(c.disposalDate))
-
-              val f    = getDisposalDateFrom(taxYear, completionDate)
-              val form = disposalDate.fold(f)(c => f.fill(c.value))
-              Ok(multipleDisposalsDisposalDatePage(form, r.journey.subscribedDetails.isATrust))
-
-            case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
-          }
-      }
     }
-  }
 
-  def disposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
-        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case Left(m: DraftMultipleDisposalsReturn) =>
-          m.triageAnswers.fold(
-            i => i.taxYear       -> i.completionDate,
-            c => Some(c.taxYear) -> Some(c.completionDate)
-          ) match {
-            case (Some(taxYear), Some(completionDate)) =>
-              val answers = m.examplePropertyDetailsAnswers
-                .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-
-              getDisposalDateFrom(taxYear, completionDate)
-                .bindFromRequest()
-                .fold(
-                  formWithErrors => {
-                    val param1 = taxYear.startDateInclusive.getYear.toString
-                    val param2 = taxYear.endDateExclusive.getYear.toString
-                    val updatedFormWithErrors = formWithErrors.errors.map {
-                      _.copy(args = Seq(param1, param2))
-                    }
-
-                    BadRequest(
-                      multipleDisposalsDisposalDatePage(
-                        formWithErrors.copy(errors = updatedFormWithErrors),
-                        r.journey.subscribedDetails.isATrust
-                      )
-                    )
-                  }, { date =>
-                    val disposalDate = DisposalDate(date, taxYear)
-
-                    if (answers
-                          .fold(_.disposalDate, c => Some(c.disposalDate))
-                          .contains(disposalDate)) {
-                      Redirect(routes.PropertyDetailsController.checkYourAnswers())
-                    } else {
-                      val updatedAnswers =
-                        answers
-                          .fold(
-                            _.copy(disposalDate = Some(disposalDate)),
-                            _.copy(disposalDate = disposalDate)
-                          )
-                      val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
-                      val result = for {
-                        _ <- returnsService.storeDraftReturn(
-                              updatedDraftReturn,
-                              r.journey.subscribedDetails.cgtReference,
-                              r.journey.agentReferenceNumber
-                            )
-                        _ <- EitherT(
-                              updateSession(sessionStore, request)(
-                                _.copy(journeyStatus = Some(r.journey.copy(draftReturn = updatedDraftReturn)))
-                              )
-                            )
-                      } yield ()
-
-                      result.fold(
-                        { e =>
-                          logger.warn("Could not update draft return", e)
-                          errorHandler.errorResult()
-                        },
-                        _ => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-                      )
-
-                    }
-
-                  }
-                )
-
-            case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
-          }
-      }
-    }
-  }
-
-  def disposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
-        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case Left(m: DraftMultipleDisposalsReturn) =>
-          val answers = m.examplePropertyDetailsAnswers
-            .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-
-          val backLink = disposalPriceBackLink(answers)
-
-          val disposalPrice = answers
-            .fold(_.disposalPrice, c => Some(c.disposalPrice))
-
-          val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
-
-          Ok(
-            multipleDisposalsDisposalPricePage(
-              form,
-              backLink,
-              r.journey.subscribedDetails.isATrust,
-              extractIndividualUserType(r)
-            )
-          )
-      }
-    }
-  }
-
-  def disposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
-        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case Left(m: DraftMultipleDisposalsReturn) =>
-          val answers = m.examplePropertyDetailsAnswers
-            .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-          val backLink = disposalPriceBackLink(answers)
-
-          disposalPriceForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
-                BadRequest(
-                  multipleDisposalsDisposalPricePage(
-                    formWithErrors,
-                    backLink,
-                    r.journey.subscribedDetails.isATrust,
-                    extractIndividualUserType(r)
-                  )
-                ),
-              disposalPrice =>
-                if (answers
-                      .fold(_.disposalPrice, c => Some(c.disposalPrice))
-                      .contains(AmountInPence.fromPounds(disposalPrice))) {
-                  Redirect(routes.PropertyDetailsController.checkYourAnswers())
-                } else {
-                  val updatedAnswers =
-                    answers
-                      .fold(
-                        _.copy(disposalPrice = Some(AmountInPence.fromPounds(disposalPrice))),
-                        _.copy(disposalPrice = AmountInPence.fromPounds(disposalPrice))
-                      )
-                  val updatedDraftReturn = m.copy(
-                    examplePropertyDetailsAnswers = Some(updatedAnswers),
-                    yearToDateLiabilityAnswers    = None
-                  )
-                  val result = for {
-                    _ <- returnsService.storeDraftReturn(
-                          updatedDraftReturn,
-                          r.journey.subscribedDetails.cgtReference,
-                          r.journey.agentReferenceNumber
-                        )
-                    _ <- EitherT(
-                          updateSession(sessionStore, request)(
-                            _.copy(journeyStatus = Some(r.journey.copy(draftReturn = updatedDraftReturn)))
-                          )
-                        )
-                  } yield ()
-
-                  result.fold(
-                    { e =>
-                      logger.warn("Could not update draft return", e)
-                      errorHandler.errorResult()
-                    },
-                    _ => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-                  )
-                }
-            )
-      }
-    }
-  }
-
-  def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
-        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case Left(m: DraftMultipleDisposalsReturn) =>
-          val answers = m.examplePropertyDetailsAnswers
-            .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-
-          val backLink = acquisitionPriceBackLink(answers)
-
-          val acquisitionPrice = answers
-            .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
-
-          val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
-
-          Ok(
-            multipleDisposalsAcquisitionPricePage(
-              form,
-              backLink,
-              r.journey.subscribedDetails.isATrust,
-              extractIndividualUserType(r)
-            )
-          )
-      }
-    }
-  }
-
-  def acquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, r) =>
-      r.draftReturn match {
-        case Right(_: DraftSingleDisposalReturn) => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-        case Left(m: DraftMultipleDisposalsReturn) =>
-          val answers = m.examplePropertyDetailsAnswers
-            .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-          val backLink = acquisitionPriceBackLink(answers)
-
-          acquisitionPriceForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
-                BadRequest(
-                  multipleDisposalsAcquisitionPricePage(
-                    formWithErrors,
-                    backLink,
-                    r.journey.subscribedDetails.isATrust,
-                    extractIndividualUserType(r)
-                  )
-                ),
-              acquisitionPrice =>
-                if (answers
-                      .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
-                      .contains(AmountInPence.fromPounds(acquisitionPrice))) {
-                  Redirect(routes.PropertyDetailsController.checkYourAnswers())
-                } else {
-                  val updatedAnswers =
-                    answers
-                      .fold(
-                        _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(acquisitionPrice))),
-                        _.copy(acquisitionPrice = AmountInPence.fromPounds(acquisitionPrice))
-                      )
-                  val updatedDraftReturn = m.copy(
-                    examplePropertyDetailsAnswers = Some(updatedAnswers),
-                    yearToDateLiabilityAnswers    = None
-                  )
-                  val result = for {
-                    _ <- returnsService.storeDraftReturn(
-                          updatedDraftReturn,
-                          r.journey.subscribedDetails.cgtReference,
-                          r.journey.agentReferenceNumber
-                        )
-                    _ <- EitherT(
-                          updateSession(sessionStore, request)(
-                            _.copy(journeyStatus = Some(r.journey.copy(draftReturn = updatedDraftReturn)))
-                          )
-                        )
-                  } yield ()
-
-                  result.fold(
-                    { e =>
-                      logger.warn("Could not update draft return", e)
-                      errorHandler.errorResult()
-                    },
-                    _ => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-                  )
-                }
-            )
-      }
-    }
-  }
-
-  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) { (_, r) =>
-      withAssetTypes(r) { assetTypes =>
-        lazy val representeeAnswers =
-          r.journey.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
-
+  def disposalDate(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
         r.draftReturn match {
+          case Right(_: DraftSingleDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case Left(m: DraftMultipleDisposalsReturn) =>
-            m.examplePropertyDetailsAnswers.fold[Future[Result]](
-              Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
-            ) {
-              case IncompleteExamplePropertyDetailsAnswers(None, _, _, _) =>
-                Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
+            m.triageAnswers.fold(
+              i => i.taxYear -> i.completionDate,
+              c => Some(c.taxYear) -> Some(c.completionDate)
+            ) match {
+              case (Some(taxYear), Some(completionDate)) =>
+                val answers = m.examplePropertyDetailsAnswers
+                  .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-              case IncompleteExamplePropertyDetailsAnswers(_, None, _, _) =>
-                Redirect(routes.PropertyDetailsController.disposalDate())
+                val disposalDate =
+                  answers.fold(_.disposalDate, c => Some(c.disposalDate))
 
-              case IncompleteExamplePropertyDetailsAnswers(_, Some(disposalDate), _, _)
-                  if (representeeAnswers
-                    .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
-                    .exists(_.value <= disposalDate.value)) =>
-                Redirect(triageRoutes.CommonTriageQuestionsController.periodOfAdministrationNotHandled())
-
-              case IncompleteExamplePropertyDetailsAnswers(_, _, None, _) =>
-                Redirect(routes.PropertyDetailsController.disposalPrice())
-
-              case IncompleteExamplePropertyDetailsAnswers(_, _, _, None) =>
-                Redirect(routes.PropertyDetailsController.acquisitionPrice())
-
-              case IncompleteExamplePropertyDetailsAnswers(Some(a), Some(dd), Some(dp), Some(ap)) =>
-                val completeAnswers    = CompleteExamplePropertyDetailsAnswers(a, dd, dp, ap)
-                val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(completeAnswers))
-                val result = for {
-                  _ <- returnsService.storeDraftReturn(
-                        updatedDraftReturn,
-                        r.journey.subscribedDetails.cgtReference,
-                        r.journey.agentReferenceNumber
-                      )
-                  _ <- EitherT(
-                        updateSession(sessionStore, request)(
-                          _.copy(journeyStatus = Some(r.journey.copy(draftReturn = updatedDraftReturn)))
-                        )
-                      )
-                } yield ()
-
-                result.fold(
-                  { e =>
-                    logger.warn("Could not update draft return", e)
-                    errorHandler.errorResult()
-                  },
-                  _ =>
-                    Ok(
-                      multipleDisposalsCheckYourAnswersPage(
-                        completeAnswers,
-                        shouldAskIfPostcodeExists(assetTypes),
-                        r.journey.subscribedDetails.isATrust,
-                        extractIndividualUserType(r)
-                      )
-                    )
-                )
-
-              case c: CompleteExamplePropertyDetailsAnswers =>
+                val f    = getDisposalDateFrom(taxYear, completionDate)
+                val form = disposalDate.fold(f)(c => f.fill(c.value))
                 Ok(
-                  multipleDisposalsCheckYourAnswersPage(
-                    c,
-                    shouldAskIfPostcodeExists(assetTypes),
-                    r.journey.subscribedDetails.isATrust,
-                    extractIndividualUserType(r)
+                  multipleDisposalsDisposalDatePage(
+                    form,
+                    r.journey.subscribedDetails.isATrust
                   )
                 )
 
+              case _                                     =>
+                Redirect(
+                  controllers.returns.routes.TaskListController.taskList()
+                )
             }
-
-          case Right(s: DraftSingleDisposalReturn) =>
-            s.propertyAddress.fold(
-              Redirect(
-                if (shouldAskIfPostcodeExists(assetTypes))
-                  routes.PropertyDetailsController.singleDisposalHasUkPostcode()
-                else
-                  routes.PropertyDetailsController.enterPostcode()
-              )
-            )(address => Ok(singleDisposalCheckYourAnswersPage(address, shouldAskIfPostcodeExists(assetTypes))))
         }
       }
     }
-  }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request)((_, _) => Redirect(returnsRoutes.TaskListController.taskList()))
-  }
+  def disposalDateSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleDisposalsReturn) =>
+            m.triageAnswers.fold(
+              i => i.taxYear -> i.completionDate,
+              c => Some(c.taxYear) -> Some(c.completionDate)
+            ) match {
+              case (Some(taxYear), Some(completionDate)) =>
+                val answers = m.examplePropertyDetailsAnswers
+                  .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-  private def getDisposalDateFrom(taxYear: TaxYear, completionDate: CompletionDate): Form[LocalDate] = {
+                getDisposalDateFrom(taxYear, completionDate)
+                  .bindFromRequest()
+                  .fold(
+                    formWithErrors => {
+                      val param1                = taxYear.startDateInclusive.getYear.toString
+                      val param2                = taxYear.endDateExclusive.getYear.toString
+                      val updatedFormWithErrors = formWithErrors.errors.map {
+                        _.copy(args = Seq(param1, param2))
+                      }
+
+                      BadRequest(
+                        multipleDisposalsDisposalDatePage(
+                          formWithErrors.copy(errors = updatedFormWithErrors),
+                          r.journey.subscribedDetails.isATrust
+                        )
+                      )
+                    },
+                    { date =>
+                      val disposalDate = DisposalDate(date, taxYear)
+
+                      if (
+                        answers
+                          .fold(_.disposalDate, c => Some(c.disposalDate))
+                          .contains(disposalDate)
+                      )
+                        Redirect(
+                          routes.PropertyDetailsController.checkYourAnswers()
+                        )
+                      else {
+                        val updatedAnswers     =
+                          answers
+                            .fold(
+                              _.copy(disposalDate = Some(disposalDate)),
+                              _.copy(disposalDate = disposalDate)
+                            )
+                        val updatedDraftReturn =
+                          m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
+                        val result             = for {
+                          _ <- returnsService.storeDraftReturn(
+                                 updatedDraftReturn,
+                                 r.journey.subscribedDetails.cgtReference,
+                                 r.journey.agentReferenceNumber
+                               )
+                          _ <- EitherT(
+                                 updateSession(sessionStore, request)(
+                                   _.copy(journeyStatus =
+                                     Some(
+                                       r.journey
+                                         .copy(draftReturn = updatedDraftReturn)
+                                     )
+                                   )
+                                 )
+                               )
+                        } yield ()
+
+                        result.fold(
+                          { e =>
+                            logger.warn("Could not update draft return", e)
+                            errorHandler.errorResult()
+                          },
+                          _ =>
+                            Redirect(
+                              routes.PropertyDetailsController
+                                .checkYourAnswers()
+                            )
+                        )
+
+                      }
+
+                    }
+                  )
+
+              case _                                     =>
+                Redirect(
+                  controllers.returns.routes.TaskListController.taskList()
+                )
+            }
+        }
+      }
+    }
+
+  def disposalPrice(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleDisposalsReturn) =>
+            val answers = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+
+            val backLink = disposalPriceBackLink(answers)
+
+            val disposalPrice = answers
+              .fold(_.disposalPrice, c => Some(c.disposalPrice))
+
+            val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
+
+            Ok(
+              multipleDisposalsDisposalPricePage(
+                form,
+                backLink,
+                r.journey.subscribedDetails.isATrust,
+                extractIndividualUserType(r)
+              )
+            )
+        }
+      }
+    }
+
+  def disposalPriceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleDisposalsReturn) =>
+            val answers  = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+            val backLink = disposalPriceBackLink(answers)
+
+            disposalPriceForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    multipleDisposalsDisposalPricePage(
+                      formWithErrors,
+                      backLink,
+                      r.journey.subscribedDetails.isATrust,
+                      extractIndividualUserType(r)
+                    )
+                  ),
+                disposalPrice =>
+                  if (
+                    answers
+                      .fold(_.disposalPrice, c => Some(c.disposalPrice))
+                      .contains(AmountInPence.fromPounds(disposalPrice))
+                  )
+                    Redirect(
+                      routes.PropertyDetailsController.checkYourAnswers()
+                    )
+                  else {
+                    val updatedAnswers     =
+                      answers
+                        .fold(
+                          _.copy(disposalPrice = Some(AmountInPence.fromPounds(disposalPrice))),
+                          _.copy(disposalPrice = AmountInPence.fromPounds(disposalPrice))
+                        )
+                    val updatedDraftReturn = m.copy(
+                      examplePropertyDetailsAnswers = Some(updatedAnswers),
+                      yearToDateLiabilityAnswers = None
+                    )
+                    val result             = for {
+                      _ <- returnsService.storeDraftReturn(
+                             updatedDraftReturn,
+                             r.journey.subscribedDetails.cgtReference,
+                             r.journey.agentReferenceNumber
+                           )
+                      _ <- EitherT(
+                             updateSession(sessionStore, request)(
+                               _.copy(journeyStatus =
+                                 Some(
+                                   r.journey.copy(draftReturn = updatedDraftReturn)
+                                 )
+                               )
+                             )
+                           )
+                    } yield ()
+
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not update draft return", e)
+                        errorHandler.errorResult()
+                      },
+                      _ =>
+                        Redirect(
+                          routes.PropertyDetailsController.checkYourAnswers()
+                        )
+                    )
+                  }
+              )
+        }
+      }
+    }
+
+  def acquisitionPrice(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleDisposalsReturn) =>
+            val answers = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+
+            val backLink = acquisitionPriceBackLink(answers)
+
+            val acquisitionPrice = answers
+              .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+
+            val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
+
+            Ok(
+              multipleDisposalsAcquisitionPricePage(
+                form,
+                backLink,
+                r.journey.subscribedDetails.isATrust,
+                extractIndividualUserType(r)
+              )
+            )
+        }
+      }
+    }
+
+  def acquisitionPriceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleDisposalsReturn) =>
+            val answers  = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+            val backLink = acquisitionPriceBackLink(answers)
+
+            acquisitionPriceForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    multipleDisposalsAcquisitionPricePage(
+                      formWithErrors,
+                      backLink,
+                      r.journey.subscribedDetails.isATrust,
+                      extractIndividualUserType(r)
+                    )
+                  ),
+                acquisitionPrice =>
+                  if (
+                    answers
+                      .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+                      .contains(AmountInPence.fromPounds(acquisitionPrice))
+                  )
+                    Redirect(
+                      routes.PropertyDetailsController.checkYourAnswers()
+                    )
+                  else {
+                    val updatedAnswers     =
+                      answers
+                        .fold(
+                          _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(acquisitionPrice))),
+                          _.copy(acquisitionPrice = AmountInPence.fromPounds(acquisitionPrice))
+                        )
+                    val updatedDraftReturn = m.copy(
+                      examplePropertyDetailsAnswers = Some(updatedAnswers),
+                      yearToDateLiabilityAnswers = None
+                    )
+                    val result             = for {
+                      _ <- returnsService.storeDraftReturn(
+                             updatedDraftReturn,
+                             r.journey.subscribedDetails.cgtReference,
+                             r.journey.agentReferenceNumber
+                           )
+                      _ <- EitherT(
+                             updateSession(sessionStore, request)(
+                               _.copy(journeyStatus =
+                                 Some(
+                                   r.journey.copy(draftReturn = updatedDraftReturn)
+                                 )
+                               )
+                             )
+                           )
+                    } yield ()
+
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not update draft return", e)
+                        errorHandler.errorResult()
+                      },
+                      _ =>
+                        Redirect(
+                          routes.PropertyDetailsController.checkYourAnswers()
+                        )
+                    )
+                  }
+              )
+        }
+      }
+    }
+
+  def checkYourAnswers(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        withAssetTypes(r) { assetTypes =>
+          lazy val representeeAnswers =
+            r.journey.draftReturn.fold(
+              _.representeeAnswers,
+              _.representeeAnswers,
+              _.representeeAnswers
+            )
+
+          r.draftReturn match {
+            case Left(m: DraftMultipleDisposalsReturn) =>
+              m.examplePropertyDetailsAnswers.fold[Future[Result]](
+                Redirect(
+                  routes.PropertyDetailsController.multipleDisposalsGuidance()
+                )
+              ) {
+                case IncompleteExamplePropertyDetailsAnswers(None, _, _, _) =>
+                  Redirect(
+                    routes.PropertyDetailsController.multipleDisposalsGuidance()
+                  )
+
+                case IncompleteExamplePropertyDetailsAnswers(_, None, _, _) =>
+                  Redirect(routes.PropertyDetailsController.disposalDate())
+
+                case IncompleteExamplePropertyDetailsAnswers(
+                      _,
+                      Some(disposalDate),
+                      _,
+                      _
+                    )
+                    if representeeAnswers
+                      .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+                      .exists(_.value <= disposalDate.value) =>
+                  Redirect(
+                    triageRoutes.CommonTriageQuestionsController
+                      .periodOfAdministrationNotHandled()
+                  )
+
+                case IncompleteExamplePropertyDetailsAnswers(_, _, None, _) =>
+                  Redirect(routes.PropertyDetailsController.disposalPrice())
+
+                case IncompleteExamplePropertyDetailsAnswers(_, _, _, None) =>
+                  Redirect(routes.PropertyDetailsController.acquisitionPrice())
+
+                case IncompleteExamplePropertyDetailsAnswers(
+                      Some(a),
+                      Some(dd),
+                      Some(dp),
+                      Some(ap)
+                    ) =>
+                  val completeAnswers    =
+                    CompleteExamplePropertyDetailsAnswers(a, dd, dp, ap)
+                  val updatedDraftReturn = m
+                    .copy(examplePropertyDetailsAnswers = Some(completeAnswers))
+                  val result             = for {
+                    _ <- returnsService.storeDraftReturn(
+                           updatedDraftReturn,
+                           r.journey.subscribedDetails.cgtReference,
+                           r.journey.agentReferenceNumber
+                         )
+                    _ <- EitherT(
+                           updateSession(sessionStore, request)(
+                             _.copy(journeyStatus =
+                               Some(
+                                 r.journey.copy(draftReturn = updatedDraftReturn)
+                               )
+                             )
+                           )
+                         )
+                  } yield ()
+
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not update draft return", e)
+                      errorHandler.errorResult()
+                    },
+                    _ =>
+                      Ok(
+                        multipleDisposalsCheckYourAnswersPage(
+                          completeAnswers,
+                          shouldAskIfPostcodeExists(assetTypes),
+                          r.journey.subscribedDetails.isATrust,
+                          extractIndividualUserType(r)
+                        )
+                      )
+                  )
+
+                case c: CompleteExamplePropertyDetailsAnswers               =>
+                  Ok(
+                    multipleDisposalsCheckYourAnswersPage(
+                      c,
+                      shouldAskIfPostcodeExists(assetTypes),
+                      r.journey.subscribedDetails.isATrust,
+                      extractIndividualUserType(r)
+                    )
+                  )
+
+              }
+
+            case Right(s: DraftSingleDisposalReturn)   =>
+              s.propertyAddress.fold(
+                Redirect(
+                  if (shouldAskIfPostcodeExists(assetTypes))
+                    routes.PropertyDetailsController
+                      .singleDisposalHasUkPostcode()
+                  else
+                    routes.PropertyDetailsController.enterPostcode()
+                )
+              )(address =>
+                Ok(
+                  singleDisposalCheckYourAnswersPage(
+                    address,
+                    shouldAskIfPostcodeExists(assetTypes)
+                  )
+                )
+              )
+          }
+        }
+      }
+    }
+
+  def checkYourAnswersSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request)((_, _) => Redirect(returnsRoutes.TaskListController.taskList()))
+    }
+
+  private def getDisposalDateFrom(
+    taxYear: TaxYear,
+    completionDate: CompletionDate
+  ): Form[LocalDate] = {
     val startDateOfTaxYear = taxYear.startDateInclusive
     val endDateOfTaxYear   = taxYear.endDateExclusive
 
@@ -788,19 +935,24 @@ class PropertyDetailsController @Inject() (
     f: FillingOutReturnAddressJourney
   ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
     f.individualUserType match {
-      case Some(IndividualUserType.Capacitor) => Some(Right(IndividualUserType.Capacitor))
+      case Some(IndividualUserType.Capacitor)              =>
+        Some(Right(IndividualUserType.Capacitor))
       case Some(IndividualUserType.PersonalRepresentative) =>
         Some(Left(IndividualUserType.PersonalRepresentative))
-      case _ => None
+      case _                                               => None
     }
-  private def disposalPriceBackLink(answers: ExamplePropertyDetailsAnswers): Call =
+  private def disposalPriceBackLink(
+    answers: ExamplePropertyDetailsAnswers
+  ): Call                                                        =
     answers
       .fold(
         _ => routes.PropertyDetailsController.disposalDate(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
       )
 
-  private def acquisitionPriceBackLink(answers: ExamplePropertyDetailsAnswers): Call =
+  private def acquisitionPriceBackLink(
+    answers: ExamplePropertyDetailsAnswers
+  ): Call =
     answers
       .fold(
         _ => routes.PropertyDetailsController.disposalPrice(),
@@ -835,7 +987,9 @@ object PropertyDetailsController {
 
     Form(
       mapping(
-        "enterUPRN-line1" -> text.transform[String](_.trim, _.trim).verifying(uprnConstraint),
+        "enterUPRN-line1" -> text
+          .transform[String](_.trim, _.trim)
+          .verifying(uprnConstraint),
         "address-line2"   -> optional(addressLineMapping),
         "address-town"    -> optional(addressLineMapping),
         "address-county"  -> optional(addressLineMapping),
@@ -844,7 +998,10 @@ object PropertyDetailsController {
     )
   }
 
-  def disposalDateForm(maximumDateInclusive: LocalDate, minimumDateInclusive: LocalDate): Form[LocalDate] = {
+  def disposalDateForm(
+    maximumDateInclusive: LocalDate,
+    minimumDateInclusive: LocalDate
+  ): Form[LocalDate] = {
     val key = "multipleDisposalsDisposalDate"
 
     Form(
@@ -867,7 +1024,8 @@ object PropertyDetailsController {
     Form(
       mapping(
         "multipleDisposalsDisposalPrice" -> of(
-          MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
+          MoneyUtils
+            .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )
       )(identity)(Some(_))
     )
@@ -876,7 +1034,8 @@ object PropertyDetailsController {
     Form(
       mapping(
         "multipleDisposalsAcquisitionPrice" -> of(
-          MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
+          MoneyUtils
+            .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )
       )(identity)(Some(_))
     )

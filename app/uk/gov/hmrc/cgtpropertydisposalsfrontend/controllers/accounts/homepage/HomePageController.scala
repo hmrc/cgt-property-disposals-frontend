@@ -64,87 +64,96 @@ class HomePageController @Inject() (
     with Logging {
 
   // homepage for after private beta: includes functionality to do with returns
-  def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser((_, subscribed) => Ok(homePage(subscribed)))(withUplift = true)
-  }
+  def homepage(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
+      withSubscribedUser((_, subscribed) => Ok(homePage(subscribed)))(
+        withUplift = true
+      )
+    }
 
-  def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser { (_, subscribed) =>
-      val exitForSubsequentReturnFlag = (subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty)
+  def startNewReturn(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser { (_, subscribed) =>
+        val exitForSubsequentReturnFlag =
+          subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty
 
-      exitForSubsequentReturnFlag match {
-        case true =>
-          Redirect(routes.HomePageController.exitForSubsequentReturn())
+        exitForSubsequentReturnFlag match {
+          case true =>
+            Redirect(routes.HomePageController.exitForSubsequentReturn())
 
-        case _ =>
-          val redirectTo = subscribed.subscribedDetails
-            .userType()
-            .fold(
-              _ => triage.routes.CommonTriageQuestionsController.howManyProperties(),
-              _ => triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
-            )
+          case _    =>
+            val redirectTo = subscribed.subscribedDetails
+              .userType()
+              .fold(
+                _ =>
+                  triage.routes.CommonTriageQuestionsController
+                    .howManyProperties(),
+                _ =>
+                  triage.routes.CommonTriageQuestionsController
+                    .whoIsIndividualRepresenting()
+              )
 
-          updateSession(sessionStore, request)(
-            _.copy(
-              journeyStatus = Some(
-                StartingNewDraftReturn(
-                  subscribed.subscribedDetails,
-                  subscribed.ggCredId,
-                  subscribed.agentReferenceNumber,
-                  Right(IncompleteSingleDisposalTriageAnswers.empty),
-                  None
+            updateSession(sessionStore, request)(
+              _.copy(
+                journeyStatus = Some(
+                  StartingNewDraftReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    Right(IncompleteSingleDisposalTriageAnswers.empty),
+                    None
+                  )
                 )
               )
-            )
-          ).map {
-            case Left(e) =>
-              logger.warn("Could not update session", e)
-              errorHandler.errorResult()
+            ).map {
+              case Left(e)  =>
+                logger.warn("Could not update session", e)
+                errorHandler.errorResult()
 
-            case Right(_) =>
-              Redirect(redirectTo)
-          }
-      }
-    }(withUplift = false)
-  }
-
-  def resumeDraftReturn(id: UUID): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser { (_, subscribed) =>
-      subscribed.draftReturns
-        .find(_.id === id)
-        .fold[Future[Result]] {
-          logger.warn(
-            s"For cgt reference ${subscribed.subscribedDetails.cgtReference.value} " +
-              s"could not find draft return with id $id"
-          )
-          errorHandler.errorResult()
-        } { draftReturn =>
-          updateSession(sessionStore, request)(
-            _.copy(
-              journeyStatus = Some(
-                FillingOutReturn(
-                  subscribed.subscribedDetails,
-                  subscribed.ggCredId,
-                  subscribed.agentReferenceNumber,
-                  draftReturn
-                )
-              )
-            )
-          ).map {
-            case Left(e) =>
-              logger.warn("Could not update session", e)
-              errorHandler.errorResult()
-
-            case Right(_) =>
-              Redirect(returns.routes.TaskListController.taskList())
-          }
+              case Right(_) =>
+                Redirect(redirectTo)
+            }
         }
-    }(withUplift = false)
-  }
+      }(withUplift = false)
+    }
 
-  def viewSentReturn(submissionId: String): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def resumeDraftReturn(id: UUID): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser { (_, subscribed) =>
+        subscribed.draftReturns
+          .find(_.id === id)
+          .fold[Future[Result]] {
+            logger.warn(
+              s"For cgt reference ${subscribed.subscribedDetails.cgtReference.value} " +
+                s"could not find draft return with id $id"
+            )
+            errorHandler.errorResult()
+          } { draftReturn =>
+            updateSession(sessionStore, request)(
+              _.copy(
+                journeyStatus = Some(
+                  FillingOutReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    draftReturn
+                  )
+                )
+              )
+            ).map {
+              case Left(e)  =>
+                logger.warn("Could not update session", e)
+                errorHandler.errorResult()
+
+              case Right(_) =>
+                Redirect(returns.routes.TaskListController.taskList())
+            }
+          }
+      }(withUplift = false)
+    }
+
+  def viewSentReturn(submissionId: String): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withSubscribedUser {
         case (_, subscribed) =>
           subscribed.sentReturns
@@ -157,65 +166,80 @@ class HomePageController @Inject() (
             } { returnSummary =>
               val result = for {
                 sentReturn <- returnsService
-                               .displayReturn(subscribed.subscribedDetails.cgtReference, returnSummary.submissionId)
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(
-                          journeyStatus = Some(
-                            ViewingReturn(
-                              subscribed.subscribedDetails,
-                              subscribed.ggCredId,
-                              subscribed.agentReferenceNumber,
-                              sentReturn,
-                              returnSummary
-                            )
-                          )
-                        )
-                      )
-                    )
+                                .displayReturn(
+                                  subscribed.subscribedDetails.cgtReference,
+                                  returnSummary.submissionId
+                                )
+                _          <- EitherT(
+                       updateSession(sessionStore, request)(
+                         _.copy(
+                           journeyStatus = Some(
+                             ViewingReturn(
+                               subscribed.subscribedDetails,
+                               subscribed.ggCredId,
+                               subscribed.agentReferenceNumber,
+                               sentReturn,
+                               returnSummary
+                             )
+                           )
+                         )
+                       )
+                     )
               } yield ()
 
-              result.fold({ e =>
-                logger.warn("Could not get sent return", e)
-                errorHandler.errorResult()
-              }, _ => Redirect(returns.routes.ViewReturnController.displayReturn()))
+              result.fold(
+                { e =>
+                  logger.warn("Could not get sent return", e)
+                  errorHandler.errorResult()
+                },
+                _ => Redirect(returns.routes.ViewReturnController.displayReturn())
+              )
             }
       }(withUplift = false)
-  }
+    }
 
-  def payTotalAmountLeftToPay(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser {
-      case (_, subscribed) =>
-        paymentsService
-          .startPaymentJourney(
-            subscribed.subscribedDetails.cgtReference,
-            None,
-            subscribed.totalLeftToPay(),
-            routes.HomePageController.homepage(),
-            routes.HomePageController.homepage()
-          )
-          .fold(
-            { e =>
-              logger.warn("Could not start payments journey to pay total amount outstanding", e)
-              errorHandler.errorResult()
-            }, { journey =>
-              logger.info(
-                s"Payment journey started with journeyId ${journey.journeyId} to pay total outstanding amount on account"
-              )
-              Redirect(journey.nextUrl)
-            }
-          )
-    }(withUplift = false)
+  def payTotalAmountLeftToPay(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser {
+        case (_, subscribed) =>
+          paymentsService
+            .startPaymentJourney(
+              subscribed.subscribedDetails.cgtReference,
+              None,
+              subscribed.totalLeftToPay(),
+              routes.HomePageController.homepage(),
+              routes.HomePageController.homepage()
+            )
+            .fold(
+              { e =>
+                logger.warn(
+                  "Could not start payments journey to pay total amount outstanding",
+                  e
+                )
+                errorHandler.errorResult()
+              },
+              { journey =>
+                logger.info(
+                  s"Payment journey started with journeyId ${journey.journeyId} to pay total outstanding amount on account"
+                )
+                Redirect(journey.nextUrl)
+              }
+            )
+      }(withUplift = false)
 
-  }
+    }
 
-  def exitForSubsequentReturn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    Ok(subsequentReturnExitPage(routes.HomePageController.homepage()))
-  }
+  def exitForSubsequentReturn(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      Ok(subsequentReturnExitPage(routes.HomePageController.homepage()))
+    }
 
   private def withSubscribedUser(
     f: (SessionData, Subscribed) => Future[Result]
-  )(withUplift: Boolean)(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
+  )(withUplift: Boolean)(implicit
+    hc: HeaderCarrier,
+    request: RequestWithSessionData[_]
+  ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: StartingNewDraftReturn)) if withUplift =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
@@ -229,7 +253,7 @@ class HomePageController @Inject() (
             )
         }(f(s, _))
 
-      case Some((s: SessionData, r: FillingOutReturn)) if withUplift =>
+      case Some((s: SessionData, r: FillingOutReturn)) if withUplift       =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
           case (r, draftReturns, sentReturns) =>
             Subscribed(
@@ -241,7 +265,7 @@ class HomePageController @Inject() (
             )
         }(f(s, _))
 
-      case Some((s: SessionData, r: JustSubmittedReturn)) if withUplift =>
+      case Some((s: SessionData, r: JustSubmittedReturn)) if withUplift    =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
           case (r, draftReturns, sentReturns) =>
             Subscribed(
@@ -253,7 +277,7 @@ class HomePageController @Inject() (
             )
         }(f(s, _))
 
-      case Some((s: SessionData, r: SubmitReturnFailed)) if withUplift =>
+      case Some((s: SessionData, r: SubmitReturnFailed)) if withUplift     =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
           case (r, draftReturns, sentReturns) =>
             Subscribed(
@@ -265,7 +289,7 @@ class HomePageController @Inject() (
             )
         }(f(s, _))
 
-      case Some((s: SessionData, r: ViewingReturn)) if withUplift =>
+      case Some((s: SessionData, r: ViewingReturn)) if withUplift          =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
           case (r, draftReturns, sentReturns) =>
             Subscribed(
@@ -277,30 +301,43 @@ class HomePageController @Inject() (
             )
         }(f(s, _))
 
-      case Some((s: SessionData, r: Subscribed)) =>
+      case Some((s: SessionData, r: Subscribed))                           =>
         f(s, r)
 
-      case _ =>
+      case _                                                               =>
         Redirect(controllers.routes.StartController.start().url)
     }
 
-  private def upliftToSubscribedAndThen[J](journey: J, cgtReference: CgtReference)(
+  private def upliftToSubscribedAndThen[J](
+    journey: J,
+    cgtReference: CgtReference
+  )(
     uplift: (J, List[DraftReturn], List[ReturnSummary]) => Subscribed
   )(
     f: Subscribed => Future[Result]
-  )()(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] = {
+  )()(implicit
+    hc: HeaderCarrier,
+    request: RequestWithSessionData[_]
+  ): Future[Result] = {
     val result = for {
       sentReturns  <- returnsService.listReturns(cgtReference)
       draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
-      subscribed = uplift(journey, draftReturns, sentReturns)
-      _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscribed))))
+      subscribed    = uplift(journey, draftReturns, sentReturns)
+      _            <- EitherT(
+             updateSession(sessionStore, request)(
+               _.copy(journeyStatus = Some(subscribed))
+             )
+           )
     } yield subscribed
 
     result
-      .biSemiflatMap({ e =>
-        logger.warn("Could not update session", e)
-        errorHandler.errorResult()
-      }, f)
+      .biSemiflatMap(
+        { e =>
+          logger.warn("Could not update session", e)
+          errorHandler.errorResult()
+        },
+        f
+      )
       .merge
   }
 

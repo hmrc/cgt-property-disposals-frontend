@@ -18,7 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class SubscriptionChangeEmailAddressAttemptedEvent(oldEmailAddress: String, newEmailAddress: String)
+final case class SubscriptionChangeEmailAddressAttemptedEvent(
+  oldEmailAddress: String,
+  newEmailAddress: String
+)
 
 object SubscriptionChangeEmailAddressAttemptedEvent {
   implicit val format: OFormat[SubscriptionChangeEmailAddressAttemptedEvent] =

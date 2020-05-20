@@ -32,25 +32,27 @@ object AuditAddress {
 
   implicit val formatAddress: OFormat[AuditAddress] = Json.format[AuditAddress]
 
-  def fromAddress(address: Address): AuditAddress = address match {
-    case Address.UkAddress(line1, line2, town, county, postcode) =>
-      AuditAddress(
-        line1,
-        line2,
-        town,
-        county,
-        Some(postcode.value),
-        Country("GB", Some("United Kingdom"))
-      )
-    case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-      AuditAddress(
-        line1,
-        line2,
-        line3,
-        line4,
-        postcode,
-        Country(country.code, country.name)
-      )
-  }
+  def fromAddress(address: Address): AuditAddress =
+    address match {
+      case Address.UkAddress(line1, line2, town, county, postcode) =>
+        AuditAddress(
+          line1,
+          line2,
+          town,
+          county,
+          Some(postcode.value),
+          Country("GB", Some("United Kingdom"))
+        )
+      case Address
+            .NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+        AuditAddress(
+          line1,
+          line2,
+          line3,
+          line4,
+          postcode,
+          Country(country.code, country.name)
+        )
+    }
 
 }

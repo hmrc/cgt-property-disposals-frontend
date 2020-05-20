@@ -66,7 +66,8 @@ class RegistrationEnterEmailController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, EnteringRegistrationEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, i: IndividualMissingEmail)) => Right(sessionData -> EnteringRegistrationEmail(Right(i)))
+      case Some((sessionData, i: IndividualMissingEmail)) =>
+        Right(sessionData -> EnteringRegistrationEmail(Right(i)))
       case _                                              => Left(Redirect(controllers.routes.StartController.start()))
     }
 
@@ -74,20 +75,26 @@ class RegistrationEnterEmailController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, EnteringRegistrationEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> EnteringRegistrationEmail(Left(r)))
+      case Some((sessionData, r: RegistrationReady)) =>
+        Right(sessionData -> EnteringRegistrationEmail(Left(r)))
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateEmail(enteringRegistrationEmail: EnteringRegistrationEmail, email: Email)(
-    implicit hc: HeaderCarrier,
+  override def updateEmail(
+    enteringRegistrationEmail: EnteringRegistrationEmail,
+    email: Email
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] =
     EitherT.rightT[Future, Error](
       RegistrationReady(
         RegistrationDetails(
-          enteringRegistrationEmail.journey.fold(_.registrationDetails.name, _.name),
+          enteringRegistrationEmail.journey
+            .fold(_.registrationDetails.name, _.name),
           email,
-          enteringRegistrationEmail.journey.fold(_.registrationDetails.address, _.address),
+          enteringRegistrationEmail.journey
+            .fold(_.registrationDetails.address, _.address),
           EmailSource.ManuallyEntered
         ),
         enteringRegistrationEmail.journey.fold(_.ggCredId, _.ggCredId)
@@ -118,15 +125,26 @@ class RegistrationEnterEmailController @Inject() (
       "registration-setup-email-address-attempted"
     )
 
-  override def name(enteringRegistrationEmail: EnteringRegistrationEmail): ContactName =
-    ContactName(enteringRegistrationEmail.journey.fold(_.registrationDetails.name, _.name).makeSingleName())
+  override def name(
+    enteringRegistrationEmail: EnteringRegistrationEmail
+  ): ContactName =
+    ContactName(
+      enteringRegistrationEmail.journey
+        .fold(_.registrationDetails.name, _.name)
+        .makeSingleName()
+    )
 
   override lazy protected val backLinkCall: Option[Call]    = None
-  override lazy protected val enterEmailCall: Call          = routes.RegistrationEnterEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call    = routes.RegistrationEnterEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call      = routes.RegistrationEnterEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call = routes.RegistrationEnterEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call       = routes.RegistrationEnterEmailController.emailVerified()
+  override lazy protected val enterEmailCall: Call          =
+    routes.RegistrationEnterEmailController.enterEmail()
+  override lazy protected val enterEmailSubmitCall: Call    =
+    routes.RegistrationEnterEmailController.enterEmailSubmit()
+  override lazy protected val checkYourInboxCall: Call      =
+    routes.RegistrationEnterEmailController.checkYourInbox()
+  override lazy protected val verifyEmailCall: UUID => Call =
+    routes.RegistrationEnterEmailController.verifyEmail
+  override lazy protected val emailVerifiedCall: Call       =
+    routes.RegistrationEnterEmailController.emailVerified()
 
   override lazy protected val emailVerifiedContinueCall: Call =
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()

@@ -41,10 +41,12 @@ object CalculateCgtTaxDueRequest {
 
   @silent
   implicit val format: OFormat[CalculateCgtTaxDueRequest] = {
-    implicit val triageFormat: OFormat[CompleteSingleDisposalTriageAnswers]           = Json.format
+    implicit val triageFormat: OFormat[CompleteSingleDisposalTriageAnswers]           =
+      Json.format
     implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]       = Json.format
     implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers] = Json.format
-    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]           = Json.format
+    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]           =
+      Json.format
     implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers] = Json.format
     Json.format
   }

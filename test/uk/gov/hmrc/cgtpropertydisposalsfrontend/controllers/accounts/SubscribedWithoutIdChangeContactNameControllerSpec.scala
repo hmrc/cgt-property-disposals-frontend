@@ -45,16 +45,19 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     with IndividualNameControllerSpec[Subscribed]
     with ScalaCheckDrivenPropertyChecks {
 
-  def mockSubscriptionUpdate(subscribedAndVerifierDetails: SubscribedUpdateDetails)(result: Either[Error, Unit]) =
+  def mockSubscriptionUpdate(
+    subscribedAndVerifierDetails: SubscribedUpdateDetails
+  )(result: Either[Error, Unit]) =
     (mockSubscriptionService
       .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
       .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def isValidJourney(journey: JourneyStatus): Boolean = journey match {
-    case _: Subscribed => true
-    case _             => false
-  }
+  def isValidJourney(journey: JourneyStatus): Boolean =
+    journey match {
+      case _: Subscribed => true
+      case _             => false
+    }
 
   override lazy val controller: SubscribedWithoutIdChangeContactNameController =
     instanceOf[SubscribedWithoutIdChangeContactNameController]
@@ -75,16 +78,29 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     List.empty
   )
 
-  override def updateName(name: IndividualName, journey: Subscribed): Subscribed = {
+  override def updateName(
+    name: IndividualName,
+    journey: Subscribed
+  ): Subscribed = {
     val contactName = s"${name.firstName} ${name.lastName}"
     journey.copy(
-      subscribedDetails = journey.subscribedDetails.copy(name = Right(name), contactName = ContactName(contactName))
+      subscribedDetails = journey.subscribedDetails
+        .copy(name = Right(name), contactName = ContactName(contactName))
     )
   }
 
   override val mockUpdateName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
-    case (oldDetails: Subscribed, newDetails: Subscribed, r: Either[Error, Unit]) =>
-      mockSubscriptionUpdate(SubscribedUpdateDetails(newDetails.subscribedDetails, oldDetails.subscribedDetails))(r)
+    case (
+          oldDetails: Subscribed,
+          newDetails: Subscribed,
+          r: Either[Error, Unit]
+        ) =>
+      mockSubscriptionUpdate(
+        SubscribedUpdateDetails(
+          newDetails.subscribedDetails,
+          oldDetails.subscribedDetails
+        )
+      )(r)
   })
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
@@ -100,7 +116,10 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     "handling submitted names" must {
 
       behave like enterNameSubmit(
-        data => controller.enterIndividualNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
+        data =>
+          controller.enterIndividualNameSubmit()(
+            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+          ),
         controllers.accounts.routes.AccountController.contactNameUpdated()
       )
     }

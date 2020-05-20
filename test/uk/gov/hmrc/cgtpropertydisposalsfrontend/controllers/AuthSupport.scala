@@ -61,9 +61,14 @@ trait AuthSupport {
     mockSessionStore
   )(instanceOf[ExecutionContext])
 
-  def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(result: Future[R]): Unit =
+  def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(
+    result: Future[R]
+  ): Unit =
     (mockAuthConnector
-      .authorise(_: Predicate, _: Retrieval[R])(_: HeaderCarrier, _: ExecutionContext))
+      .authorise(_: Predicate, _: Retrieval[R])(
+        _: HeaderCarrier,
+        _: ExecutionContext
+      ))
       .expects(predicate, retrieval, *, *)
       .returning(result)
 
@@ -109,7 +114,11 @@ trait AuthSupport {
       Some(retrievedCredentials)
     )
 
-  def mockAuthWithAllTrustRetrievals(sautr: SAUTR, email: Option[String], retrievedCredentials: Credentials): Unit =
+  def mockAuthWithAllTrustRetrievals(
+    sautr: SAUTR,
+    email: Option[String],
+    retrievedCredentials: Credentials
+  ): Unit =
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L50,
       Some(AffinityGroup.Organisation),
@@ -119,7 +128,9 @@ trait AuthSupport {
       Set(
         Enrolment(
           TrustsEnrolment.key,
-          Seq(EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)),
+          Seq(
+            EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)
+          ),
           ""
         )
       ),
@@ -136,7 +147,12 @@ trait AuthSupport {
       Set(
         Enrolment(
           CgtEnrolment.key,
-          Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, "XCGTP123456789")),
+          Seq(
+            EnrolmentIdentifier(
+              CgtEnrolment.cgtReferenceIdentifier,
+              "XCGTP123456789"
+            )
+          ),
           ""
         )
       ),

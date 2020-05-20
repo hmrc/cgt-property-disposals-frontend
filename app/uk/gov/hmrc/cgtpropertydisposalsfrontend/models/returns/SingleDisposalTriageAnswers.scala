@@ -47,9 +47,21 @@ object SingleDisposalTriageAnswers {
 
   object IncompleteSingleDisposalTriageAnswers {
     val empty: IncompleteSingleDisposalTriageAnswers =
-      IncompleteSingleDisposalTriageAnswers(None, false, None, None, None, None, None, None, None)
+      IncompleteSingleDisposalTriageAnswers(
+        None,
+        false,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None
+      )
 
-    def fromCompleteAnswers(c: CompleteSingleDisposalTriageAnswers): IncompleteSingleDisposalTriageAnswers =
+    def fromCompleteAnswers(
+      c: CompleteSingleDisposalTriageAnswers
+    ): IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(
         c.individualUserType,
         true,
@@ -62,7 +74,8 @@ object SingleDisposalTriageAnswers {
         None
       )
 
-    implicit val format: OFormat[IncompleteSingleDisposalTriageAnswers] = Json.format
+    implicit val format: OFormat[IncompleteSingleDisposalTriageAnswers] =
+      Json.format
   }
 
   final case class CompleteSingleDisposalTriageAnswers(
@@ -74,25 +87,39 @@ object SingleDisposalTriageAnswers {
     completionDate: CompletionDate
   ) extends SingleDisposalTriageAnswers
 
-  implicit class IndividualTriageQuestionOps(private val s: SingleDisposalTriageAnswers) extends AnyVal {
+  implicit class IndividualTriageQuestionOps(
+    private val s: SingleDisposalTriageAnswers
+  ) extends AnyVal {
 
     def fold[A](
       ifIncomplete: IncompleteSingleDisposalTriageAnswers => A,
       ifComplete: CompleteSingleDisposalTriageAnswers => A
-    ): A = s match {
-      case incomplete: IncompleteSingleDisposalTriageAnswers => ifIncomplete(incomplete)
-      case complete: CompleteSingleDisposalTriageAnswers     => ifComplete(complete)
-    }
+    ): A =
+      s match {
+        case incomplete: IncompleteSingleDisposalTriageAnswers =>
+          ifIncomplete(incomplete)
+        case complete: CompleteSingleDisposalTriageAnswers     =>
+          ifComplete(complete)
+      }
 
     def unset[A](
-      fieldLens: IncompleteSingleDisposalTriageAnswers.type => Lens[IncompleteSingleDisposalTriageAnswers, Option[A]]
+      fieldLens: IncompleteSingleDisposalTriageAnswers.type => Lens[
+        IncompleteSingleDisposalTriageAnswers,
+        Option[A]
+      ]
     ): IncompleteSingleDisposalTriageAnswers =
       fieldLens(IncompleteSingleDisposalTriageAnswers).set(None)(
-        fold(identity, IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers)
+        fold(
+          identity,
+          IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers
+        )
       )
 
     def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-      s.fold[Option[IndividualUserType]](_.individualUserType, _.individualUserType) match {
+      s.fold[Option[IndividualUserType]](
+        _.individualUserType,
+        _.individualUserType
+      ) match {
         case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
         case Some(Capacitor)              => Some(Right(Capacitor))
         case _                            => None
@@ -100,7 +127,8 @@ object SingleDisposalTriageAnswers {
 
   }
 
-  implicit val eq: Eq[IncompleteSingleDisposalTriageAnswers] = Eq.fromUniversalEquals
+  implicit val eq: Eq[IncompleteSingleDisposalTriageAnswers] =
+    Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[SingleDisposalTriageAnswers] = derived.oformat()

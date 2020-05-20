@@ -42,7 +42,7 @@ final case class TaxYear(
 object TaxYear {
 
   def thisTaxYearStartDate(): LocalDate = {
-    val today = TimeUtils.today()
+    val today     = TimeUtils.today()
     val startYear =
       if (today >= LocalDate.of(today.getYear, 4, 6))
         today.getYear

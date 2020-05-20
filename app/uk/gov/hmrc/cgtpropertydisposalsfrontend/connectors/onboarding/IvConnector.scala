@@ -30,18 +30,24 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[IvConnectorImpl])
 trait IvConnector {
 
-  def getFailedJourneyStatus(journeyId: UUID)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  def getFailedJourneyStatus(journeyId: UUID)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 
 }
 
 @Singleton
-class IvConnectorImpl @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(
-  implicit ec: ExecutionContext
+class IvConnectorImpl @Inject() (
+  http: HttpClient,
+  servicesConfig: ServicesConfig
+)(implicit
+  ec: ExecutionContext
 ) extends IvConnector {
 
   val baseUrl: String = servicesConfig.baseUrl("iv")
 
-  def url(journeyId: UUID): String = s"$baseUrl/mdtp/journey/journeyId/${journeyId.toString}"
+  def url(journeyId: UUID): String =
+    s"$baseUrl/mdtp/journey/journeyId/${journeyId.toString}"
 
   override def getFailedJourneyStatus(
     journeyId: UUID

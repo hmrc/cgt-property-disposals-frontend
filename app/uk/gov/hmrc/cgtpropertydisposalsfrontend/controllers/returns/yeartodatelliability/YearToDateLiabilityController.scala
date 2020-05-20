@@ -76,6 +76,8 @@ class YearToDateLiabilityController @Inject() (
   hasEstimatedDetailsPage: pages.has_estimated_details,
   taxDuePage: pages.tax_due,
   mandatoryEvidencePage: pages.upload_mandatory_evidence,
+  mandatoryEvidenceUploadFailedPage: pages.upload_mandatory_evidence_failed,
+  mandatoryEvidenceScanFailedPage: pages.upload_mandatory_evidence_scan_failed,
   calculatedCheckYouAnswersPage: pages.calculated_check_your_answers,
   taxableGainOrLossPage: pages.taxable_gain_or_loss,
   nonCalculatedEnterTaxDuePage: pages.non_calculated_enter_tax_due,
@@ -107,29 +109,51 @@ class YearToDateLiabilityController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>
+      case Some(
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
+          ) =>
         d.yearToDateLiabilityAnswers match {
           case Some(y) => f(s, r, y)
 
           case None =>
             d.reliefDetailsAnswers match {
-              case Some(CompleteReliefDetailsAnswers(_, _, Some(_: OtherReliefsOption.OtherReliefs))) =>
+              case Some(
+                    CompleteReliefDetailsAnswers(
+                      _,
+                      _,
+                      Some(_: OtherReliefsOption.OtherReliefs)
+                    )
+                  ) =>
                 f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
 
               case Some(_: CompleteReliefDetailsAnswers) =>
                 f(s, r, IncompleteCalculatedYTDAnswers.empty)
 
-              case _ =>
-                Redirect(controllers.returns.routes.TaskListController.taskList())
+              case _                                     =>
+                Redirect(
+                  controllers.returns.routes.TaskListController.taskList()
+                )
             }
         }
 
-      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftMultipleDisposalsReturn))) =>
+      case Some(
+            (s, r @ FillingOutReturn(_, _, _, d: DraftMultipleDisposalsReturn))
+          ) =>
         d.yearToDateLiabilityAnswers.fold[Future[Result]](
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(f(s, r, _))
 
-      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleIndirectDisposalReturn))) =>
+      case Some(
+            (
+              s,
+              r @ FillingOutReturn(
+                _,
+                _,
+                _,
+                d: DraftSingleIndirectDisposalReturn
+              )
+            )
+          ) =>
         d.yearToDateLiabilityAnswers.fold[Future[Result]](
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(f(s, r, _))
@@ -149,9 +173,12 @@ class YearToDateLiabilityController @Inject() (
     calculateIfMissing: Boolean,
     fillingOutReturn: FillingOutReturn,
     draftReturn: DraftSingleDisposalReturn
-  )(f: CalculatedTaxDue => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(
+    f: CalculatedTaxDue => Future[Result]
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case complete: CompleteCalculatedYTDAnswers => f(complete.calculatedTaxDue)
+      case complete: CompleteCalculatedYTDAnswers     =>
+        f(complete.calculatedTaxDue)
 
       case incomplete: IncompleteCalculatedYTDAnswers =>
         incomplete.calculatedTaxDue match {
@@ -160,45 +187,48 @@ class YearToDateLiabilityController @Inject() (
           case None if !calculateIfMissing =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
-          case None if calculateIfMissing =>
+          case None if calculateIfMissing  =>
             val result =
               for {
                 calculatedTaxDue <- cgtCalculationService
-                                     .calculateTaxDue(
-                                       CalculateCgtTaxDueRequest(
-                                         triageAnswers,
-                                         disposalDetailsAnswers,
-                                         acquisitionDetailsAnswers,
-                                         reliefDetailsAnswers,
-                                         exemptionAndLossesAnswers,
-                                         estimatedIncome,
-                                         personalAllowance,
-                                         draftReturn.initialGainOrLoss,
-                                         fillingOutReturn.subscribedDetails.isATrust
-                                       )
-                                     )
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(
-                          journeyStatus = Some(
-                            fillingOutReturn.copy(draftReturn =
-                              draftReturn.copy(yearToDateLiabilityAnswers =
-                                Some(
-                                  incomplete.copy(calculatedTaxDue = Some(calculatedTaxDue))
-                                )
-                              )
-                            )
-                          )
-                        )
-                      )
-                    )
+                                      .calculateTaxDue(
+                                        CalculateCgtTaxDueRequest(
+                                          triageAnswers,
+                                          disposalDetailsAnswers,
+                                          acquisitionDetailsAnswers,
+                                          reliefDetailsAnswers,
+                                          exemptionAndLossesAnswers,
+                                          estimatedIncome,
+                                          personalAllowance,
+                                          draftReturn.initialGainOrLoss,
+                                          fillingOutReturn.subscribedDetails.isATrust
+                                        )
+                                      )
+                _                <- EitherT(
+                       updateSession(sessionStore, request)(
+                         _.copy(
+                           journeyStatus = Some(
+                             fillingOutReturn.copy(draftReturn =
+                               draftReturn.copy(yearToDateLiabilityAnswers =
+                                 Some(
+                                   incomplete.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                                 )
+                               )
+                             )
+                           )
+                         )
+                       )
+                     )
               } yield calculatedTaxDue
 
             result
-              .biSemiflatMap({ e =>
-                logger.warn("Could not get and store calculated tax due", e)
-                errorHandler.errorResult()
-              }, f)
+              .biSemiflatMap(
+                { e =>
+                  logger.warn("Could not get and store calculated tax due", e)
+                  errorHandler.errorResult()
+                },
+                f
+              )
               .merge
         }
 
@@ -221,11 +251,11 @@ class YearToDateLiabilityController @Inject() (
       draftReturn.exemptionAndLossesAnswers
     ) match {
       case (
-          t: CompleteSingleDisposalTriageAnswers,
-          Some(d: CompleteDisposalDetailsAnswers),
-          Some(a: CompleteAcquisitionDetailsAnswers),
-          Some(r: CompleteReliefDetailsAnswers),
-          Some(e: CompleteExemptionAndLossesAnswers)
+            t: CompleteSingleDisposalTriageAnswers,
+            Some(d: CompleteDisposalDetailsAnswers),
+            Some(a: CompleteAcquisitionDetailsAnswers),
+            Some(r: CompleteReliefDetailsAnswers),
+            Some(e: CompleteExemptionAndLossesAnswers)
           ) =>
         f(t, d, a, r, e)
 
@@ -237,11 +267,12 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftSingleDisposalReturn
   )(f: (AssetType, Boolean) => Future[Result]): Future[Result] =
     draftReturn.triageAnswers.fold(
-      i => i.assetType       -> i.wasAUKResident,
+      i => i.assetType -> i.wasAUKResident,
       c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
     ) match {
       case (Some(a), Some(w)) => f(a, w)
-      case _                  => Redirect(controllers.returns.routes.TaskListController.taskList())
+      case _                  =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
     }
 
   private def withDisposalDate(
@@ -258,7 +289,9 @@ class YearToDateLiabilityController @Inject() (
   )(f: AmountInPence => Future[Result]): Future[Result] =
     answers
       .fold(_.estimatedIncome, c => Some(c.estimatedIncome))
-      .fold[Future[Result]](Redirect(routes.YearToDateLiabilityController.checkYourAnswers()))(f)
+      .fold[Future[Result]](
+        Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+      )(f)
 
   private def withPersonalAllowance(
     answers: CalculatedYTDAnswers
@@ -278,7 +311,7 @@ class YearToDateLiabilityController @Inject() (
     answers: YearToDateLiabilityAnswers
   )(f: Boolean => Future[Result]): Future[Result] =
     answers match {
-      case _: NonCalculatedYTDAnswers =>
+      case _: NonCalculatedYTDAnswers              =>
         Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
       case calculatedAnswers: CalculatedYTDAnswers =>
@@ -293,15 +326,22 @@ class YearToDateLiabilityController @Inject() (
     answers: CalculatedYTDAnswers
   )(f: (AmountInPence, CalculatedTaxDue) => Future[Result]): Future[Result] = {
     val taxDue           = answers.fold(_.taxDue, c => Some(c.taxDue))
-    val calculatedTaxDue = answers.fold(_.calculatedTaxDue, c => Some(c.calculatedTaxDue))
+    val calculatedTaxDue =
+      answers.fold(_.calculatedTaxDue, c => Some(c.calculatedTaxDue))
 
     (taxDue, calculatedTaxDue) match {
       case (Some(t), Some(c)) => f(t, c)
-      case _                  => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+      case _                  =>
+        Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
     }
   }
 
-  private def commonDisplayBehaviour[Y <: YearToDateLiabilityAnswers, A, P: Writeable, R](
+  private def commonDisplayBehaviour[
+    Y <: YearToDateLiabilityAnswers,
+    A,
+    P : Writeable,
+    R
+  ](
     currentAnswers: Y
   )(form: Y => Form[A])(
     page: (Form[A], Call) => P
@@ -311,7 +351,7 @@ class YearToDateLiabilityController @Inject() (
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       val backLink = currentAnswers match {
-        case c: CalculatedYTDAnswers =>
+        case c: CalculatedYTDAnswers    =>
           c.fold(
             _ => redirectToIfNoRequiredPreviousAnswer,
             _ => routes.YearToDateLiabilityController.checkYourAnswers()
@@ -325,11 +365,16 @@ class YearToDateLiabilityController @Inject() (
       }
 
       Ok(page(form(currentAnswers), backLink))
-    } else {
+    } else
       Redirect(redirectToIfNoRequiredPreviousAnswer)
-    }
 
-  private def commonSubmitBehaviour[Y <: YearToDateLiabilityAnswers, D <: DraftReturn: Eq, A, P: Writeable, R](
+  private def commonSubmitBehaviour[
+    Y <: YearToDateLiabilityAnswers,
+    D <: DraftReturn : Eq,
+    A,
+    P : Writeable,
+    R
+  ](
     currentFillingOutReturn: FillingOutReturn,
     currentDraftReturn: D,
     currentAnswers: Y
@@ -340,12 +385,12 @@ class YearToDateLiabilityController @Inject() (
     redirectToIfNoRequiredPreviousAnswer: Call
   )(
     updateAnswers: (A, D) => D
-  )(
-    implicit request: RequestWithSessionData[_]
+  )(implicit
+    request: RequestWithSessionData[_]
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       lazy val backLink = currentAnswers match {
-        case c: CalculatedYTDAnswers =>
+        case c: CalculatedYTDAnswers    =>
           c.fold(
             _ => redirectToIfNoRequiredPreviousAnswer,
             _ => routes.YearToDateLiabilityController.checkYourAnswers()
@@ -360,259 +405,340 @@ class YearToDateLiabilityController @Inject() (
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
+          formWithErrors => BadRequest(page(formWithErrors, backLink)),
+          { value =>
             val newDraftReturn = updateAnswers(value, currentDraftReturn)
 
             val result = for {
-              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure[Future, Error](())
-                  else
-                    returnsService.storeDraftReturn(
-                      newDraftReturn,
-                      currentFillingOutReturn.subscribedDetails.cgtReference,
-                      currentFillingOutReturn.agentReferenceNumber
-                    )
+              _ <- if (newDraftReturn === currentDraftReturn)
+                     EitherT.pure[Future, Error](())
+                   else
+                     returnsService.storeDraftReturn(
+                       newDraftReturn,
+                       currentFillingOutReturn.subscribedDetails.cgtReference,
+                       currentFillingOutReturn.agentReferenceNumber
+                     )
               _ <- EitherT(
-                    updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
-                    )
-                  )
+                     updateSession(sessionStore, request)(
+                       _.copy(journeyStatus =
+                         Some(
+                           currentFillingOutReturn
+                             .copy(draftReturn = newDraftReturn)
+                         )
+                       )
+                     )
+                   )
             } yield ()
             result.fold(
               { e =>
                 logger.warn("Could not update draft return", e)
                 errorHandler.errorResult()
               },
-              _ => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+              _ =>
+                Redirect(
+                  routes.YearToDateLiabilityController.checkYourAnswers()
+                )
             )
 
           }
         )
-    } else {
+    } else
       Redirect(redirectToIfNoRequiredPreviousAnswer)
-    }
 
-  def estimatedIncome(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (_, _) if isATrust(fillingOutReturn) =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-          withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
-            withDisposalDate(draftReturn) { disposalDate =>
-              commonDisplayBehaviour(calculatedAnswers)(
-                form = _.fold(
-                  _.estimatedIncome.fold(estimatedIncomeForm)(a => estimatedIncomeForm.fill(a.inPounds())),
-                  c => estimatedIncomeForm.fill(c.estimatedIncome.inPounds())
-                )
-              )(
-                page = estimatedIncomePage(
-                  _,
-                  _,
-                  disposalDate,
-                  wasUkResident,
-                  representativeType(draftReturn)
-                )
-              )(
-                requiredPreviousAnswer = _ => Some(()),
-                controllers.returns.routes.TaskListController.taskList()
-              )
-            }
-          }
-
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-      }
-    }
-  }
-
-  def estimatedIncomeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (_, _) if isATrust(fillingOutReturn) =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-          withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
-            withDisposalDate(draftReturn) { disposalDate =>
-              commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
-                form = estimatedIncomeForm
-              )(
-                page = { (form, backLink) =>
-                  estimatedIncomePage(
-                    form,
-                    backLink,
+  def estimatedIncome(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (_, _) if isATrust(fillingOutReturn) =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) =>
+            withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
+              withDisposalDate(draftReturn) { disposalDate =>
+                commonDisplayBehaviour(calculatedAnswers)(
+                  form = _.fold(
+                    _.estimatedIncome.fold(estimatedIncomeForm)(a => estimatedIncomeForm.fill(a.inPounds())),
+                    c => estimatedIncomeForm.fill(c.estimatedIncome.inPounds())
+                  )
+                )(
+                  page = estimatedIncomePage(
+                    _,
+                    _,
                     disposalDate,
                     wasUkResident,
                     representativeType(draftReturn)
                   )
-                }
-              )(
-                requiredPreviousAnswer               = _ => Some(()),
-                redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
-              )(
-                updateAnswers = { (i, draftReturn) =>
-                  val estimatedIncome = AmountInPence.fromPounds(i)
-
-                  if (calculatedAnswers
-                        .fold(_.estimatedIncome, c => Some(c.estimatedIncome))
-                        .contains(estimatedIncome)) {
-                    draftReturn
-                  } else {
-                    val newAnswers =
-                      calculatedAnswers
-                        .unset(_.personalAllowance)
-                        .unset(_.hasEstimatedDetails)
-                        .unset(_.calculatedTaxDue)
-                        .unset(_.taxDue)
-                        .unset(_.mandatoryEvidence)
-                        .unset(_.expiredEvidence)
-                        .unset(_.pendingUpscanUpload)
-                        .copy(estimatedIncome = Some(AmountInPence.fromPounds(i)))
-
-                    draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-                  }
-                }
-              )
-            }
-          }
-
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-      }
-    }
-  }
-
-  def personalAllowance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (_, _) if isATrust(fillingOutReturn) =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-          withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
-            withDisposalDate(draftReturn) { disposalDate =>
-              withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
-                if (estimatedIncome.value > 0L) {
-                  commonDisplayBehaviour(calculatedAnswers)(
-                    form = { a =>
-                      val emptyForm = personalAllowanceForm(disposalDate)
-                      a.fold(
-                        _.personalAllowance.fold(emptyForm)(a => emptyForm.fill(a.inPounds())),
-                        _.personalAllowance.fold(emptyForm)(a => emptyForm.fill(a.inPounds()))
-                      )
-                    }
-                  )(
-                    page = personalAllowancePage(_, _, disposalDate, wasUkResident, representativeType(draftReturn))
-                  )(
-                    requiredPreviousAnswer = _.fold(_.estimatedIncome, c => Some(c.estimatedIncome)),
-                    routes.YearToDateLiabilityController.estimatedIncome()
-                  )
-                } else {
-                  Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-                }
+                )(
+                  requiredPreviousAnswer = _ => Some(()),
+                  controllers.returns.routes.TaskListController.taskList()
+                )
               }
             }
-          }
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+
+          case _                                    =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
       }
     }
-  }
 
-  def personalAllowanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (_, _) if isATrust(fillingOutReturn) =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-          withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
-            withDisposalDate(draftReturn) { disposalDate =>
-              withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
-                if (estimatedIncome.value > 0L) {
-                  commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
-                    form = personalAllowanceForm(disposalDate)
-                  )(page =
-                    (form, backLink) =>
-                      personalAllowancePage(
-                        form,
-                        backLink,
+  def estimatedIncomeSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (_, _) if isATrust(fillingOutReturn) =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) =>
+            withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
+              withDisposalDate(draftReturn) { disposalDate =>
+                commonSubmitBehaviour(
+                  fillingOutReturn,
+                  draftReturn,
+                  calculatedAnswers
+                )(
+                  form = estimatedIncomeForm
+                )(
+                  page = { (form, backLink) =>
+                    estimatedIncomePage(
+                      form,
+                      backLink,
+                      disposalDate,
+                      wasUkResident,
+                      representativeType(draftReturn)
+                    )
+                  }
+                )(
+                  requiredPreviousAnswer = _ => Some(()),
+                  redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+                )(
+                  updateAnswers = { (i, draftReturn) =>
+                    val estimatedIncome = AmountInPence.fromPounds(i)
+
+                    if (
+                      calculatedAnswers
+                        .fold(
+                          _.estimatedIncome,
+                          c => Some(c.estimatedIncome)
+                        )
+                        .contains(estimatedIncome)
+                    )
+                      draftReturn
+                    else {
+                      val newAnswers =
+                        calculatedAnswers
+                          .unset(_.personalAllowance)
+                          .unset(_.hasEstimatedDetails)
+                          .unset(_.calculatedTaxDue)
+                          .unset(_.taxDue)
+                          .unset(_.mandatoryEvidence)
+                          .unset(_.expiredEvidence)
+                          .unset(_.pendingUpscanUpload)
+                          .copy(estimatedIncome = Some(AmountInPence.fromPounds(i)))
+
+                      draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                    }
+                  }
+                )
+              }
+            }
+
+          case _                                    =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
+      }
+    }
+
+  def personalAllowance(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (_, _) if isATrust(fillingOutReturn) =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) =>
+            withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
+              withDisposalDate(draftReturn) { disposalDate =>
+                withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
+                  if (estimatedIncome.value > 0L)
+                    commonDisplayBehaviour(calculatedAnswers)(
+                      form = { a =>
+                        val emptyForm = personalAllowanceForm(disposalDate)
+                        a.fold(
+                          _.personalAllowance.fold(emptyForm)(a => emptyForm.fill(a.inPounds())),
+                          _.personalAllowance.fold(emptyForm)(a => emptyForm.fill(a.inPounds()))
+                        )
+                      }
+                    )(
+                      page = personalAllowancePage(
+                        _,
+                        _,
                         disposalDate,
                         wasUkResident,
                         representativeType(draftReturn)
                       )
-                  )(
-                    requiredPreviousAnswer = _.fold(_.estimatedIncome, c => Some(c.estimatedIncome)),
-                    routes.YearToDateLiabilityController.estimatedIncome()
-                  ) { (p, draftReturn) =>
-                    val personalAllowance = AmountInPence.fromPounds(p)
-                    if (calculatedAnswers
-                          .fold(_.personalAllowance, _.personalAllowance)
-                          .contains(personalAllowance)) {
-                      draftReturn
-                    } else {
-                      val newAnswers = calculatedAnswers
-                        .unset(_.hasEstimatedDetails)
-                        .unset(_.calculatedTaxDue)
-                        .unset(_.taxDue)
-                        .unset(_.mandatoryEvidence)
-                        .unset(_.expiredEvidence)
-                        .unset(_.pendingUpscanUpload)
-                        .copy(personalAllowance = Some(AmountInPence.fromPounds(p)))
-
-                      draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-
-                    }
-                  }
-                } else {
-                  Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+                    )(
+                      requiredPreviousAnswer = _.fold(
+                        _.estimatedIncome,
+                        c => Some(c.estimatedIncome)
+                      ),
+                      routes.YearToDateLiabilityController.estimatedIncome()
+                    )
+                  else
+                    Redirect(
+                      routes.YearToDateLiabilityController
+                        .checkYourAnswers()
+                    )
                 }
               }
             }
-          }
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case _                                    =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
       }
     }
-  }
 
-  def hasEstimatedDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (nonCalculatedAnswers: NonCalculatedYTDAnswers, _: DraftReturn) =>
-          commonDisplayBehaviour(nonCalculatedAnswers)(
-            form = _.fold(
-              _.hasEstimatedDetails.fold(hasEstimatedDetailsForm)(hasEstimatedDetailsForm.fill),
-              c => hasEstimatedDetailsForm.fill(c.hasEstimatedDetails)
-            )
-          )(
-            page = hasEstimatedDetailsPage(
-              _,
-              _,
-              isATrust(fillingOutReturn),
-              representativeType(fillingOutReturn.draftReturn)
-            )
-          )(
-            requiredPreviousAnswer = answers =>
-              if (isATrust(fillingOutReturn)) {
-                Some(AmountInPence(0))
-              } else answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
-            redirectToIfNoRequiredPreviousAnswer =
-              if (isATrust(fillingOutReturn)) controllers.returns.routes.TaskListController.taskList()
-              else routes.YearToDateLiabilityController.taxableGainOrLoss()
-          )
+  def personalAllowanceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (_, _) if isATrust(fillingOutReturn) =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) =>
+            withAssetTypeAndResidentialStatus(draftReturn) { (_, wasUkResident) =>
+              withDisposalDate(draftReturn) { disposalDate =>
+                withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
+                  if (estimatedIncome.value > 0L)
+                    commonSubmitBehaviour(
+                      fillingOutReturn,
+                      draftReturn,
+                      calculatedAnswers
+                    )(
+                      form = personalAllowanceForm(disposalDate)
+                    )(page =
+                      (form, backLink) =>
+                        personalAllowancePage(
+                          form,
+                          backLink,
+                          disposalDate,
+                          wasUkResident,
+                          representativeType(draftReturn)
+                        )
+                    )(
+                      requiredPreviousAnswer = _.fold(
+                        _.estimatedIncome,
+                        c => Some(c.estimatedIncome)
+                      ),
+                      routes.YearToDateLiabilityController.estimatedIncome()
+                    ) { (p, draftReturn) =>
+                      val personalAllowance = AmountInPence.fromPounds(p)
+                      if (
+                        calculatedAnswers
+                          .fold(_.personalAllowance, _.personalAllowance)
+                          .contains(personalAllowance)
+                      )
+                        draftReturn
+                      else {
+                        val newAnswers = calculatedAnswers
+                          .unset(_.hasEstimatedDetails)
+                          .unset(_.calculatedTaxDue)
+                          .unset(_.taxDue)
+                          .unset(_.mandatoryEvidence)
+                          .unset(_.expiredEvidence)
+                          .unset(_.pendingUpscanUpload)
+                          .copy(personalAllowance = Some(AmountInPence.fromPounds(p)))
 
-        case (calculatedAnswers: CalculatedYTDAnswers, _: DraftSingleDisposalReturn) if !isATrust(fillingOutReturn) =>
-          withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
-            displayForEstimatedDetails(fillingOutReturn, calculatedAnswers, Some(estimatedIncome))
-          }
+                        draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
 
-        case (calculatedAnswers: CalculatedYTDAnswers, _: DraftSingleDisposalReturn) if isATrust(fillingOutReturn) =>
-          displayForEstimatedDetails(fillingOutReturn, calculatedAnswers, None)
-
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
+                      }
+                    }
+                  else
+                    Redirect(
+                      routes.YearToDateLiabilityController
+                        .checkYourAnswers()
+                    )
+                }
+              }
+            }
+          case _                                    =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
       }
     }
-  }
+
+  def hasEstimatedDetails(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (
+                nonCalculatedAnswers: NonCalculatedYTDAnswers,
+                _: DraftReturn
+              ) =>
+            commonDisplayBehaviour(nonCalculatedAnswers)(
+              form = _.fold(
+                _.hasEstimatedDetails.fold(hasEstimatedDetailsForm)(
+                  hasEstimatedDetailsForm.fill
+                ),
+                c => hasEstimatedDetailsForm.fill(c.hasEstimatedDetails)
+              )
+            )(
+              page = hasEstimatedDetailsPage(
+                _,
+                _,
+                isATrust(fillingOutReturn),
+                representativeType(fillingOutReturn.draftReturn)
+              )
+            )(
+              requiredPreviousAnswer = answers =>
+                if (isATrust(fillingOutReturn))
+                  Some(AmountInPence(0))
+                else
+                  answers.fold(
+                    _.taxableGainOrLoss,
+                    c => Some(c.taxableGainOrLoss)
+                  ),
+              redirectToIfNoRequiredPreviousAnswer =
+                if (isATrust(fillingOutReturn))
+                  controllers.returns.routes.TaskListController.taskList()
+                else routes.YearToDateLiabilityController.taxableGainOrLoss()
+            )
+
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                _: DraftSingleDisposalReturn
+              ) if !isATrust(fillingOutReturn) =>
+            withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
+              displayForEstimatedDetails(
+                fillingOutReturn,
+                calculatedAnswers,
+                Some(estimatedIncome)
+              )
+            }
+
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                _: DraftSingleDisposalReturn
+              ) if isATrust(fillingOutReturn) =>
+            displayForEstimatedDetails(
+              fillingOutReturn,
+              calculatedAnswers,
+              None
+            )
+
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+
+        }
+      }
+    }
 
   private def displayForEstimatedDetails(
     fillingOutReturn: FillingOutReturn,
@@ -621,42 +747,63 @@ class YearToDateLiabilityController @Inject() (
   )(implicit request: RequestWithSessionData[_]) =
     commonDisplayBehaviour(calculatedAnswers)(
       form = _.fold(
-        _.hasEstimatedDetails.fold(hasEstimatedDetailsForm)(hasEstimatedDetailsForm.fill),
+        _.hasEstimatedDetails
+          .fold(hasEstimatedDetailsForm)(hasEstimatedDetailsForm.fill),
         c => hasEstimatedDetailsForm.fill(c.hasEstimatedDetails)
       )
     )(
-      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn), representativeType(fillingOutReturn.draftReturn))
+      page = hasEstimatedDetailsPage(
+        _,
+        _,
+        isATrust(fillingOutReturn),
+        representativeType(fillingOutReturn.draftReturn)
+      )
     )(
       requiredPreviousAnswer = { a =>
         estimatedIncome match {
           case None                      => Some(AmountInPence(0))
-          case Some(ei) if ei.value > 0L => a.fold(_.personalAllowance, _.personalAllowance)
+          case Some(ei) if ei.value > 0L =>
+            a.fold(_.personalAllowance, _.personalAllowance)
           case _                         => a.fold(_.estimatedIncome, c => Some(c.estimatedIncome))
         }
       },
-      redirectToIfNoRequiredPreviousAnswer = {
-        estimatedIncome match {
-          case None                      => controllers.returns.routes.TaskListController.taskList()
-          case Some(ei) if ei.value > 0L => routes.YearToDateLiabilityController.personalAllowance()
-          case _                         => routes.YearToDateLiabilityController.estimatedIncome()
-        }
+      redirectToIfNoRequiredPreviousAnswer = estimatedIncome match {
+        case None                      => controllers.returns.routes.TaskListController.taskList()
+        case Some(ei) if ei.value > 0L =>
+          routes.YearToDateLiabilityController.personalAllowance()
+        case _                         => routes.YearToDateLiabilityController.estimatedIncome()
       }
     )
 
-  def hasEstimatedDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (nonCalculatedAnswers: NonCalculatedYTDAnswers, draftReturn: DraftReturn) =>
-          handleNonCalculatedEstimatedDetailsSubmit(nonCalculatedAnswers, draftReturn, fillingOutReturn)
+  def hasEstimatedDetailsSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (
+                nonCalculatedAnswers: NonCalculatedYTDAnswers,
+                draftReturn: DraftReturn
+              ) =>
+            handleNonCalculatedEstimatedDetailsSubmit(
+              nonCalculatedAnswers,
+              draftReturn,
+              fillingOutReturn
+            )
 
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-          handleNonCalculatedEstimatedDetailsSubmit(calculatedAnswers, draftReturn, fillingOutReturn)
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) =>
+            handleNonCalculatedEstimatedDetailsSubmit(
+              calculatedAnswers,
+              draftReturn,
+              fillingOutReturn
+            )
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
       }
     }
-  }
 
   private def handleNonCalculatedEstimatedDetailsSubmit(
     calculatedAnswers: CalculatedYTDAnswers,
@@ -664,10 +811,20 @@ class YearToDateLiabilityController @Inject() (
     fillingOutReturn: FillingOutReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     if (isATrust(fillingOutReturn))
-      estimatedDetailsSubmit(calculatedAnswers, draftReturn, fillingOutReturn, None)
+      estimatedDetailsSubmit(
+        calculatedAnswers,
+        draftReturn,
+        fillingOutReturn,
+        None
+      )
     else
       withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
-        estimatedDetailsSubmit(calculatedAnswers, draftReturn, fillingOutReturn, Some(estimatedIncome))
+        estimatedDetailsSubmit(
+          calculatedAnswers,
+          draftReturn,
+          fillingOutReturn,
+          Some(estimatedIncome)
+        )
       }
 
   private def estimatedDetailsSubmit(
@@ -679,28 +836,35 @@ class YearToDateLiabilityController @Inject() (
     commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
       form = hasEstimatedDetailsForm
     )(
-      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn), representativeType(draftReturn))
+      page = hasEstimatedDetailsPage(
+        _,
+        _,
+        isATrust(fillingOutReturn),
+        representativeType(draftReturn)
+      )
     )(
       requiredPreviousAnswer = { a =>
         estimatedIncome match {
           case None                      => Some(AmountInPence(0))
-          case Some(ei) if ei.value > 0L => a.fold(_.personalAllowance, _.personalAllowance)
+          case Some(ei) if ei.value > 0L =>
+            a.fold(_.personalAllowance, _.personalAllowance)
           case _                         => a.fold(_.estimatedIncome, c => Some(c.estimatedIncome))
         }
       },
-      redirectToIfNoRequiredPreviousAnswer = {
-        estimatedIncome match {
-          case None                      => controllers.returns.routes.TaskListController.taskList()
-          case Some(ei) if ei.value > 0L => routes.YearToDateLiabilityController.personalAllowance()
-          case _                         => routes.YearToDateLiabilityController.estimatedIncome()
-        }
+      redirectToIfNoRequiredPreviousAnswer = estimatedIncome match {
+        case None                      => controllers.returns.routes.TaskListController.taskList()
+        case Some(ei) if ei.value > 0L =>
+          routes.YearToDateLiabilityController.personalAllowance()
+        case _                         => routes.YearToDateLiabilityController.estimatedIncome()
       }
     ) { (hasEstimated, draftReturn) =>
-      if (calculatedAnswers
-            .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
-            .contains(hasEstimated)) {
+      if (
+        calculatedAnswers
+          .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
+          .contains(hasEstimated)
+      )
         draftReturn
-      } else {
+      else {
         val newAnswers = calculatedAnswers
           .unset(_.calculatedTaxDue)
           .unset(_.taxDue)
@@ -720,18 +884,25 @@ class YearToDateLiabilityController @Inject() (
     commonSubmitBehaviour(fillingOutReturn, draftReturn, nonCalculatedAnswers)(
       form = hasEstimatedDetailsForm
     )(
-      page = hasEstimatedDetailsPage(_, _, isATrust(fillingOutReturn), representativeType(draftReturn))
+      page = hasEstimatedDetailsPage(
+        _,
+        _,
+        isATrust(fillingOutReturn),
+        representativeType(draftReturn)
+      )
     )(
       requiredPreviousAnswer = answers =>
         if (isATrust(fillingOutReturn)) Some(AmountInPence(0))
         else answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
       redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxableGainOrLoss()
     ) { (hasEstimated, draftReturn) =>
-      if (nonCalculatedAnswers
-            .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
-            .contains(hasEstimated)) {
+      if (
+        nonCalculatedAnswers
+          .fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
+          .contains(hasEstimated)
+      )
         draftReturn
-      } else {
+      else {
         val newAnswers = nonCalculatedAnswers
           .unset(_.taxDue)
           .unset(_.mandatoryEvidence)
@@ -747,25 +918,43 @@ class YearToDateLiabilityController @Inject() (
       }
     }
 
-  def taxDue(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn)
-            if isATrust(fillingOutReturn) =>
-          taxDueDisplay(fillingOutReturn, calculatedAnswers, draftReturn, AmountInPence(0), AmountInPence(0))
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-          withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
-            withPersonalAllowance(calculatedAnswers) { personalAllowance =>
-              taxDueDisplay(fillingOutReturn, calculatedAnswers, draftReturn, estimatedIncome, personalAllowance)
+  def taxDue(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) if isATrust(fillingOutReturn) =>
+            taxDueDisplay(
+              fillingOutReturn,
+              calculatedAnswers,
+              draftReturn,
+              AmountInPence(0),
+              AmountInPence(0)
+            )
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) =>
+            withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
+              withPersonalAllowance(calculatedAnswers) { personalAllowance =>
+                taxDueDisplay(
+                  fillingOutReturn,
+                  calculatedAnswers,
+                  draftReturn,
+                  estimatedIncome,
+                  personalAllowance
+                )
+              }
             }
-          }
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
+        }
       }
     }
-  }
 
   private def taxDueDisplay(
     fillingOutReturn: FillingOutReturn,
@@ -776,7 +965,13 @@ class YearToDateLiabilityController @Inject() (
   )(implicit request: RequestWithSessionData[_]) =
     withHasEstimatedDetails(calculatedAnswers) { _ =>
       withCompleteJourneys(draftReturn) {
-        (triage, disposalDetails, acquisitionDetails, reliefDetails, exemptionsAndLossesDetails) =>
+        (
+          triage,
+          disposalDetails,
+          acquisitionDetails,
+          reliefDetails,
+          exemptionsAndLossesDetails
+        ) =>
           withCalculatedTaxDue(
             calculatedAnswers,
             triage,
@@ -821,25 +1016,43 @@ class YearToDateLiabilityController @Inject() (
       }
     }
 
-  def taxDueSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn)
-            if isATrust(fillingOutReturn) =>
-          baseTaxDueSubmit(fillingOutReturn, calculatedAnswers, draftReturn, AmountInPence(0), AmountInPence(0))
-        case (calculatedAnswers: CalculatedYTDAnswers, draftReturn: DraftSingleDisposalReturn) =>
-          withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
-            withPersonalAllowance(calculatedAnswers) { personalAllowance =>
-              baseTaxDueSubmit(fillingOutReturn, calculatedAnswers, draftReturn, estimatedIncome, personalAllowance)
+  def taxDueSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) if isATrust(fillingOutReturn) =>
+            baseTaxDueSubmit(
+              fillingOutReturn,
+              calculatedAnswers,
+              draftReturn,
+              AmountInPence(0),
+              AmountInPence(0)
+            )
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                draftReturn: DraftSingleDisposalReturn
+              ) =>
+            withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
+              withPersonalAllowance(calculatedAnswers) { personalAllowance =>
+                baseTaxDueSubmit(
+                  fillingOutReturn,
+                  calculatedAnswers,
+                  draftReturn,
+                  estimatedIncome,
+                  personalAllowance
+                )
+              }
             }
-          }
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
+        }
       }
     }
-  }
 
   private def baseTaxDueSubmit(
     fillingOutReturn: FillingOutReturn,
@@ -850,7 +1063,13 @@ class YearToDateLiabilityController @Inject() (
   )(implicit request: RequestWithSessionData[_]) =
     withHasEstimatedDetails(calculatedAnswers) { _ =>
       withCompleteJourneys(draftReturn) {
-        (triage, disposalDetails, acquisitionDetails, reliefDetails, exemptionsAndLossesDetails) =>
+        (
+          triage,
+          disposalDetails,
+          acquisitionDetails,
+          reliefDetails,
+          exemptionsAndLossesDetails
+        ) =>
           withCalculatedTaxDue(
             calculatedAnswers,
             triage,
@@ -864,7 +1083,11 @@ class YearToDateLiabilityController @Inject() (
             fillingOutReturn,
             draftReturn
           ) { calculatedTaxDue =>
-            commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
+            commonSubmitBehaviour(
+              fillingOutReturn,
+              draftReturn,
+              calculatedAnswers
+            )(
               form = taxDueForm
             )(page =
               taxDuePage(
@@ -889,9 +1112,13 @@ class YearToDateLiabilityController @Inject() (
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             ) { (t, draftReturn) =>
               val taxDue = AmountInPence.fromPounds(t)
-              if (calculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue)) {
+              if (
+                calculatedAnswers
+                  .fold(_.taxDue, c => Some(c.taxDue))
+                  .contains(taxDue)
+              )
                 draftReturn
-              } else {
+              else {
                 val updatedAnswers =
                   calculatedAnswers
                     .unset(_.mandatoryEvidence)
@@ -905,65 +1132,88 @@ class YearToDateLiabilityController @Inject() (
       }
     }
 
-  def uploadMandatoryEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      def commonDisposalMandatoryEvidence(backLink: Call): Future[Result] = {
-        val result = for {
-          upscanUpload <- upscanService
-                           .initiate(
-                             routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
-                             _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
-                           )
-          _ <- updatePendingUpscanUpload(answers, fillingOutReturn, upscanUpload)
-        } yield upscanUpload
+  def uploadMandatoryEvidence(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        def commonDisposalMandatoryEvidence(
+          backLink: Call
+        ): Future[Result] = {
+          val result = for {
+            upscanUpload <- upscanService
+                              .initiate(
+                                routes.YearToDateLiabilityController
+                                  .uploadMandatoryEvidenceFailure(),
+                                _ =>
+                                  routes.YearToDateLiabilityController
+                                    .scanningMandatoryEvidence()
+                              )
+            _            <- updatePendingUpscanUpload(
+                   answers,
+                   fillingOutReturn,
+                   upscanUpload
+                 )
+          } yield upscanUpload
 
-        result.fold(
-          { e =>
-            logger.warn("Could not initiate upscan", e)
-            errorHandler.errorResult()
-          },
-          upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink))
-        )
-      }
-
-      (answers, fillingOutReturn.draftReturn) match {
-        case (calculatedAnswers: CalculatedYTDAnswers, _: DraftSingleDisposalReturn) =>
-          withTaxDueAndCalculatedTaxDue(calculatedAnswers) { (taxDue, calculatedTaxDue) =>
-            if (calculatedTaxDue.amountOfTaxDue === taxDue) {
-              Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-            } else {
-              val backLink = calculatedAnswers.fold(
-                _ => routes.YearToDateLiabilityController.taxDue(),
-                _ => routes.YearToDateLiabilityController.checkYourAnswers()
-              )
-              commonDisposalMandatoryEvidence(backLink)
-            }
-          }
-
-        case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, _) =>
-          val backLink = nonCalculatedYTDAnswers.fold(
-            _ => routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
-            _ => routes.YearToDateLiabilityController.checkYourAnswers()
+          result.fold(
+            { e =>
+              logger.warn("Could not initiate upscan", e)
+              errorHandler.errorResult()
+            },
+            upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink))
           )
-          commonDisposalMandatoryEvidence(backLink)
+        }
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        (answers, fillingOutReturn.draftReturn) match {
+          case (
+                calculatedAnswers: CalculatedYTDAnswers,
+                _: DraftSingleDisposalReturn
+              ) =>
+            withTaxDueAndCalculatedTaxDue(calculatedAnswers) { (taxDue, calculatedTaxDue) =>
+              if (calculatedTaxDue.amountOfTaxDue === taxDue)
+                Redirect(
+                  routes.YearToDateLiabilityController.checkYourAnswers()
+                )
+              else {
+                val backLink = calculatedAnswers.fold(
+                  _ => routes.YearToDateLiabilityController.taxDue(),
+                  _ => routes.YearToDateLiabilityController.checkYourAnswers()
+                )
+                commonDisposalMandatoryEvidence(backLink)
+              }
+            }
 
+          case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, _) =>
+            val backLink = nonCalculatedYTDAnswers.fold(
+              _ =>
+                routes.YearToDateLiabilityController
+                  .nonCalculatedEnterTaxDue(),
+              _ => routes.YearToDateLiabilityController.checkYourAnswers()
+            )
+            commonDisposalMandatoryEvidence(backLink)
+
+          case _                                                     =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+
+        }
       }
     }
-  }
 
   private def updatePendingUpscanUpload(
     currentAnswers: YearToDateLiabilityAnswers,
     currentJourney: FillingOutReturn,
     upscanUpload: UpscanUpload
-  )(implicit request: RequestWithSessionData[_]): EitherT[Future, Error, Unit] = {
+  )(implicit
+    request: RequestWithSessionData[_]
+  ): EitherT[Future, Error, Unit] = {
     val newAnswers = currentAnswers match {
-      case c: CalculatedYTDAnswers =>
-        c.unset(_.expiredEvidence).unset(_.mandatoryEvidence).copy(pendingUpscanUpload = Some(upscanUpload))
+      case c: CalculatedYTDAnswers    =>
+        c.unset(_.expiredEvidence)
+          .unset(_.mandatoryEvidence)
+          .copy(pendingUpscanUpload = Some(upscanUpload))
       case n: NonCalculatedYTDAnswers =>
-        n.unset(_.expiredEvidence).unset(_.mandatoryEvidence).copy(pendingUpscanUpload = Some(upscanUpload))
+        n.unset(_.expiredEvidence)
+          .unset(_.mandatoryEvidence)
+          .copy(pendingUpscanUpload = Some(upscanUpload))
     }
 
     val newDraftReturn = currentJourney.draftReturn.fold(
@@ -974,134 +1224,139 @@ class YearToDateLiabilityController @Inject() (
 
     for {
       _ <- returnsService.storeDraftReturn(
-            newDraftReturn,
-            currentJourney.subscribedDetails.cgtReference,
-            currentJourney.agentReferenceNumber
-          )
+             newDraftReturn,
+             currentJourney.subscribedDetails.cgtReference,
+             currentJourney.agentReferenceNumber
+           )
       _ <- EitherT(
-            updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(currentJourney.copy(draftReturn = newDraftReturn)))
-            )
-          )
+             updateSession(sessionStore, request)(
+               _.copy(journeyStatus = Some(currentJourney.copy(draftReturn = newDraftReturn)))
+             )
+           )
     } yield ()
   }
 
-  def taxableGainOrLoss(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      answers match {
-        case (_: CalculatedYTDAnswers) =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
-        case (nonCalculatedAnswers: NonCalculatedYTDAnswers) =>
-          commonDisplayBehaviour(
-            nonCalculatedAnswers
-          )(form =
-            _.fold(
-              _.taxableGainOrLoss.fold(taxableGainOrLossForm)(a => taxableGainOrLossForm.fill(a.inPounds())),
-              c => taxableGainOrLossForm.fill(c.taxableGainOrLoss.inPounds())
-            )
-          )(
-            page = taxableGainOrLossPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              fillingOutReturn.draftReturn match {
-                case _: DraftMultipleDisposalsReturn      => true
-                case _: DraftSingleDisposalReturn         => false
-                case _: DraftSingleIndirectDisposalReturn => false
-              },
-              representativeType(fillingOutReturn.draftReturn)
-            )
-          )(
-            requiredPreviousAnswer               = _ => Some(()),
-            redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
-          )
-      }
-    }
-  }
-
-  def taxableGainOrLossSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      answers match {
-        case _: CalculatedYTDAnswers =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
-        case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
-          commonSubmitBehaviour(
-            fillingOutReturn,
-            fillingOutReturn.draftReturn,
-            nonCalculatedAnswers
-          )(form = taxableGainOrLossForm)(
-            page = taxableGainOrLossPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              fillingOutReturn.draftReturn match {
-                case _: DraftMultipleDisposalsReturn      => true
-                case _: DraftSingleDisposalReturn         => false
-                case _: DraftSingleIndirectDisposalReturn => false
-              },
-              representativeType(fillingOutReturn.draftReturn)
-            )
-          )(
-            requiredPreviousAnswer               = _ => Some(()),
-            redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
-          ) { (amount, draftReturn) =>
-            val taxableGainOrLoss = AmountInPence.fromPounds(amount)
-            if (nonCalculatedAnswers
-                  .fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss))
-                  .contains(taxableGainOrLoss))
-              draftReturn
-            else {
-              val newAnswers = nonCalculatedAnswers
-                .unset(_.hasEstimatedDetails)
-                .unset(_.taxDue)
-                .unset(_.mandatoryEvidence)
-                .unset(_.expiredEvidence)
-                .unset(_.pendingUpscanUpload)
-                .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
-
-              draftReturn.fold(
-                _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-              )
-            }
-          }
-      }
-    }
-  }
-
-  def nonCalculatedEnterTaxDue(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, _, answers) =>
-      answers match {
-        case _: CalculatedYTDAnswers =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-
-        case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
-          commonDisplayBehaviour(
-            nonCalculatedAnswers
-          )(form =
-            _.fold(
-              _.taxDue.fold(nonCalculatedTaxDueForm)(a => nonCalculatedTaxDueForm.fill(a.inPounds())),
-              c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
-            )
-          )(
-            page = nonCalculatedEnterTaxDuePage(_, _)
-          )(
-            requiredPreviousAnswer               = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
-            redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
-          )
-
-      }
-    }
-  }
-
-  def nonCalculatedEnterTaxDueSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def taxableGainOrLoss(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         answers match {
-          case _: CalculatedYTDAnswers =>
+          case (_: CalculatedYTDAnswers)                       =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+
+          case (nonCalculatedAnswers: NonCalculatedYTDAnswers) =>
+            commonDisplayBehaviour(
+              nonCalculatedAnswers
+            )(form =
+              _.fold(
+                _.taxableGainOrLoss.fold(taxableGainOrLossForm)(a => taxableGainOrLossForm.fill(a.inPounds())),
+                c => taxableGainOrLossForm.fill(c.taxableGainOrLoss.inPounds())
+              )
+            )(
+              page = taxableGainOrLossPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                fillingOutReturn.draftReturn match {
+                  case _: DraftMultipleDisposalsReturn      => true
+                  case _: DraftSingleDisposalReturn         => false
+                  case _: DraftSingleIndirectDisposalReturn => false
+                },
+                representativeType(fillingOutReturn.draftReturn)
+              )
+            )(
+              requiredPreviousAnswer = _ => Some(()),
+              redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+            )
+        }
+      }
+    }
+
+  def taxableGainOrLossSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        answers match {
+          case _: CalculatedYTDAnswers                       =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+
+          case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
+            commonSubmitBehaviour(
+              fillingOutReturn,
+              fillingOutReturn.draftReturn,
+              nonCalculatedAnswers
+            )(form = taxableGainOrLossForm)(
+              page = taxableGainOrLossPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                fillingOutReturn.draftReturn match {
+                  case _: DraftMultipleDisposalsReturn      => true
+                  case _: DraftSingleDisposalReturn         => false
+                  case _: DraftSingleIndirectDisposalReturn => false
+                },
+                representativeType(fillingOutReturn.draftReturn)
+              )
+            )(
+              requiredPreviousAnswer = _ => Some(()),
+              redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+            ) { (amount, draftReturn) =>
+              val taxableGainOrLoss = AmountInPence.fromPounds(amount)
+              if (
+                nonCalculatedAnswers
+                  .fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss))
+                  .contains(taxableGainOrLoss)
+              )
+                draftReturn
+              else {
+                val newAnswers = nonCalculatedAnswers
+                  .unset(_.hasEstimatedDetails)
+                  .unset(_.taxDue)
+                  .unset(_.mandatoryEvidence)
+                  .unset(_.expiredEvidence)
+                  .unset(_.pendingUpscanUpload)
+                  .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
+
+                draftReturn.fold(
+                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                )
+              }
+            }
+        }
+      }
+    }
+
+  def nonCalculatedEnterTaxDue(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, _, answers) =>
+        answers match {
+          case _: CalculatedYTDAnswers                       =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+
+          case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
+            commonDisplayBehaviour(
+              nonCalculatedAnswers
+            )(form =
+              _.fold(
+                _.taxDue.fold(nonCalculatedTaxDueForm)(a => nonCalculatedTaxDueForm.fill(a.inPounds())),
+                c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
+              )
+            )(
+              page = nonCalculatedEnterTaxDuePage(_, _)
+            )(
+              requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
+              redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+
+        }
+      }
+    }
+
+  def nonCalculatedEnterTaxDueSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        answers match {
+          case _: CalculatedYTDAnswers                       =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
@@ -1112,12 +1367,19 @@ class YearToDateLiabilityController @Inject() (
             )(form = nonCalculatedTaxDueForm)(
               page = nonCalculatedEnterTaxDuePage(_, _)
             )(
-              requiredPreviousAnswer               = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
+              requiredPreviousAnswer = _.fold(
+                _.hasEstimatedDetails,
+                c => Some(c.hasEstimatedDetails)
+              ),
               redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
             ) { (amount, draftReturn) =>
               val taxDue = AmountInPence.fromPounds(amount)
 
-              if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue))
+              if (
+                nonCalculatedAnswers
+                  .fold(_.taxDue, c => Some(c.taxDue))
+                  .contains(taxDue)
+              )
                 draftReturn
               else {
                 val newAnswers = nonCalculatedAnswers
@@ -1134,61 +1396,115 @@ class YearToDateLiabilityController @Inject() (
             }
         }
       }
-  }
+    }
 
-  def mandatoryEvidenceExpired(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, _, answers) =>
-      answers match {
-        case IncompleteNonCalculatedYTDAnswers(_, _, _, _, Some(expired), _) =>
-          Ok(expiredMandatoryEvidencePage(expired))
+  def mandatoryEvidenceExpired(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, _, answers) =>
+        answers match {
+          case IncompleteNonCalculatedYTDAnswers(
+                _,
+                _,
+                _,
+                _,
+                Some(expired),
+                _
+              ) =>
+            Ok(expiredMandatoryEvidencePage(expired))
 
-        case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, Some(expired), _) =>
-          Ok(expiredMandatoryEvidencePage(expired))
+          case IncompleteCalculatedYTDAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                Some(expired),
+                _
+              ) =>
+            Ok(expiredMandatoryEvidencePage(expired))
 
-        case _ =>
-          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+          case _ =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
       }
     }
-  }
 
   def scanningMandatoryEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         def checkAndHandleUpscanStatus(
           pendingUpscanUpload: UpscanUpload,
-          answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
+          answers: Either[
+            IncompleteNonCalculatedYTDAnswers,
+            IncompleteCalculatedYTDAnswers
+          ]
         ): Future[Result] = {
           val result = for {
-            newUpscanUpload <- upscanService.getUpscanUpload(pendingUpscanUpload.uploadReference)
-            _ <- newUpscanUpload.upscanCallBack match {
-                  case None => EitherT.pure[Future, Error](())
-                  case Some(callback) =>
-                    storeUpscanSuccessOrFailure(newUpscanUpload, callback, answers, fillingOutReturn)
-                }
+            newUpscanUpload <- upscanService.getUpscanUpload(
+                                 pendingUpscanUpload.uploadReference
+                               )
+            _               <- newUpscanUpload.upscanCallBack match {
+                   case None           => EitherT.pure[Future, Error](())
+                   case Some(callback) =>
+                     storeUpscanSuccessOrFailure(
+                       newUpscanUpload,
+                       callback,
+                       answers,
+                       fillingOutReturn
+                     )
+                 }
           } yield newUpscanUpload
 
           result.fold(
             { e =>
-              logger.warn("Error while trying to get and handle an upscan status", e)
+              logger.warn(
+                "Error while trying to get and handle an upscan status",
+                e
+              )
               errorHandler.errorResult()
             },
             upscanUpload => handleUpscanCallback(upscanUpload.upscanCallBack)
           )
         }
 
-        def handleUpscanCallback(upscanCallBack: Option[UpscanCallBack]): Result = upscanCallBack match {
-          case None                        => Ok(mandatoryEvidenceCheckUpscanPage(None))
-          case Some(failed: UpscanFailure) => Ok(mandatoryEvidenceCheckUpscanPage(Some(failed)))
-          case Some(_: UpscanSuccess)      => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        }
+        def handleUpscanCallback(
+          upscanCallBack: Option[UpscanCallBack]
+        ): Result =
+          upscanCallBack match {
+            case None                   => Ok(mandatoryEvidenceCheckUpscanPage(None))
+            case Some(_: UpscanFailure) => Ok(mandatoryEvidenceScanFailedPage())
+            case Some(_: UpscanSuccess) =>
+              Redirect(
+                routes.YearToDateLiabilityController.checkYourAnswers()
+              )
+          }
 
         answers match {
-          case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
-            if (pendingUpscanUpload.upscanCallBack.nonEmpty) handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
+          case n @ IncompleteNonCalculatedYTDAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
+                Some(pendingUpscanUpload)
+              ) =>
+            if (pendingUpscanUpload.upscanCallBack.nonEmpty)
+              handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
             else checkAndHandleUpscanStatus(pendingUpscanUpload, Left(n))
 
-          case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
-            if (pendingUpscanUpload.upscanCallBack.nonEmpty) handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
+          case c @ IncompleteCalculatedYTDAnswers(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                Some(pendingUpscanUpload)
+              ) =>
+            if (pendingUpscanUpload.upscanCallBack.nonEmpty)
+              handleUpscanCallback(pendingUpscanUpload.upscanCallBack)
             else checkAndHandleUpscanStatus(pendingUpscanUpload, Right(c))
 
           case _ =>
@@ -1202,33 +1518,57 @@ class YearToDateLiabilityController @Inject() (
       Redirect(routes.YearToDateLiabilityController.scanningMandatoryEvidence())
     }
 
-  def uploadMandatoryEvidenceFailure(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def documentDidNotUpload(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      Ok(mandatoryEvidenceUploadFailedPage())
+    }
+
+  def handleUpscanCallBackFailures(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      Ok(mandatoryEvidenceUploadFailedPage())
+    }
+
+  def uploadMandatoryEvidenceFailure(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         def handlePendingUpscanUpload(
-          answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
+          answers: Either[
+            IncompleteNonCalculatedYTDAnswers,
+            IncompleteCalculatedYTDAnswers
+          ]
         ): Future[Result] =
-          removePendingUpscanUpload(answers, fillingOutReturn).fold({ e =>
-            logger.warn("Could not update session", e)
-            errorHandler.errorResult()
-          }, _ => errorHandler.errorResult())
+          removePendingUpscanUpload(answers, fillingOutReturn).fold(
+            { e =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult()
+            },
+            _ => Redirect(routes.YearToDateLiabilityController.documentDidNotUpload())
+          )
 
         answers match {
           case n: IncompleteNonCalculatedYTDAnswers if n.pendingUpscanUpload.isDefined =>
             handlePendingUpscanUpload(Left(n))
-          case c: IncompleteCalculatedYTDAnswers if c.pendingUpscanUpload.isDefined =>
+          case c: IncompleteCalculatedYTDAnswers if c.pendingUpscanUpload.isDefined    =>
             handlePendingUpscanUpload(Right(c))
-          case _ =>
+          case _                                                                       =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
-  }
+    }
 
   private def removePendingUpscanUpload(
-    answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
+    answers: Either[
+      IncompleteNonCalculatedYTDAnswers,
+      IncompleteCalculatedYTDAnswers
+    ],
     fillingOutReturn: FillingOutReturn
-  )(implicit request: RequestWithSessionData[_]): EitherT[Future, Error, Unit] = {
-    val newAnswers = answers.fold(_.copy(pendingUpscanUpload = None), _.copy(pendingUpscanUpload = None))
+  )(implicit
+    request: RequestWithSessionData[_]
+  ): EitherT[Future, Error, Unit] = {
+    val newAnswers     = answers.fold(
+      _.copy(pendingUpscanUpload = None),
+      _.copy(pendingUpscanUpload = None)
+    )
     val newDraftReturn = fillingOutReturn.draftReturn.fold(
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
@@ -1237,24 +1577,30 @@ class YearToDateLiabilityController @Inject() (
 
     for {
       _ <- returnsService.storeDraftReturn(
-            newDraftReturn,
-            fillingOutReturn.subscribedDetails.cgtReference,
-            fillingOutReturn.agentReferenceNumber
-          )
+             newDraftReturn,
+             fillingOutReturn.subscribedDetails.cgtReference,
+             fillingOutReturn.agentReferenceNumber
+           )
       _ <- EitherT(
-            updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-            )
-          )
+             updateSession(sessionStore, request)(
+               _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+             )
+           )
     } yield ()
   }
 
   private def storeUpscanSuccessOrFailure(
     upscanUpload: UpscanUpload,
     upscanCallBack: UpscanCallBack,
-    answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
+    answers: Either[
+      IncompleteNonCalculatedYTDAnswers,
+      IncompleteCalculatedYTDAnswers
+    ],
     fillingOutReturn: FillingOutReturn
-  )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
+  )(implicit
+    request: RequestWithSessionData[_],
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] = {
     val newAnswers =
       upscanCallBack match {
         case success: UpscanSuccess =>
@@ -1267,11 +1613,13 @@ class YearToDateLiabilityController @Inject() (
               success.fileName
             )
           answers.fold(
-            _.unset(_.pendingUpscanUpload).copy(mandatoryEvidence = Some(mandatoryEvidence)),
-            _.unset(_.pendingUpscanUpload).copy(mandatoryEvidence = Some(mandatoryEvidence))
+            _.unset(_.pendingUpscanUpload)
+              .copy(mandatoryEvidence = Some(mandatoryEvidence)),
+            _.unset(_.pendingUpscanUpload)
+              .copy(mandatoryEvidence = Some(mandatoryEvidence))
           )
 
-        case _: UpscanFailure =>
+        case _: UpscanFailure       =>
           answers.fold(
             _.copy(pendingUpscanUpload = Some(upscanUpload)),
             _.copy(pendingUpscanUpload = Some(upscanUpload))
@@ -1287,53 +1635,61 @@ class YearToDateLiabilityController @Inject() (
 
     for {
       _ <- returnsService.storeDraftReturn(
-            newDraftReturn,
-            fillingOutReturn.subscribedDetails.cgtReference,
-            fillingOutReturn.agentReferenceNumber
-          )
+             newDraftReturn,
+             fillingOutReturn.subscribedDetails.cgtReference,
+             fillingOutReturn.agentReferenceNumber
+           )
       _ <- EitherT(
-            updateSession(sessionStore, request)(
-              _.copy(journeyStatus =
-                Some(
-                  fillingOutReturn.copy(draftReturn = newDraftReturn)
-                )
-              )
-            )
-          )
+             updateSession(sessionStore, request)(
+               _.copy(journeyStatus =
+                 Some(
+                   fillingOutReturn.copy(draftReturn = newDraftReturn)
+                 )
+               )
+             )
+           )
     } yield ()
   }
 
-  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
-      (answers, fillingOutReturn.draftReturn) match {
-        case (c: CalculatedYTDAnswers, s: DraftSingleDisposalReturn) =>
-          withAssetTypeAndResidentialStatus(s)((_, wasUkResident) =>
-            withDisposalDate(s)(disposalDate =>
-              checkYourAnswersHandleCalculated(
-                c,
-                fillingOutReturn,
-                s,
-                disposalDate,
-                wasUkResident
+  def checkYourAnswers(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (answers, fillingOutReturn.draftReturn) match {
+          case (c: CalculatedYTDAnswers, s: DraftSingleDisposalReturn)    =>
+            withAssetTypeAndResidentialStatus(s)((_, wasUkResident) =>
+              withDisposalDate(s)(disposalDate =>
+                checkYourAnswersHandleCalculated(
+                  c,
+                  fillingOutReturn,
+                  s,
+                  disposalDate,
+                  wasUkResident
+                )
               )
             )
-          )
 
-        case (n: NonCalculatedYTDAnswers, d) =>
-          checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d)
+          case (n: NonCalculatedYTDAnswers, d)                            =>
+            checkYourAnswersHandleNonCalculated(n, fillingOutReturn, d)
 
-        case (_: CalculatedYTDAnswers, _: DraftMultipleDisposalsReturn) =>
-          logger.warn("Found calculated year to date liability answers on a multiple disposals draft return")
-          errorHandler.errorResult()
+          case (_: CalculatedYTDAnswers, _: DraftMultipleDisposalsReturn) =>
+            logger.warn(
+              "Found calculated year to date liability answers on a multiple disposals draft return"
+            )
+            errorHandler.errorResult()
 
-        case (_: CalculatedYTDAnswers, _: DraftSingleIndirectDisposalReturn) =>
-          logger.warn("Found calculated year to date liability answers on a single indirect disposal draft return")
-          errorHandler.errorResult()
+          case (
+                _: CalculatedYTDAnswers,
+                _: DraftSingleIndirectDisposalReturn
+              ) =>
+            logger.warn(
+              "Found calculated year to date liability answers on a single indirect disposal draft return"
+            )
+            errorHandler.errorResult()
 
+        }
       }
-    }
 
-  }
+    }
 
   private def checkYourAnswersHandleNonCalculated(
     answers: NonCalculatedYTDAnswers,
@@ -1341,16 +1697,35 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, Some(expiredEvidence), _) =>
-        Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
+      case IncompleteNonCalculatedYTDAnswers(
+            _,
+            _,
+            _,
+            _,
+            Some(expiredEvidence),
+            _
+          ) =>
+        Redirect(
+          routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
+        )
 
-      case n @ IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, Some(pendingUpscanUpload)) =>
+      case n @ IncompleteNonCalculatedYTDAnswers(
+            _,
+            _,
+            _,
+            _,
+            _,
+            Some(pendingUpscanUpload)
+          ) =>
         removePendingUpscanUpload(Left(n), fillingOutReturn).fold(
           { e =>
             logger.warn("Could not remove pending upscan upload", e)
             errorHandler.errorResult()
           },
-          _ => Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
+          _ =>
+            Redirect(
+              routes.YearToDateLiabilityController.uploadMandatoryEvidence()
+            )
         )
 
       case IncompleteNonCalculatedYTDAnswers(None, _, _, _, _, _) =>
@@ -1360,31 +1735,46 @@ class YearToDateLiabilityController @Inject() (
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
       case IncompleteNonCalculatedYTDAnswers(_, _, None, _, _, _) =>
-        Redirect(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue())
+        Redirect(
+          routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
+        )
 
       case IncompleteNonCalculatedYTDAnswers(_, _, _, None, _, _) =>
         Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
 
-      case IncompleteNonCalculatedYTDAnswers(Some(t), Some(e), Some(d), Some(m), _, _) =>
-        val completeAnswers = CompleteNonCalculatedYTDAnswers(t, e, d, m)
+      case IncompleteNonCalculatedYTDAnswers(
+            Some(t),
+            Some(e),
+            Some(d),
+            Some(m),
+            _,
+            _
+          ) =>
+        val completeAnswers    = CompleteNonCalculatedYTDAnswers(t, e, d, m)
         val updatedDraftReturn = draftReturn.fold(
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
         )
-        val updatedJourney = fillingOutReturn.copy(draftReturn = updatedDraftReturn)
-        val result = for {
+        val updatedJourney     =
+          fillingOutReturn.copy(draftReturn = updatedDraftReturn)
+        val result             = for {
           _ <- returnsService.storeDraftReturn(
-                updatedDraftReturn,
-                fillingOutReturn.subscribedDetails.cgtReference,
-                fillingOutReturn.agentReferenceNumber
-              )
-          _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+                 updatedDraftReturn,
+                 fillingOutReturn.subscribedDetails.cgtReference,
+                 fillingOutReturn.agentReferenceNumber
+               )
+          _ <- EitherT(
+                 updateSession(sessionStore, request)(
+                   _.copy(journeyStatus = Some(updatedJourney))
+                 )
+               )
         } yield ()
 
         result.fold(
           { e =>
-            logger.warn("Cold not store complete year to date liability answers", e)
+            logger
+              .warn("Cold not store complete year to date liability answers", e)
             errorHandler.errorResult()
           },
           _ =>
@@ -1402,7 +1792,7 @@ class YearToDateLiabilityController @Inject() (
             )
         )
 
-      case c: CompleteNonCalculatedYTDAnswers =>
+      case c: CompleteNonCalculatedYTDAnswers                     =>
         Ok(
           nonCalculatedCheckYourAnswersPage(
             c,
@@ -1418,7 +1808,8 @@ class YearToDateLiabilityController @Inject() (
 
     }
 
-  private def isATrust(fillingOutReturn: FillingOutReturn): Boolean = fillingOutReturn.subscribedDetails.isATrust
+  private def isATrust(fillingOutReturn: FillingOutReturn): Boolean =
+    fillingOutReturn.subscribedDetails.isATrust
 
   private def checkYourAnswersHandleCalculated(
     answers: CalculatedYTDAnswers,
@@ -1428,7 +1819,7 @@ class YearToDateLiabilityController @Inject() (
     wasUkResident: Boolean
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case c: CompleteCalculatedYTDAnswers =>
+      case c: CompleteCalculatedYTDAnswers                                                          =>
         Ok(
           calculatedCheckYouAnswersPage(
             c,
@@ -1439,16 +1830,39 @@ class YearToDateLiabilityController @Inject() (
           )
         )
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, Some(expiredEvidence), _) =>
-        Redirect(routes.YearToDateLiabilityController.mandatoryEvidenceExpired())
+      case IncompleteCalculatedYTDAnswers(
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            Some(expiredEvidence),
+            _
+          ) =>
+        Redirect(
+          routes.YearToDateLiabilityController.mandatoryEvidenceExpired()
+        )
 
-      case c @ IncompleteCalculatedYTDAnswers(_, _, _, _, _, _, _, Some(pendingUpscanUpload)) =>
+      case c @ IncompleteCalculatedYTDAnswers(
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            Some(pendingUpscanUpload)
+          ) =>
         removePendingUpscanUpload(Right(c), fillingOutReturn).fold(
           { e =>
             logger.warn("Could not remove pending upscan upload", e)
             errorHandler.errorResult()
           },
-          _ => Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
+          _ =>
+            Redirect(
+              routes.YearToDateLiabilityController.uploadMandatoryEvidence()
+            )
         )
 
       case IncompleteCalculatedYTDAnswers(None, _, _, _, _, _, _, _) if !isATrust(fillingOutReturn) =>
@@ -1458,28 +1872,37 @@ class YearToDateLiabilityController @Inject() (
           if !isATrust(fillingOutReturn) && p.value > 0L =>
         Redirect(routes.YearToDateLiabilityController.personalAllowance())
 
-      case IncompleteCalculatedYTDAnswers(_, _, None, _, _, _, _, _) =>
+      case IncompleteCalculatedYTDAnswers(_, _, None, _, _, _, _, _)                                =>
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, None, _, _, _, _) =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, None, _, _, _, _)                                =>
         Redirect(routes.YearToDateLiabilityController.taxDue())
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, _, None, _, _, _) =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, _, None, _, _, _)                                =>
         Redirect(routes.YearToDateLiabilityController.taxDue())
 
       case IncompleteCalculatedYTDAnswers(
-          _,
-          _,
-          Some(_),
-          Some(calculatedTaxDue),
-          Some(taxDue),
-          None,
-          _,
-          _
+            _,
+            _,
+            Some(_),
+            Some(calculatedTaxDue),
+            Some(taxDue),
+            None,
+            _,
+            _
           ) if calculatedTaxDue.amountOfTaxDue =!= taxDue =>
         Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
 
-      case IncompleteCalculatedYTDAnswers(_, _, Some(h), Some(c), Some(t), m, _, _) if isATrust(fillingOutReturn) =>
+      case IncompleteCalculatedYTDAnswers(
+            _,
+            _,
+            Some(h),
+            Some(c),
+            Some(t),
+            m,
+            _,
+            _
+          ) if isATrust(fillingOutReturn) =>
         fromIncompleteToCompleteCalculatedYTDAnswers(
           fillingOutReturn,
           draftReturn,
@@ -1492,7 +1915,16 @@ class YearToDateLiabilityController @Inject() (
           disposalDate,
           wasUkResident
         )
-      case IncompleteCalculatedYTDAnswers(Some(e), p, Some(h), Some(c), Some(t), m, _, _) =>
+      case IncompleteCalculatedYTDAnswers(
+            Some(e),
+            p,
+            Some(h),
+            Some(c),
+            Some(t),
+            m,
+            _,
+            _
+          ) =>
         fromIncompleteToCompleteCalculatedYTDAnswers(
           fillingOutReturn,
           draftReturn,
@@ -1520,20 +1952,20 @@ class YearToDateLiabilityController @Inject() (
     wasUkResident: Boolean
   )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val completeAnswers = CompleteCalculatedYTDAnswers(e, p, h, c, t, m)
-    val newDraftReturn =
+    val newDraftReturn  =
       draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
 
     val result = for {
       _ <- returnsService.storeDraftReturn(
-            newDraftReturn,
-            fillingOutReturn.subscribedDetails.cgtReference,
-            fillingOutReturn.agentReferenceNumber
-          )
+             newDraftReturn,
+             fillingOutReturn.subscribedDetails.cgtReference,
+             fillingOutReturn.agentReferenceNumber
+           )
       _ <- EitherT(
-            updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-            )
-          )
+             updateSession(sessionStore, request)(
+               _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+             )
+           )
     } yield ()
 
     result.fold(
@@ -1554,12 +1986,13 @@ class YearToDateLiabilityController @Inject() (
     )
   }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case _ =>
-        Redirect(controllers.returns.routes.TaskListController.taskList())
+  def checkYourAnswersSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) {
+        case _ =>
+          Redirect(controllers.returns.routes.TaskListController.taskList())
+      }
     }
-  }
 
 }
 
@@ -1568,7 +2001,10 @@ object YearToDateLiabilityController {
   val estimatedIncomeForm: Form[BigDecimal] =
     Form(
       mapping(
-        "estimatedIncome" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))
+        "estimatedIncome" -> of(
+          MoneyUtils
+            .amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds)
+        )
       )(identity)(Some(_))
     )
 
@@ -1579,9 +2015,15 @@ object YearToDateLiabilityController {
           MoneyUtils.amountInPoundsFormatter(
             _ < 0,
             _ > disposalDate.taxYear.maxPersonalAllowance.inPounds(),
-            List(MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.maxPersonalAllowance.inPounds())),
             List(
-              MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.maxPersonalAllowance.inPounds()),
+              MoneyUtils.formatAmountOfMoneyWithPoundSign(
+                disposalDate.taxYear.maxPersonalAllowance.inPounds()
+              )
+            ),
+            List(
+              MoneyUtils.formatAmountOfMoneyWithPoundSign(
+                disposalDate.taxYear.maxPersonalAllowance.inPounds()
+              ),
               disposalDate.taxYear.startDateInclusive.getYear.toString,
               disposalDate.taxYear.endDateExclusive.getYear.toString
             )
@@ -1600,12 +2042,16 @@ object YearToDateLiabilityController {
   val taxDueForm: Form[BigDecimal] =
     Form(
       mapping(
-        "taxDue" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))
+        "taxDue" -> of(
+          MoneyUtils
+            .amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds)
+        )
       )(identity)(Some(_))
     )
 
   val taxableGainOrLossForm: Form[BigDecimal] = {
-    val (outerId, gainId, lossId) = ("taxableGainOrLoss", "taxableGain", "netLoss")
+    val (outerId, gainId, lossId) =
+      ("taxableGainOrLoss", "taxableGain", "netLoss")
 
     def innerOption(id: String): InnerOption[BigDecimal] =
       InnerOption { data =>
@@ -1629,9 +2075,15 @@ object YearToDateLiabilityController {
       )
     ) { d =>
       if (d > 0)
-        Map(outerId -> "0", gainId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d))
+        Map(
+          outerId -> "0",
+          gainId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
+        )
       else if (d < 0)
-        Map(outerId -> "1", lossId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1)))
+        Map(
+          outerId   -> "1",
+          lossId    -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1))
+        )
       else
         Map(outerId -> "2")
     }
@@ -1646,7 +2098,10 @@ object YearToDateLiabilityController {
   val nonCalculatedTaxDueForm: Form[BigDecimal] =
     Form(
       mapping(
-        "nonCalculatedTaxDue" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))
+        "nonCalculatedTaxDue" -> of(
+          MoneyUtils
+            .amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds)
+        )
       )(identity)(Some(_))
     )
 

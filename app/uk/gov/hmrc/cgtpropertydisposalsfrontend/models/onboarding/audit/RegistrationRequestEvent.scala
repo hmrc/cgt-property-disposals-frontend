@@ -33,7 +33,8 @@ final case class RegistrationPrePopulatedUserData(
 )
 
 object RegistrationPrePopulatedUserData {
-  implicit val format: OFormat[RegistrationPrePopulatedUserData] = Json.format[RegistrationPrePopulatedUserData]
+  implicit val format: OFormat[RegistrationPrePopulatedUserData] =
+    Json.format[RegistrationPrePopulatedUserData]
 }
 
 final case class RegistrationManuallyEnteredData(
@@ -43,12 +44,15 @@ final case class RegistrationManuallyEnteredData(
 )
 
 object RegistrationManuallyEnteredData {
-  implicit val formatManual: OFormat[RegistrationManuallyEnteredData] = Json.format[RegistrationManuallyEnteredData]
+  implicit val formatManual: OFormat[RegistrationManuallyEnteredData] =
+    Json.format[RegistrationManuallyEnteredData]
 }
 
 object RegistrationRequestEvent {
 
-  def fromRegistrationDetails(registrationDetails: RegistrationDetails): RegistrationRequestEvent = {
+  def fromRegistrationDetails(
+    registrationDetails: RegistrationDetails
+  ): RegistrationRequestEvent = {
     val prepopulatedEmailSource =
       if (registrationDetails.emailSource === EmailSource.BusinessPartnerRecord)
         Some("ETMP business partner record")
@@ -66,13 +70,16 @@ object RegistrationRequestEvent {
     val manuallyEnteredData =
       RegistrationManuallyEnteredData(
         s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}",
-        if (prepopulatedEmailSource.isEmpty) Some(registrationDetails.emailAddress.value) else None,
+        if (prepopulatedEmailSource.isEmpty)
+          Some(registrationDetails.emailAddress.value)
+        else None,
         AuditAddress.fromAddress(registrationDetails.address)
       )
 
     RegistrationRequestEvent(prePopulatedUserData, manuallyEnteredData)
   }
 
-  implicit val format: OFormat[RegistrationRequestEvent] = Json.format[RegistrationRequestEvent]
+  implicit val format: OFormat[RegistrationRequestEvent] =
+    Json.format[RegistrationRequestEvent]
 
 }

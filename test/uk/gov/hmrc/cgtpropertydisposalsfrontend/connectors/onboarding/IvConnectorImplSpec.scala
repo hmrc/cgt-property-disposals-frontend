@@ -46,7 +46,10 @@ class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with H
     )
   )
 
-  val connector = new IvConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+  val connector = new IvConnectorImpl(
+    mockHttp,
+    new ServicesConfig(config, new RunMode(config, Mode.Test))
+  )
 
   "IvConnectorImpl" when {
 
@@ -54,7 +57,8 @@ class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with H
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val journeyId                  = UUID.randomUUID()
-      val expectedUrl                = s"http://host:123/mdtp/journey/journeyId/${journeyId.toString}"
+      val expectedUrl                =
+        s"http://host:123/mdtp/journey/journeyId/${journeyId.toString}"
 
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl),

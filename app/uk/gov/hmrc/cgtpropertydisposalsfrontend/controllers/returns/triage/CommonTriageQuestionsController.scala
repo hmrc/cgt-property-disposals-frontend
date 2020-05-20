@@ -75,36 +75,43 @@ class CommonTriageQuestionsController @Inject() (
 
   import CommonTriageQuestionsController._
 
-  private def isIndividual(state: Either[StartingNewDraftReturn, FillingOutReturn]): Boolean =
-    state.fold(_.subscribedDetails.userType(), _.subscribedDetails.userType()).isRight
+  private def isIndividual(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Boolean =
+    state
+      .fold(_.subscribedDetails.userType(), _.subscribedDetails.userType())
+      .isRight
 
-  def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) { (_, state) =>
-      if (!isIndividual(state))
-        Redirect(routes.CommonTriageQuestionsController.howManyProperties())
-      else {
-        val form = {
-          val f = whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
-          getIndividualUserType(state).fold(f)(f.fill)
-        }
-
-        Ok(
-          whoAreYouReportingForPage(
-            form,
-            None,
-            state.isRight
-          )
-        )
-      }
-    }
-  }
-
-  def whoIsIndividualRepresentingSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def whoIsIndividualRepresenting(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withState(request) { (_, state) =>
         if (!isIndividual(state))
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
         else {
+          val form = {
+            val f = whoAreYouReportingForForm(
+              request.userType.contains(UserType.Agent)
+            )
+            getIndividualUserType(state).fold(f)(f.fill)
+          }
+
+          Ok(
+            whoAreYouReportingForPage(
+              form,
+              None,
+              state.isRight
+            )
+          )
+        }
+      }
+    }
+
+  def whoIsIndividualRepresentingSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        if (!isIndividual(state))
+          Redirect(routes.CommonTriageQuestionsController.howManyProperties())
+        else
           whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
             .bindFromRequest()
             .fold(
@@ -115,7 +122,8 @@ class CommonTriageQuestionsController @Inject() (
                     None,
                     state.isRight
                   )
-                ), { individualUserType =>
+                ),
+              { individualUserType =>
                 val answers    = triageAnswersFomState(state)
                 val redirectTo = redirectToCheckYourAnswers(state)
 
@@ -124,26 +132,29 @@ class CommonTriageQuestionsController @Inject() (
                   _.fold(_.individualUserType, c => c.individualUserType)
                 )
 
-                if (oldIndividualUserType.contains(individualUserType)) {
+                if (oldIndividualUserType.contains(individualUserType))
                   Redirect(redirectTo)
-                } else {
+                else {
 
-                  val updatedState = updateIndividualUserType(state, individualUserType)
-                  val result =
+                  val updatedState =
+                    updateIndividualUserType(state, individualUserType)
+                  val result       =
                     for {
                       _ <- updatedState.fold(
-                            _ => EitherT.pure[Future, Error](()),
-                            fillingOutReturn =>
-                              returnsService
-                                .storeDraftReturn(
-                                  fillingOutReturn.draftReturn,
-                                  fillingOutReturn.subscribedDetails.cgtReference,
-                                  fillingOutReturn.agentReferenceNumber
-                                )
-                          )
+                             _ => EitherT.pure[Future, Error](()),
+                             fillingOutReturn =>
+                               returnsService
+                                 .storeDraftReturn(
+                                   fillingOutReturn.draftReturn,
+                                   fillingOutReturn.subscribedDetails.cgtReference,
+                                   fillingOutReturn.agentReferenceNumber
+                                 )
+                           )
                       _ <- EitherT(
-                            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
-                          )
+                             updateSession(sessionStore, request)(
+                               _.copy(journeyStatus = Some(updatedState.merge))
+                             )
+                           )
                     } yield ()
 
                   result.fold(
@@ -156,157 +167,189 @@ class CommonTriageQuestionsController @Inject() (
                 }
               }
             )
-        }
       }
-  }
-
-  def howManyProperties(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) { (_, state) =>
-      val form =
-        getNumberOfProperties(state).fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
-      Ok(
-        howManyPropertiesPage(
-          form,
-          howManyPropertiesBackLink(state),
-          state.isRight,
-          state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
-        )
-      )
     }
-  }
 
-  def howManyPropertiesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) { (_, state) =>
-      numberOfPropertiesForm
-        .bindFromRequest()
-        .fold(
-          formWithErrors =>
-            BadRequest(
-              howManyPropertiesPage(
-                formWithErrors,
-                howManyPropertiesBackLink(state),
-                state.isRight,
-                state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
-              )
-            ),
-          numberOfProperties =>
-            if (getNumberOfProperties(state).contains(numberOfProperties)) {
-              Redirect(redirectToCheckYourAnswers(state))
-            } else {
-              val updatedState = updateNumberOfProperties(state, numberOfProperties)
-
-              val result =
-                for {
-                  _ <- updatedState.fold(
-                        _ => EitherT.pure[Future, Error](()),
-                        fillingOutReturn =>
-                          returnsService
-                            .storeDraftReturn(
-                              fillingOutReturn.draftReturn,
-                              fillingOutReturn.subscribedDetails.cgtReference,
-                              fillingOutReturn.agentReferenceNumber
-                            )
-                      )
-                  _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge))))
-                } yield ()
-
-              result.fold(
-                { e =>
-                  logger.warn("Could not perform updates", e)
-                  errorHandler.errorResult()
-                },
-                _ => Redirect(redirectToCheckYourAnswers(updatedState))
-              )
-            }
-        )
-    }
-  }
-
-  def ukResidentCanOnlyDisposeResidential(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def howManyProperties(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withState(request) { (_, state) =>
-        val triageAnswers = triageAnswersFomState(state)
-        val isAssetTypeNonResidential: Boolean = triageAnswers.fold(
-          _.fold(_.wereAllPropertiesResidential.contains(false), _.assetTypes === List(AssetType.NonResidential)),
-          _.fold(_.assetType.contains(AssetType.NonResidential), _.assetType === AssetType.NonResidential)
+        val form =
+          getNumberOfProperties(state).fold(numberOfPropertiesForm)(
+            numberOfPropertiesForm.fill
+          )
+        Ok(
+          howManyPropertiesPage(
+            form,
+            howManyPropertiesBackLink(state),
+            state.isRight,
+            state
+              .fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
+          )
         )
-        val wasUkResident = triageAnswers.fold(
+      }
+    }
+
+  def howManyPropertiesSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        numberOfPropertiesForm
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              BadRequest(
+                howManyPropertiesPage(
+                  formWithErrors,
+                  howManyPropertiesBackLink(state),
+                  state.isRight,
+                  state.fold(
+                    _.subscribedDetails.isATrust,
+                    _.subscribedDetails.isATrust
+                  )
+                )
+              ),
+            numberOfProperties =>
+              if (getNumberOfProperties(state).contains(numberOfProperties))
+                Redirect(redirectToCheckYourAnswers(state))
+              else {
+                val updatedState =
+                  updateNumberOfProperties(state, numberOfProperties)
+
+                val result =
+                  for {
+                    _ <- updatedState.fold(
+                           _ => EitherT.pure[Future, Error](()),
+                           fillingOutReturn =>
+                             returnsService
+                               .storeDraftReturn(
+                                 fillingOutReturn.draftReturn,
+                                 fillingOutReturn.subscribedDetails.cgtReference,
+                                 fillingOutReturn.agentReferenceNumber
+                               )
+                         )
+                    _ <- EitherT(
+                           updateSession(sessionStore, request)(
+                             _.copy(journeyStatus = Some(updatedState.merge))
+                           )
+                         )
+                  } yield ()
+
+                result.fold(
+                  { e =>
+                    logger.warn("Could not perform updates", e)
+                    errorHandler.errorResult()
+                  },
+                  _ => Redirect(redirectToCheckYourAnswers(updatedState))
+                )
+              }
+          )
+      }
+    }
+
+  def ukResidentCanOnlyDisposeResidential(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        val triageAnswers                      = triageAnswersFomState(state)
+        val isAssetTypeNonResidential: Boolean = triageAnswers.fold(
+          _.fold(
+            _.wereAllPropertiesResidential.contains(false),
+            _.assetTypes === List(AssetType.NonResidential)
+          ),
+          _.fold(
+            _.assetType.contains(AssetType.NonResidential),
+            _.assetType === AssetType.NonResidential
+          )
+        )
+        val wasUkResident                      = triageAnswers.fold(
           _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
           _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
         )
-        lazy val backLink = triageAnswers.fold(
-          _ => routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
-          _ => routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()
+        lazy val backLink                      = triageAnswers.fold(
+          _ =>
+            routes.MultipleDisposalsTriageController
+              .wereAllPropertiesResidential(),
+          _ =>
+            routes.SingleDisposalsTriageController
+              .didYouDisposeOfAResidentialProperty()
         )
 
         wasUkResident match {
-          case Some(true) if isAssetTypeNonResidential => Ok(ukResidentCanOnlyDisposeResidentialPage(backLink))
+          case Some(true) if isAssetTypeNonResidential =>
+            Ok(ukResidentCanOnlyDisposeResidentialPage(backLink))
           case _                                       => Redirect(redirectToCheckYourAnswers(state))
         }
       }
-  }
-
-  def disposalDateTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) { (_, state) =>
-      val triageAnswers = triageAnswersFomState(state)
-      lazy val backLink = triageAnswers.fold(
-        _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
-        _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
-      )
-
-      triageAnswers.fold(
-        _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-        _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
-      ) match {
-        case None => Redirect(redirectToCheckYourAnswers(state))
-        case Some(wasUk) =>
-          if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink))
-          else Ok(disposalDateTooEarlyNonUkResidents(backLink))
-      }
     }
-  }
 
-  def disposalsOfSharesTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) { (_, state) =>
-      val triageAnswers = triageAnswersFomState(state)
-      lazy val backLink = triageAnswers.fold(
-        _ => routes.MultipleDisposalsTriageController.disposalDateOfShares(),
-        _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
-      )
-      Ok(disposalDateTooEarlyNonUkResidents(backLink))
-    }
-  }
-
-  def assetTypeNotYetImplemented(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withState(request) { (_, state) =>
-      val triageAnswers = triageAnswersFomState(state)
-      lazy val backLink = triageAnswers.fold(
-        _ => routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents(),
-        _ => routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
-      )
-
-      def hasSupportedAssetType(assetTypes: List[AssetType]): Boolean =
-        assetTypes === List(AssetType.Residential) || assetTypes === List(AssetType.NonResidential)
-
-      triageAnswers.fold[Option[List[AssetType]]](
-        _.fold(_.assetTypes, c => Some(c.assetTypes)),
-        _.fold(
-          i => i.assetType.map(a => List(a)),
-          c => Some(List(c.assetType))
-        )
-      ) match {
-        case Some(assetTypes) if !hasSupportedAssetType(assetTypes) =>
-          Ok(assetTypeNotYetImplementedPage(backLink))
-        case _ =>
-          Redirect(redirectToCheckYourAnswers(state))
-      }
-    }
-  }
-
-  def periodOfAdministrationNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def disposalDateTooEarly(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withState(request) { (_, state) =>
         val triageAnswers = triageAnswersFomState(state)
+        lazy val backLink = triageAnswers.fold(
+          _ =>
+            routes.MultipleDisposalsTriageController
+              .whenWereContractsExchanged(),
+          _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
+        )
+
+        triageAnswers.fold(
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+        ) match {
+          case None        => Redirect(redirectToCheckYourAnswers(state))
+          case Some(wasUk) =>
+            if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink))
+            else Ok(disposalDateTooEarlyNonUkResidents(backLink))
+        }
+      }
+    }
+
+  def disposalsOfSharesTooEarly(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        val triageAnswers = triageAnswersFomState(state)
+        lazy val backLink = triageAnswers.fold(
+          _ => routes.MultipleDisposalsTriageController.disposalDateOfShares(),
+          _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
+        )
+        Ok(disposalDateTooEarlyNonUkResidents(backLink))
+      }
+    }
+
+  def assetTypeNotYetImplemented(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        val triageAnswers = triageAnswersFomState(state)
+        lazy val backLink = triageAnswers.fold(
+          _ =>
+            routes.MultipleDisposalsTriageController
+              .assetTypeForNonUkResidents(),
+          _ => routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
+        )
+
+        def hasSupportedAssetType(assetTypes: List[AssetType]): Boolean =
+          assetTypes === List(AssetType.Residential) || assetTypes === List(
+            AssetType.NonResidential
+          )
+
+        triageAnswers.fold[Option[List[AssetType]]](
+          _.fold(_.assetTypes, c => Some(c.assetTypes)),
+          _.fold(
+            i => i.assetType.map(a => List(a)),
+            c => Some(List(c.assetType))
+          )
+        ) match {
+          case Some(assetTypes) if !hasSupportedAssetType(assetTypes) =>
+            Ok(assetTypeNotYetImplementedPage(backLink))
+          case _                                                      =>
+            Redirect(redirectToCheckYourAnswers(state))
+        }
+      }
+    }
+
+  def periodOfAdministrationNotHandled(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        val triageAnswers      = triageAnswersFomState(state)
         val isIndirectDisposal = triageAnswers
           .fold(
             _.fold(_.assetTypes, c => Some(c.assetTypes)),
@@ -320,28 +363,37 @@ class CommonTriageQuestionsController @Inject() (
         val isMultipleDisposal = triageAnswers.isLeft
 
         val backLink =
-          if (isIndirectDisposal && isMultipleDisposal) routes.MultipleDisposalsTriageController.disposalDateOfShares()
+          if (isIndirectDisposal && isMultipleDisposal)
+            routes.MultipleDisposalsTriageController.disposalDateOfShares()
           else if (isIndirectDisposal && !isMultipleDisposal)
             routes.SingleDisposalsTriageController.disposalDateOfShares()
-          else if (isMultipleDisposal) controllers.returns.address.routes.PropertyDetailsController.disposalDate()
+          else if (isMultipleDisposal)
+            controllers.returns.address.routes.PropertyDetailsController
+              .disposalDate()
           else routes.SingleDisposalsTriageController.whenWasDisposalDate()
 
         Ok(periodOfAdminNotHandledPage(backLink))
       }
-  }
+    }
 
-  private def redirectToCheckYourAnswers(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
+  private def redirectToCheckYourAnswers(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Call =
     triageAnswersFomState(state).fold(
       _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
       _ => routes.SingleDisposalsTriageController.checkYourAnswers()
     )
 
-  def capacitorsAndPersonalRepresentativesNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def capacitorsAndPersonalRepresentativesNotHandled(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withState(request) { (_, state) =>
         val individualUserType = getIndividualUserType(state)
-        if (individualUserType.contains(IndividualUserType.Capacitor) || individualUserType
-              .contains(IndividualUserType.PersonalRepresentative))
+        if (
+          individualUserType.contains(
+            IndividualUserType.Capacitor
+          ) || individualUserType
+            .contains(IndividualUserType.PersonalRepresentative)
+        )
           Ok(capacitorsAndPersonalRepresentativesNotHandledPage())
         else
           Redirect(
@@ -351,10 +403,13 @@ class CommonTriageQuestionsController @Inject() (
             )
           )
       }
-  }
+    }
 
   private def isIndividualASelfUserType(
-    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
+    triageAnswers: Either[
+      MultipleDisposalsTriageAnswers,
+      SingleDisposalTriageAnswers
+    ]
   ): Boolean =
     triageAnswers
       .fold(
@@ -371,7 +426,9 @@ class CommonTriageQuestionsController @Inject() (
       )
       .contains(IndividualUserType.Self)
 
-  private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Option[Call] = {
+  private def howManyPropertiesBackLink(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Option[Call] = {
     val triageAnswers  = triageAnswersFomState(state)
     val isSelfUserType = isIndividualASelfUserType(triageAnswers)
 
@@ -383,14 +440,16 @@ class CommonTriageQuestionsController @Inject() (
           _.fold(
             _ =>
               if (isSelfUserType)
-                routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+                routes.CommonTriageQuestionsController
+                  .whoIsIndividualRepresenting()
               else representee.routes.RepresenteeController.checkYourAnswers(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           ),
           _.fold(
             _ =>
               if (isSelfUserType)
-                routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+                routes.CommonTriageQuestionsController
+                  .whoIsIndividualRepresenting()
               else representee.routes.RepresenteeController.checkYourAnswers(),
             _ => routes.SingleDisposalsTriageController.checkYourAnswers()
           )
@@ -404,10 +463,10 @@ class CommonTriageQuestionsController @Inject() (
   ): Either[StartingNewDraftReturn, FillingOutReturn] = {
     val individualUserType = getIndividualUserType(state)
     numberOfProperties match {
-      case NumberOfProperties.One =>
+      case NumberOfProperties.One         =>
         val newTriageAnswers =
           IncompleteSingleDisposalTriageAnswers.empty.copy(
-            individualUserType         = individualUserType,
+            individualUserType = individualUserType,
             hasConfirmedSingleDisposal = true
           )
 
@@ -418,7 +477,11 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
+                fillingOutReturn.draftReturn.fold(
+                  _.representeeAnswers,
+                  _.representeeAnswers,
+                  _.representeeAnswers
+                )
               )
             )
         )
@@ -436,7 +499,11 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
+                fillingOutReturn.draftReturn.fold(
+                  _.representeeAnswers,
+                  _.representeeAnswers,
+                  _.representeeAnswers
+                )
               )
             )
         )
@@ -447,7 +514,9 @@ class CommonTriageQuestionsController @Inject() (
     state: Either[StartingNewDraftReturn, FillingOutReturn],
     individualUserType: IndividualUserType
   ): Either[StartingNewDraftReturn, FillingOutReturn] = {
-    def updateSingleDisposalAnswers(i: SingleDisposalTriageAnswers): IncompleteSingleDisposalTriageAnswers =
+    def updateSingleDisposalAnswers(
+      i: SingleDisposalTriageAnswers
+    ): IncompleteSingleDisposalTriageAnswers =
       i.unset(_.wasAUKResident)
         .unset(_.countryOfResidence)
         .unset(_.assetType)
@@ -456,7 +525,9 @@ class CommonTriageQuestionsController @Inject() (
         .unset(_.completionDate)
         .copy(individualUserType = Some(individualUserType))
 
-    def updateMultipleDisposalAnswers(i: MultipleDisposalsTriageAnswers): IncompleteMultipleDisposalsTriageAnswers =
+    def updateMultipleDisposalAnswers(
+      i: MultipleDisposalsTriageAnswers
+    ): IncompleteMultipleDisposalsTriageAnswers =
       i.unset(_.wasAUKResident)
         .unset(_.countryOfResidence)
         .unset(_.assetTypes)
@@ -470,10 +541,11 @@ class CommonTriageQuestionsController @Inject() (
 
     state.bimap(
       _.copy(
-        newReturnTriageAnswers = answers.bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
-          updateMultipleDisposalAnswers,
-          updateSingleDisposalAnswers
-        ),
+        newReturnTriageAnswers = answers
+          .bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
+            updateMultipleDisposalAnswers,
+            updateSingleDisposalAnswers
+          ),
         representeeAnswers = None
       ),
       r =>
@@ -481,33 +553,33 @@ class CommonTriageQuestionsController @Inject() (
           draftReturn = r.draftReturn.fold[DraftReturn](
             m =>
               m.copy(
-                triageAnswers                 = updateMultipleDisposalAnswers(m.triageAnswers),
-                representeeAnswers            = None,
+                triageAnswers = updateMultipleDisposalAnswers(m.triageAnswers),
+                representeeAnswers = None,
                 examplePropertyDetailsAnswers = None,
-                yearToDateLiabilityAnswers    = None,
-                supportingEvidenceAnswers     = None
+                yearToDateLiabilityAnswers = None,
+                supportingEvidenceAnswers = None
               ),
             s =>
               s.copy(
-                triageAnswers              = updateSingleDisposalAnswers(s.triageAnswers),
-                representeeAnswers         = None,
-                propertyAddress            = None,
-                disposalDetailsAnswers     = None,
-                acquisitionDetailsAnswers  = None,
-                reliefDetailsAnswers       = s.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                triageAnswers = updateSingleDisposalAnswers(s.triageAnswers),
+                representeeAnswers = None,
+                propertyAddress = None,
+                disposalDetailsAnswers = None,
+                acquisitionDetailsAnswers = None,
+                reliefDetailsAnswers = s.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                 yearToDateLiabilityAnswers = None,
-                initialGainOrLoss          = None,
-                supportingEvidenceAnswers  = None
+                initialGainOrLoss = None,
+                supportingEvidenceAnswers = None
               ),
             i =>
               i.copy(
-                triageAnswers              = updateSingleDisposalAnswers(i.triageAnswers),
-                representeeAnswers         = None,
-                companyAddress             = None,
-                disposalDetailsAnswers     = None,
-                acquisitionDetailsAnswers  = None,
+                triageAnswers = updateSingleDisposalAnswers(i.triageAnswers),
+                representeeAnswers = None,
+                companyAddress = None,
+                disposalDetailsAnswers = None,
+                acquisitionDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
-                supportingEvidenceAnswers  = None
+                supportingEvidenceAnswers = None
               )
           )
         )
@@ -525,10 +597,13 @@ class CommonTriageQuestionsController @Inject() (
   private def getNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Option[NumberOfProperties] = {
-    def numberOfProperties(singleDisposalTriageAnswers: SingleDisposalTriageAnswers) =
+    def numberOfProperties(
+      singleDisposalTriageAnswers: SingleDisposalTriageAnswers
+    ) =
       singleDisposalTriageAnswers.fold(
         incomplete =>
-          if (incomplete.hasConfirmedSingleDisposal) Some(NumberOfProperties.One)
+          if (incomplete.hasConfirmedSingleDisposal)
+            Some(NumberOfProperties.One)
           else None,
         _ => Some(NumberOfProperties.One)
       )
@@ -562,37 +637,47 @@ class CommonTriageQuestionsController @Inject() (
       .merge
 
   private def withState(request: RequestWithSessionData[_])(
-    f: (SessionData, Either[StartingNewDraftReturn, FillingOutReturn]) => Future[Result]
+    f: (
+      SessionData,
+      Either[StartingNewDraftReturn, FillingOutReturn]
+    ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((session, s: StartingNewDraftReturn)) =>
         f(session, Left(s))
 
-      case Some((session, r: FillingOutReturn)) =>
+      case Some((session, r: FillingOutReturn))       =>
         f(session, Right(r))
 
-      case _ =>
-        Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
+      case _                                          =>
+        Redirect(
+          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
+            .start()
+        )
     }
 
 }
 object CommonTriageQuestionsController {
 
-  def whoAreYouReportingForForm(isAgent: Boolean): Form[IndividualUserType] = Form(
-    mapping(
-      "individualUserType" -> of(
-        FormUtils.radioFormFormatter(
-          "individualUserType",
-          if (isAgent) List(Self, PersonalRepresentative)
-          else List(Self, Capacitor, PersonalRepresentative)
+  def whoAreYouReportingForForm(isAgent: Boolean): Form[IndividualUserType] =
+    Form(
+      mapping(
+        "individualUserType" -> of(
+          FormUtils.radioFormFormatter(
+            "individualUserType",
+            if (isAgent) List(Self, PersonalRepresentative)
+            else List(Self, Capacitor, PersonalRepresentative)
+          )
         )
-      )
-    )(identity)(Some(_))
-  )
+      )(identity)(Some(_))
+    )
 
   val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
     mapping(
-      "numberOfProperties" -> of(FormUtils.radioFormFormatter("numberOfProperties", List(One, MoreThanOne)))
+      "numberOfProperties" -> of(
+        FormUtils
+          .radioFormFormatter("numberOfProperties", List(One, MoreThanOne))
+      )
     )(identity)(Some(_))
   )
 

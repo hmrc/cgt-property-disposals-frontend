@@ -21,5 +21,6 @@ import play.api.libs.json.{Json, OFormat}
 final case class TrustAuditDetails(trustName: String)
 
 object TrustAuditDetails {
-  implicit val format: OFormat[TrustAuditDetails] = Json.format[TrustAuditDetails]
+  implicit val format: OFormat[TrustAuditDetails] =
+    Json.format[TrustAuditDetails]
 }

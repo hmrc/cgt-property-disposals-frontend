@@ -67,9 +67,13 @@ class SessionStoreImplSpec
     "return an error" when {
 
       "the data in mongo cannot be parsed" in new TestEnvironment {
-        val invalidData = JsObject(Map("journeyStatus" -> JsNumber(1)))
+        val invalidData                           = JsObject(Map("journeyStatus" -> JsNumber(1)))
         val create: Future[DatabaseUpdate[Cache]] =
-          sessionStore.cacheRepository.createOrUpdate(Id(sessionId.value), sessionStore.sessionKey, invalidData)
+          sessionStore.cacheRepository.createOrUpdate(
+            Id(sessionId.value),
+            sessionStore.sessionKey,
+            invalidData
+          )
         await(create).writeResult.inError shouldBe false
         await(sessionStore.get()).isLeft  shouldBe true
       }
@@ -94,7 +98,9 @@ class SessionStoreFailureSpec extends WordSpec with Matchers with MongoSupport {
 
   reactiveMongoComponent.mongoConnector.helper.driver.close()
 
-  val mongoIsBrokenAndAttemptingTo = new AfterWord("mongo is broken and attempting to")
+  val mongoIsBrokenAndAttemptingTo = new AfterWord(
+    "mongo is broken and attempting to"
+  )
 
   "SessionStore" must {
 

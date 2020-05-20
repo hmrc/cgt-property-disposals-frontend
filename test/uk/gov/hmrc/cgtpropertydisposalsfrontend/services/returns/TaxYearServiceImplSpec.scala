@@ -69,7 +69,9 @@ class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrive
         }
 
         "the http call comes back with status 200 but the body cannot be parsed" in {
-          mockGetTaxYear(date)(Right(HttpResponse(200, Some(JsString("hello")))))
+          mockGetTaxYear(date)(
+            Right(HttpResponse(200, Some(JsString("hello"))))
+          )
 
           await(service.taxYear(date).value).isLeft shouldBe true
         }
@@ -79,13 +81,22 @@ class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrive
 
         "the call is successful and a tax year was found" in {
           val taxYear = sample[TaxYear]
-          mockGetTaxYear(date)(Right(HttpResponse(200, Some(Json.toJson(TaxYearResponse(Some(taxYear)))))))
+          mockGetTaxYear(date)(
+            Right(
+              HttpResponse(
+                200,
+                Some(Json.toJson(TaxYearResponse(Some(taxYear))))
+              )
+            )
+          )
 
           await(service.taxYear(date).value) shouldBe Right(Some(taxYear))
         }
 
         "the call is successful and a tax year was not found" in {
-          mockGetTaxYear(date)(Right(HttpResponse(200, Some(Json.toJson(TaxYearResponse(None))))))
+          mockGetTaxYear(date)(
+            Right(HttpResponse(200, Some(Json.toJson(TaxYearResponse(None)))))
+          )
 
           await(service.taxYear(date).value) shouldBe Right(None)
         }

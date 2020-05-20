@@ -41,9 +41,19 @@ object AcquisitionDetailsAnswers {
   object IncompleteAcquisitionDetailsAnswers {
 
     val empty: IncompleteAcquisitionDetailsAnswers =
-      IncompleteAcquisitionDetailsAnswers(None, None, None, None, None, None, None)
+      IncompleteAcquisitionDetailsAnswers(
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None
+      )
 
-    def fromCompleteAnswers(c: CompleteAcquisitionDetailsAnswers): IncompleteAcquisitionDetailsAnswers =
+    def fromCompleteAnswers(
+      c: CompleteAcquisitionDetailsAnswers
+    ): IncompleteAcquisitionDetailsAnswers =
       IncompleteAcquisitionDetailsAnswers(
         Some(c.acquisitionMethod),
         Some(c.acquisitionDate),
@@ -66,18 +76,24 @@ object AcquisitionDetailsAnswers {
     shouldUseRebase: Boolean
   ) extends AcquisitionDetailsAnswers
 
-  implicit class AcquisitionDetailsAnswersOps(private val a: AcquisitionDetailsAnswers) extends AnyVal {
+  implicit class AcquisitionDetailsAnswersOps(
+    private val a: AcquisitionDetailsAnswers
+  ) extends AnyVal {
 
     def fold[A](
       ifIncomplete: IncompleteAcquisitionDetailsAnswers => A,
       ifComplete: CompleteAcquisitionDetailsAnswers => A
-    ): A = a match {
-      case i: IncompleteAcquisitionDetailsAnswers => ifIncomplete(i)
-      case c: CompleteAcquisitionDetailsAnswers   => ifComplete(c)
-    }
+    ): A =
+      a match {
+        case i: IncompleteAcquisitionDetailsAnswers => ifIncomplete(i)
+        case c: CompleteAcquisitionDetailsAnswers   => ifComplete(c)
+      }
 
     def unset[A](
-      fieldLens: IncompleteAcquisitionDetailsAnswers.type => Lens[IncompleteAcquisitionDetailsAnswers, Option[A]]
+      fieldLens: IncompleteAcquisitionDetailsAnswers.type => Lens[
+        IncompleteAcquisitionDetailsAnswers,
+        Option[A]
+      ]
     ): IncompleteAcquisitionDetailsAnswers =
       fieldLens(IncompleteAcquisitionDetailsAnswers).set(None)(
         fold(identity, IncompleteAcquisitionDetailsAnswers.fromCompleteAnswers)

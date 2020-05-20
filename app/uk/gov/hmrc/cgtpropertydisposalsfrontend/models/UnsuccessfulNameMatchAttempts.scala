@@ -35,30 +35,37 @@ object UnsuccessfulNameMatchAttempts {
 
   object NameMatchDetails {
 
-    final case class IndividualSautrNameMatchDetails(name: IndividualName, sautr: SAUTR) extends NameMatchDetails
+    final case class IndividualSautrNameMatchDetails(
+      name: IndividualName,
+      sautr: SAUTR
+    ) extends NameMatchDetails
 
     final case class TrustNameMatchDetails(name: TrustName, trn: TRN) extends NameMatchDetails
 
-    final case class IndividualRepresenteeNameMatchDetails(name: IndividualName, id: RepresenteeReferenceId)
-        extends NameMatchDetails
+    final case class IndividualRepresenteeNameMatchDetails(
+      name: IndividualName,
+      id: RepresenteeReferenceId
+    ) extends NameMatchDetails
 
     implicit val eq: Eq[NameMatchDetails] = Eq.fromUniversalEquals
 
     implicit val individualSaUtrNameMatchDetailsFormat: OFormat[IndividualSautrNameMatchDetails] =
       Json.format[IndividualSautrNameMatchDetails]
 
-    implicit val trustNameMatchDetailsFormat: OFormat[TrustNameMatchDetails] = Json.format[TrustNameMatchDetails]
+    implicit val trustNameMatchDetailsFormat: OFormat[TrustNameMatchDetails] =
+      Json.format[TrustNameMatchDetails]
 
     implicit val individualRepresenteeNameMatchDetailsFormat: OFormat[IndividualRepresenteeNameMatchDetails] =
       Json.format[IndividualRepresenteeNameMatchDetails]
 
   }
-  implicit def unsuccessfulNameMatchAttemptsReads[A <: NameMatchDetails: Reads]
+  implicit def unsuccessfulNameMatchAttemptsReads[A <: NameMatchDetails : Reads]
     : Reads[UnsuccessfulNameMatchAttempts[A]] =
     Json.reads[UnsuccessfulNameMatchAttempts[A]]
 
-  implicit def unsuccessfulNameMatchAttemptsWrites[A <: NameMatchDetails: Writes]
-    : Writes[UnsuccessfulNameMatchAttempts[A]] =
+  implicit def unsuccessfulNameMatchAttemptsWrites[
+    A <: NameMatchDetails : Writes
+  ]: Writes[UnsuccessfulNameMatchAttempts[A]] =
     Json.writes[UnsuccessfulNameMatchAttempts[A]]
 
 }

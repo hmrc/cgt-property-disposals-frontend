@@ -34,11 +34,15 @@ trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] wi
   val sessionStore: SessionStore
   implicit val executionContext: ExecutionContext
 
-  def authorisedFunction[A](auth: AuthorisedFunctions, request: MessagesRequest[A]): Future[Either[Result, P[A]]]
+  def authorisedFunction[A](
+    auth: AuthorisedFunctions,
+    request: MessagesRequest[A]
+  ): Future[Either[Result, P[A]]]
 
-  private val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
-    override def authConnector: AuthConnector = self.authConnector
-  }
+  private val authorisedFunctions: AuthorisedFunctions =
+    new AuthorisedFunctions {
+      override def authConnector: AuthConnector = self.authConnector
+    }
 
   private def getString(key: String): String = config.underlying.getString(key)
 
@@ -48,11 +52,21 @@ trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] wi
 
   private val selfBaseUrl: String = getString("self.url")
 
-  override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, P[A]]] =
+  override protected def refine[A](
+    request: MessagesRequest[A]
+  ): Future[Either[Result, P[A]]] =
     authorisedFunction[A](authorisedFunctions, request).recoverWith {
       case _: NoActiveSession =>
         Future.successful(
-          Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
+          Left(
+            Redirect(
+              signInUrl,
+              Map(
+                "continue" -> Seq(selfBaseUrl + request.uri),
+                "origin"   -> Seq(origin)
+              )
+            )
+          )
         )
     }
 

@@ -58,15 +58,16 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
     "handling requests to verify emails" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val expectedUrl =
+      val expectedUrl                =
         s"$protocol://$host:$port/email-verification/verification-requests"
-      val email              = Email("email@test.com")
-      val name               = ContactName("Bob Lob")
-      val trustName          = ContactName("trust")
-      val continueCall: Call = Call("GET", s"/url")
+      val email                      = Email("email@test.com")
+      val name                       = ContactName("Bob Lob")
+      val trustName                  = ContactName("trust")
+      val continueCall: Call         = Call("GET", s"/url")
 
-      def body(name: ContactName) = Json.parse(
-        s"""
+      def body(name: ContactName) =
+        Json.parse(
+          s"""
            |{
            |"email": "${email.value}",
            |"templateId": "$templateId",
@@ -75,7 +76,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
            |"continueUrl" : "$selfUrl${continueCall.url}"
            |}
            |""".stripMargin
-      )
+        )
 
       "send a request to the email verification service with the correct details " +
         "and return the response" when {
@@ -86,17 +87,25 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
             HttpResponse(409),
             HttpResponse(500)
           ).foreach { response =>
-            mockPost(expectedUrl, Map.empty[String, String], body(name))(Some(response))
+            mockPost(expectedUrl, Map.empty[String, String], body(name))(
+              Some(response)
+            )
 
-            await(connector.verifyEmail(email, name, continueCall).value) shouldBe Right(response)
+            await(
+              connector.verifyEmail(email, name, continueCall).value
+            ) shouldBe Right(response)
           }
         }
 
         "handling trusts" in {
           val response = HttpResponse(200, Some(JsString("hi")))
-          mockPost(expectedUrl, Map.empty[String, String], body(trustName))(Some(response))
+          mockPost(expectedUrl, Map.empty[String, String], body(trustName))(
+            Some(response)
+          )
 
-          await(connector.verifyEmail(email, trustName, continueCall).value) shouldBe Right(response)
+          await(
+            connector.verifyEmail(email, trustName, continueCall).value
+          ) shouldBe Right(response)
 
         }
       }
@@ -106,7 +115,9 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
         "the future fails" in {
           mockPost(expectedUrl, Map.empty[String, String], body(name))(None)
 
-          await(connector.verifyEmail(email, name, continueCall).value).isLeft shouldBe true
+          await(
+            connector.verifyEmail(email, name, continueCall).value
+          ).isLeft shouldBe true
         }
 
       }

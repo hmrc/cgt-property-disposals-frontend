@@ -38,7 +38,9 @@ object TRN {
 
     nonEmptyText
       .transform[String](_.trim, identity)
-      .verifying(Constraint { t: String => validateTrn(t.replaceAllLiterally(" ", "")) })
+      .verifying(Constraint { t: String =>
+        validateTrn(t.replaceAllLiterally(" ", ""))
+      })
   }
 
 }

@@ -36,29 +36,40 @@ class SubscriptionChangeContactNameControllerSpec
     with ContactNameControllerSpec[SubscriptionReady]
     with ScalaCheckDrivenPropertyChecks {
 
-  override val controller: SubscriptionChangeContactNameController = instanceOf[SubscriptionChangeContactNameController]
+  override val controller: SubscriptionChangeContactNameController =
+    instanceOf[SubscriptionChangeContactNameController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   override val validJourney: SubscriptionReady = {
     val contactNameSourceLens: Lens[SubscriptionReady, ContactNameSource] =
       lens[SubscriptionReady].subscriptionDetails.contactNameSource
-    contactNameSourceLens.set(sample[SubscriptionReady])(ContactNameSource.DerivedFromBusinessPartnerRecord)
+    contactNameSourceLens.set(sample[SubscriptionReady])(
+      ContactNameSource.DerivedFromBusinessPartnerRecord
+    )
   }
 
-  override val mockUpdateContactName
-    : Option[(SubscriptionReady, SubscriptionReady, Either[models.Error, Unit]) => Unit] = None
+  override val mockUpdateContactName: Option[
+    (SubscriptionReady, SubscriptionReady, Either[models.Error, Unit]) => Unit
+  ] = None
 
-  override def updateContactName(journey: SubscriptionReady, contactName: ContactName): SubscriptionReady =
+  override def updateContactName(
+    journey: SubscriptionReady,
+    contactName: ContactName
+  ): SubscriptionReady =
     journey.copy(
       subscriptionDetails = journey.subscriptionDetails
-        .copy(contactName = contactName, contactNameSource = ContactNameSource.ManuallyEntered)
+        .copy(
+          contactName = contactName,
+          contactNameSource = ContactNameSource.ManuallyEntered
+        )
     )
 
-  def isValidJourney(journey: JourneyStatus): Boolean = journey match {
-    case _: SubscriptionReady => true
-    case _                    => false
-  }
+  def isValidJourney(journey: JourneyStatus): Boolean =
+    journey match {
+      case _: SubscriptionReady => true
+      case _                    => false
+    }
 
   "SubscriptionEnterContactNameController" when {
 
@@ -68,7 +79,10 @@ class SubscriptionChangeContactNameControllerSpec
 
     "handling submitted names" must {
       behave like enterContactNameSubmit(
-        data => controller.enterContactNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
+        data =>
+          controller.enterContactNameSubmit()(
+            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+          ),
         controllers.onboarding.routes.SubscriptionController.checkYourDetails()
       )
     }

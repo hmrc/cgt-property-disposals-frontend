@@ -40,24 +40,36 @@ class SubscriptionAddressControllerSpec
     with RedirectToStartBehaviour {
 
   val subscriptionDetails: SubscriptionDetails =
-    sample[SubscriptionDetails].copy(address = ukAddress(1), addressSource = AddressSource.BusinessPartnerRecord)
+    sample[SubscriptionDetails].copy(
+      address = ukAddress(1),
+      addressSource = AddressSource.BusinessPartnerRecord
+    )
 
-  val validJourneyStatus = SubscriptionReadyAddressJourney(SubscriptionReady(subscriptionDetails, sample[GGCredId]))
+  val validJourneyStatus = SubscriptionReadyAddressJourney(
+    SubscriptionReady(subscriptionDetails, sample[GGCredId])
+  )
 
   lazy val controller = instanceOf[SubscriptionAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  override def updateAddress(journey: SubscriptionReadyAddressJourney, address: Address): SubscriptionReady =
+  override def updateAddress(
+    journey: SubscriptionReadyAddressJourney,
+    address: Address
+  ): SubscriptionReady =
     journey.journey.copy(subscriptionDetails =
-      journey.journey.subscriptionDetails.copy(address = address, addressSource = AddressSource.ManuallyEntered)
+      journey.journey.subscriptionDetails
+        .copy(address = address, addressSource = AddressSource.ManuallyEntered)
     )
 
-  override val mockUpdateAddress: Option[(SubscriptionReadyAddressJourney, Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress: Option[
+    (SubscriptionReadyAddressJourney, Address, Either[Error, Unit]) => Unit
+  ] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: SubscriptionReady => true
         case _                    => false
       }
@@ -75,7 +87,9 @@ class SubscriptionAddressControllerSpec
 
     "handling requests to submit the is UK page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.isUkSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.isUkSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -89,19 +103,30 @@ class SubscriptionAddressControllerSpec
 
     "handling requests to display the enter UK address page" must {
 
-      def performAction(): Future[Result] = controller.enterUkAddress()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
+      behave like displayEnterUkAddressPage(
+        UserType.Individual,
+        None,
+        performAction
+      )
       behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
-      behave like displayEnterUkAddressPage(UserType.Organisation, None, performAction)
+      behave like displayEnterUkAddressPage(
+        UserType.Organisation,
+        None,
+        performAction
+      )
     }
 
     "handling submitted addresses from enter UK address page" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.enterUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterUkAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -114,7 +139,8 @@ class SubscriptionAddressControllerSpec
 
     "handling requests to display the enter non UK address page" must {
 
-      def performAction(): Future[Result] = controller.enterNonUkAddress()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterNonUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -124,7 +150,9 @@ class SubscriptionAddressControllerSpec
 
     "handling requests to submit the enter non UK address page" must {
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.enterNonUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterNonUkAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -136,7 +164,8 @@ class SubscriptionAddressControllerSpec
 
     "handling requests to display the enter postcode page" must {
 
-      def performAction(): Future[Result] = controller.enterPostcode()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterPostcode()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
       behave like enterPostcodePage(UserType.Individual, None, performAction)
@@ -147,11 +176,16 @@ class SubscriptionAddressControllerSpec
     "handling submitted postcodes and filters" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterPostcodeSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(performAction, routes.SubscriptionAddressController.selectAddress())
+      behave like submitEnterPostcode(
+        performAction,
+        routes.SubscriptionAddressController.selectAddress()
+      )
 
     }
 
@@ -187,7 +221,9 @@ class SubscriptionAddressControllerSpec
     "handling submitted selected addresses" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.selectAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.selectAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -208,7 +244,11 @@ class SubscriptionAddressControllerSpec
           }
 
           val result = performAction(Seq("address-select" -> "0"))
-          checkIsRedirect(result, controllers.onboarding.routes.SubscriptionController.checkYourDetails())
+          checkIsRedirect(
+            result,
+            controllers.onboarding.routes.SubscriptionController
+              .checkYourDetails()
+          )
         }
 
       }

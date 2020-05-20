@@ -67,50 +67,57 @@ class SubscriptionController @Inject() (
   def checkYourDetailsSubmit(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady.async { implicit request =>
       val details = request.subscriptionReady.subscriptionDetails
-      val result = for {
+      val result  = for {
         subscriptionResponse <- subscriptionService.subscribe(details)
-        _ <- EitherT(
-              subscriptionResponse match {
-                case SubscriptionSuccessful(cgtReferenceNumber) =>
-                  updateSession(sessionStore, request)(
-                    _.copy(
-                      journeyStatus = Some(
-                        Subscribed(
-                          SubscribedDetails(
-                            details.name,
-                            details.emailAddress,
-                            details.address,
-                            details.contactName,
-                            CgtReference(cgtReferenceNumber),
-                            None,
-                            registeredWithId = true
-                          ),
-                          request.subscriptionReady.ggCredId,
-                          None,
-                          List.empty,
-                          List.empty
-                        )
-                      )
-                    )
-                  )
-                case AlreadySubscribed =>
-                  updateSession(sessionStore, request)(
-                    _.copy(
-                      journeyStatus =
-                        Some(AlreadySubscribedWithDifferentGGAccount(request.subscriptionReady.ggCredId, None))
-                    )
-                  )
-              }
-            )
+        _                    <- EitherT(
+               subscriptionResponse match {
+                 case SubscriptionSuccessful(cgtReferenceNumber) =>
+                   updateSession(sessionStore, request)(
+                     _.copy(
+                       journeyStatus = Some(
+                         Subscribed(
+                           SubscribedDetails(
+                             details.name,
+                             details.emailAddress,
+                             details.address,
+                             details.contactName,
+                             CgtReference(cgtReferenceNumber),
+                             None,
+                             registeredWithId = true
+                           ),
+                           request.subscriptionReady.ggCredId,
+                           None,
+                           List.empty,
+                           List.empty
+                         )
+                       )
+                     )
+                   )
+                 case AlreadySubscribed                          =>
+                   updateSession(sessionStore, request)(
+                     _.copy(
+                       journeyStatus = Some(
+                         AlreadySubscribedWithDifferentGGAccount(
+                           request.subscriptionReady.ggCredId,
+                           None
+                         )
+                       )
+                     )
+                   )
+               }
+             )
       } yield subscriptionResponse
 
       result.fold(
         { e =>
           logger.warn("Could not subscribe", e)
           errorHandler.errorResult(request.sessionData.userType)
-        }, {
-          case SubscriptionSuccessful(cgtReferenceNumber) => {
-            logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
+        },
+        {
+          case SubscriptionSuccessful(cgtReferenceNumber) =>
+            logger.info(
+              s"Successfully subscribed with cgt id $cgtReferenceNumber"
+            )
             auditService
               .sendEvent(
                 "subscriptionRequest",
@@ -118,36 +125,47 @@ class SubscriptionController @Inject() (
                 "subscription-request"
               )
             Redirect(routes.SubscriptionController.subscribed())
-          }
-          case AlreadySubscribed =>
-            logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
+          case AlreadySubscribed                          =>
+            logger.info(
+              "Response to subscription request indicated that the user has already subscribed to cgt"
+            )
             auditService.sendEvent(
               "accessWithWrongGGAccount",
-              WrongGGAccountEvent(None, request.subscriptionReady.ggCredId.value),
+              WrongGGAccountEvent(
+                None,
+                request.subscriptionReady.ggCredId.value
+              ),
               "access-with-wrong-gg-account"
             )
-            Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+            Redirect(
+              routes.SubscriptionController
+                .alreadySubscribedWithDifferentGGAccount()
+            )
         }
       )
     }
 
-  def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(subscribed: Subscribed) => Ok(subscribedPage(subscribed.subscribedDetails))
-      case _                            => Redirect(controllers.routes.StartController.start())
-    }
-  }
-
-  def alreadySubscribedWithDifferentGGAccount(): Action[AnyContent] = authenticatedActionWithSessionData {
-    implicit request =>
+  def subscribed(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(AlreadySubscribedWithDifferentGGAccount(_, _)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
+        case Some(subscribed: Subscribed) =>
+          Ok(subscribedPage(subscribed.subscribedDetails))
+        case _                            => Redirect(controllers.routes.StartController.start())
+      }
+    }
+
+  def alreadySubscribedWithDifferentGGAccount(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      request.sessionData.flatMap(_.journeyStatus) match {
+        case Some(AlreadySubscribedWithDifferentGGAccount(_, _)) =>
+          Ok(alreadySubscribedWithDifferentGGAccountPage())
         case _                                                   => Redirect(controllers.routes.StartController.start())
       }
-  }
+    }
 
-  def changeGGAccountForSubscription(): Action[AnyContent] = authenticatedActionWithSubscriptionReady {
-    implicit request => Ok(changeGGAccountPage(routes.SubscriptionController.checkYourDetails()))
-  }
+  def changeGGAccountForSubscription(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionReady { implicit request =>
+      Ok(changeGGAccountPage(routes.SubscriptionController.checkYourDetails()))
+    }
 
 }

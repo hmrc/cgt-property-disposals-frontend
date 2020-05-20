@@ -52,20 +52,30 @@ object CompleteReturn {
 
   object CompleteMultipleDisposalsReturn {
 
-    def fromDraftReturn(draftReturn: DraftMultipleDisposalsReturn): Option[CompleteMultipleDisposalsReturn] =
+    def fromDraftReturn(
+      draftReturn: DraftMultipleDisposalsReturn
+    ): Option[CompleteMultipleDisposalsReturn] =
       draftReturn match {
         case DraftMultipleDisposalsReturn(
-            _,
-            t: CompleteMultipleDisposalsTriageAnswers,
-            Some(p: CompleteExamplePropertyDetailsAnswers),
-            Some(e: CompleteExemptionAndLossesAnswers),
-            Some(y: CompleteNonCalculatedYTDAnswers),
-            Some(u: CompleteSupportingEvidenceAnswers),
-            representeeAnswers,
-            _
+              _,
+              t: CompleteMultipleDisposalsTriageAnswers,
+              Some(p: CompleteExamplePropertyDetailsAnswers),
+              Some(e: CompleteExemptionAndLossesAnswers),
+              Some(y: CompleteNonCalculatedYTDAnswers),
+              Some(u: CompleteSupportingEvidenceAnswers),
+              representeeAnswers,
+              _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
-            CompleteMultipleDisposalsReturn(t, p, e, y, u, maybeCompleteRepresenteeAnswers, hasAttachments = true)
+            CompleteMultipleDisposalsReturn(
+              t,
+              p,
+              e,
+              y,
+              u,
+              maybeCompleteRepresenteeAnswers,
+              hasAttachments = true
+            )
           )
 
         case _ =>
@@ -82,7 +92,10 @@ object CompleteReturn {
     acquisitionDetails: CompleteAcquisitionDetailsAnswers,
     reliefDetails: CompleteReliefDetailsAnswers,
     exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-    yearToDateLiabilityAnswers: Either[CompleteNonCalculatedYTDAnswers, CompleteCalculatedYTDAnswers],
+    yearToDateLiabilityAnswers: Either[
+      CompleteNonCalculatedYTDAnswers,
+      CompleteCalculatedYTDAnswers
+    ],
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     initialGainOrLoss: Option[AmountInPence],
     representeeAnswers: Option[CompleteRepresenteeAnswers],
@@ -91,23 +104,26 @@ object CompleteReturn {
 
   object CompleteSingleDisposalReturn {
 
-    def fromDraftReturn(draftReturn: DraftSingleDisposalReturn): Option[CompleteSingleDisposalReturn] =
+    def fromDraftReturn(
+      draftReturn: DraftSingleDisposalReturn
+    ): Option[CompleteSingleDisposalReturn] =
       draftReturn match {
         case DraftSingleDisposalReturn(
-            _,
-            t: CompleteSingleDisposalTriageAnswers,
-            Some(p: UkAddress),
-            Some(d: CompleteDisposalDetailsAnswers),
-            Some(a: CompleteAcquisitionDetailsAnswers),
-            Some(r: CompleteReliefDetailsAnswers),
-            Some(e: CompleteExemptionAndLossesAnswers),
-            Some(y: CompleteCalculatedYTDAnswers),
-            i,
-            Some(u: CompleteSupportingEvidenceAnswers),
-            representeeAnswers,
-            _
+              _,
+              t: CompleteSingleDisposalTriageAnswers,
+              Some(p: UkAddress),
+              Some(d: CompleteDisposalDetailsAnswers),
+              Some(a: CompleteAcquisitionDetailsAnswers),
+              Some(r: CompleteReliefDetailsAnswers),
+              Some(e: CompleteExemptionAndLossesAnswers),
+              Some(y: CompleteCalculatedYTDAnswers),
+              i,
+              Some(u: CompleteSupportingEvidenceAnswers),
+              representeeAnswers,
+              _
             ) =>
-          val hasAttachments = u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
+          val hasAttachments =
+            u.evidences.nonEmpty || y.mandatoryEvidence.isDefined
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
             CompleteSingleDisposalReturn(
               t,
@@ -125,18 +141,18 @@ object CompleteReturn {
           )
 
         case DraftSingleDisposalReturn(
-            _,
-            t: CompleteSingleDisposalTriageAnswers,
-            Some(p: UkAddress),
-            Some(d: CompleteDisposalDetailsAnswers),
-            Some(a: CompleteAcquisitionDetailsAnswers),
-            Some(r: CompleteReliefDetailsAnswers),
-            Some(e: CompleteExemptionAndLossesAnswers),
-            Some(y: CompleteNonCalculatedYTDAnswers),
-            i,
-            Some(u: CompleteSupportingEvidenceAnswers),
-            representeeAnswers,
-            _
+              _,
+              t: CompleteSingleDisposalTriageAnswers,
+              Some(p: UkAddress),
+              Some(d: CompleteDisposalDetailsAnswers),
+              Some(a: CompleteAcquisitionDetailsAnswers),
+              Some(r: CompleteReliefDetailsAnswers),
+              Some(e: CompleteExemptionAndLossesAnswers),
+              Some(y: CompleteNonCalculatedYTDAnswers),
+              i,
+              Some(u: CompleteSupportingEvidenceAnswers),
+              representeeAnswers,
+              _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
             CompleteSingleDisposalReturn(
@@ -158,15 +174,21 @@ object CompleteReturn {
           None
       }
 
-    implicit class CompleteReturnOps(private val c: CompleteSingleDisposalReturn) extends AnyVal {
+    implicit class CompleteReturnOps(
+      private val c: CompleteSingleDisposalReturn
+    ) extends AnyVal {
 
-      def hasNonResidentialAssetType(): Boolean = c.triageAnswers.assetType === AssetType.NonResidential
+      def hasNonResidentialAssetType(): Boolean =
+        c.triageAnswers.assetType === AssetType.NonResidential
 
     }
   }
 
   implicit class CompleteReturnOps(private val c: CompleteReturn) extends AnyVal {
-    def fold[A](whenMultiple: CompleteMultipleDisposalsReturn => A, whenSingle: CompleteSingleDisposalReturn => A): A =
+    def fold[A](
+      whenMultiple: CompleteMultipleDisposalsReturn => A,
+      whenSingle: CompleteSingleDisposalReturn => A
+    ): A =
       c match {
         case m: CompleteMultipleDisposalsReturn => whenMultiple(m)
         case s: CompleteSingleDisposalReturn    => whenSingle(s)
@@ -178,13 +200,16 @@ object CompleteReturn {
     representeeAnswers: Option[RepresenteeAnswers]
   ): Option[Option[CompleteRepresenteeAnswers]] =
     (individualUserType, representeeAnswers) match {
-      case (Some(Capacitor) | Some(PersonalRepresentative), Some(r: CompleteRepresenteeAnswers)) =>
+      case (
+            Some(Capacitor) | Some(PersonalRepresentative),
+            Some(r: CompleteRepresenteeAnswers)
+          ) =>
         Some(Some(r))
 
       case (Some(Capacitor) | Some(PersonalRepresentative), _) =>
         None
 
-      case _ =>
+      case _                                                   =>
         Some(None)
     }
 
@@ -196,12 +221,14 @@ object CompleteReturn {
     implicit val examplePropertyDetailsFormat: OFormat[CompleteExamplePropertyDetailsAnswers]     = Json.format
     implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]                   = Json.format
     implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]             = Json.format
-    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                       = Json.format
+    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                       =
+      Json.format
     implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]             = Json.format
     implicit val nonCalculatedYearToDateLiabilityFormat: OFormat[CompleteNonCalculatedYTDAnswers] = Json.format
     implicit val calculatedYearToDateLiabilityFormat: OFormat[CompleteCalculatedYTDAnswers]       = Json.format
     implicit val supportingDocumentsFormat: OFormat[CompleteSupportingEvidenceAnswers]            = Json.format
-    implicit val representeeAnswersFormat: OFormat[CompleteRepresenteeAnswers]                    = Json.format
+    implicit val representeeAnswersFormat: OFormat[CompleteRepresenteeAnswers]                    =
+      Json.format
     derived.oformat()
   }
 

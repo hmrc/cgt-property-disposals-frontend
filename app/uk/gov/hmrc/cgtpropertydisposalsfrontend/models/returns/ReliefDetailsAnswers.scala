@@ -39,8 +39,14 @@ object ReliefDetailsAnswers {
     val empty: IncompleteReliefDetailsAnswers =
       IncompleteReliefDetailsAnswers(None, None, None)
 
-    def fromCompleteAnswers(c: CompleteReliefDetailsAnswers): IncompleteReliefDetailsAnswers =
-      IncompleteReliefDetailsAnswers(Some(c.privateResidentsRelief), Some(c.lettingsRelief), c.otherReliefs)
+    def fromCompleteAnswers(
+      c: CompleteReliefDetailsAnswers
+    ): IncompleteReliefDetailsAnswers =
+      IncompleteReliefDetailsAnswers(
+        Some(c.privateResidentsRelief),
+        Some(c.lettingsRelief),
+        c.otherReliefs
+      )
   }
 
   final case class CompleteReliefDetailsAnswers(
@@ -54,13 +60,17 @@ object ReliefDetailsAnswers {
     def fold[A](
       ifIncomplete: IncompleteReliefDetailsAnswers => A,
       ifComplete: CompleteReliefDetailsAnswers => A
-    ): A = a match {
-      case i: IncompleteReliefDetailsAnswers => ifIncomplete(i)
-      case c: CompleteReliefDetailsAnswers   => ifComplete(c)
-    }
+    ): A =
+      a match {
+        case i: IncompleteReliefDetailsAnswers => ifIncomplete(i)
+        case c: CompleteReliefDetailsAnswers   => ifComplete(c)
+      }
 
     def unset[A](
-      fieldLens: IncompleteReliefDetailsAnswers.type => Lens[IncompleteReliefDetailsAnswers, Option[A]]
+      fieldLens: IncompleteReliefDetailsAnswers.type => Lens[
+        IncompleteReliefDetailsAnswers,
+        Option[A]
+      ]
     ): IncompleteReliefDetailsAnswers =
       fieldLens(IncompleteReliefDetailsAnswers).set(None)(
         fold(identity, IncompleteReliefDetailsAnswers.fromCompleteAnswers)

@@ -63,8 +63,11 @@ class SubscriptionChangeContactNameController @Inject() (
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateContactName(journey: SubscriptionReady, contactName: ContactName)(
-    implicit hc: HeaderCarrier,
+  override def updateContactName(
+    journey: SubscriptionReady,
+    contactName: ContactName
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, SubscriptionReady] = {
     auditService.sendEvent(
@@ -76,12 +79,14 @@ class SubscriptionChangeContactNameController @Inject() (
       "subscription-contact-name-changed"
     )
     val source =
-      if (journey.subscriptionDetails.contactName === contactName) journey.subscriptionDetails.contactNameSource
+      if (journey.subscriptionDetails.contactName === contactName)
+        journey.subscriptionDetails.contactNameSource
       else ContactNameSource.ManuallyEntered
 
     EitherT.rightT[Future, Error](
       journey.copy(
-        subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName, contactNameSource = source)
+        subscriptionDetails = journey.subscriptionDetails
+          .copy(contactName = contactName, contactNameSource = source)
       )
     )
   }
@@ -89,11 +94,11 @@ class SubscriptionChangeContactNameController @Inject() (
   override def contactName(journey: SubscriptionReady): Option[ContactName] =
     Some(journey.subscriptionDetails.contactName)
 
-  override protected lazy val backLinkCall: Call =
+  override protected lazy val backLinkCall: Call               =
     controllers.onboarding.routes.SubscriptionController.checkYourDetails()
   override protected lazy val enterContactNameSubmitCall: Call =
     routes.SubscriptionChangeContactNameController.enterContactNameSubmit()
-  override protected lazy val continueCall: Call =
+  override protected lazy val continueCall: Call               =
     controllers.onboarding.routes.SubscriptionController.checkYourDetails()
 
 }

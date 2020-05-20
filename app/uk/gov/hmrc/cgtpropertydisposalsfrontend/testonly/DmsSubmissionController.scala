@@ -51,26 +51,37 @@ class DmsSubmissionController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: Subscribed)) =>
         f(s, r)
-      case _ =>
+      case _                                     =>
         Future.successful(
-          SeeOther(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start().url)
+          SeeOther(
+            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
+              .start()
+              .url
+          )
         )
     }
 
-  def testSubmitToDms: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) { (_, subscribed) =>
-      val result = cgtPropertyDisposalsConnector.testSubmitToDms(subscribed.subscribedDetails.cgtReference).subflatMap {
-        response =>
-          if (response.status === OK)
-            Right(())
-          else
-            Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
+  def testSubmitToDms: Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser(request) { (_, subscribed) =>
+        val result =
+          cgtPropertyDisposalsConnector
+            .testSubmitToDms(subscribed.subscribedDetails.cgtReference)
+            .subflatMap { response =>
+              if (response.status === OK)
+                Right(())
+              else
+                Left(
+                  Error(
+                    s"Call to get subscribed details came back with status ${response.status}"
+                  )
+                )
+            }
+        result.fold(
+          _ => BadRequest("failed submission to dms"),
+          _ => Ok("successful submission to dms")
+        )
       }
-      result.fold(
-        _ => BadRequest("failed submission to dms"),
-        _ => Ok("successful submission to dms")
-      )
     }
-  }
 
 }

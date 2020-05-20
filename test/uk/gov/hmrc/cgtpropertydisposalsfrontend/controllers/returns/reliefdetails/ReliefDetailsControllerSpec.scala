@@ -78,13 +78,17 @@ class ReliefDetailsControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: FillingOutReturn => true
         case _                   => false
       }
     )
 
-  def userMessageKey(individualUserType: IndividualUserType, userType: UserType): String =
+  def userMessageKey(
+    individualUserType: IndividualUserType,
+    userType: UserType
+  ): String =
     (individualUserType, userType) match {
       case (Capacitor, _)              => ".capacitor"
       case (PersonalRepresentative, _) => ".personalRep"
@@ -94,15 +98,21 @@ class ReliefDetailsControllerSpec
       case other                       => sys.error(s"User type '$other' not handled")
     }
 
-  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
-    case UserType.Agent => Some(sample[AgentReferenceNumber])
-    case _              => None
-  }
+  def setAgentReferenceNumber(
+    userType: UserType
+  ): Option[AgentReferenceNumber] =
+    userType match {
+      case UserType.Agent => Some(sample[AgentReferenceNumber])
+      case _              => None
+    }
 
-  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
-    case UserType.Organisation => Left(sample[TrustName])
-    case _                     => Right(sample[IndividualName])
-  }
+  def setNameForUserType(
+    userType: UserType
+  ): Either[TrustName, IndividualName] =
+    userType match {
+      case UserType.Organisation => Left(sample[TrustName])
+      case _                     => Right(sample[IndividualName])
+    }
 
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: Option[ReliefDetailsAnswers],
@@ -124,14 +134,14 @@ class ReliefDetailsControllerSpec
 
     val journey = sample[FillingOutReturn].copy(
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      draftReturn          = draftReturn,
+      draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
       )
     )
 
     val sessionData = SessionData.empty.copy(
-      userType      = Some(userType),
+      userType = Some(userType),
       journeyStatus = Some(journey)
     )
 
@@ -151,7 +161,7 @@ class ReliefDetailsControllerSpec
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
     val draftReturn = singleDisposalDraftReturn.copy(
-      reliefDetailsAnswers      = reliefDetailsAnswers,
+      reliefDetailsAnswers = reliefDetailsAnswers,
       exemptionAndLossesAnswers = exemptionAndLossesAnswers,
       triageAnswers = completeSingleDisposalTriageAnswers.copy(
         disposalDate = disposalDate.copy(
@@ -164,7 +174,7 @@ class ReliefDetailsControllerSpec
     )
 
     val journey = fillingOutReturn.copy(
-      draftReturn          = draftReturn,
+      draftReturn = draftReturn,
       agentReferenceNumber = setAgentReferenceNumber(userType),
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
@@ -172,7 +182,7 @@ class ReliefDetailsControllerSpec
     )
 
     val sessionData = SessionData.empty.copy(
-      userType      = Some(userType),
+      userType = Some(userType),
       journeyStatus = Some(journey)
     )
 
@@ -184,23 +194,29 @@ class ReliefDetailsControllerSpec
     userType: UserType,
     individualUserType: IndividualUserType
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
-    sessionWithReliefDetailsAnswers(Some(reliefDetailsAnswers), userType, individualUserType)
+    sessionWithReliefDetailsAnswers(
+      Some(reliefDetailsAnswers),
+      userType,
+      individualUserType
+    )
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
     case UserType.Agent | UserType.Organisation | UserType.Individual => true
     case _                                                            => false
   }
 
-  val acceptedIndividualUserTypeGen: Gen[IndividualUserType] = individualUserTypeGen.filter {
-    case Self | Capacitor | PersonalRepresentative => true
-    case _                                         => false
-  }
+  val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
+    individualUserTypeGen.filter {
+      case Self | Capacitor | PersonalRepresentative => true
+      case _                                         => false
+    }
 
   "ReliefDetailsController" when {
 
     "handling requests to display the private residence relief page" must {
 
-      def performAction(): Future[Result] = controller.privateResidentsRelief()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.privateResidentsRelief()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -214,7 +230,13 @@ class ReliefDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(sessionWithReliefDetailsAnswers(None, userType, individualUserType)._1)
+                mockGetSession(
+                  sessionWithReliefDetailsAnswers(
+                    None,
+                    userType,
+                    individualUserType
+                  )._1
+                )
               }
 
               val userKey = userMessageKey(individualUserType, userType)
@@ -261,7 +283,8 @@ class ReliefDetailsControllerSpec
                 mockAuthWithNoRetrievals()
                 mockGetSession(
                   sessionWithReliefDetailsAnswers(
-                    sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(12.34)),
+                    sample[CompleteReliefDetailsAnswers]
+                      .copy(privateResidentsRelief = AmountInPence.fromPounds(12.34)),
                     userType,
                     individualUserType
                   )._1
@@ -285,11 +308,16 @@ class ReliefDetailsControllerSpec
     "handling submitted answers to the private residence relief page" must {
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
-        controller.privateResidentsReliefSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.privateResidentsReliefSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
-      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: ReliefDetailsAnswers) =
+      def updateDraftReturn(
+        d: DraftSingleDisposalReturn,
+        newAnswers: ReliefDetailsAnswers
+      ) =
         d.copy(
-          reliefDetailsAnswers       = Some(newAnswers),
+          reliefDetailsAnswers = Some(newAnswers),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -302,7 +330,11 @@ class ReliefDetailsControllerSpec
 
         def test(data: (String, String)*)(
           expectedErrorMessageKey: String
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String) = {
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ) = {
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -319,7 +351,9 @@ class ReliefDetailsControllerSpec
             performAction(data),
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
@@ -330,12 +364,18 @@ class ReliefDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              amountOfMoneyErrorScenarios(key = valueKey, errorContext = Some(s"$valueKey$userKey")).foreach {
-                scenario =>
-                  withClue(s"For $scenario: ") {
-                    val data = (key -> "0") :: scenario.formData
-                    test(data: _*)(scenario.expectedErrorMessageKey)(userType, individualUserType, userKey)
-                  }
+              amountOfMoneyErrorScenarios(
+                key = valueKey,
+                errorContext = Some(s"$valueKey$userKey")
+              ).foreach { scenario =>
+                withClue(s"For $scenario: ") {
+                  val data = (key -> "0") :: scenario.formData
+                  test(data: _*)(scenario.expectedErrorMessageKey)(
+                    userType,
+                    individualUserType,
+                    userKey
+                  )
+                }
               }
           }
         }
@@ -353,13 +393,22 @@ class ReliefDetailsControllerSpec
           individualUserType: IndividualUserType
         ): (SessionData, FillingOutReturn, DraftReturn) = {
           val (session, journey, draftReturn) =
-            sessionWithReliefDetailsAnswers(currentAnswers, userType, individualUserType)
+            sessionWithReliefDetailsAnswers(
+              currentAnswers,
+              userType,
+              individualUserType
+            )
 
-          val newPrivateResidentsRelief = AmountInPence.fromPounds(10d)
+          val newPrivateResidentsRelief      = AmountInPence.fromPounds(10d)
           val incompleteReliefDetailsAnswers =
-            IncompleteReliefDetailsAnswers(Some(newPrivateResidentsRelief), None, currentAnswers.otherReliefs)
+            IncompleteReliefDetailsAnswers(
+              Some(newPrivateResidentsRelief),
+              None,
+              currentAnswers.otherReliefs
+            )
 
-          val newDraftReturn = updateDraftReturn(draftReturn, incompleteReliefDetailsAnswers)
+          val newDraftReturn =
+            updateDraftReturn(draftReturn, incompleteReliefDetailsAnswers)
 
           (session, journey, newDraftReturn)
         }
@@ -368,7 +417,8 @@ class ReliefDetailsControllerSpec
 
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (session, journey, newDraftReturn) = getSessionJourneyAndDraftReturn(userType, individualUserType)
+              val (session, journey, newDraftReturn) =
+                getSessionJourneyAndDraftReturn(userType, individualUserType)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -390,7 +440,8 @@ class ReliefDetailsControllerSpec
 
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (session, journey, newDraftReturn) = getSessionJourneyAndDraftReturn(userType, individualUserType)
+              val (session, journey, newDraftReturn) =
+                getSessionJourneyAndDraftReturn(userType, individualUserType)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -426,7 +477,8 @@ class ReliefDetailsControllerSpec
 
         "the user hasn't ever answered the relief details question " +
           "and the draft return and session data has been successfully updated" in {
-          val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) = "0" -> 10d
+          val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) =
+            "0" -> 10d
           val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
             reliefDetailsAnswers = None
           )
@@ -453,16 +505,21 @@ class ReliefDetailsControllerSpec
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
 
-          val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) = "0" -> 1d
-          val oldAnswers                                                  = sample[IncompleteReliefDetailsAnswers].copy(privateResidentsRelief = None)
+          val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) =
+            "0" -> 1d
+          val oldAnswers = sample[IncompleteReliefDetailsAnswers]
+            .copy(privateResidentsRelief = None)
 
-          val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(reliefDetailsAnswers = Some(oldAnswers))
+          val oldDraftReturn = sample[DraftSingleDisposalReturn]
+            .copy(reliefDetailsAnswers = Some(oldAnswers))
           val newDraftReturn =
             updateDraftReturn(
               oldDraftReturn,
               oldAnswers.copy(
-                privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue)),
-                lettingsRelief         = None
+                privateResidentsRelief = Some(
+                  AmountInPence.fromPounds(newPrivateResidentsReliefValue)
+                ),
+                lettingsRelief = None
               )
             )
 
@@ -490,13 +547,18 @@ class ReliefDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    sessionWithReliefDetailsAnswers(currentAnswers, userType, individualUserType)._1
+                    sessionWithReliefDetailsAnswers(
+                      currentAnswers,
+                      userType,
+                      individualUserType
+                    )._1
                   )
                 }
 
                 checkIsRedirect(
                   performAction(Seq(key -> "0", valueKey -> "1")),
-                  controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+                  controllers.returns.reliefdetails.routes.ReliefDetailsController
+                    .checkYourAnswers()
                 )
             }
           }
@@ -510,18 +572,26 @@ class ReliefDetailsControllerSpec
             forAll { c: CompleteReliefDetailsAnswers =>
               forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
                 (userType: UserType, individualUserType: IndividualUserType) =>
-                  val completeAnswers = c.copy(privateResidentsRelief = AmountInPence.fromPounds(5))
+                  val completeAnswers                 =
+                    c.copy(privateResidentsRelief = AmountInPence.fromPounds(5))
                   val (session, journey, draftReturn) =
-                    sessionWithReliefDetailsAnswers(completeAnswers, userType, individualUserType)
+                    sessionWithReliefDetailsAnswers(
+                      completeAnswers,
+                      userType,
+                      individualUserType
+                    )
 
-                  val newAnswers = IncompleteReliefDetailsAnswers(
+                  val newAnswers         = IncompleteReliefDetailsAnswers(
                     Some(AmountInPence.fromPounds(1)),
                     None,
                     completeAnswers.otherReliefs
                   )
-                  val updatedDraftReturn = updateDraftReturn(draftReturn, newAnswers)
-                  val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
-                  val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+                  val updatedDraftReturn =
+                    updateDraftReturn(draftReturn, newAnswers)
+                  val updatedJourney     =
+                    journey.copy(draftReturn = updatedDraftReturn)
+                  val updatedSession     =
+                    session.copy(journeyStatus = Some(updatedJourney))
 
                   inSequence {
                     mockAuthWithNoRetrievals()
@@ -538,7 +608,8 @@ class ReliefDetailsControllerSpec
 
                   checkIsRedirect(
                     performAction(Seq(key -> "0", valueKey -> "1")),
-                    controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+                    controllers.returns.reliefdetails.routes.ReliefDetailsController
+                      .checkYourAnswers()
                   )
               }
             }
@@ -554,10 +625,12 @@ class ReliefDetailsControllerSpec
       val key      = "lettingsRelief"
       val valueKey = "lettingsReliefValue"
 
-      def performAction(): Future[Result] = controller.lettingsRelief()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.lettingsRelief()(FakeRequest())
 
       val requiredPreviousAnswers =
-        IncompleteReliefDetailsAnswers.empty.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(1)))
+        IncompleteReliefDetailsAnswers.empty
+          .copy(privateResidentsRelief = Some(AmountInPence.fromPounds(1)))
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -581,7 +654,10 @@ class ReliefDetailsControllerSpec
 
               val userKey = userMessageKey(individualUserType, userType)
 
-              checkPageIsDisplayed(performAction(), messageFromMessageKey(s"$key$userKey.title"))
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(s"$key$userKey.title")
+              )
           }
         }
 
@@ -595,7 +671,7 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     IncompleteReliefDetailsAnswers.empty.copy(
                       privateResidentsRelief = Some(AmountInPence.fromPounds(1.34)),
-                      lettingsRelief         = Some(AmountInPence.fromPounds(12.34))
+                      lettingsRelief = Some(AmountInPence.fromPounds(12.34))
                     ),
                     userType,
                     individualUserType
@@ -623,7 +699,7 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     sample[CompleteReliefDetailsAnswers].copy(
                       privateResidentsRelief = AmountInPence.fromPounds(1.34),
-                      lettingsRelief         = AmountInPence.fromPounds(12.34)
+                      lettingsRelief = AmountInPence.fromPounds(12.34)
                     ),
                     userType,
                     individualUserType
@@ -653,8 +729,8 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     IncompleteReliefDetailsAnswers.empty.copy(
                       privateResidentsRelief = None,
-                      lettingsRelief         = None,
-                      otherReliefs           = None
+                      lettingsRelief = None,
+                      otherReliefs = None
                     ),
                     userType,
                     individualUserType
@@ -664,7 +740,8 @@ class ReliefDetailsControllerSpec
 
               checkIsRedirect(
                 performAction(),
-                controllers.returns.reliefdetails.routes.ReliefDetailsController.privateResidentsRelief()
+                controllers.returns.reliefdetails.routes.ReliefDetailsController
+                  .privateResidentsRelief()
               )
           }
         }
@@ -678,11 +755,16 @@ class ReliefDetailsControllerSpec
       val valueKey = "lettingsReliefValue"
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
-        controller.lettingsReliefSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.lettingsReliefSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
-      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswers: ReliefDetailsAnswers) =
+      def updateDraftReturn(
+        d: DraftSingleDisposalReturn,
+        newAnswers: ReliefDetailsAnswers
+      ) =
         d.copy(
-          reliefDetailsAnswers       = Some(newAnswers),
+          reliefDetailsAnswers = Some(newAnswers),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -694,7 +776,11 @@ class ReliefDetailsControllerSpec
 
         def test(data: (String, String)*)(
           expectedErrorMessageKey: String
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String) = {
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -710,22 +796,32 @@ class ReliefDetailsControllerSpec
             performAction(data),
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
           )
         }
 
-        def testWithResidentsRelief(residentsRelief: AmountInPence, data: (String, String)*)(
+        def testWithResidentsRelief(
+          residentsRelief: AmountInPence,
+          data: (String, String)*
+        )(
           expectedErrorMessageKey: String
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String) = {
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ) = {
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithReliefDetailsAnswers(
-                sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = residentsRelief),
+                sample[CompleteReliefDetailsAnswers]
+                  .copy(privateResidentsRelief = residentsRelief),
                 userType,
                 individualUserType
               )._1
@@ -736,7 +832,9 @@ class ReliefDetailsControllerSpec
             performAction(data),
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
@@ -750,7 +848,11 @@ class ReliefDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey)(userType, individualUserType, userKey)
+                  test(data: _*)(scenario.expectedErrorMessageKey)(
+                    userType,
+                    individualUserType,
+                    userKey
+                  )
                 }
               }
           }
@@ -759,11 +861,16 @@ class ReliefDetailsControllerSpec
         "the data is more than lettings relief limit" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
+              val userKey                        = userMessageKey(individualUserType, userType)
               val valueGreaterThanLettingsRelief =
-                (maxLettingsReliefValue ++ AmountInPence.fromPounds(10000)).inPounds().toString()
+                (maxLettingsReliefValue ++ AmountInPence.fromPounds(10000))
+                  .inPounds()
+                  .toString()
               test(key -> "0", valueKey -> valueGreaterThanLettingsRelief)(
-                Messages(s"$valueKey.error.amountOverLimit", maxLettingsReliefValue.inPounds().toString())
+                Messages(
+                  s"$valueKey.error.amountOverLimit",
+                  maxLettingsReliefValue.inPounds().toString()
+                )
               )(userType, individualUserType, userKey)
           }
         }
@@ -772,7 +879,11 @@ class ReliefDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              testWithResidentsRelief(AmountInPence.fromPounds(5), key -> "0", valueKey -> "10")(
+              testWithResidentsRelief(
+                AmountInPence.fromPounds(5),
+                key      -> "0",
+                valueKey -> "10"
+              )(
                 s"$valueKey.error.amountOverPrivateResidenceRelief"
               )(userType, individualUserType, userKey)
           }
@@ -782,15 +893,25 @@ class ReliefDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers = sample[CompleteReliefDetailsAnswers].copy(
+        val currentAnswers    = sample[CompleteReliefDetailsAnswers].copy(
           lettingsRelief = AmountInPence.fromPounds(1d)
         )
         val newLettingsRelief = AmountInPence.fromPounds(2d)
 
-        def getSessionDataJourneyAndDraftReturn(userType: UserType, individualUserType: IndividualUserType) = {
+        def getSessionDataJourneyAndDraftReturn(
+          userType: UserType,
+          individualUserType: IndividualUserType
+        ) = {
           val (session, journey, draftReturn) =
-            sessionWithReliefDetailsAnswers(currentAnswers, userType, individualUserType)
-          val newDraftReturn = updateDraftReturn(draftReturn, currentAnswers.copy(lettingsRelief = newLettingsRelief))
+            sessionWithReliefDetailsAnswers(
+              currentAnswers,
+              userType,
+              individualUserType
+            )
+          val newDraftReturn                  = updateDraftReturn(
+            draftReturn,
+            currentAnswers.copy(lettingsRelief = newLettingsRelief)
+          )
 
           (session, journey, newDraftReturn)
         }
@@ -798,7 +919,11 @@ class ReliefDetailsControllerSpec
         "there is an error updating the draft return" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (session, journey, newDraftReturn) = getSessionDataJourneyAndDraftReturn(userType, individualUserType)
+              val (session, journey, newDraftReturn) =
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -813,7 +938,12 @@ class ReliefDetailsControllerSpec
               }
 
               checkIsTechnicalErrorPage(
-                performAction(Seq(key -> "0", valueKey -> newLettingsRelief.inPounds().toString))
+                performAction(
+                  Seq(
+                    key      -> "0",
+                    valueKey -> newLettingsRelief.inPounds().toString
+                  )
+                )
               )
           }
         }
@@ -821,7 +951,11 @@ class ReliefDetailsControllerSpec
         "there is an error updating the session data" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (session, journey, newDraftReturn) = getSessionDataJourneyAndDraftReturn(userType, individualUserType)
+              val (session, journey, newDraftReturn) =
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -845,7 +979,12 @@ class ReliefDetailsControllerSpec
               }
 
               checkIsTechnicalErrorPage(
-                performAction(Seq(key -> "0", valueKey -> newLettingsRelief.inPounds().toString))
+                performAction(
+                  Seq(
+                    key      -> "0",
+                    valueKey -> newLettingsRelief.inPounds().toString
+                  )
+                )
               )
           }
         }
@@ -858,14 +997,14 @@ class ReliefDetailsControllerSpec
           "and the draft return and session data has been successfully updated" in {
           val currentAnswers = sample[IncompleteReliefDetailsAnswers].copy(
             privateResidentsRelief = Some(sample[AmountInPence]),
-            lettingsRelief         = None
+            lettingsRelief = None
           )
 
           val newLettingsRelief = 2d
 
-          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+          val triageAnswers  = sample[CompleteSingleDisposalTriageAnswers]
           val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
-            triageAnswers        = triageAnswers,
+            triageAnswers = triageAnswers,
             reliefDetailsAnswers = Some(currentAnswers)
           )
           val newDraftReturn = updateDraftReturn(
@@ -876,7 +1015,9 @@ class ReliefDetailsControllerSpec
           )
 
           testSuccessfulUpdatesAfterSubmit(
-            performAction(Seq(key -> "0", valueKey -> newLettingsRelief.toString)),
+            performAction(
+              Seq(key -> "0", valueKey -> newLettingsRelief.toString)
+            ),
             oldDraftReturn,
             newDraftReturn
           )
@@ -885,12 +1026,13 @@ class ReliefDetailsControllerSpec
         "the user has answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
           forAll { c: CompleteReliefDetailsAnswers =>
-            val currentAnswers    = c.copy(lettingsRelief = AmountInPence.fromPounds(1d))
+            val currentAnswers    =
+              c.copy(lettingsRelief = AmountInPence.fromPounds(1d))
             val newLettingsRelief = 2d
             val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
-            val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
+            val oldDraftReturn    = sample[DraftSingleDisposalReturn].copy(
               reliefDetailsAnswers = Some(currentAnswers),
-              triageAnswers        = triageAnswers
+              triageAnswers = triageAnswers
             )
 
             val newDraftReturn =
@@ -902,7 +1044,9 @@ class ReliefDetailsControllerSpec
               )
 
             testSuccessfulUpdatesAfterSubmit(
-              performAction(Seq(key -> "0", valueKey -> newLettingsRelief.toString)),
+              performAction(
+                Seq(key -> "0", valueKey -> newLettingsRelief.toString)
+              ),
               oldDraftReturn,
               newDraftReturn
             )
@@ -921,12 +1065,19 @@ class ReliefDetailsControllerSpec
 
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(sessionWithReliefDetailsAnswers(currentAnswers, userType, individualUserType)._1)
+                mockGetSession(
+                  sessionWithReliefDetailsAnswers(
+                    currentAnswers,
+                    userType,
+                    individualUserType
+                  )._1
+                )
               }
 
               checkIsRedirect(
                 performAction(Seq(key -> "0", valueKey -> "1")),
-                controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+                controllers.returns.reliefdetails.routes.ReliefDetailsController
+                  .checkYourAnswers()
               )
           }
         }
@@ -942,12 +1093,19 @@ class ReliefDetailsControllerSpec
 
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(sessionWithReliefDetailsAnswers(currentAnswers, userType, individualUserType)._1)
+              mockGetSession(
+                sessionWithReliefDetailsAnswers(
+                  currentAnswers,
+                  userType,
+                  individualUserType
+                )._1
+              )
             }
 
             checkIsRedirect(
               performAction(Seq(key -> "0", valueKey -> "1,000")),
-              controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+              controllers.returns.reliefdetails.routes.ReliefDetailsController
+                .checkYourAnswers()
             )
         }
       }
@@ -961,12 +1119,19 @@ class ReliefDetailsControllerSpec
 
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(sessionWithReliefDetailsAnswers(currentAnswers, userType, individualUserType)._1)
+              mockGetSession(
+                sessionWithReliefDetailsAnswers(
+                  currentAnswers,
+                  userType,
+                  individualUserType
+                )._1
+              )
             }
 
             checkIsRedirect(
               performAction(Seq(key -> "0", valueKey -> "£1")),
-              controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+              controllers.returns.reliefdetails.routes.ReliefDetailsController
+                .checkYourAnswers()
             )
         }
       }
@@ -975,11 +1140,12 @@ class ReliefDetailsControllerSpec
 
     "handling requests to display the other reliefs page" must {
 
-      def performAction(): Future[Result] = controller.otherReliefs()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.otherReliefs()(FakeRequest())
 
       val requiredPreviousAnswers = IncompleteReliefDetailsAnswers.empty.copy(
         privateResidentsRelief = Some(AmountInPence.fromPounds(1)),
-        lettingsRelief         = Some(AmountInPence.fromPounds(2))
+        lettingsRelief = Some(AmountInPence.fromPounds(2))
       )
 
       val key      = "otherReliefs"
@@ -989,7 +1155,8 @@ class ReliefDetailsControllerSpec
 
       behave like noLettingsReliefBehaviour(performAction)
 
-      val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
+      val otherReliefs =
+        OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
 
       "redirect to lettings relief page" when {
 
@@ -1002,8 +1169,8 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     IncompleteReliefDetailsAnswers.empty.copy(
                       privateResidentsRelief = Some(AmountInPence.fromPounds(11.34)),
-                      lettingsRelief         = None,
-                      otherReliefs           = None
+                      lettingsRelief = None,
+                      otherReliefs = None
                     ),
                     userType,
                     individualUserType
@@ -1013,7 +1180,8 @@ class ReliefDetailsControllerSpec
 
               checkIsRedirect(
                 performAction(),
-                controllers.returns.reliefdetails.routes.ReliefDetailsController.lettingsRelief()
+                controllers.returns.reliefdetails.routes.ReliefDetailsController
+                  .lettingsRelief()
               )
           }
         }
@@ -1037,7 +1205,10 @@ class ReliefDetailsControllerSpec
 
               val userKey = userMessageKey(individualUserType, userType)
 
-              checkPageIsDisplayed(performAction(), messageFromMessageKey(s"$key$userKey.title"))
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(s"$key$userKey.title")
+              )
           }
         }
 
@@ -1051,8 +1222,8 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     IncompleteReliefDetailsAnswers.empty.copy(
                       privateResidentsRelief = Some(AmountInPence.fromPounds(11.34)),
-                      lettingsRelief         = Some(AmountInPence.fromPounds(12.34)),
-                      otherReliefs           = Some(otherReliefs)
+                      lettingsRelief = Some(AmountInPence.fromPounds(12.34)),
+                      otherReliefs = Some(otherReliefs)
                     ),
                     userType,
                     individualUserType
@@ -1080,8 +1251,8 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     sample[CompleteReliefDetailsAnswers].copy(
                       privateResidentsRelief = AmountInPence.fromPounds(1.34),
-                      lettingsRelief         = AmountInPence.fromPounds(12.34),
-                      otherReliefs           = Some(otherReliefs)
+                      lettingsRelief = AmountInPence.fromPounds(12.34),
+                      otherReliefs = Some(otherReliefs)
                     ),
                     userType,
                     individualUserType
@@ -1110,7 +1281,9 @@ class ReliefDetailsControllerSpec
       val nameKey  = "otherReliefsName"
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
-        controller.otherReliefsSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.otherReliefsSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -1120,7 +1293,11 @@ class ReliefDetailsControllerSpec
 
         def test(data: (String, String)*)(
           expectedErrorMessageKey: String
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String) = {
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1136,7 +1313,9 @@ class ReliefDetailsControllerSpec
             performAction(data),
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
@@ -1147,12 +1326,19 @@ class ReliefDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              amountOfMoneyErrorScenarios(key = valueKey, errorContext = Some(s"$valueKey$userKey")).foreach {
-                scenario =>
-                  withClue(s"For $scenario: ") {
-                    val data = (key -> "0") :: (nameKey -> "ReliefsName") :: scenario.formData
-                    test(data: _*)(scenario.expectedErrorMessageKey)(userType, individualUserType, userKey)
-                  }
+              amountOfMoneyErrorScenarios(
+                key = valueKey,
+                errorContext = Some(s"$valueKey$userKey")
+              ).foreach { scenario =>
+                withClue(s"For $scenario: ") {
+                  val data =
+                    (key -> "0") :: (nameKey -> "ReliefsName") :: scenario.formData
+                  test(data: _*)(scenario.expectedErrorMessageKey)(
+                    userType,
+                    individualUserType,
+                    userKey
+                  )
+                }
               }
           }
         }
@@ -1163,7 +1349,11 @@ class ReliefDetailsControllerSpec
 
         def test(data: (String, String)*)(
           expectedErrorMessageKey: String*
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String) = {
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1180,15 +1370,21 @@ class ReliefDetailsControllerSpec
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
               expectedErrorMessageKey.toList match {
-                case Nil =>
+                case Nil             =>
                 case errorKey :: Nil =>
-                  doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                  doc
+                    .select("#error-summary-display > ul > li > a")
+                    .text() shouldBe messageFromMessageKey(
                     errorKey
                   )
-                case errorKeys =>
+                case errorKeys       =>
                   val errors =
                     (1 to errorKeys.length).map(i =>
-                      doc.select(s"#error-summary-display > ul > li:nth-child($i) > a").text()
+                      doc
+                        .select(
+                          s"#error-summary-display > ul > li:nth-child($i) > a"
+                        )
+                        .text()
                     )
                   expectedErrorMessageKey
                     .map(messageFromMessageKey(_))
@@ -1202,7 +1398,10 @@ class ReliefDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "0")(s"$nameKey$userKey.error.required", s"$valueKey$userKey.error.required")(
+              test(key -> "0")(
+                s"$nameKey$userKey.error.required",
+                s"$valueKey$userKey.error.required"
+              )(
                 userType,
                 individualUserType,
                 userKey
@@ -1225,7 +1424,9 @@ class ReliefDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "0", nameKey -> "    ", valueKey -> "£1")(s"$nameKey$userKey.error.required")(
+              test(key -> "0", nameKey -> "    ", valueKey -> "£1")(
+                s"$nameKey$userKey.error.required"
+              )(
                 userType,
                 individualUserType,
                 userKey
@@ -1240,7 +1441,11 @@ class ReliefDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "0", nameKey -> otherReliefsNameTooLong, valueKey -> "£1")(
+              test(
+                key      -> "0",
+                nameKey  -> otherReliefsNameTooLong,
+                valueKey -> "£1"
+              )(
                 s"$nameKey$userKey.error.tooLong"
               )(userType, individualUserType, userKey)
           }
@@ -1250,28 +1455,31 @@ class ReliefDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(NoOtherReliefs))
+        val currentAnswers     = sample[CompleteReliefDetailsAnswers]
+          .copy(otherReliefs = Some(NoOtherReliefs))
         val currentDraftReturn = sample[DraftSingleDisposalReturn].copy(
-          reliefDetailsAnswers       = Some(currentAnswers),
-          exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
+          reliefDetailsAnswers = Some(currentAnswers),
+          exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
           yearToDateLiabilityAnswers = Some(sample[YearToDateLiabilityAnswers]),
-          supportingEvidenceAnswers  = Some(sample[CompleteSupportingEvidenceAnswers])
+          supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
         )
-        val currentJourney = sample[FillingOutReturn].copy(
+        val currentJourney     = sample[FillingOutReturn].copy(
           draftReturn = currentDraftReturn
         )
 
-        val currentSession  = SessionData.empty.copy(journeyStatus = Some(currentJourney))
-        val newOtherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(2))
-        val newDraftReturn = currentDraftReturn.copy(
+        val currentSession  =
+          SessionData.empty.copy(journeyStatus = Some(currentJourney))
+        val newOtherReliefs =
+          OtherReliefs("ReliefName", AmountInPence.fromPounds(2))
+        val newDraftReturn  = currentDraftReturn.copy(
           reliefDetailsAnswers = Some(
             currentAnswers.copy(
               otherReliefs = Some(newOtherReliefs)
             )
           ),
-          exemptionAndLossesAnswers  = None,
+          exemptionAndLossesAnswers = None,
           yearToDateLiabilityAnswers = None,
-          supportingEvidenceAnswers  = None
+          supportingEvidenceAnswers = None
         )
 
         "there is an error updating the draft return" in {
@@ -1326,7 +1534,9 @@ class ReliefDetailsControllerSpec
               Seq(
                 "otherReliefs"       -> "0",
                 "otherReliefsName"   -> newOtherReliefs.name,
-                "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
+                "otherReliefsAmount" -> newOtherReliefs.amount
+                  .inPounds()
+                  .toString
               )
             )
           )
@@ -1340,15 +1550,16 @@ class ReliefDetailsControllerSpec
         "the user has residents relief greater than zero but lettings relief not answered yet" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(2d))
+              val otherReliefs =
+                OtherReliefs("ReliefName", AmountInPence.fromPounds(2d))
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
                   sessionWithReliefDetailsAnswers(
                     IncompleteReliefDetailsAnswers.empty.copy(
                       privateResidentsRelief = Some(AmountInPence.fromPounds(11.34)),
-                      lettingsRelief         = None,
-                      otherReliefs           = Some(otherReliefs)
+                      lettingsRelief = None,
+                      otherReliefs = Some(otherReliefs)
                     ),
                     userType,
                     individualUserType
@@ -1363,7 +1574,8 @@ class ReliefDetailsControllerSpec
                     valueKey -> otherReliefs.amount.inPounds().toString
                   )
                 ),
-                controllers.returns.reliefdetails.routes.ReliefDetailsController.lettingsRelief()
+                controllers.returns.reliefdetails.routes.ReliefDetailsController
+                  .lettingsRelief()
               )
           }
         }
@@ -1374,27 +1586,28 @@ class ReliefDetailsControllerSpec
 
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers = sample[IncompleteReliefDetailsAnswers]
+          val currentAnswers  = sample[IncompleteReliefDetailsAnswers]
             .copy(
               privateResidentsRelief = Some(sample[AmountInPence]),
-              lettingsRelief         = Some(sample[AmountInPence]),
-              otherReliefs           = None
+              lettingsRelief = Some(sample[AmountInPence]),
+              otherReliefs = None
             )
-          val newOtherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(3d))
-          val updatedAnswers = currentAnswers.copy(
+          val newOtherReliefs =
+            OtherReliefs("ReliefName", AmountInPence.fromPounds(3d))
+          val updatedAnswers  = currentAnswers.copy(
             otherReliefs = Some(newOtherReliefs)
           )
 
           val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
-            reliefDetailsAnswers       = Some(currentAnswers),
+            reliefDetailsAnswers = Some(currentAnswers),
             yearToDateLiabilityAnswers = Some(sample[YearToDateLiabilityAnswers])
           )
           val newDraftReturn =
             oldDraftReturn.copy(
-              reliefDetailsAnswers       = Some(updatedAnswers),
-              exemptionAndLossesAnswers  = None,
+              reliefDetailsAnswers = Some(updatedAnswers),
+              exemptionAndLossesAnswers = None,
               yearToDateLiabilityAnswers = None,
-              supportingEvidenceAnswers  = None
+              supportingEvidenceAnswers = None
             )
 
           testSuccessfulUpdatesAfterSubmit(
@@ -1402,7 +1615,9 @@ class ReliefDetailsControllerSpec
               Seq(
                 "otherReliefs"       -> "0",
                 "otherReliefsName"   -> newOtherReliefs.name,
-                "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
+                "otherReliefsAmount" -> newOtherReliefs.amount
+                  .inPounds()
+                  .toString
               )
             ),
             oldDraftReturn,
@@ -1413,19 +1628,23 @@ class ReliefDetailsControllerSpec
         "the user has answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
           forAll { c: CompleteReliefDetailsAnswers =>
-            val otherReliefs    = OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
-            val newOtherReliefs = OtherReliefs("ReliefName2", AmountInPence.fromPounds(2d))
+            val otherReliefs    =
+              OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
+            val newOtherReliefs =
+              OtherReliefs("ReliefName2", AmountInPence.fromPounds(2d))
 
-            val currentAnswers = c.copy(otherReliefs              = Some(otherReliefs))
-            val updatedAnswers = currentAnswers.copy(otherReliefs = Some(newOtherReliefs))
+            val currentAnswers = c.copy(otherReliefs = Some(otherReliefs))
+            val updatedAnswers =
+              currentAnswers.copy(otherReliefs = Some(newOtherReliefs))
             val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
               reliefDetailsAnswers = Some(currentAnswers)
             )
             val newDraftReturn =
               oldDraftReturn.copy(
                 reliefDetailsAnswers = Some(updatedAnswers),
-                yearToDateLiabilityAnswers =
-                  oldDraftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+                yearToDateLiabilityAnswers = oldDraftReturn.yearToDateLiabilityAnswers.flatMap(
+                  _.unsetAllButIncomeDetails()
+                )
               )
 
             testSuccessfulUpdatesAfterSubmit(
@@ -1433,7 +1652,9 @@ class ReliefDetailsControllerSpec
                 Seq(
                   "otherReliefs"       -> "0",
                   "otherReliefsName"   -> newOtherReliefs.name,
-                  "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
+                  "otherReliefsAmount" -> newOtherReliefs.amount
+                    .inPounds()
+                    .toString
                 )
               ),
               oldDraftReturn,
@@ -1447,8 +1668,10 @@ class ReliefDetailsControllerSpec
       "not update the draft return or the session data" when {
 
         "the answer given has not changed from a previous one" in {
-          val otherReliefs   = OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
-          val currentAnswers = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+          val otherReliefs   =
+            OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
+          val currentAnswers = sample[CompleteReliefDetailsAnswers]
+            .copy(otherReliefs = Some(otherReliefs))
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
@@ -1470,7 +1693,8 @@ class ReliefDetailsControllerSpec
                     valueKey -> otherReliefs.amount.inPounds().toString
                   )
                 ),
-                controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+                controllers.returns.reliefdetails.routes.ReliefDetailsController
+                  .checkYourAnswers()
               )
           }
         }
@@ -1479,7 +1703,8 @@ class ReliefDetailsControllerSpec
 
       "accept submitted values with commas" in {
 
-        val otherReliefs = OtherReliefs("ReliefName1", AmountInPence.fromPounds(1000d))
+        val otherReliefs   =
+          OtherReliefs("ReliefName1", AmountInPence.fromPounds(1000d))
         val currentAnswers = sample[CompleteReliefDetailsAnswers].copy(
           otherReliefs = Some(otherReliefs)
         )
@@ -1501,16 +1726,19 @@ class ReliefDetailsControllerSpec
               performAction(
                 Seq(key -> "0", nameKey -> "ReliefName1", valueKey -> "1,000")
               ),
-              controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+              controllers.returns.reliefdetails.routes.ReliefDetailsController
+                .checkYourAnswers()
             )
         }
       }
 
       "accept submitted values with pound signs" in {
 
-        val otherReliefs = OtherReliefs("ReliefName1", AmountInPence.fromPounds(1000d))
+        val otherReliefs   =
+          OtherReliefs("ReliefName1", AmountInPence.fromPounds(1000d))
         val currentAnswers =
-          sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+          sample[CompleteReliefDetailsAnswers]
+            .copy(otherReliefs = Some(otherReliefs))
 
         forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
           (userType: UserType, individualUserType: IndividualUserType) =>
@@ -1529,7 +1757,8 @@ class ReliefDetailsControllerSpec
               performAction(
                 Seq(key -> "0", nameKey -> "ReliefName1", valueKey -> "£1,000")
               ),
-              controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+              controllers.returns.reliefdetails.routes.ReliefDetailsController
+                .checkYourAnswers()
             )
         }
       }
@@ -1538,7 +1767,8 @@ class ReliefDetailsControllerSpec
 
     "handling requests to display the check your answers page" must {
 
-      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswers()(FakeRequest())
 
       val completeAnswers = CompleteReliefDetailsAnswers(
         sample[AmountInPence],
@@ -1571,7 +1801,10 @@ class ReliefDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.ReliefDetailsController.privateResidentsRelief())
+              checkIsRedirect(
+                performAction(),
+                routes.ReliefDetailsController.privateResidentsRelief()
+              )
           }
         }
 
@@ -1589,7 +1822,10 @@ class ReliefDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.ReliefDetailsController.privateResidentsRelief())
+              checkIsRedirect(
+                performAction(),
+                routes.ReliefDetailsController.privateResidentsRelief()
+              )
           }
 
         }
@@ -1605,8 +1841,8 @@ class ReliefDetailsControllerSpec
                   sessionWithReliefDetailsAnswers(
                     allQuestionsAnswered.copy(
                       privateResidentsRelief = Some(AmountInPence(20)),
-                      lettingsRelief         = None,
-                      otherReliefs           = None
+                      lettingsRelief = None,
+                      otherReliefs = None
                     ),
                     userType,
                     individualUserType
@@ -1614,7 +1850,10 @@ class ReliefDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.ReliefDetailsController.lettingsRelief())
+              checkIsRedirect(
+                performAction(),
+                routes.ReliefDetailsController.lettingsRelief()
+              )
           }
         }
 
@@ -1636,7 +1875,10 @@ class ReliefDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.ReliefDetailsController.otherReliefs())
+              checkIsRedirect(
+                performAction(),
+                routes.ReliefDetailsController.otherReliefs()
+              )
           }
         }
 
@@ -1672,11 +1914,12 @@ class ReliefDetailsControllerSpec
         "there is an error updating the draft return" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(
-                allQuestionsAnswered,
-                userType,
-                individualUserType
-              )
+              val (session, journey, draftReturn) =
+                sessionWithReliefDetailsAnswers(
+                  allQuestionsAnswered,
+                  userType,
+                  individualUserType
+                )
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1697,11 +1940,12 @@ class ReliefDetailsControllerSpec
         "there is an error updating the session" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(
-                allQuestionsAnswered,
-                userType,
-                individualUserType
-              )
+              val (session, journey, draftReturn) =
+                sessionWithReliefDetailsAnswers(
+                  allQuestionsAnswered,
+                  userType,
+                  individualUserType
+                )
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1737,13 +1981,15 @@ class ReliefDetailsControllerSpec
         "the user has just answered all the questions and all updates are successful" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(
-                allQuestionsAnswered,
-                userType,
-                individualUserType
-              )
-              val newDraftReturn = draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
-              val updatedJourney = journey.copy(draftReturn              = newDraftReturn)
+              val (session, journey, draftReturn) =
+                sessionWithReliefDetailsAnswers(
+                  allQuestionsAnswered,
+                  userType,
+                  individualUserType
+                )
+              val newDraftReturn                  =
+                draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+              val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1755,14 +2001,18 @@ class ReliefDetailsControllerSpec
                 )(
                   Right(())
                 )
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
               }
 
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey("reliefDetails.cya.title"),
                 doc =>
-                  doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.ReliefDetailsController
                     .checkYourAnswersSubmit()
                     .url
               )
@@ -1786,9 +2036,15 @@ class ReliefDetailsControllerSpec
 
                 checkPageIsDisplayed(
                   performAction(),
-                  messageFromMessageKey("reliefDetails.cya.title"), { doc =>
-                    validateReliefDetailsCheckYourAnswersPage(completeAnswers, doc)
-                    doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
+                  messageFromMessageKey("reliefDetails.cya.title"),
+                  { doc =>
+                    validateReliefDetailsCheckYourAnswersPage(
+                      completeAnswers,
+                      doc
+                    )
+                    doc
+                      .select("#content > article > form")
+                      .attr("action") shouldBe routes.ReliefDetailsController
                       .checkYourAnswersSubmit()
                       .url
                   }
@@ -1798,11 +2054,12 @@ class ReliefDetailsControllerSpec
         }
 
         "the user has set residential relief to no" in {
-          val completeAnswersWithoutResidentialRelief = CompleteReliefDetailsAnswers(
-            AmountInPence(0),
-            AmountInPence(0),
-            Some(sample[OtherReliefs])
-          )
+          val completeAnswersWithoutResidentialRelief =
+            CompleteReliefDetailsAnswers(
+              AmountInPence(0),
+              AmountInPence(0),
+              Some(sample[OtherReliefs])
+            )
 
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
@@ -1819,9 +2076,15 @@ class ReliefDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("reliefDetails.cya.title"), { doc =>
-                  validateReliefDetailsCheckYourAnswersPage(completeAnswersWithoutResidentialRelief, doc)
-                  doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
+                messageFromMessageKey("reliefDetails.cya.title"),
+                { doc =>
+                  validateReliefDetailsCheckYourAnswersPage(
+                    completeAnswersWithoutResidentialRelief,
+                    doc
+                  )
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.ReliefDetailsController
                     .checkYourAnswersSubmit()
                     .url
                 }
@@ -1834,7 +2097,8 @@ class ReliefDetailsControllerSpec
     }
 
     "handling submitted answers to the check your answers page" must {
-      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -1852,7 +2116,10 @@ class ReliefDetailsControllerSpec
               )
             }
 
-            checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+            checkIsRedirect(
+              performAction(),
+              controllers.returns.routes.TaskListController.taskList()
+            )
         }
       }
 
@@ -1860,7 +2127,9 @@ class ReliefDetailsControllerSpec
 
   }
 
-  def noPrivateResidentsReliefBehaviour(performAction: () => Future[Result]): Unit =
+  def noPrivateResidentsReliefBehaviour(
+    performAction: () => Future[Result]
+  ): Unit =
     "redirect to the what was your private residence relief page" when {
 
       "there is no private residence relief " in {
@@ -1926,12 +2195,16 @@ class ReliefDetailsControllerSpec
     newDraftReturn: DraftSingleDisposalReturn
   ): Unit = {
     val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
-    val session = SessionData.empty.copy(journeyStatus      = Some(journey))
+    val session = SessionData.empty.copy(journeyStatus = Some(journey))
 
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+      mockStoreDraftReturn(
+        newDraftReturn,
+        journey.subscribedDetails.cgtReference,
+        journey.agentReferenceNumber
+      )(
         Right(())
       )
       mockStoreSession(
@@ -1952,25 +2225,29 @@ object ReliefDetailsControllerSpec extends Matchers {
     doc: Document
   ): Unit = {
 
-    if (reliefDetailsAnswers.privateResidentsRelief.isZero) {
+    if (reliefDetailsAnswers.privateResidentsRelief.isZero)
       doc.select("#privateResidentsReliefValue-answer").text shouldBe "No"
-    } else {
+    else {
       doc.select("#privateResidentsRelief-answer").text shouldBe "Yes"
-      doc.select("#privateResidentsReliefValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+      doc
+        .select("#privateResidentsReliefValue-answer")
+        .text                                           shouldBe formatAmountOfMoneyWithPoundSign(
         reliefDetailsAnswers.privateResidentsRelief.inPounds()
       )
     }
 
-    if (reliefDetailsAnswers.privateResidentsRelief.isPositive) {
-      if (reliefDetailsAnswers.lettingsRelief.isZero) {
+    if (reliefDetailsAnswers.privateResidentsRelief.isPositive)
+      if (reliefDetailsAnswers.lettingsRelief.isZero)
         doc.select("#lettingsReliefValue-answer").text shouldBe "No"
-      } else {
+      else {
         doc.select("#lettingsRelief-answer").text shouldBe "Yes"
-        doc.select("#lettingsReliefValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+        doc
+          .select("#lettingsReliefValue-answer")
+          .text                                   shouldBe formatAmountOfMoneyWithPoundSign(
           reliefDetailsAnswers.lettingsRelief.inPounds()
         )
       }
-    } else {
+    else {
       doc.select("#lettingsReliefValue-answer").hasText shouldBe false
       doc.select("#lettingsRelief-answer").hasText      shouldBe false
     }
@@ -1979,10 +2256,13 @@ object ReliefDetailsControllerSpec extends Matchers {
       case a: OtherReliefsOption.OtherReliefs =>
         doc.select("#otherReliefs-answer").text     shouldBe "Yes"
         doc.select("#otherReliefsName-answer").text shouldBe a.name
-        doc.select("#otherReliefsAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+        doc
+          .select("#otherReliefsAmount-answer")
+          .text                                     shouldBe formatAmountOfMoneyWithPoundSign(
           a.amount.inPounds().bigDecimal
         )
-      case OtherReliefsOption.NoOtherReliefs => doc.select("#otherReliefs-answer").text shouldBe "No"
+      case OtherReliefsOption.NoOtherReliefs  =>
+        doc.select("#otherReliefs-answer").text shouldBe "No"
 
     }
 

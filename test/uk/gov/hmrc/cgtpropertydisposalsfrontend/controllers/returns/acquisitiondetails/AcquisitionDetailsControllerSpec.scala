@@ -62,8 +62,8 @@ class AcquisitionDetailsControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
-  lazy val controller  = instanceOf[AcquisitionDetailsController]
-  val mockRebasingUtil = new RebasingEligibilityUtil()
+  lazy val controller           = instanceOf[AcquisitionDetailsController]
+  val mockRebasingUtil          = new RebasingEligibilityUtil()
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
@@ -76,7 +76,10 @@ class AcquisitionDetailsControllerSpec
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  def userMessageKey(individualUserType: IndividualUserType, userType: UserType): String =
+  def userMessageKey(
+    individualUserType: IndividualUserType,
+    userType: UserType
+  ): String =
     (individualUserType, userType) match {
       case (Capacitor, _)              => ".capacitor"
       case (PersonalRepresentative, _) => ".personalRep"
@@ -86,19 +89,26 @@ class AcquisitionDetailsControllerSpec
       case other                       => sys.error(s"User type '$other' not handled")
     }
 
-  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
-    case UserType.Agent => Some(sample[AgentReferenceNumber])
-    case _              => None
-  }
+  def setAgentReferenceNumber(
+    userType: UserType
+  ): Option[AgentReferenceNumber] =
+    userType match {
+      case UserType.Agent => Some(sample[AgentReferenceNumber])
+      case _              => None
+    }
 
-  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
-    case UserType.Organisation => Left(sample[TrustName])
-    case _                     => Right(sample[IndividualName])
-  }
+  def setNameForUserType(
+    userType: UserType
+  ): Either[TrustName, IndividualName] =
+    userType match {
+      case UserType.Organisation => Left(sample[TrustName])
+      case _                     => Right(sample[IndividualName])
+    }
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: FillingOutReturn => true
         case _                   => false
       }
@@ -132,16 +142,16 @@ class AcquisitionDetailsControllerSpec
 
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
-        assetType          = assetType,
-        wasAUKResident     = wasUkResident,
-        disposalDate       = disposalDate,
+        assetType = assetType,
+        wasAUKResident = wasUkResident,
+        disposalDate = disposalDate,
         individualUserType = Some(individualUserType)
       ),
       acquisitionDetailsAnswers = answers
     )
 
     val journey = sample[FillingOutReturn].copy(
-      draftReturn          = draftReturn,
+      draftReturn = draftReturn,
       agentReferenceNumber = setAgentReferenceNumber(userType),
       subscribedDetails = sample[SubscribedDetails].copy(
         name = setNameForUserType(userType)
@@ -149,7 +159,7 @@ class AcquisitionDetailsControllerSpec
     )
 
     val sessionData = SessionData.empty.copy(
-      userType      = Some(userType),
+      userType = Some(userType),
       journeyStatus = Some(journey)
     )
 
@@ -162,7 +172,7 @@ class AcquisitionDetailsControllerSpec
   ) =
     d.copy(
       acquisitionDetailsAnswers = Some(newAnswers),
-      initialGainOrLoss         = None,
+      initialGainOrLoss = None,
       reliefDetailsAnswers = d.reliefDetailsAnswers.map(
         _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
       ),
@@ -174,16 +184,18 @@ class AcquisitionDetailsControllerSpec
     case _                                                            => false
   }
 
-  val acceptedIndividualUserTypeGen: Gen[IndividualUserType] = individualUserTypeGen.filter {
-    case Self | Capacitor | PersonalRepresentative => true
-    case _                                         => false
-  }
+  val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
+    individualUserTypeGen.filter {
+      case Self | Capacitor | PersonalRepresentative => true
+      case _                                         => false
+    }
 
   "AcquisitionDetailsController" when {
 
     "handling requests to display the acquisition method page" must {
 
-      def performAction(): Future[Result] = controller.acquisitionMethod()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.acquisitionMethod()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -194,71 +206,93 @@ class AcquisitionDetailsControllerSpec
         "the user has not completed the acquisition details section of the return" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              List(Some(IncompleteAcquisitionDetailsAnswers.empty), None).foreach { answers =>
-                withClue(s"For answers $answers: ") {
-                  inSequence {
-                    mockAuthWithNoRetrievals()
-                    mockGetSession(
-                      sessionWithState(answers, None, None, userType, individualUserType, Some(sample[DisposalDate]))._1
+              List(Some(IncompleteAcquisitionDetailsAnswers.empty), None)
+                .foreach { answers =>
+                  withClue(s"For answers $answers: ") {
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithState(
+                          answers,
+                          None,
+                          None,
+                          userType,
+                          individualUserType,
+                          Some(sample[DisposalDate])
+                        )._1
+                      )
+                    }
+
+                    val userMsgKey =
+                      userMessageKey(individualUserType, userType)
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey(s"$key$userMsgKey.title"),
+                      { doc =>
+                        doc
+                          .select("#back")
+                          .attr("href") shouldBe controllers.returns.routes.TaskListController
+                          .taskList()
+                          .url
+                        doc
+                          .select("#content > article > form")
+                          .attr(
+                            "action"
+                          )             shouldBe routes.AcquisitionDetailsController
+                          .acquisitionMethodSubmit()
+                          .url
+                      }
                     )
                   }
-
-                  val userMsgKey = userMessageKey(individualUserType, userType)
-
-                  checkPageIsDisplayed(
-                    performAction(),
-                    messageFromMessageKey(s"$key$userMsgKey.title"), { doc =>
-                      doc.select("#back").attr("href") shouldBe controllers.returns.routes.TaskListController
-                        .taskList()
-                        .url
-                      doc
-                        .select("#content > article > form")
-                        .attr("action") shouldBe routes.AcquisitionDetailsController
-                        .acquisitionMethodSubmit()
-                        .url
-                    }
-                  )
                 }
-              }
           }
         }
 
         "the user has already completed the acquisition details section of the return" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              List(Some(IncompleteAcquisitionDetailsAnswers.empty), None).foreach { answers =>
-                withClue(s"For answers $answers: ") {
-                  inSequence {
-                    mockAuthWithNoRetrievals()
-                    mockGetSession(
-                      sessionWithState(
-                        sample[CompleteAcquisitionDetailsAnswers],
-                        sample[AssetType],
-                        sample[Boolean],
-                        userType,
-                        individualUserType,
-                        sample[DisposalDate]
-                      )._1
+              List(Some(IncompleteAcquisitionDetailsAnswers.empty), None)
+                .foreach { answers =>
+                  withClue(s"For answers $answers: ") {
+                    inSequence {
+                      mockAuthWithNoRetrievals()
+                      mockGetSession(
+                        sessionWithState(
+                          sample[CompleteAcquisitionDetailsAnswers],
+                          sample[AssetType],
+                          sample[Boolean],
+                          userType,
+                          individualUserType,
+                          sample[DisposalDate]
+                        )._1
+                      )
+                    }
+
+                    val userKey = userMessageKey(individualUserType, userType)
+
+                    checkPageIsDisplayed(
+                      performAction(),
+                      messageFromMessageKey(s"$key$userKey.title"),
+                      { doc =>
+                        doc
+                          .select("#back")
+                          .attr(
+                            "href"
+                          ) shouldBe routes.AcquisitionDetailsController
+                          .checkYourAnswers()
+                          .url
+                        doc
+                          .select("#content > article > form")
+                          .attr(
+                            "action"
+                          ) shouldBe routes.AcquisitionDetailsController
+                          .acquisitionMethodSubmit()
+                          .url
+                      }
                     )
                   }
-
-                  val userKey = userMessageKey(individualUserType, userType)
-
-                  checkPageIsDisplayed(
-                    performAction(),
-                    messageFromMessageKey(s"$key$userKey.title"), { doc =>
-                      doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController
-                        .checkYourAnswers()
-                        .url
-                      doc
-                        .select("#content > article > form")
-                        .attr("action") shouldBe routes.AcquisitionDetailsController
-                        .acquisitionMethodSubmit()
-                        .url
-                    }
-                  )
                 }
-              }
           }
         }
 
@@ -269,7 +303,9 @@ class AcquisitionDetailsControllerSpec
     "handling submitted answers to the acquisition method page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.acquisitionMethodSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.acquisitionMethodSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -280,8 +316,14 @@ class AcquisitionDetailsControllerSpec
 
         def test(data: (String, String)*)(
           expectedErrorMessageKey: String
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit =
-          testFormError(data: _*)(userType, individualUserType)(expectedErrorMessageKey)(
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ): Unit =
+          testFormError(data: _*)(userType, individualUserType)(
+            expectedErrorMessageKey
+          )(
             s"$key$userKey.title"
           )(performAction)
 
@@ -289,7 +331,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test()(s"$key$userKey.error.required")(userType, individualUserType, userKey)
+              test()(s"$key$userKey.error.required")(
+                userType,
+                individualUserType,
+                userKey
+              )
           }
         }
 
@@ -297,7 +343,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test("acquisitionMethod" -> "4")(s"$key$userKey.error.required")(userType, individualUserType, userKey)
+              test("acquisitionMethod" -> "4")(s"$key$userKey.error.required")(
+                userType,
+                individualUserType,
+                userKey
+              )
           }
         }
 
@@ -307,7 +357,11 @@ class AcquisitionDetailsControllerSpec
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val userKey = userMessageKey(individualUserType, userType)
-                test(key -> "3")(s"$otherKey$userKey.error.required")(userType, individualUserType, userKey)
+                test(key -> "3")(s"$otherKey$userKey.error.required")(
+                  userType,
+                  individualUserType,
+                  userKey
+                )
             }
           }
 
@@ -315,7 +369,9 @@ class AcquisitionDetailsControllerSpec
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val userKey = userMessageKey(individualUserType, userType)
-                test(key -> "3", otherKey -> "")(s"$otherKey$userKey.error.required")(
+                test(key -> "3", otherKey -> "")(
+                  s"$otherKey$userKey.error.required"
+                )(
                   userType,
                   individualUserType,
                   userKey
@@ -355,8 +411,15 @@ class AcquisitionDetailsControllerSpec
           userType: UserType,
           individualUserType: IndividualUserType
         ): (SessionData, FillingOutReturn, DraftReturn) = {
-          val (session, journey, draftReturn) = sessionWithState(None, None, None, userType, individualUserType, None)
-          val updatedDraftReturn = commonUpdateDraftReturn(
+          val (session, journey, draftReturn) = sessionWithState(
+            None,
+            None,
+            None,
+            userType,
+            individualUserType,
+            None
+          )
+          val updatedDraftReturn              = commonUpdateDraftReturn(
             draftReturn,
             IncompleteAcquisitionDetailsAnswers.empty.copy(
               acquisitionMethod = Some(method)
@@ -369,7 +432,10 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -380,7 +446,9 @@ class AcquisitionDetailsControllerSpec
                 )(Left(Error("")))
               }
 
-              checkIsTechnicalErrorPage(performAction(key -> methodValue.toString))
+              checkIsTechnicalErrorPage(
+                performAction(key -> methodValue.toString)
+              )
           }
         }
 
@@ -388,8 +456,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
-              val updatedSession = session.copy(
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
+              val updatedSession                         = session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
               )
               inSequence {
@@ -403,7 +474,9 @@ class AcquisitionDetailsControllerSpec
                 mockStoreSession(updatedSession)(Left(Error("")))
               }
 
-              checkIsTechnicalErrorPage(performAction(key -> methodValue.toString))
+              checkIsTechnicalErrorPage(
+                performAction(key -> methodValue.toString)
+              )
           }
         }
 
@@ -415,13 +488,24 @@ class AcquisitionDetailsControllerSpec
 
           def test(
             data: (String, String)*
-          )(method: AcquisitionMethod)(userType: UserType, individualUserType: IndividualUserType): Unit = {
-            val (session, journey, draftReturn) = sessionWithState(None, None, None, userType, individualUserType, None)
-            val updatedDraftReturn = commonUpdateDraftReturn(
-              draftReturn,
-              IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
+          )(method: AcquisitionMethod)(
+            userType: UserType,
+            individualUserType: IndividualUserType
+          ): Unit = {
+            val (session, journey, draftReturn) = sessionWithState(
+              None,
+              None,
+              None,
+              userType,
+              individualUserType,
+              None
             )
-            val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            val updatedDraftReturn              = commonUpdateDraftReturn(
+              draftReturn,
+              IncompleteAcquisitionDetailsAnswers.empty
+                .copy(acquisitionMethod = Some(method))
+            )
+            val updatedSession                  = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -434,34 +518,48 @@ class AcquisitionDetailsControllerSpec
               mockStoreSession(updatedSession)(Right(()))
             }
 
-            checkIsRedirect(performAction(data: _*), routes.AcquisitionDetailsController.checkYourAnswers())
+            checkIsRedirect(
+              performAction(data: _*),
+              routes.AcquisitionDetailsController.checkYourAnswers()
+            )
           }
 
           "the user selects bought it" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
-                test(key -> "0")(AcquisitionMethod.Bought)(userType, individualUserType)
+                test(key -> "0")(AcquisitionMethod.Bought)(
+                  userType,
+                  individualUserType
+                )
             }
           }
 
           "the user selects inherited it" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
-                test(key -> "1")(AcquisitionMethod.Inherited)(userType, individualUserType)
+                test(key -> "1")(AcquisitionMethod.Inherited)(
+                  userType,
+                  individualUserType
+                )
             }
           }
 
           "the user selects was gifted it" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
-                test("acquisitionMethod" -> "2")(AcquisitionMethod.Gifted)(userType, individualUserType)
+                test("acquisitionMethod" -> "2")(AcquisitionMethod.Gifted)(
+                  userType,
+                  individualUserType
+                )
             }
           }
 
           "the user selects other" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
-                test(key -> "3", otherKey -> "things")(AcquisitionMethod.Other("things"))(userType, individualUserType)
+                test(key -> "3", otherKey -> "things")(
+                  AcquisitionMethod.Other("things")
+                )(userType, individualUserType)
             }
           }
 
@@ -472,8 +570,12 @@ class AcquisitionDetailsControllerSpec
           def test(data: (String, String)*)(
             oldMethod: AcquisitionMethod,
             method: AcquisitionMethod
-          )(userType: UserType, individualUserType: IndividualUserType): Unit = {
-            val answers = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = oldMethod)
+          )(
+            userType: UserType,
+            individualUserType: IndividualUserType
+          ): Unit = {
+            val answers                         = sample[CompleteAcquisitionDetailsAnswers]
+              .copy(acquisitionMethod = oldMethod)
             val (session, journey, draftReturn) = sessionWithState(
               answers,
               sample[AssetType],
@@ -481,7 +583,7 @@ class AcquisitionDetailsControllerSpec
               userType,
               individualUserType
             )
-            val updatedAnswers = IncompleteAcquisitionDetailsAnswers(
+            val updatedAnswers                  = IncompleteAcquisitionDetailsAnswers(
               Some(method),
               Some(answers.acquisitionDate),
               None,
@@ -491,8 +593,9 @@ class AcquisitionDetailsControllerSpec
               None
             )
 
-            val updatedDraftReturn = commonUpdateDraftReturn(draftReturn, updatedAnswers)
-            val updatedSession = session.copy(
+            val updatedDraftReturn =
+              commonUpdateDraftReturn(draftReturn, updatedAnswers)
+            val updatedSession     = session.copy(
               journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
             )
             inSequence {
@@ -506,27 +609,39 @@ class AcquisitionDetailsControllerSpec
               mockStoreSession(updatedSession)(Right(()))
             }
 
-            checkIsRedirect(performAction(data: _*), routes.AcquisitionDetailsController.checkYourAnswers())
+            checkIsRedirect(
+              performAction(data: _*),
+              routes.AcquisitionDetailsController.checkYourAnswers()
+            )
           }
 
           "the user selects bought it" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
-                test(key -> "0")(AcquisitionMethod.Inherited, AcquisitionMethod.Bought)(userType, individualUserType)
+                test(key -> "0")(
+                  AcquisitionMethod.Inherited,
+                  AcquisitionMethod.Bought
+                )(userType, individualUserType)
             }
           }
 
           "the user selects inherited it" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
-                test(key -> "1")(AcquisitionMethod.Bought, AcquisitionMethod.Inherited)(userType, individualUserType)
+                test(key -> "1")(
+                  AcquisitionMethod.Bought,
+                  AcquisitionMethod.Inherited
+                )(userType, individualUserType)
             }
           }
 
           "the user selects was gifted it" in {
             forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
               (userType: UserType, individualUserType: IndividualUserType) =>
-                test(key -> "2")(AcquisitionMethod.Bought, AcquisitionMethod.Gifted)(userType, individualUserType)
+                test(key -> "2")(
+                  AcquisitionMethod.Bought,
+                  AcquisitionMethod.Gifted
+                )(userType, individualUserType)
             }
           }
 
@@ -549,9 +664,10 @@ class AcquisitionDetailsControllerSpec
         "the user has selected the same as before" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (incompleteAnswers, completeAnswers) = sample[IncompleteAcquisitionDetailsAnswers] -> sample[
-                CompleteAcquisitionDetailsAnswers
-              ]
+              val (incompleteAnswers, completeAnswers) =
+                sample[IncompleteAcquisitionDetailsAnswers] -> sample[
+                  CompleteAcquisitionDetailsAnswers
+                ]
               List(
                 Seq(key -> "0") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Bought)),
                 Seq(key -> "1") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Inherited)),
@@ -578,7 +694,10 @@ class AcquisitionDetailsControllerSpec
                     )
                   }
 
-                  checkIsRedirect(performAction(data: _*), routes.AcquisitionDetailsController.checkYourAnswers())
+                  checkIsRedirect(
+                    performAction(data: _*),
+                    routes.AcquisitionDetailsController.checkYourAnswers()
+                  )
               }
           }
         }
@@ -589,7 +708,8 @@ class AcquisitionDetailsControllerSpec
 
     "handling requests to display the acquisition date page" must {
 
-      def performAction(): Future[Result] = controller.acquisitionDate()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.acquisitionDate()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -614,7 +734,10 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+              checkIsRedirect(
+                performAction(),
+                controllers.returns.routes.TaskListController.taskList()
+              )
           }
         }
 
@@ -629,7 +752,8 @@ class AcquisitionDetailsControllerSpec
                 mockAuthWithNoRetrievals()
                 mockGetSession(
                   sessionWithState(
-                    sample[IncompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = None),
+                    sample[IncompleteAcquisitionDetailsAnswers]
+                      .copy(acquisitionMethod = None),
                     sample[AssetType],
                     sample[Boolean],
                     userType,
@@ -638,7 +762,10 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.AcquisitionDetailsController.acquisitionMethod())
+              checkIsRedirect(
+                performAction(),
+                routes.AcquisitionDetailsController.acquisitionMethod()
+              )
           }
         }
 
@@ -668,9 +795,16 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionMethod().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .acquisitionMethod()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionDateSubmit()
                     .url
                 }
@@ -698,9 +832,16 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .checkYourAnswers()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionDateSubmit()
                     .url
                 }
@@ -717,7 +858,9 @@ class AcquisitionDetailsControllerSpec
       val key = "acquisitionDate"
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.acquisitionDateSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.acquisitionDateSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       def formData(date: LocalDate): List[(String, String)] =
         List(
@@ -749,7 +892,10 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+              checkIsRedirect(
+                performAction(),
+                controllers.returns.routes.TaskListController.taskList()
+              )
           }
         }
 
@@ -759,8 +905,14 @@ class AcquisitionDetailsControllerSpec
 
         def test(
           data: (String, String)*
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(userType, individualUserType)(expectedErrorKey)(s"$key$userKey.title")(
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        )(expectedErrorKey: String): Unit =
+          testFormError(data: _*)(userType, individualUserType)(
+            expectedErrorKey
+          )(s"$key$userKey.title")(
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers],
@@ -777,7 +929,12 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
               dateErrorScenarios(key, userKey).foreach {
-                case d @ DateErrorScenario(dayString, monthString, yearString, expectedErrorKey) =>
+                case d @ DateErrorScenario(
+                      dayString,
+                      monthString,
+                      yearString,
+                      expectedErrorKey
+                    ) =>
                   withClue(s"For $d: ") {
                     val formData =
                       List(
@@ -786,7 +943,9 @@ class AcquisitionDetailsControllerSpec
                         "acquisitionDate-year"  -> yearString
                       ).collect { case (id, Some(input)) => id -> input }
 
-                    test(formData: _*)(userType, individualUserType, userKey)(expectedErrorKey)
+                    test(formData: _*)(userType, individualUserType, userKey)(
+                      expectedErrorKey
+                    )
                   }
               }
           }
@@ -797,7 +956,11 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey  = userMessageKey(individualUserType, userType)
               val tomorrow = disposalDate.value.plusDays(1L)
-              test(formData(tomorrow): _*)(userType, individualUserType, userKey)(s"$key$userKey.error.tooFarInFuture")
+              test(formData(tomorrow): _*)(
+                userType,
+                individualUserType,
+                userKey
+              )(s"$key$userKey.error.tooFarInFuture")
           }
         }
 
@@ -807,15 +970,25 @@ class AcquisitionDetailsControllerSpec
 
         val acquisitionDate = AcquisitionDate(disposalDate.value)
 
-        def getSessionDataJourneyAndDraftReturn(userType: UserType, individualUserType: IndividualUserType) = {
+        def getSessionDataJourneyAndDraftReturn(
+          userType: UserType,
+          individualUserType: IndividualUserType
+        ) = {
 
           val answers = sample[CompleteAcquisitionDetailsAnswers].copy(
             acquisitionDate = AcquisitionDate(acquisitionDate.value.plusDays(1L))
           )
 
-          val wasUkResident = sample[Boolean]
+          val wasUkResident                   = sample[Boolean]
           val (session, journey, draftReturn) =
-            sessionWithState(answers, sample[AssetType], wasUkResident, userType, individualUserType, disposalDate)
+            sessionWithState(
+              answers,
+              sample[AssetType],
+              wasUkResident,
+              userType,
+              individualUserType,
+              disposalDate
+            )
 
           val newAnswers =
             IncompleteAcquisitionDetailsAnswers(
@@ -828,7 +1001,8 @@ class AcquisitionDetailsControllerSpec
               None
             )
 
-          val updatedDraftReturn = commonUpdateDraftReturn(draftReturn, newAnswers)
+          val updatedDraftReturn =
+            commonUpdateDraftReturn(draftReturn, newAnswers)
 
           (session, journey, updatedDraftReturn)
         }
@@ -837,7 +1011,10 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -848,7 +1025,9 @@ class AcquisitionDetailsControllerSpec
                 )(Left(Error("")))
               }
 
-              checkIsTechnicalErrorPage(performAction(formData(acquisitionDate.value): _*))
+              checkIsTechnicalErrorPage(
+                performAction(formData(acquisitionDate.value): _*)
+              )
           }
         }
 
@@ -856,8 +1035,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
-              val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
+              val updatedSession                         = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -869,7 +1051,9 @@ class AcquisitionDetailsControllerSpec
                 mockStoreSession(updatedSession)(Left(Error("")))
               }
 
-              checkIsTechnicalErrorPage(performAction(formData(acquisitionDate.value): _*))
+              checkIsTechnicalErrorPage(
+                performAction(formData(acquisitionDate.value): _*)
+              )
           }
         }
 
@@ -894,8 +1078,9 @@ class AcquisitionDetailsControllerSpec
             disposalDate
           )
 
-          val updatedDraftReturn = commonUpdateDraftReturn(draftReturn, newAnswers)
-          val updatedSession = session.copy(
+          val updatedDraftReturn =
+            commonUpdateDraftReturn(draftReturn, newAnswers)
+          val updatedSession     = session.copy(
             journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
           )
 
@@ -918,7 +1103,7 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the user has not answered this question before" in {
-          val date = disposalDate.value
+          val date       = disposalDate.value
           val oldAnswers = IncompleteAcquisitionDetailsAnswers.empty.copy(
             acquisitionMethod = Some(AcquisitionMethod.Bought)
           )
@@ -937,7 +1122,7 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the user has completed this section before" in {
-          val date = disposalDate.value
+          val date       = disposalDate.value
           val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
             acquisitionDate = AcquisitionDate(date.minusDays(1L))
           )
@@ -970,7 +1155,8 @@ class AcquisitionDetailsControllerSpec
 
     "handling requests to display the acquisition price page" must {
 
-      def performAction(): Future[Result] = controller.acquisitionPrice()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.acquisitionPrice()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -980,12 +1166,16 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        def incompleteSection(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit =
+        def incompleteSection(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ): Unit =
           forAll { acquisitionMethod: AcquisitionMethod =>
             val acquisitionDate = sample[AcquisitionDate]
-            val answers = sample[IncompleteAcquisitionDetailsAnswers].copy(
+            val answers         = sample[IncompleteAcquisitionDetailsAnswers].copy(
               acquisitionMethod = Some(acquisitionMethod),
-              acquisitionDate   = Some(acquisitionDate)
+              acquisitionDate = Some(acquisitionDate)
             )
 
             inSequence {
@@ -1004,7 +1194,7 @@ class AcquisitionDetailsControllerSpec
             val pricePageTitle = acquisitionMethod match {
               case AcquisitionMethod.Bought =>
                 messageFromMessageKey(s"acquisitionPriceBought$userKey.title")
-              case _ =>
+              case _                        =>
                 messageFromMessageKey(
                   s"acquisitionPriceNotBought$userKey.title",
                   TimeUtils.govDisplayFormat(acquisitionDate.value)
@@ -1013,9 +1203,16 @@ class AcquisitionDetailsControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              pricePageTitle, { doc =>
-                doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionDate().url
-                doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+              pricePageTitle,
+              { doc =>
+                doc
+                  .select("#back")
+                  .attr("href")   shouldBe routes.AcquisitionDetailsController
+                  .acquisitionDate()
+                  .url
+                doc
+                  .select("#content > article > form")
+                  .attr("action") shouldBe routes.AcquisitionDetailsController
                   .acquisitionPriceSubmit()
                   .url
               }
@@ -1030,7 +1227,11 @@ class AcquisitionDetailsControllerSpec
           }
         }
 
-        def sectionCompleted(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit = {
+        def sectionCompleted(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ): Unit = {
           val answers = sample[CompleteAcquisitionDetailsAnswers]
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1048,7 +1249,7 @@ class AcquisitionDetailsControllerSpec
           val pricePageTitle = answers.acquisitionMethod match {
             case AcquisitionMethod.Bought =>
               messageFromMessageKey(s"acquisitionPriceBought$userKey.title")
-            case _ =>
+            case _                        =>
               messageFromMessageKey(
                 s"acquisitionPriceNotBought$userKey.title",
                 TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
@@ -1057,9 +1258,16 @@ class AcquisitionDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            pricePageTitle, { doc =>
-              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+            pricePageTitle,
+            { doc =>
+              doc
+                .select("#back")
+                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
                 .acquisitionPriceSubmit()
                 .url
             }
@@ -1081,7 +1289,9 @@ class AcquisitionDetailsControllerSpec
     "handling submitted acquisition prices" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.acquisitionPriceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.acquisitionPriceSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -1091,7 +1301,11 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error" when {
 
-        def invalidPrice(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit =
+        def invalidPrice(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ): Unit =
           forAll { answers: CompleteAcquisitionDetailsAnswers =>
             val scenarioSession = sessionWithState(
               answers,
@@ -1106,18 +1320,23 @@ class AcquisitionDetailsControllerSpec
               case _                        => s"acquisitionPriceNotBought$userKey"
             }
 
-            amountOfMoneyErrorScenarios(s"acquisitionPrice", errorContext = Some(contextKey))
-              .foreach { scenario =>
-                withClue(s"For $scenario: ") {
-                  testFormError(scenario.formData: _*)(userType, individualUserType)(scenario.expectedErrorMessageKey)(
-                    s"$contextKey.title",
-                    TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
-                  )(
-                    performAction,
-                    scenarioSession
-                  )
-                }
+            amountOfMoneyErrorScenarios(
+              s"acquisitionPrice",
+              errorContext = Some(contextKey)
+            ).foreach { scenario =>
+              withClue(s"For $scenario: ") {
+                testFormError(scenario.formData: _*)(
+                  userType,
+                  individualUserType
+                )(scenario.expectedErrorMessageKey)(
+                  s"$contextKey.title",
+                  TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
+                )(
+                  performAction,
+                  scenarioSession
+                )
               }
+            }
           }
 
         "the user provides an invalid data" in {
@@ -1128,7 +1347,11 @@ class AcquisitionDetailsControllerSpec
           }
         }
 
-        def amountZero(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit =
+        def amountZero(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ): Unit =
           forAll { answers: CompleteAcquisitionDetailsAnswers =>
             val scenarioSession = sessionWithState(
               answers,
@@ -1142,7 +1365,10 @@ class AcquisitionDetailsControllerSpec
               case AcquisitionMethod.Bought => s"acquisitionPriceBought$userKey"
               case _                        => s"acquisitionPriceNotBought$userKey"
             }
-            testFormError("acquisitionPrice" -> "0")(userType, individualUserType)(
+            testFormError("acquisitionPrice" -> "0")(
+              userType,
+              individualUserType
+            )(
               s"$contextKey.error.tooSmall"
             )(
               s"$contextKey.title",
@@ -1173,7 +1399,7 @@ class AcquisitionDetailsControllerSpec
         ): (SessionData, FillingOutReturn, DraftReturn) = {
           val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
             acquisitionMethod = Some(AcquisitionMethod.Bought),
-            acquisitionDate   = Some(sample[AcquisitionDate])
+            acquisitionDate = Some(sample[AcquisitionDate])
           )
 
           val (session, journey, draftReturn) = sessionWithState(
@@ -1196,7 +1422,10 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftSession(userType, individualUserType)
+                getSessionDataJourneyAndDraftSession(
+                  userType,
+                  individualUserType
+                )
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -1207,7 +1436,9 @@ class AcquisitionDetailsControllerSpec
                 )(Left(Error("")))
               }
 
-              checkIsTechnicalErrorPage(performAction("acquisitionPrice" -> price.toString))
+              checkIsTechnicalErrorPage(
+                performAction("acquisitionPrice" -> price.toString)
+              )
           }
         }
 
@@ -1215,8 +1446,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftSession(userType, individualUserType)
-              val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+                getSessionDataJourneyAndDraftSession(
+                  userType,
+                  individualUserType
+                )
+              val updatedSession                         = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1229,7 +1463,9 @@ class AcquisitionDetailsControllerSpec
                 mockStoreSession(updatedSession)(Left(Error("")))
               }
 
-              checkIsTechnicalErrorPage(performAction("acquisitionPrice" -> price.toString))
+              checkIsTechnicalErrorPage(
+                performAction("acquisitionPrice" -> price.toString)
+              )
           }
         }
 
@@ -1240,12 +1476,18 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was incomplete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
+              val answers                         = IncompleteAcquisitionDetailsAnswers.empty.copy(
                 acquisitionMethod = Some(sample[AcquisitionMethod]),
-                acquisitionDate   = Some(sample[AcquisitionDate])
+                acquisitionDate = Some(sample[AcquisitionDate])
               )
               val (session, journey, draftReturn) =
-                sessionWithState(answers, sample[AssetType], sample[Boolean], userType, individualUserType)
+                sessionWithState(
+                  answers,
+                  sample[AssetType],
+                  sample[Boolean],
+                  userType,
+                  individualUserType
+                )
 
               val updatedDraftReturn = commonUpdateDraftReturn(
                 draftReturn,
@@ -1275,7 +1517,7 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was complete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val answers = sample[CompleteAcquisitionDetailsAnswers]
+              val answers                         = sample[CompleteAcquisitionDetailsAnswers]
               val (session, journey, draftReturn) = sessionWithState(
                 answers,
                 sample[AssetType],
@@ -1283,7 +1525,7 @@ class AcquisitionDetailsControllerSpec
                 userType,
                 individualUserType
               )
-              val updatedDraftReturn = commonUpdateDraftReturn(
+              val updatedDraftReturn              = commonUpdateDraftReturn(
                 draftReturn,
                 answers.copy(acquisitionPrice = AmountInPence(123456L))
               )
@@ -1317,7 +1559,8 @@ class AcquisitionDetailsControllerSpec
 
     "handling requests to display the rebased acquisition price page" must {
 
-      def performAction(): Future[Result] = controller.rebasedAcquisitionPrice()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.rebasedAcquisitionPrice()(FakeRequest())
 
       val acquisitionDate = AcquisitionDate(LocalDate.ofEpochDay(0L))
 
@@ -1337,7 +1580,11 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate  = Some(AcquisitionDate(nonUkResidentsResidentialProperty.minusDays(2))),
+                      acquisitionDate = Some(
+                        AcquisitionDate(
+                          nonUkResidentsResidentialProperty.minusDays(2)
+                        )
+                      ),
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -1365,7 +1612,11 @@ class AcquisitionDetailsControllerSpec
               mockGetSession(
                 sessionWithState(
                   sample[IncompleteAcquisitionDetailsAnswers].copy(
-                    acquisitionDate   = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(2))),
+                    acquisitionDate = Some(
+                      AcquisitionDate(
+                        RebasingCutoffDates.ukResidents.minusDays(2)
+                      )
+                    ),
                     acquisitionMethod = None
                   ),
                   sample[AssetType],
@@ -1402,7 +1653,10 @@ class AcquisitionDetailsControllerSpec
                   )._1
                 )
               }
-              checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
+              checkIsRedirect(
+                performAction(),
+                routes.AcquisitionDetailsController.checkYourAnswers()
+              )
           }
         }
 
@@ -1418,8 +1672,12 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate =
-                        Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1))),
+                      acquisitionDate = Some(
+                        AcquisitionDate(
+                          RebasingCutoffDates.nonUkResidentsResidentialProperty
+                            .minusDays(1)
+                        )
+                      ),
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -1429,7 +1687,10 @@ class AcquisitionDetailsControllerSpec
                   )._1
                 )
               }
-              checkIsRedirect(performAction(), routes.AcquisitionDetailsController.acquisitionPrice())
+              checkIsRedirect(
+                performAction(),
+                routes.AcquisitionDetailsController.acquisitionPrice()
+              )
           }
         }
 
@@ -1443,8 +1704,12 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate   = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(2))),
-                  acquisitionPrice  = Some(sample[AmountInPence]),
+                  acquisitionDate = Some(
+                    AcquisitionDate(
+                      RebasingCutoffDates.ukResidents.minusDays(2)
+                    )
+                  ),
+                  acquisitionPrice = Some(sample[AmountInPence]),
                   acquisitionMethod = Some(AcquisitionMethod.Bought)
                 ),
                 AssetType.Residential,
@@ -1460,12 +1725,21 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               TimeUtils.govDisplayFormat(ukResidents)
-            ), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionDate().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+            ),
+            { doc =>
+              doc
+                .select("#back")
+                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .acquisitionDate()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
-              doc.select("#rebaseAcquisitionPrice-form-hint").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#rebaseAcquisitionPrice-form-hint")
+                .text()         shouldBe messageFromMessageKey(
                 s"rebaseAcquisitionPrice$userKey.helpText"
               )
             }
@@ -1490,7 +1764,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(acquisitionDate),
+                  acquisitionDate = Some(acquisitionDate),
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1505,13 +1779,24 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              TimeUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
-            ), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+              TimeUtils.govDisplayFormat(
+                nonUkResidentsResidentialProperty.minusDays(1)
+              )
+            ),
+            { doc =>
+              doc
+                .select("#back")
+                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .acquisitionPrice()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
-              doc.select("#rebaseAcquisitionPrice-form-hint").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#rebaseAcquisitionPrice-form-hint")
+                .text()         shouldBe messageFromMessageKey(
                 s"rebaseAcquisitionPrice$userKey.helpText"
               )
             }
@@ -1522,16 +1807,25 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              incompleteSectionNonUKResident(userType, individualUserType, userKey)
+              incompleteSectionNonUKResident(
+                userType,
+                individualUserType,
+                userKey
+              )
           }
         }
 
-        def sectionCompleted(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit = {
+        def sectionCompleted(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
+                sample[CompleteAcquisitionDetailsAnswers]
+                  .copy(acquisitionDate = acquisitionDate),
                 AssetType.Residential,
                 true,
                 userType,
@@ -1545,9 +1839,16 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               TimeUtils.govDisplayFormat(ukResidents)
-            ), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+            ),
+            { doc =>
+              doc
+                .select("#back")
+                .attr("href")   shouldBe routes.AcquisitionDetailsController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
             }
@@ -1562,13 +1863,17 @@ class AcquisitionDetailsControllerSpec
           }
         }
 
-        def amountNonZero(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit = {
+        def amountNonZero(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = acquisitionDate,
+                  acquisitionDate = acquisitionDate,
                   rebasedAcquisitionPrice = Some(AmountInPence(1L))
                 ),
                 AssetType.Residential,
@@ -1585,7 +1890,10 @@ class AcquisitionDetailsControllerSpec
               "rebaseAcquisitionPrice.title",
               TimeUtils.govDisplayFormat(ukResidents)
             ),
-            doc => doc.select("#rebaseAcquisitionPrice").attr("value") shouldBe "0.01"
+            doc =>
+              doc
+                .select("#rebaseAcquisitionPrice")
+                .attr("value") shouldBe "0.01"
           )
         }
 
@@ -1606,7 +1914,9 @@ class AcquisitionDetailsControllerSpec
       val key = "rebaseAcquisitionPrice"
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.rebasedAcquisitionPriceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.rebasedAcquisitionPriceSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       val acquisitionDate = AcquisitionDate(ukResidents.minusDays(1))
 
@@ -1626,8 +1936,12 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate =
-                        Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1))),
+                      acquisitionDate = Some(
+                        AcquisitionDate(
+                          RebasingCutoffDates.nonUkResidentsNonResidentialProperty
+                            .minusDays(1)
+                        )
+                      ),
                       acquisitionPrice = None
                     ),
                     AssetType.NonResidential,
@@ -1649,14 +1963,19 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error" when {
 
-        def test(data: (String, String)*)(userType: UserType, individualUserType: IndividualUserType, userKey: String)(
+        def test(data: (String, String)*)(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        )(
           expectedErrorMessageKey: String
         ) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
+                sample[CompleteAcquisitionDetailsAnswers]
+                  .copy(acquisitionDate = acquisitionDate),
                 AssetType.Residential,
                 true,
                 userType,
@@ -1673,7 +1992,9 @@ class AcquisitionDetailsControllerSpec
               formattedRebaseDate
             ),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
                 formattedRebaseDate
               ),
@@ -1685,7 +2006,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test("rebaseAcquisitionPrice" -> "0")(userType, individualUserType, userKey)(
+              test("rebaseAcquisitionPrice" -> "0")(
+                userType,
+                individualUserType,
+                userKey
+              )(
                 s"$key.error.tooSmall"
               )
           }
@@ -1696,9 +2021,12 @@ class AcquisitionDetailsControllerSpec
       "show an error page" when {
         val price = 1.23d
 
-        def getSessionDataJourneyAndDraftReturn(userType: UserType, individualUserType: IndividualUserType) = {
-          val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-            acquisitionDate  = Some(AcquisitionDate(ukResidents.minusDays(2))),
+        def getSessionDataJourneyAndDraftReturn(
+          userType: UserType,
+          individualUserType: IndividualUserType
+        ) = {
+          val answers                         = IncompleteAcquisitionDetailsAnswers.empty.copy(
+            acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(2))),
             acquisitionPrice = Some(sample[AmountInPence])
           )
           val (session, journey, draftReturn) = sessionWithState(
@@ -1708,12 +2036,12 @@ class AcquisitionDetailsControllerSpec
             userType,
             individualUserType
           )
-          val updatedDraftReturn = commonUpdateDraftReturn(
+          val updatedDraftReturn              = commonUpdateDraftReturn(
             draftReturn,
             answers.copy(
               rebasedAcquisitionPrice = Some(AmountInPence(123L)),
-              acquisitionPrice        = Some(AmountInPence(123L)),
-              shouldUseRebase         = Some(true)
+              acquisitionPrice = Some(AmountInPence(123L)),
+              shouldUseRebase = Some(true)
             )
           )
 
@@ -1724,7 +2052,10 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -1745,8 +2076,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
-              val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
+              val updatedSession                         = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -1770,7 +2104,7 @@ class AcquisitionDetailsControllerSpec
 
         val scenarios = List(
           List("rebaseAcquisitionPrice" -> "£1,234") -> AmountInPence(123400L),
-          List("rebaseAcquisitionPrice" -> "1")      -> AmountInPence(100L)
+          List("rebaseAcquisitionPrice" -> "1") -> AmountInPence(100L)
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -1778,11 +2112,14 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               scenarios.foreach {
                 case (formData, expectedAmountInPence) =>
-                  withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
-                    val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-                      acquisitionDate  = Some(acquisitionDate),
-                      acquisitionPrice = Some(sample[AmountInPence])
-                    )
+                  withClue(
+                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                  ) {
+                    val answers                         =
+                      IncompleteAcquisitionDetailsAnswers.empty.copy(
+                        acquisitionDate = Some(acquisitionDate),
+                        acquisitionPrice = Some(sample[AmountInPence])
+                      )
                     val (session, journey, draftReturn) = sessionWithState(
                       answers,
                       AssetType.Residential,
@@ -1790,12 +2127,12 @@ class AcquisitionDetailsControllerSpec
                       userType,
                       individualUserType
                     )
-                    val updatedDraftReturn = commonUpdateDraftReturn(
+                    val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
                       answers.copy(
                         rebasedAcquisitionPrice = Some(expectedAmountInPence),
-                        acquisitionPrice        = Some(expectedAmountInPence),
-                        shouldUseRebase         = Some(true)
+                        acquisitionPrice = Some(expectedAmountInPence),
+                        shouldUseRebase = Some(true)
                       )
                     )
 
@@ -1827,11 +2164,14 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               scenarios.foreach {
                 case (formData, expectedAmountInPence) =>
-                  withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
-                    val answers = sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate         = acquisitionDate,
-                      rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
-                    )
+                  withClue(
+                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                  ) {
+                    val answers                         =
+                      sample[CompleteAcquisitionDetailsAnswers].copy(
+                        acquisitionDate = acquisitionDate,
+                        rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
+                      )
                     val (session, journey, draftReturn) = sessionWithState(
                       answers,
                       AssetType.Residential,
@@ -1839,15 +2179,15 @@ class AcquisitionDetailsControllerSpec
                       UserType.Individual,
                       individualUserType
                     )
-                    val updatedDraftReturn = commonUpdateDraftReturn(
+                    val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
                       answers.copy(
                         rebasedAcquisitionPrice = Some(expectedAmountInPence),
-                        acquisitionPrice        = expectedAmountInPence,
-                        shouldUseRebase         = true
+                        acquisitionPrice = expectedAmountInPence,
+                        shouldUseRebase = true
                       )
                     )
-                    val updatedSession = session.copy(
+                    val updatedSession                  = session.copy(
                       journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
                     )
 
@@ -1898,7 +2238,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate  = Some(AcquisitionDate(ukResidents)),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents)),
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -1928,7 +2268,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -1950,13 +2290,17 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        def incompleteSection(userType: UserType, individualUserType: IndividualUserType, userKey: String): Unit = {
+        def incompleteSection(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                  acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1969,11 +2313,16 @@ class AcquisitionDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"$key$userKey.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController
+            messageFromMessageKey(s"$key$userKey.title"),
+            { doc =>
+              doc
+                .select("#back")
+                .attr("href")   shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPrice()
                 .url
-              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
                 .improvementCostsSubmit()
                 .url
             }
@@ -1996,8 +2345,8 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate         = Some(AcquisitionDate(ukResidents)),
-                      acquisitionPrice        = Some(sample[AmountInPence]),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents)),
+                      acquisitionPrice = Some(sample[AmountInPence]),
                       rebasedAcquisitionPrice = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
@@ -2010,9 +2359,16 @@ class AcquisitionDetailsControllerSpec
               val userKey = userMessageKey(individualUserType, userType)
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .acquisitionPrice()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
                 }
@@ -2028,7 +2384,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate         = AcquisitionDate(ukResidents.minusDays(1L)),
+                      acquisitionDate = AcquisitionDate(ukResidents.minusDays(1L)),
                       rebasedAcquisitionPrice = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
@@ -2043,9 +2399,16 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .checkYourAnswers()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
                 }
@@ -2061,7 +2424,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate         = AcquisitionDate(ukResidents),
+                      acquisitionDate = AcquisitionDate(ukResidents),
                       rebasedAcquisitionPrice = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
@@ -2076,9 +2439,16 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .checkYourAnswers()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .improvementCostsSubmit()
                     .url
                 }
@@ -2094,9 +2464,9 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate         = AcquisitionDate(ukResidents),
+                      acquisitionDate = AcquisitionDate(ukResidents),
                       rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                      improvementCosts        = AmountInPence.zero
+                      improvementCosts = AmountInPence.zero
                     ),
                     AssetType.Residential,
                     true,
@@ -2113,7 +2483,10 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(
                   s"$key$userKey.title"
                 ),
-                doc => doc.select("#improvementCosts-1").attr("checked") shouldBe "checked"
+                doc =>
+                  doc
+                    .select("#improvementCosts-1")
+                    .attr("checked") shouldBe "checked"
               )
           }
         }
@@ -2126,9 +2499,9 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate         = AcquisitionDate(ukResidents),
+                      acquisitionDate = AcquisitionDate(ukResidents),
                       rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                      improvementCosts        = AmountInPence(2L)
+                      improvementCosts = AmountInPence(2L)
                     ),
                     AssetType.Residential,
                     true,
@@ -2144,9 +2517,14 @@ class AcquisitionDetailsControllerSpec
                 performAction(),
                 messageFromMessageKey(
                   s"$key$userKey.title"
-                ), { doc =>
-                  doc.select("#improvementCosts-0").attr("checked")  shouldBe "checked"
-                  doc.select("#improvementCostsValue").attr("value") shouldBe "0.02"
+                ),
+                { doc =>
+                  doc
+                    .select("#improvementCosts-0")
+                    .attr("checked") shouldBe "checked"
+                  doc
+                    .select("#improvementCostsValue")
+                    .attr("value")   shouldBe "0.02"
                 }
               )
           }
@@ -2162,7 +2540,9 @@ class AcquisitionDetailsControllerSpec
       val valueKey = "improvementCostsValue"
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.improvementCostsSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.improvementCostsSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       val acquisitionDate = AcquisitionDate(LocalDate.ofEpochDay(0L))
 
@@ -2182,7 +2562,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate  = Some(AcquisitionDate(ukResidents)),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents)),
                       acquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -2212,7 +2592,7 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -2236,14 +2616,22 @@ class AcquisitionDetailsControllerSpec
 
         def test(
           data: (String, String)*
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String)(expectedErrorKey: String) =
-          testFormError(data: _*)(userType, individualUserType)(expectedErrorKey)(s"$key$userKey.title")(performAction)
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        )(expectedErrorKey: String) =
+          testFormError(data: _*)(userType, individualUserType)(
+            expectedErrorKey
+          )(s"$key$userKey.title")(performAction)
 
         "no option has been selected" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test()(userType, individualUserType, userKey)(s"$key.error.required")
+              test()(userType, individualUserType, userKey)(
+                s"$key.error.required"
+              )
           }
         }
 
@@ -2251,7 +2639,9 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "2")(userType, individualUserType, userKey)(s"$key.error.invalid")
+              test(key -> "2")(userType, individualUserType, userKey)(
+                s"$key.error.invalid"
+              )
           }
         }
 
@@ -2262,7 +2652,9 @@ class AcquisitionDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(userType, individualUserType, userKey)(scenario.expectedErrorMessageKey)
+                  test(data: _*)(userType, individualUserType, userKey)(
+                    scenario.expectedErrorMessageKey
+                  )
                 }
               }
           }
@@ -2272,7 +2664,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "0", valueKey -> "0")(userType, individualUserType, userKey)(
+              test(key -> "0", valueKey -> "0")(
+                userType,
+                individualUserType,
+                userKey
+              )(
                 s"$valueKey.error.tooSmall"
               )
           }
@@ -2283,10 +2679,13 @@ class AcquisitionDetailsControllerSpec
       "show an error page" when {
         val price = 1.23d
 
-        def getSessionDataJourneyAndDraftReturn(userType: UserType, individualUserType: IndividualUserType) = {
-          val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-            acquisitionDate         = Some(acquisitionDate),
-            acquisitionPrice        = Some(sample[AmountInPence]),
+        def getSessionDataJourneyAndDraftReturn(
+          userType: UserType,
+          individualUserType: IndividualUserType
+        ) = {
+          val answers                         = IncompleteAcquisitionDetailsAnswers.empty.copy(
+            acquisitionDate = Some(acquisitionDate),
+            acquisitionPrice = Some(sample[AmountInPence]),
             rebasedAcquisitionPrice = Some(sample[AmountInPence])
           )
           val (session, journey, draftReturn) = sessionWithState(
@@ -2296,7 +2695,7 @@ class AcquisitionDetailsControllerSpec
             userType,
             individualUserType
           )
-          val updatedDraftReturn = commonUpdateDraftReturn(
+          val updatedDraftReturn              = commonUpdateDraftReturn(
             draftReturn,
             answers.copy(improvementCosts = Some(AmountInPence(123L)))
           )
@@ -2308,7 +2707,10 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -2329,8 +2731,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
-              val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
+              val updatedSession                         = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2362,12 +2767,15 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               scenarios.foreach {
                 case (formData, expectedAmountInPence) =>
-                  withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
-                    val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-                      acquisitionDate         = Some(acquisitionDate),
-                      acquisitionPrice        = Some(sample[AmountInPence]),
-                      rebasedAcquisitionPrice = Some(sample[AmountInPence])
-                    )
+                  withClue(
+                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                  ) {
+                    val answers                         =
+                      IncompleteAcquisitionDetailsAnswers.empty.copy(
+                        acquisitionDate = Some(acquisitionDate),
+                        acquisitionPrice = Some(sample[AmountInPence]),
+                        rebasedAcquisitionPrice = Some(sample[AmountInPence])
+                      )
                     val (session, journey, draftReturn) = sessionWithState(
                       answers,
                       AssetType.Residential,
@@ -2375,11 +2783,11 @@ class AcquisitionDetailsControllerSpec
                       userType,
                       individualUserType
                     )
-                    val updatedDraftReturn = commonUpdateDraftReturn(
+                    val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
                       answers.copy(improvementCosts = Some(expectedAmountInPence))
                     )
-                    val updatedSession = session.copy(
+                    val updatedSession                  = session.copy(
                       journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
                     )
 
@@ -2408,13 +2816,15 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               scenarios.foreach {
                 case (formData, expectedAmountInPence) =>
-                  withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
+                  withClue(
+                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                  ) {
 
-                    val answers = sample[CompleteAcquisitionDetailsAnswers]
+                    val answers                         = sample[CompleteAcquisitionDetailsAnswers]
                       .copy(
-                        acquisitionDate         = acquisitionDate,
+                        acquisitionDate = acquisitionDate,
                         rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                        improvementCosts        = AmountInPence(expectedAmountInPence.value + 1L)
+                        improvementCosts = AmountInPence(expectedAmountInPence.value + 1L)
                       )
                     val (session, journey, draftReturn) = sessionWithState(
                       answers,
@@ -2423,11 +2833,11 @@ class AcquisitionDetailsControllerSpec
                       userType,
                       individualUserType
                     )
-                    val updatedDraftReturn = commonUpdateDraftReturn(
+                    val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
                       answers.copy(improvementCosts = expectedAmountInPence)
                     )
-                    val updatedSession = session.copy(
+                    val updatedSession                  = session.copy(
                       journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
                     )
 
@@ -2459,7 +2869,8 @@ class AcquisitionDetailsControllerSpec
 
       val key = "acquisitionFees"
 
-      def performAction(): Future[Result] = controller.acquisitionFees()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.acquisitionFees()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -2502,8 +2913,12 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate  = Some(AcquisitionDate(nonUkResidentsNonResidentialProperty.plusDays(2L))),
-                      shouldUseRebase  = Some(false),
+                      acquisitionDate = Some(
+                        AcquisitionDate(
+                          nonUkResidentsNonResidentialProperty.plusDays(2L)
+                        )
+                      ),
+                      shouldUseRebase = Some(false),
                       improvementCosts = Some(sample[AmountInPence])
                     ),
                     AssetType.NonResidential,
@@ -2518,9 +2933,16 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.improvementCosts().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .improvementCosts()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                 }
@@ -2536,8 +2958,8 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate  = Some(AcquisitionDate(ukResidents.minusDays(2L))),
-                      shouldUseRebase  = Some(true),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(2L))),
+                      shouldUseRebase = Some(true),
                       improvementCosts = Some(sample[AmountInPence])
                     ),
                     AssetType.Residential,
@@ -2552,9 +2974,16 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.rebased.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.improvementCosts().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.rebased.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .improvementCosts()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                 }
@@ -2570,7 +2999,9 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.plusDays(1L)),
+                      acquisitionDate = AcquisitionDate(
+                        nonUkResidentsResidentialProperty.plusDays(1L)
+                      ),
                       shouldUseRebase = false
                     ),
                     AssetType.Residential,
@@ -2585,9 +3016,16 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .checkYourAnswers()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                 }
@@ -2618,9 +3056,16 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.rebased.title"), { doc =>
-                  doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                messageFromMessageKey(s"$key$userKey.rebased.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .checkYourAnswers()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
                 }
@@ -2636,7 +3081,9 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.plusDays(2L)),
+                      acquisitionDate = AcquisitionDate(
+                        nonUkResidentsResidentialProperty.plusDays(2L)
+                      ),
                       acquisitionFees = AmountInPence.zero,
                       shouldUseRebase = false
                     ),
@@ -2653,7 +3100,10 @@ class AcquisitionDetailsControllerSpec
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey(s"$key$userKey.title"),
-                doc => doc.select("#acquisitionFees-1").attr("checked") shouldBe "checked"
+                doc =>
+                  doc
+                    .select("#acquisitionFees-1")
+                    .attr("checked") shouldBe "checked"
               )
           }
         }
@@ -2666,7 +3116,9 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers].copy(
-                      acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.plusDays(2L)),
+                      acquisitionDate = AcquisitionDate(
+                        nonUkResidentsResidentialProperty.plusDays(2L)
+                      ),
                       acquisitionFees = AmountInPence(3L),
                       shouldUseRebase = false
                     ),
@@ -2684,9 +3136,14 @@ class AcquisitionDetailsControllerSpec
                 performAction(),
                 messageFromMessageKey(
                   s"$key$userKey.title"
-                ), { doc =>
-                  doc.select("#acquisitionFees-0").attr("checked")  shouldBe "checked"
-                  doc.select("#acquisitionFeesValue").attr("value") shouldBe "0.03"
+                ),
+                { doc =>
+                  doc
+                    .select("#acquisitionFees-0")
+                    .attr("checked") shouldBe "checked"
+                  doc
+                    .select("#acquisitionFeesValue")
+                    .attr("value")   shouldBe "0.03"
                 }
               )
           }
@@ -2702,7 +3159,9 @@ class AcquisitionDetailsControllerSpec
       val valueKey = "acquisitionFeesValue"
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.acquisitionFeesSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.acquisitionFeesSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -2739,14 +3198,22 @@ class AcquisitionDetailsControllerSpec
 
         def test(
           data: (String, String)*
-        )(userType: UserType, individualUserType: IndividualUserType, userKey: String)(expectedErrorKey: String) =
-          testFormError(data: _*)(userType, individualUserType)(expectedErrorKey)(s"$key$userKey.title")(performAction)
+        )(
+          userType: UserType,
+          individualUserType: IndividualUserType,
+          userKey: String
+        )(expectedErrorKey: String) =
+          testFormError(data: _*)(userType, individualUserType)(
+            expectedErrorKey
+          )(s"$key$userKey.title")(performAction)
 
         "no option has been selected" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test()(userType, individualUserType, userKey)(s"$key.error.required")
+              test()(userType, individualUserType, userKey)(
+                s"$key.error.required"
+              )
           }
         }
 
@@ -2754,7 +3221,9 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "2")(userType, individualUserType, userKey)(s"$key.error.invalid")
+              test(key -> "2")(userType, individualUserType, userKey)(
+                s"$key.error.invalid"
+              )
           }
         }
 
@@ -2765,7 +3234,9 @@ class AcquisitionDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(userType, individualUserType, userKey)(scenario.expectedErrorMessageKey)
+                  test(data: _*)(userType, individualUserType, userKey)(
+                    scenario.expectedErrorMessageKey
+                  )
                 }
               }
           }
@@ -2775,7 +3246,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "0", valueKey -> "0")(userType, individualUserType, userKey)(
+              test(key -> "0", valueKey -> "0")(
+                userType,
+                individualUserType,
+                userKey
+              )(
                 s"$valueKey.error.tooSmall"
               )
           }
@@ -2790,7 +3265,7 @@ class AcquisitionDetailsControllerSpec
           userType: UserType,
           individualUserType: IndividualUserType
         ): (SessionData, FillingOutReturn, DraftReturn) = {
-          val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
+          val answers                         = IncompleteAcquisitionDetailsAnswers.empty.copy(
             improvementCosts = Some(sample[AmountInPence])
           )
           val (session, journey, draftReturn) = sessionWithState(
@@ -2800,7 +3275,7 @@ class AcquisitionDetailsControllerSpec
             userType,
             individualUserType
           )
-          val updatedDraftReturn = commonUpdateDraftReturn(
+          val updatedDraftReturn              = commonUpdateDraftReturn(
             draftReturn,
             answers.copy(acquisitionFees = Some(AmountInPence(123L)))
           )
@@ -2812,7 +3287,10 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -2833,8 +3311,11 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               val (session, journey, updatedDraftReturn) =
-                getSessionDataJourneyAndDraftReturn(userType, individualUserType)
-              val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+                getSessionDataJourneyAndDraftReturn(
+                  userType,
+                  individualUserType
+                )
+              val updatedSession                         = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2867,10 +3348,13 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               scenarios.foreach {
                 case (formData, expectedAmountInPence) =>
-                  withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
-                    val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-                      improvementCosts = Some(sample[AmountInPence])
-                    )
+                  withClue(
+                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                  ) {
+                    val answers                         =
+                      IncompleteAcquisitionDetailsAnswers.empty.copy(
+                        improvementCosts = Some(sample[AmountInPence])
+                      )
                     val (session, journey, draftReturn) = sessionWithState(
                       answers,
                       sample[AssetType],
@@ -2878,7 +3362,7 @@ class AcquisitionDetailsControllerSpec
                       userType,
                       individualUserType
                     )
-                    val updatedDraftReturn = commonUpdateDraftReturn(
+                    val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
                       answers.copy(acquisitionFees = Some(expectedAmountInPence))
                     )
@@ -2912,8 +3396,10 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               scenarios.foreach {
                 case (formData, expectedAmountInPence) =>
-                  withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
-                    val answers =
+                  withClue(
+                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                  ) {
+                    val answers                         =
                       sample[CompleteAcquisitionDetailsAnswers]
                         .copy(acquisitionFees = AmountInPence(expectedAmountInPence.value + 1L))
                     val (session, journey, draftReturn) = sessionWithState(
@@ -2923,11 +3409,11 @@ class AcquisitionDetailsControllerSpec
                       userType,
                       individualUserType
                     )
-                    val updatedDraftReturn = commonUpdateDraftReturn(
+                    val updatedDraftReturn              = commonUpdateDraftReturn(
                       draftReturn,
                       answers.copy(acquisitionFees = expectedAmountInPence)
                     )
-                    val updatedSession = session.copy(
+                    val updatedSession                  = session.copy(
                       journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
                     )
 
@@ -2958,7 +3444,8 @@ class AcquisitionDetailsControllerSpec
 
     "handling requests to display the should use rebase page" must {
 
-      def performAction(): Future[Result] = controller.shouldUseRebase()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.shouldUseRebase()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -2986,7 +3473,9 @@ class AcquisitionDetailsControllerSpec
                 performAction(),
                 messageFromMessageKey(
                   "shouldUseRebase.title",
-                  TimeUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
+                  TimeUtils.govDisplayFormat(
+                    nonUkResidentsResidentialProperty.minusDays(1)
+                  )
                 )
               )
           }
@@ -3015,7 +3504,9 @@ class AcquisitionDetailsControllerSpec
                 performAction(),
                 messageFromMessageKey(
                   "shouldUseRebase.title",
-                  TimeUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
+                  TimeUtils.govDisplayFormat(
+                    nonUkResidentsNonResidentialProperty.minusDays(1)
+                  )
                 )
               )
           }
@@ -3056,20 +3547,32 @@ class AcquisitionDetailsControllerSpec
       val disposalDate = DisposalDate(LocalDate.of(1200, 1, 1), sample[TaxYear])
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.shouldUseRebaseSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.shouldUseRebaseSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       "show a form error for non residential non uk" when {
 
-        val date: String = TimeUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
+        val date: String = TimeUtils.govDisplayFormat(
+          nonUkResidentsNonResidentialProperty.minusDays(1)
+        )
 
         def test(
           data: (String, String)*
-        )(userType: UserType, individualUserType: IndividualUserType)(expectedErrorKey: String) =
-          testFormError(data: _*)(userType, individualUserType)(expectedErrorKey)("shouldUseRebase.title", date)(
+        )(userType: UserType, individualUserType: IndividualUserType)(
+          expectedErrorKey: String
+        ) =
+          testFormError(data: _*)(userType, individualUserType)(
+            expectedErrorKey
+          )("shouldUseRebase.title", date)(
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers]
-                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsNonResidentialProperty.minusDays(1))),
+                .copy(acquisitionDate =
+                  AcquisitionDate(
+                    nonUkResidentsNonResidentialProperty.minusDays(1)
+                  )
+                ),
               AssetType.NonResidential,
               false,
               userType,
@@ -3081,23 +3584,35 @@ class AcquisitionDetailsControllerSpec
         "no option has been selected" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              test()(userType, individualUserType)("shouldUseRebase.error.required")
+              test()(userType, individualUserType)(
+                "shouldUseRebase.error.required"
+              )
           }
         }
 
       }
 
       "show a form error for residential non uk" when {
-        val date: String = TimeUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
+        val date: String = TimeUtils.govDisplayFormat(
+          nonUkResidentsResidentialProperty.minusDays(1)
+        )
 
         def test(
           data: (String, String)*
-        )(userType: UserType, individualUserType: IndividualUserType)(expectedErrorKey: String) =
-          testFormError(data: _*)(userType, individualUserType)(expectedErrorKey)("shouldUseRebase.title", date)(
+        )(userType: UserType, individualUserType: IndividualUserType)(
+          expectedErrorKey: String
+        ) =
+          testFormError(data: _*)(userType, individualUserType)(
+            expectedErrorKey
+          )("shouldUseRebase.title", date)(
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers]
-                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.minusDays(1))),
+                .copy(acquisitionDate =
+                  AcquisitionDate(
+                    nonUkResidentsResidentialProperty.minusDays(1)
+                  )
+                ),
               AssetType.Residential,
               false,
               userType,
@@ -3109,7 +3624,9 @@ class AcquisitionDetailsControllerSpec
         "no option has been selected" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              test()(userType, individualUserType)("shouldUseRebase.error.required")
+              test()(userType, individualUserType)(
+                "shouldUseRebase.error.required"
+              )
           }
         }
       }
@@ -3118,7 +3635,8 @@ class AcquisitionDetailsControllerSpec
 
     "handling requests to display the check your answers page" must {
 
-      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswers()(FakeRequest())
 
       val completeAnswers = CompleteAcquisitionDetailsAnswers(
         sample[AcquisitionMethod],
@@ -3204,7 +3722,10 @@ class AcquisitionDetailsControllerSpec
               testRedirectOnMissingData(
                 sessionWithState(
                   allQuestionsAnswered
-                    .copy(acquisitionPrice = None, acquisitionDate = Some(AcquisitionDate(LocalDate.now()))),
+                    .copy(
+                      acquisitionPrice = None,
+                      acquisitionDate = Some(AcquisitionDate(LocalDate.now()))
+                    ),
                   sample[AssetType],
                   sample[Boolean],
                   userType,
@@ -3227,7 +3748,7 @@ class AcquisitionDetailsControllerSpec
                 testRedirectOnMissingData(
                   sessionWithState(
                     allQuestionsAnswered.copy(
-                      acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                      acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -3246,8 +3767,12 @@ class AcquisitionDetailsControllerSpec
                 testRedirectOnMissingData(
                   sessionWithState(
                     allQuestionsAnswered.copy(
-                      acquisitionDate =
-                        Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1L))),
+                      acquisitionDate = Some(
+                        AcquisitionDate(
+                          RebasingCutoffDates.nonUkResidentsResidentialProperty
+                            .minusDays(1L)
+                        )
+                      ),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.Residential,
@@ -3266,8 +3791,12 @@ class AcquisitionDetailsControllerSpec
                 testRedirectOnMissingData(
                   sessionWithState(
                     allQuestionsAnswered.copy(
-                      acquisitionDate =
-                        Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1L))),
+                      acquisitionDate = Some(
+                        AcquisitionDate(
+                          RebasingCutoffDates.nonUkResidentsNonResidentialProperty
+                            .minusDays(1L)
+                        )
+                      ),
                       rebasedAcquisitionPrice = None
                     ),
                     AssetType.NonResidential,
@@ -3336,7 +3865,7 @@ class AcquisitionDetailsControllerSpec
                 userType,
                 individualUserType
               )
-              val newDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+              val newDraftReturn                  = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -3363,8 +3892,8 @@ class AcquisitionDetailsControllerSpec
                 userType,
                 individualUserType
               )
-              val newDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
-              val updatedJourney = journey.copy(draftReturn                   = newDraftReturn)
+              val newDraftReturn                  = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+              val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
@@ -3375,7 +3904,9 @@ class AcquisitionDetailsControllerSpec
                 )(
                   Right(())
                 )
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -3396,10 +3927,10 @@ class AcquisitionDetailsControllerSpec
                 userType,
                 individualUserType
               )
-              val newDraftReturn = draftReturn.copy(
+              val newDraftReturn                  = draftReturn.copy(
                 acquisitionDetailsAnswers = Some(completeAnswers)
               )
-              val updatedJourney = journey.copy(draftReturn = newDraftReturn)
+              val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -3411,14 +3942,18 @@ class AcquisitionDetailsControllerSpec
                 )(
                   Right(())
                 )
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
               }
 
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey("acquisitionDetails.cya.title"),
                 doc =>
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
               )
@@ -3430,14 +3965,16 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
                 sample[AcquisitionMethod],
-                AcquisitionDate(nonUkResidentsNonResidentialProperty.minusDays(1)),
+                AcquisitionDate(
+                  nonUkResidentsNonResidentialProperty.minusDays(1)
+                ),
                 sample[AmountInPence],
                 Some(sample[AmountInPence]),
                 sample[AmountInPence],
                 sample[AmountInPence],
                 false
               )
-              val assetType = AssetType.NonResidential
+              val assetType     = AssetType.NonResidential
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3453,14 +3990,17 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+                messageFromMessageKey("acquisitionDetails.cya.title"),
+                { doc =>
                   validateAcquisitionDetailsCheckYourAnswersPage(
                     nonUkRebasing,
                     doc,
                     false,
                     true
                   )
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
                 }
@@ -3480,7 +4020,7 @@ class AcquisitionDetailsControllerSpec
                 sample[AmountInPence],
                 true
               )
-              val assetType = AssetType.NonResidential
+              val assetType     = AssetType.NonResidential
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3496,14 +4036,17 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+                messageFromMessageKey("acquisitionDetails.cya.title"),
+                { doc =>
                   validateAcquisitionDetailsCheckYourAnswersPage(
                     nonUkRebasing,
                     doc,
                     true,
                     true
                   )
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
                 }
@@ -3523,7 +4066,7 @@ class AcquisitionDetailsControllerSpec
                 sample[AmountInPence],
                 true
               )
-              val assetType = AssetType.NonResidential
+              val assetType     = AssetType.NonResidential
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3539,14 +4082,17 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+                messageFromMessageKey("acquisitionDetails.cya.title"),
+                { doc =>
                   validateAcquisitionDetailsCheckYourAnswersPage(
                     nonUkRebasing,
                     doc,
                     true,
                     false
                   )
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
                 }
@@ -3559,14 +4105,16 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
                 sample[AcquisitionMethod],
-                AcquisitionDate(nonUkResidentsNonResidentialProperty.plusDays(1)),
+                AcquisitionDate(
+                  nonUkResidentsNonResidentialProperty.plusDays(1)
+                ),
                 sample[AmountInPence],
                 Some(sample[AmountInPence]),
                 sample[AmountInPence],
                 sample[AmountInPence],
                 false
               )
-              val assetType = AssetType.NonResidential
+              val assetType     = AssetType.NonResidential
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3582,14 +4130,17 @@ class AcquisitionDetailsControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+                messageFromMessageKey("acquisitionDetails.cya.title"),
+                { doc =>
                   validateAcquisitionDetailsCheckYourAnswersPage(
                     nonUkRebasing,
                     doc,
                     false,
                     false
                   )
-                  doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
                     .checkYourAnswersSubmit()
                     .url
                 }
@@ -3605,18 +4156,30 @@ class AcquisitionDetailsControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 val userKey = userMessageKey(individualUserType, userType)
                 List(
-                  (AcquisitionMethod.Bought, messages(s"acquisitionPriceBought$userKey.title")),
+                  (
+                    AcquisitionMethod.Bought,
+                    messages(s"acquisitionPriceBought$userKey.title")
+                  ),
                   (
                     AcquisitionMethod.Inherited,
-                    messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(date))
+                    messages(
+                      s"acquisitionPriceNotBought$userKey.title",
+                      TimeUtils.govDisplayFormat(date)
+                    )
                   ),
                   (
                     AcquisitionMethod.Gifted,
-                    messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(date))
+                    messages(
+                      s"acquisitionPriceNotBought$userKey.title",
+                      TimeUtils.govDisplayFormat(date)
+                    )
                   ),
                   (
                     AcquisitionMethod.Other("test"),
-                    messages(s"acquisitionPriceNotBought$userKey.title", TimeUtils.govDisplayFormat(date))
+                    messages(
+                      s"acquisitionPriceNotBought$userKey.title",
+                      TimeUtils.govDisplayFormat(date)
+                    )
                   )
                 ).foreach {
                   case (method, expectedTitle) =>
@@ -3630,7 +4193,7 @@ class AcquisitionDetailsControllerSpec
                         sample[AmountInPence],
                         false
                       )
-                      val assetType = AssetType.NonResidential
+                      val assetType     = AssetType.NonResidential
                       inSequence {
                         mockAuthWithNoRetrievals()
                         mockGetSession(
@@ -3647,7 +4210,10 @@ class AcquisitionDetailsControllerSpec
                       checkPageIsDisplayed(
                         performAction(),
                         messageFromMessageKey("acquisitionDetails.cya.title"),
-                        doc => doc.select("#acquisitionPrice-question").text() shouldBe expectedTitle
+                        doc =>
+                          doc
+                            .select("#acquisitionPrice-question")
+                            .text() shouldBe expectedTitle
                       )
                     }
                 }
@@ -3662,7 +4228,8 @@ class AcquisitionDetailsControllerSpec
 
     "handling submits on the check your answers page" must {
 
-      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswersSubmit()(FakeRequest())
 
       "redirect to the task list" in {
         forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
@@ -3680,12 +4247,17 @@ class AcquisitionDetailsControllerSpec
               )
             }
 
-            checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+            checkIsRedirect(
+              performAction(),
+              controllers.returns.routes.TaskListController.taskList()
+            )
         }
       }
     }
 
-    def missingAssetTypeAndResidentialStatusBehaviour(performAction: () => Future[Result]) =
+    def missingAssetTypeAndResidentialStatusBehaviour(
+      performAction: () => Future[Result]
+    ) =
       "redirect to the task list page" when {
 
         "there is no asset type" in {
@@ -3705,7 +4277,10 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+              checkIsRedirect(
+                performAction(),
+                controllers.returns.routes.TaskListController.taskList()
+              )
           }
         }
 
@@ -3726,7 +4301,10 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+              checkIsRedirect(
+                performAction(),
+                controllers.returns.routes.TaskListController.taskList()
+              )
           }
         }
 
@@ -3736,7 +4314,8 @@ class AcquisitionDetailsControllerSpec
       "redirect to the check you answers page" when {
 
         "there is no acquisition date" in {
-          val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+          val completeAcquisitionDetailsAnswers =
+            sample[CompleteAcquisitionDetailsAnswers]
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
@@ -3745,11 +4324,17 @@ class AcquisitionDetailsControllerSpec
                   sessionWithState(
                     Some(
                       IncompleteAcquisitionDetailsAnswers(
-                        Some(completeAcquisitionDetailsAnswers.acquisitionMethod),
+                        Some(
+                          completeAcquisitionDetailsAnswers.acquisitionMethod
+                        ),
                         None,
-                        Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
+                        Some(
+                          completeAcquisitionDetailsAnswers.acquisitionPrice
+                        ),
                         completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
-                        Some(completeAcquisitionDetailsAnswers.improvementCosts),
+                        Some(
+                          completeAcquisitionDetailsAnswers.improvementCosts
+                        ),
                         Some(completeAcquisitionDetailsAnswers.acquisitionFees),
                         Some(completeAcquisitionDetailsAnswers.shouldUseRebase)
                       )
@@ -3763,7 +4348,10 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
+              checkIsRedirect(
+                performAction(),
+                routes.AcquisitionDetailsController.checkYourAnswers()
+              )
           }
         }
 
@@ -3773,7 +4361,8 @@ class AcquisitionDetailsControllerSpec
       "redirect to the check you answers page" when {
 
         "there is no acquisition method" in {
-          val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+          val completeAcquisitionDetailsAnswers =
+            sample[CompleteAcquisitionDetailsAnswers]
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
@@ -3784,9 +4373,13 @@ class AcquisitionDetailsControllerSpec
                       IncompleteAcquisitionDetailsAnswers(
                         None,
                         Some(completeAcquisitionDetailsAnswers.acquisitionDate),
-                        Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
+                        Some(
+                          completeAcquisitionDetailsAnswers.acquisitionPrice
+                        ),
                         completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
-                        Some(completeAcquisitionDetailsAnswers.improvementCosts),
+                        Some(
+                          completeAcquisitionDetailsAnswers.improvementCosts
+                        ),
                         Some(completeAcquisitionDetailsAnswers.acquisitionFees),
                         Some(completeAcquisitionDetailsAnswers.shouldUseRebase)
                       )
@@ -3800,7 +4393,10 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
+              checkIsRedirect(
+                performAction(),
+                routes.AcquisitionDetailsController.checkYourAnswers()
+              )
           }
         }
 
@@ -3811,12 +4407,15 @@ class AcquisitionDetailsControllerSpec
   def testFormError(data: (String, String)*)(
     userType: UserType,
     individualUserType: IndividualUserType
-  )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
+  )(
+    expectedErrorMessageKey: String,
+    errorArgs: String*
+  )(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithState(
       sample[CompleteAcquisitionDetailsAnswers].copy(
         rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-        shouldUseRebase         = false
+        shouldUseRebase = false
       ),
       sample[AssetType],
       sample[Boolean],
@@ -3832,8 +4431,11 @@ class AcquisitionDetailsControllerSpec
 
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
-        doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+      messageFromMessageKey(pageTitleKey, titleArgs: _*),
+      { doc =>
+        doc
+          .select("#error-summary-display > ul > li > a")
+          .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
         )
@@ -3854,52 +4456,63 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     isUk: Boolean,
     isRebasing: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    val expectedAcquisitionMethodDisplayName = acquisitionDetailsAnswers.acquisitionMethod match {
-      case AcquisitionMethod.Bought       => messages("returns.acquisitionMethod.Bought")
-      case AcquisitionMethod.Inherited    => messages("returns.acquisitionMethod.Inherited")
-      case AcquisitionMethod.Gifted       => messages("returns.acquisitionMethod.Gifted")
-      case AcquisitionMethod.Other(value) => value
-    }
+    val expectedAcquisitionMethodDisplayName =
+      acquisitionDetailsAnswers.acquisitionMethod match {
+        case AcquisitionMethod.Bought       =>
+          messages("returns.acquisitionMethod.Bought")
+        case AcquisitionMethod.Inherited    =>
+          messages("returns.acquisitionMethod.Inherited")
+        case AcquisitionMethod.Gifted       =>
+          messages("returns.acquisitionMethod.Gifted")
+        case AcquisitionMethod.Other(value) => value
+      }
 
-    doc.select("#acquisitionMethod-answer").text() shouldBe expectedAcquisitionMethodDisplayName
+    doc
+      .select("#acquisitionMethod-answer")
+      .text() shouldBe expectedAcquisitionMethodDisplayName
 
-    if (!isRebasing || !isUk) {
-      doc.select("#acquisitionPrice-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+    if (!isRebasing || !isUk)
+      doc
+        .select("#acquisitionPrice-answer")
+        .text()                                     shouldBe formatAmountOfMoneyWithPoundSign(
         acquisitionDetailsAnswers.acquisitionPrice.inPounds()
       )
-    } else {
+    else
       doc.select("#acquisitionPrice-answer").text() shouldBe ""
-    }
 
-    if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero) {
+    if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero)
       doc.select("#improvementCosts-answer").text shouldBe "No"
-    } else {
+    else {
       doc.select("#improvementCosts-answer").text shouldBe "Yes"
-      doc.select("#improvementCosts-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+      doc
+        .select("#improvementCosts-value-answer")
+        .text                                     shouldBe formatAmountOfMoneyWithPoundSign(
         acquisitionDetailsAnswers.improvementCosts.inPounds()
       )
     }
 
-    if (acquisitionDetailsAnswers.acquisitionFees === AmountInPence.zero) {
+    if (acquisitionDetailsAnswers.acquisitionFees === AmountInPence.zero)
       doc.select("#acquisitionFees-answer").text shouldBe "No"
-    } else {
+    else {
       doc.select("#acquisitionFees-answer").text shouldBe "Yes"
-      doc.select("#acquisitionFees-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+      doc
+        .select("#acquisitionFees-value-answer")
+        .text                                    shouldBe formatAmountOfMoneyWithPoundSign(
         acquisitionDetailsAnswers.acquisitionFees.inPounds()
       )
     }
 
     acquisitionDetailsAnswers.rebasedAcquisitionPrice.foreach { rebasedAcquisitionPrice =>
-      if (!isUk && isRebasing) {
+      if (!isUk && isRebasing)
         if (acquisitionDetailsAnswers.shouldUseRebase) {
           doc.select("#shouldRebase-answer").text shouldBe "Yes"
-          doc.select("#rebasedAcquisitionPrice-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+          doc
+            .select("#rebasedAcquisitionPrice-value-answer")
+            .text                                 shouldBe formatAmountOfMoneyWithPoundSign(
             rebasedAcquisitionPrice.inPounds()
           )
-        } else {
+        } else
           doc.select("#shouldRebase-answer").text shouldBe "No"
-        }
-      }
     }
   }
 }

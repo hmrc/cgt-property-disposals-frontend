@@ -45,9 +45,14 @@ trait AuthActionSpec { this: MockFactory =>
       )
     )
 
-  def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(result: Future[R]): Unit =
+  def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(
+    result: Future[R]
+  ): Unit =
     (mockAuthConnector
-      .authorise(_: Predicate, _: Retrieval[R])(_: HeaderCarrier, _: ExecutionContext))
+      .authorise(_: Predicate, _: Retrieval[R])(
+        _: HeaderCarrier,
+        _: ExecutionContext
+      ))
       .expects(predicate, retrieval, *, *)
       .returning(result)
 

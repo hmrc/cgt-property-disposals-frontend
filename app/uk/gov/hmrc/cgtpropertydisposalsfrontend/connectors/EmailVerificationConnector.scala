@@ -37,17 +37,20 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(email: Email, name: ContactName, continueCall: Call)(
-    implicit hc: HeaderCarrier
+  def verifyEmail(email: Email, name: ContactName, continueCall: Call)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http: HttpClient, config: Configuration)(implicit ec: ExecutionContext)
+class EmailVerificationConnectorImpl @Inject() (
+  http: HttpClient,
+  config: Configuration
+)(implicit ec: ExecutionContext)
     extends EmailVerificationConnector {
 
-  def getEmailVerificationConfig[A: Configs](key: String): A =
+  def getEmailVerificationConfig[A : Configs](key: String): A =
     config.underlying
       .get[A](s"microservice.services.email-verification.$key")
       .value
@@ -69,8 +72,8 @@ class EmailVerificationConnectorImpl @Inject() (http: HttpClient, config: Config
 
   val selfBaseUrl: String = config.underlying.get[String]("self.url").value
 
-  def verifyEmail(email: Email, name: ContactName, continueCall: Call)(
-    implicit hc: HeaderCarrier
+  def verifyEmail(email: Email, name: ContactName, continueCall: Call)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val body =
       EmailVerificationRequest(

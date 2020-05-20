@@ -28,7 +28,9 @@ class DisposalDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckD
     "have a method which converts incomplete answers to complete answers" in {
       forAll { completeAnswers: CompleteDisposalDetailsAnswers =>
         IncompleteDisposalDetailsAnswers
-          .fromCompleteAnswers(completeAnswers) shouldBe IncompleteDisposalDetailsAnswers(
+          .fromCompleteAnswers(
+            completeAnswers
+          ) shouldBe IncompleteDisposalDetailsAnswers(
           Some(completeAnswers.shareOfProperty),
           Some(completeAnswers.disposalPrice),
           Some(completeAnswers.disposalFees)
@@ -42,7 +44,7 @@ class DisposalDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckD
 
       "have a method which unsets fields" when {
 
-        val completeAnswers = sample[CompleteDisposalDetailsAnswers]
+        val completeAnswers   = sample[CompleteDisposalDetailsAnswers]
         val incompleteAnswers =
           IncompleteDisposalDetailsAnswers(
             Some(completeAnswers.shareOfProperty),
@@ -51,15 +53,21 @@ class DisposalDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckD
           )
 
         "given incomplete answers" in {
-          incompleteAnswers.unset(_.shareOfProperty) shouldBe incompleteAnswers.copy(shareOfProperty = None)
-          incompleteAnswers.unset(_.disposalPrice)   shouldBe incompleteAnswers.copy(disposalPrice   = None)
-          incompleteAnswers.unset(_.disposalFees)    shouldBe incompleteAnswers.copy(disposalFees    = None)
+          incompleteAnswers.unset(_.shareOfProperty) shouldBe incompleteAnswers
+            .copy(shareOfProperty = None)
+          incompleteAnswers.unset(_.disposalPrice)   shouldBe incompleteAnswers
+            .copy(disposalPrice = None)
+          incompleteAnswers.unset(_.disposalFees)    shouldBe incompleteAnswers
+            .copy(disposalFees = None)
         }
 
         "given complete answers" in {
-          completeAnswers.unset(_.shareOfProperty) shouldBe incompleteAnswers.copy(shareOfProperty = None)
-          completeAnswers.unset(_.disposalPrice)   shouldBe incompleteAnswers.copy(disposalPrice   = None)
-          completeAnswers.unset(_.disposalFees)    shouldBe incompleteAnswers.copy(disposalFees    = None)
+          completeAnswers.unset(_.shareOfProperty) shouldBe incompleteAnswers
+            .copy(shareOfProperty = None)
+          completeAnswers.unset(_.disposalPrice)   shouldBe incompleteAnswers
+            .copy(disposalPrice = None)
+          completeAnswers.unset(_.disposalFees)    shouldBe incompleteAnswers
+            .copy(disposalFees = None)
         }
 
       }

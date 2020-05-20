@@ -36,12 +36,14 @@ trait IvBehaviour {
   private val ivOrigin: String = getString("iv.origin")
 
   private val (ivSuccessUrl: String, ivFailureUrl: String) = {
-    val useRelativeUrls = config.underlying.getBoolean("iv.use-relative-urls")
+    val useRelativeUrls                          = config.underlying.getBoolean("iv.use-relative-urls")
     val (successRelativeUrl, failureRelativeUrl) =
-      getString("iv.success-relative-url") -> getString("iv.failure-relative-url")
+      getString("iv.success-relative-url") -> getString(
+        "iv.failure-relative-url"
+      )
 
     if (useRelativeUrls)
-      successRelativeUrl -> failureRelativeUrl
+      successRelativeUrl                 -> failureRelativeUrl
     else
       (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
   }

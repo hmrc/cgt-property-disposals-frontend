@@ -60,7 +60,10 @@ class CGTPropertyDisposalsConnectorImplSpec
   )
 
   val connector =
-    new CGTPropertyDisposalsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+    new CGTPropertyDisposalsConnectorImpl(
+      mockHttp,
+      new ServicesConfig(config, new RunMode(config, Mode.Test))
+    )
 
   "CGTPropertyDisposalsConnectorImpl" when {
 
@@ -68,7 +71,8 @@ class CGTPropertyDisposalsConnectorImplSpec
 
     "handling request to update to the subscription details" must {
 
-      val subscriptionStatusUrl = "http://host:123/cgt-property-disposals/subscription"
+      val subscriptionStatusUrl =
+        "http://host:123/cgt-property-disposals/subscription"
 
       val newSubscribedDetails = SubscribedDetails(
         Right(IndividualName("Stephen", "Wood")),
@@ -102,7 +106,8 @@ class CGTPropertyDisposalsConnectorImplSpec
         true
       )
 
-      val subscribedUpdateDetails = SubscribedUpdateDetails(newSubscribedDetails, previousSubscribedDetails)
+      val subscribedUpdateDetails =
+        SubscribedUpdateDetails(newSubscribedDetails, previousSubscribedDetails)
 
       behave like connectorBehaviour(
         mockPut(subscriptionStatusUrl, subscribedUpdateDetails)(_),
@@ -112,7 +117,8 @@ class CGTPropertyDisposalsConnectorImplSpec
 
     "handling request to get the subscription status" must {
 
-      val subscriptionStatusUrl = "http://host:123/cgt-property-disposals/check-subscription-status"
+      val subscriptionStatusUrl =
+        "http://host:123/cgt-property-disposals/check-subscription-status"
 
       behave like connectorBehaviour(
         mockGet(subscriptionStatusUrl, Map.empty)(_),
@@ -122,7 +128,8 @@ class CGTPropertyDisposalsConnectorImplSpec
 
     "handling request to get the business partner record" must {
 
-      val bprUrl     = "http://host:123/cgt-property-disposals/business-partner-record"
+      val bprUrl     =
+        "http://host:123/cgt-property-disposals/business-partner-record"
       val bprRequest = sample[BusinessPartnerRecordRequest]
 
       behave like connectorBehaviour(
@@ -136,7 +143,11 @@ class CGTPropertyDisposalsConnectorImplSpec
       val subscriptionDetails = sample[SubscriptionDetails]
 
       behave like connectorBehaviour(
-        mockPost("http://host:123/cgt-property-disposals/subscription", Map.empty, Json.toJson(subscriptionDetails))(_),
+        mockPost(
+          "http://host:123/cgt-property-disposals/subscription",
+          Map.empty,
+          Json.toJson(subscriptionDetails)
+        )(_),
         () => connector.subscribe(subscriptionDetails)
       )
     }

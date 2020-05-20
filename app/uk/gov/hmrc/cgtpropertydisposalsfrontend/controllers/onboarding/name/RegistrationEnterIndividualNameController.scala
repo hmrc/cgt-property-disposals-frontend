@@ -55,23 +55,30 @@ class RegistrationEnterIndividualNameController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, i: IndividualSupplyingInformation)) => Right(sessionData -> i)
+      case Some((sessionData, i: IndividualSupplyingInformation)) =>
+        Right(sessionData -> i)
       case _                                                      => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateName(journey: IndividualSupplyingInformation, name: IndividualName)(
-    implicit hc: HeaderCarrier,
+  override def updateName(
+    journey: IndividualSupplyingInformation,
+    name: IndividualName
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, IndividualSupplyingInformation] =
     EitherT.rightT[Future, Error](journey.copy(name = Some(name)))
 
-  override def name(journey: IndividualSupplyingInformation): Option[IndividualName] = journey.name
+  override def name(
+    journey: IndividualSupplyingInformation
+  ): Option[IndividualName] = journey.name
 
-  override protected lazy val backLinkCall: Call =
+  override protected lazy val backLinkCall: Call        =
     controllers.onboarding.routes.RegistrationController.selectEntityType()
   override protected lazy val enterNameSubmitCall: Call =
     routes.RegistrationEnterIndividualNameController.enterIndividualNameSubmit()
-  override protected lazy val continueCall: Call =
-    controllers.onboarding.address.routes.RegistrationEnterAddressController.isUk()
+  override protected lazy val continueCall: Call        =
+    controllers.onboarding.address.routes.RegistrationEnterAddressController
+      .isUk()
 
 }

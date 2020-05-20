@@ -41,7 +41,7 @@ object RepresenteeAnswers {
         None,
         None,
         None,
-        hasConfirmedPerson         = false,
+        hasConfirmedPerson = false,
         hasConfirmedContactDetails = false
       )
 
@@ -55,7 +55,10 @@ object RepresenteeAnswers {
   ) extends RepresenteeAnswers
 
   implicit class RepresenteeAnswersOps(private val r: RepresenteeAnswers) extends AnyVal {
-    def fold[A](ifIncomplete: IncompleteRepresenteeAnswers => A, ifComplete: CompleteRepresenteeAnswers => A): A =
+    def fold[A](
+      ifIncomplete: IncompleteRepresenteeAnswers => A,
+      ifComplete: CompleteRepresenteeAnswers => A
+    ): A =
       r match {
         case i: IncompleteRepresenteeAnswers => ifIncomplete(i)
         case c: CompleteRepresenteeAnswers   => ifComplete(c)

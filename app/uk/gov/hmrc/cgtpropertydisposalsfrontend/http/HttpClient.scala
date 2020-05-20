@@ -26,32 +26,55 @@ object HttpClient {
   // this HttpReads instance for HttpResponse is preferred over the default
   // uk.gov.hmrc.http.RawReads.readRaw as this custom one doesn't throw exceptions
   private class RawHttpReads extends HttpReads[HttpResponse] {
-    override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
+    override def read(
+      method: String,
+      url: String,
+      response: HttpResponse
+    ): HttpResponse = response
   }
 
   private val rawHttpReads = new RawHttpReads
 
-  implicit class HttpClientOps(private val http: uk.gov.hmrc.play.bootstrap.http.HttpClient) extends AnyVal {
+  implicit class HttpClientOps(
+    private val http: uk.gov.hmrc.play.bootstrap.http.HttpClient
+  ) extends AnyVal {
     def get(
       url: String,
       queryParams: Map[String, String] = Map.empty[String, String],
-      headers: Map[String, String]     = Map.empty[String, String]
+      headers: Map[String, String] = Map.empty[String, String]
     )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-      http.GET(url, queryParams.toSeq)(rawHttpReads, hc.withExtraHeaders(headers.toSeq: _*), ec)
+      http.GET(url, queryParams.toSeq)(
+        rawHttpReads,
+        hc.withExtraHeaders(headers.toSeq: _*),
+        ec
+      )
 
     def post[A](
       url: String,
       body: A,
       headers: Map[String, String] = Map.empty[String, String]
-    )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+    )(implicit
+      w: Writes[A],
+      hc: HeaderCarrier,
+      ec: ExecutionContext
+    ): Future[HttpResponse] =
       http.POST(url, body, headers.toSeq)(w, rawHttpReads, hc, ec)
 
     def put[A](
       url: String,
       body: A,
       headers: Map[String, String] = Map.empty[String, String]
-    )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-      http.PUT(url, body)(w, rawHttpReads, hc.withExtraHeaders(headers.toSeq: _*), ec)
+    )(implicit
+      w: Writes[A],
+      hc: HeaderCarrier,
+      ec: ExecutionContext
+    ): Future[HttpResponse] =
+      http.PUT(url, body)(
+        w,
+        rawHttpReads,
+        hc.withExtraHeaders(headers.toSeq: _*),
+        ec
+      )
 
   }
 

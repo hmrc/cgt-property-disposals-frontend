@@ -32,26 +32,30 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BusinessPartnerRecordServiceImpl])
 trait BusinessPartnerRecordService {
 
-  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
-    implicit hc: HeaderCarrier
+  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, BusinessPartnerRecordResponse]
 
 }
 
 @Singleton
-class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector)(
-  implicit ec: ExecutionContext
+class BusinessPartnerRecordServiceImpl @Inject() (
+  connector: CGTPropertyDisposalsConnector
+)(implicit
+  ec: ExecutionContext
 ) extends BusinessPartnerRecordService {
 
-  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
-    implicit hc: HeaderCarrier
+  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, BusinessPartnerRecordResponse] =
     connector
       .getBusinessPartnerRecord(request)
       .subflatMap { response =>
         response.status match {
-          case OK =>
-            response.parseJSON[BusinessPartnerRecordResponse]().leftMap(Error.apply)
+          case OK    =>
+            response
+              .parseJSON[BusinessPartnerRecordResponse]()
+              .leftMap(Error.apply)
           case other =>
             Left(Error(s"Call to get BPR came back with status $other"))
         }

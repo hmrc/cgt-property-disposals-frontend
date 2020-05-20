@@ -31,27 +31,50 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
   object uk {
     val beforeCutoff = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1)))
-    val afterCutoff = sample[CompleteAcquisitionDetailsAnswers]
+    val afterCutoff  = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents.plusDays(1)))
-    val triage = sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
+    val triage       = sample[CompleteSingleDisposalTriageAnswers]
+      .copy(countryOfResidence = Country.uk)
   }
 
   object nonUkNonResidential {
     val beforeCutoff = sample[CompleteAcquisitionDetailsAnswers]
-      .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)))
-    val afterCutoff = sample[CompleteAcquisitionDetailsAnswers]
-      .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.nonUkResidentsNonResidentialProperty.plusDays(1)))
-    val triage = sample[CompleteSingleDisposalTriageAnswers]
-      .copy(countryOfResidence = Country("US", Some("United States")), assetType = NonResidential)
+      .copy(acquisitionDate =
+        AcquisitionDate(
+          RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)
+        )
+      )
+    val afterCutoff  = sample[CompleteAcquisitionDetailsAnswers]
+      .copy(acquisitionDate =
+        AcquisitionDate(
+          RebasingCutoffDates.nonUkResidentsNonResidentialProperty.plusDays(1)
+        )
+      )
+    val triage       = sample[CompleteSingleDisposalTriageAnswers]
+      .copy(
+        countryOfResidence = Country("US", Some("United States")),
+        assetType = NonResidential
+      )
   }
 
   object nonUkResidential {
     val beforeCutoff = sample[CompleteAcquisitionDetailsAnswers]
-      .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1)))
-    val afterCutoff = sample[CompleteAcquisitionDetailsAnswers]
-      .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.nonUkResidentsResidentialProperty.plusDays(1)))
-    val triage = sample[CompleteSingleDisposalTriageAnswers]
-      .copy(countryOfResidence = Country("US", Some("United States")), assetType = Residential)
+      .copy(acquisitionDate =
+        AcquisitionDate(
+          RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1)
+        )
+      )
+    val afterCutoff  = sample[CompleteAcquisitionDetailsAnswers]
+      .copy(acquisitionDate =
+        AcquisitionDate(
+          RebasingCutoffDates.nonUkResidentsResidentialProperty.plusDays(1)
+        )
+      )
+    val triage       = sample[CompleteSingleDisposalTriageAnswers]
+      .copy(
+        countryOfResidence = Country("US", Some("United States")),
+        assetType = Residential
+      )
   }
 
   val underTest = new RebasingEligibilityUtil();
@@ -62,14 +85,20 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
 
       "is uk" in {
         val completedReturn =
-          sample[CompleteSingleDisposalReturn].copy(triageAnswers = uk.triage, acquisitionDetails = uk.beforeCutoff)
+          sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = uk.triage,
+            acquisitionDetails = uk.beforeCutoff
+          )
         underTest.isUk(completedReturn) shouldBe true
       }
 
       "is not uk" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn]
-            .copy(triageAnswers = nonUkNonResidential.triage, acquisitionDetails = nonUkNonResidential.afterCutoff)
+            .copy(
+              triageAnswers = nonUkNonResidential.triage,
+              acquisitionDetails = nonUkNonResidential.afterCutoff
+            )
         underTest.isUk(completedReturn) shouldBe false
       }
 
@@ -79,14 +108,17 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
 
       "complete return uk and eligible" in {
         val completedReturn =
-          sample[CompleteSingleDisposalReturn].copy(triageAnswers = uk.triage, acquisitionDetails = uk.beforeCutoff)
+          sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = uk.triage,
+            acquisitionDetails = uk.beforeCutoff
+          )
         underTest.isEligibleForRebase(completedReturn) shouldBe true
       }
 
       "complete return uk and not eligible" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = uk.triage,
+            triageAnswers = uk.triage,
             acquisitionDetails = uk.afterCutoff
           )
         underTest.isEligibleForRebase(completedReturn) shouldBe false
@@ -95,7 +127,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       "complete return non uk, residential and eligible" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = nonUkResidential.triage,
+            triageAnswers = nonUkResidential.triage,
             acquisitionDetails = nonUkResidential.beforeCutoff
           )
         underTest.isEligibleForRebase(completedReturn) shouldBe true
@@ -104,7 +136,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       "complete return non uk, residential and not eligible" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = nonUkResidential.triage,
+            triageAnswers = nonUkResidential.triage,
             acquisitionDetails = nonUkResidential.afterCutoff
           )
         underTest.isEligibleForRebase(completedReturn) shouldBe false
@@ -113,7 +145,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       "complete return non uk, non residential and eligible" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = nonUkNonResidential.triage,
+            triageAnswers = nonUkNonResidential.triage,
             acquisitionDetails = nonUkNonResidential.beforeCutoff
           )
         underTest.isEligibleForRebase(completedReturn) shouldBe true
@@ -122,7 +154,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       "complete return non uk, non residential and not eligible" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = nonUkNonResidential.triage,
+            triageAnswers = nonUkNonResidential.triage,
             acquisitionDetails = nonUkNonResidential.afterCutoff
           )
         underTest.isEligibleForRebase(completedReturn) shouldBe false
@@ -133,14 +165,17 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
 
       "complete return uk and eligible" in {
         val completedReturn =
-          sample[CompleteSingleDisposalReturn].copy(triageAnswers = uk.triage, acquisitionDetails = uk.afterCutoff)
+          sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = uk.triage,
+            acquisitionDetails = uk.afterCutoff
+          )
         underTest.isEligibleForAcquisitionPrice(completedReturn) shouldBe true
       }
 
       "complete return uk and not eligible" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = uk.triage,
+            triageAnswers = uk.triage,
             acquisitionDetails = uk.beforeCutoff
           )
         underTest.isEligibleForAcquisitionPrice(completedReturn) shouldBe false
@@ -149,7 +184,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       "complete return non uk, residential and eligible - before" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = nonUkResidential.triage,
+            triageAnswers = nonUkResidential.triage,
             acquisitionDetails = nonUkResidential.beforeCutoff
           )
         underTest.isEligibleForAcquisitionPrice(completedReturn) shouldBe true
@@ -158,7 +193,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       "complete return non uk, residential and eligible - after" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = nonUkResidential.triage,
+            triageAnswers = nonUkResidential.triage,
             acquisitionDetails = nonUkResidential.afterCutoff
           )
         underTest.isEligibleForAcquisitionPrice(completedReturn) shouldBe true
@@ -167,7 +202,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       "complete return non uk, non residential and eligible - before" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = nonUkNonResidential.triage,
+            triageAnswers = nonUkNonResidential.triage,
             acquisitionDetails = nonUkNonResidential.beforeCutoff
           )
         underTest.isEligibleForAcquisitionPrice(completedReturn) shouldBe true
@@ -176,7 +211,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       "complete return non uk, non residential and eligible - after" in {
         val completedReturn =
           sample[CompleteSingleDisposalReturn].copy(
-            triageAnswers      = nonUkNonResidential.triage,
+            triageAnswers = nonUkNonResidential.triage,
             acquisitionDetails = nonUkNonResidential.afterCutoff
           )
         underTest.isEligibleForAcquisitionPrice(completedReturn) shouldBe true

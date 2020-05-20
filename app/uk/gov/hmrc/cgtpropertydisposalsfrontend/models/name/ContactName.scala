@@ -37,7 +37,8 @@ object ContactName {
   }
 
   val mapping: Mapping[String] = {
-    val regexPredicate = "^[a-zA-Z0-9 &,`\\-\'.^]{1,105}$".r.pattern.asPredicate()
+    val regexPredicate =
+      "^[a-zA-Z0-9 &,`\\-\'.^]{1,105}$".r.pattern.asPredicate()
 
     def validateContactName(s: String): ValidationResult =
       if (s.length > 105) Invalid("error.tooLong")

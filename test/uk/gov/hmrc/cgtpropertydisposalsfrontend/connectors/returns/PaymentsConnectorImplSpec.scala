@@ -53,7 +53,10 @@ class PaymentsConnectorImplSpec extends WordSpec with Matchers with MockFactory 
     )
   )
 
-  val connector = new PaymentsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+  val connector = new PaymentsConnectorImpl(
+    mockHttp,
+    new ServicesConfig(config, new RunMode(config, Mode.Test))
+  )
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -65,7 +68,8 @@ class PaymentsConnectorImplSpec extends WordSpec with Matchers with MockFactory 
       val amount          = sample[AmountInPence]
       val returnCall      = controllers.routes.StartController.start()
       val backCall        = controllers.returns.routes.TaskListController.taskList()
-      val expectedUrl     = "http://host:123/pay-api/capital-gains-tax/journey/start"
+      val expectedUrl     =
+        "http://host:123/pay-api/capital-gains-tax/journey/start"
 
       behave like connectorBehaviour(
         mockPost(
@@ -83,7 +87,14 @@ class PaymentsConnectorImplSpec extends WordSpec with Matchers with MockFactory 
               |""".stripMargin
           )
         ),
-        () => connector.startPaymentJourney(cgtReference, Some(chargeReference), amount, returnCall, backCall)
+        () =>
+          connector.startPaymentJourney(
+            cgtReference,
+            Some(chargeReference),
+            amount,
+            returnCall,
+            backCall
+          )
       )
 
     }

@@ -63,88 +63,99 @@ class IvController @Inject() (
     with SessionUpdates
     with IvBehaviour {
 
-  def ivSuccessCallback(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    if (request.sessionData.forall(_ === SessionData.empty)) {
-      SeeOther(controllers.routes.StartController.start().url)
-    } else {
-      updateSession(sessionStore, request)(_ => SessionData.empty).map {
-        case Left(e) =>
-          logger.warn("Could not clear session after IV success", e)
-          errorHandler.errorResult()
+  def ivSuccessCallback(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      if (request.sessionData.forall(_ === SessionData.empty))
+        SeeOther(controllers.routes.StartController.start().url)
+      else
+        updateSession(sessionStore, request)(_ => SessionData.empty).map {
+          case Left(e)  =>
+            logger.warn("Could not clear session after IV success", e)
+            errorHandler.errorResult()
 
-        case Right(_) =>
-          SeeOther(controllers.routes.StartController.start().url)
-      }
+          case Right(_) =>
+            SeeOther(controllers.routes.StartController.start().url)
+        }
     }
-  }
 
-  def retry(): Action[AnyContent] = authenticatedActionWithSessionData.async(_ => redirectToIv)
+  def retry(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async(_ => redirectToIv)
 
-  def ivFailureCallback(journeyId: UUID): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def ivFailureCallback(journeyId: UUID): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       ivService
         .getFailedJourneyStatus(journeyId)
         .fold(
           { e =>
             logger.warn("Could not check IV journey error status", e)
             Redirect(routes.IvController.getTechnicalIssue())
-          }, {
-            case IvErrorStatus.Incomplete =>
+          },
+          {
+            case IvErrorStatus.Incomplete           =>
               metrics.ivIncompleteCounter.inc()
               Redirect(routes.IvController.getTechnicalIssue())
-            case IvErrorStatus.FailedMatching =>
+            case IvErrorStatus.FailedMatching       =>
               metrics.ivFailedMatchingCounter.inc()
               Redirect(routes.IvController.getFailedMatching())
-            case IvErrorStatus.FailedIV =>
+            case IvErrorStatus.FailedIV             =>
               metrics.ivFailedIVCounter.inc()
               Redirect(routes.IvController.getFailedIV())
             case IvErrorStatus.InsufficientEvidence =>
               metrics.ivInsufficientEvidenceCounter.inc()
               Redirect(routes.IvController.getInsufficientEvidence())
-            case IvErrorStatus.LockedOut =>
+            case IvErrorStatus.LockedOut            =>
               metrics.ivLockedOutCounter.inc()
               Redirect(routes.IvController.getLockedOut())
-            case IvErrorStatus.UserAborted =>
+            case IvErrorStatus.UserAborted          =>
               metrics.ivUserAbortedCounter.inc()
               Redirect(routes.IvController.getUserAborted())
-            case IvErrorStatus.Timeout =>
+            case IvErrorStatus.Timeout              =>
               metrics.ivTimeoutCounter.inc()
               Redirect(routes.IvController.getTimedOut())
-            case IvErrorStatus.TechnicalIssue =>
+            case IvErrorStatus.TechnicalIssue       =>
               metrics.ivTechnicalIssueCounter.inc()
               Redirect(routes.IvController.getTechnicalIssue())
-            case IvErrorStatus.PreconditionFailed =>
+            case IvErrorStatus.PreconditionFailed   =>
               metrics.ivPreconditionFailedCounter.inc()
               Redirect(routes.IvController.getPreconditionFailed())
-            case IvErrorStatus.Unknown(value) =>
+            case IvErrorStatus.Unknown(value)       =>
               metrics.ivUnknownErrorCounter.inc()
-              logger.warn(s"Received unknown error response status from IV: $value")
+              logger
+                .warn(s"Received unknown error response status from IV: $value")
               Redirect(routes.IvController.getTechnicalIssue())
           }
         )
-  }
+    }
 
-  def getFailedMatching: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
-    Ok(failedMatchingPage())
-  }
+  def getFailedMatching: Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit r ⇒
+      Ok(failedMatchingPage())
+    }
 
-  def getFailedIV: Action[AnyContent] = authenticatedActionWithSessionData(implicit r ⇒ Ok(failedIvPage()))
+  def getFailedIV: Action[AnyContent] =
+    authenticatedActionWithSessionData(implicit r ⇒ Ok(failedIvPage()))
 
-  def getInsufficientEvidence: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
-    Ok(insufficientEvidencePage())
-  }
+  def getInsufficientEvidence: Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit r ⇒
+      Ok(insufficientEvidencePage())
+    }
 
-  def getLockedOut: Action[AnyContent] = authenticatedActionWithSessionData(implicit r ⇒ Ok(lockedOutPage()))
+  def getLockedOut: Action[AnyContent] =
+    authenticatedActionWithSessionData(implicit r ⇒ Ok(lockedOutPage()))
 
-  def getUserAborted: Action[AnyContent] = authenticatedActionWithSessionData(implicit r ⇒ Ok(userAbortedPage()))
+  def getUserAborted: Action[AnyContent] =
+    authenticatedActionWithSessionData(implicit r ⇒ Ok(userAbortedPage()))
 
-  def getTimedOut: Action[AnyContent] = authenticatedActionWithSessionData(implicit r ⇒ Ok(timeoutPage()))
+  def getTimedOut: Action[AnyContent] =
+    authenticatedActionWithSessionData(implicit r ⇒ Ok(timeoutPage()))
 
-  def getTechnicalIssue: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
-    Ok(technicalIssuesPage())
-  }
-  def getPreconditionFailed: Action[AnyContent] = authenticatedActionWithSessionData { implicit r ⇒
-    Ok(preconditionFailedPage())
-  }
+  def getTechnicalIssue: Action[AnyContent]     =
+    authenticatedActionWithSessionData { implicit r ⇒
+      Ok(technicalIssuesPage())
+    }
+  def getPreconditionFailed: Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit r ⇒
+      Ok(preconditionFailedPage())
+    }
 
 }

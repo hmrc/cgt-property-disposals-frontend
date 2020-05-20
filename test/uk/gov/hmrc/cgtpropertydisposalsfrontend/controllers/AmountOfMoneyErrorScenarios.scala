@@ -33,12 +33,24 @@ object AmountOfMoneyErrorScenarios {
   def amountOfMoneyErrorScenarios(
     key: String,
     maximumAmountInclusive: BigDecimal = MoneyUtils.maxAmountOfPounds,
-    errorContext: Option[String]       = None
+    errorContext: Option[String] = None
   ) =
     List(
-      AmountOfMoneyErrorScenario(key, None, s"${errorContext.getOrElse(key)}.error.required"),
-      AmountOfMoneyErrorScenario(key, Some(""), s"${errorContext.getOrElse(key)}.error.required"),
-      AmountOfMoneyErrorScenario(key, Some("-1"), s"${errorContext.getOrElse(key)}.error.tooSmall"),
+      AmountOfMoneyErrorScenario(
+        key,
+        None,
+        s"${errorContext.getOrElse(key)}.error.required"
+      ),
+      AmountOfMoneyErrorScenario(
+        key,
+        Some(""),
+        s"${errorContext.getOrElse(key)}.error.required"
+      ),
+      AmountOfMoneyErrorScenario(
+        key,
+        Some("-1"),
+        s"${errorContext.getOrElse(key)}.error.tooSmall"
+      ),
       AmountOfMoneyErrorScenario(
         key,
         Some((maximumAmountInclusive + 1).toString),
@@ -49,7 +61,11 @@ object AmountOfMoneyErrorScenarios {
         Some("1.234"),
         s"${errorContext.getOrElse(key)}.error.tooManyDecimals"
       ),
-      AmountOfMoneyErrorScenario(key, Some("abc"), s"${errorContext.getOrElse(key)}.error.invalid")
+      AmountOfMoneyErrorScenario(
+        key,
+        Some("abc"),
+        s"${errorContext.getOrElse(key)}.error.invalid"
+      )
     )
 
 }

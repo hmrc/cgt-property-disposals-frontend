@@ -42,7 +42,9 @@ class CgtCalculationServiceImplSpec
 
   val service = new CgtCalculationServiceImpl(mockReturnsConnector)
 
-  def mockCalculateTaxDue(request: CalculateCgtTaxDueRequest)(response: Either[Error, HttpResponse]) =
+  def mockCalculateTaxDue(
+    request: CalculateCgtTaxDueRequest
+  )(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
       .calculateTaxDue(_: CalculateCgtTaxDueRequest)(_: HeaderCarrier))
       .expects(request, *)
@@ -71,7 +73,9 @@ class CgtCalculationServiceImplSpec
         }
 
         "the http call comes back with status 200 but the body cannot be parsed" in {
-          mockCalculateTaxDue(request)(Right(HttpResponse(200, Some(JsString("hello")))))
+          mockCalculateTaxDue(request)(
+            Right(HttpResponse(200, Some(JsString("hello"))))
+          )
 
           await(service.calculateTaxDue(request).value).isLeft shouldBe true
         }
@@ -82,9 +86,13 @@ class CgtCalculationServiceImplSpec
         "the call is successful and the response body can be parsed" in {
           val calculatedTaxDue = sample[CalculatedTaxDue]
 
-          mockCalculateTaxDue(request)(Right(HttpResponse(200, Some(Json.toJson(calculatedTaxDue)))))
+          mockCalculateTaxDue(request)(
+            Right(HttpResponse(200, Some(Json.toJson(calculatedTaxDue))))
+          )
 
-          await(service.calculateTaxDue(request).value) shouldBe Right(calculatedTaxDue)
+          await(service.calculateTaxDue(request).value) shouldBe Right(
+            calculatedTaxDue
+          )
         }
 
       }

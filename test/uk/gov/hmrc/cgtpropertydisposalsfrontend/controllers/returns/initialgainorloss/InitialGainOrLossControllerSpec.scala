@@ -55,7 +55,8 @@ class InitialGainOrLossControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: FillingOutReturn => true
         case _                   => false
       }
@@ -75,8 +76,9 @@ class InitialGainOrLossControllerSpec
   def sessionWithState(
     initialGainOrLoss: Option[AmountInPence]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
-    val draftReturn = sample[DraftSingleDisposalReturn].copy(initialGainOrLoss = initialGainOrLoss)
-    val journey     = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
+    val draftReturn = sample[DraftSingleDisposalReturn]
+      .copy(initialGainOrLoss = initialGainOrLoss)
+    val journey     = sample[FillingOutReturn].copy(draftReturn = draftReturn)
 
     (
       SessionData.empty.copy(journeyStatus = Some(journey)),
@@ -88,17 +90,24 @@ class InitialGainOrLossControllerSpec
   "InitialGainOrLossController" when {
 
     "handling requests to display the initial gain or loss page" must {
-      def performAction(): Future[Result] = controller.enterInitialGainOrLoss()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterInitialGainOrLoss()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
       "display the page with backlink to tasklist" when {
 
         "initialGainOrLoss is not present in draftReturn" in {
-          val draftReturn = sample[DraftSingleDisposalReturn]
-            .copy(initialGainOrLoss = None, triageAnswers = generateTriageAnswersWithSelf())
+          val draftReturn      = sample[DraftSingleDisposalReturn]
+            .copy(
+              initialGainOrLoss = None,
+              triageAnswers = generateTriageAnswersWithSelf()
+            )
           val fillingOutReturn = sample[FillingOutReturn]
-            .copy(draftReturn = draftReturn, subscribedDetails = generateIndividualSubscribedDetails())
+            .copy(
+              draftReturn = draftReturn,
+              subscribedDetails = generateIndividualSubscribedDetails()
+            )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -112,13 +121,22 @@ class InitialGainOrLossControllerSpec
             performAction(),
             messageFromMessageKey(
               "initialGainOrLoss.title"
-            ), { doc =>
-              doc.select(".govuk-caption-xl").html() should include("Initial gain or loss")
+            ),
+            { doc =>
+              doc.select(".govuk-caption-xl").html()  should include(
+                "Initial gain or loss"
+              )
               doc.select("#initialGainOrLoss").html() should include(
                 messageFromMessageKey("initialGainOrLoss.title")
               )
-              doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
+              doc
+                .select("#back")
+                .attr("href")                       shouldBe returns.routes.TaskListController
+                .taskList()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action")                     shouldBe routes.InitialGainOrLossController
                 .submitInitialGainOrLoss()
                 .url
             },
@@ -133,25 +151,28 @@ class InitialGainOrLossControllerSpec
           val draftReturn = sample[DraftSingleDisposalReturn]
             .copy(initialGainOrLoss = Some(AmountInPence(300L)))
 
-          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+          val fillingOutReturn =
+            sample[FillingOutReturn].copy(draftReturn = draftReturn)
 
           val trustFillingOutReturn = fillingOutReturn.copy(
             subscribedDetails = generateTrustSubscribedDetails(),
-            draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
+            draftReturn = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
           )
 
           val individualFillingOutReturn = fillingOutReturn.copy(
             subscribedDetails = generateIndividualSubscribedDetails(),
-            draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
+            draftReturn = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
           )
 
-          val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
-            draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
-          )
+          val personalRepresentativeFillingOutReturn =
+            fillingOutReturn.copy(draftReturn =
+              draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
+            )
 
-          val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
-            draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
-          )
+          val capacitorFillingOutReturn =
+            individualFillingOutReturn.copy(draftReturn =
+              draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
+            )
 
           val testData = List(
             ("", individualFillingOutReturn, false),
@@ -164,9 +185,17 @@ class InitialGainOrLossControllerSpec
         }
       }
 
-      def test(key: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean) = {
+      def test(
+        key: String,
+        fillingOutReturn: FillingOutReturn,
+        isAgent: Boolean
+      ) = {
         val session =
-          if (isAgent) SessionData.empty.copy(userType = Some(UserType.Agent), journeyStatus = Some(fillingOutReturn))
+          if (isAgent)
+            SessionData.empty.copy(
+              userType = Some(UserType.Agent),
+              journeyStatus = Some(fillingOutReturn)
+            )
           else
             SessionData.empty.copy(
               journeyStatus = Some(fillingOutReturn)
@@ -180,24 +209,43 @@ class InitialGainOrLossControllerSpec
           performAction(),
           messageFromMessageKey(
             s"initialGainOrLoss$key.title"
-          ), { doc =>
-            doc.select(".govuk-caption-xl").html() should include("Initial gain or loss")
-            doc.select("#initialGainOrLoss").html() should include(
+          ),
+          { doc =>
+            doc.select(".govuk-caption-xl").html()            should include(
+              "Initial gain or loss"
+            )
+            doc.select("#initialGainOrLoss").html()           should include(
               messageFromMessageKey(s"initialGainOrLoss$key.title")
             )
-            doc.select("#initialGainOrLoss-0-content > div > label").text() should be("Initial gain amount")
-            doc.select("#initialGainOrLoss-1-content > div > label").text() should be("Initial loss amount")
-            doc.select("#back").attr("href")                                shouldBe routes.InitialGainOrLossController.checkYourAnswers().url
-            doc.select("#content > article > form > details > div> ol > li:nth-child(2)").text() should include(
+            doc
+              .select("#initialGainOrLoss-0-content > div > label")
+              .text()                                         should be("Initial gain amount")
+            doc
+              .select("#initialGainOrLoss-1-content > div > label")
+              .text()                                         should be("Initial loss amount")
+            doc
+              .select("#back")
+              .attr("href")                                 shouldBe routes.InitialGainOrLossController
+              .checkYourAnswers()
+              .url
+            doc
+              .select(
+                "#content > article > form > details > div> ol > li:nth-child(2)"
+              )
+              .text()                                         should include(
               messageFromMessageKey(s"initialGainOrLoss$key.details.li2")
             )
-            doc.select("#content > article > form > details > div> p").text() should startWith(
+            doc
+              .select("#content > article > form > details > div> p")
+              .text()                                         should startWith(
               messageFromMessageKey(s"initialGainOrLoss$key.details.olTitle")
             )
             doc.select("#initialGainOrLoss-form-hint").text() should be(
               messageFromMessageKey(s"initialGainOrLoss$key.helpText")
             )
-            doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
+            doc
+              .select("#content > article > form")
+              .attr("action")                               shouldBe routes.InitialGainOrLossController
               .submitInitialGainOrLoss()
               .url
           }
@@ -208,12 +256,17 @@ class InitialGainOrLossControllerSpec
     "submitting initial gain or loss" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.submitInitialGainOrLoss()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.submitInitialGainOrLoss()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
-      def updateDraftReturn(d: DraftSingleDisposalReturn, newAnswer: AmountInPence) =
+      def updateDraftReturn(
+        d: DraftSingleDisposalReturn,
+        newAnswer: AmountInPence
+      ) =
         d.copy(
-          initialGainOrLoss          = Some(newAnswer),
-          reliefDetailsAnswers       = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+          initialGainOrLoss = Some(newAnswer),
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -224,7 +277,8 @@ class InitialGainOrLossControllerSpec
         "there is an error updating the draft return in return service " in {
           val (session, journey, draftReturn) =
             sessionWithState(Some(AmountInPence(1L)))
-          val updatedDraftReturn = updateDraftReturn(draftReturn, AmountInPence(0L))
+          val updatedDraftReturn              =
+            updateDraftReturn(draftReturn, AmountInPence(0L))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -241,7 +295,8 @@ class InitialGainOrLossControllerSpec
 
         "there is an error updating the session" in {
           val (session, journey, draftReturn) = sessionWithState(None)
-          val updatedDraftReturn              = updateDraftReturn(draftReturn, AmountInPence(0L))
+          val updatedDraftReturn              =
+            updateDraftReturn(draftReturn, AmountInPence(0L))
           val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
@@ -252,7 +307,9 @@ class InitialGainOrLossControllerSpec
               journey.subscribedDetails.cgtReference,
               journey.agentReferenceNumber
             )(Right(()))
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2"))
@@ -263,25 +320,28 @@ class InitialGainOrLossControllerSpec
         val draftReturn = sample[DraftSingleDisposalReturn]
           .copy(initialGainOrLoss = Some(AmountInPence(300L)))
 
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val fillingOutReturn =
+          sample[FillingOutReturn].copy(draftReturn = draftReturn)
 
         val trustFillingOutReturn = fillingOutReturn.copy(
           subscribedDetails = generateTrustSubscribedDetails(),
-          draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
+          draftReturn = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
         )
 
         val individualFillingOutReturn = fillingOutReturn.copy(
           subscribedDetails = generateIndividualSubscribedDetails(),
-          draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
+          draftReturn = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
         )
 
-        val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
-          draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
-        )
+        val personalRepresentativeFillingOutReturn =
+          fillingOutReturn.copy(draftReturn =
+            draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
+          )
 
-        val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
-          draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
-        )
+        val capacitorFillingOutReturn =
+          individualFillingOutReturn.copy(draftReturn =
+            draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
+          )
 
         val testData = List(
           ("", individualFillingOutReturn, false),
@@ -292,11 +352,17 @@ class InitialGainOrLossControllerSpec
         )
 
         def checkIfValueExistsForKey(expectedErrorMessageKey: String) = {
-          (messages(expectedErrorMessageKey) === expectedErrorMessageKey) shouldBe false
-          messages(expectedErrorMessageKey).trim().isEmpty                shouldBe false
+          (messages(
+            expectedErrorMessageKey
+          ) === expectedErrorMessageKey)                   shouldBe false
+          messages(expectedErrorMessageKey).trim().isEmpty shouldBe false
         }
 
-        def testFormError(fillingOutReturn: FillingOutReturn, isAgent: Boolean, data: (String, String)*)(
+        def testFormError(
+          fillingOutReturn: FillingOutReturn,
+          isAgent: Boolean,
+          data: (String, String)*
+        )(
           expectedErrorMessageKey: String,
           errorArgs: String*
         )(pageTitleKey: String, titleArgs: String*)(
@@ -306,7 +372,11 @@ class InitialGainOrLossControllerSpec
           checkIfValueExistsForKey(expectedErrorMessageKey)
 
           val session =
-            if (isAgent) SessionData.empty.copy(userType = Some(UserType.Agent), journeyStatus = Some(fillingOutReturn))
+            if (isAgent)
+              SessionData.empty.copy(
+                userType = Some(UserType.Agent),
+                journeyStatus = Some(fillingOutReturn)
+              )
             else
               SessionData.empty.copy(
                 journeyStatus = Some(fillingOutReturn)
@@ -321,7 +391,9 @@ class InitialGainOrLossControllerSpec
             performAction(data),
             messageFromMessageKey(pageTitleKey, titleArgs),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
                 errorArgs: _*
               ),
@@ -329,7 +401,12 @@ class InitialGainOrLossControllerSpec
           )
         }
 
-        def test(userKey: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean, data: (String, String)*)(
+        def test(
+          userKey: String,
+          fillingOutReturn: FillingOutReturn,
+          isAgent: Boolean,
+          data: (String, String)*
+        )(
           expectedErrorKey: String
         ): Unit =
           testFormError(fillingOutReturn, isAgent, data: _*)(
@@ -354,7 +431,12 @@ class InitialGainOrLossControllerSpec
             amountOfMoneyErrorScenarios("gain").foreach { scenario =>
               withClue(s"For $scenario: ") {
                 val data = ("initialGainOrLoss" -> "0") :: scenario.formData
-                test(keyWithReturn._1, keyWithReturn._2, keyWithReturn._3, data: _*)(scenario.expectedErrorMessageKey)
+                test(
+                  keyWithReturn._1,
+                  keyWithReturn._2,
+                  keyWithReturn._3,
+                  data: _*
+                )(scenario.expectedErrorMessageKey)
               }
             }
           }
@@ -365,7 +447,12 @@ class InitialGainOrLossControllerSpec
             amountOfMoneyErrorScenarios("loss").foreach { scenario =>
               withClue(s"For $scenario: ") {
                 val data = ("initialGainOrLoss" -> "1") :: scenario.formData
-                test(keyWithReturn._1, keyWithReturn._2, keyWithReturn._3, data: _*)(scenario.expectedErrorMessageKey)
+                test(
+                  keyWithReturn._1,
+                  keyWithReturn._2,
+                  keyWithReturn._3,
+                  data: _*
+                )(scenario.expectedErrorMessageKey)
               }
             }
           }
@@ -373,7 +460,13 @@ class InitialGainOrLossControllerSpec
 
         "the amount of gain is zero" in {
           testData.foreach { keyWithReturn =>
-            test(keyWithReturn._1, keyWithReturn._2, keyWithReturn._3, "initialGainOrLoss" -> "0", "gain" -> "0")(
+            test(
+              keyWithReturn._1,
+              keyWithReturn._2,
+              keyWithReturn._3,
+              "initialGainOrLoss" -> "0",
+              "gain"              -> "0"
+            )(
               "gain.error.tooSmall"
             )
           }
@@ -386,8 +479,8 @@ class InitialGainOrLossControllerSpec
           forAll(Gen.choose(10L, 100L).map(AmountInPence(_))) { amountInPence: AmountInPence =>
             val (session, journey, draftReturn) =
               sessionWithState(Some(AmountInPence(amountInPence.value - 1L)))
-            val newDraftReturn = updateDraftReturn(draftReturn, amountInPence)
-            val updatedJourney = journey.copy(draftReturn = newDraftReturn)
+            val newDraftReturn                  = updateDraftReturn(draftReturn, amountInPence)
+            val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -397,10 +490,16 @@ class InitialGainOrLossControllerSpec
                 updatedJourney.subscribedDetails.cgtReference,
                 updatedJourney.agentReferenceNumber
               )(Right(()))
-              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(updatedJourney))
+              )(Right(()))
             }
             checkIsRedirect(
-              performAction("initialGainOrLoss" -> "0", "loss" -> "", "gain" -> s"${amountInPence.inPounds()}"),
+              performAction(
+                "initialGainOrLoss" -> "0",
+                "loss"              -> "",
+                "gain"              -> s"${amountInPence.inPounds()}"
+              ),
               routes.InitialGainOrLossController.checkYourAnswers()
             )
           }
@@ -418,7 +517,11 @@ class InitialGainOrLossControllerSpec
             mockGetSession(session)
           }
           checkIsRedirect(
-            performAction("initialGainOrLoss" -> "0", "loss" -> "", "gain" -> "6"),
+            performAction(
+              "initialGainOrLoss" -> "0",
+              "loss"              -> "",
+              "gain"              -> "6"
+            ),
             routes.InitialGainOrLossController.checkYourAnswers()
           )
         }
@@ -427,7 +530,8 @@ class InitialGainOrLossControllerSpec
 
     "handling requests to display the check you answers page" must {
 
-      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswers()(FakeRequest())
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -439,7 +543,10 @@ class InitialGainOrLossControllerSpec
             mockGetSession(sessionWithState(None)._1)
           }
 
-          checkIsRedirect(performAction(), routes.InitialGainOrLossController.enterInitialGainOrLoss())
+          checkIsRedirect(
+            performAction(),
+            routes.InitialGainOrLossController.enterInitialGainOrLoss()
+          )
         }
       }
 
@@ -447,25 +554,28 @@ class InitialGainOrLossControllerSpec
         val draftReturn = sample[DraftSingleDisposalReturn]
           .copy(initialGainOrLoss = Some(AmountInPence(1L)))
 
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val fillingOutReturn =
+          sample[FillingOutReturn].copy(draftReturn = draftReturn)
 
         val trustFillingOutReturn = fillingOutReturn.copy(
           subscribedDetails = generateTrustSubscribedDetails(),
-          draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
+          draftReturn = draftReturn.copy(triageAnswers = generateTriageAnswersForTrust())
         )
 
         val individualFillingOutReturn = fillingOutReturn.copy(
           subscribedDetails = generateIndividualSubscribedDetails(),
-          draftReturn       = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
+          draftReturn = draftReturn.copy(triageAnswers = generateTriageAnswersWithSelf())
         )
 
-        val personalRepresentativeFillingOutReturn = fillingOutReturn.copy(draftReturn =
-          draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
-        )
+        val personalRepresentativeFillingOutReturn =
+          fillingOutReturn.copy(draftReturn =
+            draftReturn.copy(triageAnswers = generateTriageAnswersWithPersonalRepresentative())
+          )
 
-        val capacitorFillingOutReturn = individualFillingOutReturn.copy(draftReturn =
-          draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
-        )
+        val capacitorFillingOutReturn =
+          individualFillingOutReturn.copy(draftReturn =
+            draftReturn.copy(triageAnswers = generateTriageAnswersWithCapacitor())
+          )
 
         val testData = List(
           ("", individualFillingOutReturn, false),
@@ -475,13 +585,25 @@ class InitialGainOrLossControllerSpec
           (".agent", individualFillingOutReturn, true)
         )
         testData.foreach(keyWithJourneyStatus =>
-          test(keyWithJourneyStatus._1, keyWithJourneyStatus._2, keyWithJourneyStatus._3)
+          test(
+            keyWithJourneyStatus._1,
+            keyWithJourneyStatus._2,
+            keyWithJourneyStatus._3
+          )
         )
       }
 
-      def test(userKey: String, fillingOutReturn: FillingOutReturn, isAgent: Boolean) = {
+      def test(
+        userKey: String,
+        fillingOutReturn: FillingOutReturn,
+        isAgent: Boolean
+      ) = {
         val session =
-          if (isAgent) SessionData.empty.copy(userType = Some(UserType.Agent), journeyStatus = Some(fillingOutReturn))
+          if (isAgent)
+            SessionData.empty.copy(
+              userType = Some(UserType.Agent),
+              journeyStatus = Some(fillingOutReturn)
+            )
           else
             SessionData.empty.copy(
               journeyStatus = Some(fillingOutReturn)
@@ -495,12 +617,17 @@ class InitialGainOrLossControllerSpec
           performAction(),
           messageFromMessageKey(
             "initialGainOrLoss.cya.title"
-          ), { doc =>
-            doc.select("body").html() should include(Messages("initialGainOrLoss.cya.title"))
+          ),
+          { doc =>
+            doc.select("body").html()                        should include(
+              Messages("initialGainOrLoss.cya.title")
+            )
             doc.select("#initialGainOrLoss-question").text() should include(
               Messages(s"initialGainOrLoss$userKey.title")
             )
-            doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
+            doc
+              .select("#content > article > form")
+              .attr("action")                              shouldBe routes.InitialGainOrLossController
               .checkYourAnswersSubmit()
               .url
           }
@@ -509,7 +636,8 @@ class InitialGainOrLossControllerSpec
     }
 
     "handling submits on the check your answers page" must {
-      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -518,7 +646,10 @@ class InitialGainOrLossControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
         }
-        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        checkIsRedirect(
+          performAction(),
+          controllers.returns.routes.TaskListController.taskList()
+        )
       }
     }
   }
@@ -530,15 +661,19 @@ class InitialGainOrLossControllerSpec
     sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
 
   def generateTriageAnswersWithPersonalRepresentative() =
-    sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(PersonalRepresentative))
+    sample[IncompleteSingleDisposalTriageAnswers]
+      .copy(individualUserType = Some(PersonalRepresentative))
 
   def generateTriageAnswersWithCapacitor() =
-    sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor))
+    sample[IncompleteSingleDisposalTriageAnswers]
+      .copy(individualUserType = Some(Capacitor))
 
   def generateTriageAnswersWithSelf() =
-    sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self))
+    sample[IncompleteSingleDisposalTriageAnswers]
+      .copy(individualUserType = Some(Self))
 
   def generateTriageAnswersForTrust() =
-    sample[IncompleteSingleDisposalTriageAnswers].copy(individualUserType = None)
+    sample[IncompleteSingleDisposalTriageAnswers]
+      .copy(individualUserType = None)
 
 }

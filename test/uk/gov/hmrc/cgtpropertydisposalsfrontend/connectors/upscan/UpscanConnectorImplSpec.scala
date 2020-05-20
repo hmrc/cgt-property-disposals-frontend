@@ -63,7 +63,11 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
   )
 
   val connector =
-    new UpscanConnectorImpl(mockHttp, config, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+    new UpscanConnectorImpl(
+      mockHttp,
+      config,
+      new ServicesConfig(config, new RunMode(config, Mode.Test))
+    )
 
   "UpscanConnectorImplSpec" when {
 
@@ -85,7 +89,11 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
         1234
       )
       behave like upscanConnectorBehaviour(
-        mockPost[UpscanInitiateRequest](expectedUrl, Map("User-Agent" -> "cgt-property-disposals-frontend"), payload),
+        mockPost[UpscanInitiateRequest](
+          expectedUrl,
+          Map("User-Agent" -> "cgt-property-disposals-frontend"),
+          payload
+        ),
         () => connector.initiate(mockFailiure, mockSuccess, reference)
       )
     }

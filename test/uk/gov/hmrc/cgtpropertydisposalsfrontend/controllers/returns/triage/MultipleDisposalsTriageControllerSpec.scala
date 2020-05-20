@@ -71,17 +71,24 @@ class MultipleDisposalsTriageControllerSpec
 
   val mockUUIDGenerator = mock[UUIDGenerator]
 
-  val trustDisplay      = UserTypeDisplay(UserType.Organisation, None, Left(sample[TrustName]))
-  val agentDisplay      = UserTypeDisplay(UserType.Agent, None, Right(sample[IndividualName]))
-  val individualDisplay = UserTypeDisplay(UserType.Individual, None, Right(sample[IndividualName]))
+  val trustDisplay       =
+    UserTypeDisplay(UserType.Organisation, None, Left(sample[TrustName]))
+  val agentDisplay       =
+    UserTypeDisplay(UserType.Agent, None, Right(sample[IndividualName]))
+  val individualDisplay  =
+    UserTypeDisplay(UserType.Individual, None, Right(sample[IndividualName]))
   val personalRepDisplay =
     UserTypeDisplay(
       UserType.Individual,
       Some(Left(PersonalRepresentative)),
       Right(sample[IndividualName])
     )
-  val capacitorDisplay =
-    UserTypeDisplay(UserType.Individual, Some(Right(Capacitor)), Right(sample[IndividualName]))
+  val capacitorDisplay   =
+    UserTypeDisplay(
+      UserType.Individual,
+      Some(Right(Capacitor)),
+      Right(sample[IndividualName])
+    )
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -96,70 +103,90 @@ class MultipleDisposalsTriageControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def mockGetTaxYear(date: LocalDate)(response: Either[Error, Option[TaxYear]]) =
+  def mockGetTaxYear(
+    date: LocalDate
+  )(response: Either[Error, Option[TaxYear]]) =
     (mockTaxYearService
       .taxYear(_: LocalDate)(_: HeaderCarrier))
       .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def isValidJourney(journeyStatus: JourneyStatus): Boolean = journeyStatus match {
-    case r: StartingNewDraftReturn if (r.newReturnTriageAnswers.isLeft) => true
-    case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn)     => true
-    case _                                                              => false
-  }
-
-  def setIndividualUserType(displayType: UserTypeDisplay): Option[IndividualUserType] =
-    if (displayType.representativeType.exists(_.isLeft)) {
-      Some(PersonalRepresentative)
-    } else if (displayType.representativeType.exists(_.isRight)) {
-      Some(Capacitor)
-    } else {
-      Some(Self)
+  def isValidJourney(journeyStatus: JourneyStatus): Boolean =
+    journeyStatus match {
+      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn)   => true
+      case _                                                            => false
     }
+
+  def setIndividualUserType(
+    displayType: UserTypeDisplay
+  ): Option[IndividualUserType] =
+    if (displayType.representativeType.exists(_.isLeft))
+      Some(PersonalRepresentative)
+    else if (displayType.representativeType.exists(_.isRight))
+      Some(Capacitor)
+    else
+      Some(Self)
 
   def sessionDataWithStartingNewDraftReturn(
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
-    name: Either[TrustName, IndividualName]                                         = Right(sample[IndividualName]),
-    userType: UserType                                                              = UserType.Individual,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]] = None
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    userType: UserType = UserType.Individual,
+    representativeType: Option[
+      Either[PersonalRepresentative.type, Capacitor.type]
+    ] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers),
-      subscribedDetails      = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber   = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
-      representeeAnswers = if (representativeType.exists(_.isLeft)) {
-        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
-      } else if (representativeType.exists(_.isRight)) {
-        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-      } else None
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      agentReferenceNumber =
+        if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
+        else None,
+      representeeAnswers =
+        if (representativeType.exists(_.isLeft))
+          Some(
+            sample[CompleteRepresenteeAnswers]
+              .copy(dateOfDeath = Some(sample[DateOfDeath]))
+          )
+        else if (representativeType.exists(_.isRight))
+          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+        else None
     )
     SessionData.empty.copy(
       journeyStatus = Some(startingNewDraftReturn),
-      userType      = Some(userType)
+      userType = Some(userType)
     ) -> startingNewDraftReturn
   }
 
   def sessionDataWithFillingOutReturn(
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
-    name: Either[TrustName, IndividualName]                                         = Right(sample[IndividualName]),
-    userType: UserType                                                              = UserType.Individual,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]] = None
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    userType: UserType = UserType.Individual,
+    representativeType: Option[
+      Either[PersonalRepresentative.type, Capacitor.type]
+    ] = None
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
       triageAnswers = multipleDisposalsAnswers,
-      representeeAnswers = if (representativeType.exists(_.isLeft)) {
-        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
-      } else if (representativeType.exists(_.isRight)) {
-        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-      } else None
+      representeeAnswers =
+        if (representativeType.exists(_.isLeft))
+          Some(
+            sample[CompleteRepresenteeAnswers]
+              .copy(dateOfDeath = Some(sample[DateOfDeath]))
+          )
+        else if (representativeType.exists(_.isRight))
+          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+        else None
     )
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn          = draftReturn,
-      subscribedDetails    = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None
+    val journey     = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      agentReferenceNumber =
+        if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
+        else None
     )
-    val session = SessionData.empty.copy(
-      userType      = Some(userType),
+    val session     = SessionData.empty.copy(
+      userType = Some(userType),
       journeyStatus = Some(journey)
     )
     (session, journey, draftReturn)
@@ -167,7 +194,10 @@ class MultipleDisposalsTriageControllerSpec
 
   def testFormError(
     data: (String, String)*
-  )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
+  )(
+    expectedErrorMessageKey: String,
+    errorArgs: String*
+  )(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionDataWithStartingNewDraftReturn(
       sample[IncompleteMultipleDisposalsTriageAnswers]
@@ -180,8 +210,11 @@ class MultipleDisposalsTriageControllerSpec
 
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
-        doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+      messageFromMessageKey(pageTitleKey, titleArgs),
+      { doc =>
+        doc
+          .select("#error-summary-display > ul > li > a")
+          .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
         )
@@ -203,7 +236,10 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.guidance()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "display the page" when {
 
@@ -238,27 +274,33 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           "the section is complete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, personalRepDisplay, capacitorDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user name ${displayType.name.fold(_ => "Trust name", _ => "Individual name")} ${displayType.getSubKey} "
-                ) {
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              personalRepDisplay,
+              capacitorDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user name ${displayType.name.fold(_ => "Trust name", _ => "Individual name")} ${displayType.getSubKey} "
+              ) {
 
-                  val answers = sample[CompleteMultipleDisposalsTriageAnswers]
-                    .copy(individualUserType = setIndividualUserType(displayType))
+                val answers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = setIndividualUserType(displayType))
 
-                  test(
-                    sessionDataWithStartingNewDraftReturn(
-                      answers,
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1,
-                    triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                    expectReturnToSummaryLink = false,
-                    displayType
-                  )
-                }
+                test(
+                  sessionDataWithStartingNewDraftReturn(
+                    answers,
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1,
+                  triage.routes.MultipleDisposalsTriageController
+                    .checkYourAnswers(),
+                  expectReturnToSummaryLink = false,
+                  displayType
+                )
+              }
             }
           }
         }
@@ -268,7 +310,8 @@ class MultipleDisposalsTriageControllerSpec
 
             test(
               sessionDataWithFillingOutReturn(
-                IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(Self))
+                IncompleteMultipleDisposalsTriageAnswers.empty
+                  .copy(individualUserType = Some(Self))
               )._1,
               triage.routes.CommonTriageQuestionsController.howManyProperties(),
               expectReturnToSummaryLink = true,
@@ -277,24 +320,30 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           "the section is complete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, personalRepDisplay, capacitorDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user type ${displayType.getSubKey} "
-                ) {
-                  test(
-                    sessionDataWithFillingOutReturn(
-                      sample[CompleteMultipleDisposalsTriageAnswers]
-                        .copy(individualUserType = setIndividualUserType(displayType)),
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1,
-                    triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                    expectReturnToSummaryLink = true,
-                    displayType
-                  )
-                }
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              personalRepDisplay,
+              capacitorDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user type ${displayType.getSubKey} "
+              ) {
+                test(
+                  sessionDataWithFillingOutReturn(
+                    sample[CompleteMultipleDisposalsTriageAnswers]
+                      .copy(individualUserType = setIndividualUserType(displayType)),
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1,
+                  triage.routes.MultipleDisposalsTriageController
+                    .checkYourAnswers(),
+                  expectReturnToSummaryLink = true,
+                  displayType
+                )
+              }
             }
           }
         }
@@ -306,7 +355,10 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.guidanceSubmit()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "redirect to how many disposals page" when {
 
@@ -315,13 +367,17 @@ class MultipleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(Self)),
+                IncompleteMultipleDisposalsTriageAnswers.empty
+                  .copy(individualUserType = Some(Self)),
                 name = Right(sample[IndividualName])
               )._1
             )
           }
 
-          checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.howManyDisposals())
+          checkIsRedirect(
+            performAction(),
+            routes.MultipleDisposalsTriageController.howManyDisposals()
+          )
         }
 
       }
@@ -331,10 +387,17 @@ class MultipleDisposalsTriageControllerSpec
         "the user has completed the section" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1)
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1
+            )
           }
 
-          checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
+          checkIsRedirect(
+            performAction(),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
         }
       }
 
@@ -345,7 +408,10 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.howManyDisposals()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "display the page" when {
 
@@ -370,7 +436,8 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is incomplete" in {
             test(
               sessionDataWithStartingNewDraftReturn(
-                IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(Self)),
+                IncompleteMultipleDisposalsTriageAnswers.empty
+                  .copy(individualUserType = Some(Self)),
                 name = Right(sample[IndividualName])
               )._1,
               triage.routes.MultipleDisposalsTriageController.guidance(),
@@ -382,10 +449,12 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithStartingNewDraftReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
+                sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(Self)),
                 name = Right(sample[IndividualName])
               )._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -398,7 +467,8 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(
-                IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(Self)),
+                IncompleteMultipleDisposalsTriageAnswers.empty
+                  .copy(individualUserType = Some(Self)),
                 name = Right(sample[IndividualName])
               )._1,
               triage.routes.MultipleDisposalsTriageController.guidance(),
@@ -410,10 +480,12 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithFillingOutReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
+                sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(Self)),
                 name = Right(sample[IndividualName])
               )._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
@@ -427,7 +499,9 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the how many disposals page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.howManyDisposalsSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.howManyDisposalsSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       val key = "multipleDisposalsNumberOfProperties"
 
@@ -435,7 +509,8 @@ class MultipleDisposalsTriageControllerSpec
 
         "user enters number of properties as one" in {
           val (session, journey) = sessionDataWithStartingNewDraftReturn(
-            IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(Self)),
+            IncompleteMultipleDisposalsTriageAnswers.empty
+              .copy(individualUserType = Some(Self)),
             name = Right(sample[IndividualName])
           )
 
@@ -448,7 +523,7 @@ class MultipleDisposalsTriageControllerSpec
                   journey.copy(
                     newReturnTriageAnswers = Right(
                       IncompleteSingleDisposalTriageAnswers.empty.copy(
-                        individualUserType         = Some(Self),
+                        individualUserType = Some(Self),
                         hasConfirmedSingleDisposal = true
                       )
                     )
@@ -472,7 +547,7 @@ class MultipleDisposalsTriageControllerSpec
 
           "they have not answered how many disposals section and " +
             "enters number of properties more than one" in {
-            val answers = IncompleteMultipleDisposalsTriageAnswers.empty
+            val answers            = IncompleteMultipleDisposalsTriageAnswers.empty
               .copy(individualUserType = Some(Self))
             val (session, journey) = sessionDataWithStartingNewDraftReturn(
               answers,
@@ -501,12 +576,13 @@ class MultipleDisposalsTriageControllerSpec
 
           "they have already completed the section and " +
             "re-enters different number of properties value for more than one" in {
-            val answers = sample[CompleteMultipleDisposalsTriageAnswers]
+            val answers            = sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(individualUserType = Some(Self), numberOfProperties = 9)
-            val newAnswers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-              individualUserType = Some(Self),
-              numberOfProperties = Some(3)
-            )
+            val newAnswers         =
+              IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                individualUserType = Some(Self),
+                numberOfProperties = Some(3)
+              )
             val (session, journey) = sessionDataWithStartingNewDraftReturn(
               answers,
               name = Right(sample[IndividualName])
@@ -536,20 +612,21 @@ class MultipleDisposalsTriageControllerSpec
 
           "they have not completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-            val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+            val answers                         = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(Self),
               numberOfProperties = Some(2)
             )
-            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
-            val updatedDraftReturn = draftReturn.copy(
-              triageAnswers                 = answers.copy(numberOfProperties = Some(5)),
+            val (session, journey, draftReturn) =
+              sessionDataWithFillingOutReturn(answers)
+            val updatedDraftReturn              = draftReturn.copy(
+              triageAnswers = answers.copy(numberOfProperties = Some(5)),
               examplePropertyDetailsAnswers = None,
-              exemptionAndLossesAnswers     = None,
-              yearToDateLiabilityAnswers    = None,
-              supportingEvidenceAnswers     = None,
-              lastUpdatedDate               = TimeUtils.today()
+              exemptionAndLossesAnswers = None,
+              yearToDateLiabilityAnswers = None,
+              supportingEvidenceAnswers = None,
+              lastUpdatedDate = TimeUtils.today()
             )
-            val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -561,7 +638,9 @@ class MultipleDisposalsTriageControllerSpec
               )(
                 Right(())
               )
-              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(updatedJourney))
+              )(Right(()))
             }
 
             checkIsRedirect(
@@ -608,7 +687,7 @@ class MultipleDisposalsTriageControllerSpec
           )
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+          val answers      = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self)
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(
@@ -642,20 +721,21 @@ class MultipleDisposalsTriageControllerSpec
 
       "show a technical error page" when {
 
-        val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+        val answers                         = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = None
         )
-        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
-        val updatedDraftReturn = draftReturn.copy(
-          triageAnswers                 = answers.copy(numberOfProperties = Some(5)),
+        val (session, journey, draftReturn) =
+          sessionDataWithFillingOutReturn(answers)
+        val updatedDraftReturn              = draftReturn.copy(
+          triageAnswers = answers.copy(numberOfProperties = Some(5)),
           examplePropertyDetailsAnswers = None,
-          exemptionAndLossesAnswers     = None,
-          yearToDateLiabilityAnswers    = None,
-          supportingEvidenceAnswers     = None,
-          lastUpdatedDate               = TimeUtils.today()
+          exemptionAndLossesAnswers = None,
+          yearToDateLiabilityAnswers = None,
+          supportingEvidenceAnswers = None,
+          lastUpdatedDate = TimeUtils.today()
         )
-        val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+        val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
         "there is an error storing the draft return" in {
           inSequence {
@@ -684,7 +764,9 @@ class MultipleDisposalsTriageControllerSpec
             )(
               Right(())
             )
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(key -> "5"))
@@ -700,7 +782,10 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.wereYouAUKResident()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "display the page" when {
 
@@ -733,49 +818,59 @@ class MultipleDisposalsTriageControllerSpec
         "the user has not started a new draft return and" when {
 
           "the journey is incomplete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, personalRepDisplay, capacitorDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user type ${displayType.getSubKey}"
-                ) {
-                  test(
-                    sessionDataWithStartingNewDraftReturn(
-                      IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType =
-                        setIndividualUserType(displayType)
-                      ),
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1.copy(userType = Some(displayType.userType)),
-                    triage.routes.MultipleDisposalsTriageController.howManyDisposals(),
-                    "button.continue",
-                    expectReturnToSummaryLink = false,
-                    displayType
-                  )
-                }
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              personalRepDisplay,
+              capacitorDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user type ${displayType.getSubKey}"
+              ) {
+                test(
+                  sessionDataWithStartingNewDraftReturn(
+                    IncompleteMultipleDisposalsTriageAnswers.empty
+                      .copy(individualUserType = setIndividualUserType(displayType)),
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1.copy(userType = Some(displayType.userType)),
+                  triage.routes.MultipleDisposalsTriageController
+                    .howManyDisposals(),
+                  "button.continue",
+                  expectReturnToSummaryLink = false,
+                  displayType
+                )
+              }
             }
           }
           "the journey is complete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, personalRepDisplay, capacitorDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user type ${displayType.getSubKey}"
-                ) {
-                  test(
-                    sessionDataWithStartingNewDraftReturn(
-                      sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType =
-                        setIndividualUserType(displayType)
-                      ),
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1.copy(userType = Some(displayType.userType)),
-                    triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                    "button.continue",
-                    expectReturnToSummaryLink = false,
-                    displayType
-                  )
-                }
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              personalRepDisplay,
+              capacitorDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user type ${displayType.getSubKey}"
+              ) {
+                test(
+                  sessionDataWithStartingNewDraftReturn(
+                    sample[CompleteMultipleDisposalsTriageAnswers]
+                      .copy(individualUserType = setIndividualUserType(displayType)),
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1.copy(userType = Some(displayType.userType)),
+                  triage.routes.MultipleDisposalsTriageController
+                    .checkYourAnswers(),
+                  "button.continue",
+                  expectReturnToSummaryLink = false,
+                  displayType
+                )
+              }
             }
           }
 
@@ -785,34 +880,42 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is incomplete" in {
             test(
-              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
-              triage.routes.MultipleDisposalsTriageController.howManyDisposals(),
+              sessionDataWithFillingOutReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .howManyDisposals(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
           }
 
           "the journey is complete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, personalRepDisplay, capacitorDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user type ${displayType.getSubKey}"
-                ) {
-                  test(
-                    sessionDataWithFillingOutReturn(
-                      sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType =
-                        setIndividualUserType(displayType)
-                      ),
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1.copy(userType = Some(displayType.userType)),
-                    triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                    "button.saveAndContinue",
-                    expectReturnToSummaryLink = true,
-                    displayType
-                  )
-                }
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              personalRepDisplay,
+              capacitorDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user type ${displayType.getSubKey}"
+              ) {
+                test(
+                  sessionDataWithFillingOutReturn(
+                    sample[CompleteMultipleDisposalsTriageAnswers]
+                      .copy(individualUserType = setIndividualUserType(displayType)),
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1.copy(userType = Some(displayType.userType)),
+                  triage.routes.MultipleDisposalsTriageController
+                    .checkYourAnswers(),
+                  "button.saveAndContinue",
+                  expectReturnToSummaryLink = true,
+                  displayType
+                )
+              }
             }
           }
         }
@@ -824,9 +927,14 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the were uk resident page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.wereYouAUKResidentSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.wereYouAUKResidentSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
-      def updateDraftReturn(d: DraftMultipleDisposalsReturn, newAnswers: MultipleDisposalsTriageAnswers) =
+      def updateDraftReturn(
+        d: DraftMultipleDisposalsReturn,
+        newAnswers: MultipleDisposalsTriageAnswers
+      ) =
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
@@ -835,7 +943,7 @@ class MultipleDisposalsTriageControllerSpec
               .unset(_.acquisitionPrice)
           ),
           yearToDateLiabilityAnswers = None,
-          supportingEvidenceAnswers  = None
+          supportingEvidenceAnswers = None
         )
 
       val key = "multipleDisposalsWereYouAUKResident"
@@ -849,7 +957,8 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has not started a draft return and" when {
 
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
           "they have not answered the were uk resident question and selects true" in {
 
@@ -899,11 +1008,12 @@ class MultipleDisposalsTriageControllerSpec
             val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
               .copy(
                 individualUserType = Some(Self),
-                wasAUKResident     = Some(true),
+                wasAUKResident = Some(true),
                 countryOfResidence = Some(Country.uk)
               )
 
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+            val (session, journey) =
+              sessionDataWithStartingNewDraftReturn(answers)
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -914,10 +1024,10 @@ class MultipleDisposalsTriageControllerSpec
                     journey.copy(
                       newReturnTriageAnswers = Left(
                         answers.copy(
-                          wasAUKResident               = Some(false),
-                          countryOfResidence           = None,
+                          wasAUKResident = Some(false),
+                          countryOfResidence = None,
                           wereAllPropertiesResidential = None,
-                          assetTypes                   = None
+                          assetTypes = None
                         )
                       )
                     )
@@ -940,21 +1050,24 @@ class MultipleDisposalsTriageControllerSpec
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
               val answers                         = c.copy(countryOfResidence = sample[Country])
-              val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+              val (session, journey, draftReturn) =
+                sessionDataWithFillingOutReturn(answers)
 
-              val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
-                individualUserType           = answers.individualUserType,
-                numberOfProperties           = Some(answers.numberOfProperties),
-                wasAUKResident               = Some(true),
-                countryOfResidence           = None,
+              val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers(
+                individualUserType = answers.individualUserType,
+                numberOfProperties = Some(answers.numberOfProperties),
+                wasAUKResident = Some(true),
+                countryOfResidence = None,
                 wereAllPropertiesResidential = None,
-                assetTypes                   = None,
-                taxYearAfter6April2020       = Some(true),
-                taxYear                      = Some(answers.taxYear),
-                completionDate               = Some(answers.completionDate)
+                assetTypes = None,
+                taxYearAfter6April2020 = Some(true),
+                taxYear = Some(answers.taxYear),
+                completionDate = Some(answers.completionDate)
               )
-              val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
-              val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+              val updatedDraftReturn =
+                updateDraftReturn(draftReturn, updatedAnswers)
+              val updatedJourney     =
+                journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -966,7 +1079,9 @@ class MultipleDisposalsTriageControllerSpec
                 )(
                   Right(())
                 )
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
               }
 
               checkIsRedirect(
@@ -982,56 +1097,65 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          List(trustDisplay, agentDisplay, individualDisplay, capacitorDisplay, personalRepDisplay).foreach {
-            displayType: UserTypeDisplay =>
-              withClue(
-                s"For user type ${displayType.getSubKey}"
-              ) {
-                val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                  individualUserType = setIndividualUserType(displayType),
-                  numberOfProperties = Some(2)
-                )
-                val session = sessionDataWithStartingNewDraftReturn(
-                  answers,
-                  displayType.name,
-                  displayType.userType,
-                  displayType.representativeType
-                )._1.copy(userType = Some(displayType.userType))
+          List(
+            trustDisplay,
+            agentDisplay,
+            individualDisplay,
+            capacitorDisplay,
+            personalRepDisplay
+          ).foreach { displayType: UserTypeDisplay =>
+            withClue(
+              s"For user type ${displayType.getSubKey}"
+            ) {
+              val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                individualUserType = setIndividualUserType(displayType),
+                numberOfProperties = Some(2)
+              )
+              val session = sessionDataWithStartingNewDraftReturn(
+                answers,
+                displayType.name,
+                displayType.userType,
+                displayType.representativeType
+              )._1.copy(userType = Some(displayType.userType))
 
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(session)
-                }
-
-                checkPageIsDisplayed(
-                  performAction(),
-                  messageFromMessageKey(s"$key${displayType.getSubKey}.title"),
-                  doc =>
-                    doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
-                      s"$key${displayType.getSubKey}.error.required"
-                    ),
-                  BAD_REQUEST
-                )
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
               }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(s"$key${displayType.getSubKey}.title"),
+                doc =>
+                  doc
+                    .select("#error-summary-display > ul > li > a")
+                    .text() shouldBe messageFromMessageKey(
+                    s"$key${displayType.getSubKey}.error.required"
+                  ),
+                BAD_REQUEST
+              )
+            }
           }
         }
       }
 
       "show an error page" when {
 
-        val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(countryOfResidence = sample[Country])
-        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+        val answers                         = sample[CompleteMultipleDisposalsTriageAnswers]
+          .copy(countryOfResidence = sample[Country])
+        val (session, journey, draftReturn) =
+          sessionDataWithFillingOutReturn(answers)
 
-        val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
-          individualUserType           = answers.individualUserType,
-          numberOfProperties           = Some(answers.numberOfProperties),
-          wasAUKResident               = Some(true),
-          countryOfResidence           = None,
+        val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers(
+          individualUserType = answers.individualUserType,
+          numberOfProperties = Some(answers.numberOfProperties),
+          wasAUKResident = Some(true),
+          countryOfResidence = None,
           wereAllPropertiesResidential = None,
-          assetTypes                   = None,
-          taxYearAfter6April2020       = Some(true),
-          taxYear                      = Some(answers.taxYear),
-          completionDate               = Some(answers.completionDate)
+          assetTypes = None,
+          taxYearAfter6April2020 = Some(true),
+          taxYear = Some(answers.taxYear),
+          completionDate = Some(answers.completionDate)
         )
         val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
         val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
@@ -1063,7 +1187,9 @@ class MultipleDisposalsTriageControllerSpec
             )(
               Right(())
             )
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(key -> "true"))
@@ -1078,7 +1204,10 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.wereAllPropertiesResidential()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "display the page" when {
 
@@ -1092,7 +1221,8 @@ class MultipleDisposalsTriageControllerSpec
             performAction,
             session,
             "multipleDisposalsWereAllPropertiesResidential.title",
-            routes.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit(),
+            routes.MultipleDisposalsTriageController
+              .wereAllPropertiesResidentialSubmit(),
             expectedBackLink,
             expectedButtonMessageKey,
             expectReturnToSummaryLink
@@ -1102,8 +1232,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is incomplete" in {
             test(
-              sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
-              triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .wereYouAUKResident(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -1111,8 +1244,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is complete" in {
             test(
-              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -1124,8 +1260,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is incomplete" in {
             test(
-              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
-              triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+              sessionDataWithFillingOutReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .wereYouAUKResident(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
@@ -1133,8 +1272,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is complete" in {
             test(
-              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              sessionDataWithFillingOutReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
@@ -1148,7 +1290,9 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the were all properties residential page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.wereAllPropertiesResidentialSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.wereAllPropertiesResidentialSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       val key = "multipleDisposalsWereAllPropertiesResidential"
 
@@ -1157,13 +1301,14 @@ class MultipleDisposalsTriageControllerSpec
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2),
-          wasAUKResident     = Some(true),
+          wasAUKResident = Some(true),
           countryOfResidence = Some(Country.uk)
         )
 
         "the user has not started a draft return and" when {
 
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
           "user has not answered the were all properties residential section and selects true" in {
 
@@ -1177,7 +1322,7 @@ class MultipleDisposalsTriageControllerSpec
                       newReturnTriageAnswers = Left(
                         answers.copy(
                           wereAllPropertiesResidential = Some(true),
-                          assetTypes                   = Some(List(AssetType.Residential))
+                          assetTypes = Some(List(AssetType.Residential))
                         )
                       )
                     )
@@ -1204,7 +1349,7 @@ class MultipleDisposalsTriageControllerSpec
                       newReturnTriageAnswers = Left(
                         answers.copy(
                           wereAllPropertiesResidential = Some(false),
-                          assetTypes                   = Some(List(AssetType.NonResidential))
+                          assetTypes = Some(List(AssetType.NonResidential))
                         )
                       )
                     )
@@ -1223,10 +1368,11 @@ class MultipleDisposalsTriageControllerSpec
             val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
               .copy(
                 wereAllPropertiesResidential = Some(true),
-                assetTypes                   = Some(List(AssetType.Residential))
+                assetTypes = Some(List(AssetType.Residential))
               )
 
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+            val (session, journey) =
+              sessionDataWithStartingNewDraftReturn(answers)
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1238,7 +1384,7 @@ class MultipleDisposalsTriageControllerSpec
                       newReturnTriageAnswers = Left(
                         answers.copy(
                           wereAllPropertiesResidential = Some(false),
-                          assetTypes                   = Some(List(AssetType.NonResidential))
+                          assetTypes = Some(List(AssetType.NonResidential))
                         )
                       )
                     )
@@ -1258,25 +1404,27 @@ class MultipleDisposalsTriageControllerSpec
 
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
               countryOfResidence = Country.uk,
-              assetTypes         = List(AssetType.Residential)
+              assetTypes = List(AssetType.Residential)
             )
-            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+            val (session, journey, draftReturn) =
+              sessionDataWithFillingOutReturn(answers)
 
-            val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
-              individualUserType           = answers.individualUserType,
-              numberOfProperties           = Some(answers.numberOfProperties),
-              wasAUKResident               = Some(true),
-              countryOfResidence           = None,
+            val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers(
+              individualUserType = answers.individualUserType,
+              numberOfProperties = Some(answers.numberOfProperties),
+              wasAUKResident = Some(true),
+              countryOfResidence = None,
               wereAllPropertiesResidential = Some(false),
-              assetTypes                   = Some(List(AssetType.NonResidential)),
-              taxYearAfter6April2020       = Some(true),
-              taxYear                      = Some(answers.taxYear),
-              completionDate               = Some(answers.completionDate)
+              assetTypes = Some(List(AssetType.NonResidential)),
+              taxYearAfter6April2020 = Some(true),
+              taxYear = Some(answers.taxYear),
+              completionDate = Some(answers.completionDate)
             )
-            val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
-            val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+            val updatedDraftReturn =
+              draftReturn.copy(triageAnswers = updatedAnswers)
+            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1288,7 +1436,9 @@ class MultipleDisposalsTriageControllerSpec
               )(
                 Right(())
               )
-              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(updatedJourney))
+              )(Right(()))
             }
 
             checkIsRedirect(
@@ -1307,7 +1457,7 @@ class MultipleDisposalsTriageControllerSpec
           val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
               wereAllPropertiesResidential = Some(true),
-              assetTypes                   = Some(List(AssetType.Residential))
+              assetTypes = Some(List(AssetType.Residential))
             )
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -1328,10 +1478,10 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+          val answers      = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2),
-            wasAUKResident     = Some(true),
+            wasAUKResident = Some(true),
             countryOfResidence = Some(Country.uk)
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -1345,7 +1495,9 @@ class MultipleDisposalsTriageControllerSpec
             performAction(),
             messageFromMessageKey(s"$key.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 s"$key.error.required"
               ),
             BAD_REQUEST
@@ -1356,25 +1508,27 @@ class MultipleDisposalsTriageControllerSpec
 
       "show a error page" when {
 
-        val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+        val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           countryOfResidence = Country.uk,
-          assetTypes         = List(AssetType.Residential)
+          assetTypes = List(AssetType.Residential)
         )
-        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+        val (session, journey, draftReturn) =
+          sessionDataWithFillingOutReturn(answers)
 
-        val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
-          individualUserType           = answers.individualUserType,
-          numberOfProperties           = Some(answers.numberOfProperties),
-          wasAUKResident               = Some(true),
-          countryOfResidence           = None,
+        val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers(
+          individualUserType = answers.individualUserType,
+          numberOfProperties = Some(answers.numberOfProperties),
+          wasAUKResident = Some(true),
+          countryOfResidence = None,
           wereAllPropertiesResidential = Some(false),
-          assetTypes                   = Some(List(AssetType.NonResidential)),
-          taxYearAfter6April2020       = Some(true),
-          taxYear                      = Some(answers.taxYear),
-          completionDate               = Some(answers.completionDate)
+          assetTypes = Some(List(AssetType.NonResidential)),
+          taxYearAfter6April2020 = Some(true),
+          taxYear = Some(answers.taxYear),
+          completionDate = Some(answers.completionDate)
         )
-        val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
-        val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+        val updatedDraftReturn =
+          draftReturn.copy(triageAnswers = updatedAnswers)
+        val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
         "there is an error updating the draft return" in {
           inSequence {
@@ -1403,7 +1557,9 @@ class MultipleDisposalsTriageControllerSpec
             )(
               Right(())
             )
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(key -> "false"))
@@ -1418,7 +1574,10 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.whenWereContractsExchanged()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "display the page" when {
 
@@ -1432,7 +1591,8 @@ class MultipleDisposalsTriageControllerSpec
             performAction,
             session,
             "multipleDisposalsTaxYear.title",
-            routes.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit(),
+            routes.MultipleDisposalsTriageController
+              .whenWereContractsExchangedSubmit(),
             expectedBackLink,
             expectedButtonMessageKey,
             expectReturnToSummaryLink
@@ -1440,12 +1600,12 @@ class MultipleDisposalsTriageControllerSpec
 
         val incompleteAnswers =
           IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-            individualUserType           = Some(Self),
-            numberOfProperties           = Some(2),
-            wasAUKResident               = Some(true),
-            countryOfResidence           = Some(Country.uk),
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2),
+            wasAUKResident = Some(true),
+            countryOfResidence = Some(Country.uk),
             wereAllPropertiesResidential = Some(true),
-            assetTypes                   = Some(List(AssetType.Residential))
+            assetTypes = Some(List(AssetType.Residential))
           )
 
         "the user has not started a new draft return and" when {
@@ -1453,7 +1613,8 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is incomplete" in {
             test(
               sessionDataWithStartingNewDraftReturn(incompleteAnswers)._1,
-              triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
+              triage.routes.MultipleDisposalsTriageController
+                .wereAllPropertiesResidential(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -1461,8 +1622,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is complete" in {
             test(
-              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -1475,7 +1639,8 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(incompleteAnswers)._1,
-              triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
+              triage.routes.MultipleDisposalsTriageController
+                .wereAllPropertiesResidential(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
@@ -1483,8 +1648,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is complete" in {
             test(
-              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              sessionDataWithFillingOutReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
@@ -1497,7 +1665,9 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the tax year exchanged page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.whenWereContractsExchangedSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.whenWereContractsExchangedSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
       val today = LocalDate.now(Clock.systemUTC())
       val key   = "multipleDisposalsTaxYear"
@@ -1505,22 +1675,23 @@ class MultipleDisposalsTriageControllerSpec
       "redirect to redirect to cya page" when {
 
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-          individualUserType           = Some(Self),
-          numberOfProperties           = Some(2),
-          wasAUKResident               = Some(true),
-          countryOfResidence           = Some(Country.uk),
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2),
+          wasAUKResident = Some(true),
+          countryOfResidence = Some(Country.uk),
           wereAllPropertiesResidential = Some(true),
-          assetTypes                   = Some(List(AssetType.Residential))
+          assetTypes = Some(List(AssetType.Residential))
         )
 
         val taxYear = sample[TaxYear].copy(
           startDateInclusive = LocalDate.of(2019, 4, 6),
-          endDateExclusive   = LocalDate.of(2020, 4, 6)
+          endDateExclusive = LocalDate.of(2020, 4, 6)
         )
 
         "the user has not started a draft return and" when {
 
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
           "user has not answered the tax year exchanged section and selects after April 06th, 2020" in {
 
@@ -1535,7 +1706,7 @@ class MultipleDisposalsTriageControllerSpec
                       newReturnTriageAnswers = Left(
                         answers.copy(
                           taxYearAfter6April2020 = Some(true),
-                          taxYear                = Some(taxYear)
+                          taxYear = Some(taxYear)
                         )
                       )
                     )
@@ -1561,7 +1732,7 @@ class MultipleDisposalsTriageControllerSpec
                       newReturnTriageAnswers = Left(
                         answers.copy(
                           taxYearAfter6April2020 = Some(false),
-                          taxYear                = None
+                          taxYear = None
                         )
                       )
                     )
@@ -1579,18 +1750,19 @@ class MultipleDisposalsTriageControllerSpec
           "user has already answered were all properties residential section and re-selected different option" in {
             val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
               .copy(
-                individualUserType           = Some(Self),
-                numberOfProperties           = Some(2),
-                wasAUKResident               = Some(true),
-                countryOfResidence           = Some(Country.uk),
+                individualUserType = Some(Self),
+                numberOfProperties = Some(2),
+                wasAUKResident = Some(true),
+                countryOfResidence = Some(Country.uk),
                 wereAllPropertiesResidential = Some(true),
-                assetTypes                   = Some(List(AssetType.Residential)),
-                taxYearAfter6April2020       = Some(true),
-                taxYear                      = Some(taxYear),
-                completionDate               = Some(sample[CompletionDate])
+                assetTypes = Some(List(AssetType.Residential)),
+                taxYearAfter6April2020 = Some(true),
+                taxYear = Some(taxYear),
+                completionDate = Some(sample[CompletionDate])
               )
 
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+            val (session, journey) =
+              sessionDataWithStartingNewDraftReturn(answers)
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1602,8 +1774,8 @@ class MultipleDisposalsTriageControllerSpec
                       newReturnTriageAnswers = Left(
                         answers.copy(
                           taxYearAfter6April2020 = Some(false),
-                          taxYear                = None,
-                          completionDate         = None
+                          taxYear = None,
+                          completionDate = None
                         )
                       )
                     )
@@ -1625,20 +1797,24 @@ class MultipleDisposalsTriageControllerSpec
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
               val answers                         = c.copy(taxYear = taxYear)
-              val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+              val (session, journey, draftReturn) =
+                sessionDataWithFillingOutReturn(answers)
 
-              val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers
+              val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers
                 .fromCompleteAnswers(answers)
                 .copy(
                   taxYearAfter6April2020 = Some(false),
-                  taxYear                = None,
-                  completionDate         = None
+                  taxYear = None,
+                  completionDate = None
                 )
               val updatedDraftReturn = draftReturn.copy(
-                triageAnswers                 = updatedAnswers,
-                examplePropertyDetailsAnswers = draftReturn.examplePropertyDetailsAnswers.map(_.unset(_.disposalDate))
+                triageAnswers = updatedAnswers,
+                examplePropertyDetailsAnswers = draftReturn.examplePropertyDetailsAnswers.map(
+                  _.unset(_.disposalDate)
+                )
               )
-              val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+              val updatedJourney     =
+                journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -1650,7 +1826,9 @@ class MultipleDisposalsTriageControllerSpec
                 )(
                   Right(())
                 )
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
               }
 
               checkIsRedirect(
@@ -1668,18 +1846,18 @@ class MultipleDisposalsTriageControllerSpec
         "user has already answered the tax year exchanged section and re-selected same option" in {
           val taxYear = sample[TaxYear].copy(
             startDateInclusive = LocalDate.of(2019, 4, 6),
-            endDateExclusive   = LocalDate.of(2020, 4, 6)
+            endDateExclusive = LocalDate.of(2020, 4, 6)
           )
           val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
-              individualUserType           = Some(Self),
-              numberOfProperties           = Some(2),
-              wasAUKResident               = Some(true),
-              countryOfResidence           = Some(Country.uk),
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident = Some(true),
+              countryOfResidence = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
-              assetTypes                   = Some(List(AssetType.Residential)),
-              taxYearAfter6April2020       = Some(true),
-              taxYear                      = Some(taxYear)
+              assetTypes = Some(List(AssetType.Residential)),
+              taxYearAfter6April2020 = Some(true),
+              taxYear = Some(taxYear)
             )
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -1700,11 +1878,11 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-            individualUserType           = Some(Self),
-            numberOfProperties           = Some(2),
-            wasAUKResident               = Some(true),
-            countryOfResidence           = Some(Country.uk),
+          val answers      = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2),
+            wasAUKResident = Some(true),
+            countryOfResidence = Some(Country.uk),
             wereAllPropertiesResidential = Some(true)
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -1716,8 +1894,11 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"$key.title"), { doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+            messageFromMessageKey(s"$key.title"),
+            { doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 s"$key.error.required"
               )
               doc.title() should startWith("Error:")
@@ -1730,24 +1911,27 @@ class MultipleDisposalsTriageControllerSpec
 
       "show an error page" when {
 
-        val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+        val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.Residential),
-          taxYear    = sample[TaxYear]
+          taxYear = sample[TaxYear]
         )
-        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+        val (session, journey, draftReturn) =
+          sessionDataWithFillingOutReturn(answers)
 
-        val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers
+        val updatedAnswers     = IncompleteMultipleDisposalsTriageAnswers
           .fromCompleteAnswers(answers)
           .copy(
             taxYearAfter6April2020 = Some(false),
-            taxYear                = None,
-            completionDate         = None
+            taxYear = None,
+            completionDate = None
           )
         val updatedDraftReturn = draftReturn.copy(
-          triageAnswers                 = updatedAnswers,
-          examplePropertyDetailsAnswers = draftReturn.examplePropertyDetailsAnswers.map(_.unset(_.disposalDate))
+          triageAnswers = updatedAnswers,
+          examplePropertyDetailsAnswers = draftReturn.examplePropertyDetailsAnswers.map(
+            _.unset(_.disposalDate)
+          )
         )
-        val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+        val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
         "there is an error updating the draft return" in {
           inSequence {
@@ -1776,7 +1960,9 @@ class MultipleDisposalsTriageControllerSpec
             )(
               Right(())
             )
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(key -> "1"))
@@ -1785,7 +1971,11 @@ class MultipleDisposalsTriageControllerSpec
         "a tax year cannot be found when the user selects after April 2020" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1)
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty
+              )._1
+            )
             mockGetTaxYear(TimeUtils.today())(Right(None))
           }
 
@@ -1795,7 +1985,11 @@ class MultipleDisposalsTriageControllerSpec
         "there is an error while getting the tax year when the user selects after April 2020" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1)
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty
+              )._1
+            )
             mockGetTaxYear(TimeUtils.today())(Left(Error("")))
           }
 
@@ -1810,7 +2004,10 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.countryOfResidence()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "display the page" when {
 
@@ -1820,7 +2017,7 @@ class MultipleDisposalsTriageControllerSpec
           expectedButtonMessageKey: String,
           expectReturnToSummaryLink: Boolean,
           displayType: UserTypeDisplay
-        ): Unit =
+        ): Unit               =
           testPageIsDisplayed(
             performAction,
             session,
@@ -1832,7 +2029,9 @@ class MultipleDisposalsTriageControllerSpec
             List(
               SelectorAndValue(
                 "#countryCode-form-hint",
-                messageFromMessageKey(s"multipleDisposalsCountryOfResidence${displayType.getSubKey}.helpText")
+                messageFromMessageKey(
+                  s"multipleDisposalsCountryOfResidence${displayType.getSubKey}.helpText"
+                )
               ),
               SelectorAndValue(
                 "#wrapper > div:eq(1) > article > form > p",
@@ -1847,56 +2046,68 @@ class MultipleDisposalsTriageControllerSpec
           IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2),
-            wasAUKResident     = Some(false)
+            wasAUKResident = Some(false)
           )
         "the user has not started a new draft return and" when {
 
           "the journey is incomplete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, capacitorDisplay, personalRepDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user type ${displayType.getSubKey}"
-                ) {
-                  test(
-                    sessionDataWithStartingNewDraftReturn(
-                      incompleteAnswers.copy(
-                        individualUserType = setIndividualUserType(displayType),
-                        numberOfProperties = Some(2),
-                        wasAUKResident     = Some(false)
-                      ),
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1,
-                    triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
-                    "button.continue",
-                    expectReturnToSummaryLink = false,
-                    displayType
-                  )
-                }
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              capacitorDisplay,
+              personalRepDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user type ${displayType.getSubKey}"
+              ) {
+                test(
+                  sessionDataWithStartingNewDraftReturn(
+                    incompleteAnswers.copy(
+                      individualUserType = setIndividualUserType(displayType),
+                      numberOfProperties = Some(2),
+                      wasAUKResident = Some(false)
+                    ),
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1,
+                  triage.routes.MultipleDisposalsTriageController
+                    .wereYouAUKResident(),
+                  "button.continue",
+                  expectReturnToSummaryLink = false,
+                  displayType
+                )
+              }
             }
           }
 
           "the journey is complete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, personalRepDisplay, capacitorDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user type ${displayType.getSubKey}"
-                ) {
-                  test(
-                    sessionDataWithStartingNewDraftReturn(
-                      sample[CompleteMultipleDisposalsTriageAnswers]
-                        .copy(individualUserType = setIndividualUserType(displayType)),
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1,
-                    triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                    "button.continue",
-                    expectReturnToSummaryLink = false,
-                    displayType
-                  )
-                }
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              personalRepDisplay,
+              capacitorDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user type ${displayType.getSubKey}"
+              ) {
+                test(
+                  sessionDataWithStartingNewDraftReturn(
+                    sample[CompleteMultipleDisposalsTriageAnswers]
+                      .copy(individualUserType = setIndividualUserType(displayType)),
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1,
+                  triage.routes.MultipleDisposalsTriageController
+                    .checkYourAnswers(),
+                  "button.continue",
+                  expectReturnToSummaryLink = false,
+                  displayType
+                )
+              }
             }
           }
 
@@ -1907,7 +2118,8 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(incompleteAnswers)._1,
-              triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+              triage.routes.MultipleDisposalsTriageController
+                .wereYouAUKResident(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true,
               individualDisplay
@@ -1917,9 +2129,11 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithFillingOutReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self))
+                sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(Self))
               )._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true,
               individualDisplay
@@ -1936,7 +2150,7 @@ class MultipleDisposalsTriageControllerSpec
             IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(Self),
               numberOfProperties = Some(2),
-              wasAUKResident     = Some(true)
+              wasAUKResident = Some(true)
             )
           )._1
         )
@@ -1952,14 +2166,20 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the country of residence page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.countryOfResidenceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.countryOfResidenceSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
-      def updateDraftReturn(d: DraftMultipleDisposalsReturn, newAnswers: MultipleDisposalsTriageAnswers) =
+      def updateDraftReturn(
+        d: DraftMultipleDisposalsReturn,
+        newAnswers: MultipleDisposalsTriageAnswers
+      ) =
         d.copy(
           triageAnswers = newAnswers,
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
             case _: CalculatedYTDAnswers    => None
-            case n: NonCalculatedYTDAnswers => Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
+            case n: NonCalculatedYTDAnswers =>
+              Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
           }
         )
 
@@ -1972,13 +2192,14 @@ class MultipleDisposalsTriageControllerSpec
         val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2),
-          wasAUKResident     = Some(false),
+          wasAUKResident = Some(false),
           countryOfResidence = None
         )
 
         "the user has not started a draft return and" when {
 
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
           "user has not answered the country of residence section and " +
             "enters valid country" in {
@@ -2011,13 +2232,14 @@ class MultipleDisposalsTriageControllerSpec
             "re-selected different option" in {
             val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
               .copy(
-                individualUserType           = Some(Self),
-                countryOfResidence           = Some(country),
+                individualUserType = Some(Self),
+                countryOfResidence = Some(country),
                 wereAllPropertiesResidential = None,
-                assetTypes                   = None
+                assetTypes = None
               )
 
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+            val (session, journey) =
+              sessionDataWithStartingNewDraftReturn(answers)
 
             val (newCountryCode, newCountryName) = "CH" -> "Switzerland"
             val newCountry                       = Country(newCountryCode, Some(newCountryName))
@@ -2055,11 +2277,14 @@ class MultipleDisposalsTriageControllerSpec
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
               val answers = c.copy(countryOfResidence = Country("FI", None))
 
-              val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+              val (session, journey, draftReturn) =
+                sessionDataWithFillingOutReturn(answers)
 
               val updatedAnswers     = answers.copy(countryOfResidence = country)
-              val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
-              val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+              val updatedDraftReturn =
+                updateDraftReturn(draftReturn, updatedAnswers)
+              val updatedJourney     =
+                journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2071,7 +2296,9 @@ class MultipleDisposalsTriageControllerSpec
                 )(
                   Right(())
                 )
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
               }
 
               checkIsRedirect(
@@ -2093,7 +2320,7 @@ class MultipleDisposalsTriageControllerSpec
           val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
               numberOfProperties = Some(2),
-              wasAUKResident     = Some(false),
+              wasAUKResident = Some(false),
               countryOfResidence = Some(country)
             )
 
@@ -2115,10 +2342,10 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+          val answers      = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2),
-            wasAUKResident     = Some(false),
+            wasAUKResident = Some(false),
             countryOfResidence = None
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -2130,8 +2357,11 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"), { doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+            messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"),
+            { doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 s"$key.error.required"
               )
               doc.title() should startWith("Error:")
@@ -2144,7 +2374,7 @@ class MultipleDisposalsTriageControllerSpec
           val answers = IncompleteMultipleDisposalsTriageAnswers.empty
             .copy(
               numberOfProperties = Some(2),
-              wasAUKResident     = Some(false),
+              wasAUKResident = Some(false),
               countryOfResidence = None
             )
 
@@ -2157,8 +2387,11 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(key -> "XX"),
-            messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"), { doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+            messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"),
+            { doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 s"$key.error.notFound"
               )
               doc.title() should startWith("Error:")
@@ -2171,10 +2404,11 @@ class MultipleDisposalsTriageControllerSpec
 
       "show an error page" when {
 
-        val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+        val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           countryOfResidence = sample[Country]
         )
-        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+        val (session, journey, draftReturn) =
+          sessionDataWithFillingOutReturn(answers)
 
         val updatedAnswers     = answers.copy(countryOfResidence = country)
         val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
@@ -2207,7 +2441,9 @@ class MultipleDisposalsTriageControllerSpec
             )(
               Right(())
             )
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(key -> country.code))
@@ -2224,7 +2460,10 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.assetTypeForNonUkResidents()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "display the page" when {
 
@@ -2239,7 +2478,8 @@ class MultipleDisposalsTriageControllerSpec
             performAction,
             session,
             s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey}.title",
-            routes.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(),
+            routes.MultipleDisposalsTriageController
+              .assetTypeForNonUkResidentsSubmit(),
             expectedBackLink,
             expectedButtonMessageKey,
             expectReturnToSummaryLink,
@@ -2266,49 +2506,60 @@ class MultipleDisposalsTriageControllerSpec
         "the user has not started a new draft return and" when {
 
           "the journey is incomplete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, capacitorDisplay, personalRepDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user type ${displayType.getSubKey}"
-                ) {
-                  test(
-                    sessionDataWithStartingNewDraftReturn(
-                      IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType =
-                        setIndividualUserType(displayType)
-                      ),
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1.copy(userType = Some(displayType.userType)),
-                    triage.routes.MultipleDisposalsTriageController.countryOfResidence(),
-                    "button.continue",
-                    expectReturnToSummaryLink = false,
-                    displayType
-                  )
-                }
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              capacitorDisplay,
+              personalRepDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user type ${displayType.getSubKey}"
+              ) {
+                test(
+                  sessionDataWithStartingNewDraftReturn(
+                    IncompleteMultipleDisposalsTriageAnswers.empty
+                      .copy(individualUserType = setIndividualUserType(displayType)),
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1.copy(userType = Some(displayType.userType)),
+                  triage.routes.MultipleDisposalsTriageController
+                    .countryOfResidence(),
+                  "button.continue",
+                  expectReturnToSummaryLink = false,
+                  displayType
+                )
+              }
             }
           }
 
           "the journey is complete" in {
-            List(trustDisplay, agentDisplay, individualDisplay, personalRepDisplay, capacitorDisplay).foreach {
-              displayType: UserTypeDisplay =>
-                withClue(
-                  s"For user type ${displayType.getSubKey}"
-                ) {
-                  test(
-                    sessionDataWithStartingNewDraftReturn(
-                      sample[CompleteMultipleDisposalsTriageAnswers]
-                        .copy(individualUserType = setIndividualUserType(displayType)),
-                      displayType.name,
-                      displayType.userType,
-                      displayType.representativeType
-                    )._1,
-                    triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                    "button.continue",
-                    expectReturnToSummaryLink = false,
-                    displayType
-                  )
-                }
+            List(
+              trustDisplay,
+              agentDisplay,
+              individualDisplay,
+              personalRepDisplay,
+              capacitorDisplay
+            ).foreach { displayType: UserTypeDisplay =>
+              withClue(
+                s"For user type ${displayType.getSubKey}"
+              ) {
+                test(
+                  sessionDataWithStartingNewDraftReturn(
+                    sample[CompleteMultipleDisposalsTriageAnswers]
+                      .copy(individualUserType = setIndividualUserType(displayType)),
+                    displayType.name,
+                    displayType.userType,
+                    displayType.representativeType
+                  )._1,
+                  triage.routes.MultipleDisposalsTriageController
+                    .checkYourAnswers(),
+                  "button.continue",
+                  expectReturnToSummaryLink = false,
+                  displayType
+                )
+              }
             }
           }
 
@@ -2319,9 +2570,11 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is incomplete" in {
             test(
               sessionDataWithFillingOutReturn(
-                IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(Self))
+                IncompleteMultipleDisposalsTriageAnswers.empty
+                  .copy(individualUserType = Some(Self))
               )._1,
-              triage.routes.MultipleDisposalsTriageController.countryOfResidence(),
+              triage.routes.MultipleDisposalsTriageController
+                .countryOfResidence(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true,
               individualDisplay
@@ -2331,9 +2584,11 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithFillingOutReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self))
+                sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(Self))
               )._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true,
               individualDisplay
@@ -2348,14 +2603,19 @@ class MultipleDisposalsTriageControllerSpec
     "handling submits on the asset type for non-uk residents page" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.assetTypeForNonUkResidentsSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.assetTypeForNonUkResidentsSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
 
-      def updateDraftReturn(d: DraftMultipleDisposalsReturn, newAnswers: MultipleDisposalsTriageAnswers) =
+      def updateDraftReturn(
+        d: DraftMultipleDisposalsReturn,
+        newAnswers: MultipleDisposalsTriageAnswers
+      ) =
         d.copy(
-          triageAnswers                 = newAnswers,
+          triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = None,
-          yearToDateLiabilityAnswers    = None,
-          supportingEvidenceAnswers     = None
+          yearToDateLiabilityAnswers = None,
+          supportingEvidenceAnswers = None
         )
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
@@ -2370,11 +2630,12 @@ class MultipleDisposalsTriageControllerSpec
           val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2),
-            wasAUKResident     = Some(false),
+            wasAUKResident = Some(false),
             countryOfResidence = Some(country)
           )
 
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
           "user has not answered the asset type for non-uk residents section and " +
             "selects residential checkbox" in {
@@ -2442,7 +2703,9 @@ class MultipleDisposalsTriageControllerSpec
                     journey.copy(
                       newReturnTriageAnswers = Left(
                         answers.copy(
-                          assetTypes = Some(List(AssetType.Residential, AssetType.MixedUse))
+                          assetTypes = Some(
+                            List(AssetType.Residential, AssetType.MixedUse)
+                          )
                         )
                       )
                     )
@@ -2463,11 +2726,12 @@ class MultipleDisposalsTriageControllerSpec
               .copy(
                 individualUserType = Some(Self),
                 numberOfProperties = Some(2),
-                wasAUKResident     = Some(false),
-                assetTypes         = Some(List(AssetType.Residential))
+                wasAUKResident = Some(false),
+                assetTypes = Some(List(AssetType.Residential))
               )
 
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+            val (session, journey) =
+              sessionDataWithStartingNewDraftReturn(answers)
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -2500,13 +2764,14 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-              val answers = c.copy(
+              val answers                         = c.copy(
                 countryOfResidence = sample[Country],
-                assetTypes         = List(AssetType.Residential)
+                assetTypes = List(AssetType.Residential)
               )
-              val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+              val (session, journey, draftReturn) =
+                sessionDataWithFillingOutReturn(answers)
 
-              val updatedAnswers =
+              val updatedAnswers     =
                 IncompleteMultipleDisposalsTriageAnswers(
                   answers.individualUserType,
                   Some(answers.numberOfProperties),
@@ -2518,8 +2783,10 @@ class MultipleDisposalsTriageControllerSpec
                   Some(answers.taxYear),
                   Some(answers.completionDate)
                 )
-              val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
-              val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+              val updatedDraftReturn =
+                updateDraftReturn(draftReturn, updatedAnswers)
+              val updatedJourney     =
+                journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2531,7 +2798,9 @@ class MultipleDisposalsTriageControllerSpec
                 )(
                   Right(())
                 )
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
               }
 
               checkIsRedirect(
@@ -2553,8 +2822,8 @@ class MultipleDisposalsTriageControllerSpec
             .copy(
               individualUserType = Some(Self),
               numberOfProperties = Some(2),
-              wasAUKResident     = Some(false),
-              assetTypes         = Some(List(AssetType.Residential))
+              wasAUKResident = Some(false),
+              assetTypes = Some(List(AssetType.Residential))
             )
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -2575,42 +2844,51 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          List(trustDisplay, agentDisplay, individualDisplay, capacitorDisplay, personalRepDisplay).foreach {
-            displayType: UserTypeDisplay =>
-              withClue(
-                s"For user type ${displayType.getSubKey}"
-              ) {
-                val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                  individualUserType = setIndividualUserType(displayType),
-                  numberOfProperties = Some(2),
-                  wasAUKResident     = Some(false),
-                  countryOfResidence = Some(country),
-                  assetTypes         = None
-                )
-                val session = sessionDataWithStartingNewDraftReturn(
-                  answers,
-                  displayType.name,
-                  displayType.userType,
-                  displayType.representativeType
-                )._1.copy(userType = Some(displayType.userType))
+          List(
+            trustDisplay,
+            agentDisplay,
+            individualDisplay,
+            capacitorDisplay,
+            personalRepDisplay
+          ).foreach { displayType: UserTypeDisplay =>
+            withClue(
+              s"For user type ${displayType.getSubKey}"
+            ) {
+              val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                individualUserType = setIndividualUserType(displayType),
+                numberOfProperties = Some(2),
+                wasAUKResident = Some(false),
+                countryOfResidence = Some(country),
+                assetTypes = None
+              )
+              val session = sessionDataWithStartingNewDraftReturn(
+                answers,
+                displayType.name,
+                displayType.userType,
+                displayType.representativeType
+              )._1.copy(userType = Some(displayType.userType))
 
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(session)
-                }
-
-                checkPageIsDisplayed(
-                  performAction(),
-                  messageFromMessageKey(s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey}.title"), {
-                    doc =>
-                      doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
-                        s"$key${displayType.getSubKey}.error.required"
-                      )
-                      doc.title() should startWith("Error:")
-                  },
-                  BAD_REQUEST
-                )
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
               }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(
+                  s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey}.title"
+                ),
+                { doc =>
+                  doc
+                    .select("#error-summary-display > ul > li > a")
+                    .text() shouldBe messageFromMessageKey(
+                    s"$key${displayType.getSubKey}.error.required"
+                  )
+                  doc.title() should startWith("Error:")
+                },
+                BAD_REQUEST
+              )
+            }
           }
         }
 
@@ -2618,13 +2896,14 @@ class MultipleDisposalsTriageControllerSpec
 
       "show an error page" when {
 
-        val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+        val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           countryOfResidence = sample[Country],
-          assetTypes         = List(AssetType.Residential)
+          assetTypes = List(AssetType.Residential)
         )
-        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+        val (session, journey, draftReturn) =
+          sessionDataWithFillingOutReturn(answers)
 
-        val updatedAnswers =
+        val updatedAnswers     =
           IncompleteMultipleDisposalsTriageAnswers(
             answers.individualUserType,
             Some(answers.numberOfProperties),
@@ -2666,7 +2945,9 @@ class MultipleDisposalsTriageControllerSpec
             )(
               Right(())
             )
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(s"$key[]" -> "1"))
@@ -2678,9 +2959,13 @@ class MultipleDisposalsTriageControllerSpec
 
     "handling requests to display the completion date page" must {
 
-      def performAction(): Future[Result] = controller.completionDate()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.completionDate()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "display the page" when {
 
@@ -2704,8 +2989,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is incomplete" in {
             test(
-              sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
-              triage.routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .whenWereContractsExchanged(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -2713,8 +3001,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is complete" in {
             test(
-              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.continue",
               expectReturnToSummaryLink = false
             )
@@ -2726,8 +3017,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is incomplete" in {
             test(
-              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
-              triage.routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+              sessionDataWithFillingOutReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .whenWereContractsExchanged(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
@@ -2735,8 +3029,11 @@ class MultipleDisposalsTriageControllerSpec
 
           "the journey is complete" in {
             test(
-              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
-              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              sessionDataWithFillingOutReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1,
+              triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true
             )
@@ -2750,7 +3047,9 @@ class MultipleDisposalsTriageControllerSpec
     "handling submitted completion dates" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.completionDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.completionDateSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
 
       def formData(d: LocalDate): List[(String, String)] =
         List(
@@ -2759,7 +3058,10 @@ class MultipleDisposalsTriageControllerSpec
           "multipleDisposalsCompletionDate-year"  -> d.getYear.toString
         )
 
-      def updateDraftReturn(d: DraftMultipleDisposalsReturn, newAnswers: MultipleDisposalsTriageAnswers) =
+      def updateDraftReturn(
+        d: DraftMultipleDisposalsReturn,
+        newAnswers: MultipleDisposalsTriageAnswers
+      ) =
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
@@ -2768,21 +3070,32 @@ class MultipleDisposalsTriageControllerSpec
           yearToDateLiabilityAnswers = None
         )
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
+      )
 
       "show a form error" when {
 
-        def testFormError(formData: List[(String, String)])(expectedErrorMessageKey: String) = {
+        def testFormError(
+          formData: List[(String, String)]
+        )(expectedErrorMessageKey: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1)
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1
+            )
           }
 
           checkPageIsDisplayed(
             performAction(formData: _*),
             messageFromMessageKey("multipleDisposalsCompletionDate.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
@@ -2818,13 +3131,16 @@ class MultipleDisposalsTriageControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             completionDate = CompletionDate(TimeUtils.today().minusDays(1L))
           )
-          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+          val (session, journey, draftReturn) =
+            sessionDataWithFillingOutReturn(answers)
 
-          val updatedAnswers     = answers.copy(completionDate = CompletionDate(TimeUtils.today()))
-          val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
+          val updatedAnswers     =
+            answers.copy(completionDate = CompletionDate(TimeUtils.today()))
+          val updatedDraftReturn =
+            updateDraftReturn(draftReturn, updatedAnswers)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2838,25 +3154,34 @@ class MultipleDisposalsTriageControllerSpec
             )
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(TimeUtils.today()): _*))
+          checkIsTechnicalErrorPage(
+            performAction(formData(TimeUtils.today()): _*)
+          )
         }
 
         "there is an error updating the session" in {
-          val answers =
-            sample[CompleteMultipleDisposalsTriageAnswers].copy(completionDate = CompletionDate(TimeUtils.today()))
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val answers            =
+            sample[CompleteMultipleDisposalsTriageAnswers]
+              .copy(completionDate = CompletionDate(TimeUtils.today()))
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
-          val newCompletionDate = CompletionDate(answers.completionDate.value.minusDays(1L))
-          val updatedJourney =
+          val newCompletionDate =
+            CompletionDate(answers.completionDate.value.minusDays(1L))
+          val updatedJourney    =
             journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = newCompletionDate)))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newCompletionDate.value): _*))
+          checkIsTechnicalErrorPage(
+            performAction(formData(newCompletionDate.value): _*)
+          )
         }
 
       }
@@ -2867,16 +3192,19 @@ class MultipleDisposalsTriageControllerSpec
 
           "the user has not answered the question before" in {
             val answers            = IncompleteMultipleDisposalsTriageAnswers.empty
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+            val (session, journey) =
+              sessionDataWithStartingNewDraftReturn(answers)
 
             val newCompletionDate = CompletionDate(TimeUtils.today())
-            val updatedJourney =
+            val updatedJourney    =
               journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = Some(newCompletionDate))))
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(updatedJourney))
+              )(Right(()))
             }
 
             checkIsRedirect(
@@ -2887,17 +3215,22 @@ class MultipleDisposalsTriageControllerSpec
 
           "the user has already answered the question" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-              val answers            = c.copy(completionDate = CompletionDate(TimeUtils.today()))
-              val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+              val answers            =
+                c.copy(completionDate = CompletionDate(TimeUtils.today()))
+              val (session, journey) =
+                sessionDataWithStartingNewDraftReturn(answers)
 
-              val newCompletionDate = CompletionDate(answers.completionDate.value.minusDays(1L))
-              val updatedJourney =
+              val newCompletionDate =
+                CompletionDate(answers.completionDate.value.minusDays(1L))
+              val updatedJourney    =
                 journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = newCompletionDate)))
 
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(session)
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
               }
 
               checkIsRedirect(
@@ -2912,13 +3245,16 @@ class MultipleDisposalsTriageControllerSpec
 
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
-            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
               completionDate = CompletionDate(TimeUtils.today().minusDays(1L))
             )
-            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+            val (session, journey, draftReturn) =
+              sessionDataWithFillingOutReturn(answers)
 
-            val updatedAnswers     = answers.copy(completionDate = CompletionDate(TimeUtils.today()))
-            val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
+            val updatedAnswers     =
+              answers.copy(completionDate = CompletionDate(TimeUtils.today()))
+            val updatedDraftReturn =
+              updateDraftReturn(draftReturn, updatedAnswers)
             val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
@@ -2931,7 +3267,9 @@ class MultipleDisposalsTriageControllerSpec
               )(
                 Right(())
               )
-              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(updatedJourney))
+              )(Right(()))
             }
 
             checkIsRedirect(
@@ -2947,10 +3285,11 @@ class MultipleDisposalsTriageControllerSpec
       "not perform any updates" when {
 
         "the date submitted is the same as one that already exists in session" in {
-          val answers =
+          val answers            =
             sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(completionDate = CompletionDate(TimeUtils.today()))
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2971,11 +3310,12 @@ class MultipleDisposalsTriageControllerSpec
       val requiredPreviousAnswers =
         IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(sample[IndividualUserType]),
-          wasAUKResident     = Some(false),
+          wasAUKResident = Some(false),
           countryOfResidence = Some(sample[Country])
         )
 
-      def performAction(): Future[Result] = controller.disposalDateOfShares()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.disposalDateOfShares()(FakeRequest())
 
       "Page is displayed correctly" in {
         inSequence {
@@ -2992,15 +3332,21 @@ class MultipleDisposalsTriageControllerSpec
           performAction,
           messageFromMessageKey("sharesDisposalDate.title"),
           doc => {
-            doc.select("#sharesDisposalDate-form-hint").text() shouldBe messageFromMessageKey(
+            doc
+              .select("#sharesDisposalDate-form-hint")
+              .text()         shouldBe messageFromMessageKey(
               "sharesDisposalDate.helpText"
             )
-            doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+            doc
+              .select("#back")
+              .attr("href")   shouldBe routes.MultipleDisposalsTriageController
               .assetTypeForNonUkResidents()
               .url
             doc
               .select("#content > article > form")
-              .attr("action") shouldBe routes.MultipleDisposalsTriageController.disposalDateOfSharesSubmit().url
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .disposalDateOfSharesSubmit()
+              .url
           }
         )
 
@@ -3011,17 +3357,26 @@ class MultipleDisposalsTriageControllerSpec
     "handling submitted disposal of shares date" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.disposalDateOfSharesSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.disposalDateOfSharesSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
 
-      def formData(d: LocalDate): List[(String, String)] = List(
-        "sharesDisposalDate-day"   -> d.getDayOfMonth().toString,
-        "sharesDisposalDate-month" -> d.getMonthValue().toString,
-        "sharesDisposalDate-year"  -> d.getYear().toString
+      def formData(d: LocalDate): List[(String, String)] =
+        List(
+          "sharesDisposalDate-day"   -> d.getDayOfMonth().toString,
+          "sharesDisposalDate-month" -> d.getMonthValue().toString,
+          "sharesDisposalDate-year"  -> d.getYear().toString
+        )
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(),
+        isValidJourney
       )
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
-
-      def updateDraftReturn(d: DraftMultipleDisposalsReturn, newAnswers: MultipleDisposalsTriageAnswers) =
+      def updateDraftReturn(
+        d: DraftMultipleDisposalsReturn,
+        newAnswers: MultipleDisposalsTriageAnswers
+      ) =
         d.copy(
           triageAnswers = newAnswers,
           examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
@@ -3032,17 +3387,25 @@ class MultipleDisposalsTriageControllerSpec
 
       "show a form error" when {
 
-        def testFormError(formData: List[(String, String)])(expectedErrorMessageKey: String) = {
+        def testFormError(
+          formData: List[(String, String)]
+        )(expectedErrorMessageKey: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1)
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1
+            )
           }
 
           checkPageIsDisplayed(
             performAction(formData: _*),
             messageFromMessageKey("sharesDisposalDate.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
@@ -3079,19 +3442,21 @@ class MultipleDisposalsTriageControllerSpec
       "show an error page" when {
 
         "there is an error updating the session" in {
-          val taxYear = sample[TaxYear]
-          val today   = TimeUtils.today()
-          val answers =
-            sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = Some(CompletionDate(today)))
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val taxYear            = sample[TaxYear]
+          val today              = TimeUtils.today()
+          val answers            =
+            sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(completionDate = Some(CompletionDate(today)))
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
           val newCompletionDate = CompletionDate(today.minusDays(1))
-          val updatedJourney =
+          val updatedJourney    =
             journey.copy(newReturnTriageAnswers =
               Left(
                 answers.copy(
-                  completionDate         = Some(newCompletionDate),
-                  taxYear                = Some(taxYear),
+                  completionDate = Some(newCompletionDate),
+                  taxYear = Some(taxYear),
                   taxYearAfter6April2020 = Some(true)
                 )
               )
@@ -3101,10 +3466,14 @@ class MultipleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockGetTaxYear(newCompletionDate.value)(Right(Some(taxYear)))
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newCompletionDate.value): _*))
+          checkIsTechnicalErrorPage(
+            performAction(formData(newCompletionDate.value): _*)
+          )
         }
 
       }
@@ -3117,14 +3486,16 @@ class MultipleDisposalsTriageControllerSpec
             val tooEarlyDate = LocalDate.of(2020, 1, 1)
             val answers      = sample[IncompleteMultipleDisposalsTriageAnswers]
 
-            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+            val (session, journey, draftReturn) =
+              sessionDataWithFillingOutReturn(answers)
 
-            val updatedAnswers = answers.copy(
-              completionDate         = Some(CompletionDate(tooEarlyDate)),
-              taxYear                = None,
+            val updatedAnswers     = answers.copy(
+              completionDate = Some(CompletionDate(tooEarlyDate)),
+              taxYear = None,
               taxYearAfter6April2020 = Some(false)
             )
-            val updatedDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
+            val updatedDraftReturn =
+              updateDraftReturn(draftReturn, updatedAnswers)
             val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
@@ -3136,7 +3507,9 @@ class MultipleDisposalsTriageControllerSpec
                 journey.subscribedDetails.cgtReference,
                 journey.agentReferenceNumber
               )(Right(()))
-              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(updatedJourney))
+              )(Right(()))
             }
 
             checkIsRedirect(
@@ -3152,10 +3525,11 @@ class MultipleDisposalsTriageControllerSpec
       "not perform any updates" when {
 
         "the date submitted is the same as one that already exists in session" in {
-          val answers =
+          val answers            =
             sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(completionDate = CompletionDate(TimeUtils.today()))
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(answers)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3236,7 +3610,10 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "redirect to the who is individual representing page when no individual user type can be found and the subscribed " +
         "user type is individual" in {
@@ -3250,7 +3627,8 @@ class MultipleDisposalsTriageControllerSpec
 
         "an individual user type of capacitor is found" in {
           testRedirectWhenIncomplete(
-            allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.Capacitor)),
+            allQuestionsAnsweredUk
+              .copy(individualUserType = Some(IndividualUserType.Capacitor)),
             representee.routes.RepresenteeController.enterName()
           )
         }
@@ -3299,7 +3677,8 @@ class MultipleDisposalsTriageControllerSpec
         "the user was not a non uk resident and they have not selected asset types yet" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredNonUk.copy(assetTypes = None),
-            routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
+            routes.MultipleDisposalsTriageController
+              .assetTypeForNonUkResidents()
           )
         }
 
@@ -3309,7 +3688,8 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user was not a non uk resident and they have selected mixed asset types" in {
           testRedirectWhenIncomplete(
-            allQuestionsAnsweredNonUk.copy(assetTypes = Some(List(AssetType.MixedUse))),
+            allQuestionsAnsweredNonUk
+              .copy(assetTypes = Some(List(AssetType.MixedUse))),
             routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
           )
         }
@@ -3327,12 +3707,18 @@ class MultipleDisposalsTriageControllerSpec
           )
 
           forAll { assetTypes: List[AssetType] =>
-            whenever(!invalidAssetTypes.contains(assetTypes.distinct) && assetTypes.nonEmpty) {
+            whenever(
+              !invalidAssetTypes
+                .contains(assetTypes.distinct) && assetTypes.nonEmpty
+            ) {
               val (session, journey, draftReturn) =
-                sessionDataWithFillingOutReturn(allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)))
-              val updatedDraftReturn =
+                sessionDataWithFillingOutReturn(
+                  allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes))
+                )
+              val updatedDraftReturn              =
                 draftReturn.copy(triageAnswers = completeAnswersNonUk.copy(assetTypes = assetTypes))
-              val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+              val updatedJourney                  =
+                journey.copy(draftReturn = updatedDraftReturn)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -3342,7 +3728,9 @@ class MultipleDisposalsTriageControllerSpec
                   journey.subscribedDetails.cgtReference,
                   journey.agentReferenceNumber
                 )(Right(()))
-                mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+                mockStoreSession(
+                  session.copy(journeyStatus = Some(updatedJourney))
+                )(Right(()))
               }
 
               checkPageIsDisplayed(
@@ -3360,7 +3748,8 @@ class MultipleDisposalsTriageControllerSpec
         "the user was a uk resident and they have not answered the question yet" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(wereAllPropertiesResidential = None),
-            routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()
+            routes.MultipleDisposalsTriageController
+              .wereAllPropertiesResidential()
           )
         }
       }
@@ -3369,8 +3758,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user was a uk resident and they said not all properties were residential" in {
           testRedirectWhenIncomplete(
-            allQuestionsAnsweredUk.copy(wereAllPropertiesResidential = Some(false)),
-            routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential()
+            allQuestionsAnsweredUk
+              .copy(wereAllPropertiesResidential = Some(false)),
+            routes.CommonTriageQuestionsController
+              .ukResidentCanOnlyDisposeResidential()
           )
         }
 
@@ -3380,8 +3771,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "the question has not been answered yet" in {
           testRedirectWhenIncomplete(
-            allQuestionsAnsweredUk.copy(taxYearAfter6April2020 = None, taxYear = None),
-            routes.MultipleDisposalsTriageController.whenWereContractsExchanged()
+            allQuestionsAnsweredUk
+              .copy(taxYearAfter6April2020 = None, taxYear = None),
+            routes.MultipleDisposalsTriageController
+              .whenWereContractsExchanged()
           )
         }
 
@@ -3405,7 +3798,8 @@ class MultipleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                allQuestionsAnsweredUk.copy(taxYearAfter6April2020 = Some(true), taxYear = None),
+                allQuestionsAnsweredUk
+                  .copy(taxYearAfter6April2020 = Some(true), taxYear = None),
                 Right(sample[IndividualName])
               )._1
             )
@@ -3415,8 +3809,10 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "there is an error storing a draft return" in {
-          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(allQuestionsAnsweredUk)
-          val updatedDraftReturn              = draftReturn.copy(triageAnswers = completeAnswersUk)
+          val (session, journey, draftReturn) =
+            sessionDataWithFillingOutReturn(allQuestionsAnsweredUk)
+          val updatedDraftReturn              =
+            draftReturn.copy(triageAnswers = completeAnswersUk)
           val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
@@ -3427,7 +3823,9 @@ class MultipleDisposalsTriageControllerSpec
               journey.subscribedDetails.cgtReference,
               journey.agentReferenceNumber
             )(Right(()))
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -3450,13 +3848,17 @@ class MultipleDisposalsTriageControllerSpec
 
         "there is an error updating the session when converting from inomplete answers to " +
           "complete answers" in {
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredUk)
-          val updatedJourney     = journey.copy(newReturnTriageAnswers = Left(completeAnswersUk))
+          val (session, journey) =
+            sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredUk)
+          val updatedJourney     =
+            journey.copy(newReturnTriageAnswers = Left(completeAnswersUk))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -3472,24 +3874,32 @@ class MultipleDisposalsTriageControllerSpec
           "they were a uk resident" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(sessionDataWithFillingOutReturn(completeAnswersUk)._1)
+              mockGetSession(
+                sessionDataWithFillingOutReturn(completeAnswersUk)._1
+              )
             }
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+              messageFromMessageKey("multipleDisposals.triage.cya.title"),
+              { doc =>
+                doc
+                  .select("#guidanceLink")
+                  .attr(
+                    "href"
+                  )                              shouldBe routes.MultipleDisposalsTriageController
                   .guidance()
                   .url
                 doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
                   "multipleDisposals.triage.cya.guidanceLink"
                 )
 
-                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
-                  completeAnswersUk,
-                  None,
-                  doc
-                )
+                MultipleDisposalsTriageControllerSpec
+                  .validateMultipleDisposalsTriageCheckYourAnswersPage(
+                    completeAnswersUk,
+                    None,
+                    doc
+                  )
               }
             )
 
@@ -3498,24 +3908,32 @@ class MultipleDisposalsTriageControllerSpec
           "they were a not a uk resident" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswersNonUk)._1)
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(completeAnswersNonUk)._1
+              )
             }
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+              messageFromMessageKey("multipleDisposals.triage.cya.title"),
+              { doc =>
+                doc
+                  .select("#guidanceLink")
+                  .attr(
+                    "href"
+                  )                              shouldBe routes.MultipleDisposalsTriageController
                   .guidance()
                   .url
                 doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
                   "multipleDisposals.triage.cya.guidanceLink"
                 )
 
-                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
-                  completeAnswersNonUk,
-                  None,
-                  doc
-                )
+                MultipleDisposalsTriageControllerSpec
+                  .validateMultipleDisposalsTriageCheckYourAnswersPage(
+                    completeAnswersNonUk,
+                    None,
+                    doc
+                  )
               }
             )
 
@@ -3524,24 +3942,35 @@ class MultipleDisposalsTriageControllerSpec
           "they user is an agent" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswersNonUk, userType = UserType.Agent)._1)
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  completeAnswersNonUk,
+                  userType = UserType.Agent
+                )._1
+              )
             }
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+              messageFromMessageKey("multipleDisposals.triage.cya.title"),
+              { doc =>
+                doc
+                  .select("#guidanceLink")
+                  .attr(
+                    "href"
+                  )                              shouldBe routes.MultipleDisposalsTriageController
                   .guidance()
                   .url
                 doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
                   "multipleDisposals.triage.cya.guidanceLink"
                 )
 
-                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
-                  completeAnswersNonUk,
-                  Some(UserType.Agent),
-                  doc
-                )
+                MultipleDisposalsTriageControllerSpec
+                  .validateMultipleDisposalsTriageCheckYourAnswersPage(
+                    completeAnswersNonUk,
+                    Some(UserType.Agent),
+                    doc
+                  )
               }
             )
 
@@ -3562,19 +3991,26 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-              doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+            messageFromMessageKey("multipleDisposals.triage.cya.title"),
+            { doc =>
+              doc
+                .select("#guidanceLink")
+                .attr("href") shouldBe routes.MultipleDisposalsTriageController
                 .guidance()
                 .url
-              doc.select("#completionDate-question").text shouldBe messageFromMessageKey(
+              doc
+                .select("#completionDate-question")
+                .text         shouldBe messageFromMessageKey(
                 "sharesDisposalDate.title"
               )
 
-              MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
-                completeAnswersNonUk.copy(assetTypes = List(IndirectDisposal)),
-                Some(UserType.Agent),
-                doc
-              )
+              MultipleDisposalsTriageControllerSpec
+                .validateMultipleDisposalsTriageCheckYourAnswersPage(
+                  completeAnswersNonUk
+                    .copy(assetTypes = List(IndirectDisposal)),
+                  Some(UserType.Agent),
+                  doc
+                )
             }
           )
         }
@@ -3582,8 +4018,10 @@ class MultipleDisposalsTriageControllerSpec
         "the user has just answered all the question in the section and" when {
 
           "all updated are successful when the user was a uk resident" in {
-            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(allQuestionsAnsweredUk)
-            val updatedDraftReturn              = draftReturn.copy(triageAnswers = completeAnswersUk)
+            val (session, journey, draftReturn) =
+              sessionDataWithFillingOutReturn(allQuestionsAnsweredUk)
+            val updatedDraftReturn              =
+              draftReturn.copy(triageAnswers = completeAnswersUk)
             val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
@@ -3594,54 +4032,72 @@ class MultipleDisposalsTriageControllerSpec
                 journey.subscribedDetails.cgtReference,
                 journey.agentReferenceNumber
               )(Right(()))
-              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(updatedJourney))
+              )(Right(()))
             }
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+              messageFromMessageKey("multipleDisposals.triage.cya.title"),
+              { doc =>
+                doc
+                  .select("#guidanceLink")
+                  .attr(
+                    "href"
+                  )                              shouldBe routes.MultipleDisposalsTriageController
                   .guidance()
                   .url
                 doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
                   "multipleDisposals.triage.cya.guidanceLink"
                 )
 
-                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
-                  completeAnswersUk,
-                  None,
-                  doc
-                )
+                MultipleDisposalsTriageControllerSpec
+                  .validateMultipleDisposalsTriageCheckYourAnswersPage(
+                    completeAnswersUk,
+                    None,
+                    doc
+                  )
               }
             )
 
           }
 
           "all updated are successful when the user was a not uk resident" in {
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredNonUk)
-            val updatedJourney     = journey.copy(newReturnTriageAnswers = Left(completeAnswersNonUk))
+            val (session, journey) =
+              sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredNonUk)
+            val updatedJourney     =
+              journey.copy(newReturnTriageAnswers = Left(completeAnswersNonUk))
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(updatedJourney))
+              )(Right(()))
             }
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+              messageFromMessageKey("multipleDisposals.triage.cya.title"),
+              { doc =>
+                doc
+                  .select("#guidanceLink")
+                  .attr(
+                    "href"
+                  )                              shouldBe routes.MultipleDisposalsTriageController
                   .guidance()
                   .url
                 doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
                   "multipleDisposals.triage.cya.guidanceLink"
                 )
 
-                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
-                  completeAnswersNonUk,
-                  None,
-                  doc
-                )
+                MultipleDisposalsTriageControllerSpec
+                  .validateMultipleDisposalsTriageCheckYourAnswersPage(
+                    completeAnswersNonUk,
+                    None,
+                    doc
+                  )
               }
             )
 
@@ -3652,18 +4108,27 @@ class MultipleDisposalsTriageControllerSpec
     }
 
     "handling submits on the check your answers page" when {
-      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswersSubmit()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
 
       "the user has not started a new draft return yet" must {
 
         val completeAnswers    = sample[CompleteMultipleDisposalsTriageAnswers]
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(completeAnswers)
+        val (session, journey) =
+          sessionDataWithStartingNewDraftReturn(completeAnswers)
         val draftId            = UUID.randomUUID()
-        val newDraftReturn =
-          DraftMultipleDisposalsReturn.newDraftReturn(draftId, completeAnswers, journey.representeeAnswers)
-        val newJourney = FillingOutReturn(
+        val newDraftReturn     =
+          DraftMultipleDisposalsReturn.newDraftReturn(
+            draftId,
+            completeAnswers,
+            journey.representeeAnswers
+          )
+        val newJourney         = FillingOutReturn(
           journey.subscribedDetails,
           journey.ggCredId,
           journey.agentReferenceNumber,
@@ -3697,7 +4162,9 @@ class MultipleDisposalsTriageControllerSpec
                 journey.subscribedDetails.cgtReference,
                 journey.agentReferenceNumber
               )(Right(()))
-              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
+                Left(Error(""))
+              )
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -3717,10 +4184,15 @@ class MultipleDisposalsTriageControllerSpec
                 journey.subscribedDetails.cgtReference,
                 journey.agentReferenceNumber
               )(Right(()))
-              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
+                Right(())
+              )
             }
 
-            checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+            checkIsRedirect(
+              performAction(),
+              controllers.returns.routes.TaskListController.taskList()
+            )
           }
 
         }
@@ -3732,10 +4204,17 @@ class MultipleDisposalsTriageControllerSpec
         "redirect to the task list page" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1)
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                sample[CompleteMultipleDisposalsTriageAnswers]
+              )._1
+            )
           }
 
-          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+          checkIsRedirect(
+            performAction(),
+            controllers.returns.routes.TaskListController.taskList()
+          )
         }
 
       }
@@ -3752,7 +4231,7 @@ class MultipleDisposalsTriageControllerSpec
     expectedBackLink: Call,
     expectedButtonMessageKey: String,
     expectReturnToSummaryLink: Boolean,
-    expectedAdditionalIdKeyValues: List[SelectorAndValue]                    = Nil,
+    expectedAdditionalIdKeyValues: List[SelectorAndValue] = Nil,
     expectedAdditionalNameAttributeKeyValues: List[TagAttributePairAndValue] = Nil
   ): Unit = {
     inSequence {
@@ -3762,19 +4241,26 @@ class MultipleDisposalsTriageControllerSpec
 
     checkPageIsDisplayed(
       performAction(),
-      messageFromMessageKey(expectedPageTitleMessageKey), { doc =>
-        doc.select("#back").attr("href") shouldBe expectedBackLink.url
+      messageFromMessageKey(expectedPageTitleMessageKey),
+      { doc =>
+        doc.select("#back").attr("href")          shouldBe expectedBackLink.url
         doc
           .select("#content > article > form")
-          .attr("action")                  shouldBe expectedSubmit.url
-        doc.select("#submitButton").text() shouldBe messageFromMessageKey(expectedButtonMessageKey)
+          .attr("action")                         shouldBe expectedSubmit.url
+        doc.select("#submitButton").text()        shouldBe messageFromMessageKey(
+          expectedButtonMessageKey
+        )
         doc.select("#returnToSummaryLink").text() shouldBe (
-          if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link")
+          if (expectReturnToSummaryLink)
+            messageFromMessageKey("returns.return-to-summary-link")
           else ""
         )
         expectedAdditionalIdKeyValues.map(a => doc.select(a.selector).html() should be(a.value))
         expectedAdditionalNameAttributeKeyValues.map(v =>
-          doc.select(v.tagName).attr(v.attributeName, v.attributeValue).text() shouldBe (v.value)
+          doc
+            .select(v.tagName)
+            .attr(v.attributeName, v.attributeValue)
+            .text() shouldBe (v.value)
         )
       }
     )
@@ -3792,7 +4278,9 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
 
   final case class UserTypeDisplay(
     userType: UserType,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    representativeType: Option[
+      Either[PersonalRepresentative.type, Capacitor.type]
+    ],
     name: Either[TrustName, IndividualName]
   ) {
     def getSubKey: String =
@@ -3812,14 +4300,19 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
 
     answers.individualUserType.foreach { individualUserType =>
       doc.select("#individualUserType-answer").text() shouldBe messages(
-        if (userType.contains(UserType.Agent)) s"individualUserType.agent.$individualUserType"
+        if (userType.contains(UserType.Agent))
+          s"individualUserType.agent.$individualUserType"
         else s"individualUserType.$individualUserType"
       )
     }
 
-    doc.select("#numberOfProperties-answer").text() shouldBe messages("numberOfProperties.MoreThanOne")
+    doc.select("#numberOfProperties-answer").text() shouldBe messages(
+      "numberOfProperties.MoreThanOne"
+    )
 
-    doc.select("#multipleDisposalsNumberOfProperties-answer").text() shouldBe answers.numberOfProperties.toString
+    doc
+      .select("#multipleDisposalsNumberOfProperties-answer")
+      .text() shouldBe answers.numberOfProperties.toString
 
     if (answers.countryOfResidence.isUk())
       doc.select("#wereYouAUKResident-answer").text() shouldBe "Yes"
@@ -3829,17 +4322,26 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     if (answers.countryOfResidence.isUk())
       doc.select("#wereAllPropertiesResidential-answer").text() shouldBe "Yes"
     else {
-      doc.select("#countryOfResidence-answer").text() shouldBe answers.countryOfResidence.name
+      doc
+        .select("#countryOfResidence-answer")
+        .text() shouldBe answers.countryOfResidence.name
         .getOrElse(answers.countryOfResidence.code)
-      doc.select("#assetTypeForNonUkResidents-answer").text() shouldBe answers.assetTypes
-        .map(assetType => messages(s"multipleDisposalsAssetTypeForNonUkResidents.${assetType.toString}"))
+      doc
+        .select("#assetTypeForNonUkResidents-answer")
+        .text() shouldBe answers.assetTypes
+        .map(assetType =>
+          messages(
+            s"multipleDisposalsAssetTypeForNonUkResidents.${assetType.toString}"
+          )
+        )
         .mkString(", ")
     }
 
     doc
       .select("#taxYear-answer")
       .text()                                   shouldBe s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"
-    doc.select("#completionDate-answer").text() shouldBe TimeUtils.govDisplayFormat(answers.completionDate.value)
+    doc.select("#completionDate-answer").text() shouldBe TimeUtils
+      .govDisplayFormat(answers.completionDate.value)
   }
 
 }
@@ -3856,17 +4358,24 @@ class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
 
   val mockUUIDGenerator = mock[UUIDGenerator]
 
-  val trustDisplay      = UserTypeDisplay(UserType.Organisation, None, Left(sample[TrustName]))
-  val agentDisplay      = UserTypeDisplay(UserType.Agent, None, Right(sample[IndividualName]))
-  val individualDisplay = UserTypeDisplay(UserType.Individual, None, Right(sample[IndividualName]))
+  val trustDisplay       =
+    UserTypeDisplay(UserType.Organisation, None, Left(sample[TrustName]))
+  val agentDisplay       =
+    UserTypeDisplay(UserType.Agent, None, Right(sample[IndividualName]))
+  val individualDisplay  =
+    UserTypeDisplay(UserType.Individual, None, Right(sample[IndividualName]))
   val personalRepDisplay =
     UserTypeDisplay(
       UserType.Individual,
       Some(Left(PersonalRepresentative)),
       Right(sample[IndividualName])
     )
-  val capacitorDisplay =
-    UserTypeDisplay(UserType.Individual, Some(Right(Capacitor)), Right(sample[IndividualName]))
+  val capacitorDisplay   =
+    UserTypeDisplay(
+      UserType.Individual,
+      Some(Right(Capacitor)),
+      Right(sample[IndividualName])
+    )
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -3945,23 +4454,31 @@ class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
 
   def sessionDataWithStartingNewDraftReturn(
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
-    name: Either[TrustName, IndividualName]                                         = Right(sample[IndividualName]),
-    userType: UserType                                                              = UserType.Individual,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]] = None
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    userType: UserType = UserType.Individual,
+    representativeType: Option[
+      Either[PersonalRepresentative.type, Capacitor.type]
+    ] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers),
-      subscribedDetails      = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber   = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
-      representeeAnswers = if (representativeType.exists(_.isLeft)) {
-        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
-      } else if (representativeType.exists(_.isRight)) {
-        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-      } else None
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      agentReferenceNumber =
+        if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
+        else None,
+      representeeAnswers =
+        if (representativeType.exists(_.isLeft))
+          Some(
+            sample[CompleteRepresenteeAnswers]
+              .copy(dateOfDeath = Some(sample[DateOfDeath]))
+          )
+        else if (representativeType.exists(_.isRight))
+          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+        else None
     )
     SessionData.empty.copy(
       journeyStatus = Some(startingNewDraftReturn),
-      userType      = Some(userType)
+      userType = Some(userType)
     ) -> startingNewDraftReturn
   }
 }

@@ -41,8 +41,9 @@ object AddressJourneyType {
 
     final case class RegistrationReadyAddressJourney(journey: RegistrationReady) extends Onboarding
 
-    final case class IndividualSupplyingInformationAddressJourney(journey: IndividualSupplyingInformation)
-        extends Onboarding
+    final case class IndividualSupplyingInformationAddressJourney(
+      journey: IndividualSupplyingInformation
+    ) extends Onboarding
 
     final case class SubscriptionReadyAddressJourney(journey: SubscriptionReady) extends Onboarding
 
@@ -58,7 +59,10 @@ object AddressJourneyType {
 
     final case class FillingOutReturnAddressJourney(
       journey: FillingOutReturn,
-      draftReturn: Either[DraftMultipleDisposalsReturn, DraftSingleDisposalReturn],
+      draftReturn: Either[
+        DraftMultipleDisposalsReturn,
+        DraftSingleDisposalReturn
+      ],
       individualUserType: Option[IndividualUserType]
     ) extends Returns
 
@@ -71,31 +75,37 @@ object AddressJourneyType {
     final case class EnteringCompanyDetails(
       journey: FillingOutReturn,
       draftReturn: DraftSingleIndirectDisposalReturn,
-      representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+      representativeType: Option[
+        Either[PersonalRepresentative.type, Capacitor.type]
+      ],
       isATrust: Boolean
     ) extends Returns
 
   }
 
-  implicit val eq: Eq[AddressJourneyType] = Eq.fromUniversalEquals[AddressJourneyType]
+  implicit val eq: Eq[AddressJourneyType] =
+    Eq.fromUniversalEquals[AddressJourneyType]
 
   implicit class AddressJourneyTypeOps(private val a: AddressJourneyType) extends AnyVal {
 
-    def showAccountMenu(): Boolean = a match {
-      case _: ManagingSubscription => true
-      case _                       => false
-    }
-    def captionMessageKey(): String = a match {
-      case _: Onboarding           => "subscription.caption"
-      case _: ManagingSubscription => "account.caption"
-      case f: FillingOutReturnAddressJourney =>
-        f.draftReturn.fold(
-          _ => "returns.property-details.multipleDisposals.caption",
-          _ => "returns.property-address.singleDisposal.caption"
-        )
-      case _: EnteringCompanyDetails                   => "companyDetails.caption"
-      case _: ChangingRepresenteeContactAddressJourney => "representee.caption"
-    }
+    def showAccountMenu(): Boolean  =
+      a match {
+        case _: ManagingSubscription => true
+        case _                       => false
+      }
+    def captionMessageKey(): String =
+      a match {
+        case _: Onboarding                               => "subscription.caption"
+        case _: ManagingSubscription                     => "account.caption"
+        case f: FillingOutReturnAddressJourney           =>
+          f.draftReturn.fold(
+            _ => "returns.property-details.multipleDisposals.caption",
+            _ => "returns.property-address.singleDisposal.caption"
+          )
+        case _: EnteringCompanyDetails                   => "companyDetails.caption"
+        case _: ChangingRepresenteeContactAddressJourney =>
+          "representee.caption"
+      }
 
     def showReturnToSummaryLink(): Boolean =
       a match {

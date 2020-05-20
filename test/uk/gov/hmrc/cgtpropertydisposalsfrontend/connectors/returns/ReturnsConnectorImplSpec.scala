@@ -51,7 +51,10 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
     )
   )
 
-  val connector = new ReturnsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+  val connector = new ReturnsConnectorImpl(
+    mockHttp,
+    new ServicesConfig(config, new RunMode(config, Mode.Test))
+  )
 
   "ReturnsConnectorImpl" when {
 
@@ -105,8 +108,10 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
     "handling requests to list returns" must {
 
       val cgtReference       = sample[CgtReference]
-      val (fromDate, toDate) = LocalDate.of(2020, 1, 2) -> LocalDate.of(2020, 3, 4)
-      val expectedUrl        = s"http://host:123/returns/${cgtReference.value}/2020-01-02/2020-03-04"
+      val (fromDate, toDate) =
+        LocalDate.of(2020, 1, 2) -> LocalDate.of(2020, 3, 4)
+      val expectedUrl =
+        s"http://host:123/returns/${cgtReference.value}/2020-01-02/2020-03-04"
 
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),

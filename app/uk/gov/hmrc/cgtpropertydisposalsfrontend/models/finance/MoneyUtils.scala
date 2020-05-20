@@ -34,9 +34,11 @@ object MoneyUtils {
 
   val maxAmountOfPounds: BigDecimal = BigDecimal("5e10")
 
-  private val currencyFormatter = java.text.NumberFormat.getCurrencyInstance(Locale.UK)
+  private val currencyFormatter =
+    java.text.NumberFormat.getCurrencyInstance(Locale.UK)
 
-  def formatAmountOfMoneyWithPoundSign(d: BigDecimal): String = currencyFormatter.format(d).stripSuffix(".00")
+  def formatAmountOfMoneyWithPoundSign(d: BigDecimal): String =
+    currencyFormatter.format(d).stripSuffix(".00")
 
   def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String =
     formatAmountOfMoneyWithPoundSign(d).replaceAllLiterally("£", "")
@@ -54,21 +56,29 @@ object MoneyUtils {
       .leftMap(_ => FormError(key, "error.invalid"))
       .flatMap { d =>
         if (isTooSmall(d)) Left(FormError(key, "error.tooSmall", tooSmallArgs))
-        else if (isTooLarge(d)) {
+        else if (isTooLarge(d))
           Left(FormError(key, "error.tooLarge", tooLargeArgs))
-        } else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
+        else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2))
+          Left(FormError(key, "error.tooManyDecimals"))
         else Right(d)
       }
 
-  def validateValueIsLessThan(key: String, limitInclusive: AmountInPence, errorMessageKey: => String)(
+  def validateValueIsLessThan(
+    key: String,
+    limitInclusive: AmountInPence,
+    errorMessageKey: => String
+  )(
     value: BigDecimal
   ): Either[FormError, BigDecimal] =
     if (value <= limitInclusive.inPounds()) Right(value)
-    else {
+    else
       Left(
-        FormError(key, errorMessageKey, List(limitInclusive.inPounds().toString()))
+        FormError(
+          key,
+          errorMessageKey,
+          List(limitInclusive.inPounds().toString())
+        )
       )
-    }
 
   def amountInPoundsFormatter(
     isTooSmall: BigDecimal => Boolean,
@@ -77,11 +87,22 @@ object MoneyUtils {
     tooLargeArgs: List[String] = Nil
   ): Formatter[BigDecimal] =
     new Formatter[BigDecimal] {
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BigDecimal] = {
+      override def bind(
+        key: String,
+        data: Map[String, String]
+      ): Either[Seq[FormError], BigDecimal] = {
         val result =
           FormUtils
             .readValue(key, data, identity)
-            .flatMap(validateAmountOfMoney(key, isTooSmall, isTooLarge, tooSmallArgs, tooLargeArgs)(_))
+            .flatMap(
+              validateAmountOfMoney(
+                key,
+                isTooSmall,
+                isTooLarge,
+                tooSmallArgs,
+                tooLargeArgs
+              )(_)
+            )
         result.leftMap(Seq(_))
       }
 
@@ -116,14 +137,13 @@ object MoneyUtils {
           Right(BigDecimal("0"))
         )
       ) { d =>
-        if (d === BigDecimal("0")) {
+        if (d === BigDecimal("0"))
           Map(optionId -> "1")
-        } else {
+        else
           Map(
-            optionId -> "0",
-            valueId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
+            optionId   -> "0",
+            valueId    -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
           )
-        }
       }
 
     Form(
