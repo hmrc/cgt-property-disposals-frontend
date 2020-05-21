@@ -975,7 +975,10 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the enter details of one property section is incomplete" in {
           val incompletePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              assetTypes         = List(AssetType.Residential),
+              individualUserType = None
+            ),
             examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
           )
 
@@ -993,7 +996,10 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the enter details of one property section is complete" in {
           val completePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              assetTypes         = List(AssetType.Residential),
+              individualUserType = None
+            ),
             examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
           )
 
@@ -1002,6 +1008,51 @@ class TaskListControllerSpec
           )(
             "examplePropertyDetails",
             messageFromMessageKey("task-list.enter-example-property-address.link"),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the enter details of one company section status" when {
+
+        "the session data indicates that they are filling in a return and the enter details of one company section is incomplete" in {
+          val incompletePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              assetTypes         = List(AssetType.IndirectDisposal),
+              individualUserType = None
+            ),
+            examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+          )
+
+          testStateOfSection(
+            incompletePropertyDetails
+          )(
+            "examplePropertyDetails",
+            messageFromMessageKey("task-list.indirect.enter-example-property-address.link"),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the enter details of one company section is complete" in {
+          val completePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              assetTypes         = List(AssetType.IndirectDisposal),
+              individualUserType = None
+            ),
+            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+          )
+
+          testStateOfSection(
+            completePropertyDetails
+          )(
+            "examplePropertyDetails",
+            messageFromMessageKey("task-list.indirect.enter-example-property-address.link"),
             address.routes.PropertyDetailsController.checkYourAnswers(),
             TaskListStatus.Complete
           )

@@ -37,7 +37,10 @@
  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[LocalDate], isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+  form: Form[LocalDate],
+  isATrust: Boolean
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsDisposalDate"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

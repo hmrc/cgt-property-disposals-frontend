@@ -418,7 +418,12 @@ class PropertyDetailsController @Inject() (
 
               val f    = getDisposalDateFrom(taxYear, completionDate)
               val form = disposalDate.fold(f)(c => f.fill(c.value))
-              Ok(multipleDisposalsDisposalDatePage(form, r.journey.subscribedDetails.isATrust))
+              Ok(
+                multipleDisposalsDisposalDatePage(
+                  form,
+                  r.journey.subscribedDetails.isATrust
+                )
+              )
 
             case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
           }

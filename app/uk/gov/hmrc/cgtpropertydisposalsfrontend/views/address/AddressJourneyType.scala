@@ -85,6 +85,7 @@ object AddressJourneyType {
       case _: ManagingSubscription => true
       case _                       => false
     }
+
     def captionMessageKey(): String = a match {
       case _: Onboarding           => "subscription.caption"
       case _: ManagingSubscription => "account.caption"
