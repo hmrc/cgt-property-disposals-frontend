@@ -91,10 +91,7 @@ object AddressJourneyType {
       case _: ManagingSubscription => "account.caption"
       case f: FillingOutReturnAddressJourney =>
         f.draftReturn.fold(
-          m =>
-            if (f.draftReturn.fold(_.isMultipleIndirectDisposal(), _ => false))
-              "returns.indirect.property-details.multipleDisposals.caption"
-            else "returns.property-details.multipleDisposals.caption",
+          _ => "returns.property-details.multipleDisposals.caption",
           _ => "returns.property-address.singleDisposal.caption"
         )
       case _: EnteringCompanyDetails                   => "companyDetails.caption"

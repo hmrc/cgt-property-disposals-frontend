@@ -36,8 +36,7 @@
 @(
     form: Form[Boolean],
     backLink: Call,
-    isSingleDisposal: Boolean,
-    isMultipleIndirectDisposal: Boolean
+    isSingleDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"hasValidPostcode"}
@@ -50,8 +49,6 @@
 @captionMsg = @{
     if(isSingleDisposal)
         messages("returns.property-address.singleDisposal.caption")
-    else if (isMultipleIndirectDisposal)
-        messages("returns.indirect.property-details.multipleDisposals.caption")
     else
         messages("returns.property-details.multipleDisposals.caption")
 }

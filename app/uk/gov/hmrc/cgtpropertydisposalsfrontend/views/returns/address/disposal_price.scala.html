@@ -43,8 +43,7 @@
     form: Form[BigDecimal],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
-    isMultipleIndirectDisposal: Boolean
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "multipleDisposalsDisposalPrice" }
@@ -61,11 +60,6 @@
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@captionMsg = @{
-    if(isMultipleIndirectDisposal) messages("returns.indirect.property-details.multipleDisposals.caption")
-    else messages("returns.property-details.multipleDisposals.caption")
-}
-
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
@@ -74,7 +68,7 @@
         @errorSummary(form)
     }
 
-    @caption(captionMsg)
+    @caption(messages("returns.property-details.multipleDisposals.caption"))
 
     @formWrapper(address.routes.PropertyDetailsController.disposalPriceSubmit(), 'novalidate -> "novalidate") {
       @unitInput(

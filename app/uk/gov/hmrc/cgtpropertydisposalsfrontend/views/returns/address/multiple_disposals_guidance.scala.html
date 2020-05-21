@@ -37,8 +37,7 @@
 @(
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
-    isMultipleIndirectDisposal: Boolean
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"property-details.multiple-disposals.guidance"}
@@ -52,16 +51,10 @@
 }
 @title = @{messages(s"$key.title")}
 
-@captionMsg = @{
-    if(isMultipleIndirectDisposal)
-        messages("returns.indirect.property-details.multipleDisposals.caption")
-    else  messages("returns.property-details.multipleDisposals.caption")
-}
-
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
     @backLinkComponent(backLink)
 
-    @caption(captionMsg)
+    @caption(messages("returns.property-details.multipleDisposals.caption"))
 
     @pageHeading(title)
 
