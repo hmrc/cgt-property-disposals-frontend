@@ -846,7 +846,11 @@ class ReliefDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey, Nil)(userType, individualUserType, userKey)
+                  test(data: _*)(scenario.expectedErrorMessageKey, Nil)(
+                    userType,
+                    individualUserType,
+                    userKey
+                  )
                 }
               }
           }

@@ -46,7 +46,14 @@ class TestMessagesApi(
   langCookieSecure: Boolean,
   langCookieHttpOnly: Boolean,
   httpConfiguration: HttpConfiguration
-) extends DefaultMessagesApi(messages, langs, langCookieName, langCookieSecure, langCookieHttpOnly, httpConfiguration) {
+) extends DefaultMessagesApi(
+      messages,
+      langs,
+      langCookieName,
+      langCookieSecure,
+      langCookieHttpOnly,
+      httpConfiguration
+    ) {
 
   override protected def noMatch(key: String, args: Seq[Any])(implicit lang: Lang): String = {
     Logger.error(s"Could not find message for key: $key ${args.mkString("-")}")
@@ -66,10 +73,10 @@ class TestDefaultMessagesApiProvider @Inject() (
     new TestMessagesApi(
       loadAllMessages,
       langs,
-      langCookieName     = langCookieName,
-      langCookieSecure   = langCookieSecure,
+      langCookieName = langCookieName,
+      langCookieSecure = langCookieSecure,
       langCookieHttpOnly = langCookieHttpOnly,
-      httpConfiguration  = httpConfiguration
+      httpConfiguration = httpConfiguration
     )
   }
 }
@@ -123,7 +130,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
 
   def messageFromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String = {
     val m = messagesApi(messageKey, args: _*)(lang)
-    if (m === messageKey) { sys.error(s"Message key `$messageKey` is missing a message") }
+    if (m === messageKey) sys.error(s"Message key `$messageKey` is missing a message")
     m
   }
 
