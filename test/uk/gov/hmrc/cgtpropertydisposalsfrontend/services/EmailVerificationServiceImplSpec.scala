@@ -49,7 +49,8 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
       .expects(expectedEmail, expectedName, expectedContinueCall, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val service = new EmailVerificationServiceImpl(mockConnector, MockMetrics.metrics)
+  val service =
+    new EmailVerificationServiceImpl(mockConnector, MockMetrics.metrics)
   "EmailVerificationServiceImpl" when {
 
     "verifying emails" must {
@@ -62,13 +63,19 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
       "indicate when the email verification request has been requested" in {
         mockVerifyEmail(email, name, continueCall)(Right(HttpResponse(CREATED)))
 
-        await(service.verifyEmail(email, name, continueCall).value) shouldBe Right(EmailVerificationRequested)
+        await(
+          service.verifyEmail(email, name, continueCall).value
+        ) shouldBe Right(EmailVerificationRequested)
       }
 
       "indicate when the email address has already been verified" in {
-        mockVerifyEmail(email, name, continueCall)(Right(HttpResponse(CONFLICT)))
+        mockVerifyEmail(email, name, continueCall)(
+          Right(HttpResponse(CONFLICT))
+        )
 
-        await(service.verifyEmail(email, name, continueCall).value) shouldBe Right(EmailAlreadyVerified)
+        await(
+          service.verifyEmail(email, name, continueCall).value
+        ) shouldBe Right(EmailAlreadyVerified)
       }
 
       "indicate when there is an error verifying the email address" in {
@@ -78,7 +85,9 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
         ).foreach { response =>
           mockVerifyEmail(email, name, continueCall)(response)
 
-          await(service.verifyEmail(email, name, continueCall).value).isLeft shouldBe true
+          await(
+            service.verifyEmail(email, name, continueCall).value
+          ).isLeft shouldBe true
 
         }
 

@@ -34,19 +34,25 @@ class RegistrationChangeIndividualNameControllerSpec
     with IndividualNameControllerSpec[RegistrationReady]
     with ScalaCheckDrivenPropertyChecks {
 
-  def isValidJourney(journey: JourneyStatus): Boolean = journey match {
-    case _: RegistrationReady => true
-    case _                    => false
-  }
+  def isValidJourney(journey: JourneyStatus): Boolean =
+    journey match {
+      case _: RegistrationReady => true
+      case _                    => false
+    }
 
-  override val mockUpdateName: Option[(RegistrationReady, RegistrationReady, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateName: Option[
+    (RegistrationReady, RegistrationReady, Either[Error, Unit]) => Unit
+  ] = None
 
   override lazy val controller: RegistrationChangeIndividualNameController =
     instanceOf[RegistrationChangeIndividualNameController]
 
   override lazy val validJourney: RegistrationReady = sample[RegistrationReady]
 
-  override def updateName(name: IndividualName, journey: RegistrationReady): RegistrationReady =
+  override def updateName(
+    name: IndividualName,
+    journey: RegistrationReady
+  ): RegistrationReady =
     journey.copy(registrationDetails = journey.registrationDetails.copy(name = name))
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
@@ -62,7 +68,10 @@ class RegistrationChangeIndividualNameControllerSpec
     "handling submitted names" must {
 
       behave like enterNameSubmit(
-        data => controller.enterIndividualNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
+        data =>
+          controller.enterIndividualNameSubmit()(
+            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+          ),
         controllers.onboarding.routes.RegistrationController.checkYourAnswers()
       )
     }

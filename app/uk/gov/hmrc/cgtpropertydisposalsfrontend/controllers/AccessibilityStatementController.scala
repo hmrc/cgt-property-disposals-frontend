@@ -28,6 +28,7 @@ class AccessibilityStatementController @Inject() (
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
-  def accessibilityStatement(): Action[AnyContent] = Action(implicit request => Ok(accessibilityStatementPage()))
+  def accessibilityStatement(): Action[AnyContent] =
+    Action(implicit request => Ok(accessibilityStatementPage()))
 
 }

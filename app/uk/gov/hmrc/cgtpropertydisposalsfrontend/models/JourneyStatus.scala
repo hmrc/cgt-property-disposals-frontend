@@ -62,8 +62,10 @@ object JourneyStatus {
     ) extends SubscriptionStatus
 
     // subscription details have been gathered and are ready to be used to subscribe
-    final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails, ggCredId: GGCredId)
-        extends SubscriptionStatus
+    final case class SubscriptionReady(
+      subscriptionDetails: SubscriptionDetails,
+      ggCredId: GGCredId
+    ) extends SubscriptionStatus
   }
 
   // subscription has been submitted to ETMP
@@ -77,7 +79,8 @@ object JourneyStatus {
 
   object Subscribed {
     implicit class SubscribedOps(private val s: Subscribed) extends AnyVal {
-      def totalLeftToPay(): AmountInPence = AmountInPence(s.sentReturns.map(_.totalOutstanding.value).sum)
+      def totalLeftToPay(): AmountInPence =
+        AmountInPence(s.sentReturns.map(_.totalOutstanding.value).sum)
     }
   }
 
@@ -85,7 +88,10 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    newReturnTriageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
+    newReturnTriageAnswers: Either[
+      MultipleDisposalsTriageAnswers,
+      SingleDisposalTriageAnswers
+    ],
     representeeAnswers: Option[RepresenteeAnswers]
   ) extends JourneyStatus
 
@@ -118,8 +124,10 @@ object JourneyStatus {
     returnSummary: ReturnSummary
   ) extends JourneyStatus
 
-  final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId, cgtReference: Option[CgtReference])
-      extends JourneyStatus
+  final case class AlreadySubscribedWithDifferentGGAccount(
+    ggCredId: GGCredId,
+    cgtReference: Option[CgtReference]
+  ) extends JourneyStatus
 
   sealed trait RegistrationStatus extends JourneyStatus with Product with Serializable {
     val emailSource: Option[EmailSource]
@@ -143,15 +151,22 @@ object JourneyStatus {
     ) extends RegistrationStatus
 
     // we are capturing an email for a user who doesn't have one we can retrieve
-    final case class IndividualMissingEmail(name: IndividualName, address: Address, ggCredId: GGCredId)
-        extends RegistrationStatus {
+    final case class IndividualMissingEmail(
+      name: IndividualName,
+      address: Address,
+      ggCredId: GGCredId
+    ) extends RegistrationStatus {
       val emailSource: Option[EmailSource] = None
     }
 
     // we have all the details necessary for registration
-    final case class RegistrationReady(registrationDetails: RegistrationDetails, ggCredId: GGCredId)
-        extends RegistrationStatus {
-      val emailSource: Option[EmailSource] = Some(registrationDetails.emailSource)
+    final case class RegistrationReady(
+      registrationDetails: RegistrationDetails,
+      ggCredId: GGCredId
+    ) extends RegistrationStatus {
+      val emailSource: Option[EmailSource] = Some(
+        registrationDetails.emailSource
+      )
     }
 
   }
@@ -169,7 +184,8 @@ object JourneyStatus {
       correctVerifierSupplied: Boolean
     )
 
-    implicit val verifierMatchingDetailsFormat: OFormat[VerifierMatchingDetails] = Json.format
+    implicit val verifierMatchingDetailsFormat: OFormat[VerifierMatchingDetails] =
+      Json.format
 
   }
 

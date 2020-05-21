@@ -59,19 +59,22 @@ class SubscribedWithoutIdChangeContactNameController @Inject() (
 
   override val isSubscribedJourney: Boolean = true
 
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Subscribed)] =
+  override def validJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: Subscribed)) => Right(sessionData -> r)
       case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateName(journey: Subscribed, name: IndividualName)(
-    implicit hc: HeaderCarrier,
+  override def updateName(journey: Subscribed, name: IndividualName)(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, Subscribed] = {
-    val contactName = s"${name.firstName} ${name.lastName}"
+    val contactName            = s"${name.firstName} ${name.lastName}"
     val journeyWithUpdatedName =
-      journey.subscribedDetails.copy(name = Right(name), contactName = ContactName(contactName))
+      journey.subscribedDetails
+        .copy(name = Right(name), contactName = ContactName(contactName))
 
     if (journey.subscribedDetails === journeyWithUpdatedName)
       EitherT.rightT[Future, Error](journey)
@@ -89,17 +92,26 @@ class SubscribedWithoutIdChangeContactNameController @Inject() (
       )
 
       subscriptionService
-        .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedName, journey.subscribedDetails))
+        .updateSubscribedDetails(
+          SubscribedUpdateDetails(
+            journeyWithUpdatedName,
+            journey.subscribedDetails
+          )
+        )
         .map(_ => journey.copy(journeyWithUpdatedName))
     }
 
   }
 
-  override def name(journey: Subscribed): Option[IndividualName] = journey.subscribedDetails.name.toOption
+  override def name(journey: Subscribed): Option[IndividualName] =
+    journey.subscribedDetails.name.toOption
 
-  override protected lazy val backLinkCall: Call = controllers.accounts.routes.AccountController.manageYourDetails()
+  override protected lazy val backLinkCall: Call        =
+    controllers.accounts.routes.AccountController.manageYourDetails()
   override protected lazy val enterNameSubmitCall: Call =
-    routes.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit()
-  override protected lazy val continueCall: Call = controllers.accounts.routes.AccountController.contactNameUpdated()
+    routes.SubscribedWithoutIdChangeContactNameController
+      .enterIndividualNameSubmit()
+  override protected lazy val continueCall: Call        =
+    controllers.accounts.routes.AccountController.contactNameUpdated()
 
 }

@@ -44,13 +44,19 @@ trait PaymentsService {
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
-  )(implicit headerCarrier: HeaderCarrier, request: Request[_]): EitherT[Future, Error, PaymentsJourney]
+  )(implicit
+    headerCarrier: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, PaymentsJourney]
 
 }
 
 @Singleton
-class PaymentsServiceImpl @Inject() (connector: PaymentsConnector, auditService: AuditService)(
-  implicit ec: ExecutionContext
+class PaymentsServiceImpl @Inject() (
+  connector: PaymentsConnector,
+  auditService: AuditService
+)(implicit
+  ec: ExecutionContext
 ) extends PaymentsService {
 
   def startPaymentJourney(
@@ -59,29 +65,41 @@ class PaymentsServiceImpl @Inject() (connector: PaymentsConnector, auditService:
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
-  )(implicit headerCarrier: HeaderCarrier, request: Request[_]): EitherT[Future, Error, PaymentsJourney] =
-    connector.startPaymentJourney(cgtReference, chargeReference, amount, returnUrl, backUrl).subflatMap { response =>
-      if (response.status =!= CREATED) {
-        Left(
-          Error(s"Call to start payments journey came back with status other than 201 (CREATED): ${response.status}")
-        )
-      } else {
-        response
-          .parseJSON[PaymentsJourney]()
-          .leftMap(Error(_))
-          .map { journey =>
-            auditService.sendEvent(
-              "paymentInitiated",
-              PaymentInitiated(
-                cgtReference.value,
-                chargeReference,
-                amount.inPounds()
-              ),
-              "payment-initiated"
+  )(implicit
+    headerCarrier: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, PaymentsJourney] =
+    connector
+      .startPaymentJourney(
+        cgtReference,
+        chargeReference,
+        amount,
+        returnUrl,
+        backUrl
+      )
+      .subflatMap { response =>
+        if (response.status =!= CREATED)
+          Left(
+            Error(
+              s"Call to start payments journey came back with status other than 201 (CREATED): ${response.status}"
             )
-            journey
-          }
+          )
+        else
+          response
+            .parseJSON[PaymentsJourney]()
+            .leftMap(Error(_))
+            .map { journey =>
+              auditService.sendEvent(
+                "paymentInitiated",
+                PaymentInitiated(
+                  cgtReference.value,
+                  chargeReference,
+                  amount.inPounds()
+                ),
+                "payment-initiated"
+              )
+              journey
+            }
       }
-    }
 
 }

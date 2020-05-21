@@ -22,50 +22,82 @@ import com.google.inject.{Inject, Singleton}
 @Singleton
 class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
 
-  protected def timer(name: String): Timer = metrics.defaultRegistry.timer(s"frontend.$name")
+  protected def timer(name: String): Timer =
+    metrics.defaultRegistry.timer(s"frontend.$name")
 
-  protected def counter(name: String): Counter = metrics.defaultRegistry.counter(s"frontend.$name")
+  protected def counter(name: String): Counter =
+    metrics.defaultRegistry.counter(s"frontend.$name")
 
   val postcodeLookupTimer: Timer = timer("postcode-lookup.time")
 
-  val postcodeLookupErrorCounter: Counter = counter("postcode-lookup.errors.count")
+  val postcodeLookupErrorCounter: Counter = counter(
+    "postcode-lookup.errors.count"
+  )
 
   val emailVerificationTimer: Timer = timer("email-verification.time")
 
-  val emailVerificationErrorCounter: Counter = counter("email-verification.errors.count")
+  val emailVerificationErrorCounter: Counter = counter(
+    "email-verification.errors.count"
+  )
 
   val ivSuccessCounter: Counter = counter("iv.journey-status.success.count")
 
-  val ivIncompleteCounter: Counter = counter("iv.journey-status.incomplete.count")
+  val ivIncompleteCounter: Counter = counter(
+    "iv.journey-status.incomplete.count"
+  )
 
-  val ivFailedMatchingCounter: Counter = counter("iv.journey-status.failed-matching.count")
+  val ivFailedMatchingCounter: Counter = counter(
+    "iv.journey-status.failed-matching.count"
+  )
 
   val ivFailedIVCounter: Counter = counter("iv.journey-status.failed-iv.count")
 
-  val ivInsufficientEvidenceCounter: Counter = counter("iv.journey-status.insufficient-evidence.count")
+  val ivInsufficientEvidenceCounter: Counter = counter(
+    "iv.journey-status.insufficient-evidence.count"
+  )
 
-  val ivUserAbortedCounter: Counter = counter("iv.journey-status.user-aborted.count")
+  val ivUserAbortedCounter: Counter = counter(
+    "iv.journey-status.user-aborted.count"
+  )
 
-  val ivLockedOutCounter: Counter = counter("iv.journey-status.locked-out.count")
+  val ivLockedOutCounter: Counter = counter(
+    "iv.journey-status.locked-out.count"
+  )
 
-  val ivPreconditionFailedCounter: Counter = counter("iv.journey-status.precondition-failed.count")
+  val ivPreconditionFailedCounter: Counter = counter(
+    "iv.journey-status.precondition-failed.count"
+  )
 
-  val ivTechnicalIssueCounter: Counter = counter("iv.journey-status.technical-issue.count")
+  val ivTechnicalIssueCounter: Counter = counter(
+    "iv.journey-status.technical-issue.count"
+  )
 
   val ivTimeoutCounter: Counter = counter("iv.journey-status.timeout.count")
 
-  val ivUnknownErrorCounter: Counter = counter("iv.journey-status.unknown-error.count")
+  val ivUnknownErrorCounter: Counter = counter(
+    "iv.journey-status.unknown-error.count"
+  )
 
-  val ivGetFailedJourneyStatusTimer: Timer = timer("iv.get-failed-journey-status.time")
+  val ivGetFailedJourneyStatusTimer: Timer = timer(
+    "iv.get-failed-journey-status.time"
+  )
 
-  val ivGetFailedJourneyStatusErrorCounter: Counter = counter("iv.get-failed-journey-status.errors.count")
+  val ivGetFailedJourneyStatusErrorCounter: Counter = counter(
+    "iv.get-failed-journey-status.errors.count"
+  )
 
-  val accessWithWrongGGAccountCounter: Counter = counter("access-with-wrong-gg-account.count")
+  val accessWithWrongGGAccountCounter: Counter = counter(
+    "access-with-wrong-gg-account.count"
+  )
 
-  val individualWantingToRegisterTrustCounter: Counter = counter("individual-wanting-to-register-trust.count")
+  val individualWantingToRegisterTrustCounter: Counter = counter(
+    "individual-wanting-to-register-trust.count"
+  )
 
   val unregisteredTrustCounter: Counter = counter("unregistered-trust.count")
 
-  val nonTrustOrganisationCounter: Counter = counter("non-trust-organisation.count")
+  val nonTrustOrganisationCounter: Counter = counter(
+    "non-trust-organisation.count"
+  )
 
 }

@@ -16,17 +16,17 @@ object AppDependencies {
     "org.julienrf"               %% "play-json-derived-codecs" % "7.0.0",
     "com.github.julien-truffaut" %% "monocle-core"             % "2.0.0",
     "com.github.julien-truffaut" %% "monocle-macro"            % "2.0.0",
-    "com.github.ghik"            % "silencer-lib"              % "1.6.0" % Provided cross CrossVersion.full
+    "com.github.ghik"             % "silencer-lib"             % "1.6.0" % Provided cross CrossVersion.full
   )
 
   val test = Seq(
     "org.scalatest"              %% "scalatest"                 % "3.0.8"          % "test",
-    "org.jsoup"                  % "jsoup"                      % "1.12.1"         % "test",
+    "org.jsoup"                   % "jsoup"                     % "1.12.1"         % "test",
     "com.typesafe.play"          %% "play-test"                 % current          % "test",
     "org.scalamock"              %% "scalamock"                 % "4.2.0"          % "test",
     "uk.gov.hmrc"                %% "reactivemongo-test"        % "4.19.0-play-26" % "test",
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.14" % "1.2.1"          % "test",
-    "org.pegdown"                % "pegdown"                    % "1.6.0"          % "test, it",
+    "org.pegdown"                 % "pegdown"                   % "1.6.0"          % "test, it",
     "uk.gov.hmrc"                %% "service-integration-test"  % "0.10.0-play-26" % "test, it",
     "org.scalatestplus.play"     %% "scalatestplus-play"        % "3.1.2"          % "test, it"
   )

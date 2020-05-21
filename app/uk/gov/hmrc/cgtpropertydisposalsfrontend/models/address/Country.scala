@@ -43,22 +43,26 @@ object Country {
   type CountryName = String
 
   private final case class InternalCountry(code: CountryCode, name: CountryName)
-  private implicit val reads: Reads[InternalCountry] = Json.reads[InternalCountry]
+  private implicit val reads: Reads[InternalCountry] =
+    Json.reads[InternalCountry]
 
   val countryCodeToCountryName: Map[CountryCode, CountryName] = {
-    val source = Source.fromInputStream(getClass.getResourceAsStream("/resources/countries.json"))
+    val source = Source.fromInputStream(
+      getClass.getResourceAsStream("/resources/countries.json")
+    )
     try {
       val jsonString = source.getLines().toList.mkString("")
-      val countries =
+      val countries  =
         Json
           .parse(jsonString)
           .validate[List[InternalCountry]]
-          .fold(e => sys.error(s"could not parse countries.json file: $e"), identity)
+          .fold(
+            e => sys.error(s"could not parse countries.json file: $e"),
+            identity
+          )
 
       countries.map(c => c.code -> c.name).toMap
-    } finally {
-      source.close()
-    }
+    } finally source.close()
   }
 
   implicit class CountryOps(private val c: Country) extends AnyVal {
@@ -66,17 +70,23 @@ object Country {
   }
 
   val formatter: Formatter[Country] = new Formatter[Country] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Country] =
+    override def bind(
+      key: String,
+      data: Map[String, String]
+    ): Either[Seq[FormError], Country] =
       data.get(key).filter(_.nonEmpty) match {
         case Some(c) =>
           Either.fromOption(
-            Country.countryCodeToCountryName.get(c).map(name => Country(c, Some(name))),
+            Country.countryCodeToCountryName
+              .get(c)
+              .map(name => Country(c, Some(name))),
             Seq(FormError(key, "error.notFound"))
           )
-        case None => Left(Seq(FormError(key, "error.required")))
+        case None    => Left(Seq(FormError(key, "error.required")))
       }
 
-    override def unbind(key: String, value: Country): Map[String, String] = Map(key -> value.code)
+    override def unbind(key: String, value: Country): Map[String, String] =
+      Map(key -> value.code)
   }
 
 }

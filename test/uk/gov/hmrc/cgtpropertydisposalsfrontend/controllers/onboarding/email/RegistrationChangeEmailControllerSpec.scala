@@ -41,7 +41,9 @@ class RegistrationChangeEmailControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override def toJourneyStatus(journeyType: ChangingRegistrationEmail): JourneyStatus = journeyType.journey
+  override def toJourneyStatus(
+    journeyType: ChangingRegistrationEmail
+  ): JourneyStatus = journeyType.journey
 
   override val validJourneyStatus: ChangingRegistrationEmail =
     ChangingRegistrationEmail(sample[RegistrationReady])
@@ -57,22 +59,29 @@ class RegistrationChangeEmailControllerSpec
       changingRegistrationEmail.journey.copy(
         registrationDetails = changingRegistrationEmail.journey.registrationDetails.copy(
           emailAddress = email,
-          emailSource  = EmailSource.ManuallyEntered
+          emailSource = EmailSource.ManuallyEntered
         )
       )
     )
 
-  override val mockUpdateEmail
-    : Option[(ChangingRegistrationEmail, ChangingRegistrationEmail, Either[Error, Unit]) => Unit] =
+  override val mockUpdateEmail: Option[
+    (
+      ChangingRegistrationEmail,
+      ChangingRegistrationEmail,
+      Either[Error, Unit]
+    ) => Unit
+  ] =
     None
 
-  override lazy val controller: RegistrationChangeEmailController = instanceOf[RegistrationChangeEmailController]
+  override lazy val controller: RegistrationChangeEmailController =
+    instanceOf[RegistrationChangeEmailController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: RegistrationReady => true
         case _                    => false
       }
@@ -93,13 +102,17 @@ class RegistrationChangeEmailControllerSpec
     "handling submitted email addresses" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.enterEmailSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken)
+        controller.enterEmailSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
       behave like enterEmailSubmit(
         performAction,
-        ContactName(validJourneyStatus.journey.registrationDetails.name.makeSingleName()),
+        ContactName(
+          validJourneyStatus.journey.registrationDetails.name.makeSingleName()
+        ),
         emailRoutes.RegistrationChangeEmailController.verifyEmail,
         emailRoutes.RegistrationChangeEmailController.checkYourInbox()
       )

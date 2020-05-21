@@ -41,13 +41,19 @@ class RegistrationEnterIndividualNameControllerSpec
   override lazy val validJourney: IndividualSupplyingInformation =
     IndividualSupplyingInformation(None, None, None, None, sample[GGCredId])
 
-  def isValidJourney(journey: JourneyStatus): Boolean = journey match {
-    case _: IndividualSupplyingInformation => true
-    case _                                 => false
-  }
+  def isValidJourney(journey: JourneyStatus): Boolean =
+    journey match {
+      case _: IndividualSupplyingInformation => true
+      case _                                 => false
+    }
 
-  override val mockUpdateName
-    : Option[(IndividualSupplyingInformation, IndividualSupplyingInformation, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateName: Option[
+    (
+      IndividualSupplyingInformation,
+      IndividualSupplyingInformation,
+      Either[Error, Unit]
+    ) => Unit
+  ] = None
 
   override def updateName(
     name: IndividualName,
@@ -68,8 +74,12 @@ class RegistrationEnterIndividualNameControllerSpec
     "handling submitted names" must {
 
       behave like enterNameSubmit(
-        data => controller.enterIndividualNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
-        controllers.onboarding.address.routes.RegistrationEnterAddressController.isUk()
+        data =>
+          controller.enterIndividualNameSubmit()(
+            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+          ),
+        controllers.onboarding.address.routes.RegistrationEnterAddressController
+          .isUk()
       )
     }
 

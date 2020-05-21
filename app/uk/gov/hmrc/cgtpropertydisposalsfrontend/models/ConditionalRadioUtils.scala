@@ -27,41 +27,50 @@ object ConditionalRadioUtils {
   final case class InnerOption[+A](
     readValue: Map[String, String] => Either[Seq[FormError], A]
   ) {
-    def map[B](f: A => B): InnerOption[B] = InnerOption(
-      readValue(_).map(f)
-    )
+    def map[B](f: A => B): InnerOption[B] =
+      InnerOption(
+        readValue(_).map(f)
+      )
   }
 
   def formatter[A](outerKey: String)(options: List[Either[InnerOption[A], A]])(
     unbindValue: A => Map[String, String]
-  ): Formatter[A] = new Formatter[A] {
-    def readValue[T](key: String, data: Map[String, String], f: String => T): Either[FormError, T] =
-      data
-        .get(key)
-        .map(_.trim())
-        .filter(_.nonEmpty)
-        .fold[Either[FormError, T]](Left(FormError(key, "error.required"))) { stringValue =>
-          Either
-            .fromTry(Try(f(stringValue)))
-            .leftMap(_ => FormError(key, "error.invalid"))
-        }
-
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] =
-      readValue(outerKey, data, _.toInt)
-        .leftMap(Seq(_))
-        .flatMap { i =>
-          options.lift(i) match {
-            case Some(Right(value)) => Right(value)
-            case Some(Left(innerOption)) =>
-              innerOption.readValue(data)
-
-            case None => Left(Seq(FormError(outerKey, "error.invalid")))
+  ): Formatter[A] =
+    new Formatter[A] {
+      def readValue[T](
+        key: String,
+        data: Map[String, String],
+        f: String => T
+      ): Either[FormError, T] =
+        data
+          .get(key)
+          .map(_.trim())
+          .filter(_.nonEmpty)
+          .fold[Either[FormError, T]](Left(FormError(key, "error.required"))) { stringValue =>
+            Either
+              .fromTry(Try(f(stringValue)))
+              .leftMap(_ => FormError(key, "error.invalid"))
           }
-        }
 
-    override def unbind(key: String, value: A): Map[String, String] =
-      unbindValue(value)
+      override def bind(
+        key: String,
+        data: Map[String, String]
+      ): Either[Seq[FormError], A] =
+        readValue(outerKey, data, _.toInt)
+          .leftMap(Seq(_))
+          .flatMap { i =>
+            options.lift(i) match {
+              case Some(Right(value))      => Right(value)
+              case Some(Left(innerOption)) =>
+                innerOption.readValue(data)
 
-  }
+              case None                    => Left(Seq(FormError(outerKey, "error.invalid")))
+            }
+          }
+
+      override def unbind(key: String, value: A): Map[String, String] =
+        unbindValue(value)
+
+    }
 
 }

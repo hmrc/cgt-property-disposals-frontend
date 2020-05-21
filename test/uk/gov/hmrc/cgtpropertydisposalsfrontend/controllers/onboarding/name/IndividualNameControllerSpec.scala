@@ -40,7 +40,8 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
 
   val validJourney: J
 
-  lazy val sessionDataWithValidJourney = SessionData.empty.copy(journeyStatus = Some(validJourney))
+  lazy val sessionDataWithValidJourney =
+    SessionData.empty.copy(journeyStatus = Some(validJourney))
 
   def updateName(name: IndividualName, journey: J): J
 
@@ -70,12 +71,14 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
           mockGetSession(sessionDataWithValidJourney)
         }
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("enterName.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("enterName.title")
+        )
       }
 
       "the endpoint is requested and the user has previously entered a name" in {
-        val name = sample[IndividualName]
+        val name                = sample[IndividualName]
         val sessionDataWithName =
           sessionDataWithValidJourney.copy(journeyStatus = Some(updateName(name, validJourney)))
 
@@ -99,7 +102,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
     performAction: Seq[(String, String)] => Future[Result],
     continueCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {
-    val name = IndividualName("Bob", "Tob")
+    val name           = IndividualName("Bob", "Tob")
     val updatedSession =
       sessionDataWithValidJourney.copy(
         journeyStatus = Some(updateName(name, validJourney))
@@ -126,7 +129,9 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
           mockStoreSession(updatedSession)(Right(()))
         }
 
-        val result = performAction(Seq("firstName" -> name.firstName, "lastName" -> name.lastName))
+        val result = performAction(
+          Seq("firstName" -> name.firstName, "lastName" -> name.lastName)
+        )
         checkIsRedirect(result, continueCall)
       }
 
@@ -139,7 +144,12 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
           mockStoreSession(updatedSession)(Right(()))
         }
 
-        val result = performAction(Seq("firstName" -> s" ${name.firstName}  ", "lastName" -> s" ${name.lastName} "))
+        val result = performAction(
+          Seq(
+            "firstName" -> s" ${name.firstName}  ",
+            "lastName"  -> s" ${name.lastName} "
+          )
+        )
         checkIsRedirect(result, continueCall)
       }
 
@@ -152,7 +162,9 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
           mockAuthWithNoRetrievals()
           mockGetSession(updatedSession)
         }
-        val result = performAction(Seq("firstName" -> name.firstName, "lastName" -> name.lastName))
+        val result = performAction(
+          Seq("firstName" -> name.firstName, "lastName" -> name.lastName)
+        )
         checkIsRedirect(result, continueCall)
       }
 
@@ -167,7 +179,11 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
           mockStoreSession(updatedSession)(Left(Error("")))
         }
 
-        checkIsTechnicalErrorPage(performAction(Seq("firstName" -> name.firstName, "lastName" -> name.lastName)))
+        checkIsTechnicalErrorPage(
+          performAction(
+            Seq("firstName" -> name.firstName, "lastName" -> name.lastName)
+          )
+        )
       }
     }
 

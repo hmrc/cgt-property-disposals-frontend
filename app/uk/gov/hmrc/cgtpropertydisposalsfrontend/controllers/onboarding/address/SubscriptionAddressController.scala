@@ -68,18 +68,24 @@ class SubscriptionAddressController @Inject() (
   val subscriptionReadyAddressSourceLens: Lens[SubscriptionReady, AddressSource] =
     lens[SubscriptionReady].subscriptionDetails.addressSource
 
-  def isATrust(journey: SubscriptionReadyAddressJourney): Boolean = journey.journey.subscriptionDetails.name.isLeft
+  def isATrust(journey: SubscriptionReadyAddressJourney): Boolean =
+    journey.journey.subscriptionDetails.name.isLeft
 
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, SubscriptionReadyAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: SubscriptionReady)) => Right(sessionData -> SubscriptionReadyAddressJourney(s))
+      case Some((sessionData, s: SubscriptionReady)) =>
+        Right(sessionData -> SubscriptionReadyAddressJourney(s))
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: SubscriptionReadyAddressJourney, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier,
+  def updateAddress(
+    journey: SubscriptionReadyAddressJourney,
+    address: Address,
+    isManuallyEnteredAddress: Boolean
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] = {
     auditService.sendEvent(
@@ -93,7 +99,8 @@ class SubscriptionAddressController @Inject() (
     )
 
     val addressSource =
-      if (address === journey.journey.subscriptionDetails.address) journey.journey.subscriptionDetails.addressSource
+      if (address === journey.journey.subscriptionDetails.address)
+        journey.journey.subscriptionDetails.addressSource
       else AddressSource.ManuallyEntered
 
     EitherT.pure[Future, Error](
@@ -105,16 +112,27 @@ class SubscriptionAddressController @Inject() (
   protected lazy val backLinkCall: SubscriptionReadyAddressJourney => Call =
     _ => controllers.onboarding.routes.SubscriptionController.checkYourDetails()
 
-  protected lazy val isUkCall: Call                    = routes.SubscriptionAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call              = routes.SubscriptionAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          = routes.SubscriptionAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call    = routes.SubscriptionAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call       = routes.SubscriptionAddressController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call = routes.SubscriptionAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call           = routes.SubscriptionAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call     = routes.SubscriptionAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call           = routes.SubscriptionAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call     = routes.SubscriptionAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call                = controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+  protected lazy val isUkCall: Call                    =
+    routes.SubscriptionAddressController.isUk()
+  protected lazy val isUkSubmitCall: Call              =
+    routes.SubscriptionAddressController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call          =
+    routes.SubscriptionAddressController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call    =
+    routes.SubscriptionAddressController.enterUkAddressSubmit()
+  protected lazy val enterNonUkAddressCall: Call       =
+    routes.SubscriptionAddressController.enterNonUkAddress()
+  protected lazy val enterNonUkAddressSubmitCall: Call =
+    routes.SubscriptionAddressController.enterNonUkAddressSubmit()
+  protected lazy val enterPostcodeCall: Call           =
+    routes.SubscriptionAddressController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call     =
+    routes.SubscriptionAddressController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call           =
+    routes.SubscriptionAddressController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call     =
+    routes.SubscriptionAddressController.selectAddressSubmit()
+  protected lazy val continueCall: Call                =
+    controllers.onboarding.routes.SubscriptionController.checkYourDetails()
 
 }

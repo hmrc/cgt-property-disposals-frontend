@@ -46,7 +46,8 @@ object BusinessPartnerRecordNameMatchRetryStoreSpec {
 
   class TestEnvironment {
     val ggCredId             = sample[GGCredId]
-    val unsuccessfulAttempts = sample[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]]
+    val unsuccessfulAttempts =
+      sample[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]]
   }
 
 }
@@ -73,17 +74,25 @@ class NameMatchRetryStoreImplSpec extends WordSpec with Matchers with MongoSuppo
     }
 
     "return no retry data if there is no data in mongo" in new TestEnvironment {
-      await(retryStore.get[IndividualSautrNameMatchDetails](sample[GGCredId])) should be(Right(None))
+      await(
+        retryStore.get[IndividualSautrNameMatchDetails](sample[GGCredId])
+      ) should be(Right(None))
     }
 
     "return an error" when {
 
       "the data in mongo cannot be parsed" in new TestEnvironment {
-        val invalidData = JsObject(Map("numberOfRetriesDone" -> JsString("1")))
+        val invalidData                           = JsObject(Map("numberOfRetriesDone" -> JsString("1")))
         val create: Future[DatabaseUpdate[Cache]] =
-          retryStore.cacheRepository.createOrUpdate(Id(ggCredId.value), retryStore.sessionKey, invalidData)
-        await(create).writeResult.inError                                       shouldBe false
-        await(retryStore.get[IndividualSautrNameMatchDetails](ggCredId)).isLeft shouldBe true
+          retryStore.cacheRepository.createOrUpdate(
+            Id(ggCredId.value),
+            retryStore.sessionKey,
+            invalidData
+          )
+        await(create).writeResult.inError shouldBe false
+        await(
+          retryStore.get[IndividualSautrNameMatchDetails](ggCredId)
+        ).isLeft                          shouldBe true
       }
 
     }
@@ -97,18 +106,24 @@ class NameMatchRetryStoreFailureSpec extends WordSpec with Matchers with MongoSu
   val retryStore = new NameMatchRetryStoreImpl(reactiveMongoComponent, config)
   reactiveMongoComponent.mongoConnector.helper.driver.close()
 
-  val mongoIsBrokenAndAttemptingTo = new AfterWord("mongo is broken and attempting to")
+  val mongoIsBrokenAndAttemptingTo = new AfterWord(
+    "mongo is broken and attempting to"
+  )
 
   "NameMatchRetryStore" must {
 
     "return an error" when mongoIsBrokenAndAttemptingTo {
 
       "insert a record" in new TestEnvironment {
-        await(retryStore.get[IndividualSautrNameMatchDetails](ggCredId)).isLeft shouldBe true
+        await(
+          retryStore.get[IndividualSautrNameMatchDetails](ggCredId)
+        ).isLeft shouldBe true
       }
 
       "read a record" in new TestEnvironment {
-        await(retryStore.store(ggCredId, unsuccessfulAttempts)).isLeft shouldBe true
+        await(
+          retryStore.store(ggCredId, unsuccessfulAttempts)
+        ).isLeft shouldBe true
       }
 
     }

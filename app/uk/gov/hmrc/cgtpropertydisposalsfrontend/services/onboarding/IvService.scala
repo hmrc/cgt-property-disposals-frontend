@@ -39,35 +39,44 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[IvServiceImpl])
 trait IvService {
 
-  def getFailedJourneyStatus(journeyId: UUID)(implicit hc: HeaderCarrier): EitherT[Future, Error, IvErrorStatus]
+  def getFailedJourneyStatus(journeyId: UUID)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, IvErrorStatus]
 
 }
 
 @Singleton
-class IvServiceImpl @Inject() (connector: IvConnector, metrics: Metrics)(implicit ec: ExecutionContext)
-    extends IvService {
+class IvServiceImpl @Inject() (connector: IvConnector, metrics: Metrics)(implicit
+  ec: ExecutionContext
+) extends IvService {
 
   override def getFailedJourneyStatus(
     journeyId: UUID
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, IvErrorStatus] = {
     val timer = metrics.ivGetFailedJourneyStatusTimer.time()
-    connector.getFailedJourneyStatus(journeyId).subflatMap[Error, IvErrorStatus] { response =>
-      timer.close()
-      if (response.status === OK) {
-        response
-          .parseJSON[IvStatusResponse]()
-          .bimap(
-            { e =>
-              metrics.ivGetFailedJourneyStatusErrorCounter.inc()
-              Error(e)
-            },
-            r => IvErrorStatus.fromString(r.result)
+    connector
+      .getFailedJourneyStatus(journeyId)
+      .subflatMap[Error, IvErrorStatus] { response =>
+        timer.close()
+        if (response.status === OK)
+          response
+            .parseJSON[IvStatusResponse]()
+            .bimap(
+              { e =>
+                metrics.ivGetFailedJourneyStatusErrorCounter.inc()
+                Error(e)
+              },
+              r => IvErrorStatus.fromString(r.result)
+            )
+        else {
+          metrics.ivGetFailedJourneyStatusErrorCounter.inc()
+          Left(
+            Error(
+              s"Call to check status of failed IV journey came back with status ${response.status}"
+            )
           )
-      } else {
-        metrics.ivGetFailedJourneyStatusErrorCounter.inc()
-        Left(Error(s"Call to check status of failed IV journey came back with status ${response.status}"))
+        }
       }
-    }
   }
 
 }

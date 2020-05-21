@@ -55,12 +55,18 @@ trait AddressController[A <: AddressJourneyType] {
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
 
-  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, A)]
+  def validJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, A)]
 
   def isATrust(journey: A): Boolean
 
-  def updateAddress(journey: A, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier,
+  def updateAddress(
+    journey: A,
+    address: Address,
+    isManuallyEnteredAddress: Boolean
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus]
 
@@ -89,17 +95,32 @@ trait AddressController[A <: AddressJourneyType] {
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
         case (sessionData, journey) =>
-          if (sessionData.addressLookupResult.nonEmpty) {
-            updateSession(sessionStore, request)(_.copy(addressLookupResult = None)).map {
-              case Left(e) =>
+          if (sessionData.addressLookupResult.nonEmpty)
+            updateSession(sessionStore, request)(
+              _.copy(addressLookupResult = None)
+            ).map {
+              case Left(e)  =>
                 logger.warn(s"Could not clear addressLookupResult", e)
                 errorHandler.errorResult()
               case Right(_) =>
-                Ok(isUkPage(Address.isUkForm, backLinkCall(journey), isUkSubmitCall, journey))
+                Ok(
+                  isUkPage(
+                    Address.isUkForm,
+                    backLinkCall(journey),
+                    isUkSubmitCall,
+                    journey
+                  )
+                )
             }
-          } else {
-            Ok(isUkPage(Address.isUkForm, backLinkCall(journey), isUkSubmitCall, journey))
-          }
+          else
+            Ok(
+              isUkPage(
+                Address.isUkForm,
+                backLinkCall(journey),
+                isUkSubmitCall,
+                journey
+              )
+            )
       }
     }
 
@@ -110,7 +131,16 @@ trait AddressController[A <: AddressJourneyType] {
           Address.isUkForm
             .bindFromRequest()
             .fold[Future[Result]](
-              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall(journey), isUkSubmitCall, journey)), {
+              formWithErrors =>
+                BadRequest(
+                  isUkPage(
+                    formWithErrors,
+                    backLinkCall(journey),
+                    isUkSubmitCall,
+                    journey
+                  )
+                ),
+              {
                 case true  => Redirect(enterPostcodeCall)
                 case false => Redirect(enterNonUkAddressCall)
               }
@@ -202,7 +232,9 @@ trait AddressController[A <: AddressJourneyType] {
         case (sessionData, journey) =>
           val form = sessionData.addressLookupResult
             .fold(AddressLookupRequest.form)(r =>
-              AddressLookupRequest.form.fill(AddressLookupRequest(r.postcode, r.filter))
+              AddressLookupRequest.form.fill(
+                AddressLookupRequest(r.postcode, r.filter)
+              )
             )
           Ok(
             enterPostcodePage(
@@ -236,13 +268,16 @@ trait AddressController[A <: AddressJourneyType] {
                     isATrust(journey),
                     extractRepresentitiveType(journey)
                   )
-                ), {
+                ),
+              {
                 case AddressLookupRequest(postcode, filter) =>
                   def handleEmptyAddresses(r: AddressLookupResult) = {
                     val errorKey = r.filter.fold("postcode")(_ => "filter")
                     BadRequest(
                       enterPostcodePage(
-                        AddressLookupRequest.form.bindFromRequest().withError(errorKey, "error.noResults"),
+                        AddressLookupRequest.form
+                          .bindFromRequest()
+                          .withError(errorKey, "error.noResults"),
                         isUkCall,
                         enterPostcodeSubmitCall,
                         enterUkAddressCall,
@@ -255,27 +290,31 @@ trait AddressController[A <: AddressJourneyType] {
 
                   sessionData.addressLookupResult match {
                     case Some(a: AddressLookupResult) if a.postcode.value === postcode.value && a.filter === filter =>
-                      if (a.addresses.isEmpty) handleEmptyAddresses(a) else Redirect(selectAddressCall)
+                      if (a.addresses.isEmpty) handleEmptyAddresses(a)
+                      else Redirect(selectAddressCall)
 
-                    case _ =>
+                    case _                                                                                          =>
                       val result = for {
                         addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
-                        _ <- EitherT(
-                              updateSession(sessionStore, request)(
-                                _.copy(addressLookupResult = Some(addressLookupResult))
-                              )
-                            )
+                        _                   <- EitherT(
+                               updateSession(sessionStore, request)(
+                                 _.copy(addressLookupResult = Some(addressLookupResult))
+                               )
+                             )
                       } yield addressLookupResult
 
                       result.fold(
                         { e =>
-                          logger.warn(s"Could not do address lookup for postcode", e)
+                          logger.warn(
+                            s"Could not do address lookup for postcode",
+                            e
+                          )
                           errorHandler.errorResult()
                         },
                         r =>
-                          if (r.addresses.isEmpty) {
+                          if (r.addresses.isEmpty)
                             handleEmptyAddresses(r)
-                          } else Redirect(selectAddressCall)
+                          else Redirect(selectAddressCall)
                       )
                   }
 
@@ -289,7 +328,7 @@ trait AddressController[A <: AddressJourneyType] {
       withValidJourney(request) {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
-            case None =>
+            case None                                       =>
               Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
@@ -315,7 +354,7 @@ trait AddressController[A <: AddressJourneyType] {
       withValidJourney(request) {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
-            case None =>
+            case None                                       =>
               Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
@@ -346,18 +385,19 @@ trait AddressController[A <: AddressJourneyType] {
     continue: Call,
     currentJourneyStatus: A,
     isManuallyEnteredAddress: Boolean
-  )(address: Address)(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(
+    address: Address
+  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
       journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address, isManuallyEnteredAddress)
-      _ <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
-            EitherT.pure[Future, Error](())
-          else {
-            EitherT[Future, Error, Unit](
-              updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
-              )
-            )
-          }
+      _                         <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
+             EitherT.pure[Future, Error](())
+           else
+             EitherT[Future, Error, Unit](
+               updateSession(sessionStore, request)(
+                 _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
+               )
+             )
     } yield ()
 
     result.fold(
@@ -378,13 +418,15 @@ trait AddressController[A <: AddressJourneyType] {
         j.individualUserType match {
           case Some(value) =>
             value match {
-              case IndividualUserType.Capacitor              => Some(Right(IndividualUserType.Capacitor))
-              case IndividualUserType.PersonalRepresentative => Some(Left(IndividualUserType.PersonalRepresentative))
+              case IndividualUserType.Capacitor              =>
+                Some(Right(IndividualUserType.Capacitor))
+              case IndividualUserType.PersonalRepresentative =>
+                Some(Left(IndividualUserType.PersonalRepresentative))
               case _                                         => None
             }
-          case _ => None
+          case _           => None
         }
-      case _ => None
+      case _                                 => None
     }
 
 }

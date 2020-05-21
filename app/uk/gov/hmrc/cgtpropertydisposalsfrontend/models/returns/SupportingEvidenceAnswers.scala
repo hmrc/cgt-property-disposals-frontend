@@ -55,15 +55,18 @@ object SupportingEvidenceAnswers {
     evidences: List[SupportingEvidence]
   ) extends SupportingEvidenceAnswers
 
-  implicit class UploadSupportingDocumentsOps(private val a: SupportingEvidenceAnswers) extends AnyVal {
+  implicit class UploadSupportingDocumentsOps(
+    private val a: SupportingEvidenceAnswers
+  ) extends AnyVal {
 
     def fold[A](
       ifIncomplete: IncompleteSupportingEvidenceAnswers => A,
       ifComplete: CompleteSupportingEvidenceAnswers => A
-    ): A = a match {
-      case i: IncompleteSupportingEvidenceAnswers => ifIncomplete(i)
-      case c: CompleteSupportingEvidenceAnswers   => ifComplete(c)
-    }
+    ): A =
+      a match {
+        case i: IncompleteSupportingEvidenceAnswers => ifIncomplete(i)
+        case c: CompleteSupportingEvidenceAnswers   => ifComplete(c)
+      }
 
   }
 

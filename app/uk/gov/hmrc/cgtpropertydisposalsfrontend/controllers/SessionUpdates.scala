@@ -29,16 +29,18 @@ trait SessionUpdates {
 
   def updateSession[R](sessionStore: SessionStore, request: R)(
     update: SessionData => SessionData
-  )(implicit sessionProvider: SessionProvider[R], hc: HeaderCarrier): Future[Either[Error, Unit]] = {
+  )(implicit
+    sessionProvider: SessionProvider[R],
+    hc: HeaderCarrier
+  ): Future[Either[Error, Unit]] = {
     val session        = sessionProvider.toSession(request)
     val updatedSession = update(session)
 
-    if (session === updatedSession) {
+    if (session === updatedSession)
       // don't bother updating the session if it's the same
       Future.successful(Right(()))
-    } else {
+    else
       sessionStore.store(update(sessionProvider.toSession(request)))
-    }
 
   }
 

@@ -20,7 +20,10 @@ import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails.AffinityGroup
 
-final case class NeedMoreDetailsDetails(continueUrl: String, affinityGroup: AffinityGroup)
+final case class NeedMoreDetailsDetails(
+  continueUrl: String,
+  affinityGroup: AffinityGroup
+)
 
 object NeedMoreDetailsDetails {
 

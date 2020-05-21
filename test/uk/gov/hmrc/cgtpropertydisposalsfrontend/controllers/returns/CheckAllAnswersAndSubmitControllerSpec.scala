@@ -100,26 +100,37 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   val rebasingEligibilityUtil = new RebasingEligibilityUtil()
 
-  def setNameForUserType(userType: UserType): Either[TrustName, IndividualName] = userType match {
-    case UserType.Organisation => Left(sample[TrustName])
-    case _                     => Right(sample[IndividualName])
-  }
+  def setNameForUserType(
+    userType: UserType
+  ): Either[TrustName, IndividualName] =
+    userType match {
+      case UserType.Organisation => Left(sample[TrustName])
+      case _                     => Right(sample[IndividualName])
+    }
 
-  def setAgentReferenceNumber(userType: UserType): Option[AgentReferenceNumber] = userType match {
-    case UserType.Agent => Some(sample[AgentReferenceNumber])
-    case _              => None
-  }
+  def setAgentReferenceNumber(
+    userType: UserType
+  ): Option[AgentReferenceNumber] =
+    userType match {
+      case UserType.Agent => Some(sample[AgentReferenceNumber])
+      case _              => None
+    }
 
-  def sessionWithJourney(journeyStatus: JourneyStatus, userType: UserType): SessionData =
+  def sessionWithJourney(
+    journeyStatus: JourneyStatus,
+    userType: UserType
+  ): SessionData =
     SessionData.empty.copy(
       journeyStatus = Some(journeyStatus),
-      userType      = Some(userType)
+      userType = Some(userType)
     )
 
   def sessionWithJourney(journeyStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
 
-  def mockSubmitReturn(submitReturnRequest: SubmitReturnRequest)(response: Either[Error, SubmitReturnResponse]) =
+  def mockSubmitReturn(
+    submitReturnRequest: SubmitReturnRequest
+  )(response: Either[Error, SubmitReturnResponse]) =
     (mockReturnsService
       .submitReturn(_: SubmitReturnRequest)(_: HeaderCarrier))
       .expects(submitReturnRequest, *)
@@ -133,14 +144,23 @@ class CheckAllAnswersAndSubmitControllerSpec
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
     (mockPaymentsService
-      .startPaymentJourney(_: CgtReference, _: Option[String], _: AmountInPence, _: Call, _: Call)(
+      .startPaymentJourney(
+        _: CgtReference,
+        _: Option[String],
+        _: AmountInPence,
+        _: Call,
+        _: Call
+      )(
         _: HeaderCarrier,
         _: Request[_]
       ))
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def userMessageKey(individualUserType: Option[IndividualUserType], userType: UserType): String =
+  def userMessageKey(
+    individualUserType: Option[IndividualUserType],
+    userType: UserType
+  ): String =
     (individualUserType, userType) match {
       case (Some(Capacitor), _)              => ".capacitor"
       case (Some(PersonalRepresentative), _) => ".personalRep"
@@ -154,12 +174,14 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     "handling requests to display the check all answers page" when {
 
-      def performAction(): Future[Result] = controller.checkAllAnswers()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkAllAnswers()(FakeRequest())
 
       "the user is on a single disposal journey" must {
 
         val completeReturn = sample[CompleteSingleDisposalReturn].copy(
-          triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor)),
+          triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            .copy(individualUserType = Some(Capacitor)),
           representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
         )
         val hasAttachments =
@@ -184,18 +206,26 @@ class CheckAllAnswersAndSubmitControllerSpec
           sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
 
         behave like redirectToStartWhenInvalidJourney(
-          performAction, {
+          performAction,
+          {
             case _: FillingOutReturn => true
             case _                   => false
           }
         )
 
-        behave like incompleteSingleDisposalJourneyBehaviour(performAction, completeDraftReturn)
+        behave like incompleteSingleDisposalJourneyBehaviour(
+          performAction,
+          completeDraftReturn
+        )
 
         "display the page" when {
 
-          def test(sessionData: SessionData, expectedTitleKey: String, userType: Option[UserType], isATrust: Boolean)
-            : Unit = {
+          def test(
+            sessionData: SessionData,
+            expectedTitleKey: String,
+            userType: Option[UserType],
+            isATrust: Boolean
+          ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
@@ -203,7 +233,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey(expectedTitleKey), { doc =>
+              messageFromMessageKey(expectedTitleKey),
+              { doc =>
                 validateSingleDisposalCheckAllYourAnswersSections(
                   doc,
                   completeReturn.copy(hasAttachments = hasAttachments),
@@ -212,10 +243,16 @@ class CheckAllAnswersAndSubmitControllerSpec
                   rebasingEligibilityUtil.isEligibleForRebase(completeReturn),
                   isATrust
                 )
-                doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
+                doc
+                  .select("#back")
+                  .attr("href") shouldBe routes.TaskListController
+                  .taskList()
+                  .url
                 doc
                   .select("#content > article > form")
-                  .attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
+                  .attr(
+                    "action"
+                  )             shouldBe routes.CheckAllAnswersAndSubmitController
                   .checkAllAnswersSubmit()
                   .url
               }
@@ -232,7 +269,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           }
 
           "the return is complete and the user is an agent" in {
-            val userType = UserType.Agent
+            val userType          = UserType.Agent
             val subscribedDetails = sample[SubscribedDetails].copy(
               name = setNameForUserType(userType)
             )
@@ -241,7 +278,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(
                 completeFillingOutReturn.copy(
                   agentReferenceNumber = setAgentReferenceNumber(userType),
-                  subscribedDetails    = subscribedDetails
+                  subscribedDetails = subscribedDetails
                 ),
                 userType = userType
               ).copy(userType = Some(userType)),
@@ -264,8 +301,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   sessionWithJourney(
                     completeFillingOutReturn.copy(
                       draftReturn = completeDraftReturn.copy(
-                        triageAnswers =
-                          sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Capacitor)),
+                        triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                          .copy(individualUserType = Some(Capacitor)),
                         representeeAnswers = None
                       )
                     )
@@ -273,7 +310,10 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.TaskListController.taskList())
+              checkIsRedirect(
+                performAction(),
+                routes.TaskListController.taskList()
+              )
             }
 
             "the representee answers are incomplete" in {
@@ -292,7 +332,10 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.TaskListController.taskList())
+              checkIsRedirect(
+                performAction(),
+                routes.TaskListController.taskList()
+              )
             }
 
           }
@@ -305,10 +348,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeReturn = sample[CompleteMultipleDisposalsReturn]
           .copy(
-            triageAnswers =
-              sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+              .copy(individualUserType = Some(PersonalRepresentative)),
             representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
-            hasAttachments     = true
+            hasAttachments = true
           )
 
         val completeDraftReturn = DraftMultipleDisposalsReturn(
@@ -322,21 +365,30 @@ class CheckAllAnswersAndSubmitControllerSpec
           TimeUtils.today()
         )
 
-        val completeFillingOutReturn = sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+        val completeFillingOutReturn =
+          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
 
         behave like redirectToStartWhenInvalidJourney(
-          performAction, {
+          performAction,
+          {
             case _: FillingOutReturn => true
             case _                   => false
           }
         )
 
-        behave like incompleteMultipleDisposalsJourneyBehaviour(performAction, completeDraftReturn)
+        behave like incompleteMultipleDisposalsJourneyBehaviour(
+          performAction,
+          completeDraftReturn
+        )
 
         "display the page" when {
 
-          def test(sessionData: SessionData, expectedTitleKey: String, userType: Option[UserType], isATrust: Boolean)
-            : Unit = {
+          def test(
+            sessionData: SessionData,
+            expectedTitleKey: String,
+            userType: Option[UserType],
+            isATrust: Boolean
+          ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionData)
@@ -344,17 +396,24 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             checkPageIsDisplayed(
               performAction(),
-              messageFromMessageKey(expectedTitleKey), { doc =>
+              messageFromMessageKey(expectedTitleKey),
+              { doc =>
                 validateMultipleDisposalsCheckAllYourAnswersSections(
                   doc,
                   completeReturn,
                   userType,
                   isATrust
                 )
-                doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
+                doc
+                  .select("#back")
+                  .attr("href") shouldBe routes.TaskListController
+                  .taskList()
+                  .url
                 doc
                   .select("#content > article > form")
-                  .attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
+                  .attr(
+                    "action"
+                  )             shouldBe routes.CheckAllAnswersAndSubmitController
                   .checkAllAnswersSubmit()
                   .url
               }
@@ -371,7 +430,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           }
 
           "the return is complete and the user is an agent" in {
-            val userType = UserType.Agent
+            val userType          = UserType.Agent
             val subscribedDetails = sample[SubscribedDetails].copy(
               name = setNameForUserType(userType)
             )
@@ -380,7 +439,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(
                 completeFillingOutReturn.copy(
                   agentReferenceNumber = setAgentReferenceNumber(userType),
-                  subscribedDetails    = subscribedDetails
+                  subscribedDetails = subscribedDetails
                 ),
                 userType = userType
               ).copy(userType = Some(userType)),
@@ -402,8 +461,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   sessionWithJourney(
                     completeFillingOutReturn.copy(
                       draftReturn = completeDraftReturn.copy(
-                        triageAnswers =
-                          sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Capacitor)),
+                        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                          .copy(individualUserType = Some(Capacitor)),
                         representeeAnswers = None
                       )
                     )
@@ -411,7 +470,10 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.TaskListController.taskList())
+              checkIsRedirect(
+                performAction(),
+                routes.TaskListController.taskList()
+              )
             }
 
             "the representee answers are incomplete" in {
@@ -430,7 +492,10 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               }
 
-              checkIsRedirect(performAction(), routes.TaskListController.taskList())
+              checkIsRedirect(
+                performAction(),
+                routes.TaskListController.taskList()
+              )
             }
 
           }
@@ -443,11 +508,13 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     "handling submits on the check all answers page" must {
 
-      def performAction(): Future[Result] = controller.checkAllAnswersSubmit()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkAllAnswersSubmit()(FakeRequest())
 
       val (completeReturn, hasAttachments) = {
-        val r = sample[CompleteSingleDisposalReturn].copy(
-          triageAnswers      = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None),
+        val r              = sample[CompleteSingleDisposalReturn].copy(
+          triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            .copy(individualUserType = None),
           representeeAnswers = None
         )
         val hasAttachments =
@@ -472,7 +539,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         TimeUtils.today()
       )
 
-      val completeFillingOutReturn = sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+      val completeFillingOutReturn =
+        sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
 
       val submitReturnResponse = sample[SubmitReturnResponse]
 
@@ -485,11 +553,16 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
       lazy val submitReturnRequest = {
-        val cyaPge = instanceOf[views.html.returns.check_all_answers]
+        val cyaPge                          = instanceOf[views.html.returns.check_all_answers]
         implicit val requestWithSessionData =
-          RequestWithSessionData(None, AuthenticatedRequest(new MessagesRequest(FakeRequest(), messagesApi)))
-        implicit val config   = viewConfig
-        implicit val messages = MessagesImpl(Lang.apply("en"), messagesApi)
+          RequestWithSessionData(
+            None,
+            AuthenticatedRequest(
+              new MessagesRequest(FakeRequest(), messagesApi)
+            )
+          )
+        implicit val config                 = viewConfig
+        implicit val messages               = MessagesImpl(Lang.apply("en"), messagesApi)
 
         val cyaPageHtml =
           cyaPge(
@@ -509,13 +582,17 @@ class CheckAllAnswersAndSubmitControllerSpec
       }
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: FillingOutReturn => true
           case _                   => false
         }
       )
 
-      behave like incompleteSingleDisposalJourneyBehaviour(performAction, completeDraftReturn)
+      behave like incompleteSingleDisposalJourneyBehaviour(
+        performAction,
+        completeDraftReturn
+      )
 
       "show an error page" when {
 
@@ -524,7 +601,9 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturn))
             mockSubmitReturn(submitReturnRequest)(Right(submitReturnResponse))
-            mockStoreSession(sessionWithJourney(justSubmittedReturn))(Left(Error("")))
+            mockStoreSession(sessionWithJourney(justSubmittedReturn))(
+              Left(Error(""))
+            )
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -561,7 +640,10 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockStoreSession(sessionWithJourney(justSubmittedReturn))(Right(()))
           }
 
-          checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
+          checkIsRedirect(
+            performAction(),
+            routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+          )
         }
 
       }
@@ -584,7 +666,10 @@ class CheckAllAnswersAndSubmitControllerSpec
             )(Right(()))
           }
 
-          checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.submissionError())
+          checkIsRedirect(
+            performAction(),
+            routes.CheckAllAnswersAndSubmitController.submissionError()
+          )
         }
       }
 
@@ -592,10 +677,12 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     "handling requests to display the return submit failed page" must {
 
-      def performAction(): Future[Result] = controller.submissionError()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.submissionError()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: SubmitReturnFailed | _: Subscribed => true
           case _                                     => false
         }
@@ -618,7 +705,9 @@ class CheckAllAnswersAndSubmitControllerSpec
               doc =>
                 doc
                   .select("#content > article > form")
-                  .attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
+                  .attr(
+                    "action"
+                  ) shouldBe routes.CheckAllAnswersAndSubmitController
                   .submissionErrorSubmit()
                   .url
             )
@@ -638,10 +727,12 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     "handling submits on the return submit failed page" must {
 
-      def performAction(): Future[Result] = controller.submissionErrorSubmit()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.submissionErrorSubmit()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: SubmitReturnFailed | _: Subscribed => true
           case _                                     => false
         }
@@ -658,7 +749,10 @@ class CheckAllAnswersAndSubmitControllerSpec
               )
             )
 
-            checkIsRedirect(performAction(), homepage.routes.HomePageController.homepage())
+            checkIsRedirect(
+              performAction(),
+              homepage.routes.HomePageController.homepage()
+            )
           }
 
         "the user is in the SubmitReturnFailed state" in {
@@ -675,10 +769,12 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     "handling requests to display the confirmation of submission page" must {
 
-      def performAction(): Future[Result] = controller.confirmationOfSubmission()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.confirmationOfSubmission()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: JustSubmittedReturn => true
           case _                      => false
         }
@@ -688,10 +784,20 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val noTaxDueRefLine             = "Return reference number form bundle id"
         val taxDueRefLine               = "Payment reference number charge ref"
-        val submissionLine              = ("sent-date-table", "Return sent to HMRC", "2 February 2020")
-        val addressLine                 = ("property-address-table", "Property address", "123 fake street, abc123")
-        val returnReferenceWithBundleId = ("return-reference-table", "Return reference number", "form bundle id")
-        val taxDueDateLine              = ("tax-due-date-table", "Tax due by", "1 January 2020")
+        val submissionLine              =
+          ("sent-date-table", "Return sent to HMRC", "2 February 2020")
+        val addressLine                 = (
+          "property-address-table",
+          "Property address",
+          "123 fake street, abc123"
+        )
+        val returnReferenceWithBundleId = (
+          "return-reference-table",
+          "Return reference number",
+          "form bundle id"
+        )
+        val taxDueDateLine              =
+          ("tax-due-date-table", "Tax due by", "1 January 2020")
 
         sealed case class TestScenario(
           description: String,
@@ -721,7 +827,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             AmountInPence(10000),
             "",
             taxDueRefLine,
-            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
             Right(IndividualName("John", "Doe")),
             Some(Self)
           ),
@@ -741,7 +852,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             AmountInPence(10000),
             "Client: ",
             taxDueRefLine,
-            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
             Right(IndividualName("John", "Doe")),
             Some(Self)
           ),
@@ -761,7 +877,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             AmountInPence(10000),
             "Trust: ",
             taxDueRefLine,
-            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
             Left(TrustName("trust")),
             None
           ),
@@ -781,7 +902,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             AmountInPence(10000),
             "",
             taxDueRefLine,
-            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
             Right(IndividualName("John", "Doe")),
             Some(Capacitor)
           ),
@@ -801,7 +927,12 @@ class CheckAllAnswersAndSubmitControllerSpec
             AmountInPence(10000),
             "",
             taxDueRefLine,
-            List(submissionLine, returnReferenceWithBundleId, addressLine, taxDueDateLine),
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
             Right(IndividualName("John", "Doe")),
             Some(PersonalRepresentative)
           )
@@ -809,85 +940,111 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         scenarios.foreach {
           case TestScenario(
-              description,
-              userType,
-              taxOwed,
-              namePrefix,
-              reference,
-              expectedTable,
-              name,
-              individualUserType
+                description,
+                userType,
+                taxOwed,
+                namePrefix,
+                reference,
+                expectedTable,
+                name,
+                individualUserType
               ) =>
             withClue(description) {
-              val address = sample[UkAddress].copy(
-                line1    = "123 fake street",
-                line2    = None,
-                town     = None,
-                county   = None,
+              val address            = sample[UkAddress].copy(
+                line1 = "123 fake street",
+                line2 = None,
+                town = None,
+                county = None,
                 postcode = Postcode("abc123")
               )
-              val processingDate  = LocalDate.of(2020, 2, 2)
-              val dueDate         = LocalDate.of(2020, 1, 1)
-              val chargeReference = "charge ref"
-              val returnResponse = sample[SubmitReturnResponse].copy(
-                formBundleId   = "form bundle id",
+              val processingDate     = LocalDate.of(2020, 2, 2)
+              val dueDate            = LocalDate.of(2020, 1, 1)
+              val chargeReference    = "charge ref"
+              val returnResponse     = sample[SubmitReturnResponse].copy(
+                formBundleId = "form bundle id",
                 processingDate = LocalDateTime.of(processingDate, LocalTime.of(1, 1)),
                 charge = Some(
                   sample[ReturnCharge].copy(
-                    amount          = taxOwed,
+                    amount = taxOwed,
                     chargeReference = chargeReference,
-                    dueDate         = dueDate
+                    dueDate = dueDate
                   )
                 )
               )
               val representeeAnswers = individualUserType match {
                 case Some(PersonalRepresentative) =>
-                  Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
-                case Some(Capacitor) =>
-                  Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+                  Some(
+                    sample[CompleteRepresenteeAnswers]
+                      .copy(dateOfDeath = Some(sample[DateOfDeath]))
+                  )
+                case Some(Capacitor)              =>
+                  Some(
+                    sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+                  )
 
-                case _ => None
+                case _                            => None
               }
-              val triageAnswers =
-                sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType)
+              val triageAnswers      =
+                sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(individualUserType = individualUserType)
 
               val justSubmittedReturn = sample[JustSubmittedReturn].copy(
                 submissionResponse = returnResponse,
-                subscribedDetails  = sample[SubscribedDetails].copy(name = name),
+                subscribedDetails = sample[SubscribedDetails].copy(name = name),
                 completeReturn = sample[CompleteSingleDisposalReturn].copy(
-                  propertyAddress    = address,
-                  triageAnswers      = triageAnswers,
+                  propertyAddress = address,
+                  triageAnswers = triageAnswers,
                   representeeAnswers = representeeAnswers
                 ),
-                agentReferenceNumber = if (userType === UserType.Agent) Some(sample[AgentReferenceNumber]) else None
+                agentReferenceNumber =
+                  if (userType === UserType.Agent)
+                    Some(sample[AgentReferenceNumber])
+                  else None
               )
 
               val userKey = userMessageKey(individualUserType, userType)
 
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(sessionWithJourney(justSubmittedReturn).copy(userType = Some(userType)))
+                mockGetSession(
+                  sessionWithJourney(justSubmittedReturn)
+                    .copy(userType = Some(userType))
+                )
               }
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey("confirmationOfSubmission.title"), { doc =>
+                messageFromMessageKey("confirmationOfSubmission.title"),
+                { doc =>
                   val expectedName =
                     representeeAnswers
                       .map(_.name.makeSingleName())
-                      .getOrElse(namePrefix + name.fold(_.value, _.makeSingleName()))
+                      .getOrElse(
+                        namePrefix + name.fold(_.value, _.makeSingleName())
+                      )
 
                   doc.select("#user-details-name").text() shouldBe expectedName
                   doc.select("#ref-id").text()            shouldBe reference
 
                   expectedTable.map { tableDetails =>
-                    doc.select(s"#${tableDetails._1}-question").text() shouldBe tableDetails._2
-                    doc.select(s"#${tableDetails._1}-answer").text()   shouldBe tableDetails._3
+                    doc
+                      .select(s"#${tableDetails._1}-question")
+                      .text() shouldBe tableDetails._2
+                    doc
+                      .select(s"#${tableDetails._1}-answer")
+                      .text() shouldBe tableDetails._3
                   }
 
-                  doc.select("#printPage").html() shouldBe messageFromMessageKey(
-                    if (individualUserType.contains(Capacitor) && representeeAnswers
-                          .exists(_.fold(_.id, c => Some(c.id)).contains(NoReferenceId)))
+                  doc
+                    .select("#printPage")
+                    .html() shouldBe messageFromMessageKey(
+                    if (
+                      individualUserType
+                        .contains(Capacitor) && representeeAnswers
+                        .exists(
+                          _.fold(_.id, c => Some(c.id)).contains(NoReferenceId)
+                        )
+                    )
                       s"confirmationOfSubmission.capacitor.noId.printPage"
                     else
                       s"confirmationOfSubmission$userKey.printPage",
@@ -899,7 +1056,9 @@ class CheckAllAnswersAndSubmitControllerSpec
                     chargeReference
                   )
 
-                  doc.select("#ifSaHeading").text() shouldBe messageFromMessageKey(
+                  doc
+                    .select("#ifSaHeading")
+                    .text() shouldBe messageFromMessageKey(
                     s"confirmationOfSubmission$userKey.ifSa"
                   )
                 }
@@ -912,13 +1071,17 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     "handling requests to pay a return" must {
 
-      def performAction(): Future[Result] = controller.payReturn()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.payReturn()(FakeRequest())
 
-      def justSubmittedReturnWithCharge(charge: Option[ReturnCharge]): JustSubmittedReturn =
+      def justSubmittedReturnWithCharge(
+        charge: Option[ReturnCharge]
+      ): JustSubmittedReturn =
         sample[JustSubmittedReturn].copy(submissionResponse = sample[SubmitReturnResponse].copy(charge = charge))
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: JustSubmittedReturn => true
           case _                      => false
         }
@@ -929,10 +1092,15 @@ class CheckAllAnswersAndSubmitControllerSpec
         "there is no charge" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithJourney(justSubmittedReturnWithCharge(None)))
+            mockGetSession(
+              sessionWithJourney(justSubmittedReturnWithCharge(None))
+            )
           }
 
-          checkIsRedirect(performAction(), homepage.routes.HomePageController.homepage())
+          checkIsRedirect(
+            performAction(),
+            homepage.routes.HomePageController.homepage()
+          )
         }
 
       }
@@ -951,7 +1119,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               Some(charge.chargeReference),
               charge.amount,
               homepage.routes.HomePageController.homepage(),
-              routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+              routes.CheckAllAnswersAndSubmitController
+                .confirmationOfSubmission()
             )(Left(Error("")))
 
             checkIsTechnicalErrorPage(performAction())
@@ -976,7 +1145,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               Some(charge.chargeReference),
               charge.amount,
               homepage.routes.HomePageController.homepage(),
-              routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+              routes.CheckAllAnswersAndSubmitController
+                .confirmationOfSubmission()
             )(Right(paymentJourney))
 
             checkIsRedirect(performAction(), paymentJourney.nextUrl)
@@ -994,20 +1164,21 @@ class CheckAllAnswersAndSubmitControllerSpec
     performAction: () => Future[Result],
     completeDraftReturn: DraftSingleDisposalReturn
   ) = {
-    val makeIncompleteFunctions = List[DraftSingleDisposalReturn => DraftSingleDisposalReturn](
-      _.copy(triageAnswers              = sample[IncompleteSingleDisposalTriageAnswers]),
-      _.copy(propertyAddress            = None),
-      _.copy(disposalDetailsAnswers     = Some(sample[IncompleteDisposalDetailsAnswers])),
-      _.copy(disposalDetailsAnswers     = None),
-      _.copy(acquisitionDetailsAnswers  = Some(sample[IncompleteAcquisitionDetailsAnswers])),
-      _.copy(acquisitionDetailsAnswers  = None),
-      _.copy(reliefDetailsAnswers       = Some(sample[IncompleteReliefDetailsAnswers])),
-      _.copy(reliefDetailsAnswers       = None),
-      _.copy(exemptionAndLossesAnswers  = Some(sample[IncompleteExemptionAndLossesAnswers])),
-      _.copy(exemptionAndLossesAnswers  = None),
-      _.copy(yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYTDAnswers])),
-      _.copy(yearToDateLiabilityAnswers = None)
-    )
+    val makeIncompleteFunctions =
+      List[DraftSingleDisposalReturn => DraftSingleDisposalReturn](
+        _.copy(triageAnswers = sample[IncompleteSingleDisposalTriageAnswers]),
+        _.copy(propertyAddress = None),
+        _.copy(disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])),
+        _.copy(disposalDetailsAnswers = None),
+        _.copy(acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])),
+        _.copy(acquisitionDetailsAnswers = None),
+        _.copy(reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers])),
+        _.copy(reliefDetailsAnswers = None),
+        _.copy(exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])),
+        _.copy(exemptionAndLossesAnswers = None),
+        _.copy(yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYTDAnswers])),
+        _.copy(yearToDateLiabilityAnswers = None)
+      )
 
     "redirect to the task list" when {
 
@@ -1037,15 +1208,16 @@ class CheckAllAnswersAndSubmitControllerSpec
     performAction: () => Future[Result],
     completeDraftReturn: DraftMultipleDisposalsReturn
   ): Unit = {
-    val makeIncompleteFunctions = List[DraftMultipleDisposalsReturn => DraftMultipleDisposalsReturn](
-      _.copy(triageAnswers                 = sample[IncompleteMultipleDisposalsTriageAnswers]),
-      _.copy(examplePropertyDetailsAnswers = None),
-      _.copy(examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])),
-      _.copy(exemptionAndLossesAnswers     = Some(sample[IncompleteExemptionAndLossesAnswers])),
-      _.copy(exemptionAndLossesAnswers     = None),
-      _.copy(yearToDateLiabilityAnswers    = Some(sample[IncompleteCalculatedYTDAnswers])),
-      _.copy(yearToDateLiabilityAnswers    = None)
-    )
+    val makeIncompleteFunctions =
+      List[DraftMultipleDisposalsReturn => DraftMultipleDisposalsReturn](
+        _.copy(triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers]),
+        _.copy(examplePropertyDetailsAnswers = None),
+        _.copy(examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])),
+        _.copy(exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])),
+        _.copy(exemptionAndLossesAnswers = None),
+        _.copy(yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYTDAnswers])),
+        _.copy(yearToDateLiabilityAnswers = None)
+      )
 
     "redirect to the task list" when {
 
@@ -1127,7 +1299,12 @@ object CheckAllAnswersAndSubmitControllerSpec {
         individualUserType
       )
       completeReturn.yearToDateLiabilityAnswers.fold(
-        validateNonCalculatedYearToDateLiabilityPage(_, doc, userType, Some(individualUserType)),
+        validateNonCalculatedYearToDateLiabilityPage(
+          _,
+          doc,
+          userType,
+          Some(individualUserType)
+        ),
         validateCalculatedYearToDateLiabilityPage(_, isATrust, doc)
       )
     }

@@ -35,7 +35,10 @@ import scala.concurrent.Future
 class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with SessionSupport {
 
   lazy val action: SessionDataActionWithRetrievedData =
-    new SessionDataActionWithRetrievedData(mockSessionStore, instanceOf[ErrorHandler])
+    new SessionDataActionWithRetrievedData(
+      mockSessionStore,
+      instanceOf[ErrorHandler]
+    )
 
   implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
 
@@ -59,7 +62,8 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
 
     def performAction(): Future[Result] =
       action.invokeBlock(
-        authenticatedRequest, { r: RequestWithSessionDataAndRetrievedData[_] =>
+        authenticatedRequest,
+        { r: RequestWithSessionDataAndRetrievedData[_] =>
           r.messagesApi shouldBe messagesRequest.messagesApi
           r.sessionData shouldBe sessionData.copy(userType = Some(Individual))
           Future.successful(Ok)

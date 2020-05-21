@@ -51,7 +51,8 @@ import scala.reflect._
 
 class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
-  val bprService: BusinessPartnerRecordService = mock[BusinessPartnerRecordService]
+  val bprService: BusinessPartnerRecordService =
+    mock[BusinessPartnerRecordService]
 
   val retryStore: NameMatchRetryStore = mock[NameMatchRetryStore]
 
@@ -69,7 +70,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
     )
   )
 
-  val service = new NameMatchRetryServiceImpl(bprService, retryStore, mockSubscriptionService, mockAuditService, config)
+  val service = new NameMatchRetryServiceImpl(
+    bprService,
+    retryStore,
+    mockSubscriptionService,
+    mockAuditService,
+    config
+  )
 
   def mockSendBprNameMatchAttemptEvent(
     attemptsMade: Int,
@@ -78,7 +85,11 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
   )(result: Unit) =
     (
       mockAuditService
-        .sendEvent(_: String, _: BusinessPartnerRecordNameMatchAttemptEvent, _: String)(
+        .sendEvent(
+          _: String,
+          _: BusinessPartnerRecordNameMatchAttemptEvent,
+          _: String
+        )(
           _: ExecutionContext,
           _: HeaderCarrier,
           _: Writes[BusinessPartnerRecordNameMatchAttemptEvent],
@@ -149,20 +160,36 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
       .expects(expectedGGCredID, unsuccessfulNameMatchAttempts, *)
       .returning(Future.successful(result))
 
-  def mockGetIndividualBpr(expectedId: Either[SAUTR, NINO], expectedName: IndividualName)(
+  def mockGetIndividualBpr(
+    expectedId: Either[SAUTR, NINO],
+    expectedName: IndividualName
+  )(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (bprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
-      .expects(IndividualBusinessPartnerRecordRequest(expectedId, Some(expectedName)), *)
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+        _: HeaderCarrier
+      ))
+      .expects(
+        IndividualBusinessPartnerRecordRequest(expectedId, Some(expectedName)),
+        *
+      )
       .returning(EitherT.fromEither[Future](result))
 
   def mockGetTrustBpr(expectedTrn: TRN, expectedName: TrustName)(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (bprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
-      .expects(TrustBusinessPartnerRecordRequest(Left(expectedTrn), Some(expectedName)), *)
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+        _: HeaderCarrier
+      ))
+      .expects(
+        TrustBusinessPartnerRecordRequest(
+          Left(expectedTrn),
+          Some(expectedName)
+        ),
+        *
+      )
       .returning(EitherT.fromEither[Future](result))
 
   def mockGetSubscriptionDetails(
@@ -189,10 +216,18 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
       "return an error" when {
 
         "there is an error reading the value" in {
-          mockGetNumberOfUnsccessfulAttempts[IndividualSautrNameMatchDetails](ggCredId)(Left(Error("")))
+          mockGetNumberOfUnsccessfulAttempts[IndividualSautrNameMatchDetails](
+            ggCredId
+          )(Left(Error("")))
 
-          testIsErrorOfType[IndividualSautrNameMatchDetails, NameMatchServiceError.BackendError](
-            service.getNumberOfUnsuccessfulAttempts[IndividualSautrNameMatchDetails](ggCredId)
+          testIsErrorOfType[
+            IndividualSautrNameMatchDetails,
+            NameMatchServiceError.BackendError
+          ](
+            service
+              .getNumberOfUnsuccessfulAttempts[IndividualSautrNameMatchDetails](
+                ggCredId
+              )
           )
         }
 
@@ -211,7 +246,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             )
           )
 
-          await(service.getNumberOfUnsuccessfulAttempts(ggCredId).value) shouldBe Right(
+          await(
+            service.getNumberOfUnsuccessfulAttempts(ggCredId).value
+          ) shouldBe Right(
             Some(UnsuccessfulNameMatchAttempts(1, maxRetries, nameMatchDetails))
           )
 
@@ -224,7 +261,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
         "there is no record of attempts for the given gg cred id" in {
           mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(None))
 
-          await(service.getNumberOfUnsuccessfulAttempts(ggCredId).value) shouldBe Right(
+          await(
+            service.getNumberOfUnsuccessfulAttempts(ggCredId).value
+          ) shouldBe Right(
             None
           )
         }
@@ -239,12 +278,19 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           mockGetNumberOfUnsccessfulAttempts(ggCredId)(
             Right(
               Some(
-                UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, nameMatchDetails)
+                UnsuccessfulNameMatchAttempts(
+                  maxRetries,
+                  maxRetries,
+                  nameMatchDetails
+                )
               )
             )
           )
 
-          testIsErrorOfType[TrustNameMatchDetails, NameMatchServiceError.TooManyUnsuccessfulAttempts](
+          testIsErrorOfType[
+            TrustNameMatchDetails,
+            NameMatchServiceError.TooManyUnsuccessfulAttempts
+          ](
             service.getNumberOfUnsuccessfulAttempts(ggCredId)
           )
         }
@@ -255,12 +301,19 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           mockGetNumberOfUnsccessfulAttempts(ggCredId)(
             Right(
               Some(
-                UnsuccessfulNameMatchAttempts(maxRetries + 1, maxRetries, nameMatchDetails)
+                UnsuccessfulNameMatchAttempts(
+                  maxRetries + 1,
+                  maxRetries,
+                  nameMatchDetails
+                )
               )
             )
           )
 
-          testIsErrorOfType[IndividualRepresenteeNameMatchDetails, NameMatchServiceError.TooManyUnsuccessfulAttempts](
+          testIsErrorOfType[
+            IndividualRepresenteeNameMatchDetails,
+            NameMatchServiceError.TooManyUnsuccessfulAttempts
+          ](
             service.getNumberOfUnsuccessfulAttempts(ggCredId)
           )
         }
@@ -283,7 +336,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           nameMatchDetails.name.lastName,
           nameMatchDetails.sautr.value
         ),
-        mockGetIndividualBpr(Left(nameMatchDetails.sautr), nameMatchDetails.name)(_),
+        mockGetIndividualBpr(
+          Left(nameMatchDetails.sautr),
+          nameMatchDetails.name
+        )(_),
         service.attemptBusinessPartnerRecordNameMatch(_, _, _),
         _ -> _
       )
@@ -316,7 +372,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
         "return a successful response" in {
           val result = service.attemptNameMatch(
-            IndividualRepresenteeNameMatchDetails(sample[IndividualName], NoReferenceId),
+            IndividualRepresenteeNameMatchDetails(
+              sample[IndividualName],
+              NoReferenceId
+            ),
             sample[GGCredId],
             None
           )
@@ -330,7 +389,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
       "passed a nino" must {
 
         val representeeNino  = sample[RepresenteeNino]
-        val nameMatchDetails = IndividualRepresenteeNameMatchDetails(sample[IndividualName], representeeNino)
+        val nameMatchDetails = IndividualRepresenteeNameMatchDetails(
+          sample[IndividualName],
+          representeeNino
+        )
 
         behave like commonBprNameMatchBehaviour[
           IndividualRepresenteeNameMatchDetails,
@@ -342,7 +404,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             nameMatchDetails.name.lastName,
             representeeNino.value.value
           ),
-          mockGetIndividualBpr(Right(representeeNino.value), nameMatchDetails.name)(_),
+          mockGetIndividualBpr(
+            Right(representeeNino.value),
+            nameMatchDetails.name
+          )(_),
           service.attemptNameMatch(_, _, _),
           (_, _) => representeeNino
         )
@@ -352,7 +417,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
       "passed an sautr" must {
 
         val representeeSautr = sample[RepresenteeSautr]
-        val nameMatchDetails = IndividualRepresenteeNameMatchDetails(sample[IndividualName], representeeSautr)
+        val nameMatchDetails = IndividualRepresenteeNameMatchDetails(
+          sample[IndividualName],
+          representeeSautr
+        )
 
         behave like commonBprNameMatchBehaviour[
           IndividualRepresenteeNameMatchDetails,
@@ -364,7 +432,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             nameMatchDetails.name.lastName,
             representeeSautr.value.value
           ),
-          mockGetIndividualBpr(Left(representeeSautr.value), nameMatchDetails.name)(_),
+          mockGetIndividualBpr(
+            Left(representeeSautr.value),
+            nameMatchDetails.name
+          )(_),
           service.attemptNameMatch(_, _, _),
           (_, _) => representeeSautr
         )
@@ -376,28 +447,51 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
         val ggCredId                = sample[GGCredId]
         val cgtReference            = sample[CgtReference]
         val representeeCgtReference = RepresenteeCgtReference(cgtReference)
-        val nameMatchDetails        = IndividualRepresenteeNameMatchDetails(sample[IndividualName], representeeCgtReference)
+        val nameMatchDetails        = IndividualRepresenteeNameMatchDetails(
+          sample[IndividualName],
+          representeeCgtReference
+        )
 
         "return TooManyUnsuccessfulAttempts" when {
 
           "the number of previous attempts passed in equals the configured maximum" in {
-            mockSendCgtAccoutnNameMatchAttemptEvent(maxRetries, maxRetries, nameMatchDetails.name, cgtReference)
+            mockSendCgtAccoutnNameMatchAttemptEvent(
+              maxRetries,
+              maxRetries,
+              nameMatchDetails.name,
+              cgtReference
+            )
 
-            testIsErrorOfType[IndividualRepresenteeNameMatchDetails, NameMatchServiceError.TooManyUnsuccessfulAttempts](
+            testIsErrorOfType[
+              IndividualRepresenteeNameMatchDetails,
+              NameMatchServiceError.TooManyUnsuccessfulAttempts
+            ](
               service.attemptNameMatch(
                 nameMatchDetails,
                 ggCredId,
                 Some(
-                  UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[IndividualRepresenteeNameMatchDetails])
+                  UnsuccessfulNameMatchAttempts(
+                    maxRetries,
+                    maxRetries,
+                    sample[IndividualRepresenteeNameMatchDetails]
+                  )
                 )
               )
             )
           }
 
           "the number of previous attempts passed in exceeds the configured maximum" in {
-            mockSendCgtAccoutnNameMatchAttemptEvent(maxRetries + 1, maxRetries, nameMatchDetails.name, cgtReference)
+            mockSendCgtAccoutnNameMatchAttemptEvent(
+              maxRetries + 1,
+              maxRetries,
+              nameMatchDetails.name,
+              cgtReference
+            )
 
-            testIsErrorOfType[IndividualRepresenteeNameMatchDetails, NameMatchServiceError.TooManyUnsuccessfulAttempts](
+            testIsErrorOfType[
+              IndividualRepresenteeNameMatchDetails,
+              NameMatchServiceError.TooManyUnsuccessfulAttempts
+            ](
               service.attemptNameMatch(
                 nameMatchDetails,
                 ggCredId,
@@ -415,11 +509,23 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           "the user has now exceed the configured maximum number of unsuccessful attempts" when {
             def test(subscribedDetails: Option[SubscribedDetails]): Unit = {
               inSequence {
-                mockSendCgtAccoutnNameMatchAttemptEvent(maxRetries, maxRetries, nameMatchDetails.name, cgtReference)
-                mockGetSubscriptionDetails(cgtReference, Right(subscribedDetails))
+                mockSendCgtAccoutnNameMatchAttemptEvent(
+                  maxRetries,
+                  maxRetries,
+                  nameMatchDetails.name,
+                  cgtReference
+                )
+                mockGetSubscriptionDetails(
+                  cgtReference,
+                  Right(subscribedDetails)
+                )
                 mockStoreNumberOfUnsccessfulAttempts(
                   ggCredId,
-                  UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, nameMatchDetails)
+                  UnsuccessfulNameMatchAttempts(
+                    maxRetries,
+                    maxRetries,
+                    nameMatchDetails
+                  )
                 )(Right(()))
               }
 
@@ -461,7 +567,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
             "an account was found but the account name was for a trust" in {
               test(
-                Some(sample[SubscribedDetails].copy(name = Left(sample[TrustName])))
+                Some(
+                  sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
+                )
               )
             }
           }
@@ -472,11 +580,19 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
           "there is an error getting the subscription details" in {
             inSequence {
-              mockSendCgtAccoutnNameMatchAttemptEvent(1, maxRetries, nameMatchDetails.name, cgtReference)
+              mockSendCgtAccoutnNameMatchAttemptEvent(
+                1,
+                maxRetries,
+                nameMatchDetails.name,
+                cgtReference
+              )
               mockGetSubscriptionDetails(cgtReference, Left(Error("")))
             }
 
-            testIsErrorOfType[IndividualRepresenteeNameMatchDetails, NameMatchServiceError.BackendError](
+            testIsErrorOfType[
+              IndividualRepresenteeNameMatchDetails,
+              NameMatchServiceError.BackendError
+            ](
               service.attemptNameMatch(
                 nameMatchDetails,
                 ggCredId,
@@ -487,7 +603,12 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
           "there is an error updating the number of unsuccessful attempts in the retry store" in {
             inSequence {
-              mockSendCgtAccoutnNameMatchAttemptEvent(1, maxRetries, nameMatchDetails.name, cgtReference)
+              mockSendCgtAccoutnNameMatchAttemptEvent(
+                1,
+                maxRetries,
+                nameMatchDetails.name,
+                cgtReference
+              )
               mockGetSubscriptionDetails(cgtReference, Right(None))
               mockStoreNumberOfUnsccessfulAttempts(
                 ggCredId,
@@ -497,7 +618,10 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               )
             }
 
-            testIsErrorOfType[IndividualRepresenteeNameMatchDetails, NameMatchServiceError.BackendError](
+            testIsErrorOfType[
+              IndividualRepresenteeNameMatchDetails,
+              NameMatchServiceError.BackendError
+            ](
               service.attemptNameMatch(
                 nameMatchDetails,
                 ggCredId,
@@ -512,7 +636,12 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
           def test(subscribedDetails: Option[SubscribedDetails]): Unit = {
             inSequence {
-              mockSendCgtAccoutnNameMatchAttemptEvent(2, maxRetries, nameMatchDetails.name, cgtReference)
+              mockSendCgtAccoutnNameMatchAttemptEvent(
+                2,
+                maxRetries,
+                nameMatchDetails.name,
+                cgtReference
+              )
               mockGetSubscriptionDetails(cgtReference, Right(subscribedDetails))
               mockStoreNumberOfUnsccessfulAttempts(
                 ggCredId,
@@ -522,9 +651,12 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
               )
             }
 
-            testIsErrorOfType[IndividualRepresenteeNameMatchDetails, NameMatchServiceError.NameMatchFailed[
-              IndividualRepresenteeNameMatchDetails
-            ]](
+            testIsErrorOfType[
+              IndividualRepresenteeNameMatchDetails,
+              NameMatchServiceError.NameMatchFailed[
+                IndividualRepresenteeNameMatchDetails
+              ]
+            ](
               service.attemptNameMatch(
                 nameMatchDetails,
                 ggCredId,
@@ -561,21 +693,33 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
             "an account was found but the account name was for a trust" in {
               test(
-                Some(sample[SubscribedDetails].copy(name = Left(sample[TrustName])))
+                Some(
+                  sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
+                )
               )
             }
           }
 
           "the name match details passed in are the same as the previous attempt" in {
-            mockSendCgtAccoutnNameMatchAttemptEvent(1, maxRetries, nameMatchDetails.name, cgtReference)
+            mockSendCgtAccoutnNameMatchAttemptEvent(
+              1,
+              maxRetries,
+              nameMatchDetails.name,
+              cgtReference
+            )
 
-            testIsErrorOfType[IndividualRepresenteeNameMatchDetails, NameMatchServiceError.NameMatchFailed[
-              IndividualRepresenteeNameMatchDetails
-            ]](
+            testIsErrorOfType[
+              IndividualRepresenteeNameMatchDetails,
+              NameMatchServiceError.NameMatchFailed[
+                IndividualRepresenteeNameMatchDetails
+              ]
+            ](
               service.attemptNameMatch(
                 nameMatchDetails,
                 ggCredId,
-                Some(UnsuccessfulNameMatchAttempts(1, maxRetries, nameMatchDetails))
+                Some(
+                  UnsuccessfulNameMatchAttempts(1, maxRetries, nameMatchDetails)
+                )
               )
             )
 
@@ -586,14 +730,24 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
         "return a successful response" when {
 
           "the subscription details are found and the name matches" in {
-            val subscribedDetails = sample[SubscribedDetails].copy(name = Right(nameMatchDetails.name))
+            val subscribedDetails = sample[SubscribedDetails]
+              .copy(name = Right(nameMatchDetails.name))
 
             inSequence {
-              mockSendCgtAccoutnNameMatchAttemptEvent(1, maxRetries, nameMatchDetails.name, cgtReference)
-              mockGetSubscriptionDetails(cgtReference, Right(Some(subscribedDetails)))
+              mockSendCgtAccoutnNameMatchAttemptEvent(
+                1,
+                maxRetries,
+                nameMatchDetails.name,
+                cgtReference
+              )
+              mockGetSubscriptionDetails(
+                cgtReference,
+                Right(Some(subscribedDetails))
+              )
             }
 
-            val result = service.attemptNameMatch(nameMatchDetails, ggCredId, None)
+            val result =
+              service.attemptNameMatch(nameMatchDetails, ggCredId, None)
             await(result.value) shouldBe Right(representeeCgtReference)
           }
 
@@ -605,19 +759,27 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
 
   }
 
-  private def testIsErrorOfType[A <: NameMatchDetails, E <: NameMatchServiceError[A]: ClassTag](
+  private def testIsErrorOfType[
+    A <: NameMatchDetails,
+    E <: NameMatchServiceError[A] : ClassTag
+  ](
     result: EitherT[Future, NameMatchServiceError[A], _]
   ) =
     await(result.value) match {
       case Left(_: E) => ()
-      case other      => fail(s"expected error of type ${classTag[E]} but found $other")
+      case other      =>
+        fail(s"expected error of type ${classTag[E]} but found $other")
     }
 
-  private def commonBprNameMatchBehaviour[A <: NameMatchDetails: Gen, B](
+  private def commonBprNameMatchBehaviour[A <: NameMatchDetails : Gen, B](
     sampleNameMatchDetails: A,
     auditEvent: BusinessPartnerRecordNameMatchAuditDetails,
     mockGetBpr: Either[Error, BusinessPartnerRecordResponse] => Unit,
-    toResult: (A, GGCredId, Option[UnsuccessfulNameMatchAttempts[A]]) => EitherT[Future, NameMatchServiceError[A], B],
+    toResult: (
+      A,
+      GGCredId,
+      Option[UnsuccessfulNameMatchAttempts[A]]
+    ) => EitherT[Future, NameMatchServiceError[A], B],
     toSuccessfulResponse: (BusinessPartnerRecord, Option[CgtReference]) => B
   ) = {
     val ggCredId = sample[GGCredId]
@@ -636,7 +798,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           toResult(
             sampleNameMatchDetails,
             ggCredId,
-            Some(UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[A]))
+            Some(
+              UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[A])
+            )
           )
         )
       }
@@ -654,7 +818,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           toResult(
             sampleNameMatchDetails,
             ggCredId,
-            Some(UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[A]))
+            Some(
+              UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[A])
+            )
           )
         )
       }
@@ -670,7 +836,11 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           mockGetBpr(Right(BusinessPartnerRecordResponse(None, None)))
           mockStoreNumberOfUnsccessfulAttempts(
             ggCredId,
-            UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sampleNameMatchDetails)
+            UnsuccessfulNameMatchAttempts(
+              maxRetries,
+              maxRetries,
+              sampleNameMatchDetails
+            )
           )(Right(()))
         }
 
@@ -678,7 +848,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           toResult(
             sampleNameMatchDetails,
             ggCredId,
-            Some(UnsuccessfulNameMatchAttempts(maxRetries - 1, maxRetries, sample[A]))
+            Some(
+              UnsuccessfulNameMatchAttempts(
+                maxRetries - 1,
+                maxRetries,
+                sample[A]
+              )
+            )
           )
         )
       }
@@ -776,7 +952,13 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           toResult(
             sampleNameMatchDetails,
             ggCredId,
-            Some(UnsuccessfulNameMatchAttempts(1, maxRetries, sampleNameMatchDetails))
+            Some(
+              UnsuccessfulNameMatchAttempts(
+                1,
+                maxRetries,
+                sampleNameMatchDetails
+              )
+            )
           )
         )
 
@@ -817,7 +999,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
             maxRetries,
             auditEvent
           )(())
-          mockGetBpr(Right(BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference))))
+          mockGetBpr(
+            Right(BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference)))
+          )
         }
 
         val result = toResult(
@@ -826,7 +1010,9 @@ class NameMatchRetryServiceImplSpec extends WordSpec with Matchers with MockFact
           None
         )
 
-        await(result.value) shouldBe Right(toSuccessfulResponse(bpr, Some(cgtReference)))
+        await(result.value) shouldBe Right(
+          toSuccessfulResponse(bpr, Some(cgtReference))
+        )
       }
 
     }

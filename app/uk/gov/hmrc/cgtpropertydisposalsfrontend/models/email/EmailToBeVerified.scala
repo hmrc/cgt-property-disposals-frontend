@@ -20,7 +20,12 @@ import java.util.UUID
 
 import play.api.libs.json.{Format, Json}
 
-final case class EmailToBeVerified(email: Email, id: UUID, verified: Boolean, hasResentVerificationEmail: Boolean)
+final case class EmailToBeVerified(
+  email: Email,
+  id: UUID,
+  verified: Boolean,
+  hasResentVerificationEmail: Boolean
+)
 
 object EmailToBeVerified {
 

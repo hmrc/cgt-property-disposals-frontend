@@ -31,7 +31,10 @@ object RetrievedUserType {
 
   final case class Trust(sautr: SAUTR, email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
 
-  final case class OrganisationUnregisteredTrust(email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
+  final case class OrganisationUnregisteredTrust(
+    email: Option[Email],
+    ggCredId: GGCredId
+  ) extends RetrievedUserType
 
   final case class IndividualWithInsufficientConfidenceLevel(
     nino: Option[NINO],

@@ -54,14 +54,16 @@ class RegistrationChangeIndividualNameController @Inject() (
 
   override val isSubscribedJourney: Boolean = false
 
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, RegistrationReady)] =
+  override def validJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, RegistrationReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateName(journey: RegistrationReady, name: IndividualName)(
-    implicit hc: HeaderCarrier,
+  override def updateName(journey: RegistrationReady, name: IndividualName)(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, RegistrationReady] = {
     auditService.sendEvent(
@@ -72,16 +74,20 @@ class RegistrationChangeIndividualNameController @Inject() (
       ),
       "registration-contact-name-changed"
     )
-    EitherT.rightT[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(name = name)))
+    EitherT.rightT[Future, Error](
+      journey.copy(registrationDetails = journey.registrationDetails.copy(name = name))
+    )
   }
 
-  override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.registrationDetails.name)
+  override def name(journey: RegistrationReady): Option[IndividualName] =
+    Some(journey.registrationDetails.name)
 
-  override protected lazy val backLinkCall: Call =
+  override protected lazy val backLinkCall: Call        =
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()
   override protected lazy val enterNameSubmitCall: Call =
-    routes.RegistrationChangeIndividualNameController.enterIndividualNameSubmit()
-  override protected lazy val continueCall: Call =
+    routes.RegistrationChangeIndividualNameController
+      .enterIndividualNameSubmit()
+  override protected lazy val continueCall: Call        =
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()
 
 }

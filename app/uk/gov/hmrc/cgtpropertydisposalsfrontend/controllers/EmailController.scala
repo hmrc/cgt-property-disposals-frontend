@@ -60,24 +60,26 @@ trait EmailController[JourneyType <: EmailJourneyType] {
   val checkYourInboxPage: views.html.onboarding.email.check_your_inbox
   val emailVerifiedPage: views.html.onboarding.email.email_verified
 
-  def updateEmail(journey: JourneyType, email: Email)(
-    implicit hc: HeaderCarrier,
+  def updateEmail(journey: JourneyType, email: Email)(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus]
 
-  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, JourneyType)]
+  def validJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, JourneyType)]
 
   def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, JourneyType)]
 
-  def auditEmailVerifiedEvent(journey: JourneyType, email: Email)(
-    implicit hc: HeaderCarrier,
+  def auditEmailVerifiedEvent(journey: JourneyType, email: Email)(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): Unit
 
-  def auditEmailChangeAttempt(journey: JourneyType, email: Email)(
-    implicit hc: HeaderCarrier,
+  def auditEmailChangeAttempt(journey: JourneyType, email: Email)(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): Unit
 
@@ -96,15 +98,20 @@ trait EmailController[JourneyType <: EmailJourneyType] {
   protected val emailVerifiedCall: Call
   protected val emailVerifiedContinueCall: Call
 
-  def enterEmail(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) {
-      case (sessionData, journey) =>
-        val form = sessionData.emailToBeVerified.fold(
-          EmailController.submitEmailForm
-        )(e => EmailController.submitEmailForm.fill(SubmitEmailDetails(e.email, e.hasResentVerificationEmail)))
-        Ok(enterEmailPage(form, journey, backLinkCall, enterEmailSubmitCall))
+  def enterEmail(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) {
+        case (sessionData, journey) =>
+          val form = sessionData.emailToBeVerified.fold(
+            EmailController.submitEmailForm
+          )(e =>
+            EmailController.submitEmailForm.fill(
+              SubmitEmailDetails(e.email, e.hasResentVerificationEmail)
+            )
+          )
+          Ok(enterEmailPage(form, journey, backLinkCall, enterEmailSubmitCall))
+      }
     }
-  }
 
   def enterEmailSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -121,35 +128,48 @@ trait EmailController[JourneyType <: EmailJourneyType] {
                     backLinkCall,
                     enterEmailSubmitCall
                   )
-                ), {
+                ),
+              {
                 case SubmitEmailDetails(email, resendVerificationEmail) =>
                   val emailToBeVerified = sessionData.emailToBeVerified match {
                     case Some(e) if e.email === email =>
                       e.copy(hasResentVerificationEmail = resendVerificationEmail)
-                    case _ =>
+                    case _                            =>
                       EmailToBeVerified(
                         email,
                         uuidGenerator.nextId(),
-                        verified                   = false,
+                        verified = false,
                         hasResentVerificationEmail = resendVerificationEmail
                       )
                   }
 
                   val result = for {
-                    _ <- EitherT(
-                          updateSession(sessionStore, request)(_.copy(emailToBeVerified = Some(emailToBeVerified)))
-                        )
+                    _      <- EitherT(
+                           updateSession(sessionStore, request)(
+                             _.copy(emailToBeVerified = Some(emailToBeVerified))
+                           )
+                         )
                     result <- emailVerificationService
-                               .verifyEmail(email, name(journey), verifyEmailCall(emailToBeVerified.id))
-                    _ <- EitherT.pure[Future, Error](auditEmailChangeAttempt(journey, emailToBeVerified.email))
+                                .verifyEmail(
+                                  email,
+                                  name(journey),
+                                  verifyEmailCall(emailToBeVerified.id)
+                                )
+                    _      <- EitherT.pure[Future, Error](
+                           auditEmailChangeAttempt(
+                             journey,
+                             emailToBeVerified.email
+                           )
+                         )
                   } yield result
 
                   result.fold(
                     { e =>
                       logger.warn("Could not verify email", e)
                       errorHandler.errorResult()
-                    }, {
-                      case EmailAlreadyVerified =>
+                    },
+                    {
+                      case EmailAlreadyVerified       =>
                         Redirect(verifyEmailCall(emailToBeVerified.id))
 
                       case EmailVerificationRequested =>
@@ -194,30 +214,30 @@ trait EmailController[JourneyType <: EmailJourneyType] {
                 s"Received verify email request where id sent ($p) did not match the id in session (${emailToBeVerified.id})"
               )
               errorHandler.errorResult()
-            } else {
-              if (emailToBeVerified.verified) {
-                Redirect(emailVerifiedCall)
-              } else {
-                auditEmailVerifiedEvent(journey, emailToBeVerified.email)
+            } else if (emailToBeVerified.verified)
+              Redirect(emailVerifiedCall)
+            else {
+              auditEmailVerifiedEvent(journey, emailToBeVerified.email)
 
-                val result = for {
-                  updatedJourney <- updateEmail(journey, emailToBeVerified.email)
-                  _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
-                        s.copy(
-                          journeyStatus     = Some(updatedJourney),
-                          emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
-                        )
-                      })
-                } yield ()
+              val result = for {
+                updatedJourney <- updateEmail(journey, emailToBeVerified.email)
+                _              <- EitherT[Future, Error, Unit](
+                       updateSession(sessionStore, request) { s =>
+                         s.copy(
+                           journeyStatus = Some(updatedJourney),
+                           emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
+                         )
+                       }
+                     )
+              } yield ()
 
-                result.fold(
-                  error => {
-                    logger.warn(s"Could not update email: $error")
-                    errorHandler.errorResult()
-                  },
-                  _ => Redirect(emailVerifiedCall)
-                )
-              }
+              result.fold(
+                error => {
+                  logger.warn(s"Could not update email: $error")
+                  errorHandler.errorResult()
+                },
+                _ => Redirect(emailVerifiedCall)
+              )
             }
           }
       }
@@ -227,14 +247,21 @@ trait EmailController[JourneyType <: EmailJourneyType] {
     authenticatedActionWithSessionData.async { implicit request =>
       validVerificationCompleteJourney(request)
         .fold[Future[Result]](
-          toFuture, {
+          toFuture,
+          {
             case (sessionData, journey) =>
               sessionData.emailToBeVerified.fold(
                 Redirect(enterEmailCall)
               ) { emailToBeVerified =>
-                if (emailToBeVerified.verified) {
-                  Ok(emailVerifiedPage(emailToBeVerified.email, emailVerifiedContinueCall, journey))
-                } else {
+                if (emailToBeVerified.verified)
+                  Ok(
+                    emailVerifiedPage(
+                      emailToBeVerified.email,
+                      emailVerifiedContinueCall,
+                      journey
+                    )
+                  )
+                else {
 
                   logger.warn(
                     "Email verified endpoint called but email was not verified"
@@ -251,7 +278,10 @@ trait EmailController[JourneyType <: EmailJourneyType] {
 
 object EmailController {
 
-  final case class SubmitEmailDetails(email: Email, resendVerificationEmail: Boolean)
+  final case class SubmitEmailDetails(
+    email: Email,
+    resendVerificationEmail: Boolean
+  )
 
   val submitEmailForm: Form[SubmitEmailDetails] =
     Form(

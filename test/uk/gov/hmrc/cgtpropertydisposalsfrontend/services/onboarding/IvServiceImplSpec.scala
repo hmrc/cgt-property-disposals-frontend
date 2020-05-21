@@ -39,7 +39,9 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val service = new IvServiceImpl(mockConnector, MockMetrics.metrics)
 
-  def mockIvGetFailedJourneyStatus(journeyId: UUID)(result: Either[Error, HttpResponse]) =
+  def mockIvGetFailedJourneyStatus(
+    journeyId: UUID
+  )(result: Either[Error, HttpResponse]) =
     (mockConnector
       .getFailedJourneyStatus(_: UUID)(_: HeaderCarrier))
       .expects(journeyId, *)
@@ -57,26 +59,36 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
         "there is an error calling the IV service" in {
           mockIvGetFailedJourneyStatus(journeyId)(Left(Error("")))
 
-          await(service.getFailedJourneyStatus(journeyId).value).isLeft shouldBe true
+          await(
+            service.getFailedJourneyStatus(journeyId).value
+          ).isLeft shouldBe true
         }
 
         "there is no JSON body in the response" in {
           mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(200)))
 
-          await(service.getFailedJourneyStatus(journeyId).value).isLeft shouldBe true
+          await(
+            service.getFailedJourneyStatus(journeyId).value
+          ).isLeft shouldBe true
         }
 
         "the JSON in the response cannot be parsed" in {
-          mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(200, Some(JsString("")))))
+          mockIvGetFailedJourneyStatus(journeyId)(
+            Right(HttpResponse(200, Some(JsString(""))))
+          )
 
-          await(service.getFailedJourneyStatus(journeyId).value).isLeft shouldBe true
+          await(
+            service.getFailedJourneyStatus(journeyId).value
+          ).isLeft shouldBe true
 
         }
 
         "the response comes back with a status other than 200" in {
           mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(500)))
 
-          await(service.getFailedJourneyStatus(journeyId).value).isLeft shouldBe true
+          await(
+            service.getFailedJourneyStatus(journeyId).value
+          ).isLeft shouldBe true
 
         }
       }
@@ -98,10 +110,17 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
           ).foreach {
             case (statusString, status) =>
               mockIvGetFailedJourneyStatus(journeyId)(
-                Right(HttpResponse(200, Some(JsObject(Seq("result" -> JsString(statusString))))))
+                Right(
+                  HttpResponse(
+                    200,
+                    Some(JsObject(Seq("result" -> JsString(statusString))))
+                  )
+                )
               )
 
-              await(service.getFailedJourneyStatus(journeyId).value) shouldBe Right(status)
+              await(
+                service.getFailedJourneyStatus(journeyId).value
+              ) shouldBe Right(status)
           }
 
         }

@@ -27,7 +27,9 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
 
     "have a method which converts incomplete answers to complete answers" in {
       forAll { completeAnswers: CompleteReliefDetailsAnswers =>
-        IncompleteReliefDetailsAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteReliefDetailsAnswers(
+        IncompleteReliefDetailsAnswers.fromCompleteAnswers(
+          completeAnswers
+        ) shouldBe IncompleteReliefDetailsAnswers(
           Some(completeAnswers.privateResidentsRelief),
           Some(completeAnswers.lettingsRelief),
           completeAnswers.otherReliefs
@@ -39,8 +41,9 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
 
     "ReliefDetailsAnswers" must {
 
-      val otherReliefs    = sample[OtherReliefsOption.OtherReliefs]
-      val completeAnswers = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+      val otherReliefs      = sample[OtherReliefsOption.OtherReliefs]
+      val completeAnswers   = sample[CompleteReliefDetailsAnswers]
+        .copy(otherReliefs = Some(otherReliefs))
       val incompleteAnswers =
         IncompleteReliefDetailsAnswers(
           Some(completeAnswers.privateResidentsRelief),
@@ -51,17 +54,23 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
       "have a method which unsets fields" when {
 
         "given incomplete answers" in {
-          incompleteAnswers.unset(_.privateResidentsRelief) shouldBe incompleteAnswers.copy(privateResidentsRelief =
-            None
-          )
-          incompleteAnswers.unset(_.lettingsRelief) shouldBe incompleteAnswers.copy(lettingsRelief = None)
-          incompleteAnswers.unset(_.otherReliefs)   shouldBe incompleteAnswers.copy(otherReliefs   = None)
+          incompleteAnswers.unset(
+            _.privateResidentsRelief
+          )                                         shouldBe incompleteAnswers.copy(privateResidentsRelief = None)
+          incompleteAnswers.unset(_.lettingsRelief) shouldBe incompleteAnswers
+            .copy(lettingsRelief = None)
+          incompleteAnswers.unset(_.otherReliefs)   shouldBe incompleteAnswers
+            .copy(otherReliefs = None)
         }
 
         "given complete answers" in {
-          completeAnswers.unset(_.privateResidentsRelief) shouldBe incompleteAnswers.copy(privateResidentsRelief = None)
-          completeAnswers.unset(_.lettingsRelief)         shouldBe incompleteAnswers.copy(lettingsRelief         = None)
-          completeAnswers.unset(_.otherReliefs)           shouldBe incompleteAnswers.copy(otherReliefs           = None)
+          completeAnswers.unset(
+            _.privateResidentsRelief
+          )                                       shouldBe incompleteAnswers.copy(privateResidentsRelief = None)
+          completeAnswers.unset(_.lettingsRelief) shouldBe incompleteAnswers
+            .copy(lettingsRelief = None)
+          completeAnswers.unset(_.otherReliefs)   shouldBe incompleteAnswers
+            .copy(otherReliefs = None)
         }
 
       }

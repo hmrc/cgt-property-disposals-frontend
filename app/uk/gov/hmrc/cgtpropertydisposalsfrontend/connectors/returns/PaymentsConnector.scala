@@ -46,14 +46,18 @@ trait PaymentsConnector {
 }
 
 @Singleton
-class PaymentsConnectorImpl @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(implicit ec: ExecutionContext)
+class PaymentsConnectorImpl @Inject() (
+  http: HttpClient,
+  servicesConfig: ServicesConfig
+)(implicit ec: ExecutionContext)
     extends PaymentsConnector {
 
   val paymentsBaseUrl: String = servicesConfig.baseUrl("payments")
 
   val selfBaseUrl: String = servicesConfig.getString("self.url")
 
-  val startPaymentJourneyUrl: String = s"$paymentsBaseUrl/pay-api/capital-gains-tax/journey/start"
+  val startPaymentJourneyUrl: String =
+    s"$paymentsBaseUrl/pay-api/capital-gains-tax/journey/start"
 
   override def startPaymentJourney(
     cgtReference: CgtReference,

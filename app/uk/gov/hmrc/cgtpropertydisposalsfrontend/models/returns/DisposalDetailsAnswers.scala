@@ -35,10 +35,17 @@ object DisposalDetailsAnswers {
   ) extends DisposalDetailsAnswers
 
   object IncompleteDisposalDetailsAnswers {
-    val empty: IncompleteDisposalDetailsAnswers = IncompleteDisposalDetailsAnswers(None, None, None)
+    val empty: IncompleteDisposalDetailsAnswers =
+      IncompleteDisposalDetailsAnswers(None, None, None)
 
-    def fromCompleteAnswers(c: CompleteDisposalDetailsAnswers): IncompleteDisposalDetailsAnswers =
-      IncompleteDisposalDetailsAnswers(Some(c.shareOfProperty), Some(c.disposalPrice), Some(c.disposalFees))
+    def fromCompleteAnswers(
+      c: CompleteDisposalDetailsAnswers
+    ): IncompleteDisposalDetailsAnswers =
+      IncompleteDisposalDetailsAnswers(
+        Some(c.shareOfProperty),
+        Some(c.disposalPrice),
+        Some(c.disposalFees)
+      )
   }
 
   final case class CompleteDisposalDetailsAnswers(
@@ -47,18 +54,25 @@ object DisposalDetailsAnswers {
     disposalFees: AmountInPence
   ) extends DisposalDetailsAnswers
 
-  implicit class DisposalDetailsAnswersOps(private val i: DisposalDetailsAnswers) extends AnyVal {
+  implicit class DisposalDetailsAnswersOps(
+    private val i: DisposalDetailsAnswers
+  ) extends AnyVal {
 
     def fold[A](
       ifIncomplete: IncompleteDisposalDetailsAnswers => A,
       ifComplete: CompleteDisposalDetailsAnswers => A
-    ): A = i match {
-      case incomplete: IncompleteDisposalDetailsAnswers => ifIncomplete(incomplete)
-      case complete: CompleteDisposalDetailsAnswers     => ifComplete(complete)
-    }
+    ): A =
+      i match {
+        case incomplete: IncompleteDisposalDetailsAnswers =>
+          ifIncomplete(incomplete)
+        case complete: CompleteDisposalDetailsAnswers     => ifComplete(complete)
+      }
 
     def unset[A](
-      fieldLens: IncompleteDisposalDetailsAnswers.type => Lens[IncompleteDisposalDetailsAnswers, Option[A]]
+      fieldLens: IncompleteDisposalDetailsAnswers.type => Lens[
+        IncompleteDisposalDetailsAnswers,
+        Option[A]
+      ]
     ): IncompleteDisposalDetailsAnswers =
       fieldLens(IncompleteDisposalDetailsAnswers).set(None)(
         fold(identity, IncompleteDisposalDetailsAnswers.fromCompleteAnswers)
@@ -66,6 +80,7 @@ object DisposalDetailsAnswers {
 
   }
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[DisposalDetailsAnswers] = derived.oformat[DisposalDetailsAnswers]()
+  implicit val format: OFormat[DisposalDetailsAnswers] =
+    derived.oformat[DisposalDetailsAnswers]()
 
 }

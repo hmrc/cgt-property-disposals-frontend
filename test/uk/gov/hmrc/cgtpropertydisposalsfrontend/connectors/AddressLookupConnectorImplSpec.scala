@@ -47,7 +47,10 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
     )
   )
 
-  val connector = new AddressLookupConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+  val connector = new AddressLookupConnectorImpl(
+    mockHttp,
+    new ServicesConfig(config, new RunMode(config, Mode.Test))
+  )
   "AddressLookupConnectorImpl" when {
 
     "handling request to lookup addresses" must {
@@ -68,7 +71,9 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
               Map("User-Agent" -> "agent")
             )(Some(httpResponse))
 
-            await(connector.lookupAddress(postcode, None).value) shouldBe Right(httpResponse)
+            await(connector.lookupAddress(postcode, None).value) shouldBe Right(
+              httpResponse
+            )
           }
         }
       }
@@ -82,7 +87,9 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
           Map("User-Agent" -> "agent")
         )(Some(httpResponse))
 
-        await(connector.lookupAddress(postcode, Some(filter)).value) shouldBe Right(httpResponse)
+        await(
+          connector.lookupAddress(postcode, Some(filter)).value
+        ) shouldBe Right(httpResponse)
       }
 
       "get rid of all spaces and turn all lower case letters to upper case letters" in {
@@ -94,7 +101,9 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
           Map("User-Agent" -> "agent")
         )(Some(response))
 
-        await(connector.lookupAddress(Postcode(" ab1 2C d "), None).value) shouldBe Right(response)
+        await(
+          connector.lookupAddress(Postcode(" ab1 2C d "), None).value
+        ) shouldBe Right(response)
       }
 
       "return an error" when {
@@ -106,7 +115,9 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
             Map("User-Agent" -> "agent")
           )(None)
 
-          await(connector.lookupAddress(postcode, None).value).isLeft shouldBe true
+          await(
+            connector.lookupAddress(postcode, None).value
+          ).isLeft shouldBe true
         }
 
       }

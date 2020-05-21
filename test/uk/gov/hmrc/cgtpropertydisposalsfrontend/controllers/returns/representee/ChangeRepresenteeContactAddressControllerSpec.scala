@@ -46,7 +46,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
   val validJourneyStatus: ChangingRepresenteeContactAddressJourney
 
   override def overrideBindings: List[GuiceableModule] =
-    List[GuiceableModule](bind[ReturnsService].toInstance(mockReturnsService)) ::: super.overrideBindings
+    List[GuiceableModule](
+      bind[ReturnsService].toInstance(mockReturnsService)
+    ) ::: super.overrideBindings
 
   lazy val controller = instanceOf[ChangeRepresenteeContactAddressController]
 
@@ -60,7 +62,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
     val newContactDetails = contactDetails.copy(address = newAddress)
     answers.fold(
       _.copy(
-        contactDetails             = Some(newContactDetails),
+        contactDetails = Some(newContactDetails),
         hasConfirmedContactDetails = false
       ),
       complete =>
@@ -69,7 +71,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
           Some(complete.id),
           complete.dateOfDeath,
           Some(newContactDetails),
-          hasConfirmedPerson         = true,
+          hasConfirmedPerson = true,
           hasConfirmedContactDetails = false
         )
     )
@@ -97,7 +99,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
     journey: ChangingRepresenteeContactAddressJourney,
     address: Address
   ): JourneyStatus = {
-    val newAnswers = updateAnswers(journey.answers, journey.contactDetails, address)
+    val newAnswers =
+      updateAnswers(journey.answers, journey.contactDetails, address)
 
     journey.journey.fold(
       _.copy(representeeAnswers = Some(newAnswers)),
@@ -106,15 +109,22 @@ trait ChangeRepresenteeContactAddressControllerSpec
   }
 
   override val mockUpdateAddress: Option[
-    (ChangingRepresenteeContactAddressJourney, Address, Either[Error, Unit]) => Unit
+    (
+      ChangingRepresenteeContactAddressJourney,
+      Address,
+      Either[Error, Unit]
+    ) => Unit
   ]
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit = {
-    def isDefinedAndContainsContactDetails(answers: Option[RepresenteeAnswers]): Boolean =
+    def isDefinedAndContainsContactDetails(
+      answers: Option[RepresenteeAnswers]
+    ): Boolean =
       answers.exists(_.fold(_.contactDetails.isDefined, _ => true))
 
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case StartingNewDraftReturn(_, _, _, _, representeeAnswers)
             if isDefinedAndContainsContactDetails(representeeAnswers) =>
           true
@@ -148,7 +158,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
     "handling requests to submit the is UK page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.isUkSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.isUkSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -162,11 +174,16 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
     "handling requests to display the enter UK address page" must {
 
-      def performAction(): Future[Result] = controller.enterUkAddress()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
+      behave like displayEnterUkAddressPage(
+        UserType.Individual,
+        None,
+        performAction
+      )
       behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
 
     }
@@ -174,7 +191,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
     "handling submitted addresses from enter UK address page" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.enterUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterUkAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -187,7 +206,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
     "handling requests to display the enter non UK address page" must {
 
-      def performAction(): Future[Result] = controller.enterNonUkAddress()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterNonUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -197,7 +217,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
     "handling requests to submit the enter non UK address page" must {
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.enterNonUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterNonUkAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -209,7 +231,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
 
     "handling requests to display the enter postcode page" must {
 
-      def performAction(): Future[Result] = controller.enterPostcode()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterPostcode()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -220,7 +243,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
     "handling submitted postcodes and filters" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterPostcodeSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -250,7 +275,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
     "handling submitted selected addresses" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.selectAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.selectAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -269,7 +296,8 @@ class StartingNewDraftReturnChangeRepresenteeAddressSpec extends ChangeRepresent
 
   override val validJourneyStatus: ChangingRepresenteeContactAddressJourney = {
     val answers                = sample[CompleteRepresenteeAnswers]
-    val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(representeeAnswers = Some(answers))
+    val startingNewDraftReturn =
+      sample[StartingNewDraftReturn].copy(representeeAnswers = Some(answers))
     ChangingRepresenteeContactAddressJourney(
       Left(startingNewDraftReturn),
       answers,
@@ -277,16 +305,22 @@ class StartingNewDraftReturnChangeRepresenteeAddressSpec extends ChangeRepresent
     )
   }
 
-  override val mockUpdateAddress
-    : Option[(ChangingRepresenteeContactAddressJourney, Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress: Option[
+    (
+      ChangingRepresenteeContactAddressJourney,
+      Address,
+      Either[Error, Unit]
+    ) => Unit
+  ] = None
 
 }
 
 class FillingOutReturnChangeRepresenteeAddressSpec extends ChangeRepresenteeContactAddressControllerSpec {
 
   override val validJourneyStatus: ChangingRepresenteeContactAddressJourney = {
-    val contactDetails = sample[RepresenteeContactDetails]
-    val answers        = sample[IncompleteRepresenteeAnswers].copy(contactDetails = Some(contactDetails))
+    val contactDetails   = sample[RepresenteeContactDetails]
+    val answers          = sample[IncompleteRepresenteeAnswers]
+      .copy(contactDetails = Some(contactDetails))
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftSingleDisposalReturn].copy(
         representeeAnswers = Some(answers)
@@ -299,14 +333,25 @@ class FillingOutReturnChangeRepresenteeAddressSpec extends ChangeRepresenteeCont
     )
   }
 
-  override val mockUpdateAddress
-    : Option[(ChangingRepresenteeContactAddressJourney, Address, Either[Error, Unit]) => Unit] = Some {
-    case (journey: ChangingRepresenteeContactAddressJourney, newAddress: Address, mockResult: Either[Error, Unit]) =>
+  override val mockUpdateAddress: Option[
+    (
+      ChangingRepresenteeContactAddressJourney,
+      Address,
+      Either[Error, Unit]
+    ) => Unit
+  ] = Some {
+    case (
+          journey: ChangingRepresenteeContactAddressJourney,
+          newAddress: Address,
+          mockResult: Either[Error, Unit]
+        ) =>
       journey.journey match {
-        case Left(_) => ()
+        case Left(_)                 => ()
         case Right(fillingOutReturn) =>
-          val newAnswers          = updateAnswers(journey.answers, journey.contactDetails, newAddress)
-          val newFillingOutReturn = updateFillingOutReturn(fillingOutReturn, newAnswers)
+          val newAnswers          =
+            updateAnswers(journey.answers, journey.contactDetails, newAddress)
+          val newFillingOutReturn =
+            updateFillingOutReturn(fillingOutReturn, newAnswers)
 
           mockStoreDraftReturn(
             newFillingOutReturn.draftReturn,

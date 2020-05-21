@@ -53,7 +53,8 @@ class AccountControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: Subscribed => true
         case _             => false
       }
@@ -63,20 +64,24 @@ class AccountControllerSpec
 
     "handling requests signed out" must {
 
-      def performAction(): Future[Result] = controller.signedOut()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.signedOut()(FakeRequest())
 
       "display the signed out page" in {
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("signed-out.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("signed-out.title")
+        )
       }
 
     }
 
     "handling requests for manage your details" must {
 
-      def performAction(): Future[Result] = controller.manageYourDetails()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.manageYourDetails()(FakeRequest())
       behave like redirectToStartBehaviour(performAction)
 
       "display the manage your details page" in {
@@ -89,14 +94,17 @@ class AccountControllerSpec
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.p"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("account.manageYourDetails.p")
+        )
       }
 
     }
 
     "handling requests for the address changed page" must {
-      def performAction(): Future[Result] = controller.contactAddressUpdated()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.contactAddressUpdated()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -110,14 +118,17 @@ class AccountControllerSpec
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.Address.changed"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("account.manageYourDetails.Address.changed")
+        )
       }
 
     }
 
     "handling requests for the email changed page" must {
-      def performAction(): Future[Result] = controller.contactEmailUpdated()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.contactEmailUpdated()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -131,14 +142,17 @@ class AccountControllerSpec
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.Email.changed"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("account.manageYourDetails.Email.changed")
+        )
       }
 
     }
 
     "handling requests for the name changed page" must {
-      def performAction(): Future[Result] = controller.contactNameUpdated()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.contactNameUpdated()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -152,8 +166,10 @@ class AccountControllerSpec
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.ContactName.changed"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("account.manageYourDetails.ContactName.changed")
+        )
       }
 
     }

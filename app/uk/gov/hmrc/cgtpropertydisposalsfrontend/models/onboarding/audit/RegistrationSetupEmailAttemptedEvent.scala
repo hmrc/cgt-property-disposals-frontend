@@ -23,5 +23,6 @@ final case class RegistrationSetupEmailAttemptedEvent(
 )
 
 object RegistrationSetupEmailAttemptedEvent {
-  implicit val format: OFormat[RegistrationSetupEmailAttemptedEvent] = Json.format[RegistrationSetupEmailAttemptedEvent]
+  implicit val format: OFormat[RegistrationSetupEmailAttemptedEvent] =
+    Json.format[RegistrationSetupEmailAttemptedEvent]
 }

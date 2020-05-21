@@ -28,7 +28,8 @@ object ContactNameSource {
 
   final case object ManuallyEntered extends ContactNameSource
 
-  implicit val eq: Eq[ContactNameSource] = Eq.fromUniversalEquals[ContactNameSource]
+  implicit val eq: Eq[ContactNameSource] =
+    Eq.fromUniversalEquals[ContactNameSource]
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[ContactNameSource] = derived.oformat()

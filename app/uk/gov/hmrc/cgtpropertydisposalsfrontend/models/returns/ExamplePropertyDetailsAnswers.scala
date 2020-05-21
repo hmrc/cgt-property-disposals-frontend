@@ -41,7 +41,9 @@ object ExamplePropertyDetailsAnswers {
     val empty: IncompleteExamplePropertyDetailsAnswers =
       IncompleteExamplePropertyDetailsAnswers(None, None, None, None)
 
-    def fromCompleteAnswers(c: CompleteExamplePropertyDetailsAnswers): IncompleteExamplePropertyDetailsAnswers =
+    def fromCompleteAnswers(
+      c: CompleteExamplePropertyDetailsAnswers
+    ): IncompleteExamplePropertyDetailsAnswers =
       IncompleteExamplePropertyDetailsAnswers(
         Some(c.address),
         Some(c.disposalDate),
@@ -65,18 +67,25 @@ object ExamplePropertyDetailsAnswers {
     def fold[A](
       whenIncomplete: IncompleteExamplePropertyDetailsAnswers => A,
       whenComplete: CompleteExamplePropertyDetailsAnswers => A
-    ): A = m match {
-      case i: IncompleteExamplePropertyDetailsAnswers => whenIncomplete(i)
-      case c: CompleteExamplePropertyDetailsAnswers   => whenComplete(c)
-    }
+    ): A =
+      m match {
+        case i: IncompleteExamplePropertyDetailsAnswers => whenIncomplete(i)
+        case c: CompleteExamplePropertyDetailsAnswers   => whenComplete(c)
+      }
 
     def unset[A](
-      fieldLens: IncompleteExamplePropertyDetailsAnswers.type => Lens[IncompleteExamplePropertyDetailsAnswers, Option[
-        A
-      ]]
+      fieldLens: IncompleteExamplePropertyDetailsAnswers.type => Lens[
+        IncompleteExamplePropertyDetailsAnswers,
+        Option[
+          A
+        ]
+      ]
     ): IncompleteExamplePropertyDetailsAnswers =
       fieldLens(IncompleteExamplePropertyDetailsAnswers).set(None)(
-        fold(identity, IncompleteExamplePropertyDetailsAnswers.fromCompleteAnswers)
+        fold(
+          identity,
+          IncompleteExamplePropertyDetailsAnswers.fromCompleteAnswers
+        )
       )
 
   }

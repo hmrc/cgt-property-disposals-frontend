@@ -51,7 +51,7 @@
                 @{messages(s"$key.in-progress.help-text")}
             </p>
 
-            @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheckSubmit(upscanUpload.uploadReference.value), 'novalidate -> "novalidate") {
+            @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidenceCheckSubmit(upscanUpload.uploadReference.value), 'novalidate -> "novalidate") {
              @submitButton("Check and continue")
             }
 

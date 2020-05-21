@@ -41,7 +41,11 @@ trait ReturnsServiceSupport { this: ControllerSpec =>
     result: Either[Error, Unit]
   ) =
     (mockReturnsService
-      .storeDraftReturn(_: DraftReturn, _: CgtReference, _: Option[AgentReferenceNumber])(
+      .storeDraftReturn(
+        _: DraftReturn,
+        _: CgtReference,
+        _: Option[AgentReferenceNumber]
+      )(
         _: HeaderCarrier,
         _: Request[_]
       ))

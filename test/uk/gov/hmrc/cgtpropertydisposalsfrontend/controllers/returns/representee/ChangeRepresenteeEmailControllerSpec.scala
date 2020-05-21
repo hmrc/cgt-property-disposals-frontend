@@ -51,15 +51,24 @@ trait ChangeRepresenteeEmailControllerSpec
     with RedirectToStartBehaviour
     with ReturnsServiceSupport {
 
-  override def toJourneyStatus(journeyType: ChangingRepresenteeEmail): JourneyStatus = journeyType.journey.merge
+  override def toJourneyStatus(
+    journeyType: ChangingRepresenteeEmail
+  ): JourneyStatus = journeyType.journey.merge
 
   val validJourneyStatus: ChangingRepresenteeEmail
 
   val validVerificationCompleteJourneyStatus: ChangingRepresenteeEmail
 
-  val mockUpdateEmail: Option[(ChangingRepresenteeEmail, ChangingRepresenteeEmail, Either[Error, Unit]) => Unit]
+  val mockUpdateEmail: Option[
+    (
+      ChangingRepresenteeEmail,
+      ChangingRepresenteeEmail,
+      Either[Error, Unit]
+    ) => Unit
+  ]
 
-  override lazy val controller: ChangeRepresenteeEmailController = instanceOf[ChangeRepresenteeEmailController]
+  override lazy val controller: ChangeRepresenteeEmailController =
+    instanceOf[ChangeRepresenteeEmailController]
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -75,7 +84,11 @@ trait ChangeRepresenteeEmailControllerSpec
     changingRepresenteeEmail: ChangingRepresenteeEmail,
     email: Email
   ): ChangingRepresenteeEmail = {
-    val newAnswers = updateAnswers(changingRepresenteeEmail.answers, changingRepresenteeEmail.contactDetails, email)
+    val newAnswers = updateAnswers(
+      changingRepresenteeEmail.answers,
+      changingRepresenteeEmail.contactDetails,
+      email
+    )
 
     ChangingRepresenteeEmail(
       changingRepresenteeEmail.journey.bimap(
@@ -97,14 +110,17 @@ trait ChangeRepresenteeEmailControllerSpec
     val newContactDetails = contactDetails.copy(emailAddress = newEmail)
 
     answers.fold(
-      _.copy(contactDetails = Some(newContactDetails), hasConfirmedContactDetails = false),
+      _.copy(
+        contactDetails = Some(newContactDetails),
+        hasConfirmedContactDetails = false
+      ),
       complete =>
         IncompleteRepresenteeAnswers(
           Some(complete.name),
           Some(complete.id),
           complete.dateOfDeath,
           Some(newContactDetails),
-          hasConfirmedPerson         = true,
+          hasConfirmedPerson = true,
           hasConfirmedContactDetails = false
         )
     )
@@ -123,11 +139,14 @@ trait ChangeRepresenteeEmailControllerSpec
     )
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit = {
-    def isDefinedAndContainsContactDetails(answers: Option[RepresenteeAnswers]): Boolean =
+    def isDefinedAndContainsContactDetails(
+      answers: Option[RepresenteeAnswers]
+    ): Boolean =
       answers.exists(_.fold(_.contactDetails.isDefined, _ => true))
 
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case StartingNewDraftReturn(_, _, _, _, representeeAnswers)
             if isDefinedAndContainsContactDetails(representeeAnswers) =>
           true
@@ -161,13 +180,17 @@ trait ChangeRepresenteeEmailControllerSpec
     "handling submitted email addresses" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.enterEmailSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken)
+        controller.enterEmailSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
       behave like enterEmailSubmit(
         performAction,
-        validJourneyStatus.journey.fold(_.subscribedDetails, _.subscribedDetails).contactName,
+        validJourneyStatus.journey
+          .fold(_.subscribedDetails, _.subscribedDetails)
+          .contactName,
         routes.ChangeRepresenteeEmailController.verifyEmail,
         routes.ChangeRepresenteeEmailController.checkYourInbox()
       )
@@ -222,7 +245,8 @@ class StartingNewDraftReturnChangeRepresenteeEmailSpec extends ChangeRepresentee
 
   override val validJourneyStatus: ChangingRepresenteeEmail = {
     val answers                = sample[CompleteRepresenteeAnswers]
-    val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(representeeAnswers = Some(answers))
+    val startingNewDraftReturn =
+      sample[StartingNewDraftReturn].copy(representeeAnswers = Some(answers))
     ChangingRepresenteeEmail(
       Left(startingNewDraftReturn),
       answers,
@@ -232,16 +256,22 @@ class StartingNewDraftReturnChangeRepresenteeEmailSpec extends ChangeRepresentee
 
   override val validVerificationCompleteJourneyStatus: ChangingRepresenteeEmail = validJourneyStatus
 
-  override val mockUpdateEmail
-    : Option[(ChangingRepresenteeEmail, ChangingRepresenteeEmail, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail: Option[
+    (
+      ChangingRepresenteeEmail,
+      ChangingRepresenteeEmail,
+      Either[Error, Unit]
+    ) => Unit
+  ] = None
 
 }
 
 class FillingOutReturnChangeRepresenteeEmailSpec extends ChangeRepresenteeEmailControllerSpec {
 
   override val validJourneyStatus: ChangingRepresenteeEmail = {
-    val contactDetails = sample[RepresenteeContactDetails]
-    val answers        = sample[IncompleteRepresenteeAnswers].copy(contactDetails = Some(contactDetails))
+    val contactDetails   = sample[RepresenteeContactDetails]
+    val answers          = sample[IncompleteRepresenteeAnswers]
+      .copy(contactDetails = Some(contactDetails))
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftSingleDisposalReturn].copy(
         representeeAnswers = Some(answers)
@@ -256,15 +286,26 @@ class FillingOutReturnChangeRepresenteeEmailSpec extends ChangeRepresenteeEmailC
 
   override val validVerificationCompleteJourneyStatus: ChangingRepresenteeEmail = validJourneyStatus
 
-  override val mockUpdateEmail
-    : Option[(ChangingRepresenteeEmail, ChangingRepresenteeEmail, Either[Error, Unit]) => Unit] = Some {
-    case (journey: ChangingRepresenteeEmail, newDetails: ChangingRepresenteeEmail, mockResult: Either[Error, Unit]) =>
+  override val mockUpdateEmail: Option[
+    (
+      ChangingRepresenteeEmail,
+      ChangingRepresenteeEmail,
+      Either[Error, Unit]
+    ) => Unit
+  ] = Some {
+    case (
+          journey: ChangingRepresenteeEmail,
+          newDetails: ChangingRepresenteeEmail,
+          mockResult: Either[Error, Unit]
+        ) =>
       journey.journey match {
-        case Left(_) => ()
+        case Left(_)                 => ()
         case Right(fillingOutReturn) =>
           val newEmail            = newDetails.contactDetails.emailAddress
-          val newAnswers          = updateAnswers(journey.answers, journey.contactDetails, newEmail)
-          val newFillingOutReturn = updateFillingOutReturn(fillingOutReturn, newAnswers)
+          val newAnswers          =
+            updateAnswers(journey.answers, journey.contactDetails, newEmail)
+          val newFillingOutReturn =
+            updateFillingOutReturn(fillingOutReturn, newAnswers)
 
           mockStoreDraftReturn(
             newFillingOutReturn.draftReturn,

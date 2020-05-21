@@ -47,7 +47,10 @@ object UpscanCallBack {
   implicit class UpscanSuccessOps(private val u: UpscanSuccess) extends AnyVal {
 
     def fileName: String =
-      u.uploadDetails.getOrElse("fileName", sys.error(s"Could not find filename for reference ${u.reference}"))
+      u.uploadDetails.getOrElse(
+        "fileName",
+        sys.error(s"Could not find filename for reference ${u.reference}")
+      )
   }
 
   implicit val format: OFormat[UpscanCallBack] = derived.oformat()

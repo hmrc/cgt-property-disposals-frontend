@@ -21,5 +21,6 @@ import play.api.libs.json.{Json, OFormat}
 final case class RegistrationSetupEmailVerifiedEvent(emailAddress: String)
 
 object RegistrationSetupEmailVerifiedEvent {
-  implicit val format: OFormat[RegistrationSetupEmailVerifiedEvent] = Json.format[RegistrationSetupEmailVerifiedEvent]
+  implicit val format: OFormat[RegistrationSetupEmailVerifiedEvent] =
+    Json.format[RegistrationSetupEmailVerifiedEvent]
 }

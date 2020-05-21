@@ -21,7 +21,8 @@ import play.api.test.FakeRequest
 
 class AccessibilityStatementControllerSpec extends ControllerSpec {
 
-  lazy val controller: AccessibilityStatementController = instanceOf[AccessibilityStatementController]
+  lazy val controller: AccessibilityStatementController =
+    instanceOf[AccessibilityStatementController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 

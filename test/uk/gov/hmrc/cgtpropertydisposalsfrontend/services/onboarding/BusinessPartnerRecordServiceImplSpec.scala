@@ -38,9 +38,13 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 
-  def mockGetBPR(request: BusinessPartnerRecordRequest)(response: Either[Error, HttpResponse]) =
+  def mockGetBPR(
+    request: BusinessPartnerRecordRequest
+  )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+        _: HeaderCarrier
+      ))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -57,7 +61,9 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         def testError(response: => Either[Error, HttpResponse]) = {
           mockGetBPR(bprRequest)(response)
 
-          await(service.getBusinessPartnerRecord(bprRequest).value).isLeft shouldBe true
+          await(
+            service.getBusinessPartnerRecord(bprRequest).value
+          ).isLeft shouldBe true
         }
 
         "the connector fails to make the call" in {
@@ -82,18 +88,27 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         "the json body returns a bpr" in {
         val response = BusinessPartnerRecordResponse(Some(bpr), None)
 
-        mockGetBPR(bprRequest)(Right(HttpResponse(200, Some(Json.toJson(response)))))
+        mockGetBPR(bprRequest)(
+          Right(HttpResponse(200, Some(Json.toJson(response))))
+        )
 
-        await(service.getBusinessPartnerRecord(bprRequest).value) shouldBe Right(response)
+        await(
+          service.getBusinessPartnerRecord(bprRequest).value
+        ) shouldBe Right(response)
       }
 
       "return nothing when the http response comes back with status 200 and " +
         "the json body does not contain a bpr" in {
-        val response = BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]))
+        val response =
+          BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]))
 
-        mockGetBPR(bprRequest)(Right(HttpResponse(200, Some(Json.toJson(response)))))
+        mockGetBPR(bprRequest)(
+          Right(HttpResponse(200, Some(Json.toJson(response))))
+        )
 
-        await(service.getBusinessPartnerRecord(bprRequest).value) shouldBe Right(response)
+        await(
+          service.getBusinessPartnerRecord(bprRequest).value
+        ) shouldBe Right(response)
       }
     }
 

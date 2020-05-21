@@ -29,7 +29,9 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
 
     "have a method which converts incomplete answers to complete answers" in {
       forAll { completeAnswers: CompleteNonCalculatedYTDAnswers =>
-        IncompleteNonCalculatedYTDAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteNonCalculatedYTDAnswers(
+        IncompleteNonCalculatedYTDAnswers.fromCompleteAnswers(
+          completeAnswers
+        ) shouldBe IncompleteNonCalculatedYTDAnswers(
           Some(completeAnswers.taxableGainOrLoss),
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue),
@@ -44,7 +46,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
 
   "NonCalculatedYTDAnswers" must {
 
-    val completeAnswers = sample[CompleteNonCalculatedYTDAnswers]
+    val completeAnswers   = sample[CompleteNonCalculatedYTDAnswers]
     val incompleteAnswers =
       IncompleteNonCalculatedYTDAnswers(
         Some(completeAnswers.taxableGainOrLoss),
@@ -58,17 +60,25 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
     "have a method which unsets fields" when {
 
       "given incomplete answers" in {
-        incompleteAnswers.unset(_.taxableGainOrLoss)   shouldBe incompleteAnswers.copy(taxableGainOrLoss   = None)
-        incompleteAnswers.unset(_.hasEstimatedDetails) shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
-        incompleteAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue              = None)
-        incompleteAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers.copy(mandatoryEvidence   = None)
+        incompleteAnswers.unset(_.taxableGainOrLoss) shouldBe incompleteAnswers
+          .copy(taxableGainOrLoss = None)
+        incompleteAnswers.unset(
+          _.hasEstimatedDetails
+        )                                            shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
+        incompleteAnswers.unset(_.taxDue)            shouldBe incompleteAnswers
+          .copy(taxDue = None)
+        incompleteAnswers.unset(_.mandatoryEvidence) shouldBe incompleteAnswers
+          .copy(mandatoryEvidence = None)
       }
 
       "given complete answers" in {
-        completeAnswers.unset(_.taxableGainOrLoss)   shouldBe incompleteAnswers.copy(taxableGainOrLoss   = None)
-        completeAnswers.unset(_.hasEstimatedDetails) shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
-        completeAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue              = None)
-        completeAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers.copy(mandatoryEvidence   = None)
+        completeAnswers.unset(_.taxableGainOrLoss)   shouldBe incompleteAnswers
+          .copy(taxableGainOrLoss = None)
+        completeAnswers.unset(_.hasEstimatedDetails) shouldBe incompleteAnswers
+          .copy(hasEstimatedDetails = None)
+        completeAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue = None)
+        completeAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers
+          .copy(mandatoryEvidence = None)
 
       }
 
@@ -85,7 +95,9 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
 
     "have a method which converts incomplete answers to complete answers" in {
       forAll { completeAnswers: CompleteCalculatedYTDAnswers =>
-        IncompleteCalculatedYTDAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteCalculatedYTDAnswers(
+        IncompleteCalculatedYTDAnswers.fromCompleteAnswers(
+          completeAnswers
+        ) shouldBe IncompleteCalculatedYTDAnswers(
           Some(completeAnswers.estimatedIncome),
           completeAnswers.personalAllowance,
           Some(completeAnswers.hasEstimatedDetails),
@@ -125,21 +137,33 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
     "have a method which unsets fields" when {
 
       "given incomplete answers" in {
-        incompleteAnswers.unset(_.estimatedIncome)     shouldBe incompleteAnswers.copy(estimatedIncome     = None)
-        incompleteAnswers.unset(_.personalAllowance)   shouldBe incompleteAnswers.copy(personalAllowance   = None)
-        incompleteAnswers.unset(_.hasEstimatedDetails) shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
-        incompleteAnswers.unset(_.calculatedTaxDue)    shouldBe incompleteAnswers.copy(calculatedTaxDue    = None)
-        incompleteAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue              = None)
-        incompleteAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers.copy(mandatoryEvidence   = None)
+        incompleteAnswers.unset(_.estimatedIncome)   shouldBe incompleteAnswers
+          .copy(estimatedIncome = None)
+        incompleteAnswers.unset(_.personalAllowance) shouldBe incompleteAnswers
+          .copy(personalAllowance = None)
+        incompleteAnswers.unset(
+          _.hasEstimatedDetails
+        )                                            shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
+        incompleteAnswers.unset(_.calculatedTaxDue)  shouldBe incompleteAnswers
+          .copy(calculatedTaxDue = None)
+        incompleteAnswers.unset(_.taxDue)            shouldBe incompleteAnswers
+          .copy(taxDue = None)
+        incompleteAnswers.unset(_.mandatoryEvidence) shouldBe incompleteAnswers
+          .copy(mandatoryEvidence = None)
       }
 
       "given complete answers" in {
-        completeAnswers.unset(_.estimatedIncome)     shouldBe incompleteAnswers.copy(estimatedIncome     = None)
-        completeAnswers.unset(_.personalAllowance)   shouldBe incompleteAnswers.copy(personalAllowance   = None)
-        completeAnswers.unset(_.hasEstimatedDetails) shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
-        completeAnswers.unset(_.calculatedTaxDue)    shouldBe incompleteAnswers.copy(calculatedTaxDue    = None)
-        completeAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue              = None)
-        completeAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers.copy(mandatoryEvidence   = None)
+        completeAnswers.unset(_.estimatedIncome)     shouldBe incompleteAnswers
+          .copy(estimatedIncome = None)
+        completeAnswers.unset(_.personalAllowance)   shouldBe incompleteAnswers
+          .copy(personalAllowance = None)
+        completeAnswers.unset(_.hasEstimatedDetails) shouldBe incompleteAnswers
+          .copy(hasEstimatedDetails = None)
+        completeAnswers.unset(_.calculatedTaxDue)    shouldBe incompleteAnswers
+          .copy(calculatedTaxDue = None)
+        completeAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue = None)
+        completeAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers
+          .copy(mandatoryEvidence = None)
       }
 
     }

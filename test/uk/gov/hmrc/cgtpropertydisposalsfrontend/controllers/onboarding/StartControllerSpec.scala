@@ -96,31 +96,46 @@ class StartControllerSpec
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (mockBprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+        _: HeaderCarrier
+      ))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockHasFailedCgtEnrolment()(response: Either[Error, Option[CgtReference]]) =
+  def mockHasFailedCgtEnrolment()(
+    response: Either[Error, Option[CgtReference]]
+  ) =
     (mockSubscriptionService
       .hasFailedCgtEnrolment()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetSubscribedDetails(cgtReference: CgtReference)(response: Either[Error, Option[SubscribedDetails]]) =
+  def mockGetSubscribedDetails(
+    cgtReference: CgtReference
+  )(response: Either[Error, Option[SubscribedDetails]]) =
     (mockSubscriptionService
       .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetDraftReturns(cgtReference: CgtReference, sentReturns: List[ReturnSummary])(
+  def mockGetDraftReturns(
+    cgtReference: CgtReference,
+    sentReturns: List[ReturnSummary]
+  )(
     response: Either[Error, List[DraftSingleDisposalReturn]]
   ) =
     (mockReturnsService
-      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(_: HeaderCarrier))
+      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(
+        _: HeaderCarrier
+      ))
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockSendAuditEvent[A: Writes](event: A, auditType: String, transactionName: String) =
+  def mockSendAuditEvent[A : Writes](
+    event: A,
+    auditType: String,
+    transactionName: String
+  ) =
     (mockAuditService
       .sendEvent(_: String, _: A, _: String)(
         _: ExecutionContext,
@@ -153,14 +168,21 @@ class StartControllerSpec
 
     "handling requests to start a journey" when {
 
-      def performAction(rh: Request[AnyContent] = FakeRequest()): Future[Result] =
+      def performAction(
+        rh: Request[AnyContent] = FakeRequest()
+      ): Future[Result] =
         controller.start()(rh)
 
       val cgtReference = sample[CgtReference]
 
       val cgtEnrolment = Enrolment(
         CgtEnrolment.key,
-        Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, cgtReference.value)),
+        Seq(
+          EnrolmentIdentifier(
+            CgtEnrolment.cgtReferenceIdentifier,
+            cgtReference.value
+          )
+        ),
         ""
       )
 
@@ -180,7 +202,7 @@ class StartControllerSpec
             mockHasFailedCgtEnrolment()(Right(None))
             mockGetSession(
               SessionData.empty.copy(
-                userType      = Some(UserType.Organisation),
+                userType = Some(UserType.Organisation),
                 journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None))
               )
             )
@@ -188,7 +210,8 @@ class StartControllerSpec
 
           checkIsRedirect(
             performAction(),
-            onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+            onboardingRoutes.SubscriptionController
+              .alreadySubscribedWithDifferentGGAccount()
           )
         }
 
@@ -198,12 +221,17 @@ class StartControllerSpec
 
         val determiningIfOrganisationIsTrustSession =
           SessionData.empty.copy(
-            userType      = Some(UserType.Organisation),
-            journeyStatus = Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
+            userType = Some(UserType.Organisation),
+            journeyStatus = Some(
+              SubscriptionStatus
+                .DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)
+            )
           )
 
         lazy val needMoreDetailsContinueUrl =
-          onboardingRoutes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url
+          onboardingRoutes.DeterminingIfOrganisationIsTrustController
+            .doYouWantToReportForATrust()
+            .url
 
         "show an error page" when {
 
@@ -242,8 +270,14 @@ class StartControllerSpec
           "reporting for a trust' page " when {
 
           "the session already has the relevant journey status in it" in {
-            val journey     = DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
-            val sessionData = SessionData.empty.copy(journeyStatus = Some(journey))
+            val journey     = DeterminingIfOrganisationIsTrust(
+              ggCredId,
+              None,
+              Some(true),
+              Some(true)
+            )
+            val sessionData =
+              SessionData.empty.copy(journeyStatus = Some(journey))
             inSequence {
               mockAuthWithAllRetrievals(
                 ConfidenceLevel.L50,
@@ -269,7 +303,10 @@ class StartControllerSpec
               )(Right(()))
             }
 
-            checkIsRedirect(performAction(FakeRequest()), controllers.routes.StartController.weNeedMoreDetails())
+            checkIsRedirect(
+              performAction(FakeRequest()),
+              controllers.routes.StartController.weNeedMoreDetails()
+            )
           }
 
           "the session data is updated when there is no relevant journey status in it" in {
@@ -299,7 +336,10 @@ class StartControllerSpec
 
             }
 
-            checkIsRedirect(performAction(FakeRequest()), controllers.routes.StartController.weNeedMoreDetails())
+            checkIsRedirect(
+              performAction(FakeRequest()),
+              controllers.routes.StartController.weNeedMoreDetails()
+            )
           }
         }
 
@@ -326,11 +366,19 @@ class StartControllerSpec
                 mockGetSession(SessionData.empty)
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus =
-                      Some(SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)),
+                    journeyStatus = Some(
+                      SubscriptionStatus.TryingToGetIndividualsFootprint(
+                        None,
+                        None,
+                        None,
+                        ggCredId
+                      )
+                    ),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
-                        onboardingRoutes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
+                        onboardingRoutes.InsufficientConfidenceLevelController
+                          .doYouHaveNINO()
+                          .url,
                         NeedMoreDetailsDetails.AffinityGroup.Individual
                       )
                     ),
@@ -361,7 +409,11 @@ class StartControllerSpec
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockSendAuditEvent(HandOffTIvEvent(ggCredId.value, "/uri"), "handOffToIv", "handoff-to-iv")
+                mockSendAuditEvent(
+                  HandOffTIvEvent(ggCredId.value, "/uri"),
+                  "handOffToIv",
+                  "handoff-to-iv"
+                )
               }
 
               checkIsRedirectToIv(performAction(request), false)
@@ -377,7 +429,8 @@ class StartControllerSpec
                   bind[SubscriptionService].toInstance(mockSubscriptionService)
                 )
 
-              override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
+              override lazy val additionalConfig =
+                ivConfig(useRelativeUrls = true)
               val controller                     = instanceOf[StartController]
               val request                        = FakeRequest("GET", "/uri")
 
@@ -418,11 +471,18 @@ class StartControllerSpec
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(
-                      SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
+                      SubscriptionStatus.TryingToGetIndividualsFootprint(
+                        None,
+                        None,
+                        None,
+                        ggCredId
+                      )
                     ),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
-                        onboardingRoutes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
+                        onboardingRoutes.InsufficientConfidenceLevelController
+                          .doYouHaveNINO()
+                          .url,
                         NeedMoreDetailsDetails.AffinityGroup.Individual
                       )
                     ),
@@ -431,7 +491,10 @@ class StartControllerSpec
                 )(Right(()))
               }
 
-              checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.weNeedMoreDetails()
+              )
             }
 
             "the session data indicates they do not have sufficient confidence level" in {
@@ -449,14 +512,23 @@ class StartControllerSpec
                 mockGetSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(
-                      SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
+                      SubscriptionStatus.TryingToGetIndividualsFootprint(
+                        None,
+                        None,
+                        None,
+                        ggCredId
+                      )
                     ),
                     userType = Some(UserType.Individual)
                   )
                 )
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.InsufficientConfidenceLevelController.doYouHaveNINO())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.InsufficientConfidenceLevelController
+                  .doYouHaveNINO()
+              )
             }
 
           }
@@ -466,10 +538,18 @@ class StartControllerSpec
         "the session data has been updated to indicate so" when {
 
           "redirect to the do you have a nino page" in {
-            def sessionData = SessionData.empty.copy(
-              journeyStatus = Some(TryingToGetIndividualsFootprint(Some(false), None, None, ggCredId)),
-              userType      = Some(UserType.Individual)
-            )
+            def sessionData =
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  TryingToGetIndividualsFootprint(
+                    Some(false),
+                    None,
+                    None,
+                    ggCredId
+                  )
+                ),
+                userType = Some(UserType.Individual)
+              )
 
             inSequence {
               mockAuthWithAllRetrievals(
@@ -485,7 +565,11 @@ class StartControllerSpec
               mockGetSession(sessionData)
             }
 
-            checkIsRedirect(performAction(), onboardingRoutes.InsufficientConfidenceLevelController.doYouHaveNINO())
+            checkIsRedirect(
+              performAction(),
+              onboardingRoutes.InsufficientConfidenceLevelController
+                .doYouHaveNINO()
+            )
           }
 
         }
@@ -516,14 +600,23 @@ class StartControllerSpec
                 )
 
               val session = SessionData.empty.copy(
-                journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, Some(emailAddress), ggCredId, None)),
-                userType      = Some(UserType.Individual)
+                journeyStatus = Some(
+                  SubscriptionMissingData(
+                    bprWithNoEmail,
+                    Some(emailAddress),
+                    ggCredId,
+                    None
+                  )
+                ),
+                userType = Some(UserType.Individual)
               )
 
               val updatedSession =
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Individual),
-                  journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails, ggCredId))
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionReady(individualSubscriptionDetails, ggCredId)
+                  )
                 )
 
               inSequence {
@@ -540,7 +633,10 @@ class StartControllerSpec
                 mockGetSession(session)
                 mockStoreSession(updatedSession)(Right(()))
               }
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
           }
 
@@ -549,7 +645,14 @@ class StartControllerSpec
             "the email address is still missing" in {
               val sessionData =
                 SessionData.empty.copy(
-                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None))
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoEmail,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
                 )
 
               inSequence {
@@ -566,7 +669,10 @@ class StartControllerSpec
                 mockGetSession(sessionData)
               }
 
-              checkIsRedirect(performAction(), emailRoutes.SubscriptionEnterEmailController.enterEmail().url)
+              checkIsRedirect(
+                performAction(),
+                emailRoutes.SubscriptionEnterEmailController.enterEmail().url
+              )
             }
 
           }
@@ -603,14 +709,25 @@ class StartControllerSpec
 
             "there are subscription details in session" in {
               val session =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails, ggCredId)))
+                SessionData.empty.copy(journeyStatus =
+                  Some(
+                    SubscriptionReady(individualSubscriptionDetails, ggCredId)
+                  )
+                )
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(session)
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
             "there is no session data and a bpr is successfully retrieved using the retrieved auth NINO" in {
@@ -620,21 +737,32 @@ class StartControllerSpec
               ).foreach { maybeSession =>
                 val session =
                   SessionData.empty.copy(
-                    userType      = Some(UserType.Individual),
-                    journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails, ggCredId))
+                    userType = Some(UserType.Individual),
+                    journeyStatus = Some(
+                      SubscriptionReady(individualSubscriptionDetails, ggCredId)
+                    )
                   )
 
                 inSequence {
-                  mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                  mockAuthWithCl200AndWithAllIndividualRetrievals(
+                    nino.value,
+                    None,
+                    retrievedGGCredId
+                  )
                   mockHasFailedCgtEnrolment()(Right(None))
                   mockGetSession(Right(maybeSession))
-                  mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
+                  mockGetBusinessPartnerRecord(
+                    IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                  )(
                     Right(BusinessPartnerRecordResponse(Some(bpr), None))
                   )
                   mockStoreSession(session)(Right(()))
                 }
 
-                checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+                checkIsRedirect(
+                  performAction(),
+                  onboardingRoutes.SubscriptionController.checkYourDetails()
+                )
               }
             }
 
@@ -646,8 +774,10 @@ class StartControllerSpec
               ).foreach { maybeSession =>
                 val session =
                   SessionData.empty.copy(
-                    userType      = Some(UserType.Individual),
-                    journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails, ggCredId))
+                    userType = Some(UserType.Individual),
+                    journeyStatus = Some(
+                      SubscriptionReady(individualSubscriptionDetails, ggCredId)
+                    )
                   )
 
                 inSequence {
@@ -662,26 +792,34 @@ class StartControllerSpec
                   )
                   mockHasFailedCgtEnrolment()(Right(None))
                   mockGetSession(Right(maybeSession))
-                  mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
+                  mockGetBusinessPartnerRecord(
+                    IndividualBusinessPartnerRecordRequest(
+                      Left(SAUTR("sautr")),
+                      None
+                    )
+                  )(
                     Right(BusinessPartnerRecordResponse(Some(bpr), None))
                   )
                   mockStoreSession(session)(Right(()))
                 }
 
-                checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+                checkIsRedirect(
+                  performAction(),
+                  onboardingRoutes.SubscriptionController.checkYourDetails()
+                )
               }
             }
 
             "an email does not exist in the retrieved BPR but one has been retrieved in the auth record" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val ggEmail        = Email("email")
-              val session = SessionData.empty.copy(
+              val session        = SessionData.empty.copy(
                 userType = Some(UserType.Individual),
                 journeyStatus = Some(
                   SubscriptionReady(
                     individualSubscriptionDetails.copy(
                       emailAddress = ggEmail,
-                      emailSource  = EmailSource.GovernmentGateway
+                      emailSource = EmailSource.GovernmentGateway
                     ),
                     ggCredId
                   )
@@ -689,34 +827,45 @@ class StartControllerSpec
               )
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, Some(ggEmail.value), retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  Some(ggEmail.value),
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                  )
                 )
                 mockStoreSession(session)(Right(()))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
             "the user has CL<200 and an email does not exist in the retrieved BPR but one has been retrieved in the auth record" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val ggEmail        = Email("email")
-              val session = SessionData.empty.copy(
+              val session        = SessionData.empty.copy(
                 userType = Some(UserType.Individual),
                 journeyStatus = Some(
                   SubscriptionReady(
                     individualSubscriptionDetails.copy(
                       emailAddress = ggEmail,
-                      emailSource  = EmailSource.GovernmentGateway
+                      emailSource = EmailSource.GovernmentGateway
                     ),
                     ggCredId
                   )
                 )
               )
-              val sautr = SAUTR("sautr")
+              val sautr          = SAUTR("sautr")
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -730,19 +879,33 @@ class StartControllerSpec
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(sautr), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(Left(sautr), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                  )
                 )
                 mockStoreSession(session)(Right(()))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
             "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
               val session =
                 SessionData.empty.copy(
-                  journeyStatus = Some(SubscriptionMissingData(bpr, Some(emailAddress), ggCredId, None))
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bpr,
+                      Some(emailAddress),
+                      ggCredId,
+                      None
+                    )
+                  )
                 )
 
               val updatedSession =
@@ -750,19 +913,27 @@ class StartControllerSpec
                   userType = Some(UserType.Individual),
                   journeyStatus = Some(
                     SubscriptionReady(
-                      individualSubscriptionDetails.copy(emailSource = EmailSource.ManuallyEntered),
+                      individualSubscriptionDetails
+                        .copy(emailSource = EmailSource.ManuallyEntered),
                       ggCredId
                     )
                   )
                 )
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(session)
                 mockStoreSession(updatedSession)(Right(()))
               }
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
           }
@@ -785,15 +956,22 @@ class StartControllerSpec
                 List.empty,
                 List.empty
               )
-              val session =
-                SessionData.empty.copy(userType = Some(UserType.Individual), journeyStatus = Some(subscriptionStatus))
+              val session            =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(subscriptionStatus)
+                )
 
               inSequence {
                 mockAuthWithCgtEnrolmentRetrievals()
                 mockGetSession(session)
               }
 
-              checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+              checkIsRedirect(
+                performAction(),
+                controllers.accounts.homepage.routes.HomePageController
+                  .homepage()
+              )
             }
 
           }
@@ -803,11 +981,15 @@ class StartControllerSpec
             "the session data indicates that someone has started the registration journey" in {
               List(
                 RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId),
-                sample[RegistrationStatus.IndividualSupplyingInformation].copy(ggCredId = ggCredId)
+                sample[RegistrationStatus.IndividualSupplyingInformation]
+                  .copy(ggCredId = ggCredId)
               ).foreach { registrationStatus =>
                 withClue(s"For registration status $registrationStatus: ") {
                   val session = SessionData.empty
-                    .copy(userType = Some(UserType.Individual), journeyStatus = Some(registrationStatus))
+                    .copy(
+                      userType = Some(UserType.Individual),
+                      journeyStatus = Some(registrationStatus)
+                    )
 
                   inSequence {
                     mockAuthWithAllRetrievals(
@@ -823,7 +1005,10 @@ class StartControllerSpec
                     mockGetSession(session)
                   }
 
-                  checkIsRedirect(performAction(), onboardingRoutes.RegistrationController.selectEntityType())
+                  checkIsRedirect(
+                    performAction(),
+                    onboardingRoutes.RegistrationController.selectEntityType()
+                  )
                 }
 
               }
@@ -835,7 +1020,10 @@ class StartControllerSpec
 
             "the session indicates the user is ready to register" in {
               val session = SessionData.empty
-                .copy(userType = Some(UserType.Individual), journeyStatus = Some(sample[RegistrationReady]))
+                .copy(
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(sample[RegistrationReady])
+                )
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -851,7 +1039,10 @@ class StartControllerSpec
                 mockGetSession(session)
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.RegistrationController.checkYourAnswers())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.RegistrationController.checkYourAnswers()
+              )
             }
 
             "redirect to the registration enter email page" when {
@@ -860,7 +1051,11 @@ class StartControllerSpec
                 val session = SessionData.empty.copy(
                   userType = Some(UserType.Individual),
                   journeyStatus = Some(
-                    IndividualMissingEmail(sample[IndividualName], sample[Address], ggCredId)
+                    IndividualMissingEmail(
+                      sample[IndividualName],
+                      sample[Address],
+                      ggCredId
+                    )
                   )
                 )
 
@@ -878,7 +1073,10 @@ class StartControllerSpec
                   mockGetSession(session)
                 }
 
-                checkIsRedirect(performAction(), emailRoutes.RegistrationEnterEmailController.enterEmail())
+                checkIsRedirect(
+                  performAction(),
+                  emailRoutes.RegistrationEnterEmailController.enterEmail()
+                )
               }
             }
 
@@ -887,10 +1085,16 @@ class StartControllerSpec
           "display an error page" when {
             "the call to get the BPR fails" in {
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                )(
                   Left(Error("error"))
                 )
               }
@@ -899,10 +1103,16 @@ class StartControllerSpec
 
             "the call to get a BPR returns no data for a user with CL200" in {
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                )(
                   Right(BusinessPartnerRecordResponse(None, None))
                 )
               }
@@ -913,15 +1123,23 @@ class StartControllerSpec
             "the user has CL200 and the call to get BPR succeeds but it cannot be written to session" in {
               val session =
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Individual),
-                  journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails, ggCredId))
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionReady(individualSubscriptionDetails, ggCredId)
+                  )
                 )
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                )(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None))
                 )
                 mockStoreSession(session)(Left(Error("Oh no!")))
@@ -944,7 +1162,12 @@ class StartControllerSpec
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(
+                    Left(SAUTR("sautr")),
+                    None
+                  )
+                )(
                   Right(BusinessPartnerRecordResponse(None, None))
                 )
               }
@@ -955,8 +1178,10 @@ class StartControllerSpec
             "the user has CL<200 and the call to get BPR succeeds but it cannot be written to session" in {
               val session =
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Individual),
-                  journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails, ggCredId))
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionReady(individualSubscriptionDetails, ggCredId)
+                  )
                 )
 
               inSequence {
@@ -971,7 +1196,12 @@ class StartControllerSpec
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(
+                    Left(SAUTR("sautr")),
+                    None
+                  )
+                )(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None))
                 )
                 mockStoreSession(session)(Left(Error("Oh no!")))
@@ -988,16 +1218,29 @@ class StartControllerSpec
               val cgtReference = sample[CgtReference]
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference)))
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference))
+                  )
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    userType      = Some(UserType.Individual),
-                    journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
+                    userType = Some(UserType.Individual),
+                    journeyStatus = Some(
+                      AlreadySubscribedWithDifferentGGAccount(
+                        ggCredId,
+                        Some(cgtReference)
+                      )
+                    )
                   )
                 )(Right(()))
                 mockSendAuditEvent(
@@ -1009,7 +1252,8 @@ class StartControllerSpec
 
               checkIsRedirect(
                 performAction(),
-                onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+                onboardingRoutes.SubscriptionController
+                  .alreadySubscribedWithDifferentGGAccount()
               )
             }
 
@@ -1021,8 +1265,15 @@ class StartControllerSpec
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Individual),
-                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None)),
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoEmail,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  ),
                   needMoreDetailsDetails = Some(
                     NeedMoreDetailsDetails(
                       controllers.routes.StartController.start().url,
@@ -1032,24 +1283,42 @@ class StartControllerSpec
                 )
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                  )
                 )
                 mockStoreSession(updatedSession)(Right(()))
               }
 
-              checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.weNeedMoreDetails()
+              )
             }
 
             "there is no email in the BPR or the auth record for a user with CL < 200" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Individual),
-                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None)),
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoEmail,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  ),
                   needMoreDetailsDetails = Some(
                     NeedMoreDetailsDetails(
                       controllers.routes.StartController.start().url,
@@ -1070,31 +1339,55 @@ class StartControllerSpec
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(SessionData.empty)
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(
+                    Left(SAUTR("sautr")),
+                    None
+                  )
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                  )
                 )
                 mockStoreSession(updatedSession)(Right(()))
               }
 
-              checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.weNeedMoreDetails()
+              )
             }
 
             "the session data indicates there is data missing for subscription and the email address " +
               "is still missing" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
-              val sessionData =
+              val sessionData    =
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Individual),
-                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None))
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoEmail,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
                 )
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(sessionData)
               }
 
-              checkIsRedirect(performAction(), emailRoutes.SubscriptionEnterEmailController.enterEmail().url)
+              checkIsRedirect(
+                performAction(),
+                emailRoutes.SubscriptionEnterEmailController.enterEmail().url
+              )
             }
 
           }
@@ -1103,11 +1396,17 @@ class StartControllerSpec
 
         "handling trusts" must {
 
-          val sautr     = SAUTR("sautr")
-          val trustName = TrustName("trustname")
-          val address   = UkAddress("line 1", None, None, None, Postcode("postcode"))
-          val sapNumber = SapNumber("sap")
-          val bpr       = BusinessPartnerRecord(Some(emailAddress), address, sapNumber, Left(trustName))
+          val sautr                    = SAUTR("sautr")
+          val trustName                = TrustName("trustname")
+          val address                  =
+            UkAddress("line 1", None, None, None, Postcode("postcode"))
+          val sapNumber                = SapNumber("sap")
+          val bpr                      = BusinessPartnerRecord(
+            Some(emailAddress),
+            address,
+            sapNumber,
+            Left(trustName)
+          )
           val trustSubscriptionDetails =
             SubscriptionDetails(
               Left(trustName),
@@ -1138,8 +1437,11 @@ class StartControllerSpec
                 List.empty,
                 List.empty
               )
-              val session =
-                SessionData.empty.copy(userType = Some(UserType.Organisation), journeyStatus = Some(subscriptionStatus))
+              val session            =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Organisation),
+                  journeyStatus = Some(subscriptionStatus)
+                )
 
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
@@ -1147,7 +1449,11 @@ class StartControllerSpec
                 mockGetSession(session)
               }
 
-              checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+              checkIsRedirect(
+                performAction(),
+                controllers.accounts.homepage.routes.HomePageController
+                  .homepage()
+              )
             }
 
           }
@@ -1159,7 +1465,9 @@ class StartControllerSpec
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(Left(Error("")))
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -1170,8 +1478,15 @@ class StartControllerSpec
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(IndividualName("", "")))), None))
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(
+                      Some(bpr.copy(name = Right(IndividualName("", "")))),
+                      None
+                    )
+                  )
                 )
               }
 
@@ -1183,13 +1498,17 @@ class StartControllerSpec
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None))
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    userType      = Some(UserType.Organisation),
-                    journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId))
+                    userType = Some(UserType.Organisation),
+                    journeyStatus = Some(
+                      SubscriptionReady(trustSubscriptionDetails, ggCredId)
+                    )
                   )
                 )(Left(Error("")))
               }
@@ -1202,7 +1521,9 @@ class StartControllerSpec
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(
                   Right(BusinessPartnerRecordResponse(None, None))
                 )
               }
@@ -1219,28 +1540,46 @@ class StartControllerSpec
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None))
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    userType      = Some(UserType.Organisation),
-                    journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId))
+                    userType = Some(UserType.Organisation),
+                    journeyStatus = Some(
+                      SubscriptionReady(trustSubscriptionDetails, ggCredId)
+                    )
                   )
                 )(Right(()))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
             "there is an organisation name in the BPR but no email but there is an email in the " +
               "auth record" in {
               inSequence {
-                mockAuthWithAllTrustRetrievals(sautr, Some("email"), retrievedGGCredId)
+                mockAuthWithAllTrustRetrievals(
+                  sautr,
+                  Some("email"),
+                  retrievedGGCredId
+                )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = None)), None))
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(
+                      Some(bpr.copy(emailAddress = None)),
+                      None
+                    )
+                  )
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
@@ -1249,7 +1588,7 @@ class StartControllerSpec
                       SubscriptionReady(
                         trustSubscriptionDetails.copy(
                           emailAddress = Email("email"),
-                          emailSource  = EmailSource.GovernmentGateway
+                          emailSource = EmailSource.GovernmentGateway
                         ),
                         ggCredId
                       )
@@ -1258,13 +1597,16 @@ class StartControllerSpec
                 )(Right(()))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
             "there are subscription details in session" in {
               val session =
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Organisation),
+                  userType = Some(UserType.Organisation),
                   journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId))
                 )
 
@@ -1274,14 +1616,23 @@ class StartControllerSpec
                 mockGetSession(session)
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
             "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
               val session = SessionData.empty.copy(
                 userType = Some(UserType.Organisation),
-                journeyStatus =
-                  Some(SubscriptionMissingData(bpr.copy(emailAddress = None), Some(emailAddress), ggCredId, None))
+                journeyStatus = Some(
+                  SubscriptionMissingData(
+                    bpr.copy(emailAddress = None),
+                    Some(emailAddress),
+                    ggCredId,
+                    None
+                  )
+                )
               )
 
               val updatedSession =
@@ -1289,7 +1640,8 @@ class StartControllerSpec
                   userType = Some(UserType.Organisation),
                   journeyStatus = Some(
                     SubscriptionReady(
-                      trustSubscriptionDetails.copy(emailSource = EmailSource.ManuallyEntered),
+                      trustSubscriptionDetails
+                        .copy(emailSource = EmailSource.ManuallyEntered),
                       ggCredId
                     )
                   )
@@ -1301,22 +1653,32 @@ class StartControllerSpec
                 mockGetSession(session)
                 mockStoreSession(updatedSession)(Right(()))
               }
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
             "the session data indicates there is subscription data missing and there is now enough data to proceed " +
               "for a trust without a trust enrolment" in {
-              val session = SessionData.empty.copy(
+              val session        = SessionData.empty.copy(
                 userType = Some(UserType.Organisation),
-                journeyStatus =
-                  Some(SubscriptionMissingData(bpr.copy(emailAddress = None), Some(emailAddress), ggCredId, None))
+                journeyStatus = Some(
+                  SubscriptionMissingData(
+                    bpr.copy(emailAddress = None),
+                    Some(emailAddress),
+                    ggCredId,
+                    None
+                  )
+                )
               )
               val updatedSession =
                 SessionData.empty.copy(
                   userType = Some(UserType.Organisation),
                   journeyStatus = Some(
                     SubscriptionReady(
-                      trustSubscriptionDetails.copy(emailSource = EmailSource.ManuallyEntered),
+                      trustSubscriptionDetails
+                        .copy(emailSource = EmailSource.ManuallyEntered),
                       ggCredId
                     )
                   )
@@ -1337,7 +1699,10 @@ class StartControllerSpec
                 mockStoreSession(updatedSession)(Right(()))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
             }
 
           }
@@ -1348,8 +1713,15 @@ class StartControllerSpec
               "for a trust without a trust enrolment" in {
               val session =
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Organisation),
-                  journeyStatus = Some(SubscriptionMissingData(bpr.copy(emailAddress = None), None, ggCredId, None))
+                  userType = Some(UserType.Organisation),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bpr.copy(emailAddress = None),
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
                 )
 
               inSequence {
@@ -1366,7 +1738,10 @@ class StartControllerSpec
                 mockGetSession(session)
               }
 
-              checkIsRedirect(performAction(), emailRoutes.SubscriptionEnterEmailController.enterEmail())
+              checkIsRedirect(
+                performAction(),
+                emailRoutes.SubscriptionEnterEmailController.enterEmail()
+              )
             }
 
           }
@@ -1380,13 +1755,22 @@ class StartControllerSpec
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference)))
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference))
+                  )
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    userType      = Some(UserType.Organisation),
-                    journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
+                    userType = Some(UserType.Organisation),
+                    journeyStatus = Some(
+                      AlreadySubscribedWithDifferentGGAccount(
+                        ggCredId,
+                        Some(cgtReference)
+                      )
+                    )
                   )
                 )(Right(()))
                 mockSendAuditEvent(
@@ -1398,7 +1782,8 @@ class StartControllerSpec
 
               checkIsRedirect(
                 performAction(),
-                onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+                onboardingRoutes.SubscriptionController
+                  .alreadySubscribedWithDifferentGGAccount()
               )
             }
 
@@ -1413,13 +1798,24 @@ class StartControllerSpec
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(Right(None))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
-                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bprWithNoEmail), None)
+                  )
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    userType      = Some(UserType.Organisation),
-                    journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None)),
+                    userType = Some(UserType.Organisation),
+                    journeyStatus = Some(
+                      SubscriptionMissingData(
+                        bprWithNoEmail,
+                        None,
+                        ggCredId,
+                        None
+                      )
+                    ),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
                         controllers.routes.StartController.start().url,
@@ -1430,15 +1826,25 @@ class StartControllerSpec
                 )(Right(()))
               }
 
-              checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.weNeedMoreDetails()
+              )
             }
 
             "the session data indicates there is data missing for subscription and the email address " +
               "is still missing" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
-              val sessionData =
+              val sessionData    =
                 SessionData.empty.copy(
-                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None))
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoEmail,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
                 )
 
               inSequence {
@@ -1447,7 +1853,10 @@ class StartControllerSpec
                 mockGetSession(sessionData)
               }
 
-              checkIsRedirect(performAction(), emailRoutes.SubscriptionEnterEmailController.enterEmail().url)
+              checkIsRedirect(
+                performAction(),
+                emailRoutes.SubscriptionEnterEmailController.enterEmail().url
+              )
             }
 
           }
@@ -1458,7 +1867,8 @@ class StartControllerSpec
 
       "the user has a CGT enrolment" when {
 
-        val subscribedDetails = sample[SubscribedDetails].copy(cgtReference = cgtReference)
+        val subscribedDetails =
+          sample[SubscribedDetails].copy(cgtReference = cgtReference)
 
         val draftReturns = List(sample[DraftSingleDisposalReturn])
 
@@ -1493,7 +1903,10 @@ class StartControllerSpec
               mockGetSession(sessionWithSubscribed)
             }
 
-            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+            checkIsRedirect(
+              performAction(),
+              controllers.accounts.homepage.routes.HomePageController.homepage()
+            )
           }
 
         }
@@ -1550,8 +1963,12 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockGetSession(SessionData.empty)
-                mockGetSubscribedDetails(cgtReference)(Right(Some(subscribedDetails)))
-                mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
+                mockGetSubscribedDetails(cgtReference)(
+                  Right(Some(subscribedDetails))
+                )
+                mockGetReturnsList(subscribedDetails.cgtReference)(
+                  Right(sentReturns)
+                )
                 mockGetDraftReturns(cgtReference, sentReturns)(Left(Error("")))
               }
 
@@ -1570,8 +1987,12 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockGetSession(SessionData.empty)
-                mockGetSubscribedDetails(cgtReference)(Right(Some(subscribedDetails)))
-                mockGetReturnsList(subscribedDetails.cgtReference)(Left(Error("")))
+                mockGetSubscribedDetails(cgtReference)(
+                  Right(Some(subscribedDetails))
+                )
+                mockGetReturnsList(subscribedDetails.cgtReference)(
+                  Left(Error(""))
+                )
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -1589,10 +2010,19 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockGetSession(SessionData.empty)
-                mockGetSubscribedDetails(cgtReference)(Right(Some(subscribedDetails)))
-                mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
-                mockGetDraftReturns(cgtReference, sentReturns)(Right(draftReturns))
-                mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Left(Error("")))
+                mockGetSubscribedDetails(cgtReference)(
+                  Right(Some(subscribedDetails))
+                )
+                mockGetReturnsList(subscribedDetails.cgtReference)(
+                  Right(sentReturns)
+                )
+                mockGetDraftReturns(cgtReference, sentReturns)(
+                  Right(draftReturns)
+                )
+                mockStoreSession(
+                  sessionWithSubscribed
+                    .copy(userType = Some(UserType.Individual))
+                )(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -1613,13 +2043,24 @@ class StartControllerSpec
                 Some(retrievedGGCredId)
               )
               mockGetSession(SessionData.empty)
-              mockGetSubscribedDetails(cgtReference)(Right(Some(subscribedDetails)))
-              mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
-              mockGetDraftReturns(cgtReference, sentReturns)(Right(draftReturns))
-              mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Right(()))
+              mockGetSubscribedDetails(cgtReference)(
+                Right(Some(subscribedDetails))
+              )
+              mockGetReturnsList(subscribedDetails.cgtReference)(
+                Right(sentReturns)
+              )
+              mockGetDraftReturns(cgtReference, sentReturns)(
+                Right(draftReturns)
+              )
+              mockStoreSession(
+                sessionWithSubscribed.copy(userType = Some(UserType.Individual))
+              )(Right(()))
             }
 
-            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+            checkIsRedirect(
+              performAction(),
+              controllers.accounts.homepage.routes.HomePageController.homepage()
+            )
           }
 
         }
@@ -1646,7 +2087,7 @@ class StartControllerSpec
               mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.NonGovernmentGatewayUser),
+                  userType = Some(UserType.NonGovernmentGatewayUser),
                   journeyStatus = Some(NonGovernmentGatewayJourney)
                 )
               )(Left(Error("")))
@@ -1673,13 +2114,16 @@ class StartControllerSpec
               mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.NonGovernmentGatewayUser),
+                  userType = Some(UserType.NonGovernmentGatewayUser),
                   journeyStatus = Some(NonGovernmentGatewayJourney)
                 )
               )(Right(()))
             }
 
-            checkIsRedirect(performAction(), controllers.routes.StartController.weOnlySupportGG())
+            checkIsRedirect(
+              performAction(),
+              controllers.routes.StartController.weOnlySupportGG()
+            )
           }
 
           "the session data has already been updated" in {
@@ -1695,13 +2139,16 @@ class StartControllerSpec
               )
               mockGetSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Individual),
+                  userType = Some(UserType.Individual),
                   journeyStatus = Some(NonGovernmentGatewayJourney)
                 )
               )
             }
 
-            checkIsRedirect(performAction(), controllers.routes.StartController.weOnlySupportGG())
+            checkIsRedirect(
+              performAction(),
+              controllers.routes.StartController.weOnlySupportGG()
+            )
           }
 
         }
@@ -1714,7 +2161,12 @@ class StartControllerSpec
 
         val agentsEnrolment = Enrolment(
           AgentsEnrolment.key,
-          Seq(EnrolmentIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier, arn.value)),
+          Seq(
+            EnrolmentIdentifier(
+              AgentsEnrolment.agentReferenceNumberIdentifier,
+              arn.value
+            )
+          ),
           ""
         )
 
@@ -1733,8 +2185,10 @@ class StartControllerSpec
               )
               mockGetSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Agent),
-                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
+                  userType = Some(UserType.Agent),
+                  journeyStatus = Some(
+                    AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None)
+                  )
                 )
               )
             }
@@ -1759,8 +2213,10 @@ class StartControllerSpec
               mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Agent),
-                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
+                  userType = Some(UserType.Agent),
+                  journeyStatus = Some(
+                    AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None)
+                  )
                 )
               )(Right(()))
             }
@@ -1784,12 +2240,18 @@ class StartControllerSpec
               )
               mockGetSession(
                 SessionData.empty
-                  .copy(journeyStatus = Some(sample[Subscribed].copy(agentReferenceNumber = Some(arn))))
+                  .copy(journeyStatus =
+                    Some(
+                      sample[Subscribed].copy(agentReferenceNumber = Some(arn))
+                    )
+                  )
               )
               mockStoreSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Agent),
-                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
+                  userType = Some(UserType.Agent),
+                  journeyStatus = Some(
+                    AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None)
+                  )
                 )
               )(Right(()))
             }
@@ -1817,7 +2279,7 @@ class StartControllerSpec
               )
               mockGetSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Agent),
+                  userType = Some(UserType.Agent),
                   journeyStatus = Some(AgentWithoutAgentEnrolment)
                 )
               )
@@ -1843,7 +2305,7 @@ class StartControllerSpec
               mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Agent),
+                  userType = Some(UserType.Agent),
                   journeyStatus = Some(AgentWithoutAgentEnrolment)
                 )
               )(Right(()))
@@ -1873,7 +2335,7 @@ class StartControllerSpec
               mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
-                  userType      = Some(UserType.Agent),
+                  userType = Some(UserType.Agent),
                   journeyStatus = Some(AgentWithoutAgentEnrolment)
                 )
               )(Left(Error("")))
@@ -1905,7 +2367,10 @@ class StartControllerSpec
               )
             )
 
-            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+            checkIsRedirect(
+              performAction(),
+              controllers.accounts.homepage.routes.HomePageController.homepage()
+            )
           }
 
         }
@@ -1930,7 +2395,10 @@ class StartControllerSpec
               )
             )
 
-            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+            checkIsRedirect(
+              performAction(),
+              controllers.accounts.homepage.routes.HomePageController.homepage()
+            )
           }
 
         }
@@ -1963,7 +2431,10 @@ class StartControllerSpec
               )
             )
 
-            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+            checkIsRedirect(
+              performAction(),
+              controllers.accounts.homepage.routes.HomePageController.homepage()
+            )
           }
 
         }
@@ -1990,7 +2461,10 @@ class StartControllerSpec
               )
             )
 
-            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+            checkIsRedirect(
+              performAction(),
+              controllers.accounts.homepage.routes.HomePageController.homepage()
+            )
           }
 
         }
@@ -2017,7 +2491,8 @@ class StartControllerSpec
 
             checkIsRedirect(
               performAction(),
-              controllers.returns.routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+              controllers.returns.routes.CheckAllAnswersAndSubmitController
+                .confirmationOfSubmission()
             )
           }
 
@@ -2027,17 +2502,24 @@ class StartControllerSpec
 
     "handling requests to display the need more details page" must {
 
-      def performAction(): Future[Result] = controller.weNeedMoreDetails()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.weNeedMoreDetails()(FakeRequest())
 
       "redirect to the start endpoint" when {
 
         "there is no continue url in session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(sample[JourneyStatus])))
+            mockGetSession(
+              SessionData.empty
+                .copy(journeyStatus = Some(sample[JourneyStatus]))
+            )
           }
 
-          checkIsRedirect(performAction(), controllers.routes.StartController.start())
+          checkIsRedirect(
+            performAction(),
+            controllers.routes.StartController.start()
+          )
         }
 
       }
@@ -2051,10 +2533,13 @@ class StartControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
-                userType      = Some(UserType.Individual),
+                userType = Some(UserType.Individual),
                 journeyStatus = Some(sample[JourneyStatus]),
                 needMoreDetailsDetails = Some(
-                  NeedMoreDetailsDetails(continueUrl, NeedMoreDetailsDetails.AffinityGroup.Individual)
+                  NeedMoreDetailsDetails(
+                    continueUrl,
+                    NeedMoreDetailsDetails.AffinityGroup.Individual
+                  )
                 )
               )
             )
@@ -2064,8 +2549,10 @@ class StartControllerSpec
           val content = contentAsString(result)
 
           status(result) shouldBe OK
-          content        should include(messageFromMessageKey("weNeedMoreDetails.title"))
-          content        should include(continueUrl)
+          content          should include(
+            messageFromMessageKey("weNeedMoreDetails.title")
+          )
+          content          should include(continueUrl)
         }
       }
 
@@ -2073,10 +2560,12 @@ class StartControllerSpec
 
     "handling requests to display the 'we only support gg' page" must {
 
-      def performAction(): Future[Result] = controller.weOnlySupportGG()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.weOnlySupportGG()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case NonGovernmentGatewayJourney => true
           case _                           => false
         }
@@ -2085,22 +2574,30 @@ class StartControllerSpec
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney)))
+          mockGetSession(
+            SessionData.empty
+              .copy(journeyStatus = Some(NonGovernmentGatewayJourney))
+          )
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("weOnlySupportGG.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("weOnlySupportGG.title")
+        )
       }
     }
 
     "handling requests to sign out and register for GG" must {
 
       def performAction(sessionData: Seq[(String, String)]): Future[Result] =
-        controller.signOutAndRegisterForGG()(FakeRequest().withSession(sessionData: _*))
+        controller.signOutAndRegisterForGG()(
+          FakeRequest().withSession(sessionData: _*)
+        )
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(Seq.empty), {
+        () => performAction(Seq.empty),
+        {
           case NonGovernmentGatewayJourney => true
           case _                           => false
         }
@@ -2111,7 +2608,10 @@ class StartControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             SessionData.empty
-              .copy(userType = Some(UserType.Individual), journeyStatus = Some(NonGovernmentGatewayJourney))
+              .copy(
+                userType = Some(UserType.Individual),
+                journeyStatus = Some(NonGovernmentGatewayJourney)
+              )
           )
         }
 
@@ -2125,10 +2625,13 @@ class StartControllerSpec
     "handling requests to sign out and sign in" must {
 
       def performAction(sessionData: Seq[(String, String)]): Future[Result] =
-        controller.signOutAndSignIn()(FakeRequest().withSession(sessionData: _*))
+        controller.signOutAndSignIn()(
+          FakeRequest().withSession(sessionData: _*)
+        )
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(Seq.empty), {
+        () => performAction(Seq.empty),
+        {
           case NonGovernmentGatewayJourney => true
           case AgentWithoutAgentEnrolment  => true
           case _                           => false
@@ -2142,7 +2645,9 @@ class StartControllerSpec
         ).foreach { journey =>
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(journey)))
+            mockGetSession(
+              SessionData.empty.copy(journeyStatus = Some(journey))
+            )
           }
 
           val result = performAction(Seq("key" -> "value"))
@@ -2173,8 +2678,10 @@ class StartControllerSpec
 
       "display the page" in {
         val result = controller.timedOut()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("timed-out.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("timed-out.title")
+        )
       }
 
     }

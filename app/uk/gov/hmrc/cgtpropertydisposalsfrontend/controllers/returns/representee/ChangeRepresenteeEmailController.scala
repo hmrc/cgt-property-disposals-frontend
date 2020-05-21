@@ -71,7 +71,7 @@ class ChangeRepresenteeEmailController @Inject() (
     answers.flatMap(r =>
       r.fold(
         incomplete => incomplete.contactDetails.map(r -> _),
-        complete => Some(complete                     -> complete.contactDetails)
+        complete => Some(complete -> complete.contactDetails)
       )
     )
 
@@ -84,43 +84,57 @@ class ChangeRepresenteeEmailController @Inject() (
           extractAnswersAndContactDetails(s.representeeAnswers)
             .map {
               case (answers, contactDetails) =>
-                sessionData -> ChangingRepresenteeEmail(Left(s), answers, contactDetails)
+                sessionData -> ChangingRepresenteeEmail(
+                  Left(s),
+                  answers,
+                  contactDetails
+                )
             },
           Redirect(controllers.routes.StartController.start())
         )
 
-      case Some((sessionData, f: FillingOutReturn)) =>
+      case Some((sessionData, f: FillingOutReturn))       =>
         Either.fromOption(
           extractAnswersAndContactDetails(
-            f.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
+            f.draftReturn.fold(
+              _.representeeAnswers,
+              _.representeeAnswers,
+              _.representeeAnswers
+            )
           ).map {
             case (answers, contactDetails) =>
-              sessionData -> ChangingRepresenteeEmail(Right(f), answers, contactDetails)
+              sessionData -> ChangingRepresenteeEmail(
+                Right(f),
+                answers,
+                contactDetails
+              )
           },
           Redirect(controllers.routes.StartController.start())
         )
 
-      case _ => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                              => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, ChangingRepresenteeEmail)] = validJourney(request)
+  ): Either[Result, (SessionData, ChangingRepresenteeEmail)] =
+    validJourney(request)
 
   override def updateEmail(
     changingRepresenteeEmail: ChangingRepresenteeEmail,
     email: Email
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] =
     if (changingRepresenteeEmail.contactDetails.emailAddress === email)
       EitherT.pure[Future, Error](changingRepresenteeEmail.journey.merge)
     else {
-      val newContactDetails = changingRepresenteeEmail.contactDetails.copy(emailAddress = email)
-      val newAnswers = changingRepresenteeEmail.answers.fold(
+      val newContactDetails =
+        changingRepresenteeEmail.contactDetails.copy(emailAddress = email)
+      val newAnswers        = changingRepresenteeEmail.answers.fold(
         _.copy(
-          contactDetails             = Some(newContactDetails),
+          contactDetails = Some(newContactDetails),
           hasConfirmedContactDetails = false
         ),
         complete =>
@@ -129,7 +143,7 @@ class ChangeRepresenteeEmailController @Inject() (
             Some(complete.id),
             complete.dateOfDeath,
             Some(newContactDetails),
-            hasConfirmedPerson         = true,
+            hasConfirmedPerson = true,
             hasConfirmedContactDetails = false
           )
       )
@@ -170,15 +184,26 @@ class ChangeRepresenteeEmailController @Inject() (
     email: Email
   )(implicit hc: HeaderCarrier, request: Request[_]): Unit = ()
 
-  override def name(changingRepresenteeEmail: ChangingRepresenteeEmail): ContactName =
-    changingRepresenteeEmail.journey.fold(_.subscribedDetails.contactName, _.subscribedDetails.contactName)
+  override def name(
+    changingRepresenteeEmail: ChangingRepresenteeEmail
+  ): ContactName =
+    changingRepresenteeEmail.journey
+      .fold(_.subscribedDetails.contactName, _.subscribedDetails.contactName)
 
-  override lazy protected val backLinkCall: Option[Call]      = Some(routes.RepresenteeController.checkYourAnswers())
-  override lazy protected val enterEmailCall: Call            = routes.ChangeRepresenteeEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call      = routes.ChangeRepresenteeEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call        = routes.ChangeRepresenteeEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call   = routes.ChangeRepresenteeEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call         = routes.ChangeRepresenteeEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call = routes.RepresenteeController.checkYourAnswers()
+  override lazy protected val backLinkCall: Option[Call]      = Some(
+    routes.RepresenteeController.checkYourAnswers()
+  )
+  override lazy protected val enterEmailCall: Call            =
+    routes.ChangeRepresenteeEmailController.enterEmail()
+  override lazy protected val enterEmailSubmitCall: Call      =
+    routes.ChangeRepresenteeEmailController.enterEmailSubmit()
+  override lazy protected val checkYourInboxCall: Call        =
+    routes.ChangeRepresenteeEmailController.checkYourInbox()
+  override lazy protected val verifyEmailCall: UUID => Call   =
+    routes.ChangeRepresenteeEmailController.verifyEmail
+  override lazy protected val emailVerifiedCall: Call         =
+    routes.ChangeRepresenteeEmailController.emailVerified()
+  override lazy protected val emailVerifiedContinueCall: Call =
+    routes.RepresenteeController.checkYourAnswers()
 
 }

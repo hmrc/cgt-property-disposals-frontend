@@ -31,7 +31,9 @@ object TaxableAmountOfMoney {
   implicit class TaxableAmountOfMoneyOps(private val t: TaxableAmountOfMoney) extends AnyVal {
 
     def taxDue(): AmountInPence = {
-      val result = (BigDecimal(t.taxableAmount.value.toString) * (BigDecimal(t.taxRate.toString))) / BigDecimal("100")
+      val result = (BigDecimal(t.taxableAmount.value.toString) * (BigDecimal(
+        t.taxRate.toString
+      ))) / BigDecimal("100")
 
       AmountInPence(result.setScale(0, RoundingMode.DOWN).longValue())
     }

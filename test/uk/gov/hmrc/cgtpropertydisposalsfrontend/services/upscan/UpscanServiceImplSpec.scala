@@ -81,7 +81,14 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
         "initialise" in {
           val mockSuccess = Call("GET", "/mock-success")
           val mockFailure = Call("GET", "/mock-fail")
-          val response    = Right(HttpResponse(OK, Some(Json.toJson(UpscanUploadMeta("metadata", sample[UploadRequest])))))
+          val response    = Right(
+            HttpResponse(
+              OK,
+              Some(
+                Json.toJson(UpscanUploadMeta("metadata", sample[UploadRequest]))
+              )
+            )
+          )
           (mockConnector
             .initiate(_: Call, _: Call, _: UploadReference)(_: HeaderCarrier))
             .expects(mockFailure, mockSuccess, *, *)
@@ -90,7 +97,11 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
             .saveUpscanUpload(_: UpscanUpload)(_: HeaderCarrier))
             .expects(*, *)
             .returning(EitherT.fromEither[Future](Right(HttpResponse(OK))))
-          await(service.initiate(mockFailure, (_: UploadReference) => mockSuccess).value).isRight shouldBe true
+          await(
+            service
+              .initiate(mockFailure, (_: UploadReference) => mockSuccess)
+              .value
+          ).isRight shouldBe true
         }
       }
     }

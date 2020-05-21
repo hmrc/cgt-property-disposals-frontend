@@ -65,12 +65,14 @@ class SubscribedChangeContactNameController @Inject() (
       case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateContactName(journey: Subscribed, contactName: ContactName)(
-    implicit hc: HeaderCarrier,
+  override def updateContactName(journey: Subscribed, contactName: ContactName)(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, Subscribed] = {
-    val journeyWithUpdatedContactName = journey.subscribedDetails.copy(contactName = contactName)
-    if (journey.subscribedDetails === journeyWithUpdatedContactName) EitherT.rightT[Future, Error](journey)
+    val journeyWithUpdatedContactName =
+      journey.subscribedDetails.copy(contactName = contactName)
+    if (journey.subscribedDetails === journeyWithUpdatedContactName)
+      EitherT.rightT[Future, Error](journey)
     else {
       auditService.sendEvent(
         "contactNameChanged",
@@ -85,15 +87,23 @@ class SubscribedChangeContactNameController @Inject() (
       )
 
       subscriptionService
-        .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedContactName, journey.subscribedDetails))
+        .updateSubscribedDetails(
+          SubscribedUpdateDetails(
+            journeyWithUpdatedContactName,
+            journey.subscribedDetails
+          )
+        )
         .map(_ => journey.copy(journeyWithUpdatedContactName))
     }
   }
 
-  override def contactName(journey: Subscribed): Option[ContactName] = Some(journey.subscribedDetails.contactName)
+  override def contactName(journey: Subscribed): Option[ContactName] =
+    Some(journey.subscribedDetails.contactName)
 
-  override protected lazy val backLinkCall: Call = controllers.accounts.routes.AccountController.manageYourDetails()
+  override protected lazy val backLinkCall: Call               =
+    controllers.accounts.routes.AccountController.manageYourDetails()
   override protected lazy val enterContactNameSubmitCall: Call =
     routes.SubscribedChangeContactNameController.enterContactNameSubmit()
-  override protected lazy val continueCall: Call = controllers.accounts.routes.AccountController.contactNameUpdated()
+  override protected lazy val continueCall: Call               =
+    controllers.accounts.routes.AccountController.contactNameUpdated()
 }

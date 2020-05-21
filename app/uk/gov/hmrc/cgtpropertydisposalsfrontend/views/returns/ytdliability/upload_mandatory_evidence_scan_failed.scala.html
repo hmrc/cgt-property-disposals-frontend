@@ -17,7 +17,7 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
@@ -25,32 +25,34 @@
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
 @()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-    @key = @{"supporting-evidence.upload-failed"}
+    @key = @{"mandatoryEvidence.scan-failed"}
     @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+    @mainTemplate(title = title, userType = request.userType) {
 
-    @pageHeading(title)
+        @pageHeading(title)
 
-    <p>@{messages(s"$key.p1")}</p>
-    <p>@{messages(s"$key.p2")}</p>
+        <p>@{messages(s"$key.p1")}</p>
+        <p>@{messages(s"$key.p2")}</p>
 
-    <ul class="list-bullet">
-        <li>@messages(s"$key.bullet1")</li>
-        <li>@messages(s"$key.bullet2")</li>
-    </ul>
+        <ul class="list-bullet">
+            <li>@messages(s"$key.bullet1")</li>
+            <li>@messages(s"$key.bullet2")</li>
+            <li>@messages(s"$key.bullet3")</li>
+        </ul>
 
-    <p>@{messages(s"$key.p3")}</p>
+        <p>@{messages(s"$key.p2")}</p>
+        <p>@{messages(s"$key.p3")}</p>
 
-    @formWrapper(routes.SupportingEvidenceController.uploadSupportingEvidence(), 'novalidate -> "novalidate") {
+        @formWrapper(routes.YearToDateLiabilityController.uploadMandatoryEvidence(), 'novalidate -> "novalidate") {
         @submitButton(messages(s"$key.button.tryAgain"))
+        }
+
+        @returnToSummaryLink(displayReturnToSummaryLink = true)
+
     }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
-
-}

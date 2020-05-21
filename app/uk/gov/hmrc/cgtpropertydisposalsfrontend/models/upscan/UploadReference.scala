@@ -28,13 +28,16 @@ object UploadReference {
     new PathBindable[UploadReference] {
       val stringBinder: PathBindable[String] = implicitly[PathBindable[String]]
 
-      override def bind(key: String, value: String): Either[String, UploadReference] =
+      override def bind(
+        key: String,
+        value: String
+      ): Either[String, UploadReference] =
         stringBinder.bind(key, value).map(UploadReference.apply)
 
       override def unbind(key: String, value: UploadReference): String =
         stringBinder.unbind(key, value.value)
     }
-  implicit val eq: Eq[UploadReference] = Eq.fromUniversalEquals
-  implicit val format: Format[UploadReference] =
+  implicit val eq: Eq[UploadReference]               = Eq.fromUniversalEquals
+  implicit val format: Format[UploadReference]       =
     implicitly[Format[String]].inmap(UploadReference(_), _.value)
 }

@@ -39,16 +39,20 @@ trait UpscanConnector {
 
   def getUpscanUpload(
     uploadReference: UploadReference
-  )(
-    implicit hc: HeaderCarrier
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def saveUpscanUpload(upscanUpload: UpscanUpload)(
-    implicit hc: HeaderCarrier
+  def saveUpscanUpload(upscanUpload: UpscanUpload)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def initiate(errorRedirect: Call, successRedirect: Call, uploadReference: UploadReference)(
-    implicit hc: HeaderCarrier
+  def initiate(
+    errorRedirect: Call,
+    successRedirect: Call,
+    uploadReference: UploadReference
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
 }
@@ -58,12 +62,12 @@ class UpscanConnectorImpl @Inject() (
   http: HttpClient,
   config: Configuration,
   servicesConfig: ServicesConfig
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends UpscanConnector
     with Logging {
 
-  private def getUpscanInitiateConfig[A: Configs](key: String): A =
+  private def getUpscanInitiateConfig[A : Configs](key: String): A =
     config.underlying
       .get[A](s"microservice.services.upscan-initiate.$key")
       .value
@@ -81,8 +85,12 @@ class UpscanConnectorImpl @Inject() (
 
   private val maxFileSize: Long = getUpscanInitiateConfig[Long]("max-file-size")
 
-  override def initiate(errorRedirect: Call, successRedirect: Call, uploadReference: UploadReference)(
-    implicit hc: HeaderCarrier
+  override def initiate(
+    errorRedirect: Call,
+    successRedirect: Call,
+    uploadReference: UploadReference
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
 
     val payload = UpscanInitiateRequest(
@@ -102,7 +110,11 @@ class UpscanConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .post[UpscanInitiateRequest](upscanInitiateUrl, payload, Map(USER_AGENT -> "cgt-property-disposals-frontend"))
+        .post[UpscanInitiateRequest](
+          upscanInitiateUrl,
+          payload,
+          Map(USER_AGENT -> "cgt-property-disposals-frontend")
+        )
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {
             logger.warn(
@@ -110,9 +122,8 @@ class UpscanConnectorImpl @Inject() (
                 s"status ${response.status} and body ${response.body}"
             )
             Left(Error("could not initiate upscan"))
-          } else {
+          } else
             Right(response)
-          }
         }
         .recover { case e => Left(Error(e)) }
     )
@@ -120,8 +131,8 @@ class UpscanConnectorImpl @Inject() (
 
   override def getUpscanUpload(
     uploadReference: UploadReference
-  )(
-    implicit hc: HeaderCarrier
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
 
     val url =
@@ -137,9 +148,8 @@ class UpscanConnectorImpl @Inject() (
                 s"status ${response.status} and body ${response.body}"
             )
             Left(Error("could not get upscan upload"))
-          } else {
+          } else
             Right(response)
-          }
         }
         .recover { case e => Left(Error(e)) }
     )
@@ -155,11 +165,10 @@ class UpscanConnectorImpl @Inject() (
         .post[UpscanUpload](url, upscanUpload)
         .map { response =>
           response.status match {
-            case Status.OK => Right(response)
-            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR => {
+            case Status.OK                                         => Right(response)
+            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
               logger.warn("could not save upscan upload")
               Left(Error(s"failed to save upscan upload"))
-            }
           }
         }
         .recover { case e => Left(Error(e)) }

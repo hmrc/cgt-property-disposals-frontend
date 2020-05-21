@@ -33,7 +33,10 @@ class LandingPageControllerSpec extends ControllerSpec {
         checkPageIsDisplayed(
           controller.landingPage()(FakeRequest()),
           messageFromMessageKey("landingPage.title"),
-          doc => doc.select(".button").attr("href") shouldBe s"${routes.StartController.start()}"
+          doc =>
+            doc
+              .select(".button")
+              .attr("href") shouldBe s"${routes.StartController.start()}"
         )
       }
 
@@ -46,14 +49,28 @@ class LandingPageControllerSpec extends ControllerSpec {
           controller.agentsLandingPage()(FakeRequest()),
           messageFromMessageKey("agentsLandingPage.title"),
           doc => {
-            doc.select(".button").attr("href")                      shouldBe viewConfig.agentsSignInUrl
-            doc.select("#nonResidentsRebasingUrl > a").attr("href") shouldBe viewConfig.nonResidentsRebasingUrl
-            doc.select("#createAgentsAccountUrl > a").attr("href")  shouldBe viewConfig.createAgentsAccountUrl
-            doc.select("#nrcgtReturn-1 > a").attr("href")           shouldBe viewConfig.nrcgtReturn
-            doc.select("#nrcgtReturn-2 > a").attr("href")           shouldBe viewConfig.nrcgtReturn
-            doc.select("#contact-hmrc-1 > a").attr("href")          shouldBe viewConfig.returnsForSomeoneWhoHasDied
-            doc.select("#contact-hmrc-2 > a").attr("href")          shouldBe viewConfig.contactHmrc
-            doc.select("#cgtUrl > a").attr("href")                  shouldBe viewConfig.cgtUrl
+            doc
+              .select(".button")
+              .attr("href")                        shouldBe viewConfig.agentsSignInUrl
+            doc
+              .select("#nonResidentsRebasingUrl > a")
+              .attr("href")                        shouldBe viewConfig.nonResidentsRebasingUrl
+            doc
+              .select("#createAgentsAccountUrl > a")
+              .attr("href")                        shouldBe viewConfig.createAgentsAccountUrl
+            doc
+              .select("#nrcgtReturn-1 > a")
+              .attr("href")                        shouldBe viewConfig.nrcgtReturn
+            doc
+              .select("#nrcgtReturn-2 > a")
+              .attr("href")                        shouldBe viewConfig.nrcgtReturn
+            doc
+              .select("#contact-hmrc-1 > a")
+              .attr("href")                        shouldBe viewConfig.returnsForSomeoneWhoHasDied
+            doc
+              .select("#contact-hmrc-2 > a")
+              .attr("href")                        shouldBe viewConfig.contactHmrc
+            doc.select("#cgtUrl > a").attr("href") shouldBe viewConfig.cgtUrl
           }
         )
       }
@@ -62,7 +79,10 @@ class LandingPageControllerSpec extends ControllerSpec {
     "handling requests to display the sign in page" must {
 
       "redirect to the landing page" in {
-        checkIsRedirect(controller.signInPage()(FakeRequest()), routes.LandingPageController.landingPage())
+        checkIsRedirect(
+          controller.signInPage()(FakeRequest()),
+          routes.LandingPageController.landingPage()
+        )
       }
 
     }

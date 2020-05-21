@@ -39,30 +39,33 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[SubscriptionServiceImpl])
 trait SubscriptionService {
 
-  def subscribe(subscriptionDetails: SubscriptionDetails)(
-    implicit hc: HeaderCarrier
+  def subscribe(subscriptionDetails: SubscriptionDetails)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionResponse]
 
-  def registerWithoutId(registrationDetails: RegistrationDetails)(
-    implicit hc: HeaderCarrier
+  def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, RegisteredWithoutId]
 
   def hasFailedCgtEnrolment(
-    )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]]
 
-  def getSubscribedDetails(cgtReference: CgtReference)(
-    implicit hc: HeaderCarrier
+  def getSubscribedDetails(cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, Option[SubscribedDetails]]
 
-  def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(
-    implicit hc: HeaderCarrier
+  def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
 }
 
 @Singleton
-class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector, metrics: Metrics)(
-  implicit ec: ExecutionContext
+class SubscriptionServiceImpl @Inject() (
+  connector: CGTPropertyDisposalsConnector,
+  metrics: Metrics
+)(implicit
+  ec: ExecutionContext
 ) extends SubscriptionService {
 
   override def subscribe(
@@ -77,12 +80,14 @@ class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnecto
           metrics.accessWithWrongGGAccountCounter.inc()
           Right(AlreadySubscribed)
         } else
-          Left(Error(s"call to subscribe came back with status ${response.status}"))
+          Left(
+            Error(s"call to subscribe came back with status ${response.status}")
+          )
 
       }
 
-  override def registerWithoutId(registrationDetails: RegistrationDetails)(
-    implicit hc: HeaderCarrier
+  override def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, RegisteredWithoutId] =
     connector
       .registerWithoutId(registrationDetails)
@@ -90,21 +95,32 @@ class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnecto
         if (response.status === OK)
           response.parseJSON[RegisteredWithoutId]().leftMap(Error(_))
         else
-          Left(Error(s"Call to register without id came back with status ${response.status}"))
+          Left(
+            Error(
+              s"Call to register without id came back with status ${response.status}"
+            )
+          )
       }
 
   override def hasFailedCgtEnrolment(
-    )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =
     connector.getSubscriptionStatus().subflatMap { response =>
       if (response.status === OK)
-        response.parseJSON[CgtReference]().leftMap(Error(_)).map(cgtReference => Some(cgtReference))
+        response
+          .parseJSON[CgtReference]()
+          .leftMap(Error(_))
+          .map(cgtReference => Some(cgtReference))
       else if (response.status === NO_CONTENT) Right(None)
       else
-        Left(Error(s"call to get subscription status came back with status ${response.status}"))
+        Left(
+          Error(
+            s"call to get subscription status came back with status ${response.status}"
+          )
+        )
     }
 
-  override def getSubscribedDetails(cgtReference: CgtReference)(
-    implicit hc: HeaderCarrier
+  override def getSubscribedDetails(cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, Option[SubscribedDetails]] =
     connector.getSubscribedDetails(cgtReference).subflatMap { response =>
       if (response.status === OK)
@@ -112,28 +128,41 @@ class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnecto
           .parseJSON[GetSubscriptionResponse]()
           .bimap(Error(_), _.subscribedDetails)
       else
-        Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
+        Left(
+          Error(
+            s"Call to get subscribed details came back with status ${response.status}"
+          )
+        )
     }
 
-  override def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(
-    implicit hc: HeaderCarrier
+  override def updateSubscribedDetails(
+    subscribedUpdateDetails: SubscribedUpdateDetails
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] =
     connector.updateSubscribedDetails(subscribedUpdateDetails).subflatMap { response =>
       if (response.status === OK)
         Right(())
       else
-        Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
+        Left(
+          Error(
+            s"Call to get subscribed details came back with status ${response.status}"
+          )
+        )
     }
 
 }
 
 object SubscriptionService {
 
-  final case class GetSubscriptionResponse(subscribedDetails: Option[SubscribedDetails])
+  final case class GetSubscriptionResponse(
+    subscribedDetails: Option[SubscribedDetails]
+  )
 
   object GetSubscriptionResponse {
 
-    implicit val reads: Reads[GetSubscriptionResponse] = Json.reads[GetSubscriptionResponse]
+    implicit val reads: Reads[GetSubscriptionResponse] =
+      Json.reads[GetSubscriptionResponse]
 
   }
 

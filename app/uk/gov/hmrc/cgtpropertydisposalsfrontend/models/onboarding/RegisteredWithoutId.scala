@@ -23,6 +23,7 @@ final case class RegisteredWithoutId(sapNumber: SapNumber)
 
 object RegisteredWithoutId {
 
-  implicit val format: OFormat[RegisteredWithoutId] = Json.format[RegisteredWithoutId]
+  implicit val format: OFormat[RegisteredWithoutId] =
+    Json.format[RegisteredWithoutId]
 
 }

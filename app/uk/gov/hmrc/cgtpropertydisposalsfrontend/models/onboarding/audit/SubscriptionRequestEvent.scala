@@ -39,7 +39,8 @@ final case class PrePopulatedUserData(
 )
 
 object PrePopulatedUserData {
-  implicit val formatPrepop: OFormat[PrePopulatedUserData] = Json.format[PrePopulatedUserData]
+  implicit val formatPrepop: OFormat[PrePopulatedUserData] =
+    Json.format[PrePopulatedUserData]
 }
 
 final case class ManuallyEnteredData(
@@ -49,12 +50,15 @@ final case class ManuallyEnteredData(
 )
 
 object ManuallyEnteredData {
-  implicit val formatManual: OFormat[ManuallyEnteredData] = Json.format[ManuallyEnteredData]
+  implicit val formatManual: OFormat[ManuallyEnteredData] =
+    Json.format[ManuallyEnteredData]
 }
 
 object SubscriptionRequestEvent {
 
-  def fromSubscriptionDetails(subscriptionDetails: SubscriptionDetails): SubscriptionRequestEvent = {
+  def fromSubscriptionDetails(
+    subscriptionDetails: SubscriptionDetails
+  ): SubscriptionRequestEvent = {
     val prepopulatedEmailSource =
       if (subscriptionDetails.emailSource === EmailSource.BusinessPartnerRecord)
         Some("ETMP business partner record")
@@ -65,19 +69,20 @@ object SubscriptionRequestEvent {
 
     val auditAddress = AuditAddress.fromAddress(subscriptionDetails.address)
 
-    val prePopulatedUserData = {
+    val prePopulatedUserData =
       PrePopulatedUserData(
         "CGT",
         subscriptionDetails.sapNumber.value,
         subscriptionDetails.name.toOption.map(i => IndividualAuditDetails(i.firstName, i.lastName)),
         subscriptionDetails.name.swap.toOption.map(t => TrustAuditDetails(t.value)),
         prepopulatedEmailSource.map(source => EmailAuditDetails(subscriptionDetails.emailAddress.value, source)),
-        if (subscriptionDetails.addressSource =!= AddressSource.ManuallyEntered) Some(auditAddress) else None,
+        if (subscriptionDetails.addressSource =!= AddressSource.ManuallyEntered)
+          Some(auditAddress)
+        else None,
         if (subscriptionDetails.contactNameSource =!= ContactNameSource.ManuallyEntered)
           Some(subscriptionDetails.contactName.value)
         else None
       )
-    }
 
     val manuallyEnteredData =
       ManuallyEnteredData(
@@ -88,12 +93,15 @@ object SubscriptionRequestEvent {
           None
         else
           Some(subscriptionDetails.emailAddress.value),
-        if (subscriptionDetails.addressSource === AddressSource.ManuallyEntered) Some(auditAddress) else None
+        if (subscriptionDetails.addressSource === AddressSource.ManuallyEntered)
+          Some(auditAddress)
+        else None
       )
 
     SubscriptionRequestEvent(prePopulatedUserData, manuallyEnteredData)
   }
 
-  implicit val format: OFormat[SubscriptionRequestEvent] = Json.format[SubscriptionRequestEvent]
+  implicit val format: OFormat[SubscriptionRequestEvent] =
+    Json.format[SubscriptionRequestEvent]
 
 }

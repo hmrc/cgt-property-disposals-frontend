@@ -31,10 +31,15 @@ trait BusinessPartnerRecordServiceSupport {
   val mockBusinessPartnerRecordService = mock[BusinessPartnerRecordService]
   def mockGetBusinessPartnerRecord(
     businessPartnerRecordRequest: BusinessPartnerRecordRequest,
-    expectedBusinessPartnerRecordResponse: Either[Error, BusinessPartnerRecordResponse]
-  ): Unit =
+    expectedBusinessPartnerRecordResponse: Either[
+      Error,
+      BusinessPartnerRecordResponse
+    ]
+  ): Unit                              =
     (mockBusinessPartnerRecordService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(
+        _: HeaderCarrier
+      ))
       .expects(businessPartnerRecordRequest, *)
       .returning(
         EitherT[Future, Error, BusinessPartnerRecordResponse](

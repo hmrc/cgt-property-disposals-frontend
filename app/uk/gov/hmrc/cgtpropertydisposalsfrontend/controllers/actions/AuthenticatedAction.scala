@@ -43,7 +43,8 @@ class AuthenticatedAction @Inject() (
     request: MessagesRequest[A]
   ): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+      HeaderCarrierConverter
+        .fromHeadersAndSession(request.headers, Some(request.session))
 
     auth.authorised()(Future.successful(Right(AuthenticatedRequest(request))))
   }

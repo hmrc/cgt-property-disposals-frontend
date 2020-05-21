@@ -30,19 +30,27 @@ final case class RequestWithSessionDataAndRetrievedData[A](
   authenticatedRequest: AuthenticatedRequestWithRetrievedData[A]
 ) extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
-  override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
+  override def messagesApi: MessagesApi =
+    authenticatedRequest.request.messagesApi
 }
 
 @Singleton
-class SessionDataActionWithRetrievedData @Inject() (val sessionStore: SessionStore, val errorHandler: ErrorHandler)(
-  implicit val executionContext: ExecutionContext
-) extends SessionDataActionBase[AuthenticatedRequestWithRetrievedData, RequestWithSessionDataAndRetrievedData] {
+class SessionDataActionWithRetrievedData @Inject() (
+  val sessionStore: SessionStore,
+  val errorHandler: ErrorHandler
+)(implicit
+  val executionContext: ExecutionContext
+) extends SessionDataActionBase[
+      AuthenticatedRequestWithRetrievedData,
+      RequestWithSessionDataAndRetrievedData
+    ] {
 
   def sessionDataAction[A](
     sessionData: Option[SessionData],
     request: AuthenticatedRequestWithRetrievedData[A]
   ): RequestWithSessionDataAndRetrievedData[A] = {
-    val data: SessionData = sessionData.getOrElse(SessionData.empty).copy(userType = request.userType)
+    val data: SessionData =
+      sessionData.getOrElse(SessionData.empty).copy(userType = request.userType)
     RequestWithSessionDataAndRetrievedData(data, request)
   }
 

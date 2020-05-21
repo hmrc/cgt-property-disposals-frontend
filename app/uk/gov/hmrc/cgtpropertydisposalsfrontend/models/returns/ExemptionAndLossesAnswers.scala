@@ -37,9 +37,12 @@ object ExemptionAndLossesAnswers {
 
   object IncompleteExemptionAndLossesAnswers {
 
-    val empty: IncompleteExemptionAndLossesAnswers = IncompleteExemptionAndLossesAnswers(None, None, None)
+    val empty: IncompleteExemptionAndLossesAnswers =
+      IncompleteExemptionAndLossesAnswers(None, None, None)
 
-    def fromCompleteAnswers(c: CompleteExemptionAndLossesAnswers): IncompleteExemptionAndLossesAnswers =
+    def fromCompleteAnswers(
+      c: CompleteExemptionAndLossesAnswers
+    ): IncompleteExemptionAndLossesAnswers =
       IncompleteExemptionAndLossesAnswers(
         Some(c.inYearLosses),
         Some(c.previousYearsLosses),
@@ -54,18 +57,24 @@ object ExemptionAndLossesAnswers {
     annualExemptAmount: AmountInPence
   ) extends ExemptionAndLossesAnswers
 
-  implicit class ExemptionAndLossesAnswersOps(private val a: ExemptionAndLossesAnswers) extends AnyVal {
+  implicit class ExemptionAndLossesAnswersOps(
+    private val a: ExemptionAndLossesAnswers
+  ) extends AnyVal {
 
     def fold[A](
       ifIncomplete: IncompleteExemptionAndLossesAnswers => A,
       ifComplete: CompleteExemptionAndLossesAnswers => A
-    ): A = a match {
-      case i: IncompleteExemptionAndLossesAnswers => ifIncomplete(i)
-      case c: CompleteExemptionAndLossesAnswers   => ifComplete(c)
-    }
+    ): A =
+      a match {
+        case i: IncompleteExemptionAndLossesAnswers => ifIncomplete(i)
+        case c: CompleteExemptionAndLossesAnswers   => ifComplete(c)
+      }
 
     def unset[A](
-      fieldLens: IncompleteExemptionAndLossesAnswers.type => Lens[IncompleteExemptionAndLossesAnswers, Option[A]]
+      fieldLens: IncompleteExemptionAndLossesAnswers.type => Lens[
+        IncompleteExemptionAndLossesAnswers,
+        Option[A]
+      ]
     ): IncompleteExemptionAndLossesAnswers =
       fieldLens(IncompleteExemptionAndLossesAnswers).set(None)(
         fold(identity, IncompleteExemptionAndLossesAnswers.fromCompleteAnswers)

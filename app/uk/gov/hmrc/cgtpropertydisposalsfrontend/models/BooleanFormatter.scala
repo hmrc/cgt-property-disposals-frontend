@@ -26,7 +26,10 @@ object BooleanFormatter {
 
     override val format = Some(("format.boolean", Nil))
 
-    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] =
+    def bind(
+      key: String,
+      data: Map[String, String]
+    ): Either[Seq[FormError], Boolean] =
       Either
         .fromOption(data.get(key), Seq(FormError(key, "error.required")))
         .flatMap {
@@ -35,6 +38,7 @@ object BooleanFormatter {
           case _       => Left(Seq(FormError(key, "error.boolean", Nil)))
         }
 
-    def unbind(key: String, value: Boolean): Map[String, String] = Map(key -> value.toString)
+    def unbind(key: String, value: Boolean): Map[String, String] =
+      Map(key -> value.toString)
   }
 }

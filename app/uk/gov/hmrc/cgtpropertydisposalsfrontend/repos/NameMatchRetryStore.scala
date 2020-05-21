@@ -32,11 +32,11 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[NameMatchRetryStoreImpl])
 trait NameMatchRetryStore {
 
-  def get[A <: NameMatchDetails: Reads](
+  def get[A <: NameMatchDetails : Reads](
     ggCredId: GGCredId
   ): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts[A]]]]
 
-  def store[A <: NameMatchDetails: Writes](
+  def store[A <: NameMatchDetails : Writes](
     ggCredId: GGCredId,
     unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]
   ): Future[Either[Error, Unit]]
@@ -47,8 +47,8 @@ trait NameMatchRetryStore {
 class NameMatchRetryStoreImpl @Inject() (
   mongo: ReactiveMongoComponent,
   configuration: Configuration
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends NameMatchRetryStore
     with Repo {
 
@@ -57,17 +57,20 @@ class NameMatchRetryStoreImpl @Inject() (
       .get[FiniteDuration]("bpr-name-match.store.expiry-time")
       .value
 
-    new CacheMongoRepository("bpr-name-match-retries", expireAfter.toSeconds)(mongo.mongoConnector.db, ec)
+    new CacheMongoRepository("bpr-name-match-retries", expireAfter.toSeconds)(
+      mongo.mongoConnector.db,
+      ec
+    )
   }
 
   val sessionKey = "bpr-name-match-retries"
 
-  override def get[A <: NameMatchDetails: Reads](
+  override def get[A <: NameMatchDetails : Reads](
     ggCredId: GGCredId
   ): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts[A]]]] =
     get[UnsuccessfulNameMatchAttempts[A]](ggCredId.value)
 
-  override def store[A <: NameMatchDetails: Writes](
+  override def store[A <: NameMatchDetails : Writes](
     ggCredId: GGCredId,
     unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]
   ): Future[Either[Error, Unit]] =

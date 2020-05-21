@@ -37,22 +37,31 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[TaxYearServiceImpl])
 trait TaxYearService {
 
-  def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[TaxYear]]
+  def taxYear(date: LocalDate)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, Option[TaxYear]]
 
 }
 
 @Singleton
-class TaxYearServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: ExecutionContext) extends TaxYearService {
+class TaxYearServiceImpl @Inject() (connector: ReturnsConnector)(implicit
+  ec: ExecutionContext
+) extends TaxYearService {
 
-  override def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[TaxYear]] =
+  override def taxYear(
+    date: LocalDate
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[TaxYear]] =
     connector.taxYear(date).subflatMap { response =>
-      if (response.status === OK) {
+      if (response.status === OK)
         response
           .parseJSON[TaxYearResponse]()
           .bimap(Error(_), _.value)
-      } else {
-        Left(Error(s"Call to get tax year came back with unexpected status ${response.status}"))
-      }
+      else
+        Left(
+          Error(
+            s"Call to get tax year came back with unexpected status ${response.status}"
+          )
+        )
 
     }
 

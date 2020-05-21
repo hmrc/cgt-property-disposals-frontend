@@ -38,7 +38,9 @@ class RegistrationChangeAddressControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val validJourneyStatus = RegistrationReadyAddressJourney(sample[RegistrationReady])
+  val validJourneyStatus = RegistrationReadyAddressJourney(
+    sample[RegistrationReady]
+  )
 
   lazy val controller = instanceOf[RegistrationChangeAddressController]
 
@@ -50,11 +52,14 @@ class RegistrationChangeAddressControllerSpec
   ): RegistrationReady =
     journey.journey.copy(registrationDetails = journey.journey.registrationDetails.copy(address = address))
 
-  override val mockUpdateAddress: Option[(RegistrationReadyAddressJourney, Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress: Option[
+    (RegistrationReadyAddressJourney, Address, Either[Error, Unit]) => Unit
+  ] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: RegistrationReady => true
         case _                    => false
       }
@@ -72,7 +77,9 @@ class RegistrationChangeAddressControllerSpec
 
     "handling requests to submit the is UK page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.isUkSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.isUkSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -86,11 +93,16 @@ class RegistrationChangeAddressControllerSpec
 
     "handling requests to display the enter UK address page" must {
 
-      def performAction(): Future[Result] = controller.enterUkAddress()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displayEnterUkAddressPage(UserType.Individual, None, performAction)
+      behave like displayEnterUkAddressPage(
+        UserType.Individual,
+        None,
+        performAction
+      )
       behave like displayEnterUkAddressPage(UserType.Agent, None, performAction)
 
     }
@@ -98,7 +110,9 @@ class RegistrationChangeAddressControllerSpec
     "handling submitted addresses from enter UK address page" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.enterUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterUkAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -111,7 +125,8 @@ class RegistrationChangeAddressControllerSpec
 
     "handling requests to display the enter non UK address page" must {
 
-      def performAction(): Future[Result] = controller.enterNonUkAddress()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterNonUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -121,7 +136,9 @@ class RegistrationChangeAddressControllerSpec
 
     "handling requests to submit the enter non UK address page" must {
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.enterNonUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterNonUkAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -133,7 +150,8 @@ class RegistrationChangeAddressControllerSpec
 
     "handling requests to display the enter postcode page" must {
 
-      def performAction(): Future[Result] = controller.enterPostcode()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterPostcode()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -145,7 +163,9 @@ class RegistrationChangeAddressControllerSpec
     "handling submitted postcodes and filters" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterPostcodeSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -182,7 +202,9 @@ class RegistrationChangeAddressControllerSpec
     "handling submitted selected addresses" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.selectAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.selectAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 

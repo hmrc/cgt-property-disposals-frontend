@@ -26,6 +26,7 @@ final case class BusinessPartnerRecordResponse(
 
 object BusinessPartnerRecordResponse {
 
-  implicit val format: OFormat[BusinessPartnerRecordResponse] = Json.format[BusinessPartnerRecordResponse]
+  implicit val format: OFormat[BusinessPartnerRecordResponse] =
+    Json.format[BusinessPartnerRecordResponse]
 
 }

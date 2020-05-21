@@ -68,18 +68,24 @@ object YearToDateLiabilityAnswers {
       mandatoryEvidence: MandatoryEvidence
     ) extends NonCalculatedYTDAnswers
 
-    implicit class NonCalculatedYTDLiabilityAnswersOps(private val a: NonCalculatedYTDAnswers) extends AnyVal {
+    implicit class NonCalculatedYTDLiabilityAnswersOps(
+      private val a: NonCalculatedYTDAnswers
+    ) extends AnyVal {
 
       def fold[A](
         ifIncomplete: IncompleteNonCalculatedYTDAnswers => A,
         ifComplete: CompleteNonCalculatedYTDAnswers => A
-      ): A = a match {
-        case i: IncompleteNonCalculatedYTDAnswers => ifIncomplete(i)
-        case c: CompleteNonCalculatedYTDAnswers   => ifComplete(c)
-      }
+      ): A =
+        a match {
+          case i: IncompleteNonCalculatedYTDAnswers => ifIncomplete(i)
+          case c: CompleteNonCalculatedYTDAnswers   => ifComplete(c)
+        }
 
       def unset[A](
-        fieldLens: IncompleteNonCalculatedYTDAnswers.type => Lens[IncompleteNonCalculatedYTDAnswers, Option[A]]
+        fieldLens: IncompleteNonCalculatedYTDAnswers.type => Lens[
+          IncompleteNonCalculatedYTDAnswers,
+          Option[A]
+        ]
       ): IncompleteNonCalculatedYTDAnswers =
         fieldLens(IncompleteNonCalculatedYTDAnswers).set(None)(
           fold(identity, IncompleteNonCalculatedYTDAnswers.fromCompleteAnswers)
@@ -104,7 +110,16 @@ object YearToDateLiabilityAnswers {
 
     object IncompleteCalculatedYTDAnswers {
       val empty: IncompleteCalculatedYTDAnswers =
-        IncompleteCalculatedYTDAnswers(None, None, None, None, None, None, None, None)
+        IncompleteCalculatedYTDAnswers(
+          None,
+          None,
+          None,
+          None,
+          None,
+          None,
+          None,
+          None
+        )
 
       def fromCompleteAnswers(
         c: CompleteCalculatedYTDAnswers
@@ -131,18 +146,24 @@ object YearToDateLiabilityAnswers {
       mandatoryEvidence: Option[MandatoryEvidence]
     ) extends CalculatedYTDAnswers
 
-    implicit class CalculatedYTDLiabilityAnswersOps(private val a: CalculatedYTDAnswers) extends AnyVal {
+    implicit class CalculatedYTDLiabilityAnswersOps(
+      private val a: CalculatedYTDAnswers
+    ) extends AnyVal {
 
       def fold[A](
         ifIncomplete: IncompleteCalculatedYTDAnswers => A,
         ifComplete: CompleteCalculatedYTDAnswers => A
-      ): A = a match {
-        case i: IncompleteCalculatedYTDAnswers => ifIncomplete(i)
-        case c: CompleteCalculatedYTDAnswers   => ifComplete(c)
-      }
+      ): A =
+        a match {
+          case i: IncompleteCalculatedYTDAnswers => ifIncomplete(i)
+          case c: CompleteCalculatedYTDAnswers   => ifComplete(c)
+        }
 
       def unset[A](
-        fieldLens: IncompleteCalculatedYTDAnswers.type => Lens[IncompleteCalculatedYTDAnswers, Option[A]]
+        fieldLens: IncompleteCalculatedYTDAnswers.type => Lens[
+          IncompleteCalculatedYTDAnswers,
+          Option[A]
+        ]
       ): IncompleteCalculatedYTDAnswers =
         fieldLens(IncompleteCalculatedYTDAnswers).set(None)(
           fold(identity, IncompleteCalculatedYTDAnswers.fromCompleteAnswers)
@@ -152,11 +173,13 @@ object YearToDateLiabilityAnswers {
 
   }
 
-  implicit class YearToDateLiabilityAnswersOps(private val y: YearToDateLiabilityAnswers) extends AnyVal {
+  implicit class YearToDateLiabilityAnswersOps(
+    private val y: YearToDateLiabilityAnswers
+  ) extends AnyVal {
 
     def unsetAllButIncomeDetails(): Option[YearToDateLiabilityAnswers] =
       y match {
-        case c: CalculatedYTDAnswers =>
+        case c: CalculatedYTDAnswers    =>
           Some(
             c.unset(_.hasEstimatedDetails)
               .unset(_.calculatedTaxDue)

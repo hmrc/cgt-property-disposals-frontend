@@ -41,15 +41,18 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[UKAddressLookupServiceImpl])
 trait UKAddressLookupService {
 
-  def lookupAddress(postcode: Postcode, filter: Option[String])(
-    implicit hc: HeaderCarrier
+  def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, AddressLookupResult]
 
 }
 
 @Singleton
-class UKAddressLookupServiceImpl @Inject() (connector: AddressLookupConnector, metrics: Metrics)(
-  implicit ec: ExecutionContext
+class UKAddressLookupServiceImpl @Inject() (
+  connector: AddressLookupConnector,
+  metrics: Metrics
+)(implicit
+  ec: ExecutionContext
 ) extends UKAddressLookupService {
 
   override def lookupAddress(
@@ -60,7 +63,7 @@ class UKAddressLookupServiceImpl @Inject() (connector: AddressLookupConnector, m
 
     connector.lookupAddress(postcode, filter).subflatMap { response =>
       timer.close()
-      if (response.status === OK) {
+      if (response.status === OK)
         response
           .parseJSON[AddressLookupResponse]()
           .flatMap(toAddressLookupResult(_, postcode, filter))
@@ -68,9 +71,13 @@ class UKAddressLookupServiceImpl @Inject() (connector: AddressLookupConnector, m
             metrics.postcodeLookupErrorCounter.inc()
             Error(e)
           }
-      } else {
+      else {
         metrics.postcodeLookupErrorCounter.inc()
-        Left(Error(s"Response to address lookup came back with status ${response.status}"))
+        Left(
+          Error(
+            s"Response to address lookup came back with status ${response.status}"
+          )
+        )
       }
     }
   }
