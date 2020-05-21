@@ -121,6 +121,7 @@ object MultipleDisposalsTriageAnswers {
         case Some(Capacitor)              => Some(Right(Capacitor))
         case _                            => None
       }
+
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

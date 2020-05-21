@@ -153,6 +153,19 @@ object DraftReturn {
         case s: DraftSingleDisposalReturn         => whenSingle(s)
         case s: DraftSingleIndirectDisposalReturn => whenSingleIndirect(s)
       }
+
+    def isMultipleIndirectDisposal(): Boolean =
+      d.fold(m => isMultipleIndirectDisposal(m.triageAnswers), _ => false, _ => false)
+
+    private def isMultipleIndirectDisposal(m: MultipleDisposalsTriageAnswers): Boolean =
+      m.fold(
+        _.assetTypes,
+        c => Some(c.assetTypes)
+      ) match {
+        case Some(assetTypes) if assetTypes.contains(AssetType.IndirectDisposal) => true
+        case _                                                                   => false
+      }
+
   }
 
   implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals

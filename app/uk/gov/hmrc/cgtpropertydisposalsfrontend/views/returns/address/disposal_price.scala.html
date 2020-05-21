@@ -48,6 +48,7 @@
 
 @key = @{ "multipleDisposalsDisposalPrice" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+
 @userKey = @{
     if (representativeType.exists(_.isLeft)) ".personalRep"
     else if (representativeType.exists(_.isRight)) ".capacitor"
@@ -55,6 +56,7 @@
     else if (isATrust) ".trust"
     else ""
 }
+
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
