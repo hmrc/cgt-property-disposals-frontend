@@ -1313,6 +1313,70 @@ class SupportingEvidenceControllerSpec
         }
       }
 
+      "show the document did not upload error page" when {
+        "an error redirect from upscan is handled" in {
+          def performAction(): Future[Result] =
+            controller.documentDidNotUpload()(
+              FakeRequest()
+            )
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence =
+            sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = true,
+            List(supportingEvidence)
+          )
+
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "supporting-evidence.upload-failed.title"
+            )
+          )
+
+        }
+      }
+
+      "show there is a problem with your document error page" when {
+        "an upscan failure call back is received" in {
+          def performAction(): Future[Result] =
+            controller.handleUpscanCallBackFailures()(
+              FakeRequest()
+            )
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence =
+            sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = true,
+            List(supportingEvidence)
+          )
+
+          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "supporting-evidence.scan-failed.title"
+            )
+          )
+
+        }
+      }
+
       "return the user to the check your answers page" when {
 
         "the user has completed their upload of supporting evidences" in {
@@ -1474,7 +1538,7 @@ class SupportingEvidenceControllerSpec
           uploadReference.toString
         )(FakeRequest())
 
-      "redirect the user to the virus check page" when {
+      "redirect the user to the status check page" when {
 
         "they click the submit button" in {
 
