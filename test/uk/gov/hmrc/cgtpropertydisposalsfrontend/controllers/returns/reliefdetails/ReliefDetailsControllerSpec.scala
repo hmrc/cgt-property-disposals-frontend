@@ -691,9 +691,11 @@ class ReliefDetailsControllerSpec
       behave like noPrivateResidentsReliefBehaviour(() => performAction(Seq.empty))
 
       "show a form error" when {
+        type Message    = String
+        type MessageKey = String
 
         def test(data: (String, String)*)(
-          expectedErrorMessageKey: String
+          expectedErrorMessageOrKey: Either[MessageKey, Message]
         )(userType: UserType, individualUserType: IndividualUserType, userKey: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -710,9 +712,8 @@ class ReliefDetailsControllerSpec
             performAction(data),
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey
-              ),
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe
+                expectedErrorMessageOrKey.fold(messageKey => messageFromMessageKey(messageKey), identity),
             BAD_REQUEST
           )
         }
@@ -750,7 +751,7 @@ class ReliefDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey)(userType, individualUserType, userKey)
+                  test(data: _*)(Left(scenario.expectedErrorMessageKey))(userType, individualUserType, userKey)
                 }
               }
           }
@@ -763,7 +764,7 @@ class ReliefDetailsControllerSpec
               val valueGreaterThanLettingsRelief =
                 (maxLettingsReliefValue ++ AmountInPence.fromPounds(10000)).inPounds().toString()
               test(key -> "0", valueKey -> valueGreaterThanLettingsRelief)(
-                Messages(s"$valueKey.error.amountOverLimit", maxLettingsReliefValue.inPounds().toString())
+                Right(Messages(s"$valueKey.error.amountOverLimit", maxLettingsReliefValue.inPounds().toString()))
               )(userType, individualUserType, userKey)
           }
         }
