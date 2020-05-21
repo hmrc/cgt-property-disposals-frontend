@@ -61,6 +61,17 @@
         var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
         if (match) return match[2];
       };
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        'event': 'pageview',
+        'userType': "@{userType match {
+          case Some(UserType.Individual) => "individual"
+          case Some(UserType.Organisation) => "organisation"
+          case Some(UserType.Agent) => "agent"
+          case _ => "anonymous"
+        }}"
+      })
+
       window.jsConfig = window.jsConfig || {};
       window.jsConfig.lang = window.getCookie("PLAY_LANG") || "en";
       @if(withSignOutLink || withAccount) {
