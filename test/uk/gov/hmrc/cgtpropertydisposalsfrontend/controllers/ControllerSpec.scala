@@ -121,10 +121,11 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     super.afterAll()
   }
 
-  def messageFromMessageKey(messageKey: String, args: Any*)(implicit
-    messagesApi: MessagesApi
-  ): String =
-    messagesApi(messageKey, args: _*)(lang)
+  def messageFromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String = {
+    val m = messagesApi(messageKey, args: _*)(lang)
+    if (m === messageKey) { sys.error(s"Message key `$messageKey` is missing a message") }
+    m
+  }
 
   def checkIsTechnicalErrorPage(
     result: Future[Result]
