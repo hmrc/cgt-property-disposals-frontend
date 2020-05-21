@@ -24,17 +24,54 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.http.HttpConfiguration
+import play.api.i18n.{DefaultLangs, DefaultMessagesApi, DefaultMessagesApiProvider, Lang, Langs, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
-import play.api.{Application, Configuration, Play}
+import play.api.{Application, Configuration, Environment, Logger, Play}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, MockMetrics}
 
 import scala.concurrent.Future
 import scala.reflect.ClassTag
+import com.google.inject.{Inject, Singleton}
+
+@Singleton
+class TestMessagesApi @Inject() (
+  messages: Map[String, Map[String, String]] = Map.empty,
+  langs: Langs                               = new DefaultLangs(),
+  langCookieName: String                     = "PLAY_LANG",
+  langCookieSecure: Boolean                  = false,
+  langCookieHttpOnly: Boolean                = false,
+  httpConfiguration: HttpConfiguration       = HttpConfiguration()
+) extends DefaultMessagesApi(messages, langs, langCookieName, langCookieSecure, langCookieHttpOnly, httpConfiguration) {
+
+  override protected def noMatch(key: String, args: Seq[Any])(implicit lang: Lang): String = {
+    Logger.error(s"Could not find message for key: $key ${args.mkString("-")}")
+    s"""not_found_message("$key")"""
+  }
+}
+@Singleton
+class TestDefaultMessagesApiProvider @Inject() (
+  environment: Environment,
+  config: Configuration,
+  langs: Langs,
+  httpConfiguration: HttpConfiguration
+) extends DefaultMessagesApiProvider(environment, config, langs, httpConfiguration) {
+
+  override lazy val get: MessagesApi = {
+    new TestMessagesApi(
+      loadAllMessages,
+      langs,
+      langCookieName     = langCookieName,
+      langCookieSecure   = langCookieSecure,
+      langCookieHttpOnly = langCookieHttpOnly,
+      httpConfiguration  = httpConfiguration
+    )
+  }
+}
 
 trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory {
 
@@ -62,6 +99,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
       )
       .disable[uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore]
       .overrides(metricsBinding :: overrideBindings: _*)
+      .overrides(bind[MessagesApi].toProvider[TestDefaultMessagesApiProvider])
       .build()
   }
 
@@ -120,7 +158,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     status(result)           shouldBe expectedStatus
 
     val doc = Jsoup.parse(contentAsString(result))
-    doc.select("h1").text should include(expectedTitle)
+    doc.select("h1").text   should include(expectedTitle)
+    doc.select("body").text should not include ("not_found_message(")
     contentChecks(doc)
   }
 
