@@ -39,13 +39,13 @@ import scala.reflect.ClassTag
 import com.google.inject.{Inject, Singleton}
 
 @Singleton
-class TestMessagesApi @Inject() (
-  messages: Map[String, Map[String, String]] = Map.empty,
-  langs: Langs                               = new DefaultLangs(),
-  langCookieName: String                     = "PLAY_LANG",
-  langCookieSecure: Boolean                  = false,
-  langCookieHttpOnly: Boolean                = false,
-  httpConfiguration: HttpConfiguration       = HttpConfiguration()
+class TestMessagesApi(
+  messages: Map[String, Map[String, String]],
+  langs: Langs,
+  langCookieName: String,
+  langCookieSecure: Boolean,
+  langCookieHttpOnly: Boolean,
+  httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApi(messages, langs, langCookieName, langCookieSecure, langCookieHttpOnly, httpConfiguration) {
 
   override protected def noMatch(key: String, args: Seq[Any])(implicit lang: Lang): String = {
@@ -53,6 +53,7 @@ class TestMessagesApi @Inject() (
     s"""not_found_message("$key")"""
   }
 }
+
 @Singleton
 class TestDefaultMessagesApiProvider @Inject() (
   environment: Environment,
@@ -158,8 +159,15 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     status(result)           shouldBe expectedStatus
 
     val doc = Jsoup.parse(contentAsString(result))
-    doc.select("h1").text   should include(expectedTitle)
-    doc.select("body").text should not include ("not_found_message(")
+    doc.select("h1").text should include(expectedTitle)
+
+    val bodyText = doc.select("body").text
+    val regex    = """not_found_message\((.*?)\)""".r
+
+    val regexResult = regex.findAllMatchIn(bodyText).toList
+    if (regexResult.nonEmpty) fail(s"Missing message keys: ${regexResult.map(_.group(1)).mkString(", ")}")
+    else succeed
+
     contentChecks(doc)
   }
 
