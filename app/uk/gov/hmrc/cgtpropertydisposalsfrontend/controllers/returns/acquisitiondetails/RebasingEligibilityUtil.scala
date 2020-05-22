@@ -59,12 +59,14 @@ class RebasingEligibilityUtil {
     purchaseDate: LocalDate
   ): Boolean =
     (wasAUkResident, assetType, purchaseDate) match {
-      case (true, _, date)                         => date.isBefore(RebasingCutoffDates.ukResidents)
-      case (false, AssetType.Residential, date)    =>
+      case (true, _, date)                           => date.isBefore(RebasingCutoffDates.ukResidents)
+      case (false, AssetType.Residential, date)      =>
         date.isBefore(RebasingCutoffDates.nonUkResidentsResidentialProperty)
-      case (false, AssetType.NonResidential, date) =>
+      case (false, AssetType.NonResidential, date)   =>
         date.isBefore(RebasingCutoffDates.nonUkResidentsNonResidentialProperty)
-      case _                                       => false
+      case (false, AssetType.IndirectDisposal, date) =>
+        date.isBefore(RebasingCutoffDates.nonUkResidentsNonResidentialProperty)
+      case _                                         => false
     }
 
   def rebasingCutOffDate(
@@ -130,8 +132,8 @@ class RebasingEligibilityUtil {
     if (wasUkResident)
       RebasingCutoffDates.ukResidents
     else if (assetType === AssetType.Residential)
-      RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1)
-    else RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)
+      RebasingCutoffDates.nonUkResidentsResidentialProperty
+    else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
 
   private def extractIsUk(
     completeReturn: CompleteSingleDisposalReturn
