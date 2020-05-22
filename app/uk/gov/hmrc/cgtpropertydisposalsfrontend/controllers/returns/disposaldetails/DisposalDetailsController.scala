@@ -434,7 +434,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state)
+                  representativeType(state),
+                  isIndirectDisposal(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
@@ -461,7 +462,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state)
+                  representativeType(state),
+                  isIndirectDisposal(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
