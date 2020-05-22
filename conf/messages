@@ -97,28 +97,27 @@ landingPage.ifTrust.h2=If you’re representing a trust
 landingPage.ifTrust.p1=The trust must be  <a href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
 landingPage.reportingDisposals.h2=If you’re reporting indirect disposals or disposals of mixed use property
 landingPage.reportingDisposals.p1=Use the <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
-landingPage.capasitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
-landingPage.capasitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
-landingPage.capasitorOrPersonalRepresentative.p2=<a href="{0}">Contact HMRC</a> and ask for a paper version of the return to be posted to you.
-landingPage.capasitorOrPersonalRepresentative.enabled.p2=If the disposal was made by the deceased’s estate during the period of administration, <a href="{0}">you’ll need to report and pay the tax another way</a>.
-landingPage.capasitorOrPersonalRepresentative.p3=To use this service for another person, where the the disposal was not made within a period of administration, you’ll need to:
-landingPage.capasitorOrPersonalRepresentative.p4=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
-landingPage.capasitorOrPersonalRepresentative.p5=The details you provide must match the details we hold about the person.
-landingPage.capasitorOrPersonalRepresentative.p6=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
-landingPage.capasitorOrPersonalRepresentative.p7=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
-landingPage.capasitorOrPersonalRepresentative.p8=You’ll need to call HMRC to amend a return that has been sent.
-landingPage.capasitorOrPersonalRepresentative.example.title=<strong class="bold">Example</strong>
-landingPage.capasitorOrPersonalRepresentative.p9=Mr Andrews died on 20 April 2020. Mr Smith is the personal representative for Mr Andrews’ estate. Before he died Mr Andrews had agreed to sell his UK residential investment property.
-landingPage.capasitorOrPersonalRepresentative.p10=Mr Andrews exchanged contracts on 15 April 2020 before he died. After he died Mr Smith completed the property sale. Capital Gains Tax was due.
-landingPage.capasitorOrPersonalRepresentative.p11=To report and pay the tax, Mr Smith signed into his own Capital Gains Tax on UK property account. Mr Smith started a new return and selected he was completing the return for someone who had died. Mr Smith entered the details, checked and sent the return, and paid the Capital Gains Tax due.
-landingPage.capasitorOrPersonalRepresentative.list1.bullet1=sign in to your own Capital Gains Tax on UK property account or create one if you do not have one
-landingPage.capasitorOrPersonalRepresentative.list1.bullet2=start a new return from your account
-landingPage.capasitorOrPersonalRepresentative.list1.bullet3=select that you’re completing the return for someone else or someone who has died
-landingPage.capasitorOrPersonalRepresentative.list1.bullet4=enter the person’s full name
-landingPage.capasitorOrPersonalRepresentative.list1.bullet5=provide evidence that you have the authority to act on their behalf, for example a <a href="{0}">lasting power of attorney (LPA)</a> document
-landingPage.capasitorOrPersonalRepresentative.list2.bullet1=National Insurance number
-landingPage.capasitorOrPersonalRepresentative.list2.bullet2=Self Assessment Unique Taxpayer Reference
-landingPage.capasitorOrPersonalRepresentative.list2.bullet3=Capital Gains Tax on UK property account number
+landingPage.capacitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
+landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
+landingPage.capacitorOrPersonalRepresentative.p2=If the disposal was made by the deceased’s estate during the period of administration, you’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
+landingPage.capacitorOrPersonalRepresentative.p3=To use this service for another person, where the the disposal was not made within a period of administration, you’ll need to:
+landingPage.capacitorOrPersonalRepresentative.p4=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
+landingPage.capacitorOrPersonalRepresentative.p5=The details you provide must match the details we hold about the person.
+landingPage.capacitorOrPersonalRepresentative.p6=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
+landingPage.capacitorOrPersonalRepresentative.p7=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
+landingPage.capacitorOrPersonalRepresentative.p8=You’ll need to call HMRC to amend a return that has been sent.
+landingPage.capacitorOrPersonalRepresentative.example.title=<strong class="bold">Example</strong>
+landingPage.capacitorOrPersonalRepresentative.p9=Mr Andrews died on 20 April 2020. Mr Smith is the personal representative for Mr Andrews’ estate. Before he died Mr Andrews had agreed to sell his UK residential investment property.
+landingPage.capacitorOrPersonalRepresentative.p10=Mr Andrews exchanged contracts on 15 April 2020 before he died. After he died Mr Smith completed the property sale. Capital Gains Tax was due.
+landingPage.capacitorOrPersonalRepresentative.p11=To report and pay the tax, Mr Smith signed into his own Capital Gains Tax on UK property account. Mr Smith started a new return and selected he was completing the return for someone who had died. Mr Smith entered the details, checked and sent the return, and paid the Capital Gains Tax due.
+landingPage.capacitorOrPersonalRepresentative.list1.bullet1=sign in to your own Capital Gains Tax on UK property account or create one if you do not have one
+landingPage.capacitorOrPersonalRepresentative.list1.bullet2=start a new return from your account
+landingPage.capacitorOrPersonalRepresentative.list1.bullet3=select that you’re completing the return for someone else or someone who has died
+landingPage.capacitorOrPersonalRepresentative.list1.bullet4=enter the person’s full name
+landingPage.capacitorOrPersonalRepresentative.list1.bullet5=provide evidence that you have the authority to act on their behalf, for example a <a href="{0}">lasting power of attorney (LPA)</a> document
+landingPage.capacitorOrPersonalRepresentative.list2.bullet1=National Insurance number
+landingPage.capacitorOrPersonalRepresentative.list2.bullet2=Self Assessment Unique Taxpayer Reference
+landingPage.capacitorOrPersonalRepresentative.list2.bullet3=Capital Gains Tax on UK property account number
 
 landingPage.sidebar.title=Related content
 landingPage.sidebar.1=Calculate Capital Gains Tax
@@ -148,8 +147,7 @@ agentsLandingPage.report.uk-residents.list1.bullet1=report your client’s UK re
 agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay any tax they might owe for that disposal
 agentsLandingPage.report.uk-residents.list1.bullet3=view your client’s previous and current returns
 agentsLandingPage.report.what-residents-cannot-do.h4=What UK residents cannot do
-agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use the online service for your client to report UK property disposals for someone who has died - you’ll need to <a href="{0}">contact HMRC</a>.
-agentsLandingPage.report.what-residents-cannot-do.enabled.p1=You cannot use your client's online account to report a disposal made by a deceased's estate during the period of administration. You will need to <a href="{0}">report the tax another way</a> for your client.
+agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use your client’s online account to report a disposal made by a deceased’s estate during the period of administration. You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
 agentsLandingPage.report.non-residents.h4=Non-residents
 agentsLandingPage.report.non-residents.p1=Non-residents must report all sales or disposals of UK property within 30 days of the completion date, even if they have no tax to pay or have made a loss.
 agentsLandingPage.report.non-uk-residents.covid.p1=Due to coronavirus (COVID-19), non-residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
@@ -162,7 +160,7 @@ agentsLandingPage.report.what-non-residents-cannot-do.h4=What non-residents cann
 agentsLandingPage.report.what-non-residents-cannot-do.p1=You cannot use your client’s online account to report:
 agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet1=disposals of mixed-use property (part of the property was residential and part was non-residential during the period of ownership) - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
 agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet2=indirect disposals of UK property - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
-agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3=UK property disposals for someone who has died - <a href="{0}">contact HMRC</a>
+agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3=a disposal made by a deceased’s estate during the period of administration - <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you
 agentsLandingPage.how-to-ask-for-authorisation.h3=How to ask for authorisation
 agentsLandingPage.how-to-ask-for-authorisation.p1=Ask your client to:
 agentsLandingPage.how-to-ask-for-authorisation.list1.bullet1=create a Government Gateway user ID if they do not have one
@@ -2877,7 +2875,7 @@ supporting-evidence.upload-failed.p1=We could not scan your document.
 supporting-evidence.upload-failed.p2=This could be because:
 supporting-evidence.upload-failed.bullet1=the service has a technical issue
 supporting-evidence.upload-failed.bullet2=your document was larger than 3MB
-supporting-evidence.upload-failed.p3=You''ll need to try again.
+supporting-evidence.upload-failed.p3=You’ll need to try again.
 supporting-evidence.upload-failed.button.tryAgain=Try again
 
 supporting-evidence.scan-failed.title=There is a problem with your document
@@ -2886,7 +2884,7 @@ supporting-evidence.scan-failed.bullet1=the document had a virus or was corrupt
 supporting-evidence.scan-failed.bullet2=you did not select a document to upload
 supporting-evidence.scan-failed.bullet3=you uploaded the wrong type of document
 supporting-evidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG
-supporting-evidence.scan-failed.p3=You''ll need to try again.
+supporting-evidence.scan-failed.p3=You’ll need to try again.
 supporting-evidence.scan-failed.button.tryAgain=Try again
 
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
@@ -2934,7 +2932,7 @@ mandatoryEvidence.failed.p1=We could not scan your document.
 mandatoryEvidence.failed.p2=This could be because:
 mandatoryEvidence.failed.bullet1=the service has a technical issue
 mandatoryEvidence.failed.bullet2=your document was larger than 3MB
-mandatoryEvidence.failed.p3=You''ll need to try again.
+mandatoryEvidence.failed.p3=You’ll need to try again.
 mandatoryEvidence.failed.button.tryAgain=Try again
 
 mandatoryEvidence.scan-failed.title=There is a problem with your document
@@ -2943,7 +2941,7 @@ mandatoryEvidence.scan-failed.bullet1=the document had a virus or was corrupt
 mandatoryEvidence.scan-failed.bullet2=you did not select a document to upload
 mandatoryEvidence.scan-failed.bullet3=you uploaded the wrong type of document
 mandatoryEvidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG
-mandatoryEvidence.scan-failed.p3=You''ll need to try again.
+mandatoryEvidence.scan-failed.p3=You’ll need to try again.
 mandatoryEvidence.scan-failed.button.tryAgain=Try again
 
 agentNoEnrolment.title=Use your agents services account to access this service

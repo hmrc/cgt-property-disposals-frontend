@@ -25,7 +25,7 @@
         warningMessage: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(capacitorsAndPersonalRepresentativesJourneyEnabled: Boolean)(implicit messages: Messages, appConfig: ViewConfig)
+@()(implicit messages: Messages, appConfig: ViewConfig)
 
 @title = @{
     messages("landingPage.title")
@@ -66,29 +66,23 @@
 @mainTemplate(title = title, userType = None, withSignOutLink = false, sidebar = Some(sidebarContent)) {
 
     <h1 class="heading-xlarge">@title</h1>
-    @if(capacitorsAndPersonalRepresentativesJourneyEnabled) {
-        <h2 class="heading-medium">@messages("landingPage.contents.h2")</h2>
-        <ol>
-            <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet1", "#overview"))</li>
-            <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet2", "#howTo"))</li>
-            <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet3", "#beforeYouStart"))</li>
-            <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet4", "#ifAgent"))</li>
-            <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet5", "#ifTrust"))</li>
-            <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet6", "#capasitorOrPersonalRepresentative"))</li>
-        </ol>
-        <h2 class="heading-medium" id="overview">@messages("landingPage.intro.h2")</h2>
-    } else {
-        @Html("")
-    }
+
+    <h2 class="heading-medium">@messages("landingPage.contents.h2")</h2>
+    <ol>
+        <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet1", "#overview"))</li>
+        <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet2", "#howTo"))</li>
+        <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet3", "#beforeYouStart"))</li>
+        <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet4", "#ifAgent"))</li>
+        <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet5", "#ifTrust"))</li>
+        <li class="list-item--dashed">@Html(messages("landingPage.contents.list.bullet6", "#capacitorOrPersonalRepresentative"))</li>
+    </ol>
+    <h2 class="heading-medium" id="overview">@messages("landingPage.intro.h2")</h2>
+    
     <p>@Html(messages("landingPage.intro.p1", appConfig.cgtUrl))</p>
 
     <p>@Html(messages("landingPage.intro.p2", appConfig.taxSellHomeUrl))</p>
 
-    @if(capacitorsAndPersonalRepresentativesJourneyEnabled) {
-        <p>@messages("landingPage.warning")</p>
-    } else {
-        @warningMessage(messages("landingPage.warning"))
-    }
+    <p>@messages("landingPage.warning")</p>
 
     <p>@messages("landingPage.covid.p1")</p>
     <p>@messages("landingPage.covid.p2")</p>
@@ -113,16 +107,6 @@
     </ul>
     <p>@messages("landingPage.howTo.p4")</p>
 
-    @if(capacitorsAndPersonalRepresentativesJourneyEnabled) {
-        @Html("")
-    } else {
-        <p>
-            <a href="@{
-                routes.StartController.start()
-            }" role="button" draggable="false" class="button button-start">@messages("landingPage.startButton")</a>
-        </p>
-    }
-
     <h2 class="heading-medium" id="beforeYouStart">@messages("landingPage.beforeYouStart.h2")</h2>
 
     <p>@messages("landingPage.beforeYouStart.p1")</p>
@@ -140,16 +124,13 @@
         <li>@messages("landingPage.beforeYouStart.list1.bullet7")</li>
         <li>@messages("landingPage.beforeYouStart.list1.bullet8")</li>
         <li>@messages("landingPage.beforeYouStart.list1.bullet9")</li>
-    </ul>
-    @if(capacitorsAndPersonalRepresentativesJourneyEnabled) {
-        <p>
-            <a href="@{
-                routes.StartController.start()
-            }" role="button" draggable="false" class="button button-start">@messages("landingPage.startButton")</a>
-        </p>
-    } else {
-        @Html("")
-    }
+    </ul>     
+    
+    <p>
+        <a href="@{
+            routes.StartController.start()
+        }" role="button" draggable="false" class="button button-start">@messages("landingPage.startButton")</a>
+    </p>
 
     <h2 class="heading-medium" id="ifAgent">@messages("landingPage.ifAgent.h2")</h2>
 
@@ -163,34 +144,32 @@
 
     <p>@Html(messages("landingPage.reportingDisposals.p1", appConfig.nrcgtReturn))</p>
 
-    <h2 class="heading-medium" id="capasitorOrPersonalRepresentative">@messages("landingPage.capasitorOrPersonalRepresentative.h2")</h2>
+    <h2 class="heading-medium" id="capacitorOrPersonalRepresentative">@messages("landingPage.capacitorOrPersonalRepresentative.h2")</h2>
 
-    <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p1", appConfig.personalRepresentative))</p>
-    @if(capacitorsAndPersonalRepresentativesJourneyEnabled) {
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.enabled.p2", appConfig.returnsForSomeoneWhoHasDied))</p>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p3"))</p>
-        <ul class="list-bullet">
-            <li>@messages("landingPage.capasitorOrPersonalRepresentative.list1.bullet1")</li>
-            <li>@messages("landingPage.capasitorOrPersonalRepresentative.list1.bullet2")</li>
-            <li>@messages("landingPage.capasitorOrPersonalRepresentative.list1.bullet3")</li>
-            <li>@messages("landingPage.capasitorOrPersonalRepresentative.list1.bullet4")</li>
-            <li>@Html(messages("landingPage.capasitorOrPersonalRepresentative.list1.bullet5", appConfig.powerOfAttorney))</li>
-        </ul>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p4"))</p>
-        <ul class="list-bullet">
-            <li>@messages("landingPage.capasitorOrPersonalRepresentative.list2.bullet1")</li>
-            <li>@messages("landingPage.capasitorOrPersonalRepresentative.list2.bullet2")</li>
-            <li>@messages("landingPage.capasitorOrPersonalRepresentative.list2.bullet3")</li>
-        </ul>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p5"))</p>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p6"))</p>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p7"))</p>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p8"))</p>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.example.title"))</p>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p9"))</p>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p10"))</p>
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p11"))</p>
-    } else {
-        <p>@Html(messages("landingPage.capasitorOrPersonalRepresentative.p2", appConfig.contactHmrc))</p>
-    }
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p1", appConfig.personalRepresentative))</p>
+        
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p2", appConfig.contactHmrc))</p>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p3"))</p>
+    <ul class="list-bullet">
+        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet1")</li>
+        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet2")</li>
+        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet3")</li>
+        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet4")</li>
+        <li>@Html(messages("landingPage.capacitorOrPersonalRepresentative.list1.bullet5", appConfig.powerOfAttorney))</li>
+    </ul>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p4"))</p>
+    <ul class="list-bullet">
+        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet1")</li>
+        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet2")</li>
+        <li>@messages("landingPage.capacitorOrPersonalRepresentative.list2.bullet3")</li>
+    </ul>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p5"))</p>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p6"))</p>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p7"))</p>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p8"))</p>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.example.title"))</p>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p9"))</p>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p10"))</p>
+    <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p11"))</p>
+    
 }

@@ -81,11 +81,6 @@ class RepresenteeController @Inject() (
 
   import RepresenteeController._
 
-  val capacitorsAndPersonalRepresentativesJourneyEnabled: Boolean =
-    config.underlying.getBoolean(
-      "capacitors-and-personal-representatives.enabled"
-    )
-
   private def withCapacitorOrPersonalRepresentativeAnswers(
     request: RequestWithSessionData[_]
   )(
@@ -102,21 +97,11 @@ class RepresenteeController @Inject() (
     ): Future[Result] =
       individualUserType match {
         case Some(PersonalRepresentative) =>
-          if (capacitorsAndPersonalRepresentativesJourneyEnabled)
-            f(Left(PersonalRepresentative), journey, answers)
-          else
-            Redirect(
-              controllers.returns.triage.routes.CommonTriageQuestionsController
-                .capacitorsAndPersonalRepresentativesNotHandled()
-            )
+          f(Left(PersonalRepresentative), journey, answers)
+
         case Some(Capacitor)              =>
-          if (capacitorsAndPersonalRepresentativesJourneyEnabled)
-            f(Right(Capacitor), journey, answers)
-          else
-            Redirect(
-              controllers.returns.triage.routes.CommonTriageQuestionsController
-                .capacitorsAndPersonalRepresentativesNotHandled()
-            )
+          f(Right(Capacitor), journey, answers)
+
         case _                            =>
           Redirect(controllers.returns.routes.TaskListController.taskList())
       }
