@@ -149,7 +149,7 @@ agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay 
 agentsLandingPage.report.uk-residents.list1.bullet3=view your client’s previous and current returns
 agentsLandingPage.report.what-residents-cannot-do.h4=What UK residents cannot do
 agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use the online service for your client to report UK property disposals for someone who has died - you’ll need to <a href="{0}">contact HMRC</a>.
-agentsLandingPage.report.what-residents-cannot-do.enabled.p1=You cannot use your client's online account to report a disposal made by a deceased's estate during the period of administration. You will need to <a href="{0}">report the tax another way</a> for your client.
+agentsLandingPage.report.what-residents-cannot-do.enabled.p1=You cannot use your client’s online account to report a disposal made by a deceased’s estate during the period of administration. You will need to <a href="{0}">report the tax another way</a> for your client.
 agentsLandingPage.report.non-residents.h4=Non-residents
 agentsLandingPage.report.non-residents.p1=Non-residents must report all sales or disposals of UK property within 30 days of the completion date, even if they have no tax to pay or have made a loss.
 agentsLandingPage.report.non-uk-residents.covid.p1=Due to coronavirus (COVID-19), non-residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
@@ -1058,7 +1058,6 @@ percentageShare.trust.error.required=Enter how much of the property the trust ow
 percentageShare.personalRep.error.required=Enter how much of the property the person owned as a percentage
 percentageShare.capacitor.error.required=Enter how much of the property the person owned as a percentage
 
-
 percentageShare.error.invalid=The percentage of the property you owned must be a number
 percentageShare.agent.error.invalid=The percentage of the property your client owned must be a number
 percentageShare.trust.error.invalid=The percentage of the property the trust owned must be a number
@@ -1083,127 +1082,243 @@ percentageShare.trust.error.tooManyDecimals=The percentage of the property the t
 percentageShare.personalRep.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
 percentageShare.capacitor.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
 
-disposalPrice.SoldOther.title=How much did you get when you sold or disposed of the property?
-disposalPrice.agent.SoldOther.title=How much did your client get when they sold or disposed of the property?
-disposalPrice.trust.SoldOther.title=How much did the trust get when they sold or disposed of the property?
-disposalPrice.personalRep.SoldOther.title=What was the disposal amount?
-disposalPrice.capacitor.SoldOther.title=What was the disposal amount?
-
-
 
 disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
+disposalPrice.indirect.Gifted.title=What was the market value of the shares when you sold or disposed of them?
 disposalPrice.agent.Gifted.title=What was the market value of the property when your client gave it away?
+disposalPrice.agent.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 disposalPrice.trust.Gifted.title=What was the market value of the property when the trust gave it away?
+disposalPrice.trust.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 disposalPrice.personalRep.Gifted.title=What was the market value of the property when it was disposed of?
+disposalPrice.personalRep.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 disposalPrice.capacitor.Gifted.title=What was the market value of the property when it was disposed of?
-
-disposalPrice.SoldOther.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
-disposalPrice.agent.SoldOther.helpText=If the property was shared, only enter the amount your client got for their share. You’ll be able to enter any additional costs later.
-disposalPrice.trust.SoldOther.helpText=If the property was shared, only enter the amount the trust got for its share. You’ll be able to enter any additional costs later.
-disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
-disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
-
+disposalPrice.capacitor.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 
 disposalPrice.Gifted.helpText=If you owned part of the property, only enter your share of the market value. You’ll be able to enter any additional costs later.
+disposalPrice.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 disposalPrice.agent.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your client’s share.
+disposalPrice.agent.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 disposalPrice.trust.Gifted.helpText=If the property was shared, only enter the amount the trust got for its share. You’ll be able to enter any additional costs later.
+disposalPrice.trust.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 disposalPrice.personalRep.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
+disposalPrice.personalRep.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 disposalPrice.capacitor.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
-
-disposalPrice.SoldOther.error.required=Enter how much you sold or disposed of the property for
-disposalPrice.agent.SoldOther.error.required=Enter how much your client sold or disposed of the property for
-disposalPrice.trust.SoldOther.error.required=Enter how much the trust sold or disposed of the property for
-disposalPrice.personalRep.SoldOther.error.required=Enter the disposal amount
-disposalPrice.capacitor.SoldOther.error.required=Enter the disposal amount
-
-
+disposalPrice.capacitor.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 
 disposalPrice.Gifted.error.required=Enter the market value when you gave it away
+disposalPrice.indirect.Gifted.error.required=Enter the market value of the shares when you sold or disposed of them
 disposalPrice.agent.Gifted.error.required=Enter the market value of the property when it was given away
+disposalPrice.agent.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 disposalPrice.trust.Gifted.error.required=Enter the market value when the trust gave it away
+disposalPrice.trust.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 disposalPrice.personalRep.Gifted.error.required=Enter the market value of the property when it was disposed of
+disposalPrice.personalRep.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 disposalPrice.capacitor.Gifted.error.required=Enter the market value of the property when it was disposed of
+disposalPrice.capacitor.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 
 disposalPrice.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.agent.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.agent.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.trust.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.trust.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.personalRep.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.personalRep.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
-
-disposalPrice.SoldOther.error.invalid=How much the property was sold for must be an amount of money, like 160,000 or 23,040.50
-disposalPrice.agent.SoldOther.error.invalid=How much your client sold the property for must be an amount of money, like 160,000 or 23,040.50
-disposalPrice.trust.SoldOther.error.invalid=How much the trust sold the property for must be an amount of money, like 160,000 or 23,040.50
-disposalPrice.personalRep.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
-disposalPrice.capacitor.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.capacitor.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 
 disposalPrice.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.agent.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.trust.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.capacitor.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.personalRep.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.SoldOther.error.tooSmall=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.SoldOther.error.tooSmall=How much your client sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.SoldOther.error.tooSmall=How much the trust sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+
 disposalPrice.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.agent.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.trust.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.capacitor.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.personalRep.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
-disposalPrice.SoldOther.error.tooLarge=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.agent.SoldOther.error.tooLarge=How much your client sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.trust.SoldOther.error.tooLarge=How much the trust sold the property for must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRep.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
-disposalPrice.capacitor.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+
 disposalPrice.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.agent.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.agent.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.trust.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.trust.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.capacitor.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.capacitor.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.personalRep.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.personalRep.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+
+disposalPrice.SoldOther.title=How much did you get when you sold or disposed of the property?
+disposalPrice.indirect.SoldOther.title=How much did you get when you sold or disposed of the shares?
+disposalPrice.agent.SoldOther.title=How much did your client get when they sold or disposed of the property?
+disposalPrice.agent.indirect.SoldOther.title=What was the disposal amount?
+disposalPrice.trust.SoldOther.title=How much did the trust get when they sold or disposed of the property?
+disposalPrice.trust.indirect.SoldOther.title=What was the disposal amount?
+disposalPrice.personalRep.SoldOther.title=What was the disposal amount?
+disposalPrice.personalRep.indirect.SoldOther.title=What was the disposal amount?
+disposalPrice.capacitor.SoldOther.title=What was the disposal amount?
+disposalPrice.capacitor.indirect.SoldOther.title=How much did the person get when they sold or disposed of the shares?
+
+disposalPrice.SoldOther.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
+disposalPrice.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
+disposalPrice.agent.SoldOther.helpText=If the property was shared, only enter the amount your client got for their share. You’ll be able to enter any additional costs later.
+disposalPrice.agent.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
+disposalPrice.trust.SoldOther.helpText=If the property was shared, only enter the amount the trust got for its share. You’ll be able to enter any additional costs later.
+disposalPrice.trust.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
+disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
+disposalPrice.personalRep.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
+disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
+disposalPrice.capacitor.indirect.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
+
+disposalPrice.SoldOther.error.required=Enter how much you sold or disposed of the property for
+disposalPrice.indirect.SoldOther.error.required=Enter how much you got when you sold or disposed of the shares
+disposalPrice.agent.SoldOther.error.required=Enter how much your client sold or disposed of the property for
+disposalPrice.agent.indirect.SoldOther.error.required=Enter the disposal amount
+disposalPrice.trust.SoldOther.error.required=Enter how much the trust sold or disposed of the property for
+disposalPrice.trust.indirect.SoldOther.error.required=Enter the disposal amount
+disposalPrice.personalRep.SoldOther.error.required=Enter the disposal amount
+disposalPrice.personalRep.indirect.SoldOther.error.required=Enter the disposal amount
+disposalPrice.capacitor.SoldOther.error.required=Enter the disposal amount
+disposalPrice.capacitor.indirect.SoldOther.error.required=Enter how much the person got when they sold or disposed of the shares
+
+disposalPrice.SoldOther.error.invalid=How much the property was sold for must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.indirect.SoldOther.error.invalid=How much you got when you sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.agent.SoldOther.error.invalid=How much your client sold the property for must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.agent.indirect.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.trust.SoldOther.error.invalid=How much the trust sold the property for must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.trust.indirect.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.personalRep.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.personalRep.indirect.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.capacitor.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
+disposalPrice.capacitor.indirect.SoldOther.error.invalid=How much the person got when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
+
+disposalPrice.SoldOther.error.tooSmall=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
+disposalPrice.indirect.SoldOther.error.tooSmall=How much you got when you sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.SoldOther.error.tooSmall=How much your client sold the property for must be an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.SoldOther.error.tooSmall=How much the trust sold the property for must be an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.indirect.SoldOther.error.tooSmall=How much the person got when they sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
+
+disposalPrice.SoldOther.error.tooLarge=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
+disposalPrice.indirect.SoldOther.error.tooLarge=How much you got when you sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.SoldOther.error.tooLarge=How much your client sold the property for must be an amount of money between 1 and 50,000,000,000
+disposalPrice.agent.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.SoldOther.error.tooLarge=How much the trust sold the property for must be an amount of money between 1 and 50,000,000,000
+disposalPrice.trust.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.personalRep.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
+disposalPrice.capacitor.indirect.SoldOther.error.tooLarge=How much the person got when they sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
+
 disposalPrice.SoldOther.error.tooManyDecimals=How much you sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.indirect.SoldOther.error.tooManyDecimals=How much you got when you sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.agent.SoldOther.error.tooManyDecimals=How much your client sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.agent.indirect.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.trust.SoldOther.error.tooManyDecimals=How much the trust sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.trust.indirect.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.personalRep.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.personalRep.indirect.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.capacitor.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalPrice.capacitor.indirect.SoldOther.error.tooManyDecimals=How much the person got when they sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
 
 disposalPrice.cyaChange=the disposal amount
 
+
 disposalFees.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.indirect.title=How much were your additional costs when you sold or disposed of the shares?
 disposalFees.agent.title=What were your client’s additional disposal costs?
+disposalFees.indirect.agent.title=How much were the additional costs when the shares were sold or disposed of?
 disposalFees.trust.title=What were the trust’s additional disposal costs?
+disposalFees.indirect.trust.title=How much were the additional costs when the shares were sold or disposed of?
 disposalFees.personalRep.title=What were the person’s additional disposal costs?
+disposalFees.indirect.personalRep.title=How much were the additional costs when the shares were sold or disposed of?
 disposalFees.capacitor.title=What were the person’s additional disposal costs?
+disposalFees.indirect.capacitor.title=How much were the person’s additional costs when they sold or disposed of the shares?
+
 disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor. If you shared these costs, you can only claim your share.
+disposalFees.indirect.helpText=Additional costs might include stock broker’s fees.
 disposalFees.agent.helpText=For example, the amount your client paid to an estate agent or solicitor. If your client shared these costs, they can only claim their share.
+disposalFees.indirect.agent.helpText=Additional costs might include stock broker’s fees.
 disposalFees.trust.helpText=For example, the amount the trust paid to an estate agent or solicitor. If the trust shared these costs, it can only claim its share.
+disposalFees.indirect.trust.helpText=Additional costs might include stock broker’s fees.
 disposalFees.personalRep.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
+disposalFees.indirect.personalRep.helpText=Additional costs might include stock broker’s fees.
 disposalFees.capacitor.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
+disposalFees.indirect.capacitor.helpText=Additional costs might include stock broker’s fees.
+
 disposalFees.error.required=Enter the amount of additional costs when you sold or disposed of the property
+disposalFees.indirect.error.required=Enter how much your additional costs were when you sold or disposed of the shares
 disposalFees.agent.error.required=Enter your client’s additional disposal costs
+disposalFees.indirect.agent.error.required=Enter how much the additional costs were when the shares were sold or disposed of
 disposalFees.trust.error.required=Enter the trust’s additional disposal costs
+disposalFees.indirect.trust.error.required=Enter how much the additional costs were when the shares were sold or disposed of
 disposalFees.personalRep.error.required=Enter the person’s additional disposal costs
+disposalFees.indirect.personalRep.error.required=Enter how much the additional costs were when the shares were sold or disposed of
 disposalFees.capacitor.error.required=Enter the person’s additional disposal costs
+disposalFees.indirect.capacitor.error.required=Enter how much the person’s additional costs were when they sold or disposed of the shares
+
 disposalFees.error.invalid=How much you paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.indirect.error.invalid=The additional costs when you sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalFees.agent.error.invalid=How much your client paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.indirect.agent.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
 disposalFees.trust.error.invalid=How much the trust paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.indirect.trust.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
 disposalFees.capacitor.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.indirect.capacitor.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
 disposalFees.personalRep.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
+disposalFees.indirect.personalRep.error.invalid=The person’s additional costs when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
+
 disposalFees.error.tooSmall=How much you paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
+disposalFees.indirect.error.tooSmall=The additional costs when you sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
 disposalFees.agent.error.tooSmall=How much your client paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
+disposalFees.indirect.agent.error.tooSmall=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.trust.error.tooSmall=How much the trust paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
+disposalFees.indirect.trust.error.tooSmall=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.personalRep.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.indirect.personalRep.error.tooSmall=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.capacitor.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.indirect.capacitor.error.tooSmall=The person’s additional costs when they sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
+
 disposalFees.error.tooLarge=How much you paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
+disposalFees.indirect.error.tooLarge=The additional costs when you sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
 disposalFees.agent.error.tooLarge=How much your client paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
+disposalFees.indirect.agent.error.tooLarge=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.trust.error.tooLarge=How much the trust paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
+disposalFees.indirect.trust.error.tooLarge=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.personalRep.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.indirect.personalRep.error.tooLarge=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.capacitor.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
+disposalFees.indirect.capacitor.error.tooLarge=The person’s additional costs when they sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
+
 disposalFees.error.tooManyDecimals=How much you paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.indirect.error.tooManyDecimals=The additional costs when you sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.agent.error.tooManyDecimals=How much your client paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.indirect.agent.error.tooManyDecimals=The additional costs when the shares were sold or disposed of must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.trust.error.tooManyDecimals=How much the trust paid for the additional disposal costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.indirect.trust.error.tooManyDecimals=The additional costs when the shares were sold or disposed of must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.personalRep.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.indirect.personalRep.error.tooManyDecimals=The additional costs when the shares were sold or disposed of must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.capacitor.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+disposalFees.indirect.capacitor.error.tooManyDecimals=The person’s additional costs when they sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
 
 disposalFees.cyaChange=the amount of additional costs
 

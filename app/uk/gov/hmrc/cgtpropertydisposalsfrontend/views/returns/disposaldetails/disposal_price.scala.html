@@ -45,7 +45,8 @@
     disposalMethod: DisposalMethod,
     shareOfProperty: ShareOfProperty,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    isIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -62,8 +63,10 @@
     case _      => ".SoldOther"
 }}
 
+@indirectKey = @{ if(isIndirectDisposal) ".indirect" else ""}
+
 @key = @{ "disposalPrice" }
-@title = @{ messages(s"$key$userKey$disposalMethodKey.title") }
+@title = @{ messages(s"$key$userKey$indirectKey$disposalMethodKey.title") }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
@@ -71,7 +74,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, Some(s"$key$userKey$disposalMethodKey"))
+        @errorSummary(form, Some(s"$key$userKey$indirectKey$disposalMethodKey"))
     }
 
     @caption(messages("returns.disposal-details.caption"))
@@ -84,13 +87,13 @@
         hasErrors = form.error(key).nonEmpty,
         label = Html(title),
         labelAsHeading = true,
-        helpText = Some(Html(messages(s"$key$userKey$disposalMethodKey.helpText"))),
+        helpText = Some(Html(messages(s"$key$userKey$indirectKey$disposalMethodKey.helpText"))),
         autoComplete = AutoCompleteType.On,
         inputClass = Some("small"),
         aspect = "left",
         unit = "£",
         assistiveText = messages("unit-input.assistive.pounds"),
-        customErrorKey = Some(s"$key$userKey$disposalMethodKey")
+        customErrorKey = Some(s"$key$userKey$indirectKey$disposalMethodKey")
       )
 
       @submitButton(messages("button.saveAndContinue"))
