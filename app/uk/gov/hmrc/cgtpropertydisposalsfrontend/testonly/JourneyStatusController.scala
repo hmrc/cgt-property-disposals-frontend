@@ -64,51 +64,61 @@ class JourneyStatusController @Inject() (
     with SessionUpdates
     with Logging {
 
-  def setReturnState(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withStartingNewReturn(request) {
-      case (_, _) =>
-        Ok(setReturnStatePage((returnStateForm)))
+  def setReturnState(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withStartingNewReturn(request) {
+        case (_, _) =>
+          Ok(setReturnStatePage(returnStateForm))
+      }
     }
-  }
 
-  def setReturnStateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withStartingNewReturn(request) {
-      case (_, newReturn) =>
-        returnStateForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { answers =>
-              val getDisposalDate =
-                answers.disposalDate
-                  .map(date =>
-                    taxYearService
-                      .taxYear(date)
-                      .subflatMap(
-                        _.fold[Either[Error, DisposalDate]](
-                          Left(Error(s"Could not find tax year for $date"))
-                        )(t => Right(DisposalDate(date, t)))
-                      )
-                  )
-                  .sequence[EitherT[Future, Error, ?], DisposalDate]
-
-              val result = for {
-                disposalDate <- getDisposalDate
-                triageAnswers = toSingleDisposalTriageAnswers(answers, disposalDate)
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(journeyStatus = Some(newReturn.copy(newReturnTriageAnswers = Right(triageAnswers))))
-                      )
+  def setReturnStateSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withStartingNewReturn(request) {
+        case (_, newReturn) =>
+          returnStateForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors => BadRequest(setReturnStatePage(formWithErrors)),
+              { answers =>
+                val getDisposalDate =
+                  answers.disposalDate
+                    .map(date =>
+                      taxYearService
+                        .taxYear(date)
+                        .subflatMap(
+                          _.fold[Either[Error, DisposalDate]](
+                            Left(Error(s"Could not find tax year for $date"))
+                          )(t => Right(DisposalDate(date, t)))
+                        )
                     )
-              } yield ()
+                    .sequence[EitherT[Future, Error, ?], DisposalDate]
 
-              result.fold({ e =>
-                logger.warn("Could not update session", e)
-                InternalServerError(s"Could not update session: $e")
-              }, _ => Ok("session updated"))
-            }
-          )
+                val result = for {
+                  disposalDate <- getDisposalDate
+                  triageAnswers = toSingleDisposalTriageAnswers(answers, disposalDate)
+                  _            <- EitherT(
+                         updateSession(sessionStore, request)(
+                           _.copy(journeyStatus =
+                             Some(
+                               newReturn.copy(newReturnTriageAnswers = Right(triageAnswers))
+                             )
+                           )
+                         )
+                       )
+                } yield ()
+
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update session", e)
+                    InternalServerError(s"Could not update session: $e")
+                  },
+                  _ => Ok("session updated")
+                )
+              }
+            )
+      }
     }
-  }
 
   private def toSingleDisposalTriageAnswers(
     answers: Answers,
@@ -119,8 +129,10 @@ class JourneyStatusController @Inject() (
       answers.numberOfProperties.contains(NumberOfProperties.One),
       answers.disposalMethod,
       answers.wasAUkResident,
-      answers.wasAUkResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
-      answers.disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
+      answers.wasAUkResident
+        .map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
+      answers.disposedOfResidentialProperty
+        .map(if (_) AssetType.Residential else AssetType.NonResidential),
       disposalDate,
       answers.completionDate.map(CompletionDate(_)),
       None
@@ -132,7 +144,7 @@ class JourneyStatusController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: StartingNewDraftReturn)) =>
         f(s, r)
-      case _ =>
+      case _                                                 =>
         BadRequest("User has not subscribed and logged in")
     }
 
@@ -150,68 +162,85 @@ object JourneyStatusController {
     completionDate: Option[LocalDate]
   )
 
-  val individualUserTypeFormatter: Formatter[Option[IndividualUserType]] = optionFormatter[IndividualUserType](
-    Map(
-      IndividualUserType.Self                   -> "self",
-      IndividualUserType.Capacitor              -> "capacitor",
-      IndividualUserType.PersonalRepresentative -> "personal-representative"
+  val individualUserTypeFormatter: Formatter[Option[IndividualUserType]] =
+    optionFormatter[IndividualUserType](
+      Map(
+        IndividualUserType.Self                   -> "self",
+        IndividualUserType.Capacitor              -> "capacitor",
+        IndividualUserType.PersonalRepresentative -> "personal-representative"
+      )
     )
-  )
 
-  val numberOfPropertiesFormatter: Formatter[Option[NumberOfProperties]] = optionFormatter[NumberOfProperties](
-    Map(
-      NumberOfProperties.One         -> "one",
-      NumberOfProperties.MoreThanOne -> "moreThanOne"
+  val numberOfPropertiesFormatter: Formatter[Option[NumberOfProperties]] =
+    optionFormatter[NumberOfProperties](
+      Map(
+        NumberOfProperties.One         -> "one",
+        NumberOfProperties.MoreThanOne -> "moreThanOne"
+      )
     )
-  )
 
-  val disposalMethodFormatter: Formatter[Option[DisposalMethod]] = optionFormatter[DisposalMethod](
-    Map(
-      DisposalMethod.Sold   -> "sold",
-      DisposalMethod.Gifted -> "gifted"
+  val disposalMethodFormatter: Formatter[Option[DisposalMethod]] =
+    optionFormatter[DisposalMethod](
+      Map(
+        DisposalMethod.Sold   -> "sold",
+        DisposalMethod.Gifted -> "gifted"
+      )
     )
-  )
 
-  val optionalBooleanFormatter: Formatter[Option[Boolean]] = new Formatter[Option[Boolean]] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[Boolean]] =
-      data
-        .get(key)
-        .filter(_.nonEmpty)
-        .fold[Either[Seq[FormError], Option[Boolean]]](
-          Right(None)
-        )(s =>
-          Either
-            .fromTry(Try(s.toBoolean))
-            .bimap(
-              _ => Seq(FormError(key, "error.invalid")),
-              Some(_)
-            )
-        )
+  val optionalBooleanFormatter: Formatter[Option[Boolean]] =
+    new Formatter[Option[Boolean]] {
+      override def bind(
+        key: String,
+        data: Map[String, String]
+      ): Either[Seq[FormError], Option[Boolean]] =
+        data
+          .get(key)
+          .filter(_.nonEmpty)
+          .fold[Either[Seq[FormError], Option[Boolean]]](
+            Right(None)
+          )(s =>
+            Either
+              .fromTry(Try(s.toBoolean))
+              .bimap(
+                _ => Seq(FormError(key, "error.invalid")),
+                Some(_)
+              )
+          )
 
-    override def unbind(key: String, value: Option[Boolean]): Map[String, String] =
-      value.fold(Map.empty[String, String])(b => Map(key -> b.toString))
+      override def unbind(
+        key: String,
+        value: Option[Boolean]
+      ): Map[String, String] =
+        value.fold(Map.empty[String, String])(b => Map(key -> b.toString))
 
-  }
+    }
 
-  val optionalDateFormatter: Formatter[Option[LocalDate]] = new Formatter[Option[LocalDate]] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[LocalDate]] =
-      data
-        .get(key)
-        .filter(_.nonEmpty)
-        .fold[Either[Seq[FormError], Option[LocalDate]]](
-          Right(None)
-        )(s =>
-          Either
-            .fromTry(Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)))
-            .bimap(
-              _ => Seq(FormError(key, "error.invalid")),
-              Some(_)
-            )
-        )
+  val optionalDateFormatter: Formatter[Option[LocalDate]] =
+    new Formatter[Option[LocalDate]] {
+      override def bind(
+        key: String,
+        data: Map[String, String]
+      ): Either[Seq[FormError], Option[LocalDate]] =
+        data
+          .get(key)
+          .filter(_.nonEmpty)
+          .fold[Either[Seq[FormError], Option[LocalDate]]](
+            Right(None)
+          )(s =>
+            Either
+              .fromTry(Try(LocalDate.parse(s, DateTimeFormatter.ISO_DATE)))
+              .bimap(
+                _ => Seq(FormError(key, "error.invalid")),
+                Some(_)
+              )
+          )
 
-    override def unbind(key: String, value: Option[LocalDate]): Map[String, String] =
-      value.fold(Map.empty[String, String])(d => Map(key -> d.format(DateTimeFormatter.ISO_DATE)))
-  }
+      override def unbind(
+        key: String,
+        value: Option[LocalDate]
+      ): Map[String, String] =
+        value.fold(Map.empty[String, String])(d => Map(key -> d.format(DateTimeFormatter.ISO_DATE)))
+    }
 
   val returnStateForm: Form[Answers] =
     Form(
@@ -225,13 +254,13 @@ object JourneyStatusController {
         "completion-date"                  -> of(optionalDateFormatter)
       ) {
         case (
-            individualUserType,
-            numberOfProperties,
-            disposalMethod,
-            wasAUKResident,
-            disposedOfResidentialProperty,
-            disposalDate,
-            completionDate
+              individualUserType,
+              numberOfProperties,
+              disposalMethod,
+              wasAUKResident,
+              disposedOfResidentialProperty,
+              disposalDate,
+              completionDate
             ) =>
           Answers(
             individualUserType,
@@ -259,23 +288,35 @@ object JourneyStatusController {
 
   implicit class MapOps[A, B](private val m: Map[A, B]) extends AnyVal {
 
-    def getKey(b: B)(implicit eq: Eq[B]): Option[A] = m.find(_._2 === b).map(_._1)
+    def getKey(b: B)(implicit eq: Eq[B]): Option[A] =
+      m.find(_._2 === b).map(_._1)
 
   }
 
   // empty strings will map to `None`, strings not recognised by `stringToA` will result in a form
   // error
-  def optionFormatter[A](aToString: Map[A, String]): Formatter[Option[A]] = new Formatter[Option[A]] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[A]] =
-      data
-        .get(key)
-        .filter(_.nonEmpty)
-        .fold[Either[Seq[FormError], Option[A]]](
-          Right(None)
-        )(s => Either.fromOption(aToString.getKey(s), Seq(FormError(key, "error.invalid"))).map(Some(_)))
+  def optionFormatter[A](aToString: Map[A, String]): Formatter[Option[A]] =
+    new Formatter[Option[A]] {
+      override def bind(
+        key: String,
+        data: Map[String, String]
+      ): Either[Seq[FormError], Option[A]] =
+        data
+          .get(key)
+          .filter(_.nonEmpty)
+          .fold[Either[Seq[FormError], Option[A]]](
+            Right(None)
+          )(s =>
+            Either
+              .fromOption(
+                aToString.getKey(s),
+                Seq(FormError(key, "error.invalid"))
+              )
+              .map(Some(_))
+          )
 
-    override def unbind(key: String, value: Option[A]): Map[String, String] =
-      value.map(aToString).fold(Map.empty[String, String])(s => Map(key -> s))
-  }
+      override def unbind(key: String, value: Option[A]): Map[String, String] =
+        value.map(aToString).fold(Map.empty[String, String])(s => Map(key -> s))
+    }
 
 }

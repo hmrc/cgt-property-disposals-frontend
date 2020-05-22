@@ -41,7 +41,8 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
 
   val validJourney: J
 
-  lazy val sessionDataWithValidJourney = SessionData.empty.copy(journeyStatus = Some(validJourney))
+  lazy val sessionDataWithValidJourney =
+    SessionData.empty.copy(journeyStatus = Some(validJourney))
 
   def updateContactName(journey: J, contactName: ContactName): J
 
@@ -71,12 +72,14 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
           mockGetSession(sessionDataWithValidJourney)
         }
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("contactName.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("contactName.title")
+        )
       }
 
       "the endpoint is requested and the user has previously entered a contact name" in {
-        val contactName = sample[ContactName]
+        val contactName         = sample[ContactName]
         val sessionDataWithName =
           sessionDataWithValidJourney.copy(journeyStatus = Some(updateContactName(validJourney, contactName)))
 
@@ -99,7 +102,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
     performAction: Seq[(String, String)] => Future[Result],
     continueCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {
-    val contactName = ContactName("Joe Smith")
+    val contactName    = ContactName("Joe Smith")
     val updatedSession =
       sessionDataWithValidJourney.copy(
         journeyStatus = Some(updateContactName(validJourney, contactName))
@@ -123,7 +126,11 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithValidJourney)
           mockUpdateContactName.foreach { f =>
-            f(validJourney, updateContactName(validJourney, contactName), Right(()))
+            f(
+              validJourney,
+              updateContactName(validJourney, contactName),
+              Right(())
+            )
           }
           mockStoreSession(updatedSession)(Right(()))
         }
@@ -137,12 +144,17 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithValidJourney)
           mockUpdateContactName.foreach { f =>
-            f(validJourney, updateContactName(validJourney, contactName), Right(()))
+            f(
+              validJourney,
+              updateContactName(validJourney, contactName),
+              Right(())
+            )
           }
           mockStoreSession(updatedSession)(Right(()))
         }
 
-        val result = performAction(Seq("contactName" -> s"${contactName.value} "))
+        val result =
+          performAction(Seq("contactName" -> s"${contactName.value} "))
         checkIsRedirect(result, continueCall)
       }
 
@@ -167,12 +179,18 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithValidJourney)
           mockUpdateContactName.foreach { f =>
-            f(validJourney, updateContactName(validJourney, contactName), Right(()))
+            f(
+              validJourney,
+              updateContactName(validJourney, contactName),
+              Right(())
+            )
           }
           mockStoreSession(updatedSession)(Left(Error("")))
         }
 
-        checkIsTechnicalErrorPage(performAction(Seq("contactName" -> contactName.value)))
+        checkIsTechnicalErrorPage(
+          performAction(Seq("contactName" -> contactName.value))
+        )
       }
     }
 

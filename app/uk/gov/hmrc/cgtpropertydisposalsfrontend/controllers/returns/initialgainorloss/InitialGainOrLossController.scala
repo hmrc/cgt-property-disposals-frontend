@@ -57,95 +57,130 @@ class InitialGainOrLossController @Inject() (
     with SessionUpdates
     with Logging {
 
-  def enterInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answer) =>
-      val isATrust           = journeyStatus.subscribedDetails.isATrust
-      val representativeType = draftSingleDisposalReturn.triageAnswers.representativeType()
-      Ok(
-        initialGainOrLossesPage(
-          answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())),
-          getBackLink(answer),
-          isATrust,
-          representativeType
-        )
-      )
-    }
-  }
-
-  def submitInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) {
-      case (fillingOutReturn, draftReturn, answers) =>
-        val backLink           = getBackLink(answers)
-        val isATrust           = fillingOutReturn.subscribedDetails.isATrust
-        val representativeType = draftReturn.triageAnswers.representativeType()
-        initialGainOrLossForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors =>
-              BadRequest(initialGainOrLossesPage(formWithErrors, backLink, isATrust, representativeType)),
-            value =>
-              if (answers.map(_.inPounds()).contains(value))
-                Redirect(routes.InitialGainOrLossController.checkYourAnswers())
-              else {
-                val updatedDraftReturn =
-                  draftReturn.copy(
-                    initialGainOrLoss    = Some(AmountInPence.fromPounds(value)),
-                    reliefDetailsAnswers = draftReturn.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
-                    yearToDateLiabilityAnswers =
-                      draftReturn.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
-                  )
-
-                val result = for {
-                  _ <- returnsService.storeDraftReturn(
-                        updatedDraftReturn,
-                        fillingOutReturn.subscribedDetails.cgtReference,
-                        fillingOutReturn.agentReferenceNumber
-                      )
-                  _ <- EitherT(
-                        updateSession(sessionStore, request)(
-                          _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
-                        )
-                      )
-                } yield ()
-
-                result.fold(
-                  { e =>
-                    logger.warn("Could not update draft return", e)
-                    errorHandler.errorResult()
-                  },
-                  _ => Redirect(routes.InitialGainOrLossController.checkYourAnswers())
-                )
-              }
+  def enterInitialGainOrLoss: Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answer) =>
+        val isATrust           = journeyStatus.subscribedDetails.isATrust
+        val representativeType =
+          draftSingleDisposalReturn.triageAnswers.representativeType()
+        Ok(
+          initialGainOrLossesPage(
+            answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())),
+            getBackLink(answer),
+            isATrust,
+            representativeType
           )
-    }
-  }
-
-  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answers) =>
-      val isATrust           = journeyStatus.subscribedDetails.isATrust
-      val representativeType = draftSingleDisposalReturn.triageAnswers.representativeType()
-      answers match {
-        case Some(completeInitialGainOrLossAnswers) =>
-          Ok(checkYourAnswersPage(completeInitialGainOrLossAnswers, isATrust, representativeType))
-
-        case None =>
-          Redirect(routes.InitialGainOrLossController.enterInitialGainOrLoss())
+        )
       }
     }
-  }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _, _) =>
-      Redirect(controllers.returns.routes.TaskListController.taskList())
+  def submitInitialGainOrLoss: Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndAnswers(request) {
+        case (fillingOutReturn, draftReturn, answers) =>
+          val backLink           = getBackLink(answers)
+          val isATrust           = fillingOutReturn.subscribedDetails.isATrust
+          val representativeType =
+            draftReturn.triageAnswers.representativeType()
+          initialGainOrLossForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                BadRequest(
+                  initialGainOrLossesPage(
+                    formWithErrors,
+                    backLink,
+                    isATrust,
+                    representativeType
+                  )
+                ),
+              value =>
+                if (answers.map(_.inPounds()).contains(value))
+                  Redirect(
+                    routes.InitialGainOrLossController.checkYourAnswers()
+                  )
+                else {
+                  val updatedDraftReturn =
+                    draftReturn.copy(
+                      initialGainOrLoss = Some(AmountInPence.fromPounds(value)),
+                      reliefDetailsAnswers = draftReturn.reliefDetailsAnswers
+                        .map(_.unsetPrrAndLettingRelief()),
+                      yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers
+                        .flatMap(_.unsetAllButIncomeDetails())
+                    )
+
+                  val result = for {
+                    _ <- returnsService.storeDraftReturn(
+                           updatedDraftReturn,
+                           fillingOutReturn.subscribedDetails.cgtReference,
+                           fillingOutReturn.agentReferenceNumber
+                         )
+                    _ <- EitherT(
+                           updateSession(sessionStore, request)(
+                             _.copy(journeyStatus =
+                               Some(
+                                 fillingOutReturn
+                                   .copy(draftReturn = updatedDraftReturn)
+                               )
+                             )
+                           )
+                         )
+                  } yield ()
+
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not update draft return", e)
+                      errorHandler.errorResult()
+                    },
+                    _ =>
+                      Redirect(
+                        routes.InitialGainOrLossController.checkYourAnswers()
+                      )
+                  )
+                }
+            )
+      }
     }
-  }
+
+  def checkYourAnswers(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndAnswers(request) { (journeyStatus, draftSingleDisposalReturn, answers) =>
+        val isATrust           = journeyStatus.subscribedDetails.isATrust
+        val representativeType =
+          draftSingleDisposalReturn.triageAnswers.representativeType()
+        answers match {
+          case Some(completeInitialGainOrLossAnswers) =>
+            Ok(
+              checkYourAnswersPage(
+                completeInitialGainOrLossAnswers,
+                isATrust,
+                representativeType
+              )
+            )
+
+          case None                                   =>
+            Redirect(
+              routes.InitialGainOrLossController.enterInitialGainOrLoss()
+            )
+        }
+      }
+    }
+
+  def checkYourAnswersSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndAnswers(request) { (_, _, _) =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
+      }
+    }
 
   private def getBackLink(initialGainOrLoss: Option[AmountInPence]): Call =
-    initialGainOrLoss.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
-      routes.InitialGainOrLossController.checkYourAnswers()
-    )
+    initialGainOrLoss.fold(
+      controllers.returns.routes.TaskListController.taskList()
+    )(_ => routes.InitialGainOrLossController.checkYourAnswers())
 
-  private def withFillingOutReturnAndAnswers(request: RequestWithSessionData[_])(
+  private def withFillingOutReturnAndAnswers(
+    request: RequestWithSessionData[_]
+  )(
     processReturnAndAnswersIntoResult: (
       FillingOutReturn,
       DraftSingleDisposalReturn,
@@ -154,8 +189,19 @@ class InitialGainOrLossController @Inject() (
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
 
-      case Some(fillingOutReturn @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn)) =>
-        processReturnAndAnswersIntoResult(fillingOutReturn, d, d.initialGainOrLoss)
+      case Some(
+            fillingOutReturn @ FillingOutReturn(
+              _,
+              _,
+              _,
+              d: DraftSingleDisposalReturn
+            )
+          ) =>
+        processReturnAndAnswersIntoResult(
+          fillingOutReturn,
+          d,
+          d.initialGainOrLoss
+        )
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
@@ -191,9 +237,15 @@ object InitialGainOrLossController {
       )
     ) { d =>
       if (d > 0)
-        Map(outerId -> "0", gainId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d))
+        Map(
+          outerId -> "0",
+          gainId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
+        )
       else if (d < 0)
-        Map(outerId -> "1", lossId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1)))
+        Map(
+          outerId   -> "1",
+          lossId    -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1))
+        )
       else
         Map(outerId -> "2")
     }

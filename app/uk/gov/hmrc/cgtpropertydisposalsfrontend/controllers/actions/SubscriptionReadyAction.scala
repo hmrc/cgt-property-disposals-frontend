@@ -45,8 +45,11 @@ final case class RequestWithSubscriptionReady[A](
 }
 
 @Singleton
-class SubscriptionReadyAction @Inject() (sessionStore: SessionStore, errorHandler: ErrorHandler)(
-  implicit ec: ExecutionContext
+class SubscriptionReadyAction @Inject() (
+  sessionStore: SessionStore,
+  errorHandler: ErrorHandler
+)(implicit
+  ec: ExecutionContext
 ) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionReady]
     with Logging {
 
@@ -66,7 +69,10 @@ class SubscriptionReadyAction @Inject() (sessionStore: SessionStore, errorHandle
           errorHandler.errorResult(None)(request)
         }.flatMap { maybeSessionData =>
           (maybeSessionData, maybeSessionData.flatMap(_.journeyStatus)) match {
-            case (Some(sessionData), Some(ready: SubscriptionStatus.SubscriptionReady)) =>
+            case (
+                  Some(sessionData),
+                  Some(ready: SubscriptionStatus.SubscriptionReady)
+                ) =>
               Right(RequestWithSubscriptionReady(ready, sessionData, request))
 
             case (_, _) =>

@@ -33,7 +33,9 @@ trait Repo {
 
   val sessionKey: String
 
-  protected def get[A: Reads](id: String)(implicit ec: ExecutionContext): Future[Either[Error, Option[A]]] =
+  protected def get[A : Reads](
+    id: String
+  )(implicit ec: ExecutionContext): Future[Either[Error, Option[A]]] =
     preservingMdc {
       cacheRepository
         .findById(Id(id))
@@ -42,11 +44,15 @@ trait Repo {
             cache ← OptionT.fromOption[Either[Error, ?]](maybeCache)
             data ← OptionT.fromOption[Either[Error, ?]](cache.data)
             result ← OptionT.liftF[Either[Error, ?], A](
-                      (data \ sessionKey)
-                        .validate[A]
-                        .asEither
-                        .leftMap(e ⇒ Error(s"Could not parse session data from mongo: ${e.mkString("; ")}"))
-                    )
+                       (data \ sessionKey)
+                         .validate[A]
+                         .asEither
+                         .leftMap(e ⇒
+                           Error(
+                             s"Could not parse session data from mongo: ${e.mkString("; ")}"
+                           )
+                         )
+                     )
           } yield result
 
           response.value
@@ -54,13 +60,21 @@ trait Repo {
         .recover { case e ⇒ Left(Error(e)) }
     }
 
-  protected def store[A: Writes](id: String, a: A)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
+  protected def store[A : Writes](id: String, a: A)(implicit
+    ec: ExecutionContext
+  ): Future[Either[Error, Unit]] =
     preservingMdc {
       cacheRepository
         .createOrUpdate(Id(id), sessionKey, Json.toJson(a))
         .map[Either[Error, Unit]] { dbUpdate ⇒
           if (dbUpdate.writeResult.inError)
-            Left(Error(dbUpdate.writeResult.errmsg.getOrElse("unknown error during inserting session data in mongo")))
+            Left(
+              Error(
+                dbUpdate.writeResult.errmsg.getOrElse(
+                  "unknown error during inserting session data in mongo"
+                )
+              )
+            )
           else
             Right(())
         }

@@ -34,15 +34,23 @@ import scala.concurrent.Future
 class AuthenticatedActionSpec extends ControllerSpec with MockFactory with SessionSupport with AuthActionSpec {
 
   val authenticatedAction =
-    new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
+    new AuthenticatedAction(
+      mockAuthConnector,
+      config,
+      instanceOf[ErrorHandler],
+      mockSessionStore
+    )
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
     val request = new MessagesRequest[A](r, stub[MessagesApi])
-    authenticatedAction.invokeBlock(request, { a: AuthenticatedRequest[A] =>
-      a.request.messagesApi shouldBe request.messagesApi
-      Future.successful(Ok)
-    })
+    authenticatedAction.invokeBlock(
+      request,
+      { a: AuthenticatedRequest[A] =>
+        a.request.messagesApi shouldBe request.messagesApi
+        Future.successful(Ok)
+      }
+    )
   }
 
   "AuthenticatedAction" when {
@@ -65,7 +73,9 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             status(result) shouldBe SEE_OTHER
 
             val redirectTo = redirectLocation(result)
-            redirectTo shouldBe Some(s"$signInUrl?continue=${urlEncode(selfBaseUrl + requestUri)}&origin=$origin")
+            redirectTo shouldBe Some(
+              s"$signInUrl?continue=${urlEncode(selfBaseUrl + requestUri)}&origin=$origin"
+            )
           }
         }
       }

@@ -35,10 +35,13 @@ object Postcode {
         .asPredicate()
 
     def validatePostcode(p: Postcode): ValidationResult = {
-      val postcodeWithoutSpaces = p.value.toUpperCase.replaceAllLiterally(" ", "")
+      val postcodeWithoutSpaces =
+        p.value.toUpperCase.replaceAllLiterally(" ", "")
       if (p.value.length > 8) Invalid("error.tooLong")
-      else if (!postcodeWithoutSpaces.forall(_.isLetterOrDigit)) Invalid("error.invalidCharacters")
-      else if (!postcodeRegexPredicate.test(postcodeWithoutSpaces)) Invalid("error.pattern")
+      else if (!postcodeWithoutSpaces.forall(_.isLetterOrDigit))
+        Invalid("error.invalidCharacters")
+      else if (!postcodeRegexPredicate.test(postcodeWithoutSpaces))
+        Invalid("error.pattern")
       else Valid
     }
 

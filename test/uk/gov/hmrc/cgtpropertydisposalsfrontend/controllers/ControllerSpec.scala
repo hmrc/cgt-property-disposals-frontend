@@ -45,7 +45,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   lazy val additionalConfig = Configuration()
 
   def buildFakeApplication(): Application = {
-    val metricsBinding: GuiceableModule = bind[Metrics].toInstance(MockMetrics.metrics)
+    val metricsBinding: GuiceableModule =
+      bind[Metrics].toInstance(MockMetrics.metrics)
 
     new GuiceApplicationBuilder()
       .configure(
@@ -66,7 +67,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
 
   lazy val fakeApplication: Application = buildFakeApplication()
 
-  def instanceOf[A: ClassTag]: A = fakeApplication.injector.instanceOf[A]
+  def instanceOf[A : ClassTag]: A = fakeApplication.injector.instanceOf[A]
 
   lazy implicit val materializer: Materializer = fakeApplication.materializer
   lazy val viewConfig                          = instanceOf[ViewConfig]
@@ -81,27 +82,39 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     super.afterAll()
   }
 
-  def messageFromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String =
+  def messageFromMessageKey(messageKey: String, args: Any*)(implicit
+    messagesApi: MessagesApi
+  ): String =
     messagesApi(messageKey, args: _*)(lang)
 
-  def checkIsTechnicalErrorPage(result: Future[Result])(implicit messagesApi: MessagesApi): Unit = {
-    status(result)          shouldBe INTERNAL_SERVER_ERROR
-    contentAsString(result) should include(messageFromMessageKey("global.error.InternalServerError500.title"))
+  def checkIsTechnicalErrorPage(
+    result: Future[Result]
+  )(implicit messagesApi: MessagesApi): Unit = {
+    status(result)        shouldBe INTERNAL_SERVER_ERROR
+    contentAsString(result) should include(
+      messageFromMessageKey("global.error.InternalServerError500.title")
+    )
   }
 
-  def checkIsRedirect(result: Future[Result], expectedRedirectUrl: String): Unit = {
+  def checkIsRedirect(
+    result: Future[Result],
+    expectedRedirectUrl: String
+  ): Unit = {
     status(result)           shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some(expectedRedirectUrl)
   }
 
-  def checkIsRedirect(result: Future[Result], expectedRedirectCall: Call): Unit =
+  def checkIsRedirect(
+    result: Future[Result],
+    expectedRedirectCall: Call
+  ): Unit =
     checkIsRedirect(result, expectedRedirectCall.url)
 
   def checkPageIsDisplayed(
     result: Future[Result],
     expectedTitle: String,
     contentChecks: Document => Unit = _ => (),
-    expectedStatus: Int             = OK
+    expectedStatus: Int = OK
   ): Unit = {
     redirectLocation(result) shouldBe None
     status(result)           shouldBe expectedStatus

@@ -27,16 +27,25 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 
 @Singleton
-class ErrorHandler @Inject() (val messagesApi: MessagesApi, error_template: views.html.error_template)(
-  implicit val appConfig: ViewConfig
+class ErrorHandler @Inject() (
+  val messagesApi: MessagesApi,
+  error_template: views.html.error_template
+)(implicit
+  val appConfig: ViewConfig
 ) extends FrontendErrorHandler {
 
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(
-    implicit request: Request[_]
+  override def standardErrorTemplate(
+    pageTitle: String,
+    heading: String,
+    message: String
+  )(implicit
+    request: Request[_]
   ): Html =
     error_template(None, pageTitle, heading, message)
 
-  def errorResult[R <: Request[_]](userType: Option[UserType])(implicit request: R): Result =
+  def errorResult[R <: Request[_]](
+    userType: Option[UserType]
+  )(implicit request: R): Result =
     InternalServerError(
       error_template(
         userType,

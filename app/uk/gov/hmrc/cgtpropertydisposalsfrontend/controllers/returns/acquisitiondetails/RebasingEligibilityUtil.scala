@@ -27,29 +27,44 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate,
 @Singleton
 class RebasingEligibilityUtil {
 
-  def isUk(completeReturn: CompleteSingleDisposalReturn): Boolean = extractIsUk(completeReturn)
+  def isUk(completeReturn: CompleteSingleDisposalReturn): Boolean =
+    extractIsUk(completeReturn)
 
-  def isEligibleForRebase(completeReturn: CompleteSingleDisposalReturn): Boolean =
+  def isEligibleForRebase(
+    completeReturn: CompleteSingleDisposalReturn
+  ): Boolean =
     isEligibleForRebase(
       isUk(completeReturn),
       extractAssetType(completeReturn),
       completeReturn.acquisitionDetails.acquisitionDate.value
     )
 
-  def isEligibleForAcquisitionPrice(completeReturn: CompleteSingleDisposalReturn): Boolean =
-    isEligibleForAcquisitionPrice(isUk(completeReturn), completeReturn.acquisitionDetails.acquisitionDate.value)
+  def isEligibleForAcquisitionPrice(
+    completeReturn: CompleteSingleDisposalReturn
+  ): Boolean =
+    isEligibleForAcquisitionPrice(
+      isUk(completeReturn),
+      completeReturn.acquisitionDetails.acquisitionDate.value
+    )
 
-  def isEligibleForAcquisitionPrice(wasAUkResident: Boolean, purchaseDate: LocalDate): Boolean =
+  def isEligibleForAcquisitionPrice(
+    wasAUkResident: Boolean,
+    purchaseDate: LocalDate
+  ): Boolean =
     !wasAUkResident || purchaseDate.isAfter(RebasingCutoffDates.ukResidents)
 
-  def isEligibleForRebase(wasAUkResident: Boolean, assetType: AssetType, purchaseDate: LocalDate): Boolean =
+  def isEligibleForRebase(
+    wasAUkResident: Boolean,
+    assetType: AssetType,
+    purchaseDate: LocalDate
+  ): Boolean =
     (wasAUkResident, assetType, purchaseDate) match {
-      case (true, _, date) => date.isBefore(RebasingCutoffDates.ukResidents)
-      case (false, AssetType.Residential, date) =>
+      case (true, _, date)                         => date.isBefore(RebasingCutoffDates.ukResidents)
+      case (false, AssetType.Residential, date)    =>
         date.isBefore(RebasingCutoffDates.nonUkResidentsResidentialProperty)
       case (false, AssetType.NonResidential, date) =>
         date.isBefore(RebasingCutoffDates.nonUkResidentsNonResidentialProperty)
-      case _ => false
+      case _                                       => false
     }
 
   def rebasingCutOffDate(
@@ -82,8 +97,13 @@ class RebasingEligibilityUtil {
     Some(cutoffDate).filter(acquisitionDate.value.isBefore)
   }
 
-  def getRebasingCutOffDate(completeReturn: CompleteSingleDisposalReturn): LocalDate =
-    getRebasingCutOffDate(extractAssetType(completeReturn), isUk(completeReturn))
+  def getRebasingCutOffDate(
+    completeReturn: CompleteSingleDisposalReturn
+  ): LocalDate =
+    getRebasingCutOffDate(
+      extractAssetType(completeReturn),
+      isUk(completeReturn)
+    )
 
   def getRebasingCutOffDate(
     assetType: AssetType,
@@ -95,8 +115,13 @@ class RebasingEligibilityUtil {
       RebasingCutoffDates.nonUkResidentsResidentialProperty
     else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
 
-  def getDisplayRebasingCutOffDate(completeReturn: CompleteSingleDisposalReturn): LocalDate =
-    getDisplayRebasingCutOffDate(extractAssetType(completeReturn), isUk(completeReturn))
+  def getDisplayRebasingCutOffDate(
+    completeReturn: CompleteSingleDisposalReturn
+  ): LocalDate =
+    getDisplayRebasingCutOffDate(
+      extractAssetType(completeReturn),
+      isUk(completeReturn)
+    )
 
   def getDisplayRebasingCutOffDate(
     assetType: AssetType,
@@ -108,10 +133,14 @@ class RebasingEligibilityUtil {
       RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1)
     else RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)
 
-  private def extractIsUk(completeReturn: CompleteSingleDisposalReturn): Boolean =
+  private def extractIsUk(
+    completeReturn: CompleteSingleDisposalReturn
+  ): Boolean =
     completeReturn.triageAnswers.countryOfResidence.isUk()
 
-  private def extractAssetType(completeReturn: CompleteSingleDisposalReturn): AssetType =
+  private def extractAssetType(
+    completeReturn: CompleteSingleDisposalReturn
+  ): AssetType =
     completeReturn.triageAnswers.assetType
 
 }

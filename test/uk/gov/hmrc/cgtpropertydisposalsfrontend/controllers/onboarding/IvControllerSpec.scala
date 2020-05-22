@@ -59,7 +59,9 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
   val name = sample[IndividualName]
 
-  def mockGetFailedJourneyStatus(journeyId: UUID)(result: Either[Error, IvErrorStatus]) =
+  def mockGetFailedJourneyStatus(
+    journeyId: UUID
+  )(result: Either[Error, IvErrorStatus]) =
     (mockIvService
       .getFailedJourneyStatus(_: UUID)(_: HeaderCarrier))
       .expects(journeyId, *)
@@ -69,11 +71,14 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
     "handling IV success request" must {
 
-      def performAction(): Future[Result] = controller.ivSuccessCallback()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.ivSuccessCallback()(FakeRequest())
 
       val nonEmptySession =
         SessionData.empty.copy(
-          journeyStatus = Some(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
+          journeyStatus = Some(
+            TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId])
+          )
         )
 
       "clear the session and redirect to the start endpoint" in {
@@ -83,7 +88,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
           mockStoreSession(SessionData.empty)(Right(()))
         }
 
-        checkIsRedirect(performAction(), controllers.routes.StartController.start())
+        checkIsRedirect(
+          performAction(),
+          controllers.routes.StartController.start()
+        )
       }
 
       "show an error page if there is an error clearing the session" in {
@@ -104,7 +112,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
             mockGetSession(Right(None))
           }
 
-          checkIsRedirect(performAction(), controllers.routes.StartController.start())
+          checkIsRedirect(
+            performAction(),
+            controllers.routes.StartController.start()
+          )
         }
 
         "the session data is empty" in {
@@ -113,7 +124,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
             mockGetSession(SessionData.empty)
           }
 
-          checkIsRedirect(performAction(), controllers.routes.StartController.start())
+          checkIsRedirect(
+            performAction(),
+            controllers.routes.StartController.start()
+          )
         }
 
       }
@@ -136,24 +150,27 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
             mockGetFailedJourneyStatus(journeyId)(Left(Error("")))
           }
 
-          checkIsRedirect(performAction(), controllers.onboarding.routes.IvController.getTechnicalIssue())
+          checkIsRedirect(
+            performAction(),
+            controllers.onboarding.routes.IvController.getTechnicalIssue()
+          )
         }
 
       }
 
       List(
-        IvErrorStatus.Incomplete     -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
-        IvErrorStatus.FailedMatching -> (() => controllers.onboarding.routes.IvController.getFailedMatching()),
-        IvErrorStatus.FailedIV       -> (() => controllers.onboarding.routes.IvController.getFailedIV()),
+        IvErrorStatus.Incomplete           -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
+        IvErrorStatus.FailedMatching       -> (() => controllers.onboarding.routes.IvController.getFailedMatching()),
+        IvErrorStatus.FailedIV             -> (() => controllers.onboarding.routes.IvController.getFailedIV()),
         IvErrorStatus.InsufficientEvidence -> (() =>
           controllers.onboarding.routes.IvController.getInsufficientEvidence()
         ),
-        IvErrorStatus.LockedOut          -> (() => controllers.onboarding.routes.IvController.getLockedOut()),
-        IvErrorStatus.UserAborted        -> (() => controllers.onboarding.routes.IvController.getUserAborted()),
-        IvErrorStatus.Timeout            -> (() => controllers.onboarding.routes.IvController.getTimedOut()),
-        IvErrorStatus.TechnicalIssue     -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
-        IvErrorStatus.PreconditionFailed -> (() => controllers.onboarding.routes.IvController.getPreconditionFailed()),
-        IvErrorStatus.Unknown("")        -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue())
+        IvErrorStatus.LockedOut            -> (() => controllers.onboarding.routes.IvController.getLockedOut()),
+        IvErrorStatus.UserAborted          -> (() => controllers.onboarding.routes.IvController.getUserAborted()),
+        IvErrorStatus.Timeout              -> (() => controllers.onboarding.routes.IvController.getTimedOut()),
+        IvErrorStatus.TechnicalIssue       -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
+        IvErrorStatus.PreconditionFailed   -> (() => controllers.onboarding.routes.IvController.getPreconditionFailed()),
+        IvErrorStatus.Unknown("")          -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue())
       ).foreach {
         case (status, redirectTo) =>
           s"redirect to ${redirectTo().url}" when {
@@ -182,8 +199,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.getFailedMatching()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("iv.failedMatching.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("iv.failedMatching.title")
+        )
       }
 
     }
@@ -197,8 +216,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.getFailedIV()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("iv.failedIv.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("iv.failedIv.title")
+        )
       }
 
     }
@@ -212,8 +233,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.getInsufficientEvidence()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("iv.insufficientEvidence.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("iv.insufficientEvidence.title")
+        )
       }
 
     }
@@ -227,8 +250,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.getLockedOut()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("iv.lockedOut.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("iv.lockedOut.title")
+        )
 
       }
 
@@ -243,8 +268,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.getUserAborted()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("iv.userAborted.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("iv.userAborted.title")
+        )
 
       }
 
@@ -259,8 +286,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.getTimedOut()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("iv.timeout.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("iv.timeout.title")
+        )
 
       }
 
@@ -275,8 +304,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.getTechnicalIssue()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("iv.technicalIssue.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("iv.technicalIssue.title")
+        )
 
       }
 
@@ -291,8 +322,10 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.getPreconditionFailed()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("iv.preconditionFailed.title"))
+        status(result)        shouldBe OK
+        contentAsString(result) should include(
+          messageFromMessageKey("iv.preconditionFailed.title")
+        )
 
       }
 

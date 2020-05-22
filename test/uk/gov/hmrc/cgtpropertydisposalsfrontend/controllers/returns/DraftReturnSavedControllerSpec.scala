@@ -57,7 +57,8 @@ class DraftReturnSavedControllerSpec
   lazy val controller                  = instanceOf[DraftReturnSavedController]
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  private def performAction(): Future[Result] = controller.draftReturnSaved()(FakeRequest())
+  private def performAction(): Future[Result] =
+    controller.draftReturnSaved()(FakeRequest())
 
   "DraftReturnSavedController" when {
 
@@ -73,7 +74,10 @@ class DraftReturnSavedControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), controllers.routes.StartController.start())
+          checkIsRedirect(
+            performAction(),
+            controllers.routes.StartController.start()
+          )
         }
 
       }
@@ -96,14 +100,28 @@ class DraftReturnSavedControllerSpec
             )(Right(()))
           }
 
-          val formattedDate: String = TimeUtils.govDisplayFormat(TimeUtils.today().plusDays(29))
+          val formattedDate: String =
+            TimeUtils.govDisplayFormat(TimeUtils.today().plusDays(29))
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("draftReturnSaved.title"), { doc =>
-              doc.select("#back").attr("href")   shouldBe returns.routes.TaskListController.taskList().url
-              doc.select(".button").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
-              doc.select("#content > article > div > strong").text() shouldBe messageFromMessageKey(
+            messageFromMessageKey("draftReturnSaved.title"),
+            { doc =>
+              doc
+                .select("#back")
+                .attr("href") shouldBe returns.routes.TaskListController
+                .taskList()
+                .url
+              doc
+                .select(".button")
+                .attr(
+                  "href"
+                )             shouldBe accounts.homepage.routes.HomePageController
+                .homepage()
+                .url
+              doc
+                .select("#content > article > div > strong")
+                .text()       shouldBe messageFromMessageKey(
                 expectedWarningMessageKey,
                 formattedDate
               )
@@ -112,9 +130,10 @@ class DraftReturnSavedControllerSpec
           )
         }
 
-        def fillingOutReturn(name: Either[TrustName, IndividualName]) = sample[FillingOutReturn].copy(
-          subscribedDetails = sample[SubscribedDetails].copy(name = name)
-        )
+        def fillingOutReturn(name: Either[TrustName, IndividualName]) =
+          sample[FillingOutReturn].copy(
+            subscribedDetails = sample[SubscribedDetails].copy(name = name)
+          )
 
         "the user is an individual" in {
           val journey = fillingOutReturn(Right(sample[IndividualName]))
@@ -122,7 +141,7 @@ class DraftReturnSavedControllerSpec
           test(
             SessionData.empty.copy(
               journeyStatus = Some(journey),
-              userType      = Some(UserType.Individual)
+              userType = Some(UserType.Individual)
             ),
             journey,
             journey.draftReturn.fold(
@@ -140,7 +159,7 @@ class DraftReturnSavedControllerSpec
           test(
             SessionData.empty.copy(
               journeyStatus = Some(journey),
-              userType      = Some(UserType.Organisation)
+              userType = Some(UserType.Organisation)
             ),
             journey,
             journey.draftReturn.fold(
@@ -154,12 +173,13 @@ class DraftReturnSavedControllerSpec
 
         "the user is an agent" in {
           val journey =
-            fillingOutReturn(Left(sample[TrustName])).copy(agentReferenceNumber = Some(sample[AgentReferenceNumber]))
+            fillingOutReturn(Left(sample[TrustName]))
+              .copy(agentReferenceNumber = Some(sample[AgentReferenceNumber]))
 
           test(
             SessionData.empty.copy(
               journeyStatus = Some(journey),
-              userType      = Some(UserType.Agent)
+              userType = Some(UserType.Agent)
             ),
             journey,
             journey.draftReturn.fold(
@@ -176,7 +196,7 @@ class DraftReturnSavedControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          val journey = sample[FillingOutReturn]
+          val journey            = sample[FillingOutReturn]
           val updatedDraftReturn = journey.draftReturn.fold(
             _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today()),
@@ -185,7 +205,9 @@ class DraftReturnSavedControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(journey)))
+            mockGetSession(
+              SessionData.empty.copy(journeyStatus = Some(journey))
+            )
             mockStoreDraftReturn(
               updatedDraftReturn,
               journey.subscribedDetails.cgtReference,

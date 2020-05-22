@@ -33,39 +33,47 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
 trait CGTPropertyDisposalsConnector {
 
-  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
-    implicit hc: HeaderCarrier
+  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def subscribe(subscriptionDetails: SubscriptionDetails)(
-    implicit hc: HeaderCarrier
+  def subscribe(subscriptionDetails: SubscriptionDetails)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def registerWithoutId(registrationDetails: RegistrationDetails)(
-    implicit hc: HeaderCarrier
+  def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def getSubscriptionStatus()(
-    implicit hc: HeaderCarrier
+  def getSubscriptionStatus()(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def getSubscribedDetails(cgtReference: CgtReference)(
-    implicit hc: HeaderCarrier
+  def getSubscribedDetails(cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedUpdateDetails)(
-    implicit hc: HeaderCarrier
+  def updateSubscribedDetails(
+    subscribedAndVerifierDetails: SubscribedUpdateDetails
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def testSubmitToDms(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  def testSubmitToDms(cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 }
 
 @Singleton
-class CGTPropertyDisposalsConnectorImpl @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(
-  implicit ec: ExecutionContext
+class CGTPropertyDisposalsConnectorImpl @Inject() (
+  http: HttpClient,
+  servicesConfig: ServicesConfig
+)(implicit
+  ec: ExecutionContext
 ) extends CGTPropertyDisposalsConnector {
 
-  val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
+  val baseUrl: String =
+    servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
   val bprUrl: String = s"$baseUrl/business-partner-record"
 
@@ -77,10 +85,11 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (http: HttpClient, servicesCon
 
   val subscriptionUpdateUrl: String = s"$baseUrl/subscription"
 
-  def getSubscribedDetailsUrl(cgtReference: CgtReference): String = s"$baseUrl/subscription/${cgtReference.value}"
+  def getSubscribedDetailsUrl(cgtReference: CgtReference): String =
+    s"$baseUrl/subscription/${cgtReference.value}"
 
-  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
-    implicit hc: HeaderCarrier
+  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.post(bprUrl, Json.toJson(request)))
 
@@ -89,23 +98,27 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (http: HttpClient, servicesCon
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     makeCall(_.post(subscribeUrl, Json.toJson(subscriptionDetails)))
 
-  override def registerWithoutId(registrationDetails: RegistrationDetails)(
-    implicit hc: HeaderCarrier
+  override def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.post(registerWithoutIdAndSubscribeUrl, Json.toJson(registrationDetails)))
+    makeCall(
+      _.post(registerWithoutIdAndSubscribeUrl, Json.toJson(registrationDetails))
+    )
 
-  override def getSubscriptionStatus()(
-    implicit hc: HeaderCarrier
+  override def getSubscriptionStatus()(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.get(subscriptionStatusUrl))
 
-  override def getSubscribedDetails(cgtReference: CgtReference)(
-    implicit hc: HeaderCarrier
+  override def getSubscribedDetails(cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.get(getSubscribedDetailsUrl(cgtReference)))
 
-  override def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(
-    implicit hc: HeaderCarrier
+  override def updateSubscribedDetails(
+    subscribedUpdateDetails: SubscribedUpdateDetails
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.put(subscriptionUpdateUrl, subscribedUpdateDetails))
 
@@ -114,7 +127,9 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (http: HttpClient, servicesCon
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     makeCall(_.get(baseUrl + "/dms-test"))
 
-  private def makeCall(call: HttpClient => Future[HttpResponse]): EitherT[Future, Error, HttpResponse] =
+  private def makeCall(
+    call: HttpClient => Future[HttpResponse]
+  ): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       call(http)
         .map(Right(_))

@@ -36,18 +36,29 @@ trait SessionDataActionBase[R[_] <: Request[_], P[_] <: Request[_]] extends Acti
 
   implicit val executionContext: ExecutionContext
 
-  def sessionDataAction[A](sessionData: Option[SessionData], request: R[A]): P[A]
+  def sessionDataAction[A](
+    sessionData: Option[SessionData],
+    request: R[A]
+  ): P[A]
 
-  override protected def refine[A](request: R[A]): Future[Either[Result, P[A]]] = {
+  override protected def refine[A](
+    request: R[A]
+  ): Future[Either[Result, P[A]]] = {
     implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+      HeaderCarrierConverter
+        .fromHeadersAndSession(request.headers, Some(request.session))
 
     sessionStore
       .get()
-      .map(_.bimap({ e =>
-        logger.warn("Could not get session data", e)
-        errorHandler.errorResult(None)(request)
-      }, sessionDataAction(_, request)))
+      .map(
+        _.bimap(
+          { e =>
+            logger.warn("Could not get session data", e)
+            errorHandler.errorResult(None)(request)
+          },
+          sessionDataAction(_, request)
+        )
+      )
 
   }
 

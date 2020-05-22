@@ -28,7 +28,7 @@ trait NameFormValidationTests { this: ControllerSpec =>
     performAction: Seq[(String, String)] => Future[Result],
     mockActions: () => Unit,
     firstNameKey: String = "firstName",
-    lastNameKey: String  = "lastName"
+    lastNameKey: String = "lastName"
   )(implicit messagesApi: MessagesApi): Unit =
     "show the page with errors" when {
 
@@ -38,18 +38,27 @@ trait NameFormValidationTests { this: ControllerSpec =>
         val result = performAction(Seq.empty)
         status(result) shouldBe BAD_REQUEST
         val resultAsString = contentAsString(result)
-        resultAsString should include(messageFromMessageKey(s"$firstNameKey.error.required"))
-        resultAsString should include(messageFromMessageKey(s"$lastNameKey.error.required"))
+        resultAsString should include(
+          messageFromMessageKey(s"$firstNameKey.error.required")
+        )
+        resultAsString should include(
+          messageFromMessageKey(s"$lastNameKey.error.required")
+        )
       }
 
       "the request submits a first name that is too long" in {
         mockActions()
 
         val result = performAction(
-          Seq(firstNameKey -> List.fill(36)("a").mkString(""), lastNameKey -> "Smith")
+          Seq(
+            firstNameKey -> List.fill(36)("a").mkString(""),
+            lastNameKey  -> "Smith"
+          )
         )
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey(s"$firstNameKey.error.tooLong"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey(s"$firstNameKey.error.tooLong")
+        )
       }
 
       "the request submits a first name with illegal characters" in {
@@ -61,8 +70,10 @@ trait NameFormValidationTests { this: ControllerSpec =>
             lastNameKey  -> "Smith"
           )
         )
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey(s"$firstNameKey.error.pattern"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey(s"$firstNameKey.error.pattern")
+        )
       }
 
       "the request submits a last name that is too long" in {
@@ -74,8 +85,10 @@ trait NameFormValidationTests { this: ControllerSpec =>
             lastNameKey  -> List.fill(36)("a").mkString("")
           )
         )
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey(s"$lastNameKey.error.tooLong"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey(s"$lastNameKey.error.tooLong")
+        )
       }
 
       "the request submits a last name with illegal characters" in {
@@ -87,8 +100,10 @@ trait NameFormValidationTests { this: ControllerSpec =>
             lastNameKey  -> "i99"
           )
         )
-        status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messageFromMessageKey(s"$lastNameKey.error.pattern"))
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(
+          messageFromMessageKey(s"$lastNameKey.error.pattern")
+        )
       }
 
     }

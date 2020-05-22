@@ -48,8 +48,8 @@ trait AgentVerifierMatchRetryStore {
 class AgentVerifierMatchRetryStoreImpl @Inject() (
   mongo: ReactiveMongoComponent,
   configuration: Configuration
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends AgentVerifierMatchRetryStore
     with Repo {
 
@@ -58,7 +58,10 @@ class AgentVerifierMatchRetryStoreImpl @Inject() (
       .get[FiniteDuration]("agent-verifier-match.store.expiry-time")
       .value
 
-    new CacheMongoRepository("agent-verifier-match-retries", expireAfter.toSeconds)(mongo.mongoConnector.db, ec)
+    new CacheMongoRepository(
+      "agent-verifier-match-retries",
+      expireAfter.toSeconds
+    )(mongo.mongoConnector.db, ec)
   }
 
   val sessionKey = "agent-verifier-match-retries"

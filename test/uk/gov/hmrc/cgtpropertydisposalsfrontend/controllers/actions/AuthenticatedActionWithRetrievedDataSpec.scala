@@ -65,13 +65,15 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   implicit val userTypeFormat: Writes[RetrievedUserType] = derived.owrites()
 
-  def toJson(retrievedUserType: RetrievedUserType) = userTypeFormat.writes(retrievedUserType)
+  def toJson(retrievedUserType: RetrievedUserType) =
+    userTypeFormat.writes(retrievedUserType)
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
     val request = new MessagesRequest[A](r, stub[MessagesApi])
     authenticatedAction.invokeBlock(
-      request, { a: AuthenticatedRequestWithRetrievedData[A] =>
+      request,
+      { a: AuthenticatedRequestWithRetrievedData[A] =>
         a.request.messagesApi shouldBe request.messagesApi
         Future.successful(Ok(Json.toJson(a.journeyUserType)))
       }
@@ -88,7 +90,12 @@ class AuthenticatedActionWithRetrievedDataSpec
     Set(
       Enrolment(
         CgtEnrolment.key,
-        Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, "XCGT123456789")),
+        Seq(
+          EnrolmentIdentifier(
+            CgtEnrolment.cgtReferenceIdentifier,
+            "XCGT123456789"
+          )
+        ),
         "Activated",
         None
       )
@@ -97,24 +104,27 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
 
-  val (ggCredentials, ggCredId) = Credentials("id", "GovernmentGateway") -> GGCredId("id")
+  val (ggCredentials, ggCredId) =
+    Credentials("id", "GovernmentGateway") -> GGCredId("id")
 
   "AuthenticatedActionWithRetrievedData" when {
 
     "handling a user who has logged in with an auth provider which isn't gg" must {
 
       "return the auth provider id" in {
-        val providerType = "other provider"
+        val providerType     = "other provider"
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
-            None and None and None and emptyEnrolments and Some(Credentials("id", providerType))
+            None and None and None and emptyEnrolments and Some(
+            Credentials("id", providerType)
+          )
         )
 
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
 
-        status(result) shouldBe OK
+        status(result)        shouldBe OK
         contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
           RetrievedUserType.NonGovernmentGatewayRetrievedUser(providerType)
         )
@@ -134,9 +144,10 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
 
-        status(result) shouldBe OK
+        status(result)        shouldBe OK
         contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
-          RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
+          RetrievedUserType
+            .Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
         )
       }
     }
@@ -161,7 +172,7 @@ class AuthenticatedActionWithRetrievedDataSpec
             None and None and None and badCgtEnrolment and Some(ggCredentials)
         )
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
-        val result = performAction(FakeRequest())
+        val result           = performAction(FakeRequest())
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
@@ -183,9 +194,10 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
 
-        status(result) shouldBe OK
+        status(result)        shouldBe OK
         contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
-          RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
+          RetrievedUserType
+            .Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
         )
       }
     }
@@ -213,7 +225,9 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
+          expectedRetrieval
+        )
       }
     }
 
@@ -259,7 +273,9 @@ class AuthenticatedActionWithRetrievedDataSpec
             status(result) shouldBe SEE_OTHER
 
             val redirectTo = redirectLocation(result)
-            redirectTo shouldBe Some(s"$signInUrl?continue=${urlEncode(selfBaseUrl + requestUri)}&origin=$origin")
+            redirectTo shouldBe Some(
+              s"$signInUrl?continue=${urlEncode(selfBaseUrl + requestUri)}&origin=$origin"
+            )
           }
         }
       }
@@ -279,7 +295,9 @@ class AuthenticatedActionWithRetrievedDataSpec
             credentials
 
         "no credentials can be retrieved" in {
-          mockAuth(EmptyPredicate, retrievals)(Future.successful(retrievalResult(None)))
+          mockAuth(EmptyPredicate, retrievals)(
+            Future.successful(retrievalResult(None))
+          )
 
           checkIsTechnicalErrorPage(performAction(FakeRequest()))
         }
@@ -320,12 +338,17 @@ class AuthenticatedActionWithRetrievedDataSpec
       "allow the request through" when {
 
         "a gg cred id and agent reference number can be found" in {
-          val arn = AgentReferenceNumber("arn")
+          val arn        = AgentReferenceNumber("arn")
           val enrolments = Enrolments(
             Set(
               Enrolment(
                 AgentsEnrolment.key,
-                Seq(EnrolmentIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier, arn.value)),
+                Seq(
+                  EnrolmentIdentifier(
+                    AgentsEnrolment.agentReferenceNumberIdentifier,
+                    arn.value
+                  )
+                ),
                 ""
               )
             )
@@ -343,7 +366,9 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result = performAction(FakeRequest())
 
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
+          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
+            expectedRetrieval
+          )
         }
 
         "an arn cannot be found" in {
@@ -359,7 +384,9 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result = performAction(FakeRequest())
 
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
+          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
+            expectedRetrieval
+          )
         }
 
       }
@@ -388,7 +415,9 @@ class AuthenticatedActionWithRetrievedDataSpec
       "indicate when the organisation does not have a trust enrolment" in {
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
-            None and None and Some("email") and emptyEnrolments and Some(ggCredentials)
+            None and None and Some("email") and emptyEnrolments and Some(
+            ggCredentials
+          )
         )
 
         inSequence {
@@ -398,19 +427,24 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
 
-        status(result) shouldBe OK
+        status(result)        shouldBe OK
         contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
-          RetrievedUserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
+          RetrievedUserType.OrganisationUnregisteredTrust(
+            Some(Email("email")),
+            GGCredId(ggCredentials.providerId)
+          )
         )
       }
 
       "show an error page" when {
 
         "the organisation has a trust enrolment but a SAUTR cannot be found" in {
-          val trustEnrolment = Enrolment(TrustsEnrolment.key)
+          val trustEnrolment   = Enrolment(TrustsEnrolment.key)
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
-              and None and None and None and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
+              and None and None and None and Enrolments(
+              Set(trustEnrolment)
+            ) and Some(ggCredentials)
           )
 
           inSequence {
@@ -427,17 +461,24 @@ class AuthenticatedActionWithRetrievedDataSpec
       "effect the request action" when {
 
         "the organisation has a trust enrolment and a SAUTR can be found" in {
-          val sautr = SAUTR("123456")
+          val sautr          = SAUTR("123456")
           val trustEnrolment =
             Enrolment(
               TrustsEnrolment.key,
-              Seq(EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)),
+              Seq(
+                EnrolmentIdentifier(
+                  TrustsEnrolment.sautrIdentifier,
+                  sautr.value
+                )
+              ),
               "state"
             )
 
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
-              and None and None and Some("email") and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
+              and None and None and Some("email") and Enrolments(
+              Set(trustEnrolment)
+            ) and Some(ggCredentials)
           )
 
           inSequence {
@@ -446,7 +487,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           }
 
           val result = performAction(FakeRequest())
-          status(result) shouldBe OK
+          status(result)        shouldBe OK
           contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
             RetrievedUserType.Trust(sautr, Some(Email("email")), ggCredId)
           )
@@ -455,17 +496,21 @@ class AuthenticatedActionWithRetrievedDataSpec
       }
 
       "filter out empty emails" in {
-        val sautr = SAUTR("123456")
+        val sautr          = SAUTR("123456")
         val trustEnrolment =
           Enrolment(
             TrustsEnrolment.key,
-            Seq(EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)),
+            Seq(
+              EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)
+            ),
             "state"
           )
 
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
-            and None and None and Some("") and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
+            and None and None and Some("") and Enrolments(
+            Set(trustEnrolment)
+          ) and Some(ggCredentials)
         )
 
         inSequence {
@@ -475,7 +520,9 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](RetrievedUserType.Trust(sautr, None, ggCredId))
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
+          RetrievedUserType.Trust(sautr, None, ggCredId)
+        )
       }
 
     }
@@ -494,7 +541,8 @@ class AuthenticatedActionWithRetrievedDataSpec
       )
 
       val expectedRetrieval =
-        RetrievedUserType.Individual(Right(NINO("nino")), Some(Email("email")), ggCredId)
+        RetrievedUserType
+          .Individual(Right(NINO("nino")), Some(Email("email")), ggCredId)
 
       "effect the requested action" in {
         inSequence {
@@ -504,7 +552,9 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
+          expectedRetrieval
+        )
       }
     }
 
@@ -529,7 +579,9 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
+          expectedRetrieval
+        )
       }
     }
 
@@ -541,35 +593,33 @@ class AuthenticatedActionWithRetrievedDataSpec
           for {
             cl        <- List[ConfidenceLevel](L0, L50, L100)
             mayBeNino <- List[Option[NINO]](Some(NINO("nino")), None)
-          } {
-            withClue(s"For confidence level $cl ") {
-              val retrievalsResult = Future successful (
-                new ~(cl, Some(AffinityGroup.Individual)) and
-                  mayBeNino.map(_.value) and
-                  None and
-                  Some("email") and
-                  emptyEnrolments and
-                  Some(ggCredentials)
-              )
+          } withClue(s"For confidence level $cl ") {
+            val retrievalsResult = Future successful (
+              new ~(cl, Some(AffinityGroup.Individual)) and
+                mayBeNino.map(_.value) and
+                None and
+                Some("email") and
+                emptyEnrolments and
+                Some(ggCredentials)
+            )
 
-              inSequence {
-                mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
-                mockHasSubscription()(Right(None))
-              }
-
-              val json = Json.toJson[RetrievedUserType](
-                RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
-                  mayBeNino,
-                  None,
-                  Some(Email("email")),
-                  GGCredId(ggCredentials.providerId)
-                )
-              )
-
-              val result = performAction(FakeRequest())
-              status(result)        shouldBe OK
-              contentAsJson(result) shouldBe json
+            inSequence {
+              mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+              mockHasSubscription()(Right(None))
             }
+
+            val json = Json.toJson[RetrievedUserType](
+              RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
+                mayBeNino,
+                None,
+                Some(Email("email")),
+                GGCredId(ggCredentials.providerId)
+              )
+            )
+
+            val result = performAction(FakeRequest())
+            status(result)        shouldBe OK
+            contentAsJson(result) shouldBe json
           }
 
         }
@@ -577,7 +627,9 @@ class AuthenticatedActionWithRetrievedDataSpec
         "filter out empty emails" in {
           val retrievalsResult = Future successful (
             new ~(L50, Some(AffinityGroup.Individual)) and
-              None and None and Some("") and emptyEnrolments and Some(ggCredentials)
+              None and None and Some("") and emptyEnrolments and Some(
+              ggCredentials
+            )
           )
 
           inSequence {
@@ -586,7 +638,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           }
 
           val result = performAction(FakeRequest())
-          status(result) shouldBe OK
+          status(result)        shouldBe OK
           contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
             RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
               None,

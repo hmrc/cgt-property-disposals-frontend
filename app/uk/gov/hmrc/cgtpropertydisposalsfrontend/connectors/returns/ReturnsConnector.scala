@@ -38,42 +38,56 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[ReturnsConnectorImpl])
 trait ReturnsConnector {
 
-  def storeDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(
-    implicit hc: HeaderCarrier
+  def storeDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
-
-  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
-
-  def submitReturn(submitReturnRequest: SubmitReturnRequest)(
-    implicit hc: HeaderCarrier
+  def getDraftReturns(cgtReference: CgtReference)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def listReturns(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
-    implicit hc: HeaderCarrier
+  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def displayReturn(cgtReference: CgtReference, submissionId: String)(
-    implicit hc: HeaderCarrier
+  def submitReturn(submitReturnRequest: SubmitReturnRequest)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
+
+  def listReturns(
+    cgtReference: CgtReference,
+    fromDate: LocalDate,
+    toDate: LocalDate
+  )(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
+
+  def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
   def calculateTaxDue(
     request: CalculateCgtTaxDueRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
-  def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  def taxYear(date: LocalDate)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 
 }
 
 @Singleton
-class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(
-  implicit ec: ExecutionContext
+class ReturnsConnectorImpl @Inject() (
+  http: HttpClient,
+  servicesConfig: ServicesConfig
+)(implicit
+  ec: ExecutionContext
 ) extends ReturnsConnector {
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
 
-  def getDraftReturnsUrl(cgtReference: CgtReference): String = s"$baseUrl/draft-returns/${cgtReference.value}"
+  def getDraftReturnsUrl(cgtReference: CgtReference): String =
+    s"$baseUrl/draft-returns/${cgtReference.value}"
 
   val deleteDraftReturnsUrl: String = s"$baseUrl/draft-returns/delete"
 
@@ -85,7 +99,8 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     draftReturn: DraftReturn,
     cgtReference: CgtReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
-    val storeDraftReturnUrl: String = s"$baseUrl/draft-return/${cgtReference.value}"
+    val storeDraftReturnUrl: String =
+      s"$baseUrl/draft-return/${cgtReference.value}"
 
     EitherT[Future, Error, HttpResponse](
       http
@@ -109,7 +124,9 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
         }
     )
 
-  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  def deleteDraftReturns(
+    draftReturnIds: List[UUID]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
         .post(deleteDraftReturnsUrl, DeleteDraftReturnsRequest(draftReturnIds))
@@ -131,8 +148,12 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
         }
     )
 
-  def listReturns(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
-    implicit hc: HeaderCarrier
+  def listReturns(
+    cgtReference: CgtReference,
+    fromDate: LocalDate,
+    toDate: LocalDate
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val url: String =
       s"$baseUrl/returns/${cgtReference.value}/${fromDate.format(dateFormatter)}/${toDate.format(dateFormatter)}"
@@ -145,8 +166,8 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     )
   }
 
-  def displayReturn(cgtReference: CgtReference, submissionId: String)(
-    implicit hc: HeaderCarrier
+  def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val url: String = s"$baseUrl/return/${cgtReference.value}/$submissionId"
 
@@ -170,7 +191,9 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
         }
     )
 
-  def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  def taxYear(
+    date: LocalDate
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
         .get(s"$baseUrl/tax-year/${date.format(dateFormatter)}")

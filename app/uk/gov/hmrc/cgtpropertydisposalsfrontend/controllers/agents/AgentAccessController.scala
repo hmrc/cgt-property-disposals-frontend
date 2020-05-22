@@ -82,153 +82,187 @@ class AgentAccessController @Inject() (
   private val maxVerifierNameMatchAttempts: Int =
     config.underlying.getInt("agent-verifier-match.max-retries")
 
-  private val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
-    override def authConnector: AuthConnector = self.authConnector
-  }
-
-  def enterClientsCgtRef(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withAgentSupplyingClientDetails(_ => Ok(enterClientsCgtRefPage(cgtReferenceForm)))
-  }
-
-  def enterClientsCgtRefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withAgentSupplyingClientDetails {
-      case AgentSupplyingClientDetails(arn, ggCredId, _) =>
-        cgtReferenceForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => BadRequest(enterClientsCgtRefPage(formWithErrors)),
-            cgtReference => handleSubmittedCgtReferenceNumber(cgtReference, arn, ggCredId)
-          )
+  private val authorisedFunctions: AuthorisedFunctions =
+    new AuthorisedFunctions {
+      override def authConnector: AuthConnector = self.authConnector
     }
-  }
 
-  def enterClientsPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withVerifierMatchingDetails {
-      case (_, verifierMatchingDetails, _) =>
-        verifierMatchingDetails.clientDetails.address match {
-          case UkAddress(_, _, _, _, postcode) =>
-            val form =
-              if (verifierMatchingDetails.correctVerifierSupplied) postcodeForm.fill(postcode) else postcodeForm
-            Ok(enterClientsPostcodePage(form))
-
-          case _: NonUkAddress =>
-            Redirect(routes.AgentAccessController.enterClientsCountry())
-        }
-
+  def enterClientsCgtRef(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withAgentSupplyingClientDetails(_ => Ok(enterClientsCgtRefPage(cgtReferenceForm)))
     }
-  }
 
-  def enterClientsPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withVerifierMatchingDetails {
-      case (agentSupplyingClientDetails, verifierMatchingDetails, currentUnsuccessfulAttempts) =>
-        verifierMatchingDetails.clientDetails.address match {
-          case UkAddress(_, _, _, _, clientPostcode) =>
-            handleSubmittedVerifier(
-              clientPostcode
-            )(
-              (p1, p2) => toUpperWithNoSpaces(p1.value) === toUpperWithNoSpaces(p2.value),
-              postcodeForm,
-              postcodeKey,
-              enterClientsPostcodePage(_),
+  def enterClientsCgtRefSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withAgentSupplyingClientDetails {
+        case AgentSupplyingClientDetails(arn, ggCredId, _) =>
+          cgtReferenceForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors => BadRequest(enterClientsCgtRefPage(formWithErrors)),
+              cgtReference => handleSubmittedCgtReferenceNumber(cgtReference, arn, ggCredId)
+            )
+      }
+    }
+
+  def enterClientsPostcode(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withVerifierMatchingDetails {
+        case (_, verifierMatchingDetails, _) =>
+          verifierMatchingDetails.clientDetails.address match {
+            case UkAddress(_, _, _, _, postcode) =>
+              val form =
+                if (verifierMatchingDetails.correctVerifierSupplied)
+                  postcodeForm.fill(postcode)
+                else postcodeForm
+              Ok(enterClientsPostcodePage(form))
+
+            case _: NonUkAddress                 =>
+              Redirect(routes.AgentAccessController.enterClientsCountry())
+          }
+
+      }
+    }
+
+  def enterClientsPostcodeSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withVerifierMatchingDetails {
+        case (
               agentSupplyingClientDetails,
               verifierMatchingDetails,
               currentUnsuccessfulAttempts
-            )
-          case _: NonUkAddress =>
-            Redirect(routes.AgentAccessController.enterClientsCountry())
-        }
+            ) =>
+          verifierMatchingDetails.clientDetails.address match {
+            case UkAddress(_, _, _, _, clientPostcode) =>
+              handleSubmittedVerifier(
+                clientPostcode
+              )(
+                (p1, p2) =>
+                  toUpperWithNoSpaces(p1.value) === toUpperWithNoSpaces(
+                    p2.value
+                  ),
+                postcodeForm,
+                postcodeKey,
+                enterClientsPostcodePage(_),
+                agentSupplyingClientDetails,
+                verifierMatchingDetails,
+                currentUnsuccessfulAttempts
+              )
+            case _: NonUkAddress                       =>
+              Redirect(routes.AgentAccessController.enterClientsCountry())
+          }
+      }
     }
-  }
 
-  def enterClientsCountry(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withVerifierMatchingDetails {
-      case (_, verifierMatchingDetails, _) =>
-        verifierMatchingDetails.clientDetails.address match {
-          case NonUkAddress(_, _, _, _, _, country) =>
-            val form =
-              if (verifierMatchingDetails.correctVerifierSupplied) countryForm.fill(country) else countryForm
-            Ok(enterClientsCountryPage(form))
+  def enterClientsCountry(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withVerifierMatchingDetails {
+        case (_, verifierMatchingDetails, _) =>
+          verifierMatchingDetails.clientDetails.address match {
+            case NonUkAddress(_, _, _, _, _, country) =>
+              val form =
+                if (verifierMatchingDetails.correctVerifierSupplied)
+                  countryForm.fill(country)
+                else countryForm
+              Ok(enterClientsCountryPage(form))
 
-          case _: UkAddress =>
-            Redirect(routes.AgentAccessController.enterClientsPostcode())
-        }
+            case _: UkAddress                         =>
+              Redirect(routes.AgentAccessController.enterClientsPostcode())
+          }
+      }
     }
-  }
 
-  def enterClientsCountrySubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withVerifierMatchingDetails {
-      case (agentSupplyingClientDetails, verifierMatchingDetails, currentUnsuccessfulAttempts) =>
-        verifierMatchingDetails.clientDetails.address match {
-          case NonUkAddress(_, _, _, _, _, clientCountry) =>
-            handleSubmittedVerifier(
-              clientCountry
-            )(
-              _ === _,
-              countryForm,
-              countryKey,
-              enterClientsCountryPage(_),
+  def enterClientsCountrySubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withVerifierMatchingDetails {
+        case (
               agentSupplyingClientDetails,
               verifierMatchingDetails,
               currentUnsuccessfulAttempts
+            ) =>
+          verifierMatchingDetails.clientDetails.address match {
+            case NonUkAddress(_, _, _, _, _, clientCountry) =>
+              handleSubmittedVerifier(
+                clientCountry
+              )(
+                _ === _,
+                countryForm,
+                countryKey,
+                enterClientsCountryPage(_),
+                agentSupplyingClientDetails,
+                verifierMatchingDetails,
+                currentUnsuccessfulAttempts
+              )
+            case _: UkAddress                               =>
+              Redirect(routes.AgentAccessController.enterClientsPostcode())
+          }
+      }
+    }
+
+  def tooManyVerifierMatchAttempts(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withAgentSupplyingClientDetails(_ => Ok(tooManyAttemptsPage()))
+    }
+
+  def confirmClient(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withVerifierMatchingDetails {
+        case (_, verifierMatchingDetails, _) =>
+          val backLink =
+            enterVerifierCall(verifierMatchingDetails.clientDetails)
+
+          if (verifierMatchingDetails.correctVerifierSupplied)
+            Ok(
+              confirmClientPage(verifierMatchingDetails.clientDetails, backLink)
             )
-          case _: UkAddress =>
-            Redirect(routes.AgentAccessController.enterClientsPostcode())
-        }
+          else
+            Redirect(backLink)
+      }
     }
-  }
 
-  def tooManyVerifierMatchAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request => withAgentSupplyingClientDetails(_ => Ok(tooManyAttemptsPage()))
-  }
+  def confirmClientSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withVerifierMatchingDetails {
+        case (agentSupplyingClientDetails, verifierMatchingDetails, _) =>
+          val cgtReference = verifierMatchingDetails.clientDetails.cgtReference
+          if (verifierMatchingDetails.correctVerifierSupplied) {
+            val result = for {
+              sentReturns  <- returnsService.listReturns(cgtReference)
+              draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
+              _            <- EitherT(
+                     updateSession(sessionStore, request)(
+                       _.copy(
+                         journeyStatus = Some(
+                           Subscribed(
+                             verifierMatchingDetails.clientDetails,
+                             agentSupplyingClientDetails.agentGGCredId,
+                             Some(
+                               agentSupplyingClientDetails.agentReferenceNumber
+                             ),
+                             draftReturns,
+                             sentReturns
+                           )
+                         )
+                       )
+                     )
+                   )
+            } yield ()
 
-  def confirmClient(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withVerifierMatchingDetails {
-      case (_, verifierMatchingDetails, _) =>
-        val backLink = enterVerifierCall(verifierMatchingDetails.clientDetails)
-
-        if (verifierMatchingDetails.correctVerifierSupplied)
-          Ok(confirmClientPage(verifierMatchingDetails.clientDetails, backLink))
-        else
-          Redirect(backLink)
-    }
-  }
-
-  def confirmClientSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withVerifierMatchingDetails {
-      case (agentSupplyingClientDetails, verifierMatchingDetails, _) =>
-        val cgtReference = verifierMatchingDetails.clientDetails.cgtReference
-        if (verifierMatchingDetails.correctVerifierSupplied) {
-          val result = for {
-            sentReturns  <- returnsService.listReturns(cgtReference)
-            draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
-            _ <- EitherT(
-                  updateSession(sessionStore, request)(
-                    _.copy(
-                      journeyStatus = Some(
-                        Subscribed(
-                          verifierMatchingDetails.clientDetails,
-                          agentSupplyingClientDetails.agentGGCredId,
-                          Some(agentSupplyingClientDetails.agentReferenceNumber),
-                          draftReturns,
-                          sentReturns
-                        )
-                      )
-                    )
-                  )
+            result.fold(
+              { e =>
+                logger.warn("Could not update session", e)
+                errorHandler.errorResult()
+              },
+              _ =>
+                Redirect(
+                  controllers.accounts.homepage.routes.HomePageController
+                    .homepage()
                 )
-          } yield ()
-
-          result.fold(
-            { e =>
-              logger.warn("Could not update session", e)
-              errorHandler.errorResult()
-            },
-            _ => Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
-          )
-        } else
-          Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
+            )
+          } else
+            Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
+      }
     }
-  }
 
   private def enterVerifierCall(clientDetails: SubscribedDetails) =
     clientDetails.address match {
@@ -236,48 +270,61 @@ class AgentAccessController @Inject() (
       case _: NonUkAddress => routes.AgentAccessController.enterClientsCountry()
     }
 
-  private def toUpperWithNoSpaces(s: String): String = s.toUpperCase.replaceAllLiterally(" ", "")
+  private def toUpperWithNoSpaces(s: String): String =
+    s.toUpperCase.replaceAllLiterally(" ", "")
 
   private def handleSubmittedCgtReferenceNumber(
     cgtReference: CgtReference,
     agentReferenceNumber: AgentReferenceNumber,
     ggCredId: GGCredId
-  )(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit
+    hc: HeaderCarrier,
+    request: RequestWithSessionData[_]
+  ): Future[Result] =
     authorisedFunctions
       .authorised(
         Enrolment(CgtEnrolment.key)
-          .withIdentifier(CgtEnrolment.cgtReferenceIdentifier, cgtReference.value)
+          .withIdentifier(
+            CgtEnrolment.cgtReferenceIdentifier,
+            cgtReference.value
+          )
           .withDelegatedAuthRule(CgtEnrolment.delegateAuthRule)
       ) {
         agentAccessAuditService.sendEvent(
           "agentAccessAttempt",
-          AgentAccessAttempt(agentReferenceNumber.value, cgtReference.value, success = true),
+          AgentAccessAttempt(
+            agentReferenceNumber.value,
+            cgtReference.value,
+            success = true
+          ),
           "agent-access-attempt"
         )
 
         val result = for {
           details <- subscriptionService
-                      .getSubscribedDetails(cgtReference)
-                      .subflatMap(
-                        Either.fromOption(
-                          _,
-                          Error(s"Could not find subscribed details for cgt reference ${cgtReference.value}")
-                        )
-                      )
+                       .getSubscribedDetails(cgtReference)
+                       .subflatMap(
+                         Either.fromOption(
+                           _,
+                           Error(
+                             s"Could not find subscribed details for cgt reference ${cgtReference.value}"
+                           )
+                         )
+                       )
 
-          _ <- EitherT(
-                updateSession(sessionStore, request)(
-                  _.copy(
-                    journeyStatus = Some(
-                      AgentSupplyingClientDetails(
-                        agentReferenceNumber,
-                        ggCredId,
-                        Some(VerifierMatchingDetails(details, false))
-                      )
-                    )
-                  )
-                )
-              )
+          _       <- EitherT(
+                 updateSession(sessionStore, request)(
+                   _.copy(
+                     journeyStatus = Some(
+                       AgentSupplyingClientDetails(
+                         agentReferenceNumber,
+                         ggCredId,
+                         Some(VerifierMatchingDetails(details, false))
+                       )
+                     )
+                   )
+                 )
+               )
         } yield details
 
         result.fold(
@@ -292,7 +339,11 @@ class AgentAccessController @Inject() (
         case _: InsufficientEnrolments =>
           agentAccessAuditService.sendEvent(
             "agentAccessAttempt",
-            AgentAccessAttempt(agentReferenceNumber.value, cgtReference.value, success = false),
+            AgentAccessAttempt(
+              agentReferenceNumber.value,
+              cgtReference.value,
+              success = false
+            ),
             "agent-access-attempt"
           )
           BadRequest(
@@ -303,12 +354,14 @@ class AgentAccessController @Inject() (
             )
           )
 
-        case NonFatal(error) =>
-          logger.warn(s"Could not do delegated auth rule check for agent: ${error.getMessage}")
+        case NonFatal(error)           =>
+          logger.warn(
+            s"Could not do delegated auth rule check for agent: ${error.getMessage}"
+          )
           errorHandler.errorResult()
       }
 
-  private def handleSubmittedVerifier[V, P: Writeable](
+  private def handleSubmittedVerifier[V, P : Writeable](
     actualVerifier: V
   )(
     matches: (V, V) => Boolean,
@@ -317,9 +370,10 @@ class AgentAccessController @Inject() (
     page: Form[V] => P,
     currentAgentSupplyingClientDetails: AgentSupplyingClientDetails,
     currentVerifierMatchingDetails: VerifierMatchingDetails,
-    currentUnsuccessfulVerifierMatchAttempts: Option[UnsuccessfulVerifierAttempts]
-  )(
-    implicit
+    currentUnsuccessfulVerifierMatchAttempts: Option[
+      UnsuccessfulVerifierAttempts
+    ]
+  )(implicit
     request: RequestWithSessionData[_],
     toEither: V => Either[Country, Postcode]
   ): Future[Result] = {
@@ -337,7 +391,7 @@ class AgentAccessController @Inject() (
           )
         )
       ).map {
-        case Left(e) =>
+        case Left(e)  =>
           logger.warn("Could not update session", e)
           errorHandler.errorResult()
 
@@ -346,28 +400,42 @@ class AgentAccessController @Inject() (
       }
 
     def noMatchResult(submittedVerifier: V): Result =
-      BadRequest(page(form.fill(submittedVerifier).withError(formKey, "error.noMatch")))
+      BadRequest(
+        page(form.fill(submittedVerifier).withError(formKey, "error.noMatch"))
+      )
 
-    def handleNewUnmatchedVerifier(submittedVerifier: V, updatedUnsuccessfulAttempts: Int): Future[Result] =
+    def handleNewUnmatchedVerifier(
+      submittedVerifier: V,
+      updatedUnsuccessfulAttempts: Int
+    ): Future[Result] =
       agentVerifierMatchRetryStore
         .store(
           currentAgentSupplyingClientDetails.agentGGCredId,
           currentVerifierMatchingDetails.clientDetails.cgtReference,
-          UnsuccessfulVerifierAttempts(updatedUnsuccessfulAttempts, toEither(submittedVerifier))
+          UnsuccessfulVerifierAttempts(
+            updatedUnsuccessfulAttempts,
+            toEither(submittedVerifier)
+          )
         )
         .map {
-          case Left(e) =>
+          case Left(e)  =>
             logger.warn("Could not update agent verifier match retry store ", e)
             errorHandler.errorResult()
 
           case Right(_) =>
             if (updatedUnsuccessfulAttempts >= maxVerifierNameMatchAttempts)
-              Redirect(routes.AgentAccessController.tooManyVerifierMatchAttempts())
+              Redirect(
+                routes.AgentAccessController.tooManyVerifierMatchAttempts()
+              )
             else
               noMatchResult(submittedVerifier)
         }
 
-    def sendAuditEvent(submittedVerifier: V, success: Boolean, numberOfUnsuccessfulAttempts: Int): Unit =
+    def sendAuditEvent(
+      submittedVerifier: V,
+      success: Boolean,
+      numberOfUnsuccessfulAttempts: Int
+    ): Unit =
       agentAccessAuditService.sendEvent(
         "agentVerifierMatchAttempt",
         AgentVerifierMatchAttempt(
@@ -387,22 +455,42 @@ class AgentAccessController @Inject() (
         formWithErrors => BadRequest(page(formWithErrors)),
         submittedVerifier => {
           val currentNumberOfUnsuccessfulAttempts =
-            currentUnsuccessfulVerifierMatchAttempts.map(_.unsuccessfulAttempts).getOrElse(0)
+            currentUnsuccessfulVerifierMatchAttempts
+              .map(_.unsuccessfulAttempts)
+              .getOrElse(0)
 
           if (matches(submittedVerifier, actualVerifier)) {
-            sendAuditEvent(submittedVerifier, success = true, currentNumberOfUnsuccessfulAttempts)
+            sendAuditEvent(
+              submittedVerifier,
+              success = true,
+              currentNumberOfUnsuccessfulAttempts
+            )
             handleMatchedVerifier
           }
           // don't increase the unsuccessful attempt count if the same incorrect value has been submitted
-          else if (currentUnsuccessfulVerifierMatchAttempts
-                     .map(_.lastDetailsTried)
-                     .contains(toEither(submittedVerifier))) {
-            sendAuditEvent(submittedVerifier, success = false, currentNumberOfUnsuccessfulAttempts)
+          else if (
+            currentUnsuccessfulVerifierMatchAttempts
+              .map(_.lastDetailsTried)
+              .contains(toEither(submittedVerifier))
+          ) {
+            sendAuditEvent(
+              submittedVerifier,
+              success = false,
+              currentNumberOfUnsuccessfulAttempts
+            )
             noMatchResult(submittedVerifier)
           } else {
-            val updatedNumberOfUnsuccessfulAttempts = currentNumberOfUnsuccessfulAttempts + 1
-            sendAuditEvent(submittedVerifier, success = false, updatedNumberOfUnsuccessfulAttempts)
-            handleNewUnmatchedVerifier(submittedVerifier, updatedNumberOfUnsuccessfulAttempts)
+            val updatedNumberOfUnsuccessfulAttempts =
+              currentNumberOfUnsuccessfulAttempts + 1
+            sendAuditEvent(
+              submittedVerifier,
+              success = false,
+              updatedNumberOfUnsuccessfulAttempts
+            )
+            handleNewUnmatchedVerifier(
+              submittedVerifier,
+              updatedNumberOfUnsuccessfulAttempts
+            )
           }
         }
       )
@@ -418,25 +506,31 @@ class AgentAccessController @Inject() (
     }
 
   private def withVerifierMatchingDetails(
-    f: (AgentSupplyingClientDetails, VerifierMatchingDetails, Option[UnsuccessfulVerifierAttempts]) => Future[Result]
+    f: (
+      AgentSupplyingClientDetails,
+      VerifierMatchingDetails,
+      Option[UnsuccessfulVerifierAttempts]
+    ) => Future[Result]
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(a @ AgentStatus.AgentSupplyingClientDetails(_, _, Some(v))) =>
         agentVerifierMatchRetryStore
           .get(a.agentGGCredId, v.clientDetails.cgtReference)
           .flatMap {
-            case Left(e) =>
+            case Left(e)                                  =>
               logger.warn("Could not get agent verifier match details", e)
               errorHandler.errorResult()
 
             case Right(Some(unsuccessfulVerifierAttempts))
                 if unsuccessfulVerifierAttempts.unsuccessfulAttempts >= maxVerifierNameMatchAttempts =>
-              Redirect(routes.AgentAccessController.tooManyVerifierMatchAttempts())
+              Redirect(
+                routes.AgentAccessController.tooManyVerifierMatchAttempts()
+              )
 
             case Right(maybeUnsuccessfulVerifierAttempts) =>
               f(a, v, maybeUnsuccessfulVerifierAttempts)
           }
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                                                                => Redirect(controllers.routes.StartController.start())
     }
 }
 

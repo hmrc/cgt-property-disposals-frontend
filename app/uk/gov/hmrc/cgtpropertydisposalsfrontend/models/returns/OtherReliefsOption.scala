@@ -32,10 +32,11 @@ object OtherReliefsOption {
     def fold[A](
       ifOtherReliefs: OtherReliefs => A,
       ifNoOtherReliefs: () => A
-    ): A = o match {
-      case NoOtherReliefs      => ifNoOtherReliefs()
-      case value: OtherReliefs => ifOtherReliefs(value)
-    }
+    ): A =
+      o match {
+        case NoOtherReliefs      => ifNoOtherReliefs()
+        case value: OtherReliefs => ifOtherReliefs(value)
+      }
   }
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[OtherReliefsOption] = derived.oformat()

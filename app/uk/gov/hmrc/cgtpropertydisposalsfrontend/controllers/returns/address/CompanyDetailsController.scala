@@ -60,7 +60,8 @@ class CompanyDetailsController @Inject() (
     with SessionUpdates
     with AddressController[EnteringCompanyDetails] {
 
-  override val toJourneyStatus: EnteringCompanyDetails => JourneyStatus = _.journey
+  override val toJourneyStatus: EnteringCompanyDetails => JourneyStatus =
+    _.journey
 
   def isATrust(journey: EnteringCompanyDetails): Boolean =
     journey.journey.subscribedDetails.isATrust
@@ -69,7 +70,17 @@ class CompanyDetailsController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, EnteringCompanyDetails)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, f @ FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn))) =>
+      case Some(
+            (
+              sessionData,
+              f @ FillingOutReturn(
+                _,
+                _,
+                _,
+                i: DraftSingleIndirectDisposalReturn
+              )
+            )
+          ) =>
         Right(
           sessionData -> EnteringCompanyDetails(
             f,
@@ -86,8 +97,8 @@ class CompanyDetailsController @Inject() (
     journey: EnteringCompanyDetails,
     address: Address,
     isManuallyEnteredAddress: Boolean
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] = {
     val newJourney = journey.journey.copy(
@@ -105,32 +116,38 @@ class CompanyDetailsController @Inject() (
       .map(_ => newJourney)
   }
 
-  private lazy val redirectToEnterUkAddress = Action(Redirect(routes.CompanyDetailsController.enterUkAddress()))
+  private lazy val redirectToEnterUkAddress = Action(
+    Redirect(routes.CompanyDetailsController.enterUkAddress())
+  )
 
   override def enterPostcode(): Action[AnyContent] = redirectToEnterUkAddress
 
-  override def enterPostcodeSubmit(): Action[AnyContent] = redirectToEnterUkAddress
+  override def enterPostcodeSubmit(): Action[AnyContent] =
+    redirectToEnterUkAddress
 
   override def selectAddress(): Action[AnyContent] = redirectToEnterUkAddress
 
-  override def selectAddressSubmit(): Action[AnyContent] = redirectToEnterUkAddress
+  override def selectAddressSubmit(): Action[AnyContent] =
+    redirectToEnterUkAddress
 
-  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) {
-      case (_, journey) =>
-        journey.draftReturn.companyAddress.fold(
-          Redirect(routes.CompanyDetailsController.isUk())
-        )(companyAddress => Ok(checkYourAnswersPage(companyAddress)))
+  def checkYourAnswers(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) {
+        case (_, journey) =>
+          journey.draftReturn.companyAddress.fold(
+            Redirect(routes.CompanyDetailsController.isUk())
+          )(companyAddress => Ok(checkYourAnswersPage(companyAddress)))
 
+      }
     }
-  }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request) {
-      case (_, _) =>
-        Redirect(controllers.returns.routes.TaskListController.taskList())
+  def checkYourAnswersSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) {
+        case (_, _) =>
+          Redirect(controllers.returns.routes.TaskListController.taskList())
+      }
     }
-  }
 
   protected def backLinkCall: EnteringCompanyDetails => Call =
     _.draftReturn.companyAddress.fold(
@@ -138,15 +155,25 @@ class CompanyDetailsController @Inject() (
     )(_ => routes.CompanyDetailsController.checkYourAnswers())
 
   protected lazy val isUkCall: Call                                                 = routes.CompanyDetailsController.isUk()
-  protected lazy val isUkSubmitCall: Call                                           = routes.CompanyDetailsController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call                                       = routes.CompanyDetailsController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call                                 = routes.CompanyDetailsController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call                                    = routes.CompanyDetailsController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call                              = routes.CompanyDetailsController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call                                        = routes.CompanyDetailsController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call                                  = routes.CompanyDetailsController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call                                        = routes.CompanyDetailsController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call                                  = routes.CompanyDetailsController.selectAddressSubmit()
-  protected lazy val continueCall: Call                                             = routes.CompanyDetailsController.checkYourAnswers()
+  protected lazy val isUkSubmitCall: Call                                           =
+    routes.CompanyDetailsController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call                                       =
+    routes.CompanyDetailsController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call                                 =
+    routes.CompanyDetailsController.enterUkAddressSubmit()
+  protected lazy val enterNonUkAddressCall: Call                                    =
+    routes.CompanyDetailsController.enterNonUkAddress()
+  protected lazy val enterNonUkAddressSubmitCall: Call                              =
+    routes.CompanyDetailsController.enterNonUkAddressSubmit()
+  protected lazy val enterPostcodeCall: Call                                        =
+    routes.CompanyDetailsController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call                                  =
+    routes.CompanyDetailsController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call                                        =
+    routes.CompanyDetailsController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call                                  =
+    routes.CompanyDetailsController.selectAddressSubmit()
+  protected lazy val continueCall: Call                                             =
+    routes.CompanyDetailsController.checkYourAnswers()
   override protected val enterUkAddressBackLinkCall: EnteringCompanyDetails => Call = _ => isUkCall
 }

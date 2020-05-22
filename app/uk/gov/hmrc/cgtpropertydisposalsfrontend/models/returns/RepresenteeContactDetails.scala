@@ -21,7 +21,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 
-final case class RepresenteeContactDetails(contactName: ContactName, address: Address, emailAddress: Email)
+final case class RepresenteeContactDetails(
+  contactName: ContactName,
+  address: Address,
+  emailAddress: Email
+)
 
 object RepresenteeContactDetails {
 

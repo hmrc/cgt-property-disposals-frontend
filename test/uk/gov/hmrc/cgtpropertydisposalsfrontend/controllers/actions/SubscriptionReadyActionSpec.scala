@@ -45,14 +45,22 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
     val ggCredId = sample[GGCredId]
 
-    def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
-      val messagesRequest      = new MessagesRequest(FakeRequest("GET", requestUrl), messagesApi)
+    def performAction(
+      sessionData: SessionData,
+      requestUrl: String = "/"
+    ): Future[Result] = {
+      val messagesRequest      =
+        new MessagesRequest(FakeRequest("GET", requestUrl), messagesApi)
       val authenticatedRequest = AuthenticatedRequest(messagesRequest)
 
       action.invokeBlock(
-        authenticatedRequest, { r: RequestWithSubscriptionReady[_] =>
+        authenticatedRequest,
+        { r: RequestWithSubscriptionReady[_] =>
           r.sessionData       shouldBe sessionData
-          r.subscriptionReady shouldBe SubscriptionReady(subscriptionDetails, ggCredId)
+          r.subscriptionReady shouldBe SubscriptionReady(
+            subscriptionDetails,
+            ggCredId
+          )
           r.messagesApi       shouldBe messagesRequest.messagesApi
           Future.successful(Ok)
         }
@@ -70,13 +78,19 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
       "there is no session data in store" in {
         mockGetSession(Right(None))
 
-        checkIsRedirect(performAction(sample[SessionData]), routes.StartController.start())
+        checkIsRedirect(
+          performAction(sample[SessionData]),
+          routes.StartController.start()
+        )
       }
 
       "there is no subscription details in the session data" in {
         mockGetSession(SessionData.empty)
 
-        checkIsRedirect(performAction(sample[SessionData]), routes.StartController.start())
+        checkIsRedirect(
+          performAction(sample[SessionData]),
+          routes.StartController.start()
+        )
       }
 
     }

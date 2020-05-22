@@ -40,7 +40,9 @@ class SubscriptionChangeEmailControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override def toJourneyStatus(journeyType: ChangingSubscriptionEmail): JourneyStatus = journeyType.journey
+  override def toJourneyStatus(
+    journeyType: ChangingSubscriptionEmail
+  ): JourneyStatus = journeyType.journey
 
   override val validJourneyStatus: ChangingSubscriptionEmail =
     ChangingSubscriptionEmail(sample[SubscriptionReady])
@@ -57,23 +59,30 @@ class SubscriptionChangeEmailControllerSpec
       journey.copy(
         subscriptionDetails = journey.subscriptionDetails.copy(
           emailAddress = email,
-          emailSource  = EmailSource.ManuallyEntered
+          emailSource = EmailSource.ManuallyEntered
         )
       )
     )
   }
 
-  override val mockUpdateEmail
-    : Option[(ChangingSubscriptionEmail, ChangingSubscriptionEmail, Either[Error, Unit]) => Unit] =
+  override val mockUpdateEmail: Option[
+    (
+      ChangingSubscriptionEmail,
+      ChangingSubscriptionEmail,
+      Either[Error, Unit]
+    ) => Unit
+  ] =
     None
 
-  override lazy val controller: SubscriptionChangeEmailController = instanceOf[SubscriptionChangeEmailController]
+  override lazy val controller: SubscriptionChangeEmailController =
+    instanceOf[SubscriptionChangeEmailController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: SubscriptionReady => true
         case _                    => false
       }
@@ -94,7 +103,9 @@ class SubscriptionChangeEmailControllerSpec
     "handling submitted email addresses" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.enterEmailSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken)
+        controller.enterEmailSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 

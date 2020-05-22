@@ -51,7 +51,9 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
 
   def updateEmail(journey: JourneyType, email: Email): JourneyType
 
-  val mockUpdateEmail: Option[(JourneyType, JourneyType, Either[Error, Unit]) => Unit]
+  val mockUpdateEmail: Option[
+    (JourneyType, JourneyType, Either[Error, Unit]) => Unit
+  ]
 
   val controller: EmailController[JourneyType]
 
@@ -83,10 +85,11 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
     (mockUuidGenerator.nextId: () => UUID).expects().returning(uuid)
 
   lazy val sessionDataWithValidJourneyStatus =
-    SessionData.empty.copy(journeyStatus = Some(toJourneyStatus(validJourneyStatus)))
+    SessionData.empty
+      .copy(journeyStatus = Some(toJourneyStatus(validJourneyStatus)))
 
-  def enterEmailPage(performAction: () => Future[Result])(
-    implicit messagesApi: MessagesApi
+  def enterEmailPage(performAction: () => Future[Result])(implicit
+    messagesApi: MessagesApi
   ): Unit = {
     val titleKey = "email.title"
 
@@ -98,11 +101,13 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
           mockGetSession(sessionDataWithValidJourneyStatus)
         }
 
-        contentAsString(performAction()) should include(messageFromMessageKey(titleKey))
+        contentAsString(performAction()) should include(
+          messageFromMessageKey(titleKey)
+        )
       }
 
       "there is a BPR in session and there is an email to be verified in session" in {
-        val email = Email("email")
+        val email   = Email("email")
         val session = sessionDataWithValidJourneyStatus.copy(
           emailToBeVerified = Some(EmailToBeVerified(email, UUID.randomUUID(), false, false))
         )
@@ -129,7 +134,8 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
     val email                                = Email("test@email.com")
     val id                                   = UUID.randomUUID()
     val titleKey                             = "email.title"
-    def emailToBeVerified(isResend: Boolean) = EmailToBeVerified(email, id, false, isResend)
+    def emailToBeVerified(isResend: Boolean) =
+      EmailToBeVerified(email, id, false, isResend)
 
     "show a form error" when {
 
@@ -140,7 +146,9 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
             mockGetSession(sessionDataWithValidJourneyStatus)
           }
 
-          val result  = performAction(Seq("email" -> email, "resendVerificationEmail" -> "false"))
+          val result  = performAction(
+            Seq("email" -> email, "resendVerificationEmail" -> "false")
+          )
           val content = contentAsString(result)
 
           status(result) shouldBe BAD_REQUEST
@@ -177,12 +185,17 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithValidJourneyStatus)
           mockUuidGenerator(id)
-          mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))(
+          mockStoreSession(
+            sessionDataWithValidJourneyStatus
+              .copy(emailToBeVerified = Some(emailToBeVerified(false)))
+          )(
             Left(Error(""))
           )
         }
 
-        val result = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
+        val result = performAction(
+          Seq("email" -> email.value, "resendVerificationEmail" -> "false")
+        )
         checkIsTechnicalErrorPage(result)
       }
 
@@ -191,13 +204,20 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithValidJourneyStatus)
           mockUuidGenerator(id)
-          mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))(
+          mockStoreSession(
+            sessionDataWithValidJourneyStatus
+              .copy(emailToBeVerified = Some(emailToBeVerified(false)))
+          )(
             Right(())
           )
-          mockEmailVerification(email, expectedName, verifyEmailCall(id))(Left(Error("")))
+          mockEmailVerification(email, expectedName, verifyEmailCall(id))(
+            Left(Error(""))
+          )
         }
 
-        val result = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
+        val result = performAction(
+          Seq("email" -> email.value, "resendVerificationEmail" -> "false")
+        )
         checkIsTechnicalErrorPage(result)
       }
 
@@ -208,13 +228,20 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
         mockAuthWithNoRetrievals()
         mockGetSession(sessionDataWithValidJourneyStatus)
         mockUuidGenerator(id)
-        mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))(
+        mockStoreSession(
+          sessionDataWithValidJourneyStatus
+            .copy(emailToBeVerified = Some(emailToBeVerified(false)))
+        )(
           Right(())
         )
-        mockEmailVerification(email, expectedName, verifyEmailCall(id))(Right(EmailAlreadyVerified))
+        mockEmailVerification(email, expectedName, verifyEmailCall(id))(
+          Right(EmailAlreadyVerified)
+        )
       }
 
-      val result: Future[Result] = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
+      val result: Future[Result] = performAction(
+        Seq("email" -> email.value, "resendVerificationEmail" -> "false")
+      )
       checkIsRedirect(result, verifyEmailCall(id))
     }
 
@@ -224,13 +251,20 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
         mockAuthWithNoRetrievals()
         mockGetSession(sessionDataWithValidJourneyStatus)
         mockUuidGenerator(id)
-        mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))(
+        mockStoreSession(
+          sessionDataWithValidJourneyStatus
+            .copy(emailToBeVerified = Some(emailToBeVerified(false)))
+        )(
           Right(())
         )
-        mockEmailVerification(email, expectedName, verifyEmailCall(id))(Right(EmailVerificationRequested))
+        mockEmailVerification(email, expectedName, verifyEmailCall(id))(
+          Right(EmailVerificationRequested)
+        )
       }
 
-      val result: Future[Result] = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
+      val result: Future[Result] = performAction(
+        Seq("email" -> email.value, "resendVerificationEmail" -> "false")
+      )
       checkIsRedirect(result, checkYourInboxCall)
     }
 
@@ -238,44 +272,66 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
       "and the emails match" in {
       inSequence {
         mockAuthWithNoRetrievals()
-        mockGetSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))
-        mockEmailVerification(email, expectedName, verifyEmailCall(id))(Right(EmailVerificationRequested))
+        mockGetSession(
+          sessionDataWithValidJourneyStatus
+            .copy(emailToBeVerified = Some(emailToBeVerified(false)))
+        )
+        mockEmailVerification(email, expectedName, verifyEmailCall(id))(
+          Right(EmailVerificationRequested)
+        )
       }
 
-      val result: Future[Result] = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
+      val result: Future[Result] = performAction(
+        Seq("email" -> email.value, "resendVerificationEmail" -> "false")
+      )
       checkIsRedirect(result, checkYourInboxCall)
     }
 
     "strip out spaces in emails" in {
       val emailWithSpaces    = " a @ b  "
       val emailWithoutSpaces = "a@b"
-      val emailToBeVerified  = EmailToBeVerified(Email(emailWithoutSpaces), id, false, true)
+      val emailToBeVerified  =
+        EmailToBeVerified(Email(emailWithoutSpaces), id, false, true)
 
       inSequence {
         mockAuthWithNoRetrievals()
-        mockGetSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified)))
-        mockEmailVerification(Email(emailWithoutSpaces), expectedName, verifyEmailCall(id))(
+        mockGetSession(
+          sessionDataWithValidJourneyStatus
+            .copy(emailToBeVerified = Some(emailToBeVerified))
+        )
+        mockEmailVerification(
+          Email(emailWithoutSpaces),
+          expectedName,
+          verifyEmailCall(id)
+        )(
           Right(EmailVerificationRequested)
         )
       }
 
-      val result: Future[Result] = performAction(Seq("email" -> emailWithSpaces, "resendVerificationEmail" -> "true"))
+      val result: Future[Result] = performAction(
+        Seq("email" -> emailWithSpaces, "resendVerificationEmail" -> "true")
+      )
       checkIsRedirect(result, checkYourInboxCall)
     }
   }
 
-  def checkYourInboxPage(performAction: () => Future[Result], enterEmailCall: Call, expectedBackLink: String)(
-    implicit messagesApi: MessagesApi
+  def checkYourInboxPage(
+    performAction: () => Future[Result],
+    enterEmailCall: Call,
+    expectedBackLink: String
+  )(implicit
+    messagesApi: MessagesApi
   ): Unit = {
-    val email             = Email("test@email.com")
-    val id                = UUID.randomUUID()
-    val emailToBeVerified = EmailToBeVerified(email, id, false, false)
-    lazy val sessionData = SessionData.empty.copy(
-      journeyStatus     = Some(toJourneyStatus(validJourneyStatus)),
+    val email                 = Email("test@email.com")
+    val id                    = UUID.randomUUID()
+    val emailToBeVerified     = EmailToBeVerified(email, id, false, false)
+    lazy val sessionData      = SessionData.empty.copy(
+      journeyStatus = Some(toJourneyStatus(validJourneyStatus)),
       emailToBeVerified = Some(emailToBeVerified)
     )
     lazy val expectedTitleKey = validJourneyStatus match {
-      case _: EmailJourneyType.Returns.ChangingRepresenteeEmail => "confirmEmail.representee.title"
+      case _: EmailJourneyType.Returns.ChangingRepresenteeEmail =>
+        "confirmEmail.representee.title"
       case _                                                    => "confirmEmail.title"
     }
 
@@ -302,8 +358,8 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
       val result         = performAction()
       val resultAsString = contentAsString(result)
       status(result) shouldBe OK
-      resultAsString should include(messageFromMessageKey(expectedTitleKey))
-      resultAsString should include(expectedBackLink)
+      resultAsString   should include(messageFromMessageKey(expectedTitleKey))
+      resultAsString   should include(expectedBackLink)
     }
   }
 
@@ -317,7 +373,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
     val emailToBeVerified = EmailToBeVerified(email, id, false, false)
 
     lazy val sessionData = SessionData.empty.copy(
-      journeyStatus     = Some(toJourneyStatus(validJourneyStatus)),
+      journeyStatus = Some(toJourneyStatus(validJourneyStatus)),
       emailToBeVerified = Some(emailToBeVerified)
     )
 
@@ -350,12 +406,20 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
           mockAuthWithNoRetrievals()
           mockGetSession(sessionData)
           mockUpdateEmail.foreach { f =>
-            f(validJourneyStatus, updateEmail(validJourneyStatus, emailToBeVerified.email), Right(Unit))
+            f(
+              validJourneyStatus,
+              updateEmail(validJourneyStatus, emailToBeVerified.email),
+              Right(Unit)
+            )
           }
           mockStoreSession(
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-              journeyStatus     = Some(toJourneyStatus(updateEmail(validJourneyStatus, emailToBeVerified.email)))
+              journeyStatus = Some(
+                toJourneyStatus(
+                  updateEmail(validJourneyStatus, emailToBeVerified.email)
+                )
+              )
             )
           )(Left(Error("")))
         }
@@ -383,7 +447,9 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
       "the session indicates the email has already been verified" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = true))))
+          mockGetSession(
+            sessionData.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = true)))
+          )
         }
         checkIsRedirect(performAction(id), emailVerifiedCall)
       }
@@ -393,12 +459,20 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
           mockAuthWithNoRetrievals()
           mockGetSession(sessionData)
           mockUpdateEmail.foreach { f =>
-            f(validJourneyStatus, updateEmail(validJourneyStatus, emailToBeVerified.email), Right(Unit))
+            f(
+              validJourneyStatus,
+              updateEmail(validJourneyStatus, emailToBeVerified.email),
+              Right(Unit)
+            )
           }
           mockStoreSession(
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-              journeyStatus     = Some(toJourneyStatus(updateEmail(validJourneyStatus, emailToBeVerified.email)))
+              journeyStatus = Some(
+                toJourneyStatus(
+                  updateEmail(validJourneyStatus, emailToBeVerified.email)
+                )
+              )
             )
           )(Right(()))
         }
@@ -412,10 +486,15 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
     expectedContinueCall: Call,
     enterEmailCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {
-    val emailToBeVerified = EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true, false)
+    val emailToBeVerified = EmailToBeVerified(
+      Email("verified@email.com"),
+      UUID.randomUUID(),
+      true,
+      false
+    )
 
     lazy val sessionData = SessionData.empty.copy(
-      journeyStatus     = Some(toJourneyStatus(validVerificationCompleteJourneyStatus)),
+      journeyStatus = Some(toJourneyStatus(validVerificationCompleteJourneyStatus)),
       emailToBeVerified = Some(emailToBeVerified)
     )
 
@@ -424,7 +503,9 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
       "the email has not been verified" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = false))))
+          mockGetSession(
+            sessionData.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = false)))
+          )
         }
 
         checkIsTechnicalErrorPage(performAction())
@@ -457,7 +538,9 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
         val result = performAction()
         status(result) shouldBe OK
         val content = contentAsString(result)
-        content should include(messageFromMessageKey("confirmEmail.verified.title"))
+        content should include(
+          messageFromMessageKey("confirmEmail.verified.title")
+        )
         content should include(expectedContinueCall.url)
       }
 

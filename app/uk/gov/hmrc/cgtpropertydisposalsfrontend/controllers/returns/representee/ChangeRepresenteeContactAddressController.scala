@@ -61,7 +61,8 @@ class ChangeRepresenteeContactAddressController @Inject() (
     with SessionUpdates
     with AddressController[ChangingRepresenteeContactAddressJourney] {
 
-  override val toJourneyStatus: ChangingRepresenteeContactAddressJourney => JourneyStatus = _.journey.merge
+  override val toJourneyStatus: ChangingRepresenteeContactAddressJourney => JourneyStatus =
+    _.journey.merge
 
   def isATrust(journey: ChangingRepresenteeContactAddressJourney): Boolean =
     journey.journey.fold(
@@ -75,7 +76,7 @@ class ChangeRepresenteeContactAddressController @Inject() (
     answers.flatMap(r =>
       r.fold(
         incomplete => incomplete.contactDetails.map(r -> _),
-        complete => Some(complete                     -> complete.contactDetails)
+        complete => Some(complete -> complete.contactDetails)
       )
     )
 
@@ -88,37 +89,49 @@ class ChangeRepresenteeContactAddressController @Inject() (
           extractAnswersAndContactDetails(s.representeeAnswers)
             .map {
               case (answers, contactDetails) =>
-                sessionData -> ChangingRepresenteeContactAddressJourney(Left(s), answers, contactDetails)
+                sessionData -> ChangingRepresenteeContactAddressJourney(
+                  Left(s),
+                  answers,
+                  contactDetails
+                )
             },
           Redirect(controllers.routes.StartController.start())
         )
 
-      case Some((sessionData, f: FillingOutReturn)) =>
+      case Some((sessionData, f: FillingOutReturn))       =>
         Either.fromOption(
           extractAnswersAndContactDetails(
-            f.draftReturn.fold(_.representeeAnswers, _.representeeAnswers, _.representeeAnswers)
+            f.draftReturn.fold(
+              _.representeeAnswers,
+              _.representeeAnswers,
+              _.representeeAnswers
+            )
           ).map {
             case (answers, contactDetails) =>
-              sessionData -> ChangingRepresenteeContactAddressJourney(Right(f), answers, contactDetails)
+              sessionData -> ChangingRepresenteeContactAddressJourney(
+                Right(f),
+                answers,
+                contactDetails
+              )
           },
           Redirect(controllers.routes.StartController.start())
         )
 
-      case _ => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                              => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(
     journey: ChangingRepresenteeContactAddressJourney,
     address: Address,
     isManuallyEnteredAddress: Boolean
-  )(
-    implicit hc: HeaderCarrier,
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] = {
     val newContactDetails = journey.contactDetails.copy(address = address)
-    val newAnswers = journey.answers.fold(
+    val newAnswers        = journey.answers.fold(
       _.copy(
-        contactDetails             = Some(newContactDetails),
+        contactDetails = Some(newContactDetails),
         hasConfirmedContactDetails = false
       ),
       complete =>
@@ -127,7 +140,7 @@ class ChangeRepresenteeContactAddressController @Inject() (
           Some(complete.id),
           complete.dateOfDeath,
           Some(newContactDetails),
-          hasConfirmedPerson         = true,
+          hasConfirmedPerson = true,
           hasConfirmedContactDetails = false
         )
     )
@@ -160,19 +173,26 @@ class ChangeRepresenteeContactAddressController @Inject() (
   protected lazy val backLinkCall: ChangingRepresenteeContactAddressJourney => Call =
     _ => routes.RepresenteeController.checkYourAnswers()
 
-  protected lazy val isUkCall: Call           = routes.ChangeRepresenteeContactAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call     = routes.ChangeRepresenteeContactAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call = routes.ChangeRepresenteeContactAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call =
+  protected lazy val isUkCall: Call                    =
+    routes.ChangeRepresenteeContactAddressController.isUk()
+  protected lazy val isUkSubmitCall: Call              =
+    routes.ChangeRepresenteeContactAddressController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call          =
+    routes.ChangeRepresenteeContactAddressController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call    =
     routes.ChangeRepresenteeContactAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call = routes.ChangeRepresenteeContactAddressController.enterNonUkAddress()
+  protected lazy val enterNonUkAddressCall: Call       =
+    routes.ChangeRepresenteeContactAddressController.enterNonUkAddress()
   protected lazy val enterNonUkAddressSubmitCall: Call =
     routes.ChangeRepresenteeContactAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call = routes.ChangeRepresenteeContactAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call =
+  protected lazy val enterPostcodeCall: Call           =
+    routes.ChangeRepresenteeContactAddressController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call     =
     routes.ChangeRepresenteeContactAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call = routes.ChangeRepresenteeContactAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call =
+  protected lazy val selectAddressCall: Call           =
+    routes.ChangeRepresenteeContactAddressController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call     =
     routes.ChangeRepresenteeContactAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call = routes.RepresenteeController.checkYourAnswers()
+  protected lazy val continueCall: Call                =
+    routes.RepresenteeController.checkYourAnswers()
 }

@@ -72,7 +72,9 @@ class SubscriptionControllerSpec
   val sessionWithSubscriptionDetails =
     SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails, ggCredId)))
 
-  def mockSubscribe(expectedSubscriptionDetails: SubscriptionDetails)(response: Either[Error, SubscriptionResponse]) =
+  def mockSubscribe(
+    expectedSubscriptionDetails: SubscriptionDetails
+  )(response: Either[Error, SubscriptionResponse]) =
     (mockSubscriptionService
       .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
       .expects(expectedSubscriptionDetails, *)
@@ -80,7 +82,8 @@ class SubscriptionControllerSpec
 
   def redirectToStart(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: SubscriptionReady => true
         case _                    => false
       }
@@ -101,7 +104,11 @@ class SubscriptionControllerSpec
           val individualSessionWithSubscriptionDetails =
             SessionData.empty.copy(
               journeyStatus = Some(
-                SubscriptionReady(sample[SubscriptionDetails].copy(name = Right(sample[IndividualName])), ggCredId)
+                SubscriptionReady(
+                  sample[SubscriptionDetails]
+                    .copy(name = Right(sample[IndividualName])),
+                  ggCredId
+                )
               )
             )
           inSequence {
@@ -110,15 +117,22 @@ class SubscriptionControllerSpec
           }
 
           val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(messageFromMessageKey("subscription.individual.title"))
+          status(result)        shouldBe OK
+          contentAsString(result) should include(
+            messageFromMessageKey("subscription.individual.title")
+          )
         }
 
         "there are subscription details in session for an organisation" in {
           val organisationSessionWithSubscriptionDetails =
             SessionData.empty.copy(
-              journeyStatus =
-                Some(SubscriptionReady(sample[SubscriptionDetails].copy(name = Left(sample[TrustName])), ggCredId))
+              journeyStatus = Some(
+                SubscriptionReady(
+                  sample[SubscriptionDetails]
+                    .copy(name = Left(sample[TrustName])),
+                  ggCredId
+                )
+              )
             )
           inSequence {
             mockAuthWithNoRetrievals()
@@ -126,8 +140,10 @@ class SubscriptionControllerSpec
           }
 
           val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(messageFromMessageKey("subscription.organisation.title"))
+          status(result)        shouldBe OK
+          contentAsString(result) should include(
+            messageFromMessageKey("subscription.organisation.title")
+          )
         }
 
       }
@@ -140,7 +156,7 @@ class SubscriptionControllerSpec
         controller.checkYourDetailsSubmit()(requestWithCSRFToken)
 
       val subscriptionSuccessfulResponse = SubscriptionSuccessful("number")
-      val accountDetails = SubscribedDetails(
+      val accountDetails                 = SubscribedDetails(
         subscriptionDetails.name,
         subscriptionDetails.emailAddress,
         subscriptionDetails.address,
@@ -152,7 +168,11 @@ class SubscriptionControllerSpec
 
       val sessionWithSubscriptionComplete =
         SessionData.empty
-          .copy(journeyStatus = Some(Subscribed(accountDetails, ggCredId, None, List.empty, List.empty)))
+          .copy(journeyStatus =
+            Some(
+              Subscribed(accountDetails, ggCredId, None, List.empty, List.empty)
+            )
+          )
 
       behave like redirectToStart(performAction)
 
@@ -172,7 +192,9 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithSubscriptionDetails)
-            mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
+            mockSubscribe(subscriptionDetails)(
+              Right(subscriptionSuccessfulResponse)
+            )
             mockStoreSession(sessionWithSubscriptionComplete)(Left(Error("")))
           }
 
@@ -187,11 +209,16 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithSubscriptionDetails)
-            mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
+            mockSubscribe(subscriptionDetails)(
+              Right(subscriptionSuccessfulResponse)
+            )
             mockStoreSession(sessionWithSubscriptionComplete)(Right(()))
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.subscribed())
+          checkIsRedirect(
+            performAction(),
+            onboardingRoutes.SubscriptionController.subscribed()
+          )
         }
 
       }
@@ -211,7 +238,8 @@ class SubscriptionControllerSpec
 
           checkIsRedirect(
             performAction(),
-            onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+            onboardingRoutes.SubscriptionController
+              .alreadySubscribedWithDifferentGGAccount()
           )
         }
 
@@ -225,7 +253,8 @@ class SubscriptionControllerSpec
         controller.subscribed()(FakeRequest())
 
       redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: Subscribed => true
           case _             => false
         }
@@ -235,7 +264,7 @@ class SubscriptionControllerSpec
 
         "there is a subscription response and subscription details in session" in {
           val cgtReferenceNumber = UUID.randomUUID().toString
-          val session = SessionData.empty.copy(
+          val session            = SessionData.empty.copy(
             journeyStatus = Some(
               Subscribed(
                 SubscribedDetails(
@@ -261,9 +290,11 @@ class SubscriptionControllerSpec
           }
 
           val result = performAction()
-          status(result)          shouldBe OK
+          status(result)        shouldBe OK
           contentAsString(result) should include(cgtReferenceNumber)
-          contentAsString(result) should include(messageFromMessageKey("subscribed.title"))
+          contentAsString(result) should include(
+            messageFromMessageKey("subscribed.title")
+          )
 
         }
       }
@@ -276,7 +307,8 @@ class SubscriptionControllerSpec
         controller.alreadySubscribedWithDifferentGGAccount()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case AlreadySubscribedWithDifferentGGAccount(_, _) => true
           case _                                             => false
         }
@@ -293,8 +325,12 @@ class SubscriptionControllerSpec
           }
 
           val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(messageFromMessageKey("alreadySubscribedWithDifferentGGAccount.title"))
+          status(result)        shouldBe OK
+          contentAsString(result) should include(
+            messageFromMessageKey(
+              "alreadySubscribedWithDifferentGGAccount.title"
+            )
+          )
 
         }
 
@@ -308,7 +344,8 @@ class SubscriptionControllerSpec
         controller.changeGGAccountForSubscription()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction, {
+        performAction,
+        {
           case _: SubscriptionReady => true
           case _                    => false
         }
@@ -319,12 +356,17 @@ class SubscriptionControllerSpec
         "the session data indicates that the user has already subscribed with a different gg account" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(sample[SubscriptionReady])))
+            mockGetSession(
+              SessionData.empty
+                .copy(journeyStatus = Some(sample[SubscriptionReady]))
+            )
           }
 
           val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(messageFromMessageKey("changeGGAccount.title"))
+          status(result)        shouldBe OK
+          contentAsString(result) should include(
+            messageFromMessageKey("changeGGAccount.title")
+          )
 
         }
 

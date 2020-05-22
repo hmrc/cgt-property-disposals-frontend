@@ -46,32 +46,50 @@ class DraftReturnSavedController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging {
 
-  def draftReturnSaved(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(subscribedDetails, _, agentReferenceNumber, draftReturn)) =>
-        val draftReturnWithLastUpdated = draftReturn.fold(
-          _.copy(lastUpdatedDate = TimeUtils.today()),
-          _.copy(lastUpdatedDate = TimeUtils.today()),
-          _.copy(lastUpdatedDate = TimeUtils.today())
-        )
+  def draftReturnSaved(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      request.sessionData.flatMap(_.journeyStatus) match {
+        case Some(
+              FillingOutReturn(
+                subscribedDetails,
+                _,
+                agentReferenceNumber,
+                draftReturn
+              )
+            ) =>
+          val draftReturnWithLastUpdated = draftReturn.fold(
+            _.copy(lastUpdatedDate = TimeUtils.today()),
+            _.copy(lastUpdatedDate = TimeUtils.today()),
+            _.copy(lastUpdatedDate = TimeUtils.today())
+          )
 
-        val response = returnsService
-          .storeDraftReturn(draftReturnWithLastUpdated, subscribedDetails.cgtReference, agentReferenceNumber)
-
-        response.fold(
-          { e =>
-            logger.error(
-              s"For cgt reference ${subscribedDetails.cgtReference.value}, got the following error ${e.value}"
+          val response = returnsService
+            .storeDraftReturn(
+              draftReturnWithLastUpdated,
+              subscribedDetails.cgtReference,
+              agentReferenceNumber
             )
-            errorHandler.errorResult()
-          },
-          _ => Ok(returnSavedPage(draftReturnWithLastUpdated, subscribedDetails.isATrust))
-        )
 
-      case _ =>
-        Future.successful(Redirect(baseRoutes.StartController.start()))
+          response.fold(
+            { e =>
+              logger.error(
+                s"For cgt reference ${subscribedDetails.cgtReference.value}, got the following error ${e.value}"
+              )
+              errorHandler.errorResult()
+            },
+            _ =>
+              Ok(
+                returnSavedPage(
+                  draftReturnWithLastUpdated,
+                  subscribedDetails.isATrust
+                )
+              )
+          )
+
+        case _ =>
+          Future.successful(Redirect(baseRoutes.StartController.start()))
+      }
+
     }
-
-  }
 
 }

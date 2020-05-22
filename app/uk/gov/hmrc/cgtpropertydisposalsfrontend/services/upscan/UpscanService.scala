@@ -42,8 +42,8 @@ trait UpscanService {
   def initiate(
     errorRedirect: Call,
     successRedirect: UploadReference => Call
-  )(
-    implicit hc: HeaderCarrier
+  )(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, UpscanUpload]
 
   def getUpscanUpload(
@@ -64,34 +64,33 @@ class UpscanServiceImpl @Inject() (
     successRedirect: UploadReference => Call
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanUpload] =
     for {
-      uploadReference <- EitherT.pure(UploadReference(UUID.randomUUID().toString))
-      httpResponse <- upscanConnector
-                       .initiate(
-                         errorRedirect,
-                         successRedirect(uploadReference),
-                         uploadReference
-                       )
+      uploadReference  <- EitherT.pure(UploadReference(UUID.randomUUID().toString))
+      httpResponse     <- upscanConnector
+                        .initiate(
+                          errorRedirect,
+                          successRedirect(uploadReference),
+                          uploadReference
+                        )
       upscanUploadMeta <- EitherT.fromOption(
-                           httpResponse.json.validate[UpscanUploadMeta].asOpt,
-                           Error("could not parse upscan initiate response")
-                         )
-      upscanUpload <- EitherT.pure(
-                       UpscanUpload(uploadReference, upscanUploadMeta, TimeUtils.now(), None)
-                     )
-      _ <- upscanConnector.saveUpscanUpload(upscanUpload)
+                            httpResponse.json.validate[UpscanUploadMeta].asOpt,
+                            Error("could not parse upscan initiate response")
+                          )
+      upscanUpload     <- EitherT.pure(
+                        UpscanUpload(uploadReference, upscanUploadMeta, TimeUtils.now(), None)
+                      )
+      _                <- upscanConnector.saveUpscanUpload(upscanUpload)
     } yield upscanUpload
 
   override def getUpscanUpload(
     uploadReference: UploadReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanUpload] =
     upscanConnector.getUpscanUpload(uploadReference).subflatMap { response =>
-      if (response.status === OK) {
+      if (response.status === OK)
         response
           .parseJSON[UpscanUpload]()
           .leftMap(Error(_))
-      } else {
+      else
         Left(Error(s"call to get upscan upload failed ${response.status}"))
-      }
     }
 
 }

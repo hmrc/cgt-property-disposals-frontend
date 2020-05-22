@@ -43,11 +43,18 @@ class SubscriptionEnterEmailControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  override def toJourneyStatus(journeyType: EnteringSubscriptionEmail): JourneyStatus = journeyType.journey
+  override def toJourneyStatus(
+    journeyType: EnteringSubscriptionEmail
+  ): JourneyStatus = journeyType.journey
 
   override val validJourneyStatus: EnteringSubscriptionEmail =
     EnteringSubscriptionEmail(
-      SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None), None, sample[GGCredId], None)
+      SubscriptionMissingData(
+        sample[BusinessPartnerRecord].copy(emailAddress = None),
+        None,
+        sample[GGCredId],
+        None
+      )
     )
 
   override val validVerificationCompleteJourneyStatus: EnteringSubscriptionEmail =
@@ -70,16 +77,23 @@ class SubscriptionEnterEmailControllerSpec
     )
   }
 
-  override val mockUpdateEmail
-    : Option[(EnteringSubscriptionEmail, EnteringSubscriptionEmail, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail: Option[
+    (
+      EnteringSubscriptionEmail,
+      EnteringSubscriptionEmail,
+      Either[Error, Unit]
+    ) => Unit
+  ] = None
 
-  override lazy val controller: SubscriptionEnterEmailController = instanceOf[SubscriptionEnterEmailController]
+  override lazy val controller: SubscriptionEnterEmailController =
+    instanceOf[SubscriptionEnterEmailController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction, {
+      performAction,
+      {
         case _: SubscriptionMissingData => true
         case _                          => false
       }
@@ -99,13 +113,18 @@ class SubscriptionEnterEmailControllerSpec
     "handling submitted email addresses" must {
 
       def performAction(data: (String, String)*): Future[Result] =
-        controller.enterEmailSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken)
+        controller.enterEmailSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
       behave like enterEmailSubmit(
         performAction,
-        ContactName(validJourneyStatus.journey.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName())),
+        ContactName(
+          validJourneyStatus.journey.businessPartnerRecord.name
+            .fold(_.value, n => n.makeSingleName())
+        ),
         emailRoutes.SubscriptionEnterEmailController.verifyEmail,
         emailRoutes.SubscriptionEnterEmailController.checkYourInbox()
       )

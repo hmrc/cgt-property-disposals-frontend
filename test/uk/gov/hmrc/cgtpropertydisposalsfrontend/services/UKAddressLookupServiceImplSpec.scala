@@ -36,7 +36,10 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
 
   val mockConnector = mock[AddressLookupConnector]
 
-  def mockLookupAddress(expectedPostcode: Postcode, filter: Option[String] = None)(
+  def mockLookupAddress(
+    expectedPostcode: Postcode,
+    filter: Option[String] = None
+  )(
     result: Either[Error, HttpResponse]
   ) =
     (mockConnector
@@ -44,7 +47,8 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val service = new UKAddressLookupServiceImpl(mockConnector, MockMetrics.metrics)
+  val service =
+    new UKAddressLookupServiceImpl(mockConnector, MockMetrics.metrics)
 
   "AddressLookupServiceImpl" when {
 
@@ -58,25 +62,35 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
         "the http response does not come back with status 200" in {
           mockLookupAddress(postcode)(Right(HttpResponse(500)))
 
-          await(service.lookupAddress(postcode, None).value).isLeft shouldBe true
+          await(
+            service.lookupAddress(postcode, None).value
+          ).isLeft shouldBe true
         }
 
         "when the call to the connector fails" in {
           mockLookupAddress(postcode)(Left(Error("uh oh!")))
 
-          await(service.lookupAddress(postcode, None).value).isLeft shouldBe true
+          await(
+            service.lookupAddress(postcode, None).value
+          ).isLeft shouldBe true
         }
 
         "there is no JSON in the body of the response" in {
           mockLookupAddress(postcode)(Right(HttpResponse(200)))
 
-          await(service.lookupAddress(postcode, None).value).isLeft shouldBe true
+          await(
+            service.lookupAddress(postcode, None).value
+          ).isLeft shouldBe true
         }
 
         "the JSON in the body of the response cannot be parsed" in {
-          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(JsNumber(1)))))
+          mockLookupAddress(postcode)(
+            Right(HttpResponse(200, Some(JsNumber(1))))
+          )
 
-          await(service.lookupAddress(postcode, None).value).isLeft shouldBe true
+          await(
+            service.lookupAddress(postcode, None).value
+          ).isLeft shouldBe true
         }
 
         "there are no lines of address found in the response" in {
@@ -100,7 +114,9 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
 
           mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
 
-          await(service.lookupAddress(postcode, None).value).isLeft shouldBe true
+          await(
+            service.lookupAddress(postcode, None).value
+          ).isLeft shouldBe true
         }
 
       }
@@ -157,11 +173,35 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
             postcode,
             None,
             List(
-              UkAddress("line1", Some("line2"), Some("town"), Some("county"), Postcode("ABC 123")),
+              UkAddress(
+                "line1",
+                Some("line2"),
+                Some("town"),
+                Some("county"),
+                Postcode("ABC 123")
+              ),
               UkAddress("line1", None, Some("town"), None, Postcode("ABC 123")),
-              UkAddress("line1", None, Some("town"), Some("county"), Postcode("ABC 123")),
-              UkAddress("line1", Some("line2"), Some("town"), None, Postcode("ABC 123")),
-              UkAddress("line1", Some("line2, line3"), Some("town"), None, Postcode("ABC 123"))
+              UkAddress(
+                "line1",
+                None,
+                Some("town"),
+                Some("county"),
+                Postcode("ABC 123")
+              ),
+              UkAddress(
+                "line1",
+                Some("line2"),
+                Some("town"),
+                None,
+                Postcode("ABC 123")
+              ),
+              UkAddress(
+                "line1",
+                Some("line2, line3"),
+                Some("town"),
+                None,
+                Postcode("ABC 123")
+              )
             )
           )
         )

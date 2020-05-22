@@ -28,7 +28,9 @@ class AcquisitionDetailsAnswersSpec extends WordSpec with Matchers with ScalaChe
 
     "have a method which converts incomplete answers to complete answers" in {
       forAll { completeAnswers: CompleteAcquisitionDetailsAnswers =>
-        IncompleteAcquisitionDetailsAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteAcquisitionDetailsAnswers(
+        IncompleteAcquisitionDetailsAnswers.fromCompleteAnswers(
+          completeAnswers
+        ) shouldBe IncompleteAcquisitionDetailsAnswers(
           Some(completeAnswers.acquisitionMethod),
           Some(completeAnswers.acquisitionDate),
           Some(completeAnswers.acquisitionPrice),
@@ -45,8 +47,9 @@ class AcquisitionDetailsAnswersSpec extends WordSpec with Matchers with ScalaChe
 
       "have a method which unsets fields" when {
 
-        val completeAnswers =
-          sample[CompleteAcquisitionDetailsAnswers].copy(rebasedAcquisitionPrice = Some(sample[AmountInPence]))
+        val completeAnswers   =
+          sample[CompleteAcquisitionDetailsAnswers]
+            .copy(rebasedAcquisitionPrice = Some(sample[AmountInPence]))
         val incompleteAnswers =
           IncompleteAcquisitionDetailsAnswers(
             Some(completeAnswers.acquisitionMethod),
@@ -59,27 +62,40 @@ class AcquisitionDetailsAnswersSpec extends WordSpec with Matchers with ScalaChe
           )
 
         "given incomplete answers" in {
-          incompleteAnswers.unset(_.acquisitionMethod) shouldBe incompleteAnswers.copy(acquisitionMethod = None)
-          incompleteAnswers.unset(_.acquisitionDate)   shouldBe incompleteAnswers.copy(acquisitionDate   = None)
-          incompleteAnswers.unset(_.acquisitionPrice)  shouldBe incompleteAnswers.copy(acquisitionPrice  = None)
-          incompleteAnswers.unset(_.rebasedAcquisitionPrice) shouldBe incompleteAnswers.copy(rebasedAcquisitionPrice =
-            None
-          )
-          incompleteAnswers.unset(_.improvementCosts) shouldBe incompleteAnswers.copy(improvementCosts = None)
-          incompleteAnswers.unset(_.acquisitionFees)  shouldBe incompleteAnswers.copy(acquisitionFees  = None)
-          incompleteAnswers.unset(_.shouldUseRebase)  shouldBe incompleteAnswers.copy(shouldUseRebase  = None)
+          incompleteAnswers.unset(
+            _.acquisitionMethod
+          )                                           shouldBe incompleteAnswers.copy(acquisitionMethod = None)
+          incompleteAnswers.unset(_.acquisitionDate)  shouldBe incompleteAnswers
+            .copy(acquisitionDate = None)
+          incompleteAnswers.unset(_.acquisitionPrice) shouldBe incompleteAnswers
+            .copy(acquisitionPrice = None)
+          incompleteAnswers.unset(
+            _.rebasedAcquisitionPrice
+          )                                           shouldBe incompleteAnswers.copy(rebasedAcquisitionPrice = None)
+          incompleteAnswers.unset(_.improvementCosts) shouldBe incompleteAnswers
+            .copy(improvementCosts = None)
+          incompleteAnswers.unset(_.acquisitionFees)  shouldBe incompleteAnswers
+            .copy(acquisitionFees = None)
+          incompleteAnswers.unset(_.shouldUseRebase)  shouldBe incompleteAnswers
+            .copy(shouldUseRebase = None)
         }
 
         "given complete answers" in {
-          completeAnswers.unset(_.acquisitionMethod) shouldBe incompleteAnswers.copy(acquisitionMethod = None)
-          completeAnswers.unset(_.acquisitionDate)   shouldBe incompleteAnswers.copy(acquisitionDate   = None)
-          completeAnswers.unset(_.acquisitionPrice)  shouldBe incompleteAnswers.copy(acquisitionPrice  = None)
-          completeAnswers.unset(_.rebasedAcquisitionPrice) shouldBe incompleteAnswers.copy(rebasedAcquisitionPrice =
-            None
-          )
-          completeAnswers.unset(_.improvementCosts) shouldBe incompleteAnswers.copy(improvementCosts = None)
-          completeAnswers.unset(_.acquisitionFees)  shouldBe incompleteAnswers.copy(acquisitionFees  = None)
-          completeAnswers.unset(_.shouldUseRebase)  shouldBe incompleteAnswers.copy(shouldUseRebase  = None)
+          completeAnswers.unset(_.acquisitionMethod) shouldBe incompleteAnswers
+            .copy(acquisitionMethod = None)
+          completeAnswers.unset(_.acquisitionDate)   shouldBe incompleteAnswers
+            .copy(acquisitionDate = None)
+          completeAnswers.unset(_.acquisitionPrice)  shouldBe incompleteAnswers
+            .copy(acquisitionPrice = None)
+          completeAnswers.unset(
+            _.rebasedAcquisitionPrice
+          )                                          shouldBe incompleteAnswers.copy(rebasedAcquisitionPrice = None)
+          completeAnswers.unset(_.improvementCosts)  shouldBe incompleteAnswers
+            .copy(improvementCosts = None)
+          completeAnswers.unset(_.acquisitionFees)   shouldBe incompleteAnswers
+            .copy(acquisitionFees = None)
+          completeAnswers.unset(_.shouldUseRebase)   shouldBe incompleteAnswers
+            .copy(shouldUseRebase = None)
         }
 
       }

@@ -24,5 +24,6 @@ final case class WrongGGAccountEvent(
 )
 
 object WrongGGAccountEvent {
-  implicit val format: OFormat[WrongGGAccountEvent] = Json.format[WrongGGAccountEvent]
+  implicit val format: OFormat[WrongGGAccountEvent] =
+    Json.format[WrongGGAccountEvent]
 }

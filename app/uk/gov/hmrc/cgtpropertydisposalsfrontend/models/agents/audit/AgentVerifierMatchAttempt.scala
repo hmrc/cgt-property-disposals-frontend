@@ -32,11 +32,12 @@ object AgentVerifierMatchAttempt {
 
   implicit val verifierWrites: Writes[Either[Country, Postcode]] = Writes(
     _.fold(
-      country => JsObject(Map("country"   -> Json.toJson(country))),
+      country => JsObject(Map("country" -> Json.toJson(country))),
       postcode => JsObject(Map("postcode" -> JsString(postcode.value)))
     )
   )
 
-  implicit val writes: Writes[AgentVerifierMatchAttempt] = Json.writes[AgentVerifierMatchAttempt]
+  implicit val writes: Writes[AgentVerifierMatchAttempt] =
+    Json.writes[AgentVerifierMatchAttempt]
 
 }

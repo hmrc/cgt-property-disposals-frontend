@@ -32,19 +32,22 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
 trait AddressLookupConnector {
 
-  def lookupAddress(postcode: Postcode, filter: Option[String])(
-    implicit
+  def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
 }
 
 @Singleton
-class AddressLookupConnectorImpl @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(
-  implicit ec: ExecutionContext
+class AddressLookupConnectorImpl @Inject() (
+  http: HttpClient,
+  servicesConfig: ServicesConfig
+)(implicit
+  ec: ExecutionContext
 ) extends AddressLookupConnector {
 
-  val url: String = servicesConfig.baseUrl("address-lookup") + "/v2/uk/addresses"
+  val url: String =
+    servicesConfig.baseUrl("address-lookup") + "/v2/uk/addresses"
 
   val headers: Map[String, String] = {
     val userAgent = servicesConfig.getString(
@@ -53,11 +56,13 @@ class AddressLookupConnectorImpl @Inject() (http: HttpClient, servicesConfig: Se
     Map("User-Agent" -> userAgent)
   }
 
-  override def lookupAddress(postcode: Postcode, filter: Option[String])(
-    implicit hc: HeaderCarrier
+  override def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
+    hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val queryParameters = {
-      val paramMap = Map("postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase)
+      val paramMap = Map(
+        "postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase
+      )
       filter.fold(paramMap)(f => paramMap.updated("filter", URLEncoder.encode(f, "UTF-8")))
     }
 

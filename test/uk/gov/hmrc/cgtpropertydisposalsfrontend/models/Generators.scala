@@ -102,11 +102,17 @@ sealed trait GenUtils {
   def gen[A](implicit arb: Arbitrary[A]): Gen[A] = arb.arbitrary
 
   // define our own Arbitrary instance for String to generate more legible strings
-  implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.nonEmptyListOf(Gen.alphaUpperChar).map(_.mkString("")))
+  implicit val stringArb: Arbitrary[String] = Arbitrary(
+    Gen.nonEmptyListOf(Gen.alphaUpperChar).map(_.mkString(""))
+  )
 
-  implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(-5e13.toLong, 5e13.toLong))
+  implicit val longArb: Arbitrary[Long] = Arbitrary(
+    Gen.choose(-5e13.toLong, 5e13.toLong)
+  )
 
-  implicit val bigDecimalGen: Arbitrary[BigDecimal] = Arbitrary(Gen.choose(0L, 1e9.toLong).map(BigDecimal(_)))
+  implicit val bigDecimalGen: Arbitrary[BigDecimal] = Arbitrary(
+    Gen.choose(0L, 1e9.toLong).map(BigDecimal(_))
+  )
 
   implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
     Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
@@ -116,7 +122,10 @@ sealed trait GenUtils {
     Arbitrary(
       Gen
         .chooseNum(0L, 10000L)
-        .map(l => LocalDateTime.ofInstant(Instant.ofEpochMilli(l), ZoneId.systemDefault()))
+        .map(l =>
+          LocalDateTime
+            .ofInstant(Instant.ofEpochMilli(l), ZoneId.systemDefault())
+        )
     )
 
 }
@@ -131,7 +140,8 @@ trait BusinessPartnerRecordGen { this: GenUtils =>
 
   implicit val bprArb: Gen[BusinessPartnerRecord] = gen[BusinessPartnerRecord]
 
-  implicit val bprRequestArb: Gen[BusinessPartnerRecordRequest] = gen[BusinessPartnerRecordRequest]
+  implicit val bprRequestArb: Gen[BusinessPartnerRecordRequest] =
+    gen[BusinessPartnerRecordRequest]
 
 }
 
@@ -167,32 +177,40 @@ trait JourneyStatusGen extends JourneyStatusLowerPriorityGen { this: GenUtils =>
 
   implicit val journeyStatusGen: Gen[JourneyStatus] = gen[JourneyStatus]
 
-  implicit val subscriptionReadyGen: Gen[SubscriptionReady] = gen[SubscriptionReady]
+  implicit val subscriptionReadyGen: Gen[SubscriptionReady] =
+    gen[SubscriptionReady]
 
 }
 
 trait JourneyStatusLowerPriorityGen { this: GenUtils =>
 
-  implicit val subscriptionSuccessfulGen: Gen[SubscriptionSuccessful] = gen[SubscriptionSuccessful]
+  implicit val subscriptionSuccessfulGen: Gen[SubscriptionSuccessful] =
+    gen[SubscriptionSuccessful]
 
   implicit val individualSupplyingInformationGen: Gen[IndividualSupplyingInformation] =
     gen[IndividualSupplyingInformation]
 
   implicit val subscribedGen: Gen[Subscribed] = gen[Subscribed]
 
-  implicit val individualMissingEmailGen: Gen[IndividualMissingEmail] = gen[IndividualMissingEmail]
+  implicit val individualMissingEmailGen: Gen[IndividualMissingEmail] =
+    gen[IndividualMissingEmail]
 
-  implicit val registrationReadyGen: Gen[RegistrationReady] = gen[RegistrationReady]
+  implicit val registrationReadyGen: Gen[RegistrationReady] =
+    gen[RegistrationReady]
 
-  implicit val startingNewDraftReturnGen: Gen[StartingNewDraftReturn] = gen[StartingNewDraftReturn]
+  implicit val startingNewDraftReturnGen: Gen[StartingNewDraftReturn] =
+    gen[StartingNewDraftReturn]
 
-  implicit val fillingOutReturnGen: Gen[FillingOutReturn] = gen[FillingOutReturn]
+  implicit val fillingOutReturnGen: Gen[FillingOutReturn] =
+    gen[FillingOutReturn]
 
-  implicit val justSubmittedReturnGen: Gen[JustSubmittedReturn] = gen[JustSubmittedReturn]
+  implicit val justSubmittedReturnGen: Gen[JustSubmittedReturn] =
+    gen[JustSubmittedReturn]
 
   implicit val viewingReturnGen: Gen[ViewingReturn] = gen[ViewingReturn]
 
-  implicit val submitReturnFailedGen: Gen[SubmitReturnFailed] = gen[SubmitReturnFailed]
+  implicit val submitReturnFailedGen: Gen[SubmitReturnFailed] =
+    gen[SubmitReturnFailed]
 
 }
 
@@ -205,7 +223,9 @@ trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
   implicit val postcodeGen: Gen[Postcode] = gen[Postcode]
 
   implicit val countryGen: Gen[Country] = {
-    val countries = Country.countryCodeToCountryName.map { case (code, name) => Country(code, Some(name)) }.toList
+    val countries = Country.countryCodeToCountryName.map {
+      case (code, name) => Country(code, Some(name))
+    }.toList
     Gen.oneOf(countries)
   }
 
@@ -219,7 +239,8 @@ trait AddressLowerPriorityGen { this: GenUtils =>
 
 trait NameMatchGen { this: GenUtils =>
 
-  implicit val trustNameMatchDetailsGen: Gen[TrustNameMatchDetails] = gen[TrustNameMatchDetails]
+  implicit val trustNameMatchDetailsGen: Gen[TrustNameMatchDetails] =
+    gen[TrustNameMatchDetails]
 
   implicit val individualSautrNameMatchDetailsGen: Gen[IndividualSautrNameMatchDetails] =
     gen[IndividualSautrNameMatchDetails]
@@ -235,13 +256,17 @@ trait NameMatchGen { this: GenUtils =>
 
 trait OnboardingDetailsGen { this: GenUtils =>
 
-  implicit val registrationDetailsArb: Gen[RegistrationDetails] = gen[RegistrationDetails]
+  implicit val registrationDetailsArb: Gen[RegistrationDetails] =
+    gen[RegistrationDetails]
 
-  implicit val subscriptionDetailsArb: Gen[SubscriptionDetails] = gen[SubscriptionDetails]
+  implicit val subscriptionDetailsArb: Gen[SubscriptionDetails] =
+    gen[SubscriptionDetails]
 
-  implicit val subscribedDetailsGen: Gen[SubscribedDetails] = gen[SubscribedDetails]
+  implicit val subscribedDetailsGen: Gen[SubscribedDetails] =
+    gen[SubscribedDetails]
 
-  implicit val subscribedUpdateDetailsGen: Gen[SubscribedUpdateDetails] = gen[SubscribedUpdateDetails]
+  implicit val subscribedUpdateDetailsGen: Gen[SubscribedUpdateDetails] =
+    gen[SubscribedUpdateDetails]
 
 }
 
@@ -265,9 +290,11 @@ trait UserTypeGen { this: GenUtils =>
 
 }
 
-trait TriageQuestionsGen extends LowerPriorityTriageQuestionsGen { this: GenUtils =>
+trait TriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
+  this: GenUtils =>
 
-  implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = gen[SingleDisposalTriageAnswers]
+  implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] =
+    gen[SingleDisposalTriageAnswers]
 
   implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
     gen[CompleteSingleDisposalTriageAnswers]
@@ -278,9 +305,11 @@ trait TriageQuestionsGen extends LowerPriorityTriageQuestionsGen { this: GenUtil
   implicit val incompleteMultipleDisposalsTriageAnswersGen: Gen[IncompleteMultipleDisposalsTriageAnswers] =
     gen[IncompleteMultipleDisposalsTriageAnswers]
 
-  implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
+  implicit val individualUserTypeGen: Gen[IndividualUserType] =
+    gen[IndividualUserType]
 
-  implicit val numberOfPropertiesGen: Gen[NumberOfProperties] = gen[NumberOfProperties]
+  implicit val numberOfPropertiesGen: Gen[NumberOfProperties] =
+    gen[NumberOfProperties]
 
   implicit val disposalDateGen: Gen[DisposalDate] = gen[DisposalDate]
 
@@ -301,19 +330,24 @@ trait ReturnGen extends LowerPriorityReturnGen { this: GenUtils =>
 
   implicit val draftReturnGen: Gen[DraftReturn] = gen[DraftReturn]
 
-  implicit val singleDisposalDraftReturnGen: Gen[DraftSingleDisposalReturn] = gen[DraftSingleDisposalReturn]
+  implicit val singleDisposalDraftReturnGen: Gen[DraftSingleDisposalReturn] =
+    gen[DraftSingleDisposalReturn]
 
   implicit val completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] = gen[CompleteSingleDisposalReturn]
 
-  implicit val submitReturnRequestGen: Gen[SubmitReturnRequest] = gen[SubmitReturnRequest]
+  implicit val submitReturnRequestGen: Gen[SubmitReturnRequest] =
+    gen[SubmitReturnRequest]
 
-  implicit val submitReturnResponseGen: Gen[SubmitReturnResponse] = gen[SubmitReturnResponse]
+  implicit val submitReturnResponseGen: Gen[SubmitReturnResponse] =
+    gen[SubmitReturnResponse]
 
-  implicit val listReturnsResponseGen: Gen[ListReturnsResponse] = gen[ListReturnsResponse]
+  implicit val listReturnsResponseGen: Gen[ListReturnsResponse] =
+    gen[ListReturnsResponse]
 
   implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
 
-  implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] = gen[CalculateCgtTaxDueRequest]
+  implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] =
+    gen[CalculateCgtTaxDueRequest]
 
 }
 
@@ -336,7 +370,8 @@ trait FileUploadGen { this: GenUtils =>
   implicit val incompleteUploadSupportingEvidenceAnswersGen: Gen[IncompleteSupportingEvidenceAnswers] =
     gen[IncompleteSupportingEvidenceAnswers]
 
-  implicit val supportingEvidenceGen: Gen[SupportingEvidence] = gen[SupportingEvidence]
+  implicit val supportingEvidenceGen: Gen[SupportingEvidence] =
+    gen[SupportingEvidence]
 
   implicit val uploadRequestGen: Gen[UploadRequest] = gen[UploadRequest]
 
@@ -365,7 +400,8 @@ trait DisposalDetailsGen { this: GenUtils =>
 
   implicit val shareOfPropertyGen: Gen[ShareOfProperty] =
     gen[ShareOfProperty].map {
-      case a: ShareOfProperty.Other if a.percentageValue > 100 => ShareOfProperty.Full
+      case a: ShareOfProperty.Other if a.percentageValue > 100 =>
+        ShareOfProperty.Full
       case other: ShareOfProperty                              => other
     }
 }
@@ -378,7 +414,8 @@ trait AcquisitionDetailsGen { this: GenUtils =>
   implicit val incompleteAcquisitionDetailsAnswersGen: Gen[IncompleteAcquisitionDetailsAnswers] =
     gen[IncompleteAcquisitionDetailsAnswers]
 
-  implicit val acquisitionMethodGen: Gen[AcquisitionMethod] = gen[AcquisitionMethod]
+  implicit val acquisitionMethodGen: Gen[AcquisitionMethod] =
+    gen[AcquisitionMethod]
 
   implicit val acquisitionDateGen: Gen[AcquisitionDate] = gen[AcquisitionDate]
 
@@ -388,13 +425,15 @@ trait ReliefDetailsGen { this: GenUtils =>
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
     gen[CompleteReliefDetailsAnswers].map {
-      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty =>
+        a.copy(otherReliefs = Some(NoOtherReliefs))
       case other                                                     => other
     }
 
   implicit val incompleteReliefDetailsAnswersGen: Gen[IncompleteReliefDetailsAnswers] =
     gen[IncompleteReliefDetailsAnswers].map {
-      case a: IncompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case a: IncompleteReliefDetailsAnswers if a.otherReliefs.isEmpty =>
+        a.copy(otherReliefs = Some(NoOtherReliefs))
       case other                                                       => other
     }
 
@@ -412,7 +451,8 @@ trait MoneyGen { this: GenUtils =>
 
   implicit val paymentsJourneyGen: Gen[PaymentsJourney] = gen[PaymentsJourney]
 
-  implicit val amountInPenceWithSourceGen: Gen[AmountInPenceWithSource] = gen[AmountInPenceWithSource]
+  implicit val amountInPenceWithSourceGen: Gen[AmountInPenceWithSource] =
+    gen[AmountInPenceWithSource]
 
 }
 
@@ -422,16 +462,20 @@ trait TaxYearGen { this: GenUtils =>
 
 }
 
-trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
+trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen {
+  this: GenUtils =>
 
-  override implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(0.toLong, 5e13.toLong))
+  override implicit val longArb: Arbitrary[Long] = Arbitrary(
+    Gen.choose(0.toLong, 5e13.toLong)
+  )
 
   implicit val reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] =
     gen[ReliefDetailsAnswers]
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
     gen[CompleteReliefDetailsAnswers].map {
-      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty =>
+        a.copy(otherReliefs = Some(NoOtherReliefs))
       case other                                                     => other
     }
 
@@ -457,20 +501,24 @@ trait ExemptionAndLossesAnswersGen { this: GenUtils =>
 
 trait YearToDateLiabilityAnswersGen extends LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
 
-  implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] = gen[YearToDateLiabilityAnswers]
+  implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] =
+    gen[YearToDateLiabilityAnswers]
 
   implicit val completeCalculatedYTDLiabilityAnswersGen: Gen[CompleteCalculatedYTDAnswers] =
     gen[CompleteCalculatedYTDAnswers].map {
       case a: CompleteCalculatedYTDAnswers if a.estimatedIncome > AmountInPence.zero && a.personalAllowance.isEmpty =>
         a.copy(personalAllowance = Some(AmountInPence.zero))
-      case other => other
+      case other                                                                                                    => other
     }
 
-  implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
+  implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] =
+    gen[CalculatedTaxDue]
 
-  implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
+  implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] =
+    gen[GainCalculatedTaxDue]
 
-  implicit val mandatoryEvidenceGen: Gen[MandatoryEvidence] = gen[MandatoryEvidence]
+  implicit val mandatoryEvidenceGen: Gen[MandatoryEvidence] =
+    gen[MandatoryEvidence]
 
 }
 
@@ -480,7 +528,9 @@ trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearTo
   implicit val incompleteCalculatedYTDLiabilityAnswersGen: Gen[IncompleteCalculatedYTDAnswers] =
     gen[IncompleteCalculatedYTDAnswers].map {
       case a: IncompleteCalculatedYTDAnswers
-          if a.estimatedIncome.exists(_ > AmountInPence.zero) && a.personalAllowance.isEmpty =>
+          if a.estimatedIncome.exists(
+            _ > AmountInPence.zero
+          ) && a.personalAllowance.isEmpty =>
         a.copy(personalAllowance = Some(AmountInPence.zero))
       case other => other
     }
@@ -507,24 +557,31 @@ trait ExamplePropertyDetailsAnswersGen { this: GenUtils =>
 
 }
 
-trait RepresenteeAnswersGen extends LowerPriorityRepresenteeAnswersGen { this: GenUtils =>
+trait RepresenteeAnswersGen extends LowerPriorityRepresenteeAnswersGen {
+  this: GenUtils =>
 
-  implicit val representeeAnswersGen: Gen[RepresenteeAnswers] = gen[RepresenteeAnswers]
+  implicit val representeeAnswersGen: Gen[RepresenteeAnswers] =
+    gen[RepresenteeAnswers]
 
   implicit val incompleteRepresenteeAnswersGen: Gen[IncompleteRepresenteeAnswers] = gen[IncompleteRepresenteeAnswers]
 
-  implicit val representeeReferenceIdGen: Gen[RepresenteeReferenceId] = gen[RepresenteeReferenceId]
+  implicit val representeeReferenceIdGen: Gen[RepresenteeReferenceId] =
+    gen[RepresenteeReferenceId]
 
-  implicit val representeeCgtReferenceGen: Gen[RepresenteeCgtReference] = gen[RepresenteeCgtReference]
+  implicit val representeeCgtReferenceGen: Gen[RepresenteeCgtReference] =
+    gen[RepresenteeCgtReference]
 
-  implicit val representeeContactDetailsGen: Gen[RepresenteeContactDetails] = gen[RepresenteeContactDetails]
+  implicit val representeeContactDetailsGen: Gen[RepresenteeContactDetails] =
+    gen[RepresenteeContactDetails]
 }
 
 trait LowerPriorityRepresenteeAnswersGen { this: GenUtils =>
 
-  implicit val completeRepresenteeAnswersGen: Gen[CompleteRepresenteeAnswers] = gen[CompleteRepresenteeAnswers]
+  implicit val completeRepresenteeAnswersGen: Gen[CompleteRepresenteeAnswers] =
+    gen[CompleteRepresenteeAnswers]
 
-  implicit val representeeSautrGen: Gen[RepresenteeSautr] = gen[RepresenteeSautr]
+  implicit val representeeSautrGen: Gen[RepresenteeSautr] =
+    gen[RepresenteeSautr]
 
   implicit val representeeNinoGen: Gen[RepresenteeNino] = gen[RepresenteeNino]
 

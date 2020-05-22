@@ -18,8 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class SubscriptionContactNameChangedEvent(oldContactName: String, newContactName: String)
+final case class SubscriptionContactNameChangedEvent(
+  oldContactName: String,
+  newContactName: String
+)
 
 object SubscriptionContactNameChangedEvent {
-  implicit val format: OFormat[SubscriptionContactNameChangedEvent] = Json.format[SubscriptionContactNameChangedEvent]
+  implicit val format: OFormat[SubscriptionContactNameChangedEvent] =
+    Json.format[SubscriptionContactNameChangedEvent]
 }

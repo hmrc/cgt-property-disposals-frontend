@@ -2986,6 +2986,23 @@ supporting-evidence.check-upscan-status.uploaded=Scan in progress
 supporting-evidence.check-upscan-status.button.checkAgain=Check status and continue
 supporting-evidence.check-upscan-status.button.uploadAnotherFile=Upload another file
 
+supporting-evidence.upload-failed.title=Sorry, there is a problem
+supporting-evidence.upload-failed.p1=We could not scan your document.
+supporting-evidence.upload-failed.p2=This could be because:
+supporting-evidence.upload-failed.bullet1=the service has a technical issue
+supporting-evidence.upload-failed.bullet2=your document was larger than 3MB
+supporting-evidence.upload-failed.p3=You''ll need to try again.
+supporting-evidence.upload-failed.button.tryAgain=Try again
+
+supporting-evidence.scan-failed.title=There is a problem with your document
+supporting-evidence.scan-failed.p1=The problem could be that:
+supporting-evidence.scan-failed.bullet1=the document had a virus or was corrupt
+supporting-evidence.scan-failed.bullet2=you did not select a document to upload
+supporting-evidence.scan-failed.bullet3=you uploaded the wrong type of document
+supporting-evidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG
+supporting-evidence.scan-failed.p3=You''ll need to try again.
+supporting-evidence.scan-failed.button.tryAgain=Try again
+
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement
 accessibilityStatement.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
@@ -3025,6 +3042,23 @@ mandatoryEvidence.check-upscan-status.failed=Failed
 mandatoryEvidence.check-upscan-status.changeFile=Change file
 mandatoryEvidence.check-upscan-status.button.checkStatusAndContinue=Check status and continue
 mandatoryEvidence.check-upscan-status.button.uploadAnotherFile=Upload another file
+
+mandatoryEvidence.failed.title=Sorry, there is a problem
+mandatoryEvidence.failed.p1=We could not scan your document.
+mandatoryEvidence.failed.p2=This could be because:
+mandatoryEvidence.failed.bullet1=the service has a technical issue
+mandatoryEvidence.failed.bullet2=your document was larger than 3MB
+mandatoryEvidence.failed.p3=You''ll need to try again.
+mandatoryEvidence.failed.button.tryAgain=Try again
+
+mandatoryEvidence.scan-failed.title=There is a problem with your document
+mandatoryEvidence.scan-failed.p1=The problem could be that:
+mandatoryEvidence.scan-failed.bullet1=the document had a virus or was corrupt
+mandatoryEvidence.scan-failed.bullet2=you did not select a document to upload
+mandatoryEvidence.scan-failed.bullet3=you uploaded the wrong type of document
+mandatoryEvidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG
+mandatoryEvidence.scan-failed.p3=You''ll need to try again.
+mandatoryEvidence.scan-failed.button.tryAgain=Try again
 
 agentNoEnrolment.title=Use your agents services account to access this service
 agentNoEnrolment.p1=You’ll need to sign in using your agent services account user ID and password. If you do not have one, you’ll need to <a href="{0}">create an agent services account</a>.

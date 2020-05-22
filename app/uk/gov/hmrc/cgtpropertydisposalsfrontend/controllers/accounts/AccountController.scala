@@ -48,33 +48,37 @@ class AccountController @Inject() (
     with SessionUpdates
     with Logging {
 
-  def manageYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request: RequestWithSessionData[AnyContent] =>
+  def manageYourDetails(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser(request)((_, subscribed) => Ok(manageYourDetailsPage(subscribed.subscribedDetails)))
-  }
-
-  def signedOut(): Action[AnyContent] = Action(implicit request => Ok(signedOutPage()))
-
-  def contactNameUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) {
-      case _ =>
-        Ok(detailUpdatedPage(SubscriptionDetail.ContactName))
     }
-  }
 
-  def contactEmailUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) {
-      case _ =>
-        Ok(detailUpdatedPage(SubscriptionDetail.Email))
-    }
-  }
+  def signedOut(): Action[AnyContent] =
+    Action(implicit request => Ok(signedOutPage()))
 
-  def contactAddressUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) {
-      case _ =>
-        Ok(detailUpdatedPage(SubscriptionDetail.Address))
+  def contactNameUpdated(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser(request) {
+        case _ =>
+          Ok(detailUpdatedPage(SubscriptionDetail.ContactName))
+      }
     }
-  }
+
+  def contactEmailUpdated(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser(request) {
+        case _ =>
+          Ok(detailUpdatedPage(SubscriptionDetail.Email))
+      }
+    }
+
+  def contactAddressUpdated(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser(request) {
+        case _ =>
+          Ok(detailUpdatedPage(SubscriptionDetail.Address))
+      }
+    }
 
   private def withSubscribedUser(request: RequestWithSessionData[_])(
     f: (SessionData, Subscribed) => Future[Result]
@@ -82,9 +86,13 @@ class AccountController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: Subscribed)) =>
         f(s, r)
-      case _ =>
+      case _                                     =>
         Future.successful(
-          SeeOther(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start().url)
+          SeeOther(
+            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
+              .start()
+              .url
+          )
         )
     }
 }

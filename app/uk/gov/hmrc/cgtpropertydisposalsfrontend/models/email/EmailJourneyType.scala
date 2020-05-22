@@ -33,8 +33,9 @@ object EmailJourneyType {
 
   object Onboarding {
 
-    final case class EnteringRegistrationEmail(journey: Either[RegistrationReady, IndividualMissingEmail])
-        extends Onboarding
+    final case class EnteringRegistrationEmail(
+      journey: Either[RegistrationReady, IndividualMissingEmail]
+    ) extends Onboarding
 
     final case class ChangingRegistrationEmail(journey: RegistrationReady) extends Onboarding
 
@@ -65,7 +66,8 @@ object EmailJourneyType {
     def captionMessageKey: String =
       e match {
         case _: EmailJourneyType.Onboarding                       => "subscription.caption"
-        case _: EmailJourneyType.Returns.ChangingRepresenteeEmail => "representee.caption"
+        case _: EmailJourneyType.Returns.ChangingRepresenteeEmail =>
+          "representee.caption"
         case _: EmailJourneyType.ManagingSubscription             => "account.caption"
       }
 

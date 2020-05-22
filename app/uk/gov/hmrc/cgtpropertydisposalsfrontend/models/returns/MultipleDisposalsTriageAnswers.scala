@@ -46,15 +46,29 @@ object MultipleDisposalsTriageAnswers {
 
   object IncompleteMultipleDisposalsTriageAnswers {
     val empty: IncompleteMultipleDisposalsTriageAnswers =
-      IncompleteMultipleDisposalsTriageAnswers(None, None, None, None, None, None, None, None, None)
+      IncompleteMultipleDisposalsTriageAnswers(
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None
+      )
 
-    def fromCompleteAnswers(c: CompleteMultipleDisposalsTriageAnswers): IncompleteMultipleDisposalsTriageAnswers =
+    def fromCompleteAnswers(
+      c: CompleteMultipleDisposalsTriageAnswers
+    ): IncompleteMultipleDisposalsTriageAnswers =
       IncompleteMultipleDisposalsTriageAnswers(
         c.individualUserType,
         Some(c.numberOfProperties),
         Some(c.countryOfResidence.isUk()),
         if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
-        if (c.countryOfResidence.isUk()) Some(c.assetTypes === List(AssetType.Residential)) else None,
+        if (c.countryOfResidence.isUk())
+          Some(c.assetTypes === List(AssetType.Residential))
+        else None,
         Some(c.assetTypes),
         Some(true),
         Some(c.taxYear),
@@ -71,26 +85,38 @@ object MultipleDisposalsTriageAnswers {
     completionDate: CompletionDate
   ) extends MultipleDisposalsTriageAnswers
 
-  implicit class MultipleDisposalsTriageAnswersOps(private val m: MultipleDisposalsTriageAnswers) extends AnyVal {
+  implicit class MultipleDisposalsTriageAnswersOps(
+    private val m: MultipleDisposalsTriageAnswers
+  ) extends AnyVal {
     def fold[A](
       ifIncomplete: IncompleteMultipleDisposalsTriageAnswers => A,
       ifComplete: CompleteMultipleDisposalsTriageAnswers => A
-    ): A = m match {
-      case i: IncompleteMultipleDisposalsTriageAnswers => ifIncomplete(i)
-      case c: CompleteMultipleDisposalsTriageAnswers   => ifComplete(c)
-    }
+    ): A =
+      m match {
+        case i: IncompleteMultipleDisposalsTriageAnswers => ifIncomplete(i)
+        case c: CompleteMultipleDisposalsTriageAnswers   => ifComplete(c)
+      }
 
     def unset[A](
-      fieldLens: IncompleteMultipleDisposalsTriageAnswers.type => Lens[IncompleteMultipleDisposalsTriageAnswers, Option[
-        A
-      ]]
+      fieldLens: IncompleteMultipleDisposalsTriageAnswers.type => Lens[
+        IncompleteMultipleDisposalsTriageAnswers,
+        Option[
+          A
+        ]
+      ]
     ): IncompleteMultipleDisposalsTriageAnswers =
       fieldLens(IncompleteMultipleDisposalsTriageAnswers).set(None)(
-        fold(identity, IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers)
+        fold(
+          identity,
+          IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers
+        )
       )
 
     def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-      m.fold[Option[IndividualUserType]](_.individualUserType, _.individualUserType) match {
+      m.fold[Option[IndividualUserType]](
+        _.individualUserType,
+        _.individualUserType
+      ) match {
         case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
         case Some(Capacitor)              => Some(Right(Capacitor))
         case _                            => None
@@ -99,5 +125,6 @@ object MultipleDisposalsTriageAnswers {
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[MultipleDisposalsTriageAnswers] = derived.oformat()
+  implicit val format: OFormat[MultipleDisposalsTriageAnswers] =
+    derived.oformat()
 }

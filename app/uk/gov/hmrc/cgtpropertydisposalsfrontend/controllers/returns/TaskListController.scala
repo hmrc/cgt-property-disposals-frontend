@@ -63,63 +63,76 @@ class TaskListController @Inject() (
 
   private val s3UrlExpirySeconds: Long =
     configuration.underlying
-      .get[FiniteDuration]("microservice.services.upscan-initiate.s3-url-expiry-duration")
+      .get[FiniteDuration](
+        "microservice.services.upscan-initiate.s3-url-expiry-duration"
+      )
       .value
       .toSeconds
 
-  def taskList(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(f @ FillingOutReturn(_, _, _, draftReturn)) =>
-        handleExpiredFiles(draftReturn, f).fold(
-          { e =>
-            logger.warn("Could not handle expired files", e)
-            errorHandler.errorResult()
-          },
-          _.fold(
-            m => Ok(multipleDisposalsTaskListPage(m)),
-            s => Ok(singleDisposalTaskListPage(s)),
-            i => Ok(singleIndirectDisposalTaskListPage(i))
+  def taskList(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      request.sessionData.flatMap(_.journeyStatus) match {
+        case Some(f @ FillingOutReturn(_, _, _, draftReturn)) =>
+          handleExpiredFiles(draftReturn, f).fold(
+            { e =>
+              logger.warn("Could not handle expired files", e)
+              errorHandler.errorResult()
+            },
+            _.fold(
+              m => Ok(multipleDisposalsTaskListPage(m)),
+              s => Ok(singleDisposalTaskListPage(s)),
+              i => Ok(singleIndirectDisposalTaskListPage(i))
+            )
           )
-        )
 
-      case _ =>
-        Redirect(baseRoutes.StartController.start())
+        case _                                                =>
+          Redirect(baseRoutes.StartController.start())
+
+      }
 
     }
-
-  }
 
   private def handleExpiredFiles(
     draftReturn: DraftReturn,
     journey: FillingOutReturn
-  )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): EitherT[Future, Error, DraftReturn] = {
-    val updatedUploadSupportingEvidenceAnswers = getExpiredSupportingEvidence(draftReturn).map {
-      case (expired, answers) =>
-        val incompleteAnswers =
-          answers.fold(
-            identity,
-            c =>
-              IncompleteSupportingEvidenceAnswers(
-                Some(c.doYouWantToUploadSupportingEvidence),
-                c.evidences,
-                List.empty
-              )
+  )(implicit
+    request: RequestWithSessionData[_],
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, DraftReturn] = {
+    val updatedUploadSupportingEvidenceAnswers =
+      getExpiredSupportingEvidence(draftReturn).map {
+        case (expired, answers) =>
+          val incompleteAnswers =
+            answers.fold(
+              identity,
+              c =>
+                IncompleteSupportingEvidenceAnswers(
+                  Some(c.doYouWantToUploadSupportingEvidence),
+                  c.evidences,
+                  List.empty
+                )
+            )
+          incompleteAnswers.copy(
+            evidences = incompleteAnswers.evidences.diff(expired.toList),
+            expiredEvidences =
+              expired.toList ::: incompleteAnswers.expiredEvidences
           )
-        incompleteAnswers.copy(
-          evidences        = incompleteAnswers.evidences.diff(expired.toList),
-          expiredEvidences = expired.toList ::: incompleteAnswers.expiredEvidences
-        )
-    }
+      }
 
-    val updatedYearToDateAnswers = getExpiredMandatoryEvidence(draftReturn).map {
-      case (expired, answers) =>
-        answers match {
-          case c: CalculatedYTDAnswers =>
-            c.unset(_.mandatoryEvidence).unset(_.pendingUpscanUpload).copy(expiredEvidence = Some(expired))
-          case n: NonCalculatedYTDAnswers =>
-            n.unset(_.mandatoryEvidence).unset(_.pendingUpscanUpload).copy(expiredEvidence = Some(expired))
-        }
-    }
+    val updatedYearToDateAnswers =
+      getExpiredMandatoryEvidence(draftReturn).map {
+        case (expired, answers) =>
+          answers match {
+            case c: CalculatedYTDAnswers    =>
+              c.unset(_.mandatoryEvidence)
+                .unset(_.pendingUpscanUpload)
+                .copy(expiredEvidence = Some(expired))
+            case n: NonCalculatedYTDAnswers =>
+              n.unset(_.mandatoryEvidence)
+                .unset(_.pendingUpscanUpload)
+                .copy(expiredEvidence = Some(expired))
+          }
+      }
 
     if (updatedUploadSupportingEvidenceAnswers.isEmpty && updatedYearToDateAnswers.isEmpty)
       EitherT.pure[Future, Error](draftReturn)
@@ -127,35 +140,42 @@ class TaskListController @Inject() (
       val updatedDraftReturn = draftReturn.fold(
         m =>
           m.copy(
-            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(m.yearToDateLiabilityAnswers)(Some(_)),
-            supportingEvidenceAnswers =
-              updatedUploadSupportingEvidenceAnswers.fold(m.supportingEvidenceAnswers)(Some(_))
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
+              m.yearToDateLiabilityAnswers
+            )(Some(_)),
+            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
+              .fold(m.supportingEvidenceAnswers)(Some(_))
           ),
         s =>
           s.copy(
-            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(s.yearToDateLiabilityAnswers)(Some(_)),
-            supportingEvidenceAnswers =
-              updatedUploadSupportingEvidenceAnswers.fold(s.supportingEvidenceAnswers)(Some(_))
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
+              s.yearToDateLiabilityAnswers
+            )(Some(_)),
+            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
+              .fold(s.supportingEvidenceAnswers)(Some(_))
           ),
         i =>
           i.copy(
-            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(i.yearToDateLiabilityAnswers)(Some(_)),
-            supportingEvidenceAnswers =
-              updatedUploadSupportingEvidenceAnswers.fold(i.supportingEvidenceAnswers)(Some(_))
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
+              i.yearToDateLiabilityAnswers
+            )(Some(_)),
+            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers.fold(
+              i.supportingEvidenceAnswers
+            )(Some(_))
           )
       )
 
       for {
         _ <- returnsService.storeDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )
+               updatedDraftReturn,
+               journey.subscribedDetails.cgtReference,
+               journey.agentReferenceNumber
+             )
         _ <- EitherT(
-              updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-              )
-            )
+               updateSession(sessionStore, request)(
+                 _.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+               )
+             )
       } yield updatedDraftReturn
     }
 
@@ -165,7 +185,11 @@ class TaskListController @Inject() (
     draftReturn: DraftReturn
   ): Option[(NonEmptyList[SupportingEvidence], SupportingEvidenceAnswers)] =
     draftReturn
-      .fold(_.supportingEvidenceAnswers, _.supportingEvidenceAnswers, _.supportingEvidenceAnswers)
+      .fold(
+        _.supportingEvidenceAnswers,
+        _.supportingEvidenceAnswers,
+        _.supportingEvidenceAnswers
+      )
       .flatMap { answers =>
         val supportingEvidence = answers.fold(_.evidences, _.evidences)
         supportingEvidence.filter(f => fileHasExpired(f.uploadedOn)) match {
@@ -178,11 +202,17 @@ class TaskListController @Inject() (
     draftReturn: DraftReturn
   ): Option[(MandatoryEvidence, YearToDateLiabilityAnswers)] =
     draftReturn
-      .fold(_.yearToDateLiabilityAnswers, _.yearToDateLiabilityAnswers, _.yearToDateLiabilityAnswers)
+      .fold(
+        _.yearToDateLiabilityAnswers,
+        _.yearToDateLiabilityAnswers,
+        _.yearToDateLiabilityAnswers
+      )
       .flatMap { answers =>
         val mandatoryEvidence = answers match {
-          case c: CalculatedYTDAnswers    => c.fold(_.mandatoryEvidence, _.mandatoryEvidence)
-          case n: NonCalculatedYTDAnswers => n.fold(_.mandatoryEvidence, c => Some(c.mandatoryEvidence))
+          case c: CalculatedYTDAnswers    =>
+            c.fold(_.mandatoryEvidence, _.mandatoryEvidence)
+          case n: NonCalculatedYTDAnswers =>
+            n.fold(_.mandatoryEvidence, c => Some(c.mandatoryEvidence))
         }
 
         mandatoryEvidence

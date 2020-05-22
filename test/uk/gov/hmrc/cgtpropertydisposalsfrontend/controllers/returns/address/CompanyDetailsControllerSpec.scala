@@ -58,8 +58,10 @@ class CompanyDetailsControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
-      performAction, {
-        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn) => true
+      performAction,
+      {
+        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn) =>
+          true
         case _                                                               => false
       }
     )
@@ -80,18 +82,21 @@ class CompanyDetailsControllerSpec
     individualUserType: Option[IndividualUserType],
     companyAddress: Option[Address]
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
-    val draftReturn = sample[DraftSingleIndirectDisposalReturn].copy(
-      triageAnswers  = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType),
+    val draftReturn      = sample[DraftSingleIndirectDisposalReturn].copy(
+      triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+        .copy(individualUserType = individualUserType),
       companyAddress = companyAddress
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
-      draftReturn          = draftReturn,
-      subscribedDetails    = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber = if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber]) else None
+      draftReturn = draftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      agentReferenceNumber =
+        if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber])
+        else None
     )
-    val sessionData = SessionData.empty.copy(
+    val sessionData      = SessionData.empty.copy(
       journeyStatus = Some(fillingOutReturn),
-      userType      = Some(userType)
+      userType = Some(userType)
     )
     (sessionData, fillingOutReturn, draftReturn)
   }
@@ -197,7 +202,9 @@ class CompanyDetailsControllerSpec
             result,
             messageFromMessageKey(expectedTitleKey),
             doc =>
-              doc.select("#content > article > form").attr("action") shouldBe routes.CompanyDetailsController
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
                 .isUkSubmit()
                 .url
           )
@@ -255,18 +262,24 @@ class CompanyDetailsControllerSpec
     "handling submits on the is uk page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.isUkSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.isUkSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
       "show a form error" when {
 
-        def test(formData: (String, String)*)(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
             performAction(formData: _*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
@@ -280,7 +293,10 @@ class CompanyDetailsControllerSpec
               mockGetSession(individualState()._1)
             }
 
-            test()("isUk.companyDetails.error.required", "companyDetails.isUk.title")
+            test()(
+              "isUk.companyDetails.error.required",
+              "companyDetails.isUk.title"
+            )
           }
 
           "the user is a personal representative" in {
@@ -289,7 +305,10 @@ class CompanyDetailsControllerSpec
               mockGetSession(personalRepState()._1)
             }
 
-            test()("isUk.companyDetails.personalRep.error.required", "companyDetails.isUk.personalRep.title")
+            test()(
+              "isUk.companyDetails.personalRep.error.required",
+              "companyDetails.isUk.personalRep.title"
+            )
           }
 
           "the user is a capacitor" in {
@@ -298,7 +317,10 @@ class CompanyDetailsControllerSpec
               mockGetSession(capacitorState()._1)
             }
 
-            test()("isUk.companyDetails.capacitor.error.required", "companyDetails.isUk.capacitor.title")
+            test()(
+              "isUk.companyDetails.capacitor.error.required",
+              "companyDetails.isUk.capacitor.title"
+            )
           }
         }
 
@@ -308,7 +330,10 @@ class CompanyDetailsControllerSpec
             mockGetSession(agentState()._1)
           }
 
-          test()("isUk.companyDetails.agent.error.required", "companyDetails.isUk.agent.title")
+          test()(
+            "isUk.companyDetails.agent.error.required",
+            "companyDetails.isUk.agent.title"
+          )
         }
 
         "the user is a trust" in {
@@ -317,7 +342,10 @@ class CompanyDetailsControllerSpec
             mockGetSession(trustState()._1)
           }
 
-          test()("isUk.companyDetails.trust.error.required", "companyDetails.isUk.trust.title")
+          test()(
+            "isUk.companyDetails.trust.error.required",
+            "companyDetails.isUk.trust.title"
+          )
         }
 
       }
@@ -357,7 +385,8 @@ class CompanyDetailsControllerSpec
 
     "handling requests to display the enter uk company address page" must {
 
-      def performAction(): Future[Result] = controller.enterUkAddress()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -366,20 +395,29 @@ class CompanyDetailsControllerSpec
         def test(result: Future[Result], expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
             result,
-            messageFromMessageKey(expectedTitleKey), { doc =>
-              doc.select("#address > legend > h1 > span").text() shouldBe messageFromMessageKey(
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc
+                .select("#address > legend > h1 > span")
+                .text() shouldBe messageFromMessageKey(
                 "companyDetails.caption"
               )
 
-              doc.select("#address > div:nth-child(2) > label").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#address > div:nth-child(2) > label")
+                .text() shouldBe messageFromMessageKey(
                 "address.uk.companyDetails.line1.label"
               )
 
-              doc.select("#address > div:nth-child(3) > label").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#address > div:nth-child(3) > label")
+                .text() shouldBe messageFromMessageKey(
                 "address.uk.companyDetails.line2.label"
               )
 
-              doc.select("#content > article > form").attr("action") shouldBe routes.CompanyDetailsController
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
                 .enterUkAddressSubmit()
                 .url
             }
@@ -438,18 +476,24 @@ class CompanyDetailsControllerSpec
     "handling submitted uk company address" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.enterUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.enterUkAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
       "return a form error" when {
 
-        def test(formData: (String, String)*)(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
             performAction(formData: _*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
@@ -461,7 +505,10 @@ class CompanyDetailsControllerSpec
             mockGetSession(individualState()._1)
           }
 
-          test("postcode" -> "W1A2HV")("address-line1.companyDetails.error.required", "address.uk.companyDetails.title")
+          test("postcode" -> "W1A2HV")(
+            "address-line1.companyDetails.error.required",
+            "address.uk.companyDetails.title"
+          )
         }
 
         "address line 1 is too long" in {
@@ -473,7 +520,10 @@ class CompanyDetailsControllerSpec
           test(
             "address-line1" -> ("a" * 100),
             "postcode"      -> "W1A2HV"
-          )("address-line1.companyDetails.error.tooLong", "address.uk.companyDetails.agent.title")
+          )(
+            "address-line1.companyDetails.error.tooLong",
+            "address.uk.companyDetails.agent.title"
+          )
         }
 
         "address line 1 is invalid" in {
@@ -485,7 +535,10 @@ class CompanyDetailsControllerSpec
           test(
             "address-line1" -> "ab%csd",
             "postcode"      -> "W1A2HV"
-          )("address-line1.companyDetails.error.pattern", "address.uk.companyDetails.trust.title")
+          )(
+            "address-line1.companyDetails.error.pattern",
+            "address.uk.companyDetails.trust.title"
+          )
         }
 
         "address line 2 is too long" in {
@@ -497,7 +550,10 @@ class CompanyDetailsControllerSpec
             "address-line1" -> "Company name",
             "address-line2" -> ("a" * 100),
             "postcode"      -> "W1A2HV"
-          )("address-line2.companyDetails.error.tooLong", "address.uk.companyDetails.personalRep.title")
+          )(
+            "address-line2.companyDetails.error.tooLong",
+            "address.uk.companyDetails.personalRep.title"
+          )
         }
 
         "address line 2 is invalid" in {
@@ -510,7 +566,10 @@ class CompanyDetailsControllerSpec
             "address-line1" -> "Company name",
             "address-line2" -> "fsdhio*fde@df",
             "postcode"      -> "W1A2HV"
-          )("address-line2.companyDetails.error.pattern", "address.uk.companyDetails.capacitor.title")
+          )(
+            "address-line2.companyDetails.error.pattern",
+            "address.uk.companyDetails.capacitor.title"
+          )
         }
 
         "address line 3 is too long" in {
@@ -522,7 +581,10 @@ class CompanyDetailsControllerSpec
             "address-line1" -> "Company name",
             "address-town"  -> ("a" * 100),
             "postcode"      -> "W1A2HV"
-          )("address-town.companyDetails.error.tooLong", "address.uk.companyDetails.personalRep.title")
+          )(
+            "address-town.companyDetails.error.tooLong",
+            "address.uk.companyDetails.personalRep.title"
+          )
         }
 
         "address line 3 is invalid" in {
@@ -535,7 +597,10 @@ class CompanyDetailsControllerSpec
             "address-line1" -> "Company name",
             "address-town"  -> "fsdhio*fde@df",
             "postcode"      -> "W1A2HV"
-          )("address-town.companyDetails.error.pattern", "address.uk.companyDetails.capacitor.title")
+          )(
+            "address-town.companyDetails.error.pattern",
+            "address.uk.companyDetails.capacitor.title"
+          )
         }
 
         "address line 4 is too long" in {
@@ -547,7 +612,10 @@ class CompanyDetailsControllerSpec
             "address-line1"  -> "Company name",
             "address-county" -> ("a" * 100),
             "postcode"       -> "W1A2HV"
-          )("address-county.companyDetails.error.tooLong", "address.uk.companyDetails.personalRep.title")
+          )(
+            "address-county.companyDetails.error.tooLong",
+            "address.uk.companyDetails.personalRep.title"
+          )
         }
 
         "address line 4 is invalid" in {
@@ -560,7 +628,10 @@ class CompanyDetailsControllerSpec
             "address-line1"  -> "Company name",
             "address-county" -> "fsdhio*fde@df",
             "postcode"       -> "W1A2HV"
-          )("address-county.companyDetails.error.pattern", "address.uk.companyDetails.capacitor.title")
+          )(
+            "address-county.companyDetails.error.pattern",
+            "address.uk.companyDetails.capacitor.title"
+          )
         }
 
         "address postcode is empty" in {
@@ -584,7 +655,10 @@ class CompanyDetailsControllerSpec
           test(
             "address-line1" -> "1 the Street",
             "postcode"      -> "W1A,2HV"
-          )("postcode.companyDetails.error.invalidCharacters", "address.uk.companyDetails.title")
+          )(
+            "postcode.companyDetails.error.invalidCharacters",
+            "address.uk.companyDetails.title"
+          )
         }
 
         "the address postcode does not have a valid format" in {
@@ -596,7 +670,10 @@ class CompanyDetailsControllerSpec
           test(
             "address-line1" -> "1 the Street",
             "postcode"      -> "ABC123"
-          )("postcode.companyDetails.error.pattern", "address.uk.companyDetails.title")
+          )(
+            "postcode.companyDetails.error.pattern",
+            "address.uk.companyDetails.title"
+          )
         }
 
       }
@@ -604,17 +681,22 @@ class CompanyDetailsControllerSpec
       "show an error page" when {
 
         val (session, journey, draftReturn) = individualState()
-        val address                         = UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
+        val address                         =
+          UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
 
         val newDraftReturn = draftReturn.copy(companyAddress = Some(address))
-        val newJourney     = journey.copy(draftReturn        = newDraftReturn)
-        val newSession     = session.copy(journeyStatus      = Some(newJourney))
+        val newJourney     = journey.copy(draftReturn = newDraftReturn)
+        val newSession     = session.copy(journeyStatus = Some(newJourney))
 
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
               Left(Error(""))
             )
           }
@@ -631,7 +713,11 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
               Right(())
             )
             mockStoreSession(newSession)(Left(Error("")))
@@ -651,16 +737,21 @@ class CompanyDetailsControllerSpec
 
         "all updates are successful" in {
           val (session, journey, draftReturn) = agentState()
-          val address                         = UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
+          val address                         =
+            UkAddress("The Company", None, None, None, Postcode("ZZ10ZZ"))
 
           val newDraftReturn = draftReturn.copy(companyAddress = Some(address))
-          val newJourney     = journey.copy(draftReturn        = newDraftReturn)
-          val newSession     = session.copy(journeyStatus      = Some(newJourney))
+          val newJourney     = journey.copy(draftReturn = newDraftReturn)
+          val newSession     = session.copy(journeyStatus = Some(newJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
               Right(())
             )
             mockStoreSession(newSession)(Right(()))
@@ -681,7 +772,8 @@ class CompanyDetailsControllerSpec
 
     "handling requests to display the enter non-uk company address page" must {
 
-      def performAction(): Future[Result] = controller.enterNonUkAddress()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterNonUkAddress()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -690,20 +782,29 @@ class CompanyDetailsControllerSpec
         def test(result: Future[Result], expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
             result,
-            messageFromMessageKey(expectedTitleKey), { doc =>
-              doc.select("#nonUkAddress > legend > h1 > span").text() shouldBe messageFromMessageKey(
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc
+                .select("#nonUkAddress > legend > h1 > span")
+                .text() shouldBe messageFromMessageKey(
                 "companyDetails.caption"
               )
 
-              doc.select("#nonUkAddress > div:nth-child(2) > label").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#nonUkAddress > div:nth-child(2) > label")
+                .text() shouldBe messageFromMessageKey(
                 "nonUkAddress.companyDetails.line1.label"
               )
 
-              doc.select("#nonUkAddress > div:nth-child(3) > label").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#nonUkAddress > div:nth-child(3) > label")
+                .text() shouldBe messageFromMessageKey(
                 "nonUkAddress.companyDetails.line2.label"
               )
 
-              doc.select("#content > article > form").attr("action") shouldBe routes.CompanyDetailsController
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
                 .enterNonUkAddressSubmit()
                 .url
             }
@@ -762,18 +863,24 @@ class CompanyDetailsControllerSpec
     "handling submitted non-uk company address" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.enterNonUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.enterNonUkAddressSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
 
       behave like redirectToStartBehaviour(() => performAction())
 
       "return a form error" when {
 
-        def test(formData: (String, String)*)(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
             performAction(formData: _*),
             messageFromMessageKey(expectedTitleKey),
             doc =>
-              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               ),
             BAD_REQUEST
@@ -800,7 +907,10 @@ class CompanyDetailsControllerSpec
           test(
             "nonUkAddress-line1" -> ("a" * 100),
             "countryCode"        -> "HK"
-          )("nonUkAddress-line1.companyDetails.error.tooLong", "nonUkAddress.companyDetails.agent.title")
+          )(
+            "nonUkAddress-line1.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.agent.title"
+          )
         }
 
         "address line 1 is invalid" in {
@@ -812,7 +922,10 @@ class CompanyDetailsControllerSpec
           test(
             "nonUkAddress-line1" -> "ab%csd",
             "countryCode"        -> "HK"
-          )("nonUkAddress-line1.companyDetails.error.pattern", "nonUkAddress.companyDetails.trust.title")
+          )(
+            "nonUkAddress-line1.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.trust.title"
+          )
         }
 
         "address line 2 is too long" in {
@@ -824,7 +937,10 @@ class CompanyDetailsControllerSpec
             "nonUkAddress-line1" -> "Company name",
             "nonUkAddress-line2" -> ("a" * 100),
             "countryCode"        -> "HK"
-          )("nonUkAddress-line2.companyDetails.error.tooLong", "nonUkAddress.companyDetails.personalRep.title")
+          )(
+            "nonUkAddress-line2.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.personalRep.title"
+          )
         }
 
         "address line 2 is invalid" in {
@@ -837,7 +953,10 @@ class CompanyDetailsControllerSpec
             "nonUkAddress-line1" -> "Company name",
             "nonUkAddress-line2" -> "fsdhio*fde@df",
             "countryCode"        -> "HK"
-          )("nonUkAddress-line2.companyDetails.error.pattern", "nonUkAddress.companyDetails.capacitor.title")
+          )(
+            "nonUkAddress-line2.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.capacitor.title"
+          )
         }
 
         "address line 3 is too long" in {
@@ -849,7 +968,10 @@ class CompanyDetailsControllerSpec
             "nonUkAddress-line1" -> "Company name",
             "nonUkAddress-line3" -> ("a" * 100),
             "countryCode"        -> "HK"
-          )("nonUkAddress-line3.companyDetails.error.tooLong", "nonUkAddress.companyDetails.personalRep.title")
+          )(
+            "nonUkAddress-line3.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.personalRep.title"
+          )
         }
 
         "address line 3 is invalid" in {
@@ -862,7 +984,10 @@ class CompanyDetailsControllerSpec
             "nonUkAddress-line1" -> "Company name",
             "nonUkAddress-line3" -> "fsdhio*fde@df",
             "countryCode"        -> "HK"
-          )("nonUkAddress-line3.companyDetails.error.pattern", "nonUkAddress.companyDetails.capacitor.title")
+          )(
+            "nonUkAddress-line3.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.capacitor.title"
+          )
         }
 
         "address line 4 is too long" in {
@@ -874,7 +999,10 @@ class CompanyDetailsControllerSpec
             "nonUkAddress-line1" -> "Company name",
             "nonUkAddress-line4" -> ("a" * 100),
             "countryCode"        -> "HK"
-          )("nonUkAddress-line4.companyDetails.error.tooLong", "nonUkAddress.companyDetails.personalRep.title")
+          )(
+            "nonUkAddress-line4.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.personalRep.title"
+          )
         }
 
         "address line 4 is invalid" in {
@@ -887,7 +1015,10 @@ class CompanyDetailsControllerSpec
             "nonUkAddress-line1" -> "Company name",
             "nonUkAddress-line4" -> "fsdhio*fde@df",
             "countryCode"        -> "HK"
-          )("nonUkAddress-line4.companyDetails.error.pattern", "nonUkAddress.companyDetails.capacitor.title")
+          )(
+            "nonUkAddress-line4.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.capacitor.title"
+          )
         }
 
         "a country is not selected" in {
@@ -898,7 +1029,10 @@ class CompanyDetailsControllerSpec
 
           test(
             "nonUkAddress-line1" -> "Company name"
-          )("countryCode.companyDetails.error.required", "nonUkAddress.companyDetails.capacitor.title")
+          )(
+            "countryCode.companyDetails.error.required",
+            "nonUkAddress.companyDetails.capacitor.title"
+          )
         }
 
         "the country cannot be found" in {
@@ -910,7 +1044,10 @@ class CompanyDetailsControllerSpec
           test(
             "nonUkAddress-line1" -> "Company name",
             "countryCode"        -> "ZZ"
-          )("countryCode.companyDetails.error.notFound", "nonUkAddress.companyDetails.capacitor.title")
+          )(
+            "countryCode.companyDetails.error.notFound",
+            "nonUkAddress.companyDetails.capacitor.title"
+          )
         }
 
       }
@@ -918,17 +1055,28 @@ class CompanyDetailsControllerSpec
       "show an error page" when {
 
         val (session, journey, draftReturn) = individualState()
-        val address                         = NonUkAddress("The Company", None, None, None, None, Country("HK", Some("Hong Kong")))
+        val address                         = NonUkAddress(
+          "The Company",
+          None,
+          None,
+          None,
+          None,
+          Country("HK", Some("Hong Kong"))
+        )
 
         val newDraftReturn = draftReturn.copy(companyAddress = Some(address))
-        val newJourney     = journey.copy(draftReturn        = newDraftReturn)
-        val newSession     = session.copy(journeyStatus      = Some(newJourney))
+        val newJourney     = journey.copy(draftReturn = newDraftReturn)
+        val newSession     = session.copy(journeyStatus = Some(newJourney))
 
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
               Left(Error(""))
             )
           }
@@ -945,7 +1093,11 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
               Right(())
             )
             mockStoreSession(newSession)(Left(Error("")))
@@ -965,16 +1117,27 @@ class CompanyDetailsControllerSpec
 
         "all updates are successful" in {
           val (session, journey, draftReturn) = trustState()
-          val address                         = NonUkAddress("The Company", None, None, None, None, Country("HK", Some("Hong Kong")))
+          val address                         = NonUkAddress(
+            "The Company",
+            None,
+            None,
+            None,
+            None,
+            Country("HK", Some("Hong Kong"))
+          )
 
           val newDraftReturn = draftReturn.copy(companyAddress = Some(address))
-          val newJourney     = journey.copy(draftReturn        = newDraftReturn)
-          val newSession     = session.copy(journeyStatus      = Some(newJourney))
+          val newJourney     = journey.copy(draftReturn = newDraftReturn)
+          val newSession     = session.copy(journeyStatus = Some(newJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+            mockStoreDraftReturn(
+              newDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
               Right(())
             )
             mockStoreSession(newSession)(Right(()))
@@ -995,7 +1158,8 @@ class CompanyDetailsControllerSpec
 
     "handling requests to display the cya page" must {
 
-      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswers()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -1007,7 +1171,10 @@ class CompanyDetailsControllerSpec
             mockGetSession(individualState(companyAddress = None)._1)
           }
 
-          checkIsRedirect(performAction(), routes.CompanyDetailsController.isUk())
+          checkIsRedirect(
+            performAction(),
+            routes.CompanyDetailsController.isUk()
+          )
         }
       }
 
@@ -1024,7 +1191,9 @@ class CompanyDetailsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("companyDetails.cya.title"),
-            doc => CompanyDetailsControllerSpec.validatePropertyAddressPage(address, doc)
+            doc =>
+              CompanyDetailsControllerSpec
+                .validatePropertyAddressPage(address, doc)
           )
 
         }
@@ -1034,7 +1203,8 @@ class CompanyDetailsControllerSpec
 
     "handling submits on the cya page" must {
 
-      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.checkYourAnswersSubmit()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -1044,7 +1214,10 @@ class CompanyDetailsControllerSpec
           mockGetSession(individualState()._1)
         }
 
-        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        checkIsRedirect(
+          performAction(),
+          controllers.returns.routes.TaskListController.taskList()
+        )
       }
 
     }
@@ -1063,14 +1236,17 @@ object CompanyDetailsControllerSpec extends Matchers {
       val lines = address match {
         case UkAddress(line1, line2, town, county, postcode) =>
           List(Some(line1), line2, town, county, Some(postcode.value))
-        case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+        case Address
+              .NonUkAddress(line1, line2, line3, line4, postcode, country) =>
           List(Some(line1), line2, line3, line4, postcode, country.name)
       }
 
       lines.collect { case Some(s) => s.trim }
     }
 
-    doc.select("#company-address-answer").text() shouldBe addressLines.mkString(" ")
+    doc.select("#company-address-answer").text() shouldBe addressLines.mkString(
+      " "
+    )
   }
 
 }

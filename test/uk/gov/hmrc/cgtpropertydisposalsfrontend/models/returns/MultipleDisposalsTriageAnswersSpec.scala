@@ -30,9 +30,14 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
 
       "the country of residence is uk" in {
         forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-          val completeAnswers = c.copy(countryOfResidence = Country.uk, assetTypes = List(AssetType.Residential))
+          val completeAnswers = c.copy(
+            countryOfResidence = Country.uk,
+            assetTypes = List(AssetType.Residential)
+          )
 
-          IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteMultipleDisposalsTriageAnswers(
+          IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers(
+            completeAnswers
+          ) shouldBe IncompleteMultipleDisposalsTriageAnswers(
             c.individualUserType,
             Some(c.numberOfProperties),
             wasAUKResident = Some(true),
@@ -50,7 +55,9 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
         forAll { c: CompleteMultipleDisposalsTriageAnswers =>
           val completeAnswers = c.copy(countryOfResidence = sample[Country])
 
-          IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers(completeAnswers) shouldBe IncompleteMultipleDisposalsTriageAnswers(
+          IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers(
+            completeAnswers
+          ) shouldBe IncompleteMultipleDisposalsTriageAnswers(
             c.individualUserType,
             Some(c.numberOfProperties),
             wasAUKResident = Some(false),
@@ -73,16 +80,17 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
         val ukCompleteAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
           .copy(
             countryOfResidence = Country.uk,
-            assetTypes         = List(AssetType.Residential),
+            assetTypes = List(AssetType.Residential),
             individualUserType = Some(IndividualUserType.Self)
           )
 
-        val nonUkCompleteAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-          .copy(
-            countryOfResidence = sample[Country],
-            assetTypes         = List(AssetType.Residential),
-            individualUserType = Some(IndividualUserType.Self)
-          )
+        val nonUkCompleteAnswers =
+          sample[CompleteMultipleDisposalsTriageAnswers]
+            .copy(
+              countryOfResidence = sample[Country],
+              assetTypes = List(AssetType.Residential),
+              individualUserType = Some(IndividualUserType.Self)
+            )
 
         val ukIncompleteAnswers =
           IncompleteMultipleDisposalsTriageAnswers(
@@ -111,41 +119,60 @@ class MultipleDisposalsTriageAnswersSpec extends WordSpec with Matchers with Sca
           )
 
         "given incomplete answers" in {
-          nonUkIncompleteAnswers.unset(_.individualUserType) shouldBe nonUkIncompleteAnswers.copy(individualUserType =
-            None
-          )
-          nonUkIncompleteAnswers.unset(_.numberOfProperties) shouldBe nonUkIncompleteAnswers.copy(numberOfProperties =
-            None
-          )
-          nonUkIncompleteAnswers.unset(_.countryOfResidence) shouldBe nonUkIncompleteAnswers.copy(countryOfResidence =
-            None
-          )
-          ukIncompleteAnswers.unset(_.wereAllPropertiesResidential) shouldBe ukIncompleteAnswers
+          nonUkIncompleteAnswers.unset(
+            _.individualUserType
+          ) shouldBe nonUkIncompleteAnswers.copy(individualUserType = None)
+          nonUkIncompleteAnswers.unset(
+            _.numberOfProperties
+          ) shouldBe nonUkIncompleteAnswers.copy(numberOfProperties = None)
+          nonUkIncompleteAnswers.unset(
+            _.countryOfResidence
+          ) shouldBe nonUkIncompleteAnswers.copy(countryOfResidence = None)
+          ukIncompleteAnswers.unset(
+            _.wereAllPropertiesResidential
+          ) shouldBe ukIncompleteAnswers
             .copy(wereAllPropertiesResidential = None)
-          nonUkIncompleteAnswers.unset(_.assetTypes) shouldBe nonUkIncompleteAnswers.copy(assetTypes = None)
-          nonUkIncompleteAnswers.unset(_.taxYearAfter6April2020) shouldBe nonUkIncompleteAnswers
+          nonUkIncompleteAnswers.unset(
+            _.assetTypes
+          ) shouldBe nonUkIncompleteAnswers.copy(assetTypes = None)
+          nonUkIncompleteAnswers.unset(
+            _.taxYearAfter6April2020
+          ) shouldBe nonUkIncompleteAnswers
             .copy(taxYearAfter6April2020 = None)
-          nonUkIncompleteAnswers.unset(_.taxYear)        shouldBe nonUkIncompleteAnswers.copy(taxYear        = None)
-          nonUkIncompleteAnswers.unset(_.completionDate) shouldBe nonUkIncompleteAnswers.copy(completionDate = None)
+          nonUkIncompleteAnswers.unset(
+            _.taxYear
+          ) shouldBe nonUkIncompleteAnswers.copy(taxYear = None)
+          nonUkIncompleteAnswers.unset(
+            _.completionDate
+          ) shouldBe nonUkIncompleteAnswers.copy(completionDate = None)
         }
 
         "given complete answers" in {
-          nonUkCompleteAnswers.unset(_.individualUserType) shouldBe nonUkIncompleteAnswers.copy(individualUserType =
-            None
-          )
-          nonUkCompleteAnswers.unset(_.numberOfProperties) shouldBe nonUkIncompleteAnswers.copy(numberOfProperties =
-            None
-          )
-          nonUkCompleteAnswers.unset(_.countryOfResidence) shouldBe nonUkIncompleteAnswers.copy(countryOfResidence =
-            None
-          )
-          ukCompleteAnswers.unset(_.wereAllPropertiesResidential) shouldBe ukIncompleteAnswers
+          nonUkCompleteAnswers.unset(
+            _.individualUserType
+          )                                     shouldBe nonUkIncompleteAnswers.copy(individualUserType = None)
+          nonUkCompleteAnswers.unset(
+            _.numberOfProperties
+          )                                     shouldBe nonUkIncompleteAnswers.copy(numberOfProperties = None)
+          nonUkCompleteAnswers.unset(
+            _.countryOfResidence
+          )                                     shouldBe nonUkIncompleteAnswers.copy(countryOfResidence = None)
+          ukCompleteAnswers.unset(
+            _.wereAllPropertiesResidential
+          )                                     shouldBe ukIncompleteAnswers
             .copy(wereAllPropertiesResidential = None)
-          nonUkCompleteAnswers.unset(_.assetTypes) shouldBe nonUkIncompleteAnswers.copy(assetTypes = None)
-          nonUkCompleteAnswers.unset(_.taxYearAfter6April2020) shouldBe nonUkIncompleteAnswers
+          nonUkCompleteAnswers.unset(
+            _.assetTypes
+          )                                     shouldBe nonUkIncompleteAnswers.copy(assetTypes = None)
+          nonUkCompleteAnswers.unset(
+            _.taxYearAfter6April2020
+          )                                     shouldBe nonUkIncompleteAnswers
             .copy(taxYearAfter6April2020 = None)
-          nonUkCompleteAnswers.unset(_.taxYear)        shouldBe nonUkIncompleteAnswers.copy(taxYear        = None)
-          nonUkCompleteAnswers.unset(_.completionDate) shouldBe nonUkIncompleteAnswers.copy(completionDate = None)
+          nonUkCompleteAnswers.unset(_.taxYear) shouldBe nonUkIncompleteAnswers
+            .copy(taxYear = None)
+          nonUkCompleteAnswers.unset(
+            _.completionDate
+          )                                     shouldBe nonUkIncompleteAnswers.copy(completionDate = None)
         }
 
       }

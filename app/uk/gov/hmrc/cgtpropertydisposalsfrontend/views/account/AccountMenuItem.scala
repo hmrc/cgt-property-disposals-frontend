@@ -24,10 +24,11 @@ object AccountMenuItem {
   final case class ManageYourDetails() extends AccountMenuItem
 
   implicit class AccountMenuItemOps(private val a: AccountMenuItem) extends AnyVal {
-    def is[A <: AccountMenuItem: ClassTag]: Boolean = a match {
-      case _: A => true
-      case _    => false
-    }
+    def is[A <: AccountMenuItem : ClassTag]: Boolean =
+      a match {
+        case _: A => true
+        case _    => false
+      }
   }
 
 }

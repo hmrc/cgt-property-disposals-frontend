@@ -65,9 +65,12 @@ class SubscribedChangeEmailController @Inject() (
     with SessionUpdates
     with EmailController[ChangingAccountEmail] {
 
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, ChangingAccountEmail)] =
+  override def validJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, ChangingAccountEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: Subscribed)) => Right(sessionData -> ChangingAccountEmail(s))
+      case Some((sessionData, s: Subscribed)) =>
+        Right(sessionData -> ChangingAccountEmail(s))
       case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
@@ -76,19 +79,27 @@ class SubscribedChangeEmailController @Inject() (
   ): Either[Result, (SessionData, ChangingAccountEmail)] =
     validJourney(request)
 
-  override def updateEmail(changingAccountEmail: ChangingAccountEmail, email: Email)(
-    implicit hc: HeaderCarrier,
+  override def updateEmail(
+    changingAccountEmail: ChangingAccountEmail,
+    email: Email
+  )(implicit
+    hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] = {
     val journey                 = changingAccountEmail.journey
-    val journeyWithUpdatedEmail = journey.subscribedDetails.copy(emailAddress = email)
-    if (journey.subscribedDetails === journeyWithUpdatedEmail) {
+    val journeyWithUpdatedEmail =
+      journey.subscribedDetails.copy(emailAddress = email)
+    if (journey.subscribedDetails === journeyWithUpdatedEmail)
       EitherT.pure[Future, Error](journey)
-    } else {
+    else
       subscriptionService
-        .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedEmail, journey.subscribedDetails))
+        .updateSubscribedDetails(
+          SubscribedUpdateDetails(
+            journeyWithUpdatedEmail,
+            journey.subscribedDetails
+          )
+        )
         .map(_ => journey.copy(journeyWithUpdatedEmail))
-    }
   }
 
   override def auditEmailVerifiedEvent(
@@ -130,14 +141,19 @@ class SubscribedChangeEmailController @Inject() (
   override def name(changingAccountEmail: ChangingAccountEmail): ContactName =
     changingAccountEmail.journey.subscribedDetails.contactName
 
-  override lazy protected val backLinkCall: Option[Call] = Some(
+  override lazy protected val backLinkCall: Option[Call]      = Some(
     controllers.accounts.routes.AccountController.manageYourDetails()
   )
-  override lazy protected val enterEmailCall: Call          = routes.SubscribedChangeEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call    = routes.SubscribedChangeEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call      = routes.SubscribedChangeEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call = routes.SubscribedChangeEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call       = routes.SubscribedChangeEmailController.emailVerified()
+  override lazy protected val enterEmailCall: Call            =
+    routes.SubscribedChangeEmailController.enterEmail()
+  override lazy protected val enterEmailSubmitCall: Call      =
+    routes.SubscribedChangeEmailController.enterEmailSubmit()
+  override lazy protected val checkYourInboxCall: Call        =
+    routes.SubscribedChangeEmailController.checkYourInbox()
+  override lazy protected val verifyEmailCall: UUID => Call   =
+    routes.SubscribedChangeEmailController.verifyEmail
+  override lazy protected val emailVerifiedCall: Call         =
+    routes.SubscribedChangeEmailController.emailVerified()
   override lazy protected val emailVerifiedContinueCall: Call =
     controllers.accounts.routes.AccountController.contactEmailUpdated()
 

@@ -26,6 +26,7 @@ final case class AgentAccessAttempt(
 
 object AgentAccessAttempt {
 
-  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
+  implicit val writes: Writes[AgentAccessAttempt] =
+    Json.writes[AgentAccessAttempt]
 
 }

@@ -32,7 +32,8 @@ object Charge {
 
   implicit class ChargeOps(private val c: Charge) extends AnyVal {
 
-    def totalPaid(): AmountInPence = AmountInPence(c.payments.map(_.amount.value).sum)
+    def totalPaid(): AmountInPence =
+      AmountInPence(c.payments.map(_.amount.value).sum)
 
     def totalOutstanding(): AmountInPence = c.amount -- totalPaid()
 

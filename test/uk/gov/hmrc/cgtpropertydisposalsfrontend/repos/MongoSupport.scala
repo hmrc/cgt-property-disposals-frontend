@@ -29,7 +29,8 @@ trait MongoSupport extends MongoSpecSupport with BeforeAndAfterEach with BeforeA
       override def mongoConnector: MongoConnector = mongoConnectorForTest
     }
 
-  val reactiveMongoComponent: ReactiveMongoComponent = newReactiveMongoComponent()
+  val reactiveMongoComponent: ReactiveMongoComponent =
+    newReactiveMongoComponent()
 
   abstract override def beforeEach(): Unit = {
     super.beforeEach()

@@ -26,7 +26,11 @@ import scala.util.Try
 
 object FormUtils {
 
-  def readValue[T](key: String, data: Map[String, String], f: String => T): Either[FormError, T] =
+  def readValue[T](
+    key: String,
+    data: Map[String, String],
+    f: String => T
+  ): Either[FormError, T] =
     data
       .get(key)
       .map(_.trim())
@@ -37,27 +41,45 @@ object FormUtils {
           .leftMap(_ => FormError(key, "error.invalid"))
       }
 
-  def radioFormFormatter[A: Eq](id: String, orderedOptions: List[A]): Formatter[A] = new Formatter[A] {
-    val optionsZippedWithIndex: List[(A, Int)] = orderedOptions.zipWithIndex
+  def radioFormFormatter[A : Eq](
+    id: String,
+    orderedOptions: List[A]
+  ): Formatter[A] =
+    new Formatter[A] {
+      val optionsZippedWithIndex: List[(A, Int)] = orderedOptions.zipWithIndex
 
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] = {
-      lazy val invalidError = FormError(key, "error.invalid")
-      data
-        .get(key)
-        .map(_.trim())
-        .filter(_.nonEmpty)
-        .fold[Either[Seq[FormError], A]](Left(Seq(FormError(key, "error.required")))) { stringValue =>
-          Either
-            .fromTry(Try(stringValue.toInt))
-            .leftMap(_ => Seq(invalidError))
-            .flatMap(i => Either.fromOption(optionsZippedWithIndex.find(_._2 === i), Seq(invalidError)).map(_._1))
-        }
+      override def bind(
+        key: String,
+        data: Map[String, String]
+      ): Either[Seq[FormError], A] = {
+        lazy val invalidError = FormError(key, "error.invalid")
+        data
+          .get(key)
+          .map(_.trim())
+          .filter(_.nonEmpty)
+          .fold[Either[Seq[FormError], A]](
+            Left(Seq(FormError(key, "error.required")))
+          ) { stringValue =>
+            Either
+              .fromTry(Try(stringValue.toInt))
+              .leftMap(_ => Seq(invalidError))
+              .flatMap(i =>
+                Either
+                  .fromOption(
+                    optionsZippedWithIndex.find(_._2 === i),
+                    Seq(invalidError)
+                  )
+                  .map(_._1)
+              )
+          }
+      }
+
+      override def unbind(key: String, value: A): Map[String, String] =
+        optionsZippedWithIndex
+          .find(_._1 === value)
+          .fold(Map.empty[String, String]) {
+            case (_, i) => Map(key -> i.toString)
+          }
     }
-
-    override def unbind(key: String, value: A): Map[String, String] =
-      optionsZippedWithIndex
-        .find(_._1 === value)
-        .fold(Map.empty[String, String]) { case (_, i) => Map(key -> i.toString) }
-  }
 
 }

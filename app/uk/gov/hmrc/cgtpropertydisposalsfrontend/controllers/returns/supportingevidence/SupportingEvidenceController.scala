@@ -65,14 +65,15 @@ class SupportingEvidenceController @Inject() (
   expiredPage: pages.expired,
   checkYourAnswersPage: pages.check_your_answers,
   uploadPendingPage: pages.upload_pending,
-  uploadFailedPage: pages.upload_failed
+  uploadFailedPage: pages.upload_failed,
+  scanFailedPage: pages.scan_failed
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
 
-  private def getUpscanInitiateConfig[A: Configs](key: String): A =
+  private def getUpscanInitiateConfig[A : Configs](key: String): A =
     configuration.underlying
       .get[A](s"microservice.services.upscan-initiate.$key")
       .value
@@ -89,17 +90,55 @@ class SupportingEvidenceController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_: SubscribedDetails, _, _, d: DraftReturn))) =>
+      case Some(
+            (
+              s,
+              r @ FillingOutReturn(_: SubscribedDetails, _, _, d: DraftReturn)
+            )
+          ) =>
         d match {
-          case DraftSingleDisposalReturn(_, _, _, _, _, _, _, _, _, maybeSupportingEvidenceAnswers, _, _) =>
+          case DraftSingleDisposalReturn(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                maybeSupportingEvidenceAnswers,
+                _,
+                _
+              ) =>
             maybeSupportingEvidenceAnswers.fold[Future[Result]](
               f(s, r, IncompleteSupportingEvidenceAnswers.empty)
             )(f(s, r, _))
-          case DraftMultipleDisposalsReturn(_, _, _, _, _, maybeSupportingDocumentsAnswers, _, _) =>
+          case DraftMultipleDisposalsReturn(
+                _,
+                _,
+                _,
+                _,
+                _,
+                maybeSupportingDocumentsAnswers,
+                _,
+                _
+              ) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
               f(s, r, IncompleteSupportingEvidenceAnswers.empty)
             )(f(s, r, _))
-          case DraftSingleIndirectDisposalReturn(_, _, _, _, _, _, _, maybeSupportingDocumentsAnswers, _, _) =>
+          case DraftSingleIndirectDisposalReturn(
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                maybeSupportingDocumentsAnswers,
+                _,
+                _
+              ) =>
             maybeSupportingDocumentsAnswers.fold[Future[Result]](
               f(s, r, IncompleteSupportingEvidenceAnswers.empty)
             )(f(s, r, _))
@@ -107,7 +146,7 @@ class SupportingEvidenceController @Inject() (
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
-  private def commonDisplayBehaviour[A, P: Writeable, R](
+  private def commonDisplayBehaviour[A, P : Writeable, R](
     currentAnswers: SupportingEvidenceAnswers
   )(form: SupportingEvidenceAnswers => Form[A])(
     page: (Form[A], Call) => P
@@ -121,12 +160,11 @@ class SupportingEvidenceController @Inject() (
         _ => routes.SupportingEvidenceController.checkYourAnswers()
       )
       Ok(page(form(currentAnswers), backLink))
-    } else {
+    } else
       Redirect(redirectToIfNoRequiredPreviousAnswer)
-    }
 
-  def doYouWantToUploadSupportingDocuments(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def doYouWantToUploadSupportingEvidence(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
@@ -137,81 +175,69 @@ class SupportingEvidenceController @Inject() (
         )(
           page = doYouWantToUploadPage(_, _)
         )(
-          requiredPreviousAnswer               = { _ => Some(()) },
+          requiredPreviousAnswer = { _ => Some(()) },
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
         )
       }
-  }
+    }
 
-  def doYouWantToUploadSupportingDocumentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def doYouWantToUploadSupportingEvidenceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
         doYouWantToUploadForm.bindFromRequest.fold(
           errors =>
             BadRequest(
-              doYouWantToUploadPage(errors, controllers.returns.routes.TaskListController.taskList())
+              doYouWantToUploadPage(
+                errors,
+                controllers.returns.routes.TaskListController.taskList()
+              )
             ),
           newDoYouWantToUploadSupportingEvidenceAnswer =>
             if (newDoYouWantToUploadSupportingEvidenceAnswer) {
               val updatedAnswers: SupportingEvidenceAnswers = answers match {
                 case IncompleteSupportingEvidenceAnswers(
-                    _,
+                      _,
+                      evidences,
+                      expiredEvidences
+                    ) =>
+                  IncompleteSupportingEvidenceAnswers(
+                    Some(true),
                     evidences,
                     expiredEvidences
-                    ) =>
-                  IncompleteSupportingEvidenceAnswers(Some(true), evidences, expiredEvidences)
+                  )
                 case CompleteSupportingEvidenceAnswers(_, evidences) =>
-                  IncompleteSupportingEvidenceAnswers(Some(true), evidences, List.empty)
+                  IncompleteSupportingEvidenceAnswers(
+                    Some(true),
+                    evidences,
+                    List.empty
+                  )
               }
 
               val newDraftReturn = fillingOutReturn.draftReturn match {
-                case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-                case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-                case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case s: DraftSingleDisposalReturn         =>
+                  s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case m: DraftMultipleDisposalsReturn      =>
+                  m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+                case i: DraftSingleIndirectDisposalReturn =>
+                  i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
               }
 
               val result = for {
                 _ <- returnsService
-                      .storeDraftReturn(
-                        newDraftReturn,
-                        fillingOutReturn.subscribedDetails.cgtReference,
-                        fillingOutReturn.agentReferenceNumber
-                      )
+                       .storeDraftReturn(
+                         newDraftReturn,
+                         fillingOutReturn.subscribedDetails.cgtReference,
+                         fillingOutReturn.agentReferenceNumber
+                       )
                 _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-                      )
-                    )
-              } yield ()
-
-              result.fold({ e =>
-                logger.warn("Could not update session", e)
-                errorHandler.errorResult()
-              }, _ => Redirect(routes.SupportingEvidenceController.checkYourAnswers()))
-
-            } else {
-              val updatedAnswers: SupportingEvidenceAnswers = answers.fold(
-                _ => IncompleteSupportingEvidenceAnswers(Some(false), List.empty, List.empty),
-                _ => CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence = false, List.empty)
-              )
-              val newDraftReturn = fillingOutReturn.draftReturn.fold(
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-                _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-              )
-
-              val result = for {
-                _ <- returnsService
-                      .storeDraftReturn(
-                        newDraftReturn,
-                        fillingOutReturn.subscribedDetails.cgtReference,
-                        fillingOutReturn.agentReferenceNumber
-                      )
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-                      )
-                    )
+                       updateSession(sessionStore, request)(
+                         _.copy(journeyStatus =
+                           Some(
+                             fillingOutReturn.copy(draftReturn = newDraftReturn)
+                           )
+                         )
+                       )
+                     )
               } yield ()
 
               result.fold(
@@ -219,23 +245,76 @@ class SupportingEvidenceController @Inject() (
                   logger.warn("Could not update session", e)
                   errorHandler.errorResult()
                 },
-                _ => Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+                _ =>
+                  Redirect(
+                    routes.SupportingEvidenceController.checkYourAnswers()
+                  )
+              )
+
+            } else {
+              val updatedAnswers: SupportingEvidenceAnswers = answers.fold(
+                _ =>
+                  IncompleteSupportingEvidenceAnswers(
+                    Some(false),
+                    List.empty,
+                    List.empty
+                  ),
+                _ =>
+                  CompleteSupportingEvidenceAnswers(
+                    doYouWantToUploadSupportingEvidence = false,
+                    List.empty
+                  )
+              )
+              val newDraftReturn                            = fillingOutReturn.draftReturn.fold(
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+              )
+
+              val result = for {
+                _ <- returnsService
+                       .storeDraftReturn(
+                         newDraftReturn,
+                         fillingOutReturn.subscribedDetails.cgtReference,
+                         fillingOutReturn.agentReferenceNumber
+                       )
+                _ <- EitherT(
+                       updateSession(sessionStore, request)(
+                         _.copy(journeyStatus =
+                           Some(
+                             fillingOutReturn.copy(draftReturn = newDraftReturn)
+                           )
+                         )
+                       )
+                     )
+              } yield ()
+
+              result.fold(
+                { e =>
+                  logger.warn("Could not update session", e)
+                  errorHandler.errorResult()
+                },
+                _ =>
+                  Redirect(
+                    routes.SupportingEvidenceController.checkYourAnswers()
+                  )
               )
             }
         )
       }
-  }
+    }
 
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, _, answers) =>
         if (answers.fold(_.evidences, _.evidences).length >= maxUploads)
           Redirect(routes.SupportingEvidenceController.checkYourAnswers())
-        else {
+        else
           upscanService
             .initiate(
-              routes.SupportingEvidenceController.uploadSupportingEvidenceError(),
-              routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck
+              routes.SupportingEvidenceController
+                .handleUpscanErrorRedirect(),
+              routes.SupportingEvidenceController.uploadSupportingEvidenceCheck
             )
             .fold(
               { e =>
@@ -246,48 +325,70 @@ class SupportingEvidenceController @Inject() (
                 Ok(
                   uploadPage(
                     uploadUpscan,
-                    routes.SupportingEvidenceController.doYouWantToUploadSupportingDocuments()
+                    routes.SupportingEvidenceController
+                      .doYouWantToUploadSupportingEvidence()
                   )
                 )
             )
-        }
       }
     }
 
-  def uploadSupportingEvidenceError(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    errorHandler.errorResult()
-  }
+  def handleUpscanErrorRedirect(): Action[AnyContent] =
+    authenticatedActionWithSessionData {
+      Redirect(routes.SupportingEvidenceController.documentDidNotUpload())
+    }
 
-  def uploadSupportingEvidenceVirusCheck(uploadReference: UploadReference): Action[AnyContent] =
+  def documentDidNotUpload(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      Ok(uploadFailedPage())
+    }
+
+  def handleUpscanCallBackFailures(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      Ok(scanFailedPage())
+    }
+
+  def uploadSupportingEvidenceCheck(
+    uploadReference: UploadReference
+  ): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
         answers match {
-          case _: CompleteSupportingEvidenceAnswers =>
+          case _: CompleteSupportingEvidenceAnswers                   =>
             Redirect(routes.SupportingEvidenceController.checkYourAnswers())
 
           case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
             val result = for {
               upscanUpload <- upscanService.getUpscanUpload(uploadReference)
-              _ <- upscanUpload.upscanCallBack match {
-                    case Some(s: UpscanSuccess) =>
-                      storeUpscanSuccess(upscanUpload, s, incompleteAnswers, fillingOutReturn)
-                    case _ =>
-                      EitherT.pure[Future, Error](())
-                  }
+              _            <- upscanUpload.upscanCallBack match {
+                     case Some(s: UpscanSuccess) =>
+                       storeUpscanSuccess(
+                         upscanUpload,
+                         s,
+                         incompleteAnswers,
+                         fillingOutReturn
+                       )
+                     case _                      =>
+                       EitherT.pure[Future, Error](())
+                   }
             } yield upscanUpload
 
             result.fold(
               e => {
-                logger.warn(s"could not update the status of upscan upload to uploaded : $e")
+                logger.warn(
+                  s"could not update the status of upscan upload to uploaded : $e"
+                )
                 errorHandler.errorResult()
               },
               upscanUpload =>
                 upscanUpload.upscanCallBack match {
                   case Some(_: UpscanSuccess) =>
-                    Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+                    Redirect(
+                      routes.SupportingEvidenceController.checkYourAnswers()
+                    )
                   case Some(_: UpscanFailure) =>
-                    Ok(uploadFailedPage())
-                  case None =>
+                    Redirect(routes.SupportingEvidenceController.handleUpscanCallBackFailures())
+                  case None                   =>
                     Ok(uploadPendingPage(upscanUpload))
                 }
             )
@@ -297,9 +398,14 @@ class SupportingEvidenceController @Inject() (
 
     }
 
-  def uploadSupportingEvidenceVirusCheckSubmit(uploadReference: String): Action[AnyContent] =
+  def uploadSupportingEvidenceCheckSubmit(
+    uploadReference: String
+  ): Action[AnyContent] =
     authenticatedActionWithSessionData.async { _ =>
-      Redirect(routes.SupportingEvidenceController.uploadSupportingEvidenceVirusCheck(UploadReference(uploadReference)))
+      Redirect(
+        routes.SupportingEvidenceController
+          .uploadSupportingEvidenceCheck(UploadReference(uploadReference))
+      )
     }
 
   private def storeUpscanSuccess(
@@ -307,7 +413,10 @@ class SupportingEvidenceController @Inject() (
     upscanCallBack: UpscanSuccess,
     answers: IncompleteSupportingEvidenceAnswers,
     fillingOutReturn: FillingOutReturn
-  )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): EitherT[Future, Error, Unit] = {
+  )(implicit
+    request: RequestWithSessionData[_],
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] = {
     val newAnswers =
       upscanCallBack match {
         case success: UpscanSuccess =>
@@ -331,32 +440,40 @@ class SupportingEvidenceController @Inject() (
 
     for {
       _ <- returnsService.storeDraftReturn(
-            newDraftReturn,
-            fillingOutReturn.subscribedDetails.cgtReference,
-            fillingOutReturn.agentReferenceNumber
-          )
+             newDraftReturn,
+             fillingOutReturn.subscribedDetails.cgtReference,
+             fillingOutReturn.agentReferenceNumber
+           )
       _ <- EitherT(
-            updateSession(sessionStore, request)(
-              _.copy(journeyStatus =
-                Some(
-                  fillingOutReturn.copy(draftReturn = newDraftReturn)
-                )
-              )
-            )
-          )
+             updateSession(sessionStore, request)(
+               _.copy(journeyStatus =
+                 Some(
+                   fillingOutReturn.copy(draftReturn = newDraftReturn)
+                 )
+               )
+             )
+           )
     } yield ()
   }
 
-  def deleteSupportingEvidence(uploadReference: UploadReference, addNew: Boolean): Action[AnyContent] =
+  def deleteSupportingEvidence(
+    uploadReference: UploadReference,
+    addNew: Boolean
+  ): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
         val updatedAnswers = answers.fold(
           incomplete =>
             incomplete.copy(
-              evidences        = incomplete.evidences.filterNot(_.uploadReference === uploadReference),
-              expiredEvidences = incomplete.expiredEvidences.filterNot(_.uploadReference === uploadReference)
-            ), { complete =>
-            val newEvidences = complete.evidences.filterNot(_.uploadReference === uploadReference)
+              evidences = incomplete.evidences
+                .filterNot(_.uploadReference === uploadReference),
+              expiredEvidences = incomplete.expiredEvidences.filterNot(
+                _.uploadReference === uploadReference
+              )
+            ),
+          { complete =>
+            val newEvidences = complete.evidences
+              .filterNot(_.uploadReference === uploadReference)
             IncompleteSupportingEvidenceAnswers(
               Some(complete.doYouWantToUploadSupportingEvidence),
               newEvidences,
@@ -366,23 +483,26 @@ class SupportingEvidenceController @Inject() (
         )
 
         val newDraftReturn = fillingOutReturn.draftReturn match {
-          case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case s: DraftSingleDisposalReturn         =>
+            s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case m: DraftMultipleDisposalsReturn      =>
+            m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case i: DraftSingleIndirectDisposalReturn =>
+            i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
         }
 
         val result = for {
           _ <- returnsService
-                .storeDraftReturn(
-                  newDraftReturn,
-                  fillingOutReturn.subscribedDetails.cgtReference,
-                  fillingOutReturn.agentReferenceNumber
-                )
+                 .storeDraftReturn(
+                   newDraftReturn,
+                   fillingOutReturn.subscribedDetails.cgtReference,
+                   fillingOutReturn.agentReferenceNumber
+                 )
           _ <- EitherT(
-                updateSession(sessionStore, request)(
-                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-                )
-              )
+                 updateSession(sessionStore, request)(
+                   _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                 )
+               )
         } yield ()
 
         result.fold(
@@ -392,18 +512,25 @@ class SupportingEvidenceController @Inject() (
           },
           _ =>
             if (addNew)
-              Redirect(routes.SupportingEvidenceController.uploadSupportingEvidence())
+              Redirect(
+                routes.SupportingEvidenceController.uploadSupportingEvidence()
+              )
             else
               Redirect(routes.SupportingEvidenceController.checkYourAnswers())
         )
       }
     }
 
-  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
-      checkYourAnswersHandler(answers, fillingOutReturn, fillingOutReturn.draftReturn)
+  def checkYourAnswers(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
+        checkYourAnswersHandler(
+          answers,
+          fillingOutReturn,
+          fillingOutReturn.draftReturn
+        )
+      }
     }
-  }
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -415,39 +542,54 @@ class SupportingEvidenceController @Inject() (
             )
 
           case IncompleteSupportingEvidenceAnswers(
-              Some(doYouWantToUploadSupportingEvidence),
-              evidences,
-              _
+                Some(doYouWantToUploadSupportingEvidence),
+                evidences,
+                _
               ) =>
-            CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence, evidences)
-          case CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence, evidences) =>
-            CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidence, evidences)
+            CompleteSupportingEvidenceAnswers(
+              doYouWantToUploadSupportingEvidence,
+              evidences
+            )
+          case CompleteSupportingEvidenceAnswers(
+                doYouWantToUploadSupportingEvidence,
+                evidences
+              ) =>
+            CompleteSupportingEvidenceAnswers(
+              doYouWantToUploadSupportingEvidence,
+              evidences
+            )
         }
 
         val newDraftReturn = fillingOutReturn.draftReturn match {
-          case s: DraftSingleDisposalReturn         => s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case m: DraftMultipleDisposalsReturn      => m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case i: DraftSingleIndirectDisposalReturn => i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case s: DraftSingleDisposalReturn         =>
+            s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case m: DraftMultipleDisposalsReturn      =>
+            m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          case i: DraftSingleIndirectDisposalReturn =>
+            i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
         }
 
         val result = for {
           _ <- returnsService
-                .storeDraftReturn(
-                  newDraftReturn,
-                  fillingOutReturn.subscribedDetails.cgtReference,
-                  fillingOutReturn.agentReferenceNumber
-                )
+                 .storeDraftReturn(
+                   newDraftReturn,
+                   fillingOutReturn.subscribedDetails.cgtReference,
+                   fillingOutReturn.agentReferenceNumber
+                 )
           _ <- EitherT(
-                updateSession(sessionStore, request)(
-                  _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-                )
-              )
+                 updateSession(sessionStore, request)(
+                   _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                 )
+               )
         } yield ()
 
-        result.fold({ e =>
-          logger.warn("Could not update session", e)
-          errorHandler.errorResult()
-        }, _ => Redirect(controllers.returns.routes.TaskListController.taskList()))
+        result.fold(
+          { e =>
+            logger.warn("Could not update session", e)
+            errorHandler.errorResult()
+          },
+          _ => Redirect(controllers.returns.routes.TaskListController.taskList())
+        )
       }
     }
 
@@ -458,18 +600,27 @@ class SupportingEvidenceController @Inject() (
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
       case IncompleteSupportingEvidenceAnswers(_, _, expiredEvidences) if expiredEvidences.nonEmpty =>
-        Redirect(routes.SupportingEvidenceController.supportingEvidenceExpired())
+        Redirect(
+          routes.SupportingEvidenceController.supportingEvidenceExpired()
+        )
 
-      case IncompleteSupportingEvidenceAnswers(None, _, _) =>
-        Redirect(routes.SupportingEvidenceController.doYouWantToUploadSupportingDocuments())
+      case IncompleteSupportingEvidenceAnswers(None, _, _)                                          =>
+        Redirect(
+          routes.SupportingEvidenceController
+            .doYouWantToUploadSupportingEvidence()
+        )
 
-      case IncompleteSupportingEvidenceAnswers(Some(true), supportingEvidences, _) if supportingEvidences.isEmpty =>
+      case IncompleteSupportingEvidenceAnswers(
+            Some(true),
+            supportingEvidences,
+            _
+          ) if supportingEvidences.isEmpty =>
         Redirect(routes.SupportingEvidenceController.uploadSupportingEvidence())
 
       case IncompleteSupportingEvidenceAnswers(
-          Some(doYouWantToUploadSupportingEvidence),
-          supportingEvidences,
-          _
+            Some(doYouWantToUploadSupportingEvidence),
+            supportingEvidences,
+            _
           ) =>
         Ok(
           checkYourAnswersPage(
@@ -481,7 +632,10 @@ class SupportingEvidenceController @Inject() (
           )
         )
 
-      case CompleteSupportingEvidenceAnswers(doYouWantToUploadSupportingEvidenceAnswer, supportingEvidences) =>
+      case CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidenceAnswer,
+            supportingEvidences
+          ) =>
         Ok(
           checkYourAnswersPage(
             CompleteSupportingEvidenceAnswers(
@@ -493,23 +647,24 @@ class SupportingEvidenceController @Inject() (
         )
     }
 
-  def supportingEvidenceExpired(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withUploadSupportingEvidenceAnswers(request) { (_, _, answers) =>
-      answers match {
-        case IncompleteSupportingEvidenceAnswers(_, _, expired) if expired.nonEmpty =>
-          Ok(expiredPage(expired))
-        case _ =>
-          Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+  def supportingEvidenceExpired(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withUploadSupportingEvidenceAnswers(request) { (_, _, answers) =>
+        answers match {
+          case IncompleteSupportingEvidenceAnswers(_, _, expired) if expired.nonEmpty =>
+            Ok(expiredPage(expired))
+          case _                                                                      =>
+            Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+        }
       }
     }
-  }
 
-  def supportingEvidenceExpiredSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def supportingEvidenceExpiredSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
         answers match {
           case IncompleteSupportingEvidenceAnswers(_, _, expired) if expired.nonEmpty =>
-            val updatedAnswers = answers.fold(
+            val updatedAnswers     = answers.fold(
               _.copy(expiredEvidences = List.empty),
               complete =>
                 IncompleteSupportingEvidenceAnswers(
@@ -526,32 +681,40 @@ class SupportingEvidenceController @Inject() (
 
             val result = for {
               _ <- returnsService.storeDraftReturn(
-                    updatedDraftReturn,
-                    fillingOutReturn.subscribedDetails.cgtReference,
-                    fillingOutReturn.agentReferenceNumber
-                  )
+                     updatedDraftReturn,
+                     fillingOutReturn.subscribedDetails.cgtReference,
+                     fillingOutReturn.agentReferenceNumber
+                   )
               _ <- EitherT(
-                    updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
-                    )
-                  )
+                     updateSession(sessionStore, request)(
+                       _.copy(journeyStatus =
+                         Some(
+                           fillingOutReturn
+                             .copy(draftReturn = updatedDraftReturn)
+                         )
+                       )
+                     )
+                   )
             } yield ()
 
             result.fold(
               { e =>
                 logger.warn("Could not update draft return", e)
                 errorHandler.errorResult()
-              }, { _ =>
+              },
+              { _ =>
                 logger.info(s"Deleted expired evidence}")
-                Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+                Redirect(
+                  routes.SupportingEvidenceController.checkYourAnswers()
+                )
               }
             )
 
-          case _ =>
+          case _                                                                      =>
             Redirect(routes.SupportingEvidenceController.checkYourAnswers())
         }
       }
-  }
+    }
 
 }
 
@@ -559,7 +722,9 @@ object SupportingEvidenceController {
   val doYouWantToUploadForm: Form[Boolean] =
     Form(
       mapping(
-        "supporting-evidence.do-you-want-to-upload" -> of(BooleanFormatter.formatter)
+        "supporting-evidence.do-you-want-to-upload" -> of(
+          BooleanFormatter.formatter
+        )
       )(identity)(Some(_))
     )
 }

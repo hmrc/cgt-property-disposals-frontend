@@ -79,25 +79,36 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
       case _                                         => Redirect(controllers.routes.StartController.start())
     }
 
-  def doYouWantToReportForATrust(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { determiningIfOrganisationIsTrust =>
-      val form =
-        determiningIfOrganisationIsTrust.isReportingForTrust.fold(doYouWantToReportForATrustForm)(
-          doYouWantToReportForATrustForm.fill
+  def doYouWantToReportForATrust(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { determiningIfOrganisationIsTrust =>
+        val form =
+          determiningIfOrganisationIsTrust.isReportingForTrust.fold(
+            doYouWantToReportForATrustForm
+          )(
+            doYouWantToReportForATrustForm.fill
+          )
+        Ok(
+          doYouWantToReportForATrustPage(
+            form,
+            controllers.routes.StartController.weNeedMoreDetails()
+          )
         )
-      Ok(doYouWantToReportForATrustPage(form, controllers.routes.StartController.weNeedMoreDetails()))
+      }
     }
-  }
 
-  def doYouWantToReportForATrustSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
+  def doYouWantToReportForATrustSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
       withValidUser(request) { determiningIfOrganisationIsTrust =>
         doYouWantToReportForATrustForm
           .bindFromRequest()
           .fold(
             formWithError =>
               BadRequest(
-                doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())
+                doYouWantToReportForATrustPage(
+                  formWithError,
+                  controllers.routes.StartController.weNeedMoreDetails()
+                )
               ),
             isReportingForTrust =>
               updateSession(sessionStore, request)(
@@ -112,243 +123,329 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   )
                 )
               ).map {
-                case Left(e) =>
-                  logger.warn("Could not update session data with reporting for trust answer", e)
+                case Left(e)  =>
+                  logger.warn(
+                    "Could not update session data with reporting for trust answer",
+                    e
+                  )
                   errorHandler.errorResult()
 
                 case Right(_) =>
                   if (isReportingForTrust)
-                    Redirect(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn())
+                    Redirect(
+                      routes.DeterminingIfOrganisationIsTrustController
+                        .doYouHaveATrn()
+                    )
                   else {
                     metrics.nonTrustOrganisationCounter.inc()
-                    Redirect(routes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax())
+                    Redirect(
+                      routes.DeterminingIfOrganisationIsTrustController
+                        .reportWithCorporateTax()
+                    )
                   }
               }
           )
       }
-  }
-
-  def reportWithCorporateTax(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { determiningIfOrganisationIsTrust =>
-      if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(false)) {
-        Ok(reportWithCorporateTaxPage(routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()))
-      } else {
-        Redirect(controllers.routes.StartController.start())
-      }
     }
-  }
 
-  def doYouHaveATrn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { determiningIfOrganisationIsTrust =>
-      if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
-        val form =
-          determiningIfOrganisationIsTrust.hasTrn.fold(doYouHaveATrnForm)(doYouHaveATrnForm.fill)
-        Ok(doYouHaveATrnPage(form, routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()))
-      } else {
-        Redirect(controllers.routes.StartController.start())
-      }
-    }
-  }
-
-  def doYouHaveATrnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { determiningIfOrganisationIsTrust =>
-      if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
-        doYouHaveATrnForm
-          .bindFromRequest()
-          .fold(
-            formWithError =>
-              BadRequest(
-                doYouHaveATrnPage(
-                  formWithError,
-                  routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()
-                )
-              ),
-            hasTrn =>
-              updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(determiningIfOrganisationIsTrust.copy(hasTrn = Some(hasTrn))))
-              ).map {
-                case Left(e) =>
-                  logger.warn("Could not update session data with has TRN answer", e)
-                  errorHandler.errorResult()
-
-                case Right(_) =>
-                  if (hasTrn)
-                    Redirect(routes.DeterminingIfOrganisationIsTrustController.enterTrn())
-                  else {
-                    metrics.unregisteredTrustCounter.inc()
-                    Redirect(routes.DeterminingIfOrganisationIsTrustController.registerYourTrust())
-                  }
-              }
-          )
-      } else {
-        Redirect(controllers.routes.StartController.start())
-      }
-
-    }
-  }
-
-  def enterTrn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { determiningIfOrganisationIsTrust =>
-      determiningIfOrganisationIsTrust.hasTrn match {
-        case Some(true) =>
-          bprNameMatchService
-            .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](determiningIfOrganisationIsTrust.ggCredId)
-            .fold(
-              handleNameMatchServiceError,
-              _ =>
-                Ok(
-                  enterTrnAndNamePage(
-                    enterTrnAndNameForm,
-                    routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
-                  )
-                )
+  def reportWithCorporateTax(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { determiningIfOrganisationIsTrust =>
+        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(false))
+          Ok(
+            reportWithCorporateTaxPage(
+              routes.DeterminingIfOrganisationIsTrustController
+                .doYouWantToReportForATrust()
             )
-        case _ => Redirect(controllers.routes.StartController.start())
+          )
+        else
+          Redirect(controllers.routes.StartController.start())
       }
     }
-  }
 
-  def enterTrnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { determiningIfOrganisationIsTrust =>
-      determiningIfOrganisationIsTrust.hasTrn match {
-        case Some(true) =>
-          val result =
-            for {
-              unsuccessfulAttempts <- bprNameMatchService
-                                       .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](
-                                         determiningIfOrganisationIsTrust.ggCredId
-                                       )
-                                       .leftMap(ServiceError(_))
-              bprWithCgtReference <- {
-                enterTrnAndNameForm
-                  .bindFromRequest()
-                  .fold[EitherT[
-                    Future,
-                    NameMatchError[TrustNameMatchDetails],
-                    (BusinessPartnerRecord, Option[CgtReference])
-                  ]](
-                    e => EitherT.fromEither[Future](Left(ValidationError(e))),
-                    trustNameMatchDetails =>
-                      attemptNameMatchAndUpdateSession(
-                        trustNameMatchDetails,
-                        determiningIfOrganisationIsTrust.ggCredId,
-                        determiningIfOrganisationIsTrust.ggEmail,
-                        unsuccessfulAttempts
-                      ).leftMap(ServiceError(_))
-                  )
-              }
-            } yield bprWithCgtReference
+  def doYouHaveATrn(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { determiningIfOrganisationIsTrust =>
+        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
+          val form =
+            determiningIfOrganisationIsTrust.hasTrn.fold(doYouHaveATrnForm)(
+              doYouHaveATrnForm.fill
+            )
+          Ok(
+            doYouHaveATrnPage(
+              form,
+              routes.DeterminingIfOrganisationIsTrustController
+                .doYouWantToReportForATrust()
+            )
+          )
+        } else
+          Redirect(controllers.routes.StartController.start())
+      }
+    }
 
-          result
+  def doYouHaveATrnSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { determiningIfOrganisationIsTrust =>
+        if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true))
+          doYouHaveATrnForm
+            .bindFromRequest()
             .fold(
-              {
-                case ValidationError(formWithErrors) =>
-                  BadRequest(
-                    enterTrnAndNamePage(
-                      formWithErrors,
-                      routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+              formWithError =>
+                BadRequest(
+                  doYouHaveATrnPage(
+                    formWithError,
+                    routes.DeterminingIfOrganisationIsTrustController
+                      .doYouWantToReportForATrust()
+                  )
+                ),
+              hasTrn =>
+                updateSession(sessionStore, request)(
+                  _.copy(journeyStatus =
+                    Some(
+                      determiningIfOrganisationIsTrust
+                        .copy(hasTrn = Some(hasTrn))
                     )
                   )
-                case ServiceError(e) =>
-                  handleNameMatchServiceError(e)
-              }, {
-                case (_, maybeCgtReference) =>
-                  Redirect(
-                    maybeCgtReference.fold(controllers.routes.StartController.start()) { cgtReference =>
-                      auditService.sendEvent(
-                        "accessWithWrongGGAccount",
-                        WrongGGAccountEvent(Some(cgtReference.value), determiningIfOrganisationIsTrust.ggCredId.value),
-                        "access-with-wrong-gg-account"
-                      )
-                      onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
-                    }
-                  )
-              }
-            )
+                ).map {
+                  case Left(e)  =>
+                    logger.warn(
+                      "Could not update session data with has TRN answer",
+                      e
+                    )
+                    errorHandler.errorResult()
 
-        case _ => Redirect(controllers.routes.StartController.start())
+                  case Right(_) =>
+                    if (hasTrn)
+                      Redirect(
+                        routes.DeterminingIfOrganisationIsTrustController
+                          .enterTrn()
+                      )
+                    else {
+                      metrics.unregisteredTrustCounter.inc()
+                      Redirect(
+                        routes.DeterminingIfOrganisationIsTrustController
+                          .registerYourTrust()
+                      )
+                    }
+                }
+            )
+        else
+          Redirect(controllers.routes.StartController.start())
+
       }
     }
-  }
 
-  def registerYourTrust(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { _ =>
-      Ok(registerYourTrustPage(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))
-    }
-  }
-
-  def tooManyAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { determiningIfOrganisationIsTrust =>
-      bprNameMatchService
-        .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](
-          determiningIfOrganisationIsTrust.ggCredId
-        )
-        .value
-        .map {
-          case Left(NameMatchServiceError.TooManyUnsuccessfulAttempts()) => Ok(tooManyAttemptsPage())
-          case Left(otherNameMatchError)                                 => handleNameMatchServiceError(otherNameMatchError)
-          case Right(_)                                                  => Redirect(routes.DeterminingIfOrganisationIsTrustController.enterTrn())
+  def enterTrn(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { determiningIfOrganisationIsTrust =>
+        determiningIfOrganisationIsTrust.hasTrn match {
+          case Some(true) =>
+            bprNameMatchService
+              .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](
+                determiningIfOrganisationIsTrust.ggCredId
+              )
+              .fold(
+                handleNameMatchServiceError,
+                _ =>
+                  Ok(
+                    enterTrnAndNamePage(
+                      enterTrnAndNameForm,
+                      routes.DeterminingIfOrganisationIsTrustController
+                        .doYouHaveATrn()
+                    )
+                  )
+              )
+          case _          => Redirect(controllers.routes.StartController.start())
         }
+      }
     }
-  }
+
+  def enterTrnSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { determiningIfOrganisationIsTrust =>
+        determiningIfOrganisationIsTrust.hasTrn match {
+          case Some(true) =>
+            val result =
+              for {
+                unsuccessfulAttempts <- bprNameMatchService
+                                          .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](
+                                            determiningIfOrganisationIsTrust.ggCredId
+                                          )
+                                          .leftMap(ServiceError(_))
+                bprWithCgtReference  <- enterTrnAndNameForm
+                                         .bindFromRequest()
+                                         .fold[EitherT[
+                                           Future,
+                                           NameMatchError[TrustNameMatchDetails],
+                                           (BusinessPartnerRecord, Option[CgtReference])
+                                         ]](
+                                           e => EitherT.fromEither[Future](Left(ValidationError(e))),
+                                           trustNameMatchDetails =>
+                                             attemptNameMatchAndUpdateSession(
+                                               trustNameMatchDetails,
+                                               determiningIfOrganisationIsTrust.ggCredId,
+                                               determiningIfOrganisationIsTrust.ggEmail,
+                                               unsuccessfulAttempts
+                                             ).leftMap(ServiceError(_))
+                                         )
+              } yield bprWithCgtReference
+
+            result
+              .fold(
+                {
+                  case ValidationError(formWithErrors) =>
+                    BadRequest(
+                      enterTrnAndNamePage(
+                        formWithErrors,
+                        routes.DeterminingIfOrganisationIsTrustController
+                          .doYouHaveATrn()
+                      )
+                    )
+                  case ServiceError(e)                 =>
+                    handleNameMatchServiceError(e)
+                },
+                {
+                  case (_, maybeCgtReference) =>
+                    Redirect(
+                      maybeCgtReference.fold(
+                        controllers.routes.StartController.start()
+                      ) { cgtReference =>
+                        auditService.sendEvent(
+                          "accessWithWrongGGAccount",
+                          WrongGGAccountEvent(
+                            Some(cgtReference.value),
+                            determiningIfOrganisationIsTrust.ggCredId.value
+                          ),
+                          "access-with-wrong-gg-account"
+                        )
+                        onboarding.routes.SubscriptionController
+                          .alreadySubscribedWithDifferentGGAccount()
+                      }
+                    )
+                }
+              )
+
+          case _          => Redirect(controllers.routes.StartController.start())
+        }
+      }
+    }
+
+  def registerYourTrust(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { _ =>
+        Ok(
+          registerYourTrustPage(
+            routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+          )
+        )
+      }
+    }
+
+  def tooManyAttempts(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { determiningIfOrganisationIsTrust =>
+        bprNameMatchService
+          .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](
+            determiningIfOrganisationIsTrust.ggCredId
+          )
+          .value
+          .map {
+            case Left(NameMatchServiceError.TooManyUnsuccessfulAttempts()) =>
+              Ok(tooManyAttemptsPage())
+            case Left(otherNameMatchError)                                 =>
+              handleNameMatchServiceError(otherNameMatchError)
+            case Right(_)                                                  =>
+              Redirect(
+                routes.DeterminingIfOrganisationIsTrustController.enterTrn()
+              )
+          }
+      }
+    }
 
   private def attemptNameMatchAndUpdateSession(
     trustNameMatchDetails: TrustNameMatchDetails,
     ggCredId: GGCredId,
     ggEmail: Option[Email],
-    previousUnsuccessfulAttempt: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
-  )(
-    implicit hc: HeaderCarrier,
+    previousUnsuccessfulAttempt: Option[
+      UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
+    ]
+  )(implicit
+    hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, NameMatchServiceError[TrustNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])] =
+  ): EitherT[Future, NameMatchServiceError[
+    TrustNameMatchDetails
+  ], (BusinessPartnerRecord, Option[CgtReference])] =
     for {
       bprWithCgtReference <- bprNameMatchService
-                              .attemptBusinessPartnerRecordNameMatch(
-                                trustNameMatchDetails,
-                                ggCredId,
-                                previousUnsuccessfulAttempt
-                              )
-                              .subflatMap {
-                                case (bpr, cgtReference) =>
-                                  if (bpr.name.isRight) {
-                                    Left(
-                                      NameMatchServiceError
-                                        .BackendError(Error("Found BPR for individual but expected one for a trust"))
-                                    )
-                                  } else {
-                                    Right(bpr -> cgtReference)
-                                  }
-                              }
-      _ <- EitherT(
-            updateSession(sessionStore, request)(
-              _.copy(journeyStatus =
-                Some(
-                  bprWithCgtReference._2.fold[JourneyStatus](
-                    SubscriptionStatus.SubscriptionMissingData(bprWithCgtReference._1, None, ggCredId, ggEmail)
-                  )(cgtRef => AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtRef)))
-                )
-              )
-            )
-          ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](NameMatchServiceError.BackendError)
+                               .attemptBusinessPartnerRecordNameMatch(
+                                 trustNameMatchDetails,
+                                 ggCredId,
+                                 previousUnsuccessfulAttempt
+                               )
+                               .subflatMap {
+                                 case (bpr, cgtReference) =>
+                                   if (bpr.name.isRight)
+                                     Left(
+                                       NameMatchServiceError
+                                         .BackendError(
+                                           Error(
+                                             "Found BPR for individual but expected one for a trust"
+                                           )
+                                         )
+                                     )
+                                   else
+                                     Right(bpr -> cgtReference)
+                               }
+      _                   <- EitherT(
+             updateSession(sessionStore, request)(
+               _.copy(journeyStatus =
+                 Some(
+                   bprWithCgtReference._2.fold[JourneyStatus](
+                     SubscriptionStatus.SubscriptionMissingData(
+                       bprWithCgtReference._1,
+                       None,
+                       ggCredId,
+                       ggEmail
+                     )
+                   )(cgtRef =>
+                     AlreadySubscribedWithDifferentGGAccount(
+                       ggCredId,
+                       Some(cgtRef)
+                     )
+                   )
+                 )
+               )
+             )
+           ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](
+             NameMatchServiceError.BackendError
+           )
     } yield bprWithCgtReference
 
   private def handleNameMatchServiceError(
     nameMatchError: NameMatchServiceError[TrustNameMatchDetails]
-  )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
-    case NameMatchServiceError.BackendError(error) =>
-      logger.warn("Could not get BPR with entered TRN", error)
-      // errorHandler.errorResult()
-      errorHandler.tmpErrorResult()
+  )(implicit request: RequestWithSessionData[_]): Result =
+    nameMatchError match {
+      case NameMatchServiceError.BackendError(error)                   =>
+        logger.warn("Could not get BPR with entered TRN", error)
+        // errorHandler.errorResult()
+        errorHandler.tmpErrorResult()
 
-    case NameMatchServiceError.NameMatchFailed(unsuccessfulAttempts) =>
-      val form = enterTrnAndNameForm
-        .fill(unsuccessfulAttempts.lastDetailsTried)
-        .withUnsuccessfulAttemptsError(unsuccessfulAttempts)
-      BadRequest(enterTrnAndNamePage(form, routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))
+      case NameMatchServiceError.NameMatchFailed(unsuccessfulAttempts) =>
+        val form = enterTrnAndNameForm
+          .fill(unsuccessfulAttempts.lastDetailsTried)
+          .withUnsuccessfulAttemptsError(unsuccessfulAttempts)
+        BadRequest(
+          enterTrnAndNamePage(
+            form,
+            routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+          )
+        )
 
-    case NameMatchServiceError.TooManyUnsuccessfulAttempts() =>
-      Redirect(routes.DeterminingIfOrganisationIsTrustController.tooManyAttempts())
-  }
+      case NameMatchServiceError.TooManyUnsuccessfulAttempts()         =>
+        Redirect(
+          routes.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
+        )
+    }
 
 }
 
@@ -358,9 +455,13 @@ object DeterminingIfOrganisationIsTrustController {
 
   object NameMatchError {
 
-    final case class ServiceError[A <: NameMatchDetails](error: NameMatchServiceError[A]) extends NameMatchError[A]
+    final case class ServiceError[A <: NameMatchDetails](
+      error: NameMatchServiceError[A]
+    ) extends NameMatchError[A]
 
-    final case class ValidationError[A <: NameMatchDetails](formWithErrors: Form[A]) extends NameMatchError[A]
+    final case class ValidationError[A <: NameMatchDetails](
+      formWithErrors: Form[A]
+    ) extends NameMatchError[A]
 
   }
 
@@ -384,14 +485,23 @@ object DeterminingIfOrganisationIsTrustController {
         "trn"       -> TRN.mapping,
         "trustName" -> TrustName.mapping
       ) {
-        case (trn, trustName) => TrustNameMatchDetails(TrustName(trustName), TRN(trn))
-      }(trustNameMatchDetails => Some((trustNameMatchDetails.trn.value, trustNameMatchDetails.name.value)))
+        case (trn, trustName) =>
+          TrustNameMatchDetails(TrustName(trustName), TRN(trn))
+      }(trustNameMatchDetails =>
+        Some(
+          (trustNameMatchDetails.trn.value, trustNameMatchDetails.name.value)
+        )
+      )
     )
 
-  implicit class TRNAndTrustNameFormOps(private val form: Form[TrustNameMatchDetails]) extends AnyVal {
+  implicit class TRNAndTrustNameFormOps(
+    private val form: Form[TrustNameMatchDetails]
+  ) extends AnyVal {
 
     def withUnsuccessfulAttemptsError(
-      numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
+      numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[
+        TrustNameMatchDetails
+      ]
     ): Form[TrustNameMatchDetails] =
       form
         .withGlobalError(

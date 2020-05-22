@@ -53,7 +53,8 @@ object AgentVerifierMatchRetryStoreImplSpec {
 }
 class AgentVerifierMatchRetryStoreImplSpec extends WordSpec with Matchers with MongoSupport with Eventually {
 
-  val retryStore = new AgentVerifierMatchRetryStoreImpl(reactiveMongoComponent, config)
+  val retryStore =
+    new AgentVerifierMatchRetryStoreImpl(reactiveMongoComponent, config)
 
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(5.seconds, 500.millis)
@@ -61,7 +62,8 @@ class AgentVerifierMatchRetryStoreImplSpec extends WordSpec with Matchers with M
   "AgentVerifierMatchRetryStoreImpl" must {
 
     "be able to insert retry data into mongo and read it back" in new TestEnvironment {
-      val result = retryStore.store(agentGGCredId, clientCgtReference, unsuccessfulAttempts)
+      val result = retryStore
+        .store(agentGGCredId, clientCgtReference, unsuccessfulAttempts)
 
       await(result) should be(Right(()))
 
@@ -73,21 +75,25 @@ class AgentVerifierMatchRetryStoreImplSpec extends WordSpec with Matchers with M
     }
 
     "return no retry data if there is no data in mongo" in new TestEnvironment {
-      await(retryStore.get(sample[GGCredId], sample[CgtReference])) should be(Right(None))
+      await(retryStore.get(sample[GGCredId], sample[CgtReference])) should be(
+        Right(None)
+      )
     }
 
     "return an error" when {
 
       "the data in mongo cannot be parsed" in new TestEnvironment {
-        val invalidData = JsObject(Map("unsuccessfulAttempts" -> JsString("1")))
+        val invalidData                           = JsObject(Map("unsuccessfulAttempts" -> JsString("1")))
         val create: Future[DatabaseUpdate[Cache]] =
           retryStore.cacheRepository.createOrUpdate(
             Id(s"${agentGGCredId.value}#${clientCgtReference.value}"),
             retryStore.sessionKey,
             invalidData
           )
-        await(create).writeResult.inError                               shouldBe false
-        await(retryStore.get(agentGGCredId, clientCgtReference)).isLeft shouldBe true
+        await(create).writeResult.inError shouldBe false
+        await(
+          retryStore.get(agentGGCredId, clientCgtReference)
+        ).isLeft                          shouldBe true
       }
 
     }
@@ -98,22 +104,30 @@ class AgentVerifierMatchRetryStoreImplSpec extends WordSpec with Matchers with M
 
 class AgentVerifierMatchRetryStoreImplFailureSpec extends WordSpec with Matchers with MongoSupport {
 
-  val retryStore = new AgentVerifierMatchRetryStoreImpl(reactiveMongoComponent, config)
+  val retryStore =
+    new AgentVerifierMatchRetryStoreImpl(reactiveMongoComponent, config)
 
   reactiveMongoComponent.mongoConnector.helper.driver.close()
 
-  val mongoIsBrokenAndAttemptingTo = new AfterWord("mongo is broken and attempting to")
+  val mongoIsBrokenAndAttemptingTo = new AfterWord(
+    "mongo is broken and attempting to"
+  )
 
   "NameMatchRetryStore" must {
 
     "return an error" when mongoIsBrokenAndAttemptingTo {
 
       "insert a record" in new TestEnvironment {
-        await(retryStore.get(agentGGCredId, clientCgtReference)).isLeft shouldBe true
+        await(
+          retryStore.get(agentGGCredId, clientCgtReference)
+        ).isLeft shouldBe true
       }
 
       "read a record" in new TestEnvironment {
-        await(retryStore.store(agentGGCredId, clientCgtReference, unsuccessfulAttempts)).isLeft shouldBe true
+        await(
+          retryStore
+            .store(agentGGCredId, clientCgtReference, unsuccessfulAttempts)
+        ).isLeft shouldBe true
       }
 
     }

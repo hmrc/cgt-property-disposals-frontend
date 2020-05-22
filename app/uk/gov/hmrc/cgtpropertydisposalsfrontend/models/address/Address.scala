@@ -90,7 +90,7 @@ object Address {
       )(UkAddress.apply)(UkAddress.unapply)
     )
 
-  val nonUkAddressForm: Form[NonUkAddress] = {
+  val nonUkAddressForm: Form[NonUkAddress] =
     Form(
       formMapping(
         "nonUkAddress-line1" -> addressLineMapping,
@@ -101,7 +101,6 @@ object Address {
         "countryCode"        -> of(Country.formatter)
       )(NonUkAddress.apply)(NonUkAddress.unapply)
     )
-  }
 
   val isUkForm: Form[Boolean] =
     Form(
