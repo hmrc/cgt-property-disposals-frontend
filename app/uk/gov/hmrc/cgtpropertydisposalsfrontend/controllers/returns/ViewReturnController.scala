@@ -71,7 +71,8 @@ class ViewReturnController @Inject() (
               returnSummary,
               rebasingEligibilityUtil,
               subscribedDetails,
-              representativeType(sentReturn)
+              representativeType(sentReturn),
+              sentReturn.isIndirectDisposal()
             )
           )
       }

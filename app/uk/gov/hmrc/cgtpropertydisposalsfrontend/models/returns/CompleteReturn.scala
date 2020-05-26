@@ -193,6 +193,13 @@ object CompleteReturn {
         case m: CompleteMultipleDisposalsReturn => whenMultiple(m)
         case s: CompleteSingleDisposalReturn    => whenSingle(s)
       }
+
+    def isIndirectDisposal(): Boolean =
+      c.fold[Boolean](
+        m => m.triageAnswers.isIndirectDisposal(),
+        s => s.triageAnswers.isIndirectDisposal()
+      )
+
   }
 
   private def validRepresenteeAnswers(

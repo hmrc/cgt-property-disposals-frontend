@@ -35,7 +35,8 @@
     answers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    isIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 
@@ -48,15 +49,18 @@
     else ""
 }
 
+@indirectKey = @{ if(isIndirectDisposal) ".indirect" else ""}
+
 @disposalMethodKey = @{ disposalMethod match {
     case DisposalMethod.Gifted => ".Gifted"
     case _      => ".SoldOther"
 }}
 
 @formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
+
 @shareOfPropertyTitle = @{messages(s"shareOfProperty$userKey.title")}
-@disposalPriceTitle   = @{messages(s"disposalPrice$userKey$disposalMethodKey.title")}
-@disposalFeesTitle    = @{messages(s"disposalFees$userKey.title")}
+@disposalPriceTitle   = @{messages(s"disposalPrice$userKey$indirectKey$disposalMethodKey.title")}
+@disposalFeesTitle    = @{messages(s"disposalFees$userKey$indirectKey.title")}
 
 @cyaSection() {
   @cyaRow(

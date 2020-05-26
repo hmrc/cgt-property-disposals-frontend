@@ -20,10 +20,10 @@ import java.time.LocalDate
 
 import cats.Eq
 import julienrf.json.derived
-import play.api.libs.json.OFormat
 import monocle.Lens
 import monocle.macros.Lenses
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig.TrustsEnrolment
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
@@ -124,6 +124,16 @@ object SingleDisposalTriageAnswers {
         case Some(Capacitor)              => Some(Right(Capacitor))
         case _                            => None
       }
+
+    def isIndirectDisposal(): Boolean =
+      s.fold(
+          _.assetType,
+          c => Some(c.assetType)
+        )
+        .exists {
+          case AssetType.IndirectDisposal => true
+          case _                          => false
+        }
 
   }
 

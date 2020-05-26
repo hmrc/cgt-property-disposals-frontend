@@ -24,6 +24,7 @@ import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 sealed trait MultipleDisposalsTriageAnswers
@@ -121,6 +122,16 @@ object MultipleDisposalsTriageAnswers {
         case Some(Capacitor)              => Some(Right(Capacitor))
         case _                            => None
       }
+
+    def isIndirectDisposal(): Boolean =
+      m.fold[Option[List[AssetType]]](
+          _.assetTypes,
+          c => Some(c.assetTypes)
+        )
+        .exists {
+          case List(IndirectDisposal) => true
+          case _                      => false
+        }
 
   }
 

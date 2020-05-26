@@ -37,7 +37,8 @@
     answers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    isIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
@@ -47,7 +48,7 @@
 
     @pageHeading(title, Some(messages("returns.disposal-details.caption")))
 
-    @summary(answers, disposalMethod, isATrust, representativeType)
+    @summary(answers, disposalMethod, isATrust, representativeType, isIndirectDisposal)
 
     @formWrapper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

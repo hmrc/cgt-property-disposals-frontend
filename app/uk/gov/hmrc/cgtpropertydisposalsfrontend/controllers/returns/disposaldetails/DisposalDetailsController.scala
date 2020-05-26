@@ -575,7 +575,8 @@ class DisposalDetailsController @Inject() (
                           completeAnswers,
                           disposalMethod,
                           fillingOutReturn.subscribedDetails.isATrust,
-                          representativeType(state)
+                          representativeType(state),
+                          isIndirectDisposal(state)
                         )
                       )
                   )
@@ -586,7 +587,8 @@ class DisposalDetailsController @Inject() (
                       answers,
                       disposalMethod,
                       fillingOutReturn.subscribedDetails.isATrust,
-                      representativeType(state)
+                      representativeType(state),
+                      isIndirectDisposal(state)
                     )
                   )
               }
