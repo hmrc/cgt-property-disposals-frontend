@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, IndividualUserType, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, IndividualUserType, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -106,11 +106,37 @@ class DisposalDetailsControllerSpec
       case (_, UserType.Agent)         => ".agent"
       case other                       => sys.error(s"User type '$other' not handled")
     }
+  def fillingOutReturn(
+    disposalMethod: DisposalMethod,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType],
+    assetType: AssetType
+  ): (FillingOutReturn, DraftSingleDisposalReturn) = {
+    val answers           = sample[CompleteSingleDisposalTriageAnswers].copy(
+      disposalMethod = disposalMethod,
+      individualUserType = individualUserType,
+      assetType = assetType
+    )
+    val subscribedDetails = sample[SubscribedDetails].copy(
+      name = setNameForUserType(userType)
+    )
+    val draftReturn       = sample[DraftSingleDisposalReturn].copy(
+      triageAnswers = answers
+    )
+
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = subscribedDetails,
+      agentReferenceNumber = setAgentReferenceNumber(userType)
+    )
+
+    fillingOutReturn -> draftReturn
+  }
 
   def fillingOutReturn(
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
   ): (FillingOutReturn, DraftSingleDisposalReturn) = {
     val answers           = sample[CompleteSingleDisposalTriageAnswers].copy(
       disposalMethod = disposalMethod,
@@ -139,18 +165,44 @@ class DisposalDetailsControllerSpec
     individualUserType: Option[IndividualUserType]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
-    val (journey, draftReturn) =
-      fillingOutReturn(disposalMethod, userType, individualUserType)
+    val (journey, draftReturn) = fillingOutReturn(
+      disposalMethod,
+      userType,
+      individualUserType
+    )
     val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
     val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
-    (
-      SessionData.empty.copy(
-        journeyStatus = Some(updatedJourney),
-        userType = Some(userType)
-      ),
-      updatedJourney,
-      updatedDraftReturn
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(updatedJourney),
+      userType = Some(userType)
     )
+
+    (sessionData, updatedJourney, updatedDraftReturn)
+
+  }
+
+  def sessionWithDisposalDetailsAnswers(
+    answers: Option[DisposalDetailsAnswers],
+    disposalMethod: DisposalMethod,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType],
+    assetType: AssetType
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+
+    val (journey, draftReturn) = fillingOutReturn(
+      disposalMethod,
+      userType,
+      individualUserType,
+      assetType
+    )
+    val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
+    val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(updatedJourney),
+      userType = Some(userType)
+    )
+
+    (sessionData, updatedJourney, updatedDraftReturn)
 
   }
 
@@ -165,6 +217,21 @@ class DisposalDetailsControllerSpec
       disposalMethod,
       userType,
       individualUserType
+    )
+
+  def sessionWithDisposalDetailsAnswers(
+    answers: DisposalDetailsAnswers,
+    disposalMethod: DisposalMethod,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType],
+    assetType: AssetType
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
+    sessionWithDisposalDetailsAnswers(
+      Some(answers),
+      disposalMethod,
+      userType,
+      individualUserType,
+      assetType
     )
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
@@ -1133,6 +1200,7 @@ class DisposalDetailsControllerSpec
         }
 
       }
+
     }
 
     "handling submitted answers to the what was disposal price page" must {
@@ -1241,6 +1309,7 @@ class DisposalDetailsControllerSpec
               }
           }
         }
+
       }
 
       "show an error page" when {
@@ -1740,6 +1809,7 @@ class DisposalDetailsControllerSpec
               )
           }
         }
+
       }
 
       "display the page" when {
@@ -1859,7 +1929,9 @@ class DisposalDetailsControllerSpec
               }
           }
         }
+
       }
+
     }
 
     "handling submitted answers to the what was disposal fees page" must {

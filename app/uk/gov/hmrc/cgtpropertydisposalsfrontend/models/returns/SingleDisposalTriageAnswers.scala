@@ -23,7 +23,6 @@ import julienrf.json.derived
 import monocle.Lens
 import monocle.macros.Lenses
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig.TrustsEnrolment
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
