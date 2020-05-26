@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
@@ -106,17 +107,32 @@ class DisposalDetailsControllerSpec
       case (_, UserType.Agent)         => ".agent"
       case other                       => sys.error(s"User type '$other' not handled")
     }
+
+  def indirectMessageKey(assetType: AssetType): String =
+    assetType match {
+      case AssetType.IndirectDisposal => ".indirect"
+      case _                          => ""
+    }
+
   def fillingOutReturn(
     disposalMethod: DisposalMethod,
     userType: UserType,
     individualUserType: Option[IndividualUserType],
     assetType: AssetType
   ): (FillingOutReturn, DraftSingleDisposalReturn) = {
-    val answers           = sample[CompleteSingleDisposalTriageAnswers].copy(
+
+    val country =
+      if (assetType === AssetType.IndirectDisposal)
+        Country("NZ", Some("New Zealand"))
+      else Country.uk
+
+    val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
       disposalMethod = disposalMethod,
       individualUserType = individualUserType,
-      assetType = assetType
+      assetType = assetType,
+      countryOfResidence = country
     )
+    
     val subscribedDetails = sample[SubscribedDetails].copy(
       name = setNameForUserType(userType)
     )
@@ -136,7 +152,7 @@ class DisposalDetailsControllerSpec
   def fillingOutReturn(
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType],
+    individualUserType: Option[IndividualUserType]
   ): (FillingOutReturn, DraftSingleDisposalReturn) = {
     val answers           = sample[CompleteSingleDisposalTriageAnswers].copy(
       disposalMethod = disposalMethod,
@@ -172,7 +188,7 @@ class DisposalDetailsControllerSpec
     )
     val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
     val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
-    val sessionData = SessionData.empty.copy(
+    val sessionData            = SessionData.empty.copy(
       journeyStatus = Some(updatedJourney),
       userType = Some(userType)
     )
@@ -197,7 +213,7 @@ class DisposalDetailsControllerSpec
     )
     val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
     val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
-    val sessionData = SessionData.empty.copy(
+    val sessionData            = SessionData.empty.copy(
       journeyStatus = Some(updatedJourney),
       userType = Some(userType)
     )
@@ -356,6 +372,7 @@ class DisposalDetailsControllerSpec
         }
 
       }
+
     }
 
     "handling submitted answers to the how much did you own page" must {
@@ -1008,60 +1025,64 @@ class DisposalDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.whatWasDisposalPrice()(FakeRequest())
 
-      val requiredPreviousAnswers =
-        IncompleteDisposalDetailsAnswers.empty
-          .copy(shareOfProperty = Some(ShareOfProperty.Full))
+      val requiredPreviousAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
+        shareOfProperty = Some(ShareOfProperty.Full)
+      )
 
       def disposalPriceTitleScenarios(
         individualUserType: IndividualUserType,
-        userType: UserType
-      ) = {
-        val userMsgKey = userMessageKey(individualUserType, userType)
+        userType: UserType,
+        assetType: AssetType
+      ): List[(DisposalMethod, ShareOfProperty, String)] = {
+        val userMsgKey     = userMessageKey(individualUserType, userType)
+        val indirectMsgKey = indirectMessageKey(assetType)
+        val key            = "disposalPrice"
+
         List(
           (
             DisposalMethod.Sold,
             ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.SoldOther.title"
+            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
           ),
           (
             DisposalMethod.Sold,
             ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.SoldOther.title"
+            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
           ),
           (
             DisposalMethod.Sold,
             ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.SoldOther.title"
+            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
           ),
           (
             DisposalMethod.Gifted,
             ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.Gifted.title"
+            s"$key$userMsgKey$indirectMsgKey.Gifted.title"
           ),
           (
             DisposalMethod.Gifted,
             ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.Gifted.title"
+            s"$key$userMsgKey$indirectMsgKey.Gifted.title"
           ),
           (
             DisposalMethod.Gifted,
             ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.Gifted.title"
+            s"$key$userMsgKey$indirectMsgKey.Gifted.title"
           ),
           (
             DisposalMethod.Other,
             ShareOfProperty.Full,
-            s"disposalPrice$userMsgKey.SoldOther.title"
+            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
           ),
           (
             DisposalMethod.Other,
             ShareOfProperty.Half,
-            s"disposalPrice$userMsgKey.SoldOther.title"
+            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
           ),
           (
             DisposalMethod.Other,
             ShareOfProperty.Other(1),
-            s"disposalPrice$userMsgKey.SoldOther.title"
+            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
           )
         )
       }
@@ -1075,9 +1096,9 @@ class DisposalDetailsControllerSpec
       "display the page" when {
 
         "the user has not answered the question before" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              disposalPriceTitleScenarios(individualUserType, userType)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserType, assetTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              disposalPriceTitleScenarios(individualUserType, userType, assetType)
                 .foreach {
                   case (disposalMethod, share, expectedTitleKey) =>
                     withClue(
@@ -1091,7 +1112,8 @@ class DisposalDetailsControllerSpec
                             requiredPreviousAnswers.copy(shareOfProperty = Some(share)),
                             disposalMethod,
                             userType,
-                            Some(individualUserType)
+                            Some(individualUserType),
+                            assetType
                           )._1
                         )
                       }
@@ -1110,14 +1132,16 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen
+            individualUserTypeGen,
+            assetTypeGen
           ) {
             (
               userType: UserType,
               disposalMethod: DisposalMethod,
-              individualUserType: IndividualUserType
+              individualUserType: IndividualUserType,
+              assetType: AssetType
             ) =>
-              disposalPriceTitleScenarios(individualUserType, userType)
+              disposalPriceTitleScenarios(individualUserType, userType, assetType)
                 .foreach {
                   case (disposalMethod, share, expectedTitleKey) =>
                     withClue(
@@ -1157,14 +1181,16 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen
+            individualUserTypeGen,
+            assetTypeGen
           ) {
             (
               userType: UserType,
               disposalMethod: DisposalMethod,
-              individualUserType: IndividualUserType
+              individualUserType: IndividualUserType,
+              assetType: AssetType
             ) =>
-              disposalPriceTitleScenarios(individualUserType, userType)
+              disposalPriceTitleScenarios(individualUserType, userType, assetType)
                 .foreach {
                   case (disposalMethod, share, expectedTitleKey) =>
                     withClue(
@@ -1247,8 +1273,12 @@ class DisposalDetailsControllerSpec
         )(
           disposalMethod: DisposalMethod,
           userType: UserType,
-          individualUserType: IndividualUserType
-        ) = {
+          individualUserType: IndividualUserType,
+          assetType: AssetType
+        )(
+          userKey: String,
+          indirectKey: String
+        ): Unit = {
 
           val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
 
@@ -1261,16 +1291,15 @@ class DisposalDetailsControllerSpec
                 ),
                 disposalMethod,
                 userType,
-                Some(individualUserType)
+                Some(individualUserType),
+                assetType
               )._1
             )
           }
 
-          val userKey = userMessageKey(individualUserType, userType)
-
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"$key$userKey$disposalMethodKey.title"),
+            messageFromMessageKey(s"$key$userKey$indirectKey$disposalMethodKey.title"),
             doc =>
               doc
                 .select("#error-summary-display > ul > li > a")
@@ -1285,25 +1314,32 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen
+            individualUserTypeGen,
+            assetTypeGen
           ) {
             (
               userType: UserType,
               disposalMethod: DisposalMethod,
-              individualUserType: IndividualUserType
+              individualUserType: IndividualUserType,
+              assetType: AssetType
             ) =>
               val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
               val userKey           = userMessageKey(individualUserType, userType)
+              val indirectMsgKey    = indirectMessageKey(assetType)
 
               amountOfMoneyErrorScenarios(
                 key = key,
-                errorContext = Some(s"$key$userKey$disposalMethodKey")
+                errorContext = Some(s"$key$userKey$indirectMsgKey$disposalMethodKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
                     disposalMethod,
                     userType,
-                    individualUserType
+                    individualUserType,
+                    assetType
+                  )(
+                    userKey,
+                    indirectMsgKey
                   )
                 }
               }
@@ -2478,6 +2514,41 @@ class DisposalDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      "skip the how much did you own page and redirect to the disposal price page" when {
+
+        "user is non-uk resident and selects indirect disposal" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithDisposalDetailsAnswers(
+                    None,
+                    disposalMethod,
+                    userType,
+                    Some(individualUserType),
+                    AssetType.IndirectDisposal
+                  )._1
+                )
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.DisposalDetailsController.whatWasDisposalPrice()
+              )
+          }
+        }
+
+      }
+
       "redirect to the how much did you own page" when {
 
         "there are no disposal details answers in session" in {
@@ -2891,6 +2962,7 @@ class DisposalDetailsControllerSpec
             )
         }
       }
+
     }
 
   }
