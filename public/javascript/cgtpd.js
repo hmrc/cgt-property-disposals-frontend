@@ -36,6 +36,35 @@
     wrapper.addEventListener('change', resetSelectIfEmpty);
   }
 
+  var urBanner = document.querySelector('.ur-banner')
+  if (urBanner) {
+    var urBannerCookieName = 'mtdpurr'
+    var hasDismissed = GOVUK.getCookie(urBannerCookieName)
+
+    function removeUrBanner () {
+      urBanner.parentNode.removeChild(urBanner)
+    }
+
+    function dismissUrBanner (e) {
+      if (e.target && e.target.id === 'dismiss-ur-banner') {
+        e.preventDefault()
+        GOVUK.setCookie(urBannerCookieName, 'suppress_for_all_services', { days: 30 })
+        removeUrBanner()
+      }
+    }
+
+    function showUrBanner () {
+      urBanner.addEventListener('click', dismissUrBanner)
+      urBanner.classList.remove('js-hidden')
+    }
+
+    if (hasDismissed) {
+      removeUrBanner()
+    } else {
+      showUrBanner()
+    }
+  }
+
   if (window.jsConfig && window.jsConfig.timeoutEnabled) {
     GOVUK.sessionTimeout({
       timeout: window.jsConfig.timeout,

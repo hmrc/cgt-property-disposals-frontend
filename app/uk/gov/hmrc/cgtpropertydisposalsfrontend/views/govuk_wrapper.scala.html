@@ -35,7 +35,8 @@
     uiMainContent: uk.gov.hmrc.play.views.html.layouts.MainContent,
     uiFooterLinks: uk.gov.hmrc.play.views.html.layouts.FooterLinks,
     helperReportAProblemLink: uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink,
-    betaBanner: uk.gov.hmrc.play.views.html.layouts.BetaBanner
+    betaBanner: uk.gov.hmrc.play.views.html.layouts.BetaBanner,
+    userRecruitmentBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.user_recruitment_banner
 )
 
 
@@ -94,7 +95,11 @@
       navLinks = Some(headerNavLinks))
 }
 
-@afterHeader = {}
+@afterHeader = {
+  @if(appConfig.userRecruitmentBannerEnabled) {
+    @userRecruitmentBanner(appConfig.userRecruitmentUrl)
+  }
+}
 
 @withCustomJS = {
   @scriptElem
