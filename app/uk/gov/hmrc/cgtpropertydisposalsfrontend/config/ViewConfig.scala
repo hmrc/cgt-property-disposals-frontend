@@ -166,4 +166,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     "telephone-numbers.agent-dedicated-line"
   )
 
+  val userRecruitmentBannerEnabled: Boolean = servicesConfig.getBoolean("user-recruitment-banner.enabled")
+  val userRecruitmentUrl: String            = getString("user-recruitment-banner.url")
+
 }
