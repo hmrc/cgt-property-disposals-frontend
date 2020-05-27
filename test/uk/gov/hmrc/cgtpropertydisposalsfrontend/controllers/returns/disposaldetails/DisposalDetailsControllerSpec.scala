@@ -3712,7 +3712,12 @@ object DisposalDetailsControllerSpec extends Matchers {
     doc: Document,
     isIndirectDisposal: Boolean = false
   ): Unit = {
-    if (!isIndirectDisposal)
+    if (isIndirectDisposal)
+      doc
+        .select("#propertyShare-answer")
+        .text()
+        .stripSuffix("%") shouldBe ""
+    else
       doc
         .select("#propertyShare-answer")
         .text()
