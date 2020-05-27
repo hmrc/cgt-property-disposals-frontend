@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, IndividualUserType, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, IndividualUserType, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -108,47 +108,6 @@ class DisposalDetailsControllerSpec
       case other                       => sys.error(s"User type '$other' not handled")
     }
 
-  def indirectMessageKey(assetType: AssetType): String =
-    assetType match {
-      case AssetType.IndirectDisposal => ".indirect"
-      case _                          => ""
-    }
-
-  def fillingOutReturn(
-    disposalMethod: DisposalMethod,
-    userType: UserType,
-    individualUserType: Option[IndividualUserType],
-    assetType: AssetType
-  ): (FillingOutReturn, DraftSingleDisposalReturn) = {
-
-    val country =
-      if (assetType === AssetType.IndirectDisposal)
-        Country("NZ", Some("New Zealand"))
-      else Country.uk
-
-    val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
-      disposalMethod = disposalMethod,
-      individualUserType = individualUserType,
-      assetType = assetType,
-      countryOfResidence = country
-    )
-    
-    val subscribedDetails = sample[SubscribedDetails].copy(
-      name = setNameForUserType(userType)
-    )
-    val draftReturn       = sample[DraftSingleDisposalReturn].copy(
-      triageAnswers = answers
-    )
-
-    val fillingOutReturn = sample[FillingOutReturn].copy(
-      draftReturn = draftReturn,
-      subscribedDetails = subscribedDetails,
-      agentReferenceNumber = setAgentReferenceNumber(userType)
-    )
-
-    fillingOutReturn -> draftReturn
-  }
-
   def fillingOutReturn(
     disposalMethod: DisposalMethod,
     userType: UserType,
@@ -198,31 +157,6 @@ class DisposalDetailsControllerSpec
   }
 
   def sessionWithDisposalDetailsAnswers(
-    answers: Option[DisposalDetailsAnswers],
-    disposalMethod: DisposalMethod,
-    userType: UserType,
-    individualUserType: Option[IndividualUserType],
-    assetType: AssetType
-  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
-
-    val (journey, draftReturn) = fillingOutReturn(
-      disposalMethod,
-      userType,
-      individualUserType,
-      assetType
-    )
-    val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
-    val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
-    val sessionData            = SessionData.empty.copy(
-      journeyStatus = Some(updatedJourney),
-      userType = Some(userType)
-    )
-
-    (sessionData, updatedJourney, updatedDraftReturn)
-
-  }
-
-  def sessionWithDisposalDetailsAnswers(
     answers: DisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     userType: UserType,
@@ -235,19 +169,74 @@ class DisposalDetailsControllerSpec
       individualUserType
     )
 
-  def sessionWithDisposalDetailsAnswers(
+  def fillingOutIndirectReturn(
+    disposalMethod: DisposalMethod,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType]
+  ): (FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+
+    val country = Country("NZ", Some("New Zealand"))
+
+    val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
+      disposalMethod = disposalMethod,
+      individualUserType = individualUserType,
+      assetType = AssetType.IndirectDisposal,
+      countryOfResidence = country
+    )
+
+    val subscribedDetails = sample[SubscribedDetails].copy(
+      name = setNameForUserType(userType)
+    )
+    val draftReturn       = sample[DraftSingleIndirectDisposalReturn].copy(
+      triageAnswers = answers
+    )
+
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = subscribedDetails,
+      agentReferenceNumber = setAgentReferenceNumber(userType)
+    )
+
+    fillingOutReturn -> draftReturn
+  }
+
+  def sessionWithIndirectDisposalDetailsAnswers(
+    answers: Option[DisposalDetailsAnswers],
+    disposalMethod: DisposalMethod,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType]
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+
+    val (journey, draftReturn) = fillingOutIndirectReturn(
+      disposalMethod,
+      userType,
+      individualUserType
+    )
+
+    val updatedDraftReturn = draftReturn.copy(
+      disposalDetailsAnswers = answers
+    )
+    val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+    val sessionData        = SessionData.empty.copy(
+      journeyStatus = Some(updatedJourney),
+      userType = Some(userType)
+    )
+
+    (sessionData, updatedJourney, updatedDraftReturn)
+
+  }
+
+  def sessionWithIndirectDisposalDetailsAnswers(
     answers: DisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     userType: UserType,
-    individualUserType: Option[IndividualUserType],
-    assetType: AssetType
-  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
-    sessionWithDisposalDetailsAnswers(
+    individualUserType: Option[IndividualUserType]
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
+    sessionWithIndirectDisposalDetailsAnswers(
       Some(answers),
       disposalMethod,
       userType,
-      individualUserType,
-      assetType
+      individualUserType
     )
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
@@ -1031,58 +1020,26 @@ class DisposalDetailsControllerSpec
 
       def disposalPriceTitleScenarios(
         individualUserType: IndividualUserType,
-        userType: UserType,
-        assetType: AssetType
+        userType: UserType
       ): List[(DisposalMethod, ShareOfProperty, String)] = {
-        val userMsgKey     = userMessageKey(individualUserType, userType)
-        val indirectMsgKey = indirectMessageKey(assetType)
-        val key            = "disposalPrice"
+        val userMsgKey = userMessageKey(individualUserType, userType)
+        val key        = "disposalPrice"
 
         List(
           (
             DisposalMethod.Sold,
             ShareOfProperty.Full,
-            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Half,
-            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Sold,
-            ShareOfProperty.Other(1),
-            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
+            s"$key$userMsgKey.indirect.SoldOther.title"
           ),
           (
             DisposalMethod.Gifted,
             ShareOfProperty.Full,
-            s"$key$userMsgKey$indirectMsgKey.Gifted.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Half,
-            s"$key$userMsgKey$indirectMsgKey.Gifted.title"
-          ),
-          (
-            DisposalMethod.Gifted,
-            ShareOfProperty.Other(1),
-            s"$key$userMsgKey$indirectMsgKey.Gifted.title"
+            s"$key$userMsgKey.indirect.Gifted.title"
           ),
           (
             DisposalMethod.Other,
             ShareOfProperty.Full,
-            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Half,
-            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
-          ),
-          (
-            DisposalMethod.Other,
-            ShareOfProperty.Other(1),
-            s"$key$userMsgKey$indirectMsgKey.SoldOther.title"
+            s"$key$userMsgKey.indirect.SoldOther.title"
           )
         )
       }
@@ -1096,9 +1053,9 @@ class DisposalDetailsControllerSpec
       "display the page" when {
 
         "the user has not answered the question before" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserType, assetTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
-              disposalPriceTitleScenarios(individualUserType, userType, assetType)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              disposalPriceTitleScenarios(individualUserType, userType)
                 .foreach {
                   case (disposalMethod, share, expectedTitleKey) =>
                     withClue(
@@ -1108,12 +1065,11 @@ class DisposalDetailsControllerSpec
                       inSequence {
                         mockAuthWithNoRetrievals()
                         mockGetSession(
-                          sessionWithDisposalDetailsAnswers(
+                          sessionWithIndirectDisposalDetailsAnswers(
                             requiredPreviousAnswers.copy(shareOfProperty = Some(share)),
                             disposalMethod,
                             userType,
-                            Some(individualUserType),
-                            assetType
+                            Some(individualUserType)
                           )._1
                         )
                       }
@@ -1132,16 +1088,14 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen,
-            assetTypeGen
+            individualUserTypeGen
           ) {
             (
               userType: UserType,
               disposalMethod: DisposalMethod,
-              individualUserType: IndividualUserType,
-              assetType: AssetType
+              individualUserType: IndividualUserType
             ) =>
-              disposalPriceTitleScenarios(individualUserType, userType, assetType)
+              disposalPriceTitleScenarios(individualUserType, userType)
                 .foreach {
                   case (disposalMethod, share, expectedTitleKey) =>
                     withClue(
@@ -1151,7 +1105,7 @@ class DisposalDetailsControllerSpec
                       inSequence {
                         mockAuthWithNoRetrievals()
                         mockGetSession(
-                          sessionWithDisposalDetailsAnswers(
+                          sessionWithIndirectDisposalDetailsAnswers(
                             requiredPreviousAnswers.copy(
                               shareOfProperty = Some(share),
                               disposalPrice = Some(AmountInPence.fromPounds(12.34))
@@ -1181,16 +1135,14 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen,
-            assetTypeGen
+            individualUserTypeGen
           ) {
             (
               userType: UserType,
               disposalMethod: DisposalMethod,
-              individualUserType: IndividualUserType,
-              assetType: AssetType
+              individualUserType: IndividualUserType
             ) =>
-              disposalPriceTitleScenarios(individualUserType, userType, assetType)
+              disposalPriceTitleScenarios(individualUserType, userType)
                 .foreach {
                   case (disposalMethod, share, expectedTitleKey) =>
                     withClue(
@@ -1200,7 +1152,7 @@ class DisposalDetailsControllerSpec
                       inSequence {
                         mockAuthWithNoRetrievals()
                         mockGetSession(
-                          sessionWithDisposalDetailsAnswers(
+                          sessionWithIndirectDisposalDetailsAnswers(
                             sample[CompleteDisposalDetailsAnswers].copy(
                               shareOfProperty = share,
                               disposalPrice = AmountInPence.fromPounds(12.34)
@@ -1273,11 +1225,9 @@ class DisposalDetailsControllerSpec
         )(
           disposalMethod: DisposalMethod,
           userType: UserType,
-          individualUserType: IndividualUserType,
-          assetType: AssetType
+          individualUserType: IndividualUserType
         )(
-          userKey: String,
-          indirectKey: String
+          userKey: String
         ): Unit = {
 
           val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
@@ -1285,21 +1235,20 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithDisposalDetailsAnswers(
+              sessionWithIndirectDisposalDetailsAnswers(
                 sample[CompleteDisposalDetailsAnswers].copy(
                   shareOfProperty = ShareOfProperty.Full
                 ),
                 disposalMethod,
                 userType,
-                Some(individualUserType),
-                assetType
+                Some(individualUserType)
               )._1
             )
           }
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey(s"$key$userKey$indirectKey$disposalMethodKey.title"),
+            messageFromMessageKey(s"$key$userKey.indirect$disposalMethodKey.title"),
             doc =>
               doc
                 .select("#error-summary-display > ul > li > a")
@@ -1314,32 +1263,27 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen,
-            assetTypeGen
+            individualUserTypeGen
           ) {
             (
               userType: UserType,
               disposalMethod: DisposalMethod,
-              individualUserType: IndividualUserType,
-              assetType: AssetType
+              individualUserType: IndividualUserType
             ) =>
               val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
               val userKey           = userMessageKey(individualUserType, userType)
-              val indirectMsgKey    = indirectMessageKey(assetType)
 
               amountOfMoneyErrorScenarios(
                 key = key,
-                errorContext = Some(s"$key$userKey$indirectMsgKey$disposalMethodKey")
+                errorContext = Some(s"$key$userKey.indirect$disposalMethodKey")
               ).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
                     disposalMethod,
                     userType,
-                    individualUserType,
-                    assetType
+                    individualUserType
                   )(
-                    userKey,
-                    indirectMsgKey
+                    userKey
                   )
                 }
               }
@@ -2530,12 +2474,11 @@ class DisposalDetailsControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  sessionWithDisposalDetailsAnswers(
+                  sessionWithIndirectDisposalDetailsAnswers(
                     None,
                     disposalMethod,
                     userType,
-                    Some(individualUserType),
-                    AssetType.IndirectDisposal
+                    Some(individualUserType)
                   )._1
                 )
               }
