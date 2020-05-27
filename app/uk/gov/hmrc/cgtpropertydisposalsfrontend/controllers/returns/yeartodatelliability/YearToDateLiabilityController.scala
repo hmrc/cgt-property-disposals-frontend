@@ -1263,11 +1263,11 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
                 fillingOutReturn.draftReturn match {
-                  case _: DraftMultipleDisposalsReturn      => true
-                  case _: DraftSingleDisposalReturn         => false
-                  case _: DraftSingleIndirectDisposalReturn => false
-                  case _: DraftSingleMixedUseDisposalReturn => false
-
+                  case _: DraftMultipleDisposalsReturn         => true
+                  case _: DraftSingleDisposalReturn            => false
+                  case _: DraftSingleIndirectDisposalReturn    => false
+                  case _: DraftMultipleIndirectDisposalsReturn => true
+                  case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 representativeType(fillingOutReturn.draftReturn)
               )
@@ -1297,10 +1297,11 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
                 fillingOutReturn.draftReturn match {
-                  case _: DraftMultipleDisposalsReturn      => true
-                  case _: DraftSingleDisposalReturn         => false
-                  case _: DraftSingleIndirectDisposalReturn => false
-                  case _: DraftSingleMixedUseDisposalReturn => false
+                  case _: DraftMultipleDisposalsReturn         => true
+                  case _: DraftSingleDisposalReturn            => false
+                  case _: DraftSingleIndirectDisposalReturn    => false
+                  case _: DraftMultipleIndirectDisposalsReturn => true
+                  case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 representativeType(fillingOutReturn.draftReturn)
               )
@@ -1705,6 +1706,15 @@ class YearToDateLiabilityController @Inject() (
             )
             errorHandler.errorResult()
 
+          case (
+                _: CalculatedYTDAnswers,
+                _: DraftMultipleIndirectDisposalsReturn
+              ) =>
+            logger.warn(
+              "Found calculated year to date liability answers on a multiple indirect disposals draft return"
+            )
+            errorHandler.errorResult()
+
         }
       }
 
@@ -1803,10 +1813,11 @@ class YearToDateLiabilityController @Inject() (
               nonCalculatedCheckYourAnswersPage(
                 completeAnswers,
                 fillingOutReturn.draftReturn match {
-                  case _: DraftMultipleDisposalsReturn      => true
-                  case _: DraftSingleDisposalReturn         => false
-                  case _: DraftSingleIndirectDisposalReturn => false
-                  case _: DraftSingleMixedUseDisposalReturn => false
+                  case _: DraftMultipleDisposalsReturn         => true
+                  case _: DraftSingleDisposalReturn            => false
+                  case _: DraftSingleIndirectDisposalReturn    => false
+                  case _: DraftMultipleIndirectDisposalsReturn => true
+                  case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 fillingOutReturn.subscribedDetails.isATrust,
                 representativeType(draftReturn)

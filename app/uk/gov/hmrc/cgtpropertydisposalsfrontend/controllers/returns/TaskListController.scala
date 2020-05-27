@@ -55,7 +55,8 @@ class TaskListController @Inject() (
   singleDisposalTaskListPage: taskListPages.single_disposal_task_list,
   multipleDisposalsTaskListPage: taskListPages.multiple_disposals_task_list,
   singleIndirectDisposalTaskListPage: taskListPages.single_indirect_disposal_task_list,
-  singleMixedUseDisposalTaskListPage: taskListPages.single_mixed_use_disposal_task_list
+  singleMixedUseDisposalTaskListPage: taskListPages.single_mixed_use_disposal_task_list,
+  multipleIndirectDisposalTaskListPage: taskListPages.multiple_indirect_disposals_task_list
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -83,7 +84,7 @@ class TaskListController @Inject() (
               m => Ok(multipleDisposalsTaskListPage(m)),
               s => Ok(singleDisposalTaskListPage(s)),
               si => Ok(singleIndirectDisposalTaskListPage(si)),
-              mi => sys.error("not supported yet"), // TODO: work on it
+              mi => Ok(multipleIndirectDisposalTaskListPage(mi)),
               sm => Ok(singleMixedUseDisposalTaskListPage(sm))
             )
           )
