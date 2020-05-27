@@ -3709,20 +3709,21 @@ object DisposalDetailsControllerSpec extends Matchers {
 
   def validateDisposalDetailsCheckYourAnswersPage(
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
-    doc: Document
+    doc: Document,
+    isIndirectDisposal: Boolean = false
   ): Unit = {
-    doc
-      .select("#propertyShare-answer")
-      .text()
-      .stripSuffix(
-        "%"
-      )       shouldBe disposalDetailsAnswers.shareOfProperty.percentageValue
-      .toString()
+    if (!isIndirectDisposal)
+      doc
+        .select("#propertyShare-answer")
+        .text()
+        .stripSuffix("%") shouldBe disposalDetailsAnswers.shareOfProperty.percentageValue.toString()
+
     doc
       .select("#disposalPrice-answer")
       .text() shouldBe formatAmountOfMoneyWithPoundSign(
       disposalDetailsAnswers.disposalPrice.inPounds()
     )
+
     doc
       .select("#disposalFees-answer")
       .text() shouldBe formatAmountOfMoneyWithPoundSign(

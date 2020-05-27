@@ -1284,8 +1284,10 @@ object CheckAllAnswersAndSubmitControllerSpec {
 
     validateDisposalDetailsCheckYourAnswersPage(
       completeReturn.disposalDetails,
-      doc
+      doc,
+      completeReturn.isIndirectDisposal()
     )
+
     validateReliefDetailsCheckYourAnswersPage(
       completeReturn.reliefDetails,
       doc
