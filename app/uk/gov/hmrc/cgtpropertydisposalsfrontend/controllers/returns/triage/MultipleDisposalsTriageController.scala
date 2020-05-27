@@ -555,8 +555,8 @@ class MultipleDisposalsTriageController @Inject() (
                 val result =
                   for {
                     taxYear        <- if (taxYearAfter6April2020)
-                                 taxYearService.taxYear(TimeUtils.today())
-                               else EitherT.pure[Future, Error](None)
+                                        taxYearService.taxYear(TimeUtils.today())
+                                      else EitherT.pure[Future, Error](None)
                     updatedAnswers <- EitherT.fromEither[Future](
                                         updateTaxYearToAnswers(
                                           taxYearAfter6April2020,
@@ -565,28 +565,28 @@ class MultipleDisposalsTriageController @Inject() (
                                         )
                                       )
                     newState        = updateState(
-                                 state,
-                                 updatedAnswers,
-                                 d =>
-                                   d.copy(examplePropertyDetailsAnswers =
-                                     d.examplePropertyDetailsAnswers
-                                       .map(_.unset(_.disposalDate))
-                                   )
-                               )
+                                        state,
+                                        updatedAnswers,
+                                        d =>
+                                          d.copy(examplePropertyDetailsAnswers =
+                                            d.examplePropertyDetailsAnswers
+                                              .map(_.unset(_.disposalDate))
+                                          )
+                                      )
                     _              <- newState.fold(
-                           _ => EitherT.pure[Future, Error](()),
-                           r =>
-                             returnsService.storeDraftReturn(
-                               r.draftReturn,
-                               r.subscribedDetails.cgtReference,
-                               r.agentReferenceNumber
-                             )
-                         )
+                                        _ => EitherT.pure[Future, Error](()),
+                                        r =>
+                                          returnsService.storeDraftReturn(
+                                            r.draftReturn,
+                                            r.subscribedDetails.cgtReference,
+                                            r.agentReferenceNumber
+                                          )
+                                      )
                     _              <- EitherT(
-                           updateSession(sessionStore, request)(
-                             _.copy(journeyStatus = Some(newState.merge))
-                           )
-                         )
+                                        updateSession(sessionStore, request)(
+                                          _.copy(journeyStatus = Some(newState.merge))
+                                        )
+                                      )
                   } yield ()
 
                 result.fold(
@@ -871,29 +871,29 @@ class MultipleDisposalsTriageController @Inject() (
                                           )
                                         )
                     newState        = updateState(
-                                 state,
-                                 updatedAnswers,
-                                 d =>
-                                   d.copy(
-                                     examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers
-                                       .map(_.unset(_.disposalDate)),
-                                     yearToDateLiabilityAnswers = None
-                                   )
-                               )
+                                        state,
+                                        updatedAnswers,
+                                        d =>
+                                          d.copy(
+                                            examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers
+                                              .map(_.unset(_.disposalDate)),
+                                            yearToDateLiabilityAnswers = None
+                                          )
+                                      )
                     _              <- newState.fold(
-                           _ => EitherT.pure[Future, Error](()),
-                           r =>
-                             returnsService.storeDraftReturn(
-                               r.draftReturn,
-                               r.subscribedDetails.cgtReference,
-                               r.agentReferenceNumber
-                             )
-                         )
+                                        _ => EitherT.pure[Future, Error](()),
+                                        r =>
+                                          returnsService.storeDraftReturn(
+                                            r.draftReturn,
+                                            r.subscribedDetails.cgtReference,
+                                            r.agentReferenceNumber
+                                          )
+                                      )
                     _              <- EitherT(
-                           updateSession(sessionStore, request)(
-                             _.copy(journeyStatus = Some(newState.merge))
-                           )
-                         )
+                                        updateSession(sessionStore, request)(
+                                          _.copy(journeyStatus = Some(newState.merge))
+                                        )
+                                      )
                   } yield taxYear
 
                 result.fold(

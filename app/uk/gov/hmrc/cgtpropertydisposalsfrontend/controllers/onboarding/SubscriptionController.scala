@@ -70,42 +70,42 @@ class SubscriptionController @Inject() (
       val result  = for {
         subscriptionResponse <- subscriptionService.subscribe(details)
         _                    <- EitherT(
-               subscriptionResponse match {
-                 case SubscriptionSuccessful(cgtReferenceNumber) =>
-                   updateSession(sessionStore, request)(
-                     _.copy(
-                       journeyStatus = Some(
-                         Subscribed(
-                           SubscribedDetails(
-                             details.name,
-                             details.emailAddress,
-                             details.address,
-                             details.contactName,
-                             CgtReference(cgtReferenceNumber),
-                             None,
-                             registeredWithId = true
-                           ),
-                           request.subscriptionReady.ggCredId,
-                           None,
-                           List.empty,
-                           List.empty
-                         )
-                       )
-                     )
-                   )
-                 case AlreadySubscribed                          =>
-                   updateSession(sessionStore, request)(
-                     _.copy(
-                       journeyStatus = Some(
-                         AlreadySubscribedWithDifferentGGAccount(
-                           request.subscriptionReady.ggCredId,
-                           None
-                         )
-                       )
-                     )
-                   )
-               }
-             )
+                                  subscriptionResponse match {
+                                    case SubscriptionSuccessful(cgtReferenceNumber) =>
+                                      updateSession(sessionStore, request)(
+                                        _.copy(
+                                          journeyStatus = Some(
+                                            Subscribed(
+                                              SubscribedDetails(
+                                                details.name,
+                                                details.emailAddress,
+                                                details.address,
+                                                details.contactName,
+                                                CgtReference(cgtReferenceNumber),
+                                                None,
+                                                registeredWithId = true
+                                              ),
+                                              request.subscriptionReady.ggCredId,
+                                              None,
+                                              List.empty,
+                                              List.empty
+                                            )
+                                          )
+                                        )
+                                      )
+                                    case AlreadySubscribed                          =>
+                                      updateSession(sessionStore, request)(
+                                        _.copy(
+                                          journeyStatus = Some(
+                                            AlreadySubscribedWithDifferentGGAccount(
+                                              request.subscriptionReady.ggCredId,
+                                              None
+                                            )
+                                          )
+                                        )
+                                      )
+                                  }
+                                )
       } yield subscriptionResponse
 
       result.fold(
