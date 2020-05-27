@@ -94,6 +94,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
         ),
         _.copy(
           representeeAnswers = Some(answers)
+        ),
+        _.copy(
+          representeeAnswers = Some(answers)
         )
       )
     )

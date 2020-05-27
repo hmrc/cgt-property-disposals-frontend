@@ -100,6 +100,7 @@ class SupportingEvidenceController @Inject() (
           _.supportingEvidenceAnswers,
           _.supportingEvidenceAnswers,
           _.supportingEvidenceAnswers,
+          _.supportingEvidenceAnswers,
           _.supportingEvidenceAnswers
         )
         maybeSupportingEvidenceAnswers.fold[Future[Result]](
@@ -180,6 +181,7 @@ class SupportingEvidenceController @Inject() (
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
               )
 
@@ -227,6 +229,7 @@ class SupportingEvidenceController @Inject() (
                   )
               )
               val newDraftReturn                            = fillingOutReturn.draftReturn.fold(
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
@@ -394,6 +397,7 @@ class SupportingEvidenceController @Inject() (
       _.copy(supportingEvidenceAnswers = Some(newAnswers)),
       _.copy(supportingEvidenceAnswers = Some(newAnswers)),
       _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
       _.copy(supportingEvidenceAnswers = Some(newAnswers))
     )
 
@@ -442,6 +446,7 @@ class SupportingEvidenceController @Inject() (
         )
 
         val newDraftReturn = fillingOutReturn.draftReturn.fold(
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
           _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
           _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
           _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
@@ -514,6 +519,7 @@ class SupportingEvidenceController @Inject() (
         }
 
         val newDraftReturn = fillingOutReturn.draftReturn.fold(
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
           _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
           _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
           _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
@@ -623,6 +629,7 @@ class SupportingEvidenceController @Inject() (
                 )
             )
             val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
+              _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),

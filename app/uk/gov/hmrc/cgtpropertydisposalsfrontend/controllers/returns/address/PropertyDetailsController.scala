@@ -100,6 +100,7 @@ class PropertyDetailsController @Inject() (
           m => Some(Left(m)),
           s => Some(Right(s)),
           _ => None,
+          _ => None,
           _ => None
         )
 

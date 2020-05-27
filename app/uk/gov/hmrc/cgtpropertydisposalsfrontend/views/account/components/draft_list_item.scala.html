@@ -41,6 +41,10 @@
         c => Some(c.disposalDate.value)
     ) -> "shareDisposalDate",
     _.triageAnswers.fold(
+    _.completionDate.map(_.value),
+    c => Some(c.completionDate.value)
+    ) -> "completionDate",
+    _.triageAnswers.fold(
         _.completionDate.map(_.value),
         c => Some(c.completionDate.value)
     ) -> "completionDate",
@@ -53,10 +57,12 @@
         draftReturn.fold(
             _.examplePropertyDetailsAnswers.flatMap{
                 _.fold(_.address, c => Some(c.address)).map(getAddressLines)
-            }
-            ,
+            },
             _.propertyAddress.map(getAddressLines),
             _.companyAddress.map(getAddressLines),
+            _.examplePropertyDetailsAnswers.flatMap{
+            _.fold(_.address, c => Some(c.address)).map(getAddressLines)
+            },
             _.examplePropertyDetailsAnswers.flatMap{
                 _.fold(_.address, c => Some(c.address)).map(getAddressLines)
             }

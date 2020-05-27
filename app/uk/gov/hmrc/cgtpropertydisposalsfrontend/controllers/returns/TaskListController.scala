@@ -82,8 +82,9 @@ class TaskListController @Inject() (
             _.fold(
               m => Ok(multipleDisposalsTaskListPage(m)),
               s => Ok(singleDisposalTaskListPage(s)),
-              i => Ok(singleIndirectDisposalTaskListPage(i)),
-              m => Ok(singleMixedUseDisposalTaskListPage(m))
+              si => Ok(singleIndirectDisposalTaskListPage(si)),
+              mi => sys.error("not supported yet"), // TODO: work on it
+              sm => Ok(singleMixedUseDisposalTaskListPage(sm))
             )
           )
 
@@ -140,39 +141,47 @@ class TaskListController @Inject() (
       EitherT.pure[Future, Error](draftReturn)
     else {
       val updatedDraftReturn = draftReturn.fold(
-        m =>
-          m.copy(
+        multiple =>
+          multiple.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
-              m.yearToDateLiabilityAnswers
+              multiple.yearToDateLiabilityAnswers
             )(Some(_)),
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
-              .fold(m.supportingEvidenceAnswers)(Some(_))
+              .fold(multiple.supportingEvidenceAnswers)(Some(_))
           ),
-        s =>
-          s.copy(
+        single =>
+          single.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
-              s.yearToDateLiabilityAnswers
+              single.yearToDateLiabilityAnswers
             )(Some(_)),
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
-              .fold(s.supportingEvidenceAnswers)(Some(_))
+              .fold(single.supportingEvidenceAnswers)(Some(_))
           ),
-        i =>
-          i.copy(
+        singleIndirect =>
+          singleIndirect.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
-              i.yearToDateLiabilityAnswers
+              singleIndirect.yearToDateLiabilityAnswers
             )(Some(_)),
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers.fold(
-              i.supportingEvidenceAnswers
+              singleIndirect.supportingEvidenceAnswers
             )(Some(_))
           ),
-        m =>
-          m.copy(
+        singleMixedUse =>
+          singleMixedUse.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
-              m.yearToDateLiabilityAnswers
+              singleMixedUse.yearToDateLiabilityAnswers
             )(Some(_)),
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers.fold(
-              m.supportingEvidenceAnswers
+              singleMixedUse.supportingEvidenceAnswers
             )(Some(_))
+          ),
+        multipleIndirect =>
+          multipleIndirect.copy(
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
+              multipleIndirect.yearToDateLiabilityAnswers
+            )(Some(_)),
+            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
+              .fold(multipleIndirect.supportingEvidenceAnswers)(Some(_))
           )
       )
 
@@ -200,6 +209,7 @@ class TaskListController @Inject() (
         _.supportingEvidenceAnswers,
         _.supportingEvidenceAnswers,
         _.supportingEvidenceAnswers,
+        _.supportingEvidenceAnswers,
         _.supportingEvidenceAnswers
       )
       .flatMap { answers =>
@@ -215,6 +225,7 @@ class TaskListController @Inject() (
   ): Option[(MandatoryEvidence, YearToDateLiabilityAnswers)] =
     draftReturn
       .fold(
+        _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers,

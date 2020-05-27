@@ -97,6 +97,7 @@ class YearToDateLiabilityController @Inject() (
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType()
     )
 
@@ -915,6 +916,7 @@ class YearToDateLiabilityController @Inject() (
           _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
         )
       }
@@ -1222,6 +1224,7 @@ class YearToDateLiabilityController @Inject() (
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
     )
 
@@ -1325,6 +1328,7 @@ class YearToDateLiabilityController @Inject() (
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
                 )
               }
@@ -1395,6 +1399,7 @@ class YearToDateLiabilityController @Inject() (
                   .unset(_.pendingUpscanUpload)
                   .copy(taxDue = Some(taxDue))
                 draftReturn.fold(
+                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
@@ -1577,6 +1582,7 @@ class YearToDateLiabilityController @Inject() (
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
     )
 
@@ -1633,6 +1639,7 @@ class YearToDateLiabilityController @Inject() (
       }
 
     val newDraftReturn = fillingOutReturn.draftReturn.fold(
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
@@ -1764,6 +1771,7 @@ class YearToDateLiabilityController @Inject() (
           ) =>
         val completeAnswers    = CompleteNonCalculatedYTDAnswers(t, e, d, m)
         val updatedDraftReturn = draftReturn.fold(
+          _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),

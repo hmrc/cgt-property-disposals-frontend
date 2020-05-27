@@ -140,6 +140,37 @@ object DraftSingleIndirectDisposalReturn {
 
 }
 
+final case class DraftMultipleIndirectDisposalsReturn(
+  id: UUID,
+  triageAnswers: MultipleDisposalsTriageAnswers,
+  examplePropertyDetailsAnswers: Option[ExamplePropertyDetailsAnswers],
+  exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
+  yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+  supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
+  representeeAnswers: Option[RepresenteeAnswers],
+  lastUpdatedDate: LocalDate
+) extends DraftReturn
+
+object DraftMultipleIndirectDisposalsReturn {
+
+  def newDraftReturn(
+    id: UUID,
+    triageAnswers: MultipleDisposalsTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): DraftMultipleIndirectDisposalsReturn =
+    DraftMultipleIndirectDisposalsReturn(
+      id,
+      triageAnswers,
+      None,
+      None,
+      None,
+      None,
+      representeeAnswers,
+      TimeUtils.today()
+    )
+
+}
+
 final case class DraftSingleMixedUseDisposalReturn(
   id: UUID,
   triageAnswers: SingleDisposalTriageAnswers,
@@ -178,26 +209,20 @@ object DraftReturn {
       whenMultiple: DraftMultipleDisposalsReturn => A,
       whenSingle: DraftSingleDisposalReturn => A,
       whenSingleIndirect: DraftSingleIndirectDisposalReturn => A,
+      whenMultipleIndirect: DraftMultipleIndirectDisposalsReturn => A,
       whenSingleMixedUse: DraftSingleMixedUseDisposalReturn => A
     ): A =
       d match {
-        case m: DraftMultipleDisposalsReturn      => whenMultiple(m)
-        case s: DraftSingleDisposalReturn         => whenSingle(s)
-        case s: DraftSingleIndirectDisposalReturn => whenSingleIndirect(s)
-        case s: DraftSingleMixedUseDisposalReturn => whenSingleMixedUse(s)
+        case m: DraftMultipleDisposalsReturn         => whenMultiple(m)
+        case s: DraftSingleDisposalReturn            => whenSingle(s)
+        case s: DraftSingleIndirectDisposalReturn    => whenSingleIndirect(s)
+        case m: DraftMultipleIndirectDisposalsReturn => whenMultipleIndirect(m)
+        case s: DraftSingleMixedUseDisposalReturn    => whenSingleMixedUse(s)
       }
 
+    // TODO: test it
     def isMultipleIndirectDisposal(): Boolean =
-      d.fold(m => isMultipleIndirectDisposal(m.triageAnswers), _ => false, _ => false, _ => false)
-
-    private def isMultipleIndirectDisposal(m: MultipleDisposalsTriageAnswers): Boolean =
-      m.fold(
-        _.assetTypes,
-        c => Some(c.assetTypes)
-      ) match {
-        case Some(assetTypes) if assetTypes.contains(AssetType.IndirectDisposal) => true
-        case _                                                                   => false
-      }
+      d.fold(_ => false, _ => false, _ => false, _ => false, _ => true)
 
   }
 
