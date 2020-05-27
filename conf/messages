@@ -1181,7 +1181,7 @@ disposalPrice.trust.indirect.SoldOther.helpText=You’ll be able to include acqu
 disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.personalRep.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
 disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
-disposalPrice.capacitor.indirect.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
+disposalPrice.capacitor.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
 
 disposalPrice.SoldOther.error.required=Enter how much you sold or disposed of the property for
 disposalPrice.indirect.SoldOther.error.required=Enter how much you got when you sold or disposed of the shares
