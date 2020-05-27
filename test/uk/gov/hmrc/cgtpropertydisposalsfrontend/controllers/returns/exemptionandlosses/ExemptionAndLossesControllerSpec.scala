@@ -2173,22 +2173,28 @@ class ExemptionAndLossesControllerSpec
       case (session, journey, draftReturn) =>
         withClue(s"For initial session $session: ") {
           val updatedDraftReturn = draftReturn.fold(
-            m =>
-              m.copy(
+            multiple =>
+              multiple.copy(
                 exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = m.yearToDateLiabilityAnswers
+                yearToDateLiabilityAnswers = multiple.yearToDateLiabilityAnswers
                   .flatMap(_.unsetAllButIncomeDetails())
               ),
-            s =>
-              s.copy(
+            single =>
+              single.copy(
                 exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers
+                yearToDateLiabilityAnswers = single.yearToDateLiabilityAnswers
                   .flatMap(_.unsetAllButIncomeDetails())
               ),
-            i =>
-              i.copy(
+            singleIndirect =>
+              singleIndirect.copy(
                 exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
+                yearToDateLiabilityAnswers = singleIndirect.yearToDateLiabilityAnswers
+                  .flatMap(_.unsetAllButIncomeDetails())
+              ),
+            singleMixedUse =>
+              singleMixedUse.copy(
+                exemptionAndLossesAnswers = Some(newAnswers),
+                yearToDateLiabilityAnswers = singleMixedUse.yearToDateLiabilityAnswers
                   .flatMap(_.unsetAllButIncomeDetails())
               )
           )

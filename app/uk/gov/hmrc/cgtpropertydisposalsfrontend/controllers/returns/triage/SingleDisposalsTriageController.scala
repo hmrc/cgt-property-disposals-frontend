@@ -91,7 +91,7 @@ class SingleDisposalsTriageController @Inject() (
   type JourneyState = Either[
     StartingNewDraftReturn,
     (
-      Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn],
+      Either[Either[DraftSingleMixedUseDisposalReturn, DraftSingleIndirectDisposalReturn], DraftSingleDisposalReturn],
       FillingOutReturn
     )
   ]
@@ -169,7 +169,7 @@ class SingleDisposalsTriageController @Inject() (
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)),
               {
-                case (Right(d), r) =>
+                case (Right(d), r)       =>
                   r.copy(
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
@@ -184,7 +184,7 @@ class SingleDisposalsTriageController @Inject() (
                       supportingEvidenceAnswers = None
                     )
                   )
-                case (Left(d), r)  =>
+                case (Left(Right(d)), r) =>
                   r.copy(
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
@@ -192,6 +192,16 @@ class SingleDisposalsTriageController @Inject() (
                         _.unset(_.disposalPrice)
                           .unset(_.disposalFees)
                       ),
+                      exemptionAndLossesAnswers = None,
+                      yearToDateLiabilityAnswers = None,
+                      supportingEvidenceAnswers = None
+                    )
+                  )
+                case (Left(Left(d)), r)  =>
+                  r.copy(
+                    draftReturn = d.copy(
+                      triageAnswers = newAnswers,
+                      examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(_.unset(_.disposalPrice)),
                       exemptionAndLossesAnswers = None,
                       yearToDateLiabilityAnswers = None,
                       supportingEvidenceAnswers = None
@@ -268,7 +278,7 @@ class SingleDisposalsTriageController @Inject() (
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)),
               {
-                case (Right(d), r) =>
+                case (Right(d), r)                         =>
                   r.copy(draftReturn =
                     d.copy(
                       triageAnswers = newAnswers,
@@ -283,13 +293,23 @@ class SingleDisposalsTriageController @Inject() (
                       supportingEvidenceAnswers = None
                     )
                   )
-                case (Left(d), r)  =>
+                case (Left(Right(indirectDraftReturn)), r) =>
                   r.copy(draftReturn =
-                    d.copy(
+                    indirectDraftReturn.copy(
                       triageAnswers = newAnswers,
                       companyAddress = None,
                       disposalDetailsAnswers = None,
                       acquisitionDetailsAnswers = None,
+                      exemptionAndLossesAnswers = None,
+                      yearToDateLiabilityAnswers = None,
+                      supportingEvidenceAnswers = None
+                    )
+                  )
+                case (Left(Left(mixedUseDraftReturn)), r)  =>
+                  r.copy(draftReturn =
+                    mixedUseDraftReturn.copy(
+                      triageAnswers = newAnswers,
+                      examplePropertyDetailsAnswers = None,
                       exemptionAndLossesAnswers = None,
                       yearToDateLiabilityAnswers = None,
                       supportingEvidenceAnswers = None
@@ -373,7 +393,10 @@ class SingleDisposalsTriageController @Inject() (
                 case (d, r) =>
                   r.copy(draftReturn =
                     d.fold(
-                      _.copy(triageAnswers = newAnswers),
+                      _.fold(
+                        _.copy(triageAnswers = newAnswers),
+                        _.copy(triageAnswers = newAnswers)
+                      ),
                       _.copy(triageAnswers = newAnswers)
                     )
                   )
@@ -513,13 +536,13 @@ class SingleDisposalsTriageController @Inject() (
 
   private def updateDraftReturnForDisposalDate(
     currentDraftReturn: Either[
-      DraftSingleIndirectDisposalReturn,
+      Either[DraftSingleMixedUseDisposalReturn, DraftSingleIndirectDisposalReturn],
       DraftSingleDisposalReturn
     ],
     newAnswers: IncompleteSingleDisposalTriageAnswers
   ): DraftReturn =
     currentDraftReturn match {
-      case Right(currentDraftReturn: DraftSingleDisposalReturn)        =>
+      case Right(currentDraftReturn: DraftSingleDisposalReturn)               =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
           acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
@@ -538,7 +561,7 @@ class SingleDisposalsTriageController @Inject() (
           supportingEvidenceAnswers = None
         )
 
-      case Left(currentDraftReturn: DraftSingleIndirectDisposalReturn) =>
+      case Left(Right(currentDraftReturn: DraftSingleIndirectDisposalReturn)) =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
           acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
@@ -549,6 +572,16 @@ class SingleDisposalsTriageController @Inject() (
               .unset(_.improvementCosts)
               .unset(_.acquisitionFees)
           ),
+          yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
+            .flatMap(_.unsetAllButIncomeDetails()),
+          supportingEvidenceAnswers = None
+        )
+
+      case Left(Left(currentDraftReturn: DraftSingleMixedUseDisposalReturn))  =>
+        currentDraftReturn.copy(
+          triageAnswers = newAnswers,
+          examplePropertyDetailsAnswers =
+            currentDraftReturn.examplePropertyDetailsAnswers.map(_.unset(_.acquisitionPrice)),
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
           supportingEvidenceAnswers = None
@@ -751,19 +784,30 @@ class SingleDisposalsTriageController @Inject() (
                 case (d, r) =>
                   r.copy(
                     draftReturn = d.fold(
+                      _.fold(
+                        mixedUseDraftReturn =>
+                          mixedUseDraftReturn.copy(
+                            triageAnswers = newAnswers,
+                            yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers.flatMap {
+                              case _: CalculatedYTDAnswers    => None
+                              case n: NonCalculatedYTDAnswers =>
+                                Some(n.unset(_.hasEstimatedDetails))
+                            }
+                          ),
+                        indirectDraftReturn =>
+                          indirectDraftReturn.copy(
+                            triageAnswers = newAnswers,
+                            yearToDateLiabilityAnswers = indirectDraftReturn.yearToDateLiabilityAnswers.flatMap {
+                              case _: CalculatedYTDAnswers    => None
+                              case n: NonCalculatedYTDAnswers =>
+                                Some(n.unset(_.hasEstimatedDetails))
+                            }
+                          )
+                      ),
                       s =>
                         s.copy(
                           triageAnswers = newAnswers,
                           yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap {
-                            case _: CalculatedYTDAnswers    => None
-                            case n: NonCalculatedYTDAnswers =>
-                              Some(n.unset(_.hasEstimatedDetails))
-                          }
-                        ),
-                      i =>
-                        i.copy(
-                          triageAnswers = newAnswers,
-                          yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap {
                             case _: CalculatedYTDAnswers    => None
                             case n: NonCalculatedYTDAnswers =>
                               Some(n.unset(_.hasEstimatedDetails))
@@ -858,7 +902,7 @@ class SingleDisposalsTriageController @Inject() (
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)),
               {
-                case (Right(d), r) =>
+                case (Right(d), r)       =>
                   if (isNowIndirectDisposal)
                     r.copy(
                       draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
@@ -883,7 +927,7 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     )
 
-                case (Left(d), r)  =>
+                case (Left(Right(d)), r) =>
                   // if it was indirect, then we are now at not indirect since we've already checked for equality
                   r.copy(
                     draftReturn = DraftSingleDisposalReturn.newDraftReturn(
@@ -1024,7 +1068,7 @@ class SingleDisposalsTriageController @Inject() (
         val representeeAnswers           = state
           .fold(
             _.representeeAnswers,
-            _._1.fold(_.representeeAnswers, _.representeeAnswers)
+            _._1.fold(_.fold(_.representeeAnswers, _.representeeAnswers), _.representeeAnswers)
           )
         val representeeAnswersIncomplete = !representeeAnswers
           .map(_.fold(_ => false, _ => true))
@@ -1349,7 +1393,10 @@ class SingleDisposalsTriageController @Inject() (
         case (d, r) =>
           r.copy(draftReturn =
             d.fold(
-              _.copy(triageAnswers = newCompleteTriageAnswers),
+              _.fold(
+                _.copy(triageAnswers = newCompleteTriageAnswers),
+                _.copy(triageAnswers = newCompleteTriageAnswers)
+              ),
               _.copy(triageAnswers = newCompleteTriageAnswers)
             )
           )
@@ -1563,17 +1610,7 @@ class SingleDisposalsTriageController @Inject() (
   private def withSingleDisposalTriageAnswers(
     request: RequestWithSessionData[_]
   )(
-    f: (
-      SessionData,
-      Either[
-        StartingNewDraftReturn,
-        (
-          Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn],
-          FillingOutReturn
-        )
-      ],
-      SingleDisposalTriageAnswers
-    ) => Future[Result]
+    f: (SessionData, JourneyState, SingleDisposalTriageAnswers) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t), _))) =>
@@ -1598,7 +1635,20 @@ class SingleDisposalsTriageController @Inject() (
               )
             )
           ) =>
-        f(session, Right(Left(d) -> r), d.triageAnswers)
+        f(session, Right(Left(Right(d)) -> r), d.triageAnswers)
+
+      case Some(
+            (
+              session,
+              r @ FillingOutReturn(
+                _,
+                _,
+                _,
+                d: DraftSingleMixedUseDisposalReturn
+              )
+            )
+          ) =>
+        f(session, Right(Left(Left(d)) -> r), d.triageAnswers)
 
       case _                                                                 =>
         Redirect(

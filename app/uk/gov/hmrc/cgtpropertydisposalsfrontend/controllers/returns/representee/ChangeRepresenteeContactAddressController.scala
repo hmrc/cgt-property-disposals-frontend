@@ -104,6 +104,7 @@ class ChangeRepresenteeContactAddressController @Inject() (
             f.draftReturn.fold(
               _.representeeAnswers,
               _.representeeAnswers,
+              _.representeeAnswers,
               _.representeeAnswers
             )
           ).map {
@@ -150,6 +151,7 @@ class ChangeRepresenteeContactAddressController @Inject() (
       fillingOutReturn =>
         fillingOutReturn.copy(draftReturn =
           fillingOutReturn.draftReturn.fold(
+            _.copy(representeeAnswers = Some(newAnswers)),
             _.copy(representeeAnswers = Some(newAnswers)),
             _.copy(representeeAnswers = Some(newAnswers)),
             _.copy(representeeAnswers = Some(newAnswers))

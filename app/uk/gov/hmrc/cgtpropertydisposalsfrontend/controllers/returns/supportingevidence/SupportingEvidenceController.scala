@@ -96,53 +96,16 @@ class SupportingEvidenceController @Inject() (
               r @ FillingOutReturn(_: SubscribedDetails, _, _, d: DraftReturn)
             )
           ) =>
-        d match {
-          case DraftSingleDisposalReturn(
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                maybeSupportingEvidenceAnswers,
-                _,
-                _
-              ) =>
-            maybeSupportingEvidenceAnswers.fold[Future[Result]](
-              f(s, r, IncompleteSupportingEvidenceAnswers.empty)
-            )(f(s, r, _))
-          case DraftMultipleDisposalsReturn(
-                _,
-                _,
-                _,
-                _,
-                _,
-                maybeSupportingDocumentsAnswers,
-                _,
-                _
-              ) =>
-            maybeSupportingDocumentsAnswers.fold[Future[Result]](
-              f(s, r, IncompleteSupportingEvidenceAnswers.empty)
-            )(f(s, r, _))
-          case DraftSingleIndirectDisposalReturn(
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                maybeSupportingDocumentsAnswers,
-                _,
-                _
-              ) =>
-            maybeSupportingDocumentsAnswers.fold[Future[Result]](
-              f(s, r, IncompleteSupportingEvidenceAnswers.empty)
-            )(f(s, r, _))
-        }
+        val maybeSupportingEvidenceAnswers = d.fold(
+          _.supportingEvidenceAnswers,
+          _.supportingEvidenceAnswers,
+          _.supportingEvidenceAnswers,
+          _.supportingEvidenceAnswers
+        )
+        maybeSupportingEvidenceAnswers.fold[Future[Result]](
+          f(s, r, IncompleteSupportingEvidenceAnswers.empty)
+        )(f(s, r, _))
+
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
@@ -213,14 +176,12 @@ class SupportingEvidenceController @Inject() (
                   )
               }
 
-              val newDraftReturn = fillingOutReturn.draftReturn match {
-                case s: DraftSingleDisposalReturn         =>
-                  s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-                case m: DraftMultipleDisposalsReturn      =>
-                  m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-                case i: DraftSingleIndirectDisposalReturn =>
-                  i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-              }
+              val newDraftReturn = fillingOutReturn.draftReturn.fold(
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+              )
 
               val result = for {
                 _ <- returnsService
@@ -266,6 +227,7 @@ class SupportingEvidenceController @Inject() (
                   )
               )
               val newDraftReturn                            = fillingOutReturn.draftReturn.fold(
+                _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
                 _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
@@ -339,14 +301,10 @@ class SupportingEvidenceController @Inject() (
     }
 
   def documentDidNotUpload(): Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit request =>
-      Ok(uploadFailedPage())
-    }
+    authenticatedActionWithSessionData(implicit request => Ok(uploadFailedPage()))
 
   def handleUpscanCallBackFailures(): Action[AnyContent] =
-    authenticatedActionWithSessionData { implicit request =>
-      Ok(scanFailedPage())
-    }
+    authenticatedActionWithSessionData(implicit request => Ok(scanFailedPage()))
 
   def uploadSupportingEvidenceCheck(
     uploadReference: UploadReference
@@ -435,6 +393,7 @@ class SupportingEvidenceController @Inject() (
     val newDraftReturn = fillingOutReturn.draftReturn.fold(
       _.copy(supportingEvidenceAnswers = Some(newAnswers)),
       _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
       _.copy(supportingEvidenceAnswers = Some(newAnswers))
     )
 
@@ -482,14 +441,12 @@ class SupportingEvidenceController @Inject() (
           }
         )
 
-        val newDraftReturn = fillingOutReturn.draftReturn match {
-          case s: DraftSingleDisposalReturn         =>
-            s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case m: DraftMultipleDisposalsReturn      =>
-            m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case i: DraftSingleIndirectDisposalReturn =>
-            i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        }
+        val newDraftReturn = fillingOutReturn.draftReturn.fold(
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+        )
 
         val result = for {
           _ <- returnsService
@@ -524,11 +481,7 @@ class SupportingEvidenceController @Inject() (
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
-        checkYourAnswersHandler(
-          answers,
-          fillingOutReturn,
-          fillingOutReturn.draftReturn
-        )
+        checkYourAnswersHandler(answers)
       }
     }
 
@@ -560,14 +513,12 @@ class SupportingEvidenceController @Inject() (
             )
         }
 
-        val newDraftReturn = fillingOutReturn.draftReturn match {
-          case s: DraftSingleDisposalReturn         =>
-            s.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case m: DraftMultipleDisposalsReturn      =>
-            m.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-          case i: DraftSingleIndirectDisposalReturn =>
-            i.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        }
+        val newDraftReturn = fillingOutReturn.draftReturn.fold(
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+          _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+        )
 
         val result = for {
           _ <- returnsService
@@ -594,9 +545,7 @@ class SupportingEvidenceController @Inject() (
     }
 
   private def checkYourAnswersHandler(
-    answers: SupportingEvidenceAnswers,
-    fillingOutReturn: FillingOutReturn,
-    draftReturn: DraftReturn
+    answers: SupportingEvidenceAnswers
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
       case IncompleteSupportingEvidenceAnswers(_, _, expiredEvidences) if expiredEvidences.nonEmpty =>
@@ -674,6 +623,7 @@ class SupportingEvidenceController @Inject() (
                 )
             )
             val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
+              _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
               _.copy(supportingEvidenceAnswers = Some(updatedAnswers))

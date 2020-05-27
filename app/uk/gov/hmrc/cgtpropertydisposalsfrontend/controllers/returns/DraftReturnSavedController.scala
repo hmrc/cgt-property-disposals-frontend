@@ -60,6 +60,7 @@ class DraftReturnSavedController @Inject() (
           val draftReturnWithLastUpdated = draftReturn.fold(
             _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today()),
+            _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today())
           )
 
