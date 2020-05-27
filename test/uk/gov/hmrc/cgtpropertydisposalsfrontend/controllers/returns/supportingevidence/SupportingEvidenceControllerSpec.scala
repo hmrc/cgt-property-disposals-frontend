@@ -547,7 +547,7 @@ class SupportingEvidenceControllerSpec
                 .handleUpscanErrorRedirect(),
               uploadReference =>
                 routes.SupportingEvidenceController
-                  .uploadSupportingEvidenceCheck(uploadReference)
+                  .scanProgress(uploadReference)
             )(
               Left(Error("some upscan error"))
             )
@@ -581,7 +581,7 @@ class SupportingEvidenceControllerSpec
                 .handleUpscanErrorRedirect(),
               uploadReference =>
                 routes.SupportingEvidenceController
-                  .uploadSupportingEvidenceCheck(uploadReference)
+                  .scanProgress(uploadReference)
             )(Right(upscanUpload))
           }
 
@@ -1255,7 +1255,7 @@ class SupportingEvidenceControllerSpec
 
     "handling requests to check the upload status of the supporting evidence" must {
       def performAction(uploadReference: UploadReference): Future[Result] =
-        controller.uploadSupportingEvidenceCheck(uploadReference)(
+        controller.scanProgress(uploadReference)(
           FakeRequest()
         )
 
@@ -1525,8 +1525,20 @@ class SupportingEvidenceControllerSpec
           checkPageIsDisplayed(
             performAction(uploadReference),
             messageFromMessageKey(
-              "supporting-evidence.check-upscan-status.title"
-            )
+              "supporting-evidence.scan-progress.title"
+            ),
+            { doc =>
+              doc
+                .select("#content > article > p:nth-child(3)")
+                .text() shouldBe messageFromMessageKey(
+                "supporting-evidence.scan-progress.p1"
+              )
+              doc
+                .select("#content > article > p:nth-child(4)")
+                .text() shouldBe messageFromMessageKey(
+                "supporting-evidence.scan-progress.p2"
+              )
+            }
           )
         }
       }
@@ -1534,7 +1546,7 @@ class SupportingEvidenceControllerSpec
 
     "handling submit requests to check the upload status of the supporting evidence" must {
       def performAction(uploadReference: UploadReference): Future[Result] =
-        controller.uploadSupportingEvidenceCheckSubmit(
+        controller.scanProgressSubmit(
           uploadReference.toString
         )(FakeRequest())
 
@@ -1562,7 +1574,7 @@ class SupportingEvidenceControllerSpec
           checkIsRedirect(
             performAction(uploadReference),
             routes.SupportingEvidenceController
-              .uploadSupportingEvidenceCheck(
+              .scanProgress(
                 UploadReference(uploadReference.toString)
               )
           )

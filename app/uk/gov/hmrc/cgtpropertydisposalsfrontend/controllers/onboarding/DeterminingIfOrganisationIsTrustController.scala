@@ -273,21 +273,21 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                           )
                                           .leftMap(ServiceError(_))
                 bprWithCgtReference  <- enterTrnAndNameForm
-                                         .bindFromRequest()
-                                         .fold[EitherT[
-                                           Future,
-                                           NameMatchError[TrustNameMatchDetails],
-                                           (BusinessPartnerRecord, Option[CgtReference])
-                                         ]](
-                                           e => EitherT.fromEither[Future](Left(ValidationError(e))),
-                                           trustNameMatchDetails =>
-                                             attemptNameMatchAndUpdateSession(
-                                               trustNameMatchDetails,
-                                               determiningIfOrganisationIsTrust.ggCredId,
-                                               determiningIfOrganisationIsTrust.ggEmail,
-                                               unsuccessfulAttempts
-                                             ).leftMap(ServiceError(_))
-                                         )
+                                          .bindFromRequest()
+                                          .fold[EitherT[
+                                            Future,
+                                            NameMatchError[TrustNameMatchDetails],
+                                            (BusinessPartnerRecord, Option[CgtReference])
+                                          ]](
+                                            e => EitherT.fromEither[Future](Left(ValidationError(e))),
+                                            trustNameMatchDetails =>
+                                              attemptNameMatchAndUpdateSession(
+                                                trustNameMatchDetails,
+                                                determiningIfOrganisationIsTrust.ggCredId,
+                                                determiningIfOrganisationIsTrust.ggEmail,
+                                                unsuccessfulAttempts
+                                              ).leftMap(ServiceError(_))
+                                          )
               } yield bprWithCgtReference
 
             result
@@ -397,28 +397,28 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                      Right(bpr -> cgtReference)
                                }
       _                   <- EitherT(
-             updateSession(sessionStore, request)(
-               _.copy(journeyStatus =
-                 Some(
-                   bprWithCgtReference._2.fold[JourneyStatus](
-                     SubscriptionStatus.SubscriptionMissingData(
-                       bprWithCgtReference._1,
-                       None,
-                       ggCredId,
-                       ggEmail
-                     )
-                   )(cgtRef =>
-                     AlreadySubscribedWithDifferentGGAccount(
-                       ggCredId,
-                       Some(cgtRef)
-                     )
-                   )
-                 )
-               )
-             )
-           ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](
-             NameMatchServiceError.BackendError
-           )
+                               updateSession(sessionStore, request)(
+                                 _.copy(journeyStatus =
+                                   Some(
+                                     bprWithCgtReference._2.fold[JourneyStatus](
+                                       SubscriptionStatus.SubscriptionMissingData(
+                                         bprWithCgtReference._1,
+                                         None,
+                                         ggCredId,
+                                         ggEmail
+                                       )
+                                     )(cgtRef =>
+                                       AlreadySubscribedWithDifferentGGAccount(
+                                         ggCredId,
+                                         Some(cgtRef)
+                                       )
+                                     )
+                                   )
+                                 )
+                               )
+                             ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](
+                               NameMatchServiceError.BackendError
+                             )
     } yield bprWithCgtReference
 
   private def handleNameMatchServiceError(

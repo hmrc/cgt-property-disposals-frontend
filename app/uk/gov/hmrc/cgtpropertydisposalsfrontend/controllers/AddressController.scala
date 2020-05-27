@@ -297,10 +297,10 @@ trait AddressController[A <: AddressJourneyType] {
                       val result = for {
                         addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
                         _                   <- EitherT(
-                               updateSession(sessionStore, request)(
-                                 _.copy(addressLookupResult = Some(addressLookupResult))
-                               )
-                             )
+                                                 updateSession(sessionStore, request)(
+                                                   _.copy(addressLookupResult = Some(addressLookupResult))
+                                                 )
+                                               )
                       } yield addressLookupResult
 
                       result.fold(
@@ -391,13 +391,13 @@ trait AddressController[A <: AddressJourneyType] {
     val result = for {
       journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address, isManuallyEnteredAddress)
       _                         <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
-             EitherT.pure[Future, Error](())
-           else
-             EitherT[Future, Error, Unit](
-               updateSession(sessionStore, request)(
-                 _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
-               )
-             )
+                                     EitherT.pure[Future, Error](())
+                                   else
+                                     EitherT[Future, Error, Unit](
+                                       updateSession(sessionStore, request)(
+                                         _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
+                                       )
+                                     )
     } yield ()
 
     result.fold(

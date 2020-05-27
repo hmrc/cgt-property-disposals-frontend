@@ -292,11 +292,11 @@ class NameMatchRetryServiceImpl @Inject() (
                        .getBusinessPartnerRecord(bprRequest)
                        .leftMap(NameMatchServiceError.BackendError)
       bpr         <- extractBpr(
-               bprResponse,
-               nameMatchDetails,
-               ggCredId,
-               previousUnsuccessfulNameMatchAttempts
-             )
+                       bprResponse,
+                       nameMatchDetails,
+                       ggCredId,
+                       previousUnsuccessfulNameMatchAttempts
+                     )
     } yield bpr
 
   private def auditNameMatchEvent(
@@ -365,8 +365,8 @@ class NameMatchRetryServiceImpl @Inject() (
     }
     for {
       subscription   <- subscriptionService
-                        .getSubscribedDetails(cgtReference)
-                        .leftMap(NameMatchServiceError.BackendError)
+                          .getSubscribedDetails(cgtReference)
+                          .leftMap(NameMatchServiceError.BackendError)
       matchedDetails <- {
         val nameMatchResult = Either.fromOption(
           subscription.filter(_.name.exists(doNamesMatch(_, name))),

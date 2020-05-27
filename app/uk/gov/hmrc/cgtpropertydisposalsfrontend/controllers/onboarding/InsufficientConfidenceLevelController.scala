@@ -250,21 +250,21 @@ class InsufficientConfidenceLevelController @Inject() (
                                           )
                                           .leftMap(ServiceError(_))
                 bprWithCgtReference  <- InsufficientConfidenceLevelController.sautrAndNameForm
-                                         .bindFromRequest()
-                                         .fold[EitherT[
-                                           Future,
-                                           NameMatchError[IndividualSautrNameMatchDetails],
-                                           (BusinessPartnerRecord, Option[CgtReference])
-                                         ]](
-                                           e => EitherT.fromEither[Future](Left(ValidationError(e))),
-                                           IndividualSautrNameMatchDetails =>
-                                             attemptNameMatchAndUpdateSession(
-                                               IndividualSautrNameMatchDetails,
-                                               insufficientConfidenceLevel.ggCredId,
-                                               insufficientConfidenceLevel.ggEmail,
-                                               unsuccessfulAttempts
-                                             ).leftMap(ServiceError(_))
-                                         )
+                                          .bindFromRequest()
+                                          .fold[EitherT[
+                                            Future,
+                                            NameMatchError[IndividualSautrNameMatchDetails],
+                                            (BusinessPartnerRecord, Option[CgtReference])
+                                          ]](
+                                            e => EitherT.fromEither[Future](Left(ValidationError(e))),
+                                            IndividualSautrNameMatchDetails =>
+                                              attemptNameMatchAndUpdateSession(
+                                                IndividualSautrNameMatchDetails,
+                                                insufficientConfidenceLevel.ggCredId,
+                                                insufficientConfidenceLevel.ggEmail,
+                                                unsuccessfulAttempts
+                                              ).leftMap(ServiceError(_))
+                                          )
               } yield bprWithCgtReference
 
             result
@@ -373,28 +373,28 @@ class InsufficientConfidenceLevelController @Inject() (
                                      Right(bpr -> cgtReference)
                                }
       _                   <- EitherT(
-             updateSession(sessionStore, request)(
-               _.copy(journeyStatus =
-                 Some(
-                   bprWithCgtReference._2.fold[JourneyStatus](
-                     SubscriptionStatus.SubscriptionMissingData(
-                       bprWithCgtReference._1,
-                       None,
-                       ggCredId,
-                       ggEmail
-                     )
-                   )(cgtReference =>
-                     AlreadySubscribedWithDifferentGGAccount(
-                       ggCredId,
-                       Some(cgtReference)
-                     )
-                   )
-                 )
-               )
-             )
-           ).leftMap[NameMatchServiceError[IndividualSautrNameMatchDetails]](
-             NameMatchServiceError.BackendError
-           )
+                               updateSession(sessionStore, request)(
+                                 _.copy(journeyStatus =
+                                   Some(
+                                     bprWithCgtReference._2.fold[JourneyStatus](
+                                       SubscriptionStatus.SubscriptionMissingData(
+                                         bprWithCgtReference._1,
+                                         None,
+                                         ggCredId,
+                                         ggEmail
+                                       )
+                                     )(cgtReference =>
+                                       AlreadySubscribedWithDifferentGGAccount(
+                                         ggCredId,
+                                         Some(cgtReference)
+                                       )
+                                     )
+                                   )
+                                 )
+                               )
+                             ).leftMap[NameMatchServiceError[IndividualSautrNameMatchDetails]](
+                               NameMatchServiceError.BackendError
+                             )
     } yield bprWithCgtReference
 
   private def handleNameMatchServiceError(
