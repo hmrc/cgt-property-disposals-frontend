@@ -1,0 +1,55 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+
+@this()
+
+@(url: String)(implicit messages: Messages)
+
+<div class="ur-banner js-hidden">
+  <div class="centered-content">
+    <div class="grid-row">
+
+      <div class="column-two-thirds">
+        <p>
+          <strong class="bold">
+            @messages("recruitment-banner.message")
+          </strong>
+        </p>
+      </div>
+
+      <div class="column-one-third no-thanks">
+        <p>
+          <a
+          id="dismiss-ur-banner"
+          href="#no-thanks"
+          class="js-visible">@messages("recruitment-banner.dismiss")</a>
+        </p>
+      </div>
+
+      <div class="column-full">
+        <p>
+          <a
+            target="_blank"
+            rel="noreferrer noopener"
+            href="@url">@messages("recruitment-banner.link")</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
