@@ -517,18 +517,16 @@ class DisposalDetailsController @Inject() (
           withDisposalMethod(state) {
             case (disposalMethod) =>
               answers match {
-                case IncompleteDisposalDetailsAnswers(None, _, _) if isIndirectDisposal(state) =>
-                  Redirect(routes.DisposalDetailsController.whatWasDisposalPrice())
 
-                case IncompleteDisposalDetailsAnswers(None, _, _)                              =>
+                case IncompleteDisposalDetailsAnswers(None, _, _) =>
                   Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
 
-                case IncompleteDisposalDetailsAnswers(_, None, _)                              =>
+                case IncompleteDisposalDetailsAnswers(_, None, _) =>
                   Redirect(
                     routes.DisposalDetailsController.whatWasDisposalPrice()
                   )
 
-                case IncompleteDisposalDetailsAnswers(_, _, None)                              =>
+                case IncompleteDisposalDetailsAnswers(_, _, None) =>
                   Redirect(
                     routes.DisposalDetailsController.whatWereDisposalFees()
                   )
@@ -581,7 +579,7 @@ class DisposalDetailsController @Inject() (
                       )
                   )
 
-                case answers: CompleteDisposalDetailsAnswers                                   =>
+                case answers: CompleteDisposalDetailsAnswers      =>
                   Ok(
                     checkYouAnswers(
                       answers,
