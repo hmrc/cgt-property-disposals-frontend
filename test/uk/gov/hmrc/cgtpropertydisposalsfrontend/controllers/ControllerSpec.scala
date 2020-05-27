@@ -25,7 +25,7 @@ import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import play.api.http.HttpConfiguration
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi, DefaultMessagesApiProvider, Lang, Langs, MessagesApi}
+import play.api.i18n.{DefaultMessagesApi, DefaultMessagesApiProvider, Lang, Langs, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}

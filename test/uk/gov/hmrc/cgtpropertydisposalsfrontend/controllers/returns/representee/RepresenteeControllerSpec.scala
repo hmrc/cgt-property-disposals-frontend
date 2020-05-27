@@ -23,7 +23,6 @@ import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -72,10 +71,6 @@ class RepresenteeControllerSpec
 
   val mockNameMatchRetryService: NameMatchRetryService =
     mock[NameMatchRetryService]
-
-  override lazy val additionalConfig: Configuration = Configuration(
-    "capacitors-and-personal-representatives.enabled" -> "true"
-  )
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -3138,92 +3133,4 @@ object RepresenteeControllerSpec extends Matchers {
     }
 
   }
-}
-
-class DisabledRepresenteeControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
-
-  override lazy val additionalConfig: Configuration = Configuration(
-    "capacitors-and-personal-representatives.enabled" -> "false"
-  )
-
-  override val overrideBindings =
-    List[GuiceableModule](
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
-    )
-
-  lazy val controller = instanceOf[RepresenteeController]
-
-  "RepresenteeController" when {
-
-    "the capacitor and personal representative journey are disabled in config" must {
-
-      "redirect to the capacitor and personal representative exit page" when {
-
-        def test(action: Action[AnyContent]): Unit = {
-          val journey =
-            sample[StartingNewDraftReturn].copy(
-              newReturnTriageAnswers = Right(
-                sample[CompleteSingleDisposalTriageAnswers].copy(
-                  individualUserType = Some(Capacitor)
-                )
-              )
-            )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(journeyStatus = Some(journey))
-            )
-          }
-
-          checkIsRedirect(
-            action(FakeRequest()),
-            returns.triage.routes.CommonTriageQuestionsController
-              .capacitorsAndPersonalRepresentativesNotHandled()
-          )
-        }
-
-        "handling requests to display the enter name page" in {
-          test(controller.enterName())
-        }
-
-        "handling submitted names" in {
-          test(controller.enterNameSubmit())
-        }
-
-        "handling requests to display the enter id page" in {
-          test(controller.enterId())
-        }
-
-        "handling submitted ids" in {
-          test(controller.enterIdSubmit())
-        }
-
-        "handling requests to display the enter date of death page" in {
-          test(controller.enterDateOfDeath())
-        }
-
-        "handling submitted date of deaths" in {
-          test(controller.enterDateOfDeathSubmit())
-        }
-
-        "handling requests to display the check contact details page" in {
-          test(controller.checkContactDetails())
-        }
-
-        "handling submits on the check contact details page" in {
-          test(controller.checkContactDetailsSubmit())
-        }
-
-        "handling requests to display the check your answers page" in {
-          test(controller.checkYourAnswers())
-        }
-
-      }
-
-    }
-
-  }
-
 }
