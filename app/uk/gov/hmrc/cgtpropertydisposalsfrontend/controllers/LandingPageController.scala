@@ -32,18 +32,13 @@ class LandingPageController @Inject() (
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
-  val capacitorsAndPersonalRepresentativesJourneyEnabled: Boolean =
-    config.underlying.getBoolean(
-      "capacitors-and-personal-representatives.enabled"
-    )
-
   def landingPage(): Action[AnyContent] =
-    Action(implicit request => Ok(landing_page(capacitorsAndPersonalRepresentativesJourneyEnabled)))
+    Action(implicit request => Ok(landing_page()))
 
   def agentsLandingPage(): Action[AnyContent] =
     Action(implicit request =>
       Ok(
-        agents_landing_page(capacitorsAndPersonalRepresentativesJourneyEnabled)
+        agents_landing_page()
       )
     )
 

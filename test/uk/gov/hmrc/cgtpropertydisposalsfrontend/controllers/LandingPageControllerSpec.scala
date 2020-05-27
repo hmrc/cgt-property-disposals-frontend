@@ -66,7 +66,7 @@ class LandingPageControllerSpec extends ControllerSpec {
               .attr("href")                        shouldBe viewConfig.nrcgtReturn
             doc
               .select("#contact-hmrc-1 > a")
-              .attr("href")                        shouldBe viewConfig.returnsForSomeoneWhoHasDied
+              .attr("href")                        shouldBe viewConfig.contactHmrc
             doc
               .select("#contact-hmrc-2 > a")
               .attr("href")                        shouldBe viewConfig.contactHmrc
