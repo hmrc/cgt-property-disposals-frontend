@@ -775,7 +775,8 @@ class ReliefDetailsControllerSpec
       "show a form error" when {
 
         def test(data: (String, String)*)(
-          expectedErrorMessageKey: String
+          expectedErrorMessageKey: String,
+          args: List[String]
         )(
           userType: UserType,
           individualUserType: IndividualUserType,
@@ -796,11 +797,8 @@ class ReliefDetailsControllerSpec
             performAction(data),
             messageFromMessageKey(s"$key$userKey.title"),
             doc =>
-              doc
-                .select("#error-summary-display > ul > li > a")
-                .text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey
-              ),
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe
+                Messages(expectedErrorMessageKey, args: _*),
             BAD_REQUEST
           )
         }
@@ -848,7 +846,7 @@ class ReliefDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey)(
+                  test(data: _*)(scenario.expectedErrorMessageKey, Nil)(
                     userType,
                     individualUserType,
                     userKey
@@ -867,10 +865,8 @@ class ReliefDetailsControllerSpec
                   .inPounds()
                   .toString()
               test(key -> "0", valueKey -> valueGreaterThanLettingsRelief)(
-                Messages(
-                  s"$valueKey.error.amountOverLimit",
-                  maxLettingsReliefValue.inPounds().toString()
-                )
+                s"$valueKey.error.amountOverLimit",
+                List(maxLettingsReliefValue.inPounds().toString())
               )(userType, individualUserType, userKey)
           }
         }

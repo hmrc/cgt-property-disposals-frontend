@@ -1596,7 +1596,8 @@ acquisitionFees.agent.title=Were there any additional acquisition costs?
 acquisitionFees.trust.title=Were there any additional acquisition costs?
 acquisitionFees.capacitor.title=Does the person want to claim for any additional acquisition costs?
 acquisitionFees.personalRep.title=Are you including any additional acquisition costs?
-
+acquisitionFees.capacitor.details.p1=The person owned the property on or before {0}.
+acquisitionFees.personalRep.details.p1=The person owned the property on or before {0}.
 acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
 acquisitionFees.agent.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
 acquisitionFees.trust.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share.

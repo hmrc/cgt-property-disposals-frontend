@@ -181,7 +181,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeReturn = sample[CompleteSingleDisposalReturn].copy(
           triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-            .copy(individualUserType = Some(Capacitor)),
+            .copy(individualUserType = Some(PersonalRepresentative)),
           representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
         )
         val hasAttachments =
