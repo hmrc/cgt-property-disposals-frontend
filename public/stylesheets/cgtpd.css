@@ -664,6 +664,11 @@ main>div>.service-info {
 {
     color: white;
 }
+.ur-banner p a:focus,
+.ur-banner p a:link:focus {
+    color: #0b0c0c;
+}
+
 
 
 
