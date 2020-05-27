@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
@@ -43,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, IndividualUserType, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, IndividualUserType, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -139,18 +140,19 @@ class DisposalDetailsControllerSpec
     individualUserType: Option[IndividualUserType]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
-    val (journey, draftReturn) =
-      fillingOutReturn(disposalMethod, userType, individualUserType)
+    val (journey, draftReturn) = fillingOutReturn(
+      disposalMethod,
+      userType,
+      individualUserType
+    )
     val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
     val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
-    (
-      SessionData.empty.copy(
-        journeyStatus = Some(updatedJourney),
-        userType = Some(userType)
-      ),
-      updatedJourney,
-      updatedDraftReturn
+    val sessionData            = SessionData.empty.copy(
+      journeyStatus = Some(updatedJourney),
+      userType = Some(userType)
     )
+
+    (sessionData, updatedJourney, updatedDraftReturn)
 
   }
 
@@ -161,6 +163,76 @@ class DisposalDetailsControllerSpec
     individualUserType: Option[IndividualUserType]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithDisposalDetailsAnswers(
+      Some(answers),
+      disposalMethod,
+      userType,
+      individualUserType
+    )
+
+  def fillingOutIndirectReturn(
+    disposalMethod: DisposalMethod,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType]
+  ): (FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+
+    val country = Country("NZ", Some("New Zealand"))
+
+    val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
+      disposalMethod = disposalMethod,
+      individualUserType = individualUserType,
+      assetType = AssetType.IndirectDisposal,
+      countryOfResidence = country
+    )
+
+    val subscribedDetails = sample[SubscribedDetails].copy(
+      name = setNameForUserType(userType)
+    )
+    val draftReturn       = sample[DraftSingleIndirectDisposalReturn].copy(
+      triageAnswers = answers
+    )
+
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = subscribedDetails,
+      agentReferenceNumber = setAgentReferenceNumber(userType)
+    )
+
+    fillingOutReturn -> draftReturn
+  }
+
+  def sessionWithIndirectDisposalDetailsAnswers(
+    answers: Option[DisposalDetailsAnswers],
+    disposalMethod: DisposalMethod,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType]
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+
+    val (journey, draftReturn) = fillingOutIndirectReturn(
+      disposalMethod,
+      userType,
+      individualUserType
+    )
+
+    val updatedDraftReturn = draftReturn.copy(
+      disposalDetailsAnswers = answers
+    )
+    val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+    val sessionData        = SessionData.empty.copy(
+      journeyStatus = Some(updatedJourney),
+      userType = Some(userType)
+    )
+
+    (sessionData, updatedJourney, updatedDraftReturn)
+
+  }
+
+  def sessionWithIndirectDisposalDetailsAnswers(
+    answers: DisposalDetailsAnswers,
+    disposalMethod: DisposalMethod,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType]
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
+    sessionWithIndirectDisposalDetailsAnswers(
       Some(answers),
       disposalMethod,
       userType,
@@ -289,6 +361,7 @@ class DisposalDetailsControllerSpec
         }
 
       }
+
     }
 
     "handling submitted answers to the how much did you own page" must {
@@ -1638,6 +1711,684 @@ class DisposalDetailsControllerSpec
 
     }
 
+    "handling requests to display the what was disposal price page for indirect disposal assettype" must {
+
+      def performAction(): Future[Result] =
+        controller.whatWasDisposalPrice()(FakeRequest())
+
+      val requiredPreviousAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
+        shareOfProperty = Some(ShareOfProperty.Full)
+      )
+
+      def disposalPriceTitleScenarios(
+        individualUserType: IndividualUserType,
+        userType: UserType
+      ): List[(DisposalMethod, ShareOfProperty, String)] = {
+        val userMsgKey = userMessageKey(individualUserType, userType)
+        val key        = "disposalPrice"
+
+        List(
+          (
+            DisposalMethod.Sold,
+            ShareOfProperty.Full,
+            s"$key$userMsgKey.indirect.SoldOther.title"
+          ),
+          (
+            DisposalMethod.Gifted,
+            ShareOfProperty.Full,
+            s"$key$userMsgKey.indirect.Gifted.title"
+          ),
+          (
+            DisposalMethod.Other,
+            ShareOfProperty.Full,
+            s"$key$userMsgKey.indirect.SoldOther.title"
+          )
+        )
+      }
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like noDisposalMethodBehaviour(performAction)
+
+      behave like noPropertyShareBehaviour(performAction)
+
+      "display the page" when {
+
+        "the user has not answered the question before" in {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserType) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              disposalPriceTitleScenarios(individualUserType, userType)
+                .foreach {
+                  case (disposalMethod, share, expectedTitleKey) =>
+                    withClue(
+                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                        s"($disposalMethod $share, $expectedTitleKey): "
+                    ) {
+                      inSequence {
+                        mockAuthWithNoRetrievals()
+                        mockGetSession(
+                          sessionWithIndirectDisposalDetailsAnswers(
+                            requiredPreviousAnswers.copy(shareOfProperty = Some(share)),
+                            disposalMethod,
+                            userType,
+                            Some(individualUserType)
+                          )._1
+                        )
+                      }
+
+                      checkPageIsDisplayed(
+                        performAction(),
+                        messageFromMessageKey(expectedTitleKey)
+                      )
+                    }
+                }
+          }
+        }
+
+        "the user has answered the question before but has " +
+          "not completed the disposal details section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              disposalPriceTitleScenarios(individualUserType, userType)
+                .foreach {
+                  case (disposalMethod, share, expectedTitleKey) =>
+                    withClue(
+                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                        s"($disposalMethod $share, $expectedTitleKey): "
+                    ) {
+                      inSequence {
+                        mockAuthWithNoRetrievals()
+                        mockGetSession(
+                          sessionWithIndirectDisposalDetailsAnswers(
+                            requiredPreviousAnswers.copy(
+                              shareOfProperty = Some(share),
+                              disposalPrice = Some(AmountInPence.fromPounds(12.34))
+                            ),
+                            disposalMethod,
+                            userType,
+                            Some(individualUserType)
+                          )._1
+                        )
+                      }
+
+                      checkPageIsDisplayed(
+                        performAction(),
+                        messageFromMessageKey(expectedTitleKey),
+                        doc =>
+                          doc
+                            .select("#disposalPrice")
+                            .attr("value") shouldBe "12.34"
+                      )
+                    }
+                }
+          }
+        }
+
+        "the user has answered the question before but has " +
+          "completed the disposal details section" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              disposalPriceTitleScenarios(individualUserType, userType)
+                .foreach {
+                  case (disposalMethod, share, expectedTitleKey) =>
+                    withClue(
+                      s"For (disposalMethod, shareOfProperty, expectedTitleKey) = " +
+                        s"($disposalMethod $share, $expectedTitleKey): "
+                    ) {
+                      inSequence {
+                        mockAuthWithNoRetrievals()
+                        mockGetSession(
+                          sessionWithIndirectDisposalDetailsAnswers(
+                            sample[CompleteDisposalDetailsAnswers].copy(
+                              shareOfProperty = share,
+                              disposalPrice = AmountInPence.fromPounds(12.34)
+                            ),
+                            disposalMethod,
+                            userType,
+                            Some(individualUserType)
+                          )._1
+                        )
+                      }
+
+                      checkPageIsDisplayed(
+                        performAction(),
+                        messageFromMessageKey(expectedTitleKey),
+                        doc =>
+                          doc
+                            .select("#disposalPrice")
+                            .attr("value") shouldBe "12.34"
+                      )
+                    }
+                }
+          }
+        }
+
+      }
+
+    }
+
+    "handling submitted answers to the what was disposal price page for indirect disposal assettype" must {
+
+      def performAction(data: Seq[(String, String)]): Future[Result] =
+        controller.whatWasDisposalPriceSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
+
+      def updateDraftReturn(
+        d: DraftSingleDisposalReturn,
+        newAnswers: DisposalDetailsAnswers
+      ) =
+        d.copy(
+          disposalDetailsAnswers = Some(newAnswers),
+          initialGainOrLoss = None,
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
+            _.unset(_.privateResidentsRelief)
+              .unset(_.lettingsRelief)
+          ),
+          yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+        )
+
+      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
+
+      behave like noPropertyShareBehaviour(() => performAction(Seq.empty))
+
+      "show a form error" when {
+
+        val key = "disposalPrice"
+
+        def disposalMethodErrorKey(disposalMethod: DisposalMethod): String =
+          disposalMethod match {
+            case DisposalMethod.Gifted => ".Gifted"
+            case _                     => ".SoldOther"
+          }
+
+        def test(
+          data: (String, String)*
+        )(
+          expectedErrorMessageKey: String
+        )(
+          disposalMethod: DisposalMethod,
+          userType: UserType,
+          individualUserType: IndividualUserType
+        )(
+          userKey: String
+        ): Unit = {
+
+          val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithIndirectDisposalDetailsAnswers(
+                sample[CompleteDisposalDetailsAnswers].copy(
+                  shareOfProperty = ShareOfProperty.Full
+                ),
+                disposalMethod,
+                userType,
+                Some(individualUserType)
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(data),
+            messageFromMessageKey(s"$key$userKey.indirect$disposalMethodKey.title"),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+        }
+
+        "the data is invalid" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              val disposalMethodKey = disposalMethodErrorKey(disposalMethod)
+              val userKey           = userMessageKey(individualUserType, userType)
+
+              amountOfMoneyErrorScenarios(
+                key = key,
+                errorContext = Some(s"$key$userKey.indirect$disposalMethodKey")
+              ).foreach { scenario =>
+                withClue(s"For $scenario: ") {
+                  test(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
+                    disposalMethod,
+                    userType,
+                    individualUserType
+                  )(
+                    userKey
+                  )
+                }
+              }
+          }
+        }
+
+      }
+
+      "show an error page" when {
+
+        "there is an error updating the draft return" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              val currentAnswers                  =
+                sample[CompleteDisposalDetailsAnswers]
+                  .copy(disposalPrice = AmountInPence.fromPounds(1d))
+              val (session, journey, draftReturn) =
+                sessionWithDisposalDetailsAnswers(
+                  currentAnswers,
+                  disposalMethod,
+                  userType,
+                  Some(individualUserType)
+                )
+              val newDisposalPrice                = AmountInPence.fromPounds(2d)
+              val newDraftReturn                  = updateDraftReturn(
+                draftReturn,
+                currentAnswers.copy(disposalPrice = newDisposalPrice)
+              )
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(
+                  Left(Error(""))
+                )
+              }
+
+              checkIsTechnicalErrorPage(
+                performAction(
+                  Seq("disposalPrice" -> newDisposalPrice.inPounds().toString)
+                )
+              )
+          }
+        }
+
+        "there is an error updating the session data" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              val currentAnswers                  =
+                sample[CompleteDisposalDetailsAnswers]
+                  .copy(disposalPrice = AmountInPence.fromPounds(1d))
+              val (session, journey, draftReturn) =
+                sessionWithDisposalDetailsAnswers(
+                  currentAnswers,
+                  disposalMethod,
+                  userType,
+                  Some(individualUserType)
+                )
+              val newDisposalPrice                = AmountInPence.fromPounds(2d)
+              val newDraftReturn                  = updateDraftReturn(
+                draftReturn,
+                currentAnswers.copy(disposalPrice = newDisposalPrice)
+              )
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(
+                  Right(())
+                )
+                mockStoreSession(
+                  session.copy(journeyStatus =
+                    Some(
+                      journey.copy(
+                        draftReturn = newDraftReturn
+                      )
+                    )
+                  )
+                )(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(
+                performAction(
+                  Seq("disposalPrice" -> newDisposalPrice.inPounds().toString)
+                )
+              )
+          }
+        }
+
+      }
+
+      "redirect to the cya page" when {
+
+        "the user hasn't ever answered the disposal details question " +
+          "and the draft return and session data has been successfully updated" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              val incompleteDisposalDetailsAnswers =
+                IncompleteDisposalDetailsAnswers(
+                  Some(ShareOfProperty.Full),
+                  None,
+                  None
+                )
+              val (session, journey, draftReturn)  =
+                sessionWithDisposalDetailsAnswers(
+                  incompleteDisposalDetailsAnswers,
+                  disposalMethod,
+                  userType,
+                  Some(individualUserType)
+                )
+
+              val newDisposalPrice = 2d
+              val updatedAnswers   = incompleteDisposalDetailsAnswers.copy(
+                disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
+              )
+              val newDraftReturn   =
+                updateDraftReturn(draftReturn, updatedAnswers)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(
+                  Right(())
+                )
+                mockStoreSession(
+                  session.copy(journeyStatus =
+                    Some(
+                      journey.copy(
+                        draftReturn = newDraftReturn
+                      )
+                    )
+                  )
+                )(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(
+                  Seq("disposalPrice" -> newDisposalPrice.toString)
+                ),
+                controllers.returns.disposaldetails.routes.DisposalDetailsController
+                  .checkYourAnswers()
+              )
+          }
+        }
+
+        "the user has not answered all of the disposal details questions " +
+          "and the draft return and session data has been successfully updated" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              val currentAnswers                  = sample[IncompleteDisposalDetailsAnswers]
+                .copy(
+                  shareOfProperty = Some(sample[ShareOfProperty]),
+                  disposalPrice = None
+                )
+              val (session, journey, draftReturn) =
+                sessionWithDisposalDetailsAnswers(
+                  currentAnswers,
+                  disposalMethod,
+                  userType,
+                  Some(individualUserType)
+                )
+
+              val newDisposalPrice = 2d
+              val updatedAnswers   = currentAnswers.copy(
+                disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
+              )
+              val newDraftReturn   =
+                updateDraftReturn(draftReturn, updatedAnswers)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(
+                  Right(())
+                )
+                mockStoreSession(
+                  session.copy(journeyStatus =
+                    Some(
+                      journey.copy(
+                        draftReturn = newDraftReturn
+                      )
+                    )
+                  )
+                )(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(
+                  Seq("disposalPrice" -> newDisposalPrice.toString)
+                ),
+                controllers.returns.disposaldetails.routes.DisposalDetailsController
+                  .checkYourAnswers()
+              )
+          }
+        }
+
+        "the user has answered all of the disposal details questions " +
+          "and the draft return and session data has been successfully updated" in {
+          forAll {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              c: CompleteDisposalDetailsAnswers,
+              individualUserType: IndividualUserType
+            ) =>
+              val currentAnswers                  =
+                c.copy(disposalPrice = AmountInPence.fromPounds(1d))
+              val (session, journey, draftReturn) =
+                sessionWithDisposalDetailsAnswers(
+                  currentAnswers,
+                  disposalMethod,
+                  userType,
+                  Some(individualUserType)
+                )
+
+              val newDisposalPrice = 2d
+              val newDraftReturn   = updateDraftReturn(
+                draftReturn,
+                currentAnswers.copy(disposalPrice = AmountInPence.fromPounds(newDisposalPrice))
+              )
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(session)
+                mockStoreDraftReturn(
+                  newDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )(
+                  Right(())
+                )
+                mockStoreSession(
+                  session.copy(journeyStatus =
+                    Some(
+                      journey.copy(
+                        draftReturn = newDraftReturn
+                      )
+                    )
+                  )
+                )(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(
+                  Seq("disposalPrice" -> newDisposalPrice.toString)
+                ),
+                controllers.returns.disposaldetails.routes.DisposalDetailsController
+                  .checkYourAnswers()
+              )
+          }
+        }
+      }
+
+      "not update the draft return or the session data" when {
+
+        "the answer given has not changed from a previous one" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              val currentAnswers =
+                sample[CompleteDisposalDetailsAnswers]
+                  .copy(disposalPrice = AmountInPence.fromPounds(1d))
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithDisposalDetailsAnswers(
+                    currentAnswers,
+                    disposalMethod,
+                    userType,
+                    Some(individualUserType)
+                  )._1
+                )
+              }
+
+              checkIsRedirect(
+                performAction(Seq("disposalPrice" -> "1")),
+                controllers.returns.disposaldetails.routes.DisposalDetailsController
+                  .checkYourAnswers()
+              )
+          }
+        }
+      }
+
+      "accept submitted values with commas" in {
+        forAll(acceptedUserTypeGen, disposalMethodGen, individualUserTypeGen) {
+          (
+            userType: UserType,
+            disposalMethod: DisposalMethod,
+            individualUserType: IndividualUserType
+          ) =>
+            val currentAnswers =
+              sample[CompleteDisposalDetailsAnswers]
+                .copy(disposalPrice = AmountInPence.fromPounds(1000d))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithDisposalDetailsAnswers(
+                  currentAnswers,
+                  disposalMethod,
+                  userType,
+                  Some(individualUserType)
+                )._1
+              )
+            }
+
+            checkIsRedirect(
+              performAction(Seq("disposalPrice" -> "1,000")),
+              controllers.returns.disposaldetails.routes.DisposalDetailsController
+                .checkYourAnswers()
+            )
+        }
+      }
+
+      "accept submitted values with pound signs" in {
+        forAll(acceptedUserTypeGen, disposalMethodGen, individualUserTypeGen) {
+          (
+            userType: UserType,
+            disposalMethod: DisposalMethod,
+            individualUserType: IndividualUserType
+          ) =>
+            val currentAnswers =
+              sample[CompleteDisposalDetailsAnswers]
+                .copy(disposalPrice = AmountInPence.fromPounds(1d))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithDisposalDetailsAnswers(
+                  currentAnswers,
+                  disposalMethod,
+                  userType,
+                  Some(individualUserType)
+                )._1
+              )
+            }
+
+            checkIsRedirect(
+              performAction(Seq("disposalPrice" -> "£1")),
+              controllers.returns.disposaldetails.routes.DisposalDetailsController
+                .checkYourAnswers()
+            )
+        }
+      }
+
+    }
+
     "handling requests to display the what were disposal fees page" must {
 
       def performAction(): Future[Result] =
@@ -1740,6 +2491,7 @@ class DisposalDetailsControllerSpec
               )
           }
         }
+
       }
 
       "display the page" when {
@@ -1859,7 +2611,9 @@ class DisposalDetailsControllerSpec
               }
           }
         }
+
       }
+
     }
 
     "handling submitted answers to the what was disposal fees page" must {
@@ -2406,6 +3160,40 @@ class DisposalDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      "skip the how much did you own page and redirect to the disposal price page" when {
+
+        "user is non-uk resident and selects indirect disposal" in {
+          forAll(
+            acceptedUserTypeGen,
+            disposalMethodGen,
+            individualUserTypeGen
+          ) {
+            (
+              userType: UserType,
+              disposalMethod: DisposalMethod,
+              individualUserType: IndividualUserType
+            ) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithIndirectDisposalDetailsAnswers(
+                    None,
+                    disposalMethod,
+                    userType,
+                    Some(individualUserType)
+                  )._1
+                )
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.DisposalDetailsController.whatWasDisposalPrice()
+              )
+          }
+        }
+
+      }
+
       "redirect to the how much did you own page" when {
 
         "there are no disposal details answers in session" in {
@@ -2819,6 +3607,7 @@ class DisposalDetailsControllerSpec
             )
         }
       }
+
     }
 
   }

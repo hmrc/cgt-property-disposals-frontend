@@ -569,7 +569,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             completeReturn,
             instanceOf[RebasingEligibilityUtil],
             completeFillingOutReturn.subscribedDetails.isATrust,
-            representativeType(completeReturn)
+            representativeType(completeReturn),
+            completeReturn.isIndirectDisposal()
           ).toString
 
         SubmitReturnRequest(

@@ -54,7 +54,8 @@
     completeReturn: CompleteReturn,
     rebasingEligibilityUtil: RebasingEligibilityUtil,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]],
+    isIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{ messages("checkAllAnswers.title") }
@@ -82,7 +83,7 @@
      @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
 
      <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
-     @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, isATrust, representativeType)
+     @disposalDetailsSummary(s.disposalDetails, s.triageAnswers.disposalMethod, isATrust, representativeType, isIndirectDisposal)
 
 <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
      @acquisitionDetailsSummary(s.acquisitionDetails,

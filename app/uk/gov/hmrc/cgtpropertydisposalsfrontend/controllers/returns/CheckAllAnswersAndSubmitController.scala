@@ -71,7 +71,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
             completeReturn,
             rebasingEligibilityUtil,
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(completeReturn)
+            representativeType(completeReturn),
+            completeReturn.isIndirectDisposal()
           )
         )
       }
@@ -88,7 +89,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
                   completeReturn,
                   rebasingEligibilityUtil,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(completeReturn)
+                  representativeType(completeReturn),
+                  completeReturn.isIndirectDisposal()
                 ).toString().getBytes
               )
             )

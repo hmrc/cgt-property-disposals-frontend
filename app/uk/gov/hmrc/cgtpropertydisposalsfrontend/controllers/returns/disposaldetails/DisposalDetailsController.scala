@@ -101,9 +101,12 @@ class DisposalDetailsController @Inject() (
               )
             )
           ) =>
+        val answers = IncompleteDisposalDetailsAnswers.empty.copy(
+          shareOfProperty = Some(ShareOfProperty.Full)
+        )
         d.disposalDetailsAnswers
           .fold[Future[Result]](
-            f(s, r, Left(d), IncompleteDisposalDetailsAnswers.empty)
+            f(s, r, Left(d), answers)
           )(f(s, r, Left(d), _))
 
       case _ => Redirect(controllers.routes.StartController.start())
@@ -221,6 +224,12 @@ class DisposalDetailsController @Inject() (
       _.triageAnswers.representativeType()
     )
 
+  private def isIndirectDisposal(state: JourneyState): Boolean =
+    state match {
+      case Right(_) => false
+      case Left(_)  => true
+    }
+
   def howMuchDidYouOwn(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndDisposalDetailsAnswers(request) {
@@ -332,7 +341,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state)
+                  representativeType(state),
+                  isIndirectDisposal(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
@@ -359,7 +369,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state)
+                  representativeType(state),
+                  isIndirectDisposal(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
@@ -423,7 +434,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state)
+                  representativeType(state),
+                  isIndirectDisposal(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
@@ -450,7 +462,8 @@ class DisposalDetailsController @Inject() (
                   disposalMethod,
                   shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state)
+                  representativeType(state),
+                  isIndirectDisposal(state)
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
@@ -504,6 +517,7 @@ class DisposalDetailsController @Inject() (
           withDisposalMethod(state) {
             case (disposalMethod) =>
               answers match {
+
                 case IncompleteDisposalDetailsAnswers(None, _, _) =>
                   Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
 
@@ -559,7 +573,8 @@ class DisposalDetailsController @Inject() (
                           completeAnswers,
                           disposalMethod,
                           fillingOutReturn.subscribedDetails.isATrust,
-                          representativeType(state)
+                          representativeType(state),
+                          isIndirectDisposal(state)
                         )
                       )
                   )
@@ -570,7 +585,8 @@ class DisposalDetailsController @Inject() (
                       answers,
                       disposalMethod,
                       fillingOutReturn.subscribedDetails.isATrust,
-                      representativeType(state)
+                      representativeType(state),
+                      isIndirectDisposal(state)
                     )
                   )
               }
