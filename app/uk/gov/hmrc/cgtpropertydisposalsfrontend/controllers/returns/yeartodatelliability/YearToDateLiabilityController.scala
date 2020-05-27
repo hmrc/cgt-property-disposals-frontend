@@ -83,7 +83,7 @@ class YearToDateLiabilityController @Inject() (
   nonCalculatedEnterTaxDuePage: pages.non_calculated_enter_tax_due,
   nonCalculatedCheckYourAnswersPage: pages.non_calculated_check_your_answers,
   expiredMandatoryEvidencePage: pages.expired_mandatory_evidence,
-  mandatoryEvidenceCheckUpscanPage: pages.mandatory_evidence_upscan_check
+  mandatoryEvidenceScanProgressPage: pages.mandatory_evidence_scan_progress
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -206,20 +206,20 @@ class YearToDateLiabilityController @Inject() (
                                         )
                                       )
                 _                <- EitherT(
-                       updateSession(sessionStore, request)(
-                         _.copy(
-                           journeyStatus = Some(
-                             fillingOutReturn.copy(draftReturn =
-                               draftReturn.copy(yearToDateLiabilityAnswers =
-                                 Some(
-                                   incomplete.copy(calculatedTaxDue = Some(calculatedTaxDue))
-                                 )
-                               )
-                             )
-                           )
-                         )
-                       )
-                     )
+                                      updateSession(sessionStore, request)(
+                                        _.copy(
+                                          journeyStatus = Some(
+                                            fillingOutReturn.copy(draftReturn =
+                                              draftReturn.copy(yearToDateLiabilityAnswers =
+                                                Some(
+                                                  incomplete.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                                                )
+                                              )
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
               } yield calculatedTaxDue
 
             result
@@ -1150,10 +1150,10 @@ class YearToDateLiabilityController @Inject() (
                                     .scanningMandatoryEvidence()
                               )
             _            <- updatePendingUpscanUpload(
-                   answers,
-                   fillingOutReturn,
-                   upscanUpload
-                 )
+                              answers,
+                              fillingOutReturn,
+                              upscanUpload
+                            )
           } yield upscanUpload
 
           result.fold(
@@ -1453,15 +1453,15 @@ class YearToDateLiabilityController @Inject() (
                                  pendingUpscanUpload.uploadReference
                                )
             _               <- newUpscanUpload.upscanCallBack match {
-                   case None           => EitherT.pure[Future, Error](())
-                   case Some(callback) =>
-                     storeUpscanSuccessOrFailure(
-                       newUpscanUpload,
-                       callback,
-                       answers,
-                       fillingOutReturn
-                     )
-                 }
+                                 case None           => EitherT.pure[Future, Error](())
+                                 case Some(callback) =>
+                                   storeUpscanSuccessOrFailure(
+                                     newUpscanUpload,
+                                     callback,
+                                     answers,
+                                     fillingOutReturn
+                                   )
+                               }
           } yield newUpscanUpload
 
           result.fold(
@@ -1480,7 +1480,7 @@ class YearToDateLiabilityController @Inject() (
           upscanCallBack: Option[UpscanCallBack]
         ): Result =
           upscanCallBack match {
-            case None                   => Ok(mandatoryEvidenceCheckUpscanPage(None))
+            case None                   => Ok(mandatoryEvidenceScanProgressPage())
             case Some(_: UpscanFailure) => Ok(mandatoryEvidenceScanFailedPage())
             case Some(_: UpscanSuccess) =>
               Redirect(

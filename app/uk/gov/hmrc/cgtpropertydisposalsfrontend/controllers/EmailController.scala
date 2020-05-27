@@ -145,10 +145,10 @@ trait EmailController[JourneyType <: EmailJourneyType] {
 
                   val result = for {
                     _      <- EitherT(
-                           updateSession(sessionStore, request)(
-                             _.copy(emailToBeVerified = Some(emailToBeVerified))
-                           )
-                         )
+                                updateSession(sessionStore, request)(
+                                  _.copy(emailToBeVerified = Some(emailToBeVerified))
+                                )
+                              )
                     result <- emailVerificationService
                                 .verifyEmail(
                                   email,
@@ -156,11 +156,11 @@ trait EmailController[JourneyType <: EmailJourneyType] {
                                   verifyEmailCall(emailToBeVerified.id)
                                 )
                     _      <- EitherT.pure[Future, Error](
-                           auditEmailChangeAttempt(
-                             journey,
-                             emailToBeVerified.email
-                           )
-                         )
+                                auditEmailChangeAttempt(
+                                  journey,
+                                  emailToBeVerified.email
+                                )
+                              )
                   } yield result
 
                   result.fold(
@@ -222,13 +222,13 @@ trait EmailController[JourneyType <: EmailJourneyType] {
               val result = for {
                 updatedJourney <- updateEmail(journey, emailToBeVerified.email)
                 _              <- EitherT[Future, Error, Unit](
-                       updateSession(sessionStore, request) { s =>
-                         s.copy(
-                           journeyStatus = Some(updatedJourney),
-                           emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
-                         )
-                       }
-                     )
+                                    updateSession(sessionStore, request) { s =>
+                                      s.copy(
+                                        journeyStatus = Some(updatedJourney),
+                                        emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
+                                      )
+                                    }
+                                  )
               } yield ()
 
               result.fold(

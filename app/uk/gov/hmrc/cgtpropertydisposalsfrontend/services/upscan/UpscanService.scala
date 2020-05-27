@@ -66,18 +66,18 @@ class UpscanServiceImpl @Inject() (
     for {
       uploadReference  <- EitherT.pure(UploadReference(UUID.randomUUID().toString))
       httpResponse     <- upscanConnector
-                        .initiate(
-                          errorRedirect,
-                          successRedirect(uploadReference),
-                          uploadReference
-                        )
+                            .initiate(
+                              errorRedirect,
+                              successRedirect(uploadReference),
+                              uploadReference
+                            )
       upscanUploadMeta <- EitherT.fromOption(
                             httpResponse.json.validate[UpscanUploadMeta].asOpt,
                             Error("could not parse upscan initiate response")
                           )
       upscanUpload     <- EitherT.pure(
-                        UpscanUpload(uploadReference, upscanUploadMeta, TimeUtils.now(), None)
-                      )
+                            UpscanUpload(uploadReference, upscanUploadMeta, TimeUtils.now(), None)
+                          )
       _                <- upscanConnector.saveUpscanUpload(upscanUpload)
     } yield upscanUpload
 

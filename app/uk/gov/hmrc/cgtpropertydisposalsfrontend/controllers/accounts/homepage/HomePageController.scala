@@ -171,20 +171,20 @@ class HomePageController @Inject() (
                                   returnSummary.submissionId
                                 )
                 _          <- EitherT(
-                       updateSession(sessionStore, request)(
-                         _.copy(
-                           journeyStatus = Some(
-                             ViewingReturn(
-                               subscribed.subscribedDetails,
-                               subscribed.ggCredId,
-                               subscribed.agentReferenceNumber,
-                               sentReturn,
-                               returnSummary
-                             )
-                           )
-                         )
-                       )
-                     )
+                                updateSession(sessionStore, request)(
+                                  _.copy(
+                                    journeyStatus = Some(
+                                      ViewingReturn(
+                                        subscribed.subscribedDetails,
+                                        subscribed.ggCredId,
+                                        subscribed.agentReferenceNumber,
+                                        sentReturn,
+                                        returnSummary
+                                      )
+                                    )
+                                  )
+                                )
+                              )
               } yield ()
 
               result.fold(
@@ -324,10 +324,10 @@ class HomePageController @Inject() (
       draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
       subscribed    = uplift(journey, draftReturns, sentReturns)
       _            <- EitherT(
-             updateSession(sessionStore, request)(
-               _.copy(journeyStatus = Some(subscribed))
-             )
-           )
+                        updateSession(sessionStore, request)(
+                          _.copy(journeyStatus = Some(subscribed))
+                        )
+                      )
     } yield subscribed
 
     result

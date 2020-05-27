@@ -133,29 +133,27 @@ class ReturnsServiceImpl @Inject() (
     sentReturns: List[ReturnSummary]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
     for {
-      httpResponse                          <- connector
-                        .getDraftReturns(cgtReference)
-                        .subflatMap(r =>
-                          if (r.status === OK) Right(r)
-                          else
-                            Left(
-                              Error(
-                                s"Call to get draft returns came back with status ${r.status}}"
-                              )
-                            )
-                        )
+      httpResponse                          <- connector.getDraftReturns(cgtReference)
+                                                 .subflatMap(r =>
+                                                   if (r.status === OK) Right(r)
+                                                   else
+                                                     Left(
+                                                       Error(
+                                                         s"Call to get draft returns came back with status ${r.status}}"
+                                                       )
+                                                     )
+                                                 )
       draftReturns                          <- EitherT.fromEither(
-                        httpResponse
-                          .parseJSON[GetDraftReturnResponse]()
-                          .leftMap(Error(_))
-                          .map(_.draftReturns)
-                      )
+                                                 httpResponse.parseJSON[GetDraftReturnResponse]()
+                                                   .leftMap(Error(_))
+                                                   .map(_.draftReturns)
+                                               )
       (sentDraftReturns, unsentDraftReturns) = draftReturns.partition(hasBeenSent(sentReturns))
       _                                     <- if (sentDraftReturns.nonEmpty)
-             EitherT.liftF[Future, Error, Unit](
-               deleteSentDraftReturns(sentDraftReturns)
-             )
-           else EitherT.rightT[Future, Error](())
+                                                 EitherT.liftF[Future, Error, Unit](
+                                                   deleteSentDraftReturns(sentDraftReturns)
+                                                 )
+                                               else EitherT.rightT[Future, Error](())
     } yield unsentDraftReturns
 
   private def deleteSentDraftReturns(
