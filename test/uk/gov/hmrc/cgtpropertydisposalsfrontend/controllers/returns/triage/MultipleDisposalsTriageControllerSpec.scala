@@ -3684,24 +3684,10 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
-      "redirect to the asset types not implemented page" when {
-
-        "the user was not a non uk resident and they have selected mixed asset types" in {
-          testRedirectWhenIncomplete(
-            allQuestionsAnsweredNonUk
-              .copy(assetTypes = Some(List(AssetType.MixedUse))),
-            routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
-          )
-        }
-
-      }
-
       "not redirect to the asset types not implemented page" when {
 
         "the user selects a valid combination of asset types" in {
           val invalidAssetTypes = List(
-            List(AssetType.IndirectDisposal),
-            List(AssetType.MixedUse),
             List(AssetType.IndirectDisposal, AssetType.MixedUse),
             List(AssetType.MixedUse, AssetType.IndirectDisposal)
           )
@@ -4358,25 +4344,6 @@ class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
 
   val mockUUIDGenerator = mock[UUIDGenerator]
 
-  val trustDisplay       =
-    UserTypeDisplay(UserType.Organisation, None, Left(sample[TrustName]))
-  val agentDisplay       =
-    UserTypeDisplay(UserType.Agent, None, Right(sample[IndividualName]))
-  val individualDisplay  =
-    UserTypeDisplay(UserType.Individual, None, Right(sample[IndividualName]))
-  val personalRepDisplay =
-    UserTypeDisplay(
-      UserType.Individual,
-      Some(Left(PersonalRepresentative)),
-      Right(sample[IndividualName])
-    )
-  val capacitorDisplay   =
-    UserTypeDisplay(
-      UserType.Individual,
-      Some(Right(Capacitor)),
-      Right(sample[IndividualName])
-    )
-
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
@@ -4391,7 +4358,8 @@ class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   override lazy val additionalConfig = Configuration(
-    "indirect-disposals.enabled" -> false
+    "indirect-disposals.enabled" -> false,
+    "mixed-use.enabled"          -> false
   )
 
   def performAction(): Future[Result] =
@@ -4421,7 +4389,6 @@ class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
   "redirect to the asset types not implemented page" when {
     "the user was not a non uk resident and they have selected asset types that are not supported" in {
       List(
-        List(AssetType.MixedUse),
         List(AssetType.IndirectDisposal, AssetType.MixedUse),
         List(AssetType.MixedUse, AssetType.IndirectDisposal)
       ).foreach { assetTypes =>
@@ -4441,10 +4408,7 @@ class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(
-        sessionDataWithStartingNewDraftReturn(
-          answers,
-          Right(sample[IndividualName])
-        )._1
+        sessionDataWithStartingNewDraftReturn(answers)._1
       )
     }
 
@@ -4453,32 +4417,11 @@ class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
   }
 
   def sessionDataWithStartingNewDraftReturn(
-    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
-    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
-    userType: UserType = UserType.Individual,
-    representativeType: Option[
-      Either[PersonalRepresentative.type, Capacitor.type]
-    ] = None
+    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers
   ): (SessionData, StartingNewDraftReturn) = {
-    val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
-      newReturnTriageAnswers = Left(multipleDisposalsAnswers),
-      subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber =
-        if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
-        else None,
-      representeeAnswers =
-        if (representativeType.exists(_.isLeft))
-          Some(
-            sample[CompleteRepresenteeAnswers]
-              .copy(dateOfDeath = Some(sample[DateOfDeath]))
-          )
-        else if (representativeType.exists(_.isRight))
-          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-        else None
-    )
-    SessionData.empty.copy(
-      journeyStatus = Some(startingNewDraftReturn),
-      userType = Some(userType)
-    ) -> startingNewDraftReturn
+    val startingNewDraftReturn =
+      sample[StartingNewDraftReturn].copy(newReturnTriageAnswers = Left(multipleDisposalsAnswers))
+
+    SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
   }
 }
