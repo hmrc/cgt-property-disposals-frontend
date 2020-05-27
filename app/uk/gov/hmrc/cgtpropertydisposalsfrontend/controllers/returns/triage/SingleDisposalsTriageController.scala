@@ -99,6 +99,9 @@ class SingleDisposalsTriageController @Inject() (
   private val indirectDisposalsEnabled: Boolean =
     config.underlying.getBoolean("indirect-disposals.enabled")
 
+  private val mixedUseEnabled: Boolean =
+    config.underlying.getBoolean("mixed-use.enabled")
+
   def howDidYouDisposeOfProperty(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       displayTriagePage(
@@ -1240,7 +1243,7 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _
-              ) =>
+              ) if !mixedUseEnabled =>
             Redirect(
               routes.CommonTriageQuestionsController
                 .assetTypeNotYetImplemented()

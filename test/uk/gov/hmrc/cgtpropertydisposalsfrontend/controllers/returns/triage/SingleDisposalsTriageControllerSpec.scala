@@ -4177,17 +4177,6 @@ class SingleDisposalsTriageControllerSpec
                 .copy(
                   wasAUKResident = Some(false),
                   countryOfResidence = Some(sample[Country]),
-                  assetType = Some(AssetType.MixedUse)
-                ),
-              Right(sample[IndividualName]),
-              routes.CommonTriageQuestionsController
-                .assetTypeNotYetImplemented()
-            ),
-            Scenario(
-              allQuestionsAnswered
-                .copy(
-                  wasAUKResident = Some(false),
-                  countryOfResidence = Some(sample[Country]),
                   assetType = Some(AssetType.IndirectDisposal),
                   completionDate = None,
                   disposalDate = None
@@ -4292,27 +4281,6 @@ class SingleDisposalsTriageControllerSpec
           }
 
         }
-
-      }
-
-      "show a exit page when a user has selected mixed use" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionDataWithStartingNewDraftReturn(
-              allQuestionsAnswered.copy(
-                assetType = Some(AssetType.MixedUse)
-              ),
-              representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
-            )._1
-          )
-        }
-
-        val result = performAction()
-        checkIsRedirect(
-          result,
-          routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
-        )
 
       }
 
@@ -5133,7 +5101,8 @@ class DisabledIndirectDisposalSingleDisposalsTriageControllerSpec
     )
 
   override lazy val additionalConfig = Configuration(
-    "indirect-disposals.enabled" -> false
+    "indirect-disposals.enabled" -> false,
+    "mixed-use.enabled"          -> false
   )
 
   lazy val controller = instanceOf[SingleDisposalsTriageController]
@@ -5157,6 +5126,42 @@ class DisabledIndirectDisposalSingleDisposalsTriageControllerSpec
                       wasAUKResident = Some(false),
                       countryOfResidence = Some(sample[Country]),
                       assetType = Some(AssetType.IndirectDisposal),
+                      completionDate = None,
+                      disposalDate = None,
+                      tooEarlyDisposalDate = None
+                    )
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkIsRedirect(
+          controller.checkYourAnswers()(FakeRequest()),
+          routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+        )
+      }
+
+    }
+
+    "mixed use disposals are disabled" must {
+
+      "redirect to the exit page when a non-uk resident user selects mixed use" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(
+                sample[StartingNewDraftReturn].copy(
+                  newReturnTriageAnswers = Right(
+                    IncompleteSingleDisposalTriageAnswers(
+                      hasConfirmedSingleDisposal = true,
+                      individualUserType = Some(Self),
+                      disposalMethod = Some(sample[DisposalMethod]),
+                      wasAUKResident = Some(false),
+                      countryOfResidence = Some(sample[Country]),
+                      assetType = Some(AssetType.MixedUse),
                       completionDate = None,
                       disposalDate = None,
                       tooEarlyDisposalDate = None

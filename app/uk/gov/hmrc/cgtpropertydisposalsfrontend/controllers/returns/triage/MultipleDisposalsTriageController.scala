@@ -87,6 +87,9 @@ class MultipleDisposalsTriageController @Inject() (
   private val indirectDisposalsEnabled: Boolean =
     config.underlying.getBoolean("indirect-disposals.enabled")
 
+  private val mixedUseEnabled: Boolean =
+    config.underlying.getBoolean("mixed-use.enabled")
+
   def guidance(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
@@ -1052,7 +1055,8 @@ class MultipleDisposalsTriageController @Inject() (
                 _
               )
               if assetTypes.forall(a =>
-                a === AssetType.MixedUse || (a === AssetType.IndirectDisposal && !indirectDisposalsEnabled)
+                (a === AssetType.MixedUse && !mixedUseEnabled) ||
+                  (a === AssetType.IndirectDisposal && !indirectDisposalsEnabled)
               ) =>
             Redirect(
               routes.CommonTriageQuestionsController
