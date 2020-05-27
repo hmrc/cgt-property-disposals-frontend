@@ -3860,17 +3860,19 @@ class YearToDateLiabilityControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "mandatoryEvidence.check-upscan-status.title"
+              "mandatoryEvidence.scan-progress.title"
             ),
             { doc =>
-              doc.select("#helpText").text() shouldBe messageFromMessageKey(
-                "mandatoryEvidence.check-upscan-status.in-progress.help-text"
+              doc
+                .select("#content > article > p:nth-child(3)")
+                .text() shouldBe messageFromMessageKey(
+                "mandatoryEvidence.scan-progress.p1"
               )
               doc
-                .select("#content > article > form")
-                .attr("action")              shouldBe routes.YearToDateLiabilityController
-                .scanningMandatoryEvidenceSubmit()
-                .url
+                .select("#content > article > p:nth-child(4)")
+                .text() shouldBe messageFromMessageKey(
+                "mandatoryEvidence.scan-progress.p2"
+              )
             }
           )
         }

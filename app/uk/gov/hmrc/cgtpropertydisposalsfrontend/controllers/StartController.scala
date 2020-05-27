@@ -318,21 +318,21 @@ class StartController @Inject() (
       sentReturns       <- returnsService.listReturns(cgtReference)
       draftReturns      <- returnsService.getDraftReturns(cgtReference, sentReturns)
       _                 <- EitherT(
-             updateSession(sessionStore, request)(
-               _.copy(
-                 userType = request.authenticatedRequest.userType,
-                 journeyStatus = Some(
-                   Subscribed(
-                     subscribedDetails,
-                     ggCredId,
-                     None,
-                     draftReturns,
-                     sentReturns
-                   )
-                 )
-               )
-             )
-           )
+                             updateSession(sessionStore, request)(
+                               _.copy(
+                                 userType = request.authenticatedRequest.userType,
+                                 journeyStatus = Some(
+                                   Subscribed(
+                                     subscribedDetails,
+                                     ggCredId,
+                                     None,
+                                     draftReturns,
+                                     sentReturns
+                                   )
+                                 )
+                               )
+                             )
+                           )
     } yield ()
 
     result.fold(
@@ -449,28 +449,26 @@ class StartController @Inject() (
     val result =
       for {
         bprResponse              <- bprService.getBusinessPartnerRecord(
-                         TrustBusinessPartnerRecordRequest(Right(trust.sautr), None)
-                       )
+                                      TrustBusinessPartnerRecordRequest(Right(trust.sautr), None)
+                                    )
 
         bprWithTrustName         <- EitherT.fromEither[Future](
-                              Either
-                                .fromOption(
-                                  bprResponse.businessPartnerRecord,
-                                  Error("Could not find BPR for trust")
-                                )
-                                .flatMap(bpr =>
-                                  bpr.name
-                                    .fold[Either[Error, (BusinessPartnerRecord, TrustName)]](
-                                      trustName => Right((bpr, trustName)),
-                                      _ =>
-                                        Left(
-                                          Error(
-                                            "Found individual name but expected trust name in business partner record"
+                                      Either.fromOption(
+                                          bprResponse.businessPartnerRecord,
+                                          Error("Could not find BPR for trust")
+                                        )
+                                        .flatMap(bpr =>
+                                          bpr.name.fold[Either[Error, (BusinessPartnerRecord, TrustName)]](
+                                            trustName => Right((bpr, trustName)),
+                                            _ =>
+                                              Left(
+                                                Error(
+                                                  "Found individual name but expected trust name in business partner record"
+                                                )
+                                              )
                                           )
                                         )
                                     )
-                                )
-                            )
         maybeSubscriptionDetails <- EitherT.pure(
                                       bprWithTrustName._1.emailAddress
                                         .map(_ -> EmailSource.BusinessPartnerRecord)
@@ -504,11 +502,11 @@ class StartController @Inject() (
                                         }
                                     )
         _                        <- updateSession(
-               maybeSubscriptionDetails,
-               trust.email,
-               trust.ggCredId,
-               AffinityGroup.Organisation
-             )
+                                      maybeSubscriptionDetails,
+                                      trust.email,
+                                      trust.ggCredId,
+                                      AffinityGroup.Organisation
+                                    )
       } yield maybeSubscriptionDetails
 
     result.fold(
@@ -581,14 +579,14 @@ class StartController @Inject() (
   ): Future[Result] = {
     val result = for {
       bprResponse              <- bprService.getBusinessPartnerRecord(
-                       IndividualBusinessPartnerRecordRequest(individual.id, None)
-                     )
+                                    IndividualBusinessPartnerRecordRequest(individual.id, None)
+                                  )
       bpr                      <- EitherT.fromEither[Future](
-               Either.fromOption(
-                 bprResponse.businessPartnerRecord,
-                 Error("Could not find BPR for individual")
-               )
-             )
+                                    Either.fromOption(
+                                      bprResponse.businessPartnerRecord,
+                                      Error("Could not find BPR for individual")
+                                    )
+                                  )
       maybeSubscriptionDetails <- EitherT.pure(
                                     bprResponse.cgtReference
                                       .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
@@ -601,11 +599,11 @@ class StartController @Inject() (
                                       )
                                   )
       _                        <- updateSession(
-             maybeSubscriptionDetails,
-             individual.email,
-             individual.ggCredId,
-             AffinityGroup.Individual
-           )
+                                    maybeSubscriptionDetails,
+                                    individual.email,
+                                    individual.ggCredId,
+                                    AffinityGroup.Individual
+                                  )
     } yield maybeSubscriptionDetails
 
     result.fold(

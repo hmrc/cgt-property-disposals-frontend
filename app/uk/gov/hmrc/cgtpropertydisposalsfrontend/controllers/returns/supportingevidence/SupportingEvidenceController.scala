@@ -64,7 +64,7 @@ class SupportingEvidenceController @Inject() (
   uploadPage: pages.upload,
   expiredPage: pages.expired,
   checkYourAnswersPage: pages.check_your_answers,
-  uploadPendingPage: pages.upload_pending,
+  scanProgressPage: pages.scan_progress,
   uploadFailedPage: pages.upload_failed,
   scanFailedPage: pages.scan_failed
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
@@ -314,7 +314,7 @@ class SupportingEvidenceController @Inject() (
             .initiate(
               routes.SupportingEvidenceController
                 .handleUpscanErrorRedirect(),
-              routes.SupportingEvidenceController.uploadSupportingEvidenceCheck
+              routes.SupportingEvidenceController.scanProgress
             )
             .fold(
               { e =>
@@ -348,7 +348,7 @@ class SupportingEvidenceController @Inject() (
       Ok(scanFailedPage())
     }
 
-  def uploadSupportingEvidenceCheck(
+  def scanProgress(
     uploadReference: UploadReference
   ): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -361,16 +361,16 @@ class SupportingEvidenceController @Inject() (
             val result = for {
               upscanUpload <- upscanService.getUpscanUpload(uploadReference)
               _            <- upscanUpload.upscanCallBack match {
-                     case Some(s: UpscanSuccess) =>
-                       storeUpscanSuccess(
-                         upscanUpload,
-                         s,
-                         incompleteAnswers,
-                         fillingOutReturn
-                       )
-                     case _                      =>
-                       EitherT.pure[Future, Error](())
-                   }
+                                case Some(s: UpscanSuccess) =>
+                                  storeUpscanSuccess(
+                                    upscanUpload,
+                                    s,
+                                    incompleteAnswers,
+                                    fillingOutReturn
+                                  )
+                                case _                      =>
+                                  EitherT.pure[Future, Error](())
+                              }
             } yield upscanUpload
 
             result.fold(
@@ -389,7 +389,7 @@ class SupportingEvidenceController @Inject() (
                   case Some(_: UpscanFailure) =>
                     Redirect(routes.SupportingEvidenceController.handleUpscanCallBackFailures())
                   case None                   =>
-                    Ok(uploadPendingPage(upscanUpload))
+                    Ok(scanProgressPage(upscanUpload))
                 }
             )
         }
@@ -398,13 +398,13 @@ class SupportingEvidenceController @Inject() (
 
     }
 
-  def uploadSupportingEvidenceCheckSubmit(
+  def scanProgressSubmit(
     uploadReference: String
   ): Action[AnyContent] =
     authenticatedActionWithSessionData.async { _ =>
       Redirect(
         routes.SupportingEvidenceController
-          .uploadSupportingEvidenceCheck(UploadReference(uploadReference))
+          .scanProgress(UploadReference(uploadReference))
       )
     }
 
