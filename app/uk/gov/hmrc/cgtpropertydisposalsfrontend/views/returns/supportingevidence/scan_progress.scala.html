@@ -50,7 +50,7 @@
         <p>@{messages(s"$key.p2")}</p>
 
         @formWrapper(routes.SupportingEvidenceController.scanProgressSubmit(upscanUpload.uploadReference.value), 'novalidate -> "novalidate") {
-          @submitButton("Continue")
+            @submitButton(messages("button.continue"))
         }
 
         @returnToSummaryLink(displayReturnToSummaryLink = true)

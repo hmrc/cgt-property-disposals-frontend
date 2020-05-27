@@ -43,7 +43,7 @@
     <p>@{messages(s"$key.p2")}</p>
 
     @formWrapper(routes.YearToDateLiabilityController.scanningMandatoryEvidenceSubmit(), 'novalidate -> "novalidate") {
-      @submitButton(messages(s"$key.button.checkStatusAndContinue"))
+      @submitButton(messages("button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
