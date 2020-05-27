@@ -687,7 +687,7 @@ class SingleDisposalsTriageController @Inject() (
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)),
               {
-                case (Right(d), r) =>
+                case (Right(d), r)                        =>
                   r.copy(
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
@@ -704,7 +704,19 @@ class SingleDisposalsTriageController @Inject() (
                         .flatMap(_.unsetAllButIncomeDetails())
                     )
                   )
-                case (Left(_), _)  =>
+
+                case (Left(Left(mixedUseDraftReturn)), r) =>
+                  r.copy(
+                    draftReturn = mixedUseDraftReturn.copy(
+                      triageAnswers = newAnswers,
+                      examplePropertyDetailsAnswers = mixedUseDraftReturn.examplePropertyDetailsAnswers.map(
+                        _.unset(_.acquisitionPrice)
+                      ),
+                      yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers
+                        .flatMap(_.unsetAllButIncomeDetails())
+                    )
+                  )
+                case (Left(Right(_)), _)                  =>
                   sys.error(
                     "completion date page not handled for indirect disposals"
                   )
@@ -881,13 +893,14 @@ class SingleDisposalsTriageController @Inject() (
           )
             state.map(_._2)
           else {
-            val wasIndirectDisposal   = answers
-              .fold(_.assetType, c => Some(c.assetType))
-              .contains(IndirectDisposal)
-            val isNowIndirectDisposal = assetType === IndirectDisposal
+            val oldAssetType                       = answers.fold(_.assetType, c => Some(c.assetType))
+            val (wasIndirectDisposal, wasMixedUse) =
+              oldAssetType.contains(IndirectDisposal) -> oldAssetType.contains(MixedUse)
+            val (isNowIndirectDisposal, isNowMixedUse) =
+              (assetType === IndirectDisposal) -> (assetType === MixedUse)
 
             val newAnswers =
-              if (wasIndirectDisposal === isNowIndirectDisposal)
+              if (!wasIndirectDisposal === !isNowIndirectDisposal && !wasMixedUse === !isNowMixedUse)
                 answers.fold(
                   _.copy(assetType = Some(assetType)),
                   _.copy(assetType = assetType)
@@ -902,10 +915,18 @@ class SingleDisposalsTriageController @Inject() (
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)),
               {
-                case (Right(d), r)       =>
+                case (Right(d), r)                         =>
                   if (isNowIndirectDisposal)
                     r.copy(
                       draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
+                        d.id,
+                        newAnswers,
+                        d.representeeAnswers
+                      )
+                    )
+                  else if (isNowMixedUse)
+                    r.copy(
+                      draftReturn = DraftSingleMixedUseDisposalReturn.newDraftReturn(
                         d.id,
                         newAnswers,
                         d.representeeAnswers
@@ -927,15 +948,41 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     )
 
-                case (Left(Right(d)), r) =>
-                  // if it was indirect, then we are now at not indirect since we've already checked for equality
-                  r.copy(
-                    draftReturn = DraftSingleDisposalReturn.newDraftReturn(
-                      d.id,
-                      newAnswers,
-                      d.representeeAnswers
+                case (Left(Right(indirectDraftReturn)), r) =>
+                  if (isNowMixedUse)
+                    r.copy(
+                      draftReturn = DraftSingleMixedUseDisposalReturn.newDraftReturn(
+                        indirectDraftReturn.id,
+                        newAnswers,
+                        indirectDraftReturn.representeeAnswers
+                      )
                     )
-                  )
+                  else
+                    r.copy(
+                      draftReturn = DraftSingleDisposalReturn.newDraftReturn(
+                        indirectDraftReturn.id,
+                        newAnswers,
+                        indirectDraftReturn.representeeAnswers
+                      )
+                    )
+
+                case (Left(Left(mixedUseDraftReturn)), r)  =>
+                  if (isNowIndirectDisposal)
+                    r.copy(
+                      draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
+                        mixedUseDraftReturn.id,
+                        newAnswers,
+                        mixedUseDraftReturn.representeeAnswers
+                      )
+                    )
+                  else
+                    r.copy(
+                      draftReturn = DraftSingleDisposalReturn.newDraftReturn(
+                        mixedUseDraftReturn.id,
+                        newAnswers,
+                        mixedUseDraftReturn.representeeAnswers
+                      )
+                    )
               }
             )
           }
@@ -1446,6 +1493,13 @@ class SingleDisposalsTriageController @Inject() (
               val newDraftReturn =
                 if (complete.assetType === IndirectDisposal)
                   DraftSingleIndirectDisposalReturn
+                    .newDraftReturn(
+                      uuidGenerator.nextId(),
+                      complete,
+                      startingNewDraftReturn.representeeAnswers
+                    )
+                else if (complete.assetType === MixedUse)
+                  DraftSingleMixedUseDisposalReturn
                     .newDraftReturn(
                       uuidGenerator.nextId(),
                       complete,
