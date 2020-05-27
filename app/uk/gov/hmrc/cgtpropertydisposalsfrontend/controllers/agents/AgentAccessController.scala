@@ -230,22 +230,22 @@ class AgentAccessController @Inject() (
               sentReturns  <- returnsService.listReturns(cgtReference)
               draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
               _            <- EitherT(
-                     updateSession(sessionStore, request)(
-                       _.copy(
-                         journeyStatus = Some(
-                           Subscribed(
-                             verifierMatchingDetails.clientDetails,
-                             agentSupplyingClientDetails.agentGGCredId,
-                             Some(
-                               agentSupplyingClientDetails.agentReferenceNumber
-                             ),
-                             draftReturns,
-                             sentReturns
-                           )
-                         )
-                       )
-                     )
-                   )
+                                updateSession(sessionStore, request)(
+                                  _.copy(
+                                    journeyStatus = Some(
+                                      Subscribed(
+                                        verifierMatchingDetails.clientDetails,
+                                        agentSupplyingClientDetails.agentGGCredId,
+                                        Some(
+                                          agentSupplyingClientDetails.agentReferenceNumber
+                                        ),
+                                        draftReturns,
+                                        sentReturns
+                                      )
+                                    )
+                                  )
+                                )
+                              )
             } yield ()
 
             result.fold(
@@ -313,18 +313,18 @@ class AgentAccessController @Inject() (
                        )
 
           _       <- EitherT(
-                 updateSession(sessionStore, request)(
-                   _.copy(
-                     journeyStatus = Some(
-                       AgentSupplyingClientDetails(
-                         agentReferenceNumber,
-                         ggCredId,
-                         Some(VerifierMatchingDetails(details, false))
+                       updateSession(sessionStore, request)(
+                         _.copy(
+                           journeyStatus = Some(
+                             AgentSupplyingClientDetails(
+                               agentReferenceNumber,
+                               ggCredId,
+                               Some(VerifierMatchingDetails(details, false))
+                             )
+                           )
+                         )
                        )
                      )
-                   )
-                 )
-               )
         } yield details
 
         result.fold(

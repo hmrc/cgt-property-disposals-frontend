@@ -99,8 +99,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
         val result =
           for {
             response        <- EitherT.liftF(
-                          submitReturn(completeReturn, fillingOutReturn, cyaPageB64Html)
-                        )
+                                 submitReturn(completeReturn, fillingOutReturn, cyaPageB64Html)
+                               )
             newJourneyStatus = response match {
                                  case _: SubmitReturnError =>
                                    SubmitReturnFailed(
@@ -120,10 +120,10 @@ class CheckAllAnswersAndSubmitController @Inject() (
                                    )
                                }
             _               <- EitherT(
-                   updateSession(sessionStore, request)(
-                     _.copy(journeyStatus = Some(newJourneyStatus))
-                   )
-                 )
+                                 updateSession(sessionStore, request)(
+                                   _.copy(journeyStatus = Some(newJourneyStatus))
+                                 )
+                               )
           } yield response
 
         result.fold(

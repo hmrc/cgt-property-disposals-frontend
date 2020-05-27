@@ -43,7 +43,7 @@ h1 > span.heading-medium,
 }
 
 .govuk-box-highlight--status {
-    background-color: #1d70b8;
+    background-color: #005ea5;
 }
 
 .govuk-box-highlight--status > p {
@@ -185,7 +185,7 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 
 .govuk-related-items {
     margin-top: 30px;
-    border-top: 10px solid #1d70b8;
+    border-top: 10px solid #005ea5;
     padding-top: 5px;
 }
 .govuk-related-items h2 {
@@ -210,8 +210,8 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 }
 
 .hmcts-banner {
-    border: 5px solid #1d70b8;
-    color: #1d70b8;
+    border: 5px solid #005ea5;
+    color: #005ea5;
     font-size: 0;
     margin-bottom: 30px;
     padding: 10px;
@@ -633,6 +633,45 @@ input:focus + .hmcts-currency-input__symbol.form-control--error {
     box-shadow: inset 0 0 0 2px;
 }
 
+.ur-banner {
+    background-color: #005ea5;
+    padding-top: 10px;
+    color: white;
+}
+
+.service-info .beta-banner .phase-tag, .service-info .phase-tag {
+    background-color: #005ea5;
+}
+
+main>div>.service-info {
+    border-top-color: #005ea5;
+}
+
+.ur-banner+div+main>div>.service-info {
+    border: none;
+}
+
+.no-thanks {
+    text-align: right;
+}
+
+.no-thanks a {
+    font-size: 16px;
+}
+
+.ur-banner p a,
+.ur-banner p a:link
+{
+    color: white;
+}
+.ur-banner p a:focus,
+.ur-banner p a:link:focus {
+    color: #0b0c0c;
+}
+
+
+
+
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     ::i-block-chrome, input:focus + .hmcts-currency-input__symbol.form-control--error {
         border-width: 4px;
@@ -823,6 +862,14 @@ h1 > .sub-heading {
 
     .govuk-check-your-answers.cya-questions-long .sum-part > .cya-question {
         color: #515A5C;
+    }
+
+    .ur-banner {
+        padding-bottom: 10px;
+    }
+
+    .ur-banner .no-thanks {
+        text-align: left;
     }
 
 }

@@ -367,13 +367,13 @@ class RepresenteeController @Inject() (
                                      .leftMap(ServiceError)
                                )
                 _         <- updateDraftReturnAndSession(
-                       IncompleteRepresenteeAnswers.empty.copy(
-                         name = answers.fold(_.name, c => Some(c.name)),
-                         dateOfDeath = answers.fold(_.dateOfDeath, _.dateOfDeath),
-                         id = Some(matchedId)
-                       ),
-                       journey
-                     ).leftMap[NameMatchError](e => ServiceError(NameMatchServiceError.BackendError(e)))
+                               IncompleteRepresenteeAnswers.empty.copy(
+                                 name = answers.fold(_.name, c => Some(c.name)),
+                                 dateOfDeath = answers.fold(_.dateOfDeath, _.dateOfDeath),
+                                 id = Some(matchedId)
+                               ),
+                               journey
+                             ).leftMap[NameMatchError](e => ServiceError(NameMatchServiceError.BackendError(e)))
               } yield ()
 
               result.fold(

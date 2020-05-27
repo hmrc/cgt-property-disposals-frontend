@@ -98,14 +98,14 @@ class JourneyStatusController @Inject() (
                   disposalDate <- getDisposalDate
                   triageAnswers = toSingleDisposalTriageAnswers(answers, disposalDate)
                   _            <- EitherT(
-                         updateSession(sessionStore, request)(
-                           _.copy(journeyStatus =
-                             Some(
-                               newReturn.copy(newReturnTriageAnswers = Right(triageAnswers))
-                             )
-                           )
-                         )
-                       )
+                                    updateSession(sessionStore, request)(
+                                      _.copy(journeyStatus =
+                                        Some(
+                                          newReturn.copy(newReturnTriageAnswers = Right(triageAnswers))
+                                        )
+                                      )
+                                    )
+                                  )
                 } yield ()
 
                 result.fold(

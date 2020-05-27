@@ -100,10 +100,10 @@ trait ContactNameController[J <: JourneyStatus] {
                 val result = for {
                   journey <- updateContactName(journey, contactName)
                   _       <- EitherT[Future, Error, Unit](
-                         updateSession(sessionStore, request) { s =>
-                           s.copy(journeyStatus = Some(journey))
-                         }
-                       )
+                               updateSession(sessionStore, request) { s =>
+                                 s.copy(journeyStatus = Some(journey))
+                               }
+                             )
                 } yield ()
 
                 result.fold(

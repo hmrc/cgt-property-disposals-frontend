@@ -47,6 +47,10 @@ unit-input.assistive.percent=do not enter the percent sign
 
 error.summary.heading=There’s a problem
 
+recruitment-banner.message=Help improve GOV.UK
+recruitment-banner.dismiss=No thanks
+recruitment-banner.link=Get involved in making Government services better (opens in a new tab)
+
 landingPage.title=Report and pay Capital Gains Tax on UK property
 landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
 landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
@@ -2974,16 +2978,10 @@ supporting-evidence.expired.file-label=Document {0}
 supporting-evidence.expired.deleted=Deleted
 supporting-evidence.expired.button.tryAgain=Try again
 
-supporting-evidence.check-upscan-status.title=Supporting evidence file upload status
-supporting-evidence.check-upscan-status.caption=Supporting evidence
-supporting-evidence.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
-supporting-evidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
-supporting-evidence.check-upscan-status.passed.help-text=Your supporting evidence file has been successfully saved and scanned. We will save it for 5 days or until you submit your return when it will be attached to your submission.
-supporting-evidence.check-upscan-status.passed=Passed
-supporting-evidence.check-upscan-status.failed=Failed
-supporting-evidence.check-upscan-status.uploaded=Scan in progress
-supporting-evidence.check-upscan-status.button.checkAgain=Check status and continue
-supporting-evidence.check-upscan-status.button.uploadAnotherFile=Upload another file
+supporting-evidence.scan-progress.title=Scan in progress
+supporting-evidence.scan-progress.caption=Supporting evidence
+supporting-evidence.scan-progress.p1=You’ll need to wait a few seconds
+supporting-evidence.scan-progress.p2=When we’ve finished scanning your document you can continue
 
 supporting-evidence.upload-failed.title=Sorry, there is a problem
 supporting-evidence.upload-failed.p1=We could not scan your document.
@@ -3033,14 +3031,24 @@ accessibilityStatement.howWeTested.title=How we tested this service
 accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019  and checked for compliance with WCAG 2.1 AA. It  was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
 accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 6 April 2020.
 
-mandatoryEvidence.check-upscan-status.title=Supporting evidence file upload status
-mandatoryEvidence.check-upscan-status.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
-mandatoryEvidence.check-upscan-status.in-progress=Scan in progress
-mandatoryEvidence.check-upscan-status.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
-mandatoryEvidence.check-upscan-status.failed=Failed
-mandatoryEvidence.check-upscan-status.changeFile=Change file
-mandatoryEvidence.check-upscan-status.button.checkStatusAndContinue=Check status and continue
-mandatoryEvidence.check-upscan-status.button.uploadAnotherFile=Upload another file
+
+supporting-evidence.scan-progress.title=Scan in progress
+supporting-evidence.scan-progress.caption=Supporting evidence
+supporting-evidence.scan-progress.p1=You’ll need to wait a few seconds
+supporting-evidence.scan-progress.p2=When we’ve finished scanning your document you can continue
+
+mandatoryEvidence.scan-progress.title=Scan in progress
+mandatoryEvidence.scan-progress.caption=Tax Owed
+mandatoryEvidence.scan-progress.p1=You’ll need to wait a few seconds
+mandatoryEvidence.scan-progress.p2=When we’ve finished scanning your document you can continue
+
+mandatoryEvidence.scan-progress.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
+mandatoryEvidence.scan-progress.in-progress=Scan in progress
+mandatoryEvidence.scan-progress.failed.help-text=Your supporting evidence file has failed its scan. You can try again by uploading another file.
+mandatoryEvidence.scan-progress.failed=Failed
+mandatoryEvidence.scan-progress.changeFile=Change file
+mandatoryEvidence.scan-progress.button.checkStatusAndContinue=Check status and continue
+mandatoryEvidence.scan-progress.button.uploadAnotherFile=Upload another file
 
 mandatoryEvidence.failed.title=Sorry, there is a problem
 mandatoryEvidence.failed.p1=We could not scan your document.

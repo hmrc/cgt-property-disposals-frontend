@@ -483,31 +483,31 @@ class SingleDisposalsTriageController @Inject() (
                         taxYear       <- taxYearService.taxYear(date)
                         updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
                         newState       = state.bimap(
-                                     _.copy(newReturnTriageAnswers = Right(updatedAnswers)),
-                                     {
-                                       case (d, r) =>
-                                         r.copy(draftReturn =
-                                           updateDraftReturnForDisposalDate(
-                                             d,
-                                             updatedAnswers
+                                           _.copy(newReturnTriageAnswers = Right(updatedAnswers)),
+                                           {
+                                             case (d, r) =>
+                                               r.copy(draftReturn =
+                                                 updateDraftReturnForDisposalDate(
+                                                   d,
+                                                   updatedAnswers
+                                                 )
+                                               )
+                                           }
+                                         )
+                        _             <- newState.fold(
+                                           _ => EitherT.pure(()),
+                                           r =>
+                                             returnsService.storeDraftReturn(
+                                               r.draftReturn,
+                                               r.subscribedDetails.cgtReference,
+                                               r.agentReferenceNumber
+                                             )
+                                         )
+                        _             <- EitherT(
+                                           updateSession(sessionStore, request)(
+                                             _.copy(journeyStatus = Some(newState.merge))
                                            )
                                          )
-                                     }
-                                   )
-                        _             <- newState.fold(
-                               _ => EitherT.pure(()),
-                               r =>
-                                 returnsService.storeDraftReturn(
-                                   r.draftReturn,
-                                   r.subscribedDetails.cgtReference,
-                                   r.agentReferenceNumber
-                                 )
-                             )
-                        _             <- EitherT(
-                               updateSession(sessionStore, request)(
-                                 _.copy(journeyStatus = Some(newState.merge))
-                               )
-                             )
                       } yield taxYear
                   }
 
@@ -1004,31 +1004,31 @@ class SingleDisposalsTriageController @Inject() (
                         updatedDisposalAndCompletionDate = updatedDisposalDate
                                                              .copy(completionDate = Some(CompletionDate(date.value)))
                         newState                         = state.bimap(
-                                     _.copy(newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)),
-                                     {
-                                       case (d, r) =>
-                                         r.copy(draftReturn =
-                                           updateDraftReturnForDisposalDate(
-                                             d,
-                                             updatedDisposalAndCompletionDate
-                                           )
-                                         )
-                                     }
-                                   )
+                                                             _.copy(newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)),
+                                                             {
+                                                               case (d, r) =>
+                                                                 r.copy(draftReturn =
+                                                                   updateDraftReturnForDisposalDate(
+                                                                     d,
+                                                                     updatedDisposalAndCompletionDate
+                                                                   )
+                                                                 )
+                                                             }
+                                                           )
                         _                               <- newState.fold(
-                               _ => EitherT.pure(()),
-                               r =>
-                                 returnsService.storeDraftReturn(
-                                   r.draftReturn,
-                                   r.subscribedDetails.cgtReference,
-                                   r.agentReferenceNumber
-                                 )
-                             )
+                                                             _ => EitherT.pure(()),
+                                                             r =>
+                                                               returnsService.storeDraftReturn(
+                                                                 r.draftReturn,
+                                                                 r.subscribedDetails.cgtReference,
+                                                                 r.agentReferenceNumber
+                                                               )
+                                                           )
                         _                               <- EitherT(
-                               updateSession(sessionStore, request)(
-                                 _.copy(journeyStatus = Some(newState.merge))
-                               )
-                             )
+                                                             updateSession(sessionStore, request)(
+                                                               _.copy(journeyStatus = Some(newState.merge))
+                                                             )
+                                                           )
                       } yield taxYear
                   }
 
@@ -1461,10 +1461,10 @@ class SingleDisposalsTriageController @Inject() (
 
               val result = for {
                 _         <- returnsService.storeDraftReturn(
-                       newDraftReturn,
-                       startingNewDraftReturn.subscribedDetails.cgtReference,
-                       startingNewDraftReturn.agentReferenceNumber
-                     )
+                               newDraftReturn,
+                               startingNewDraftReturn.subscribedDetails.cgtReference,
+                               startingNewDraftReturn.agentReferenceNumber
+                             )
                 newJourney = FillingOutReturn(
                                startingNewDraftReturn.subscribedDetails,
                                startingNewDraftReturn.ggCredId,
@@ -1472,10 +1472,10 @@ class SingleDisposalsTriageController @Inject() (
                                newDraftReturn
                              )
                 _         <- EitherT(
-                       updateSession(sessionStore, request)(
-                         _.copy(journeyStatus = Some(newJourney))
-                       )
-                     )
+                               updateSession(sessionStore, request)(
+                                 _.copy(journeyStatus = Some(newJourney))
+                               )
+                             )
               } yield newJourney
 
               result.fold(
