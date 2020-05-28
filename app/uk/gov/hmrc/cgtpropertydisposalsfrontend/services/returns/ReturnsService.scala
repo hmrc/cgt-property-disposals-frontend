@@ -216,11 +216,13 @@ class ReturnsServiceImpl @Inject() (
           .map(Right(_)),
         _.propertyAddress.map(a => Right(a.postcode)),
         _.companyAddress.map(extractCountryCodeOrPostcode),
-        _.examplePropertyDetailsAnswers
+        _.exampleCompanyDetailsAnswers
           .flatMap(
-            _.fold(_.address.map(_.postcode), c => Some(c.address.postcode))
-          )
-          .map(Right(_)),
+            _.fold(
+              _.address.map(extractCountryCodeOrPostcode),
+              c => Some(extractCountryCodeOrPostcode(c.address))
+            )
+          ),
         _.examplePropertyDetailsAnswers
           .flatMap(
             _.fold(_.address.map(_.postcode), c => Some(c.address.postcode))

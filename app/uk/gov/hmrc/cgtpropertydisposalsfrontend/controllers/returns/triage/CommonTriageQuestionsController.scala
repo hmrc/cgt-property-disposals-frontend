@@ -567,7 +567,7 @@ class CommonTriageQuestionsController @Inject() (
               multipleIndirect.copy(
                 triageAnswers = updateMultipleDisposalAnswers(multipleIndirect.triageAnswers),
                 representeeAnswers = None,
-                examplePropertyDetailsAnswers = None,
+                exampleCompanyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None
               ),

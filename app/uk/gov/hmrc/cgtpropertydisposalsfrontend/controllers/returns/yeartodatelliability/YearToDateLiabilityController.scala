@@ -1830,10 +1830,11 @@ class YearToDateLiabilityController @Inject() (
           nonCalculatedCheckYourAnswersPage(
             c,
             fillingOutReturn.draftReturn match {
-              case _: DraftMultipleDisposalsReturn      => true
-              case _: DraftSingleDisposalReturn         => false
-              case _: DraftSingleIndirectDisposalReturn => false
-              case _: DraftSingleMixedUseDisposalReturn => false
+              case _: DraftMultipleDisposalsReturn         => true
+              case _: DraftSingleDisposalReturn            => false
+              case _: DraftSingleIndirectDisposalReturn    => false
+              case _: DraftMultipleIndirectDisposalsReturn => true
+              case _: DraftSingleMixedUseDisposalReturn    => false
             },
             fillingOutReturn.subscribedDetails.isATrust,
             representativeType(draftReturn)

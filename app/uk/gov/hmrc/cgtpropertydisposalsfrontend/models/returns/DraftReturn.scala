@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import java.time.LocalDate
 import java.util.UUID
-
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
@@ -143,7 +142,7 @@ object DraftSingleIndirectDisposalReturn {
 final case class DraftMultipleIndirectDisposalsReturn(
   id: UUID,
   triageAnswers: MultipleDisposalsTriageAnswers,
-  examplePropertyDetailsAnswers: Option[ExamplePropertyDetailsAnswers],
+  exampleCompanyDetailsAnswers: Option[ExampleCompanyDetailsAnswers],
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],

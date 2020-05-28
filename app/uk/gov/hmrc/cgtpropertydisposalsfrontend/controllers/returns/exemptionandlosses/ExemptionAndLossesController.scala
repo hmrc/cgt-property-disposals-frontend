@@ -108,12 +108,7 @@ class ExemptionAndLossesController @Inject() (
         _.disposalDate,
         c => Some(c.disposalDate)
       ),
-      _.examplePropertyDetailsAnswers.flatMap(
-        _.fold(
-          _.disposalDate,
-          c => Some(c.disposalDate)
-        )
-      ),
+      _ => None, // no disposalDate for ExampleCompanyDetailsAnswers
       _.triageAnswers.fold(
         _.disposalDate,
         c => Some(c.disposalDate)

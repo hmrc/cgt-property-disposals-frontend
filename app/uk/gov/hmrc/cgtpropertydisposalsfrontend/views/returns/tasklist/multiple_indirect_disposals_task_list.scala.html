@@ -46,7 +46,7 @@
 @triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
 
 @examplePropertyDetailsState = @{
-    draftReturn.examplePropertyDetailsAnswers.fold[TaskListStatus](ToDo)(
+    draftReturn.exampleCompanyDetailsAnswers.fold[TaskListStatus](ToDo)(
         _.fold(_ => InProgress, _ => Complete)
     )
 }
