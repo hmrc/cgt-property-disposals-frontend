@@ -361,6 +361,9 @@ trait LowerPriorityReturnGen { this: GenUtils =>
   implicit val singleIndirectDisposalDraftReturnGen: Gen[DraftSingleIndirectDisposalReturn] =
     gen[DraftSingleIndirectDisposalReturn]
 
+  implicit val singleMixedUseDraftReturnGen: Gen[DraftSingleMixedUseDisposalReturn] =
+    gen[DraftSingleMixedUseDisposalReturn]
+
 }
 
 trait FileUploadGen { this: GenUtils =>

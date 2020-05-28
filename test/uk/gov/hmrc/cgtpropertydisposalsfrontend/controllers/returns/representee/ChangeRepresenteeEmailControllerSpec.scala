@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Re
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, RepresenteeAnswers, RepresenteeContactDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, DraftSingleMixedUseDisposalReturn, RepresenteeAnswers, RepresenteeContactDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -134,6 +134,7 @@ trait ChangeRepresenteeEmailControllerSpec
       fillingOutReturn.draftReturn.fold(
         _.copy(representeeAnswers = Some(newAnswers)),
         _.copy(representeeAnswers = Some(newAnswers)),
+        _.copy(representeeAnswers = Some(newAnswers)),
         _.copy(representeeAnswers = Some(newAnswers))
       )
     )
@@ -157,6 +158,9 @@ trait ChangeRepresenteeEmailControllerSpec
             if isDefinedAndContainsContactDetails(m.representeeAnswers) =>
           true
         case FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn)
+            if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
+          true
+        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
 

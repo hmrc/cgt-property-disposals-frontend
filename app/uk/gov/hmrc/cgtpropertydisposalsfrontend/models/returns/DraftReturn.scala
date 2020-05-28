@@ -140,22 +140,55 @@ object DraftSingleIndirectDisposalReturn {
 
 }
 
+final case class DraftSingleMixedUseDisposalReturn(
+  id: UUID,
+  triageAnswers: SingleDisposalTriageAnswers,
+  examplePropertyDetailsAnswers: Option[ExamplePropertyDetailsAnswers],
+  exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
+  yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+  supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
+  representeeAnswers: Option[RepresenteeAnswers],
+  lastUpdatedDate: LocalDate
+) extends DraftReturn
+
+object DraftSingleMixedUseDisposalReturn {
+
+  def newDraftReturn(
+    id: UUID,
+    triageAnswers: SingleDisposalTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): DraftSingleMixedUseDisposalReturn =
+    DraftSingleMixedUseDisposalReturn(
+      id,
+      triageAnswers,
+      None,
+      None,
+      None,
+      None,
+      representeeAnswers,
+      TimeUtils.today()
+    )
+
+}
+
 object DraftReturn {
 
   implicit class DraftReturnOps(private val d: DraftReturn) extends AnyVal {
     def fold[A](
       whenMultiple: DraftMultipleDisposalsReturn => A,
       whenSingle: DraftSingleDisposalReturn => A,
-      whenSingleIndirect: DraftSingleIndirectDisposalReturn => A
+      whenSingleIndirect: DraftSingleIndirectDisposalReturn => A,
+      whenSingleMixedUse: DraftSingleMixedUseDisposalReturn => A
     ): A =
       d match {
         case m: DraftMultipleDisposalsReturn      => whenMultiple(m)
         case s: DraftSingleDisposalReturn         => whenSingle(s)
         case s: DraftSingleIndirectDisposalReturn => whenSingleIndirect(s)
+        case s: DraftSingleMixedUseDisposalReturn => whenSingleMixedUse(s)
       }
 
     def isMultipleIndirectDisposal(): Boolean =
-      d.fold(m => isMultipleIndirectDisposal(m.triageAnswers), _ => false, _ => false)
+      d.fold(m => isMultipleIndirectDisposal(m.triageAnswers), _ => false, _ => false, _ => false)
 
     private def isMultipleIndirectDisposal(m: MultipleDisposalsTriageAnswers): Boolean =
       m.fold(
