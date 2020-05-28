@@ -1304,18 +1304,25 @@ class MultipleDisposalsTriageController @Inject() (
 
           case Left(startingNewDraftReturn) =>
             answers match {
-              case _: IncompleteMultipleDisposalsTriageAnswers =>
+              case _: IncompleteMultipleDisposalsTriageAnswers      =>
                 Redirect(
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
 
-              case c: CompleteMultipleDisposalsTriageAnswers   =>
-                val newDraftReturn = DraftMultipleDisposalsReturn
-                  .newDraftReturn(
-                    uuidGenerator.nextId(),
-                    c,
-                    startingNewDraftReturn.representeeAnswers
-                  )
+              case complete: CompleteMultipleDisposalsTriageAnswers =>
+                val newDraftReturn =
+                  if (complete.assetTypes.contains(IndirectDisposal))
+                    DraftMultipleIndirectDisposalsReturn.newDraftReturn(
+                      uuidGenerator.nextId(),
+                      complete,
+                      startingNewDraftReturn.representeeAnswers
+                    )
+                  else
+                    DraftMultipleDisposalsReturn.newDraftReturn(
+                      uuidGenerator.nextId(),
+                      complete,
+                      startingNewDraftReturn.representeeAnswers
+                    )
 
                 val newJourney = FillingOutReturn(
                   startingNewDraftReturn.subscribedDetails,

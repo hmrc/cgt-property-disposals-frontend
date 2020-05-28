@@ -221,7 +221,7 @@ object DraftReturn {
 
     // TODO: test it
     def isMultipleIndirectDisposal(): Boolean =
-      d.fold(_ => false, _ => false, _ => false, _ => false, _ => true)
+      d.fold(_ => false, _ => false, _ => false, _ => true, _ => false)
 
   }
 
