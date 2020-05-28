@@ -55,9 +55,8 @@
 
     }
 
-    <p>
-        @messages(s"$key.p1")
-    </p>
+    <p>@messages(s"$key.p1")</p>
+    <p>@messages(s"$key.p2")</p>
     <a href="@{routes.YearToDateLiabilityController.uploadMandatoryEvidence().url}" class="button" role="button">@messages("mandatoryEvidenceExpired.button.text")</a>
 }
 
