@@ -30,8 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -71,7 +70,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
             completeReturn,
             rebasingEligibilityUtil,
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(completeReturn),
+            completeReturn.representativeType(),
             completeReturn.isIndirectDisposal()
           )
         )
@@ -89,7 +88,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                   completeReturn,
                   rebasingEligibilityUtil,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(completeReturn),
+                  completeReturn.representativeType(),
                   completeReturn.isIndirectDisposal()
                 ).toString().getBytes
               )
@@ -284,17 +283,26 @@ class CheckAllAnswersAndSubmitController @Inject() (
             Redirect(routes.TaskListController.taskList())
           )(f(s, r, _))
 
+      case Some(
+            (
+              s,
+              r @ FillingOutReturn(
+                _,
+                _,
+                _,
+                draftReturn: DraftSingleIndirectDisposalReturn
+              )
+            )
+          ) =>
+        CompleteSingleIndirectDisposalReturn
+          .fromDraftReturn(draftReturn)
+          .fold[Future[Result]](
+            Redirect(routes.TaskListController.taskList())
+          )(f(s, r, _))
+
       case _ =>
         Redirect(baseRoutes.StartController.start())
     }
-
-  private def representativeType(
-    completeReturn: CompleteReturn
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-    completeReturn.fold(
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType()
-    )
 
 }
 

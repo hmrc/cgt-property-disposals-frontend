@@ -4287,10 +4287,12 @@ class YearToDateLiabilityControllerSpec
             messageFromMessageKey("mandatoryEvidenceExpired.title"),
             doc => {
               doc
-                .select("#content > article > p").get(0)
+                .select("#content > article > p")
+                .get(0)
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.p1")
               doc
-                .select("#content > article > p").get(1)
+                .select("#content > article > p")
+                .get(1)
                 .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.p2")
               doc
                 .select("#content > article > a")
