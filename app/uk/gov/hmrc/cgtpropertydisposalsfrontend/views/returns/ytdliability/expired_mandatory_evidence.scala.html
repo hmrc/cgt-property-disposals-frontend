@@ -27,7 +27,8 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
         cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
 @(expired : MandatoryEvidence)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
@@ -37,26 +38,29 @@
 
 @mainTemplate(title = title, userType = request.userType) {
 
-  @caption(messages("ytdLiability.caption"))
+    @caption(messages("ytdLiability.caption"))
 
-  @pageHeading(title)
+    @pageHeading(title)
 
-  <p>
-  @messages(s"$key.p1")
-  </p>
+    @cyaSection(None, Some("cya-questions-short")) {
 
-  @cyaSection(None, Some("cya-questions-short")) {
+        @cyaRow(
+            expired.fileName,
+            Html(""),
+            Some(Html(
+                messages(s"$key.label")
+            )),
+            key
+        )
 
-    @cyaRow(
-      messages(s"$key.label"),
-      Html(expired.fileName),
-      Some(cyaChange(
-        messages(s"$key.cyaChange"),
-        routes.YearToDateLiabilityController.uploadMandatoryEvidence().url
-      )),
-      key
-    )
+    }
 
-  }
-
+    <p>
+        @messages(s"$key.p1")
+    </p>
+    <a href="@{routes.YearToDateLiabilityController.uploadMandatoryEvidence().url}" class="button" role="button">@messages("mandatoryEvidenceExpired.button.text")</a>
 }
+
+
+
+

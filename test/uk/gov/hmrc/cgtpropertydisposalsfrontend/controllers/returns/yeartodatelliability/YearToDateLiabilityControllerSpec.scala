@@ -4277,16 +4277,33 @@ class YearToDateLiabilityControllerSpec
       }
 
       "display the page" when {
+        val expiredEvidence = sample[MandatoryEvidence]
 
         def checkPage(result: Future[Result]) =
           checkPageIsDisplayed(
             result,
-            messageFromMessageKey("mandatoryEvidenceExpired.title")
+            messageFromMessageKey("mandatoryEvidenceExpired.title"),
+            doc => {
+              doc
+                .select("#content > article > p")
+                .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.p1")
+              doc
+                .select("#content > article > a")
+                .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.button.text")
+              doc
+                .select("#content > article > a")
+                .attr("href") shouldBe routes.YearToDateLiabilityController.uploadMandatoryEvidence().url
+              doc
+                .select("#content > article > dl > div > dt")
+                .text()       shouldBe expiredEvidence.fileName
+              doc
+                .select("#content > article > dl > div > dd:eq(2)")
+                .text()       shouldBe messageFromMessageKey("mandatoryEvidenceExpired.label")
+            }
           )
 
         "the user is on a calculated journey" in {
-          val expiredEvidence = sample[MandatoryEvidence]
-          val session         = sessionWithSingleDisposalState(
+          val session = sessionWithSingleDisposalState(
             sample[IncompleteCalculatedYTDAnswers]
               .copy(expiredEvidence = Some(expiredEvidence)),
             sample[DisposalDate],
@@ -4303,8 +4320,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the user is on a non-calculated journey" in {
-          val expiredEvidence = sample[MandatoryEvidence]
-          val session         = sessionWithMultipleDisposalsState(
+          val session = sessionWithMultipleDisposalsState(
             sample[IncompleteNonCalculatedYTDAnswers]
               .copy(expiredEvidence = Some(expiredEvidence)),
             sample[UserType],
