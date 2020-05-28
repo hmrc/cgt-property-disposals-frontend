@@ -327,6 +327,12 @@ class DisposalDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndDisposalDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
+          val backLink =
+            if (isIndirectDisposal(state))
+              controllers.returns.routes.TaskListController.taskList()
+            else
+              controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+
           withDisposalMethodAndShareOfProperty(state, answers) {
             case (disposalMethod, shareOfProperty) =>
               displayPage(answers)(
@@ -346,9 +352,7 @@ class DisposalDetailsController @Inject() (
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
-                redirectToIfNoRequiredPreviousAnswer =
-                  controllers.returns.disposaldetails.routes.DisposalDetailsController
-                    .howMuchDidYouOwn()
+                redirectToIfNoRequiredPreviousAnswer = backLink
               )
           }
       }

@@ -63,12 +63,14 @@
 @disposalFeesTitle    = @{messages(s"disposalFees$userKey$indirectKey.title")}
 
 @cyaSection() {
-  @cyaRow(
-    shareOfPropertyTitle,
-    Html(formatPercentage(answers.shareOfProperty.percentageValue)),
-    Some(cyaChange(messages("shareOfProperty.cyaChange"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url)),
-      "propertyShare"
-  )
+  @if(!isIndirectDisposal){
+    @cyaRow(
+        shareOfPropertyTitle,
+        Html(formatPercentage(answers.shareOfProperty.percentageValue)),
+        Some(cyaChange(messages("shareOfProperty.cyaChange"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url)),
+        "propertyShare"
+    )
+  } else { }
   @cyaRow(
     disposalPriceTitle,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),

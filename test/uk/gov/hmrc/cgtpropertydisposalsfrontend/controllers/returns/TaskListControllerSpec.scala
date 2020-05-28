@@ -2065,6 +2065,323 @@ class TaskListControllerSpec
 
     }
 
+
+    "handling requests to display the single mixed use task list page" must {
+
+      def performAction(): Future[Result] = controller.taskList()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case _: FillingOutReturn => true
+          case _                   => false
+        }
+      )
+
+      def testStateOfSection(draftReturn: DraftSingleMixedUseDisposalReturn)(
+        sectionLinkId: String,
+        sectionLinkText: String,
+        sectionLinkHref: Call,
+        sectionsStatus: TaskListStatus,
+        extraChecks: Document => Unit = _ => ()
+      ): Unit = {
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+          draftReturn.copy(
+            supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
+          )
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("service.title"),
+          { doc =>
+            sectionsStatus match {
+              case TaskListStatus.CannotStart =>
+                doc
+                  .select(s"li#$sectionLinkId > span")
+                  .text shouldBe sectionLinkText
+
+              case _                          =>
+                doc
+                  .select(s"li#$sectionLinkId > a")
+                  .text         shouldBe sectionLinkText
+                doc
+                  .select(s"li#$sectionLinkId > a")
+                  .attr("href") shouldBe sectionLinkHref.url
+            }
+
+            doc
+              .select(s"li#$sectionLinkId > strong")
+              .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+            extraChecks(doc)
+          }
+        )
+      }
+
+      "display the page with the proper person represented section status" when {
+
+        "the individual user type is personal representative or capacitor and" when {
+
+          "the section has not been started" in {
+            val draftReturn =
+              sample[DraftSingleMixedUseDisposalReturn].copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = None
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.ToDo,
+              _.select("div.notice")
+                .contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is incomplete" in {
+            val draftReturn =
+              sample[DraftSingleMixedUseDisposalReturn].copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[IncompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.InProgress,
+              _.select("div.notice")
+                .contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is complete" in {
+            val draftReturn =
+              sample[DraftSingleMixedUseDisposalReturn].copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.Complete
+            )
+          }
+
+        }
+
+      }
+
+      "display the page with the proper triage section status" when {
+
+        "the session data indicates that they are filling in a return and the triage section is incomplete" in {
+          val incompleteTriage = sample[DraftSingleMixedUseDisposalReturn].copy(
+            triageAnswers = sample[IncompleteSingleDisposalTriageAnswers]
+              .copy(individualUserType = None)
+          )
+
+          testStateOfSection(
+            incompleteTriage
+          )(
+            "canTheyUseOurService",
+            messageFromMessageKey("task-list.triage.link"),
+            triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice")
+              .contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the triage section is complete" in {
+          val completeTriage = sample[DraftSingleMixedUseDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(individualUserType = None)
+          )
+
+          testStateOfSection(
+            completeTriage
+          )(
+            "canTheyUseOurService",
+            messageFromMessageKey("task-list.triage.link"),
+            triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+        }
+
+      }
+
+      "display the page with the enter details of one property section status" when {
+
+        "the session data indicates that they are filling in a return and the enter details of one property section is incomplete" in {
+          val incompletePropertyDetails = sample[DraftSingleMixedUseDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = AssetType.MixedUse,
+              individualUserType = None
+            ),
+            examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+          )
+
+          testStateOfSection(
+            incompletePropertyDetails
+          )(
+            "examplePropertyDetails",
+            messageFromMessageKey("task-list.enter-example-property-address.link"),
+            Call("", "#"),
+            TaskListStatus.InProgress,
+            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the enter details of one property section is complete" in {
+          val completePropertyDetails = sample[DraftSingleMixedUseDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = AssetType.MixedUse,
+              individualUserType = None
+            ),
+            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+          )
+
+          testStateOfSection(
+            completePropertyDetails
+          )(
+            "examplePropertyDetails",
+            messageFromMessageKey("task-list.enter-example-property-address.link"),
+            Call("", "#"),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the enter losses and exemptions section status" when {
+
+        "the session data indicates that they are filling in a return and the enter losses and exemptions section is incomplete" in {
+          val incompleteExemptionAndLossesAnswers =
+            sample[DraftSingleMixedUseDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = None),
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])
+            )
+
+          testStateOfSection(
+            incompleteExemptionAndLossesAnswers
+          )(
+            "exemptionsAndLosses",
+            messageFromMessageKey("task-list.exemptions-and-losses.link"),
+            exemptionandlosses.routes.ExemptionAndLossesController
+              .checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice")
+              .contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the enter losses and exemptions section is complete" in {
+          val completeExemptionAndLossesAnswers =
+            sample[DraftSingleMixedUseDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = None),
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
+            )
+
+          testStateOfSection(
+            completeExemptionAndLossesAnswers
+          )(
+            "exemptionsAndLosses",
+            messageFromMessageKey("task-list.exemptions-and-losses.link"),
+            exemptionandlosses.routes.ExemptionAndLossesController
+              .checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the enter capital gains tax liability so far this tax year section status" when {
+
+        "the session data indicates that they are filling in a return and" +
+          " the enter capital gains tax liability so far this tax year section is incomplete" in {
+          val incompleteNonCalculatedYTDAnswers =
+            sample[DraftSingleMixedUseDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = None),
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
+            )
+
+          testStateOfSection(
+            incompleteNonCalculatedYTDAnswers
+          )(
+            "enterCgtLiability",
+            messageFromMessageKey("task-list.enter-cgt-liability.link"),
+            yeartodatelliability.routes.YearToDateLiabilityController
+              .checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the check and send return, pay any tax due section status" when {
+
+        "the session data indicates that they are filling in a return and" +
+          " the check and send return, pay any tax due section is incomplete" in {
+          val checkAllAnswersAndSubmitAnswers =
+            sample[DraftSingleMixedUseDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = None),
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
+              supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
+            )
+
+          testStateOfSection(
+            checkAllAnswersAndSubmitAnswers
+          )(
+            "checkAndSendReturn",
+            messageFromMessageKey("task-list.check-and-send-return.link"),
+            routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
+            TaskListStatus.ToDo
+          )
+
+        }
+
+      }
+
+    }
+
   }
 
 }

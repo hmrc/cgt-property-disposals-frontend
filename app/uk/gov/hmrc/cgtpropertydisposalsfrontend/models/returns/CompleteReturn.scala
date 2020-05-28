@@ -21,6 +21,7 @@ import com.github.ghik.silencer.silent
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
@@ -184,20 +185,91 @@ object CompleteReturn {
     }
   }
 
+  final case class CompleteSingleIndirectDisposalReturn(
+    triageAnswers: CompleteSingleDisposalTriageAnswers,
+    companyAddress: Address,
+    disposalDetails: CompleteDisposalDetailsAnswers,
+    acquisitionDetails: CompleteAcquisitionDetailsAnswers,
+    exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
+    yearToDateLiabilityAnswers: Either[
+      CompleteNonCalculatedYTDAnswers,
+      CompleteCalculatedYTDAnswers
+    ],
+    supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
+    representeeAnswers: Option[CompleteRepresenteeAnswers],
+    hasAttachments: Boolean
+  ) extends CompleteReturn
+
+  object CompleteSingleIndirectDisposalReturn {
+
+    def fromDraftReturn(
+      draftReturn: DraftSingleIndirectDisposalReturn
+    ): Option[CompleteSingleIndirectDisposalReturn] =
+      draftReturn match {
+        case DraftSingleIndirectDisposalReturn(
+              _,
+              t: CompleteSingleDisposalTriageAnswers,
+              Some(c: Address),
+              Some(d: CompleteDisposalDetailsAnswers),
+              Some(a: CompleteAcquisitionDetailsAnswers),
+              Some(e: CompleteExemptionAndLossesAnswers),
+              Some(y: CompleteNonCalculatedYTDAnswers),
+              Some(u: CompleteSupportingEvidenceAnswers),
+              representeeAnswers,
+              _
+            ) =>
+          validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
+            CompleteSingleIndirectDisposalReturn(
+              t,
+              c,
+              d,
+              a,
+              e,
+              Left(y),
+              u,
+              maybeCompleteRepresenteeAnswers,
+              hasAttachments = true
+            )
+          )
+
+        case _ =>
+          None
+      }
+
+    implicit class CompleteReturnOps(
+      private val c: CompleteSingleDisposalReturn
+    ) extends AnyVal {
+
+      def hasNonResidentialAssetType(): Boolean =
+        c.triageAnswers.assetType === AssetType.NonResidential
+
+    }
+  }
+
   implicit class CompleteReturnOps(private val c: CompleteReturn) extends AnyVal {
     def fold[A](
       whenMultiple: CompleteMultipleDisposalsReturn => A,
-      whenSingle: CompleteSingleDisposalReturn => A
+      whenSingle: CompleteSingleDisposalReturn => A,
+      whenSingleIndirect: CompleteSingleIndirectDisposalReturn => A
     ): A =
       c match {
-        case m: CompleteMultipleDisposalsReturn => whenMultiple(m)
-        case s: CompleteSingleDisposalReturn    => whenSingle(s)
+        case m: CompleteMultipleDisposalsReturn      => whenMultiple(m)
+        case s: CompleteSingleDisposalReturn         => whenSingle(s)
+        case s: CompleteSingleIndirectDisposalReturn => whenSingleIndirect(s)
       }
 
     def isIndirectDisposal(): Boolean =
       c.fold[Boolean](
         m => m.triageAnswers.isIndirectDisposal(),
-        s => s.triageAnswers.isIndirectDisposal()
+        _ => false,
+        _ => true
+      )
+
+    def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+      c.fold(
+        _.triageAnswers.representativeType(),
+        _.triageAnswers.representativeType(),
+        _.triageAnswers.representativeType()
       )
 
   }

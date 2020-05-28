@@ -219,7 +219,6 @@ object DraftReturn {
         case s: DraftSingleMixedUseDisposalReturn    => whenSingleMixedUse(s)
       }
 
-    // TODO: test it
     def isMultipleIndirectDisposal(): Boolean =
       d.fold(_ => false, _ => false, _ => false, _ => true, _ => false)
 
