@@ -2576,7 +2576,7 @@ class RepresenteeControllerSpec
       val allQuestionsAnswers = IncompleteRepresenteeAnswers(
         Some(completeAnswers.name),
         Some(completeAnswers.id),
-        completeAnswers.dateOfDeath,
+        completeAnswers.dateOfDeath.fold[Option[DateOfDeath]](Some(sample[DateOfDeath]))(dod => Some(dod)),
         Some(sample[RepresenteeContactDetails]),
         true,
         true
