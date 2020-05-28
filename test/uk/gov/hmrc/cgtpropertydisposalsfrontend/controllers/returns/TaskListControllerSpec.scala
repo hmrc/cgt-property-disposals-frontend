@@ -38,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Self}
@@ -946,6 +947,7 @@ class TaskListControllerSpec
             extraChecks(doc)
           }
         )
+
       }
 
       "display the page with the proper person represented section status" when {
@@ -1092,51 +1094,6 @@ class TaskListControllerSpec
           )(
             "examplePropertyDetails",
             messageFromMessageKey("task-list.enter-example-property-address.link"),
-            address.routes.PropertyDetailsController.checkYourAnswers(),
-            TaskListStatus.Complete
-          )
-
-        }
-
-      }
-
-      "display the page with the enter details of one company section status" when {
-
-        "the session data indicates that they are filling in a return and the enter details of one company section is incomplete" in {
-          val incompletePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-              assetTypes = List(AssetType.IndirectDisposal),
-              individualUserType = None
-            ),
-            examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
-          )
-
-          testStateOfSection(
-            incompletePropertyDetails
-          )(
-            "examplePropertyDetails",
-            messageFromMessageKey("task-list.indirect.enter-example-property-address.link"),
-            address.routes.PropertyDetailsController.checkYourAnswers(),
-            TaskListStatus.InProgress,
-            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
-          )
-
-        }
-
-        "the session data indicates that they are filling in a return and the enter details of one company section is complete" in {
-          val completePropertyDetails = sample[DraftMultipleDisposalsReturn].copy(
-            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-              assetTypes = List(AssetType.IndirectDisposal),
-              individualUserType = None
-            ),
-            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
-          )
-
-          testStateOfSection(
-            completePropertyDetails
-          )(
-            "examplePropertyDetails",
-            messageFromMessageKey("task-list.indirect.enter-example-property-address.link"),
             address.routes.PropertyDetailsController.checkYourAnswers(),
             TaskListStatus.Complete
           )
@@ -1783,6 +1740,325 @@ class TaskListControllerSpec
             .attr("href")       shouldBe routes.DraftReturnSavedController
             .draftReturnSaved()
             .url
+        }
+
+      }
+
+    }
+
+    "handling requests to display the multiple indirect disposal task list page" must {
+
+      def performAction(): Future[Result] = controller.taskList()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case _: FillingOutReturn => true
+          case _                   => false
+        }
+      )
+
+      def testStateOfSection(draftReturn: DraftMultipleIndirectDisposalsReturn)(
+        sectionLinkId: String,
+        sectionLinkText: String,
+        sectionLinkHref: Call,
+        sectionsStatus: TaskListStatus,
+        extraChecks: Document => Unit = _ => ()
+      ): Unit = {
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+          draftReturn.copy(
+            supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
+          )
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("service.title"),
+          { doc =>
+            sectionsStatus match {
+              case TaskListStatus.CannotStart =>
+                doc
+                  .select(s"li#$sectionLinkId > span")
+                  .text shouldBe sectionLinkText
+
+              case _                          =>
+                doc
+                  .select(s"li#$sectionLinkId > a")
+                  .text         shouldBe sectionLinkText
+                doc
+                  .select(s"li#$sectionLinkId > a")
+                  .attr("href") shouldBe sectionLinkHref.url
+            }
+
+            doc
+              .select(s"li#$sectionLinkId > strong")
+              .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+            extraChecks(doc)
+          }
+        )
+
+      }
+
+      "display the page with the proper person represented section status" when {
+
+        "the individual user type is personal representative or capacitor and" when {
+
+          "the section has not been started" in {
+            val draftReturn =
+              sample[DraftMultipleIndirectDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = None
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.ToDo,
+              _.select("div.notice")
+                .contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is incomplete" in {
+            val draftReturn =
+              sample[DraftMultipleIndirectDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[IncompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.InProgress,
+              _.select("div.notice")
+                .contains(messageFromMessageKey("task-list.incompleteTriage"))
+            )
+          }
+
+          "the section is complete" in {
+            val draftReturn =
+              sample[DraftMultipleIndirectDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
+              )
+
+            testStateOfSection(
+              draftReturn
+            )(
+              "representee",
+              messageFromMessageKey("task-list.representee.link"),
+              representee.routes.RepresenteeController.checkYourAnswers(),
+              TaskListStatus.Complete
+            )
+          }
+
+        }
+
+      }
+
+      "display the page with the proper multiple disposal triage section status" when {
+
+        "the session data indicates that they are filling in a return and the triage section is incomplete" in {
+          val incompleteTriage = sample[DraftMultipleIndirectDisposalsReturn].copy(
+            triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(individualUserType = None)
+          )
+
+          testStateOfSection(
+            incompleteTriage
+          )(
+            "canTheyUseOurService",
+            messageFromMessageKey("task-list.triage.link"),
+            triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice")
+              .contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the triage section is complete" in {
+          val completeTriage = sample[DraftMultipleIndirectDisposalsReturn].copy(
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+              .copy(individualUserType = None)
+          )
+
+          testStateOfSection(
+            completeTriage
+          )(
+            "canTheyUseOurService",
+            messageFromMessageKey("task-list.triage.link"),
+            triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+        }
+
+      }
+
+      "display the page with the enter details of one company section status" when {
+
+        "the session data indicates that they are filling in a return and" +
+          " the enter details of one company section is incomplete" in {
+          val incompletePropertyDetails = sample[DraftMultipleIndirectDisposalsReturn].copy(
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              assetTypes = List(AssetType.IndirectDisposal),
+              individualUserType = None
+            ),
+            exampleCompanyDetailsAnswers = Some(sample[IncompleteExampleCompanyDetailsAnswers])
+          )
+
+          testStateOfSection(
+            incompletePropertyDetails
+          )(
+            "examplePropertyDetails",
+            messageFromMessageKey("task-list.indirect.enter-example-property-address.link"),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and" +
+          " the enter details of one company section is complete" in {
+          val completePropertyDetails = sample[DraftMultipleIndirectDisposalsReturn].copy(
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              assetTypes = List(AssetType.IndirectDisposal),
+              individualUserType = None
+            ),
+            exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers])
+          )
+
+          testStateOfSection(
+            completePropertyDetails
+          )(
+            "examplePropertyDetails",
+            messageFromMessageKey("task-list.indirect.enter-example-property-address.link"),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the enter losses and exemptions section status" when {
+
+        "the session data indicates that they are filling in a return and the enter losses and exemptions section is incomplete" in {
+          val incompleteExemptionAndLossesAnswers =
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None),
+              exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])
+            )
+
+          testStateOfSection(
+            incompleteExemptionAndLossesAnswers
+          )(
+            "exemptionsAndLosses",
+            messageFromMessageKey("task-list.exemptions-and-losses.link"),
+            exemptionandlosses.routes.ExemptionAndLossesController
+              .checkYourAnswers(),
+            TaskListStatus.InProgress,
+            _.select("div.notice")
+              .contains(messageFromMessageKey("task-list.incompleteTriage"))
+          )
+
+        }
+
+        "the session data indicates that they are filling in a return and the enter losses and exemptions section is complete" in {
+          val completeExemptionAndLossesAnswers =
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None),
+              exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
+            )
+
+          testStateOfSection(
+            completeExemptionAndLossesAnswers
+          )(
+            "exemptionsAndLosses",
+            messageFromMessageKey("task-list.exemptions-and-losses.link"),
+            exemptionandlosses.routes.ExemptionAndLossesController
+              .checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the enter capital gains tax liability so far this tax year section status" when {
+
+        "the session data indicates that they are filling in a return and" +
+          " the enter capital gains tax liability so far this tax year section is incomplete" in {
+          val incompleteNonCalculatedYTDAnswers =
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None),
+              exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
+            )
+
+          testStateOfSection(
+            incompleteNonCalculatedYTDAnswers
+          )(
+            "enterCgtLiability",
+            messageFromMessageKey("task-list.enter-cgt-liability.link"),
+            yeartodatelliability.routes.YearToDateLiabilityController
+              .checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+
+        }
+
+      }
+
+      "display the page with the check and send return, pay any tax due section status" when {
+
+        "the session data indicates that they are filling in a return and" +
+          " the check and send return, pay any tax due section is incomplete" in {
+          val checkAllAnswersAndSubmitAnswers =
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None),
+              exampleCompanyDetailsAnswers = Some(sample[CompleteExampleCompanyDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
+              supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
+            )
+
+          testStateOfSection(
+            checkAllAnswersAndSubmitAnswers
+          )(
+            "checkAndSendReturn",
+            messageFromMessageKey("task-list.check-and-send-return.link"),
+            routes.CheckAllAnswersAndSubmitController.checkAllAnswers(),
+            TaskListStatus.ToDo
+          )
+
         }
 
       }
