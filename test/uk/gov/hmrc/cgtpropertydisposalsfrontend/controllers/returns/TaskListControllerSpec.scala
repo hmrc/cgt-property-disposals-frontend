@@ -2065,7 +2065,6 @@ class TaskListControllerSpec
 
     }
 
-
     "handling requests to display the single mixed use task list page" must {
 
       def performAction(): Future[Result] = controller.taskList()(FakeRequest())

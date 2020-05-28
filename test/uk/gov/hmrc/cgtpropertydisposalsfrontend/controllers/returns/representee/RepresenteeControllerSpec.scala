@@ -2570,7 +2570,7 @@ class RepresenteeControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like nonCapacitorOrPersonalRepBehaviour(performAction)
-      val dateOfDeath = sample[DateOfDeath]
+      val dateOfDeath     = sample[DateOfDeath]
       val completeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
 
       val allQuestionsAnswers = IncompleteRepresenteeAnswers(

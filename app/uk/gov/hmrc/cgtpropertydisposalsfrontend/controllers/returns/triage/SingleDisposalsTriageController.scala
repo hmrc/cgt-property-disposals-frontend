@@ -915,7 +915,7 @@ class SingleDisposalsTriageController @Inject() (
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)),
               {
-                case (Right(d), r)       =>
+                case (Right(d), r)                         =>
                   if (isNowIndirectDisposal)
                     r.copy(
                       draftReturn = DraftSingleIndirectDisposalReturn.newDraftReturn(
