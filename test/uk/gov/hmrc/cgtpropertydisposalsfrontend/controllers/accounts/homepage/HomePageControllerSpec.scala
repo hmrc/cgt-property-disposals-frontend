@@ -36,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.govShortDisplayFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
@@ -301,6 +302,32 @@ class HomePageControllerSpec
           )
         }
 
+        def addressWithoutLine1(a: Address): String =
+          a match {
+            case u: Address.UkAddress    =>
+              s"${u.line2 match {
+                case Some(l2) => s"$l2, "
+                case _        => ""
+              }}${u.town match {
+                case Some(t) => s"$t, "
+                case _       => ""
+              }}${u.county match {
+                case Some(c) => s"$c, "
+                case _       => ""
+              }}${u.postcode.value}"
+            case n: Address.NonUkAddress =>
+              s"${n.line2 match {
+                case Some(l2) => s"$l2, "
+                case _        => ""
+              }}${n.line3 match {
+                case Some(l3) => s"$l3, "
+                case _        => ""
+              }}${n.line4 match {
+                case Some(l4) => s"$l4, "
+                case _        => ""
+              }}${n.country.name.getOrElse("")}"
+          }
+
         checkPageIsDisplayed(
           performAction(),
           messageFromMessageKey("account.home.title"),
@@ -321,8 +348,8 @@ class HomePageControllerSpec
             doc
               .select(s"#draftReturn-${sampleDraftReturn.id} > h3")
               .text() shouldBe messages(
-              "drafts.list.propertyAddress"
-            ) + " " + propertyAddress.line1 + ", " + propertyAddress.postcode.value
+              "drafts.list.disposalDetails"
+            ) + " " + propertyAddress.line1 + " " + addressWithoutLine1(propertyAddress)
           }
         )
       }

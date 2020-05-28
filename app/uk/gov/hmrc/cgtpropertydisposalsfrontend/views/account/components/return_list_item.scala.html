@@ -34,8 +34,26 @@
 @numberOfOutstandingCharges = @{ sentReturn.charges.count(_.totalOutstanding() > AmountInPence.zero) }
 @addressLines = @{
     sentReturn.propertyAddress match {
-        case u: UkAddress => s"${u.line1}, ${u.postcode.value}"
-        case n: NonUkAddress => s"${n.line1}, ${n.country.name.getOrElse("")}"
+        case u: UkAddress => s"${u.line2 match {
+          case Some(l2) => s"${l2}, "
+          case _ => ""
+        }}${u.town match {
+          case Some(l3) => s"${l3}, "
+          case _ => ""
+        }}${u.county match {
+          case Some(l4) => s"${l4}, "
+          case _ => ""
+        }}${u.postcode.value}" -> u.line1
+        case n: NonUkAddress => s"${n.line1}${n.line2 match {
+          case Some(l2) => s"${l2}, "
+          case _ => ""
+        }}${n.line3 match {
+          case Some(l3) => s"${l3}, "
+          case _ => ""
+        }}${n.line4 match {
+          case Some(l4) => s"${l4}, "
+          case _ => ""
+        }}${n.country.name.getOrElse("")}" -> n.line1
     }
 }
 
@@ -43,8 +61,9 @@
   <div class="grid-row">
     <div class="column-three-quarters submission-summary">
       <h3>
-        <span class="caption">@messages("returns.list.propertyAddress")</span>
-        @addressLines
+        <span class="caption">@messages("returns.list.disposalDetails")</span>
+        @addressLines._2
+        <span class="sub-heading">@addressLines._1</span>
       </h3>
       <h4 id="taxOwed-@sentReturn.submissionId" class="cgt-liability">
         <span class="caption">@messages("returns.list.taxOwed")</span>
