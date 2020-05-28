@@ -318,6 +318,7 @@ class ViewReturnControllerSpec
             viewingReturn.subscribedDetails.isATrust
           )
         }
+
       }
 
       "display the page for a multiple disposals journey" in {
