@@ -2439,11 +2439,11 @@ mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XL
 
 mandatoryEvidence.cyaChange=the document showing how the Capital Gains Tax due was worked out
 
-mandatoryEvidenceExpired.title=Your uploaded file has expired
-mandatoryEvidenceExpired.p1=Uploaded files can only be kept for 5 days before they expire. You must either upload the file again or replace it with another before you can continue.
-mandatoryEvidenceExpired.label=Supporting file
-mandatoryEvidenceExpired.cyaChange=the file or upload it again
-
+mandatoryEvidenceExpired.title=For your security, we deleted this document
+mandatoryEvidenceExpired.p1=We deleted the document because we only save documents for 5 days.
+mandatoryEvidenceExpired.p2=You’ll need to try again and upload a document showing how the amount of Capital Gains Tax due was worked out.
+mandatoryEvidenceExpired.label=Deleted
+mandatoryEvidenceExpired.button.text=Try Again
 ytdLiability.cyaChange.annualExemptAmount=your annual exempt amount
 ytdLiability.cyaChange.taxableGainOrLoss=your taxable gain or net loss
 ytdLiability.cyaChange.nonCalculatedTaxDue=your tax due
