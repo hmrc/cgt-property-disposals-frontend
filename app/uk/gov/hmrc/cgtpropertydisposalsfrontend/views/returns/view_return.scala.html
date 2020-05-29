@@ -203,10 +203,7 @@
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @s.yearToDateLiabilityAnswers.fold(
-            nonCalculatedYearToDateLiabilitySummary(_, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType),
-            calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = false, subscribedDetails.isATrust, representativeType, s.triageAnswers.countryOfResidence.isUk())
-        )
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType),
 
         @if(s.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
