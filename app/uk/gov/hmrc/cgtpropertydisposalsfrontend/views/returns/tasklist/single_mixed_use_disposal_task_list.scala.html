@@ -45,21 +45,14 @@
 
 @triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
 
-@examplePropertyDetailsState = @{
+@propertyDetailsState = @{
     draftReturn.examplePropertyDetailsAnswers.fold[TaskListStatus](ToDo)(
         _.fold(_ => InProgress, _ => Complete)
     )
 }
 
-@examplePropertyDetailsTaskName = @{
-    if(draftReturn.isMultipleIndirectDisposal)
-        messages("task-list.indirect.enter-example-property-address.link")
-    else
-        messages("task-list.enter-example-property-address.link")
-}
-
 @exemptionsAndLossesState = @{
-    examplePropertyDetailsState match {
+    propertyDetailsState match {
         case Complete =>
             draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
         case _ =>
@@ -83,7 +76,7 @@
 }
 
 @checkAndSendReturnState = @{
-    (examplePropertyDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
+    (propertyDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
         case (Complete, Complete, Complete, Complete) => ToDo
         case _                                        => CannotStart
     }
@@ -132,11 +125,11 @@
                 @messages("task-list.provide-details.heading")
             </h2>
             <ul class="app-task-list__items">
-                <li id="examplePropertyDetails" class="app-task-list__item">
+                <li id="propertyDetails" class="app-task-list__item">
                 @taskLink(
-                    examplePropertyDetailsTaskName,
+                    messages("task-list.enter-property-details.link"),
                     "#",
-                    examplePropertyDetailsState
+                    propertyDetailsState
                 )
                 </li>
             </ul>
