@@ -313,24 +313,27 @@ class MultipleDisposalsTriageController @Inject() (
                   state,
                   updatedAnswers,
                   d =>
-                    d.copy(
-                      examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
-                        _.unset(_.address)
-                          .unset(_.disposalPrice)
-                          .unset(_.acquisitionPrice)
-                      ),
-                      yearToDateLiabilityAnswers = None,
-                      supportingEvidenceAnswers = None
-                    ),
-                  d =>
-                    d.copy(
-                      exampleCompanyDetailsAnswers = d.exampleCompanyDetailsAnswers.map(
-                        _.unset(_.address)
-                          .unset(_.disposalPrice)
-                          .unset(_.acquisitionPrice)
-                      ),
-                      yearToDateLiabilityAnswers = None,
-                      supportingEvidenceAnswers = None
+                    d.bimap(
+                      multiple =>
+                        multiple.copy(
+                          examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
+                            _.unset(_.address)
+                              .unset(_.disposalPrice)
+                              .unset(_.acquisitionPrice)
+                          ),
+                          yearToDateLiabilityAnswers = None,
+                          supportingEvidenceAnswers = None
+                        ),
+                      multipleIndirect =>
+                        multipleIndirect.copy(
+                          exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers.map(
+                            _.unset(_.address)
+                              .unset(_.disposalPrice)
+                              .unset(_.acquisitionPrice)
+                          ),
+                          yearToDateLiabilityAnswers = None,
+                          supportingEvidenceAnswers = None
+                        )
                     )
                 )
                 updateStateAndThen(
@@ -407,7 +410,7 @@ class MultipleDisposalsTriageController @Inject() (
                       assetTypes = Some(assetType(wereAllPropertiesResidential))
                     )
 
-                val newState = updateState(state, updatedAnswers, identity, identity)
+                val newState = updateState(state, updatedAnswers, identity)
                 updateStateAndThen(
                   newState,
                   Redirect(
@@ -499,20 +502,23 @@ class MultipleDisposalsTriageController @Inject() (
                   state,
                   updatedAnswers,
                   d =>
-                    d.copy(
-                      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-                        case _: CalculatedYTDAnswers    => None
-                        case n: NonCalculatedYTDAnswers =>
-                          Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
-                      }
-                    ),
-                  d =>
-                    d.copy(
-                      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-                        case _: CalculatedYTDAnswers    => None
-                        case n: NonCalculatedYTDAnswers =>
-                          Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
-                      }
+                    d.bimap(
+                      multiple =>
+                        multiple.copy(
+                          yearToDateLiabilityAnswers = multiple.yearToDateLiabilityAnswers.flatMap {
+                            case _: CalculatedYTDAnswers    => None
+                            case n: NonCalculatedYTDAnswers =>
+                              Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
+                          }
+                        ),
+                      multipleIndirect =>
+                        multipleIndirect.copy(
+                          yearToDateLiabilityAnswers = multipleIndirect.yearToDateLiabilityAnswers.flatMap {
+                            case _: CalculatedYTDAnswers    => None
+                            case n: NonCalculatedYTDAnswers =>
+                              Some(n.unset(_.hasEstimatedDetails).unset(_.taxDue))
+                          }
+                        )
                     )
                 )
                 updateStateAndThen(
@@ -596,13 +602,13 @@ class MultipleDisposalsTriageController @Inject() (
                                         state,
                                         updatedAnswers,
                                         d =>
-                                          d.copy(examplePropertyDetailsAnswers =
-                                            d.examplePropertyDetailsAnswers
-                                              .map(_.unset(_.disposalDate))
-                                          ),
-                                        d =>
-                                          d.copy(exampleCompanyDetailsAnswers =
-                                            d.exampleCompanyDetailsAnswers
+                                          d.bimap(
+                                            m =>
+                                              m.copy(examplePropertyDetailsAnswers =
+                                                m.examplePropertyDetailsAnswers
+                                                  .map(_.unset(_.disposalDate))
+                                              ),
+                                            mi => mi.copy(exampleCompanyDetailsAnswers = mi.exampleCompanyDetailsAnswers)
                                           )
                                       )
                     _              <- newState.fold(
@@ -698,33 +704,76 @@ class MultipleDisposalsTriageController @Inject() (
                   routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
               else {
-                val updatedAnswers =
-                  answers.fold[MultipleDisposalsTriageAnswers](
-                    _.copy(assetTypes = Some(assetTypes)),
-                    complete =>
-                      IncompleteMultipleDisposalsTriageAnswers
-                        .fromCompleteAnswers(complete)
-                        .copy(
-                          assetTypes = Some(assetTypes)
+                val oldAssetTypes: Option[List[AssetType]] = answers.fold(_.assetTypes, c => Some(c.assetTypes))
+                val wasIndirectDisposal                    = oldAssetTypes.contains(List(IndirectDisposal))
+                val isNowIndirectDisposal                  = assetTypes === List(IndirectDisposal)
+
+                val newAnswers: MultipleDisposalsTriageAnswers =
+                  if (!wasIndirectDisposal === !isNowIndirectDisposal)
+                    answers.fold[MultipleDisposalsTriageAnswers](
+                      _.copy(assetTypes = Some(assetTypes)),
+                      _.copy(assetTypes = assetTypes)
+                    )
+                  else
+                    answers
+                      .unset(_.completionDate)
+                      .copy(assetTypes = Some(assetTypes))
+
+                val udpatedState =
+                  state.bimap(
+                    _.copy(newReturnTriageAnswers = Left(newAnswers)),
+                    {
+                      case (r, Right(d))                  =>
+                        if (isNowIndirectDisposal) {
+                          val newDraftReturn = DraftMultipleIndirectDisposalsReturn.newDraftReturn(
+                            d.id,
+                            newAnswers,
+                            d.representeeAnswers
+                          )
+
+                          (r.copy(draftReturn = newDraftReturn), Right(newDraftReturn))
+                        } else
+                          (
+                            r.copy(
+                              draftReturn = d.copy(
+                                triageAnswers = newAnswers,
+                                yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
+                                  .flatMap(_.unsetAllButIncomeDetails()),
+                                supportingEvidenceAnswers = None
+                              )
+                            ),
+                            Right(d)
+                          )
+
+                      case (r, Left(indirectDraftReturn)) =>
+                        val newDraftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
+                          indirectDraftReturn.id,
+                          newAnswers,
+                          indirectDraftReturn.representeeAnswers
                         )
+
+                        (r.copy(draftReturn = newDraftReturn), Left(newDraftReturn))
+                    }
                   )
 
                 val newState = updateState(
-                  state,
-                  updatedAnswers,
+                  udpatedState,
+                  newAnswers,
                   d =>
-                    d.copy(
-                      examplePropertyDetailsAnswers = None,
-                      yearToDateLiabilityAnswers = None,
-                      supportingEvidenceAnswers = None
-                    ),
-                  d =>
-                    d.copy(
-                      exampleCompanyDetailsAnswers = None,
-                      yearToDateLiabilityAnswers = None,
-                      supportingEvidenceAnswers = None
+                    d.bimap(
+                      _.copy(
+                        examplePropertyDetailsAnswers = None,
+                        yearToDateLiabilityAnswers = None,
+                        supportingEvidenceAnswers = None
+                      ),
+                      _.copy(
+                        exampleCompanyDetailsAnswers = None,
+                        yearToDateLiabilityAnswers = None,
+                        supportingEvidenceAnswers = None
+                      )
                     )
                 )
+
                 updateStateAndThen(
                   newState,
                   Redirect(
@@ -795,16 +844,19 @@ class MultipleDisposalsTriageController @Inject() (
                   state,
                   updatedAnswers,
                   d =>
-                    d.copy(
-                      examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(
-                        _.unset(_.disposalDate)
-                      ),
-                      yearToDateLiabilityAnswers = None
-                    ),
-                  d =>
-                    d.copy(
-                      exampleCompanyDetailsAnswers = d.exampleCompanyDetailsAnswers,
-                      yearToDateLiabilityAnswers = None
+                    d.bimap(
+                      multiple =>
+                        multiple.copy(
+                          examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
+                            _.unset(_.disposalDate)
+                          ),
+                          yearToDateLiabilityAnswers = None
+                        ),
+                      multipleIndirect =>
+                        multipleIndirect.copy(
+                          exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
+                          yearToDateLiabilityAnswers = None
+                        )
                     )
                 )
                 updateStateAndThen(
@@ -917,15 +969,18 @@ class MultipleDisposalsTriageController @Inject() (
                                         state,
                                         updatedAnswers,
                                         d =>
-                                          d.copy(
-                                            examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers
-                                              .map(_.unset(_.disposalDate)),
-                                            yearToDateLiabilityAnswers = None
-                                          ),
-                                        d =>
-                                          d.copy(
-                                            exampleCompanyDetailsAnswers = d.exampleCompanyDetailsAnswers,
-                                            yearToDateLiabilityAnswers = None
+                                          d.bimap(
+                                            multiple =>
+                                              multiple.copy(
+                                                examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers
+                                                  .map(_.unset(_.disposalDate)),
+                                                yearToDateLiabilityAnswers = None
+                                              ),
+                                            multipleIndirect =>
+                                              multipleIndirect.copy(
+                                                exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
+                                                yearToDateLiabilityAnswers = None
+                                              )
                                           )
                                       )
                     _              <- newState.fold(
@@ -1234,7 +1289,7 @@ class MultipleDisposalsTriageController @Inject() (
             val completeAnswers =
               CompleteMultipleDisposalsTriageAnswers(i, n, Country.uk, a, t, d)
             updateStateAndThen(
-              updateState(state, completeAnswers, identity, identity),
+              updateState(state, completeAnswers, identity),
               Ok(
                 checkYourAnswersPage(
                   completeAnswers,
@@ -1261,7 +1316,7 @@ class MultipleDisposalsTriageController @Inject() (
             val completeAnswers =
               CompleteMultipleDisposalsTriageAnswers(i, n, c, a, t, d)
             updateStateAndThen(
-              updateState(state, completeAnswers, identity, identity),
+              updateState(state, completeAnswers, identity),
               Ok(
                 checkYourAnswersPage(
                   completeAnswers,
@@ -1432,17 +1487,21 @@ class MultipleDisposalsTriageController @Inject() (
       (FillingOutReturn, Either[DraftMultipleDisposalsReturn, DraftMultipleIndirectDisposalsReturn])
     ],
     newAnswers: MultipleDisposalsTriageAnswers,
-    modifyDraftReturn: DraftMultipleDisposalsReturn => DraftMultipleDisposalsReturn,
-    modifyIndirectDraftReturn: DraftMultipleIndirectDisposalsReturn => DraftMultipleIndirectDisposalsReturn
+    modifyDraftReturn: Either[DraftMultipleDisposalsReturn, DraftMultipleIndirectDisposalsReturn] => Either[
+      DraftMultipleDisposalsReturn,
+      DraftMultipleIndirectDisposalsReturn
+    ]
   ): Either[StartingNewDraftReturn, FillingOutReturn] =
     currentState.bimap(
       _.copy(newReturnTriageAnswers = Left(newAnswers)),
       {
-        case (r, Left(d))  =>
-          r.copy(draftReturn = modifyDraftReturn(d).copy(triageAnswers = newAnswers))
-
-        case (r, Right(d)) =>
-          r.copy(draftReturn = modifyIndirectDraftReturn(d).copy(triageAnswers = newAnswers))
+        case (r, d) =>
+          r.copy(draftReturn =
+            modifyDraftReturn(d).fold(
+              _.copy(triageAnswers = newAnswers),
+              _.copy(triageAnswers = newAnswers)
+            )
+          )
       }
     )
 

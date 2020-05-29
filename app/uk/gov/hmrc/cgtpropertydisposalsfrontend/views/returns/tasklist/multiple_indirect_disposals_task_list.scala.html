@@ -45,7 +45,7 @@
 
 @triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
 
-@examplePropertyDetailsState = @{
+@exampleCompanyDetailsState = @{
     draftReturn.exampleCompanyDetailsAnswers.fold[TaskListStatus](ToDo)(
         _.fold(_ => InProgress, _ => Complete)
     )
@@ -59,7 +59,7 @@
 }
 
 @exemptionsAndLossesState = @{
-    examplePropertyDetailsState match {
+    exampleCompanyDetailsState match {
         case Complete =>
             draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
         case _ =>
@@ -83,7 +83,7 @@
 }
 
 @checkAndSendReturnState = @{
-    (examplePropertyDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
+    (exampleCompanyDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
         case (Complete, Complete, Complete, Complete) => ToDo
         case _                                        => CannotStart
     }
@@ -136,7 +136,7 @@
                 @taskLink(
                     examplePropertyDetailsTaskName,
                     returns.address.routes.PropertyDetailsController.checkYourAnswers().url,
-                    examplePropertyDetailsState
+                    exampleCompanyDetailsState
                 )
                 </li>
             </ul>
