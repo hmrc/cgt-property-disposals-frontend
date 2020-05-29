@@ -2232,7 +2232,7 @@ class TaskListControllerSpec
 
       }
 
-      "display the page with the enter details of one property section status" when {
+      "display the page with the enter property details section status" when {
 
         "the session data indicates that they are filling in a return and the enter details of one property section is incomplete" in {
           val incompletePropertyDetails = sample[DraftSingleMixedUseDisposalReturn].copy(
@@ -2246,8 +2246,8 @@ class TaskListControllerSpec
           testStateOfSection(
             incompletePropertyDetails
           )(
-            "examplePropertyDetails",
-            messageFromMessageKey("task-list.enter-example-property-address.link"),
+            "propertyDetails",
+            messageFromMessageKey("task-list.enter-property-details.link"),
             Call("", "#"),
             TaskListStatus.InProgress,
             _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
@@ -2267,8 +2267,8 @@ class TaskListControllerSpec
           testStateOfSection(
             completePropertyDetails
           )(
-            "examplePropertyDetails",
-            messageFromMessageKey("task-list.enter-example-property-address.link"),
+            "propertyDetails",
+            messageFromMessageKey("task-list.enter-property-details.link"),
             Call("", "#"),
             TaskListStatus.Complete
           )

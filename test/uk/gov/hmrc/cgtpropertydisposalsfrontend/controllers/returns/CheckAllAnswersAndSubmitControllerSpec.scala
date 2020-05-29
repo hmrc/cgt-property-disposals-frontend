@@ -512,7 +512,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
             .copy(individualUserType = Some(PersonalRepresentative)),
           representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
-          yearToDateLiabilityAnswers = Left(sample[CompleteNonCalculatedYTDAnswers]),
+          yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers],
           hasAttachments = true
         )
 
@@ -523,7 +523,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.disposalDetails),
           Some(completeReturn.acquisitionDetails),
           Some(completeReturn.exemptionsAndLossesDetails),
-          Some(completeReturn.yearToDateLiabilityAnswers.merge),
+          Some(completeReturn.yearToDateLiabilityAnswers),
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
           TimeUtils.today()
@@ -1613,14 +1613,11 @@ object CheckAllAnswersAndSubmitControllerSpec {
         individualUserType
       )
 
-      completeReturn.yearToDateLiabilityAnswers.fold(
-        validateNonCalculatedYearToDateLiabilityPage(
-          _,
-          doc,
-          userType,
-          Some(individualUserType)
-        ),
-        validateCalculatedYearToDateLiabilityPage(_, isATrust, doc)
+      validateNonCalculatedYearToDateLiabilityPage(
+        completeReturn.yearToDateLiabilityAnswers,
+        doc,
+        userType,
+        Some(individualUserType)
       )
     }
   }

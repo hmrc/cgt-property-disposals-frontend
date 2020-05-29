@@ -957,6 +957,7 @@ task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
 task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss
 task-list.enter-property-address.link=Enter property address
+task-list.enter-property-details.link=Enter property details
 task-list.enter-company-details.link=Enter company details
 task-list.disposals-details.link=Enter sale or disposal details
 task-list.acquisition-details.link=Enter purchase or acquisition details
