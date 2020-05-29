@@ -603,7 +603,6 @@ class MultipleDisposalsTriageController @Inject() (
                                         d =>
                                           d.copy(exampleCompanyDetailsAnswers =
                                             d.exampleCompanyDetailsAnswers
-                                          //.map(_.unset(_.disposalDate))//TODO: no disposalDate
                                           )
                                       )
                     _              <- newState.fold(
@@ -804,10 +803,7 @@ class MultipleDisposalsTriageController @Inject() (
                     ),
                   d =>
                     d.copy(
-                      exampleCompanyDetailsAnswers = d.exampleCompanyDetailsAnswers
-//                        .map(
-//                        _.unset(_.disposalDate)) // TODO: no disposalDate
-                      ,
+                      exampleCompanyDetailsAnswers = d.exampleCompanyDetailsAnswers,
                       yearToDateLiabilityAnswers = None
                     )
                 )
@@ -928,9 +924,7 @@ class MultipleDisposalsTriageController @Inject() (
                                           ),
                                         d =>
                                           d.copy(
-                                            exampleCompanyDetailsAnswers = d.exampleCompanyDetailsAnswers
-                                            //.map(_.unset(_.disposalDate)) // TODO: no disposalDate
-                                            ,
+                                            exampleCompanyDetailsAnswers = d.exampleCompanyDetailsAnswers,
                                             yearToDateLiabilityAnswers = None
                                           )
                                       )
