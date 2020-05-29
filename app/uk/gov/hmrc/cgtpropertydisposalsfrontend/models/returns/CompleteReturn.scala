@@ -191,10 +191,7 @@ object CompleteReturn {
     disposalDetails: CompleteDisposalDetailsAnswers,
     acquisitionDetails: CompleteAcquisitionDetailsAnswers,
     exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-    yearToDateLiabilityAnswers: Either[
-      CompleteNonCalculatedYTDAnswers,
-      CompleteCalculatedYTDAnswers
-    ],
+    yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     hasAttachments: Boolean
@@ -225,7 +222,7 @@ object CompleteReturn {
               d,
               a,
               e,
-              Left(y),
+              y,
               u,
               maybeCompleteRepresenteeAnswers,
               hasAttachments = true
