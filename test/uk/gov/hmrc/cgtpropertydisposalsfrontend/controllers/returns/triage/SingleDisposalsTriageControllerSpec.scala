@@ -3559,7 +3559,7 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
-          "the asset type has changed from indirect disposal to not indirect disposal" in {
+          "the asset type has changed from indirect disposal to not indirect disposal and not mixed use" in {
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               requiredPreviousAnswers.copy(assetType = Some(IndirectDisposal)),
@@ -3577,7 +3577,25 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
-          "the asset type has changed from not indirect disposal to indirect disposal" in {
+          "the asset type has changed from indirect disposal to mixed use" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers.copy(assetType = Some(IndirectDisposal)),
+              List("assetTypeForNonUkResidents" -> "2"),
+              requiredPreviousAnswers.copy(
+                assetType = Some(AssetType.MixedUse),
+                disposalDate = None,
+                completionDate = None,
+                tooEarlyDisposalDate = None
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+          }
+
+          "the asset type has changed from not indirect disposal and not mixed use to indirect disposal" in {
             val answers    = sample[CompleteSingleDisposalTriageAnswers]
               .copy(assetType = NonResidential)
             val newAnswers = answers
@@ -3598,6 +3616,69 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
+          "the asset type has changed from not indirect disposal and not mixed use to mixed use" in {
+            val answers    = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(assetType = NonResidential)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(MixedUse))
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              answers,
+              List("assetTypeForNonUkResidents" -> "2"),
+              newAnswers,
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+          }
+
+          "the asset type has changed from mixed use to indirect disposal" in {
+            val answers    = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(assetType = MixedUse)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(IndirectDisposal))
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              answers,
+              List("assetTypeForNonUkResidents" -> "3"),
+              newAnswers,
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+          }
+
+          "the asset type has changed from mixed use to not indirect disposal" in {
+            val answers    = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(assetType = MixedUse)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(Residential))
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              answers,
+              List("assetTypeForNonUkResidents" -> "0"),
+              newAnswers,
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+          }
+
         }
 
         "the user is filling out a draft return and" when {
@@ -3607,10 +3688,10 @@ class SingleDisposalsTriageControllerSpec
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
                 completeAnswers.copy(assetType = AssetType.Residential),
-                List("assetTypeForNonUkResidents" -> "2"),
+                List("assetTypeForNonUkResidents" -> "1"),
                 updateDraftReturn(
                   _,
-                  completeAnswers.copy(assetType = AssetType.MixedUse)
+                  completeAnswers.copy(assetType = AssetType.NonResidential)
                 ),
                 checkIsRedirect(
                   _,
@@ -3637,7 +3718,7 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
-          "the asset type has changed from indirect disposal to not indirect disposal" in {
+          "the asset type has changed from indirect disposal to not indirect disposal and not mixed use" in {
             val answers    = sample[CompleteSingleDisposalTriageAnswers]
               .copy(assetType = IndirectDisposal)
             val newAnswers = answers
@@ -3666,7 +3747,36 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
-          "the asset type has changed from not indirect disposal to indirect disposal" in {
+          "the asset type has changed from indirect disposal to mixed use" in {
+            val answers    = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(assetType = IndirectDisposal)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(MixedUse))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              sample[DraftSingleIndirectDisposalReturn]
+                .copy(triageAnswers = answers),
+              List("assetTypeForNonUkResidents" -> "2")
+            )(
+              oldDraftReturn =>
+                DraftSingleMixedUseDisposalReturn
+                  .newDraftReturn(
+                    oldDraftReturn.id,
+                    newAnswers,
+                    oldDraftReturn.representeeAnswers
+                  ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+          }
+
+          "the asset type has changed from not indirect disposal and not mixed use to indirect disposal" in {
             val answers    = sample[CompleteSingleDisposalTriageAnswers]
               .copy(assetType = NonResidential)
             val newAnswers = answers
@@ -3682,6 +3792,90 @@ class SingleDisposalsTriageControllerSpec
             )(
               oldDraftReturn =>
                 DraftSingleIndirectDisposalReturn
+                  .newDraftReturn(
+                    oldDraftReturn.id,
+                    newAnswers,
+                    oldDraftReturn.representeeAnswers
+                  ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+          }
+
+          "the asset type has changed from not indirect disposal and not mixed use to mixed use" in {
+            val answers    = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(assetType = NonResidential)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(MixedUse))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              sample[DraftSingleDisposalReturn].copy(triageAnswers = answers),
+              List("assetTypeForNonUkResidents" -> "2")
+            )(
+              oldDraftReturn =>
+                DraftSingleMixedUseDisposalReturn
+                  .newDraftReturn(
+                    oldDraftReturn.id,
+                    newAnswers,
+                    oldDraftReturn.representeeAnswers
+                  ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+          }
+
+          "the asset type has changed from mixed use to indirect disposal" in {
+            val answers    = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(assetType = MixedUse)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(IndirectDisposal))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              sample[DraftSingleMixedUseDisposalReturn].copy(triageAnswers = answers),
+              List("assetTypeForNonUkResidents" -> "3")
+            )(
+              oldDraftReturn =>
+                DraftSingleIndirectDisposalReturn
+                  .newDraftReturn(
+                    oldDraftReturn.id,
+                    newAnswers,
+                    oldDraftReturn.representeeAnswers
+                  ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+          }
+
+          "the asset type has changed from mixed use to not indirect disposal" in {
+            val answers    = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(assetType = MixedUse)
+            val newAnswers = answers
+              .unset(_.disposalDate)
+              .unset(_.completionDate)
+              .unset(_.tooEarlyDisposalDate)
+              .copy(assetType = Some(Residential))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              sample[DraftSingleMixedUseDisposalReturn].copy(triageAnswers = answers),
+              List("assetTypeForNonUkResidents" -> "0")
+            )(
+              oldDraftReturn =>
+                DraftSingleDisposalReturn
                   .newDraftReturn(
                     oldDraftReturn.id,
                     newAnswers,
@@ -4558,23 +4752,113 @@ class SingleDisposalsTriageControllerSpec
 
       "redirect to the task list page" when {
 
-        "the draft return is stored and the session is updated and a draft return had not already been created" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithCompleteStartingNewDraftReturn)
-            mockGetNextUUID(uuid)
-            mockStoreDraftReturn(
-              fillingOutReturn.draftReturn,
-              fillingOutReturn.subscribedDetails.cgtReference,
-              fillingOutReturn.agentReferenceNumber
-            )(Right(()))
-            mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
+        "the draft return is stored and the session is updated and a draft return had not already been created" when {
+
+          "the asset type is not indirect disposals or mixed use" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithCompleteStartingNewDraftReturn)
+              mockGetNextUUID(uuid)
+              mockStoreDraftReturn(
+                fillingOutReturn.draftReturn,
+                fillingOutReturn.subscribedDetails.cgtReference,
+                fillingOutReturn.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(),
+              returnsRoutes.TaskListController.taskList()
+            )
           }
 
-          checkIsRedirect(
-            performAction(),
-            returnsRoutes.TaskListController.taskList()
-          )
+          "the asset type is indirect disposal" in {
+            val answers                                   = completeAnswers.copy(assetType = IndirectDisposal)
+            val sessionWithCompleteStartingNewDraftReturn =
+              SessionData.empty
+                .copy(journeyStatus = Some(startingNewDraftReturn.copy(newReturnTriageAnswers = Right(answers))))
+
+            val fillingOutReturn                     = FillingOutReturn(
+              startingNewDraftReturn.subscribedDetails,
+              startingNewDraftReturn.ggCredId,
+              startingNewDraftReturn.agentReferenceNumber,
+              DraftSingleIndirectDisposalReturn(
+                uuid,
+                answers,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                startingNewDraftReturn.representeeAnswers,
+                TimeUtils.today()
+              )
+            )
+            val sessionDataWithFillingOutDraftReturn =
+              SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithCompleteStartingNewDraftReturn)
+              mockGetNextUUID(uuid)
+              mockStoreDraftReturn(
+                fillingOutReturn.draftReturn,
+                fillingOutReturn.subscribedDetails.cgtReference,
+                fillingOutReturn.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(),
+              returnsRoutes.TaskListController.taskList()
+            )
+          }
+
+          "the asset type is mixed use" in {
+            val answers                                   = completeAnswers.copy(assetType = MixedUse)
+            val sessionWithCompleteStartingNewDraftReturn =
+              SessionData.empty
+                .copy(journeyStatus = Some(startingNewDraftReturn.copy(newReturnTriageAnswers = Right(answers))))
+
+            val fillingOutReturn                     = FillingOutReturn(
+              startingNewDraftReturn.subscribedDetails,
+              startingNewDraftReturn.ggCredId,
+              startingNewDraftReturn.agentReferenceNumber,
+              DraftSingleMixedUseDisposalReturn(
+                uuid,
+                answers,
+                None,
+                None,
+                None,
+                None,
+                startingNewDraftReturn.representeeAnswers,
+                TimeUtils.today()
+              )
+            )
+            val sessionDataWithFillingOutDraftReturn =
+              SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithCompleteStartingNewDraftReturn)
+              mockGetNextUUID(uuid)
+              mockStoreDraftReturn(
+                fillingOutReturn.draftReturn,
+                fillingOutReturn.subscribedDetails.cgtReference,
+                fillingOutReturn.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(),
+              returnsRoutes.TaskListController.taskList()
+            )
+          }
+
         }
 
         "the draft return is stored and the session is updated and a draft return had already been created" in {

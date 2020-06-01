@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{tasklist => taskListPages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -52,9 +52,10 @@ class TaskListController @Inject() (
   configuration: Configuration,
   returnsService: ReturnsService,
   cc: MessagesControllerComponents,
-  singleDisposalTaskListPage: views.html.returns.single_disposal_task_list,
-  multipleDisposalsTaskListPage: views.html.returns.multiple_disposals_task_list,
-  singleIndirectDisposalTaskListPage: views.html.returns.single_indirect_disposal_task_list
+  singleDisposalTaskListPage: taskListPages.single_disposal_task_list,
+  multipleDisposalsTaskListPage: taskListPages.multiple_disposals_task_list,
+  singleIndirectDisposalTaskListPage: taskListPages.single_indirect_disposal_task_list,
+  singleMixedUseDisposalTaskListPage: taskListPages.single_mixed_use_disposal_task_list
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -81,7 +82,8 @@ class TaskListController @Inject() (
             _.fold(
               m => Ok(multipleDisposalsTaskListPage(m)),
               s => Ok(singleDisposalTaskListPage(s)),
-              i => Ok(singleIndirectDisposalTaskListPage(i))
+              i => Ok(singleIndirectDisposalTaskListPage(i)),
+              m => Ok(singleMixedUseDisposalTaskListPage(m))
             )
           )
 
@@ -162,6 +164,15 @@ class TaskListController @Inject() (
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers.fold(
               i.supportingEvidenceAnswers
             )(Some(_))
+          ),
+        m =>
+          m.copy(
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
+              m.yearToDateLiabilityAnswers
+            )(Some(_)),
+            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers.fold(
+              m.supportingEvidenceAnswers
+            )(Some(_))
           )
       )
 
@@ -188,6 +199,7 @@ class TaskListController @Inject() (
       .fold(
         _.supportingEvidenceAnswers,
         _.supportingEvidenceAnswers,
+        _.supportingEvidenceAnswers,
         _.supportingEvidenceAnswers
       )
       .flatMap { answers =>
@@ -203,6 +215,7 @@ class TaskListController @Inject() (
   ): Option[(MandatoryEvidence, YearToDateLiabilityAnswers)] =
     draftReturn
       .fold(
+        _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers

@@ -458,6 +458,7 @@ class CommonTriageQuestionsController @Inject() (
                 fillingOutReturn.draftReturn.fold(
                   _.representeeAnswers,
                   _.representeeAnswers,
+                  _.representeeAnswers,
                   _.representeeAnswers
                 )
               )
@@ -478,6 +479,7 @@ class CommonTriageQuestionsController @Inject() (
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
                 fillingOutReturn.draftReturn.fold(
+                  _.representeeAnswers,
                   _.representeeAnswers,
                   _.representeeAnswers,
                   _.representeeAnswers
@@ -558,6 +560,14 @@ class CommonTriageQuestionsController @Inject() (
                 acquisitionDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None
+              ),
+            m =>
+              m.copy(
+                triageAnswers = updateSingleDisposalAnswers(m.triageAnswers),
+                representeeAnswers = None,
+                examplePropertyDetailsAnswers = None,
+                yearToDateLiabilityAnswers = None,
+                supportingEvidenceAnswers = None
               )
           )
         )
@@ -594,6 +604,7 @@ class CommonTriageQuestionsController @Inject() (
       _.draftReturn.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
         s => numberOfProperties(s.triageAnswers),
+        s => numberOfProperties(s.triageAnswers),
         s => numberOfProperties(s.triageAnswers)
       )
     )
@@ -608,6 +619,7 @@ class CommonTriageQuestionsController @Inject() (
         r =>
           r.draftReturn.fold(
             m => Left(m.triageAnswers),
+            s => Right(s.triageAnswers),
             s => Right(s.triageAnswers),
             s => Right(s.triageAnswers)
           )

@@ -27,10 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, rou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -43,8 +40,6 @@ class ViewReturnController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   errorHandler: ErrorHandler,
-  sessionStore: SessionStore,
-  returnsService: ReturnsService,
   paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
   viewReturnPage: views.html.returns.view_return,
@@ -71,7 +66,7 @@ class ViewReturnController @Inject() (
               returnSummary,
               rebasingEligibilityUtil,
               subscribedDetails,
-              representativeType(sentReturn),
+              sentReturn.representativeType(),
               sentReturn.isIndirectDisposal()
             )
           )
@@ -127,13 +122,5 @@ class ViewReturnController @Inject() (
       case Some(v: ViewingReturn) => f(v)
       case _                      => Redirect(baseRoutes.StartController.start())
     }
-
-  private def representativeType(
-    completeReturn: CompleteReturn
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-    completeReturn.fold(
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType()
-    )
 
 }
