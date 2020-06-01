@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
@@ -619,7 +619,8 @@ class MultipleDisposalsTriageControllerSpec
             )
             val (session, journey, draftReturn) =
               sessionDataWithFillingOutReturn(answers)
-            val updatedDraftReturn              = draftReturn.copy(
+
+            val updatedDraftReturn = draftReturn.copy(
               triageAnswers = answers.copy(numberOfProperties = Some(5)),
               examplePropertyDetailsAnswers = None,
               exemptionAndLossesAnswers = None,
@@ -627,7 +628,7 @@ class MultipleDisposalsTriageControllerSpec
               supportingEvidenceAnswers = None,
               lastUpdatedDate = TimeUtils.today()
             )
-            val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()

@@ -84,6 +84,11 @@ class MultipleDisposalsTriageController @Inject() (
     with Logging
     with SessionUpdates {
 
+  type JourneyState = Either[
+    StartingNewDraftReturn,
+    (FillingOutReturn, Either[DraftMultipleIndirectDisposalsReturn, DraftMultipleDisposalsReturn])
+  ]
+
   private val indirectDisposalsEnabled: Boolean =
     config.underlying.getBoolean("indirect-disposals.enabled")
 
@@ -184,10 +189,7 @@ class MultipleDisposalsTriageController @Inject() (
   private def updateNumberOfPropertiesWithRedirect(
     numberOfProperties: Int,
     currentAnswers: MultipleDisposalsTriageAnswers,
-    currentState: Either[
-      StartingNewDraftReturn,
-      (FillingOutReturn, Either[DraftMultipleIndirectDisposalsReturn, DraftMultipleDisposalsReturn])
-    ]
+    currentState: JourneyState
   ): (Either[StartingNewDraftReturn, FillingOutReturn], Call) = {
     val newAnswersWithRedirectTo =
       if (numberOfProperties > 1)
@@ -214,7 +216,7 @@ class MultipleDisposalsTriageController @Inject() (
     val newState                 = currentState.bimap(
       _.copy(newReturnTriageAnswers = newAnswersWithRedirectTo._1),
       {
-        case (r, Left(d))  =>
+        case (r, Right(d)) =>
           val newDraftReturn = newAnswersWithRedirectTo._1.bimap(
             DraftMultipleDisposalsReturn
               .newDraftReturn(d.id, _, d.representeeAnswers),
@@ -223,7 +225,7 @@ class MultipleDisposalsTriageController @Inject() (
           )
 
           r.copy(draftReturn = newDraftReturn.merge)
-        case (r, Right(d)) =>
+        case (r, Left(d))  =>
           val newDraftReturn = newAnswersWithRedirectTo._1.bimap(
             DraftMultipleIndirectDisposalsReturn
               .newDraftReturn(d.id, _, d.representeeAnswers),
@@ -708,38 +710,44 @@ class MultipleDisposalsTriageController @Inject() (
                 val wasIndirectDisposal                    = oldAssetTypes.contains(List(IndirectDisposal))
                 val isNowIndirectDisposal                  = assetTypes === List(IndirectDisposal)
 
-                val newAnswers: MultipleDisposalsTriageAnswers =
+                val newAnswers =
                   if (!wasIndirectDisposal === !isNowIndirectDisposal)
-                    answers.fold[MultipleDisposalsTriageAnswers](
-                      _.copy(assetTypes = Some(assetTypes)),
-                      _.copy(assetTypes = assetTypes)
-                    )
+                    answers.unset(_.assetTypes).copy(assetTypes = Some(assetTypes))
                   else
-                    answers
-                      .unset(_.completionDate)
-                      .copy(assetTypes = Some(assetTypes))
+                    answers.unset(_.completionDate).copy(assetTypes = Some(assetTypes))
 
                 val newState = updateState(
                   state,
                   newAnswers,
                   {
                     case Left(indirectDisposalsReturn) =>
-                      if (isNowIndirectDisposal) {
-                        val newDraftReturn = DraftMultipleIndirectDisposalsReturn.newDraftReturn(
-                          indirectDisposalsReturn.id,
-                          newAnswers,
-                          indirectDisposalsReturn.representeeAnswers
-                        )
-                        Left(newDraftReturn)
-                      } else Left(indirectDisposalsReturn)
-
-                    case Right(draftReturn)            =>
-                      val newDraftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
-                        draftReturn.id,
-                        newAnswers,
-                        draftReturn.representeeAnswers
+                      Right(
+                        DraftMultipleDisposalsReturn
+                          .newDraftReturn(
+                            indirectDisposalsReturn.id,
+                            newAnswers,
+                            indirectDisposalsReturn.representeeAnswers
+                          )
                       )
-                      Right(newDraftReturn)
+                    case Right(draftReturn)            =>
+                      if (isNowIndirectDisposal)
+                        Left(
+                          DraftMultipleIndirectDisposalsReturn
+                            .newDraftReturn(
+                              draftReturn.id,
+                              newAnswers,
+                              draftReturn.representeeAnswers
+                            )
+                        )
+                      else
+                        Right(
+                          draftReturn.copy(
+                            triageAnswers = newAnswers,
+                            examplePropertyDetailsAnswers = None,
+                            yearToDateLiabilityAnswers = None,
+                            supportingEvidenceAnswers = None
+                          )
+                        )
                   }
                 )
 
@@ -1380,14 +1388,7 @@ class MultipleDisposalsTriageController @Inject() (
   private def withMultipleDisposalTriageAnswers(
     request: RequestWithSessionData[_]
   )(
-    f: (
-      SessionData,
-      Either[
-        StartingNewDraftReturn,
-        (FillingOutReturn, Either[DraftMultipleIndirectDisposalsReturn, DraftMultipleDisposalsReturn])
-      ],
-      MultipleDisposalsTriageAnswers
-    ) => Future[Result]
+    f: (SessionData, JourneyState, MultipleDisposalsTriageAnswers) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t), _))) =>
@@ -1451,10 +1452,7 @@ class MultipleDisposalsTriageController @Inject() (
   }
 
   private def updateState(
-    currentState: Either[
-      StartingNewDraftReturn,
-      (FillingOutReturn, Either[DraftMultipleIndirectDisposalsReturn, DraftMultipleDisposalsReturn])
-    ],
+    currentState: JourneyState,
     newAnswers: MultipleDisposalsTriageAnswers,
     modifyDraftReturn: Either[DraftMultipleIndirectDisposalsReturn, DraftMultipleDisposalsReturn] => Either[
       DraftMultipleIndirectDisposalsReturn,
