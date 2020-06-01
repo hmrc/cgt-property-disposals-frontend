@@ -198,6 +198,10 @@ class ReturnsServiceImpl @Inject() (
         c => Some(c.disposalDate.taxYear) -> Some(c.completionDate)
       ),
       _.triageAnswers.fold(
+        i => i.taxYear -> i.completionDate,
+        c => Some(c.taxYear) -> Some(c.completionDate)
+      ),
+      _.triageAnswers.fold(
         i => i.disposalDate.map(_.taxYear) -> i.completionDate,
         c => Some(c.disposalDate.taxYear) -> Some(c.completionDate)
       )
@@ -212,6 +216,13 @@ class ReturnsServiceImpl @Inject() (
           .map(Right(_)),
         _.propertyAddress.map(a => Right(a.postcode)),
         _.companyAddress.map(extractCountryCodeOrPostcode),
+        _.exampleCompanyDetailsAnswers
+          .flatMap(
+            _.fold(
+              _.address.map(extractCountryCodeOrPostcode),
+              c => Some(extractCountryCodeOrPostcode(c.address))
+            )
+          ),
         _.examplePropertyDetailsAnswers
           .flatMap(
             _.fold(_.address.map(_.postcode), c => Some(c.address.postcode))

@@ -560,6 +560,7 @@ object ReliefDetailsController {
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType()
     )
 

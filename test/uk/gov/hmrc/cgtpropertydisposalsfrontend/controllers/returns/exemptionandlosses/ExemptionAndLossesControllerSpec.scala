@@ -2236,6 +2236,12 @@ class ExemptionAndLossesControllerSpec
                 yearToDateLiabilityAnswers = singleIndirect.yearToDateLiabilityAnswers
                   .flatMap(_.unsetAllButIncomeDetails())
               ),
+            multipleIndirect =>
+              multipleIndirect.copy(
+                exemptionAndLossesAnswers = Some(newAnswers),
+                yearToDateLiabilityAnswers = multipleIndirect.yearToDateLiabilityAnswers
+                  .flatMap(_.unsetAllButIncomeDetails())
+              ),
             singleMixedUse =>
               singleMixedUse.copy(
                 exemptionAndLossesAnswers = Some(newAnswers),

@@ -81,6 +81,7 @@ class ExemptionAndLossesController @Inject() (
             _.exemptionAndLossesAnswers,
             _.exemptionAndLossesAnswers,
             _.exemptionAndLossesAnswers,
+            _.exemptionAndLossesAnswers,
             _.exemptionAndLossesAnswers
           )
           .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
@@ -106,6 +107,10 @@ class ExemptionAndLossesController @Inject() (
       _.triageAnswers.fold(
         _.disposalDate,
         c => Some(c.disposalDate)
+      ),
+      _.triageAnswers.fold(
+        i => i.completionDate.flatMap(d => i.taxYear.map(t => DisposalDate(d.value, t))),
+        c => Some(DisposalDate(c.completionDate.value, c.taxYear))
       ),
       _.triageAnswers.fold(
         _.disposalDate,
@@ -135,6 +140,10 @@ class ExemptionAndLossesController @Inject() (
         ),
         _.triageAnswers.fold(
           _.wasAUKResident,
+          c => Some(c.countryOfResidence.isUk())
+        ),
+        _.triageAnswers.fold(
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
           c => Some(c.countryOfResidence.isUk())
         ),
         _.triageAnswers.fold(
@@ -214,6 +223,12 @@ class ExemptionAndLossesController @Inject() (
                   i.copy(
                     exemptionAndLossesAnswers = Some(newAnswers),
                     yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
+                      .flatMap(_.unsetAllButIncomeDetails())
+                  ),
+                m =>
+                  m.copy(
+                    exemptionAndLossesAnswers = Some(newAnswers),
+                    yearToDateLiabilityAnswers = m.yearToDateLiabilityAnswers
                       .flatMap(_.unsetAllButIncomeDetails())
                   ),
                 m =>
@@ -504,6 +519,7 @@ class ExemptionAndLossesController @Inject() (
                   _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
                   _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
                   _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
+                  _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
                   _.copy(exemptionAndLossesAnswers = Some(completeAnswers))
                 )
 
@@ -561,6 +577,7 @@ object ExemptionAndLossesController {
     draftReturn: DraftReturn
   ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
     draftReturn.fold(
+      _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
