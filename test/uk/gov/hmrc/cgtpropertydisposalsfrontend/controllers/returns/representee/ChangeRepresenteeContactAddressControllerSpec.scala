@@ -154,7 +154,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
         case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
-
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn)
+            if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
+          true
         case _ => false
       }
     )
