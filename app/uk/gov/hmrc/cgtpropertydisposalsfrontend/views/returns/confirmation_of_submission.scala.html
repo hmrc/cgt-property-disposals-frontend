@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => accountRoutes}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
@@ -55,6 +55,7 @@
 
 @representeeAnswers = @{
     justSubmittedReturn.completeReturn.fold(
+        _.representeeAnswers,
         _.representeeAnswers,
         _.representeeAnswers,
         _.representeeAnswers
@@ -153,6 +154,7 @@
                 case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
                 case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
                 case c: CompleteSingleIndirectDisposalReturn => addressDisplay(c.companyAddress, Line)
+                case c: CompleteMultipleIndirectDisposalReturn => addressDisplay(c.exampleCompanyDetailsAnswers.address, Line)
             },
             None,
             "property-address-table"
