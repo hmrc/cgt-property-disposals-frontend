@@ -1337,7 +1337,7 @@ class MultipleDisposalsTriageController @Inject() (
 
               case complete: CompleteMultipleDisposalsTriageAnswers =>
                 val newDraftReturn =
-                  if (complete.assetTypes.contains(IndirectDisposal))
+                  if (complete.assetTypes === List(IndirectDisposal))
                     DraftMultipleIndirectDisposalsReturn.newDraftReturn(
                       uuidGenerator.nextId(),
                       complete,

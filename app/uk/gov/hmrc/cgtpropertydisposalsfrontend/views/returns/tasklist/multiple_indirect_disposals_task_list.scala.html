@@ -51,13 +51,6 @@
     )
 }
 
-@examplePropertyDetailsTaskName = @{
-    if(draftReturn.isMultipleIndirectDisposal)
-        messages("task-list.indirect.enter-example-property-address.link")
-    else
-        messages("task-list.enter-example-property-address.link")
-}
-
 @exemptionsAndLossesState = @{
     exampleCompanyDetailsState match {
         case Complete =>
@@ -134,7 +127,7 @@
             <ul class="app-task-list__items">
                 <li id="examplePropertyDetails" class="app-task-list__item">
                 @taskLink(
-                    examplePropertyDetailsTaskName,
+                    messages("task-list.indirect.enter-example-property-address.link"),
                     returns.address.routes.PropertyDetailsController.checkYourAnswers().url,
                     exampleCompanyDetailsState
                 )
