@@ -135,6 +135,7 @@ trait ChangeRepresenteeEmailControllerSpec
         _.copy(representeeAnswers = Some(newAnswers)),
         _.copy(representeeAnswers = Some(newAnswers)),
         _.copy(representeeAnswers = Some(newAnswers)),
+        _.copy(representeeAnswers = Some(newAnswers)),
         _.copy(representeeAnswers = Some(newAnswers))
       )
     )
