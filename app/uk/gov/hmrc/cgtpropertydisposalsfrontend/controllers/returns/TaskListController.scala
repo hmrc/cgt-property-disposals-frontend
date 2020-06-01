@@ -167,6 +167,14 @@ class TaskListController @Inject() (
               singleIndirect.supportingEvidenceAnswers
             )(Some(_))
           ),
+        multipleIndirect =>
+          multipleIndirect.copy(
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
+              multipleIndirect.yearToDateLiabilityAnswers
+            )(Some(_)),
+            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
+              .fold(multipleIndirect.supportingEvidenceAnswers)(Some(_))
+          ),
         singleMixedUse =>
           singleMixedUse.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
@@ -175,14 +183,6 @@ class TaskListController @Inject() (
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers.fold(
               singleMixedUse.supportingEvidenceAnswers
             )(Some(_))
-          ),
-        multipleIndirect =>
-          multipleIndirect.copy(
-            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
-              multipleIndirect.yearToDateLiabilityAnswers
-            )(Some(_)),
-            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
-              .fold(multipleIndirect.supportingEvidenceAnswers)(Some(_))
           )
       )
 
