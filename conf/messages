@@ -1285,9 +1285,9 @@ disposalFees.agent.indirect.error.invalid=The additional costs when the shares w
 disposalFees.trust.error.invalid=How much the trust paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
 disposalFees.trust.indirect.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
 disposalFees.capacitor.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
-disposalFees.capacitor.indirect.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
+disposalFees.capacitor.indirect.error.invalid=The person’s additional costs when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalFees.personalRep.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
-disposalFees.personalRep.indirect.error.invalid=The person’s additional costs when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
+disposalFees.personalRep.indirect.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
 
 disposalFees.error.tooSmall=How much you paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.indirect.error.tooSmall=The additional costs when you sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000

@@ -1276,12 +1276,18 @@ class DisposalDetailsControllerSpec
           checkPageIsDisplayed(
             performAction(data),
             messageFromMessageKey(s"$key$userKey$disposalMethodKey.title"),
-            doc =>
+            doc => {
               doc
                 .select("#error-summary-display > ul > li > a")
-                .text() shouldBe messageFromMessageKey(
+                .text()       shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              ),
+              )
+              doc
+                .select("#back")
+                .attr("href") shouldBe routes.DisposalDetailsController
+                .checkYourAnswers()
+                .url
+            },
             BAD_REQUEST
           )
         }
