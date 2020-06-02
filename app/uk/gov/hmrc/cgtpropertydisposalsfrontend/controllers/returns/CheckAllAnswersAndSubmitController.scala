@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -295,6 +295,23 @@ class CheckAllAnswersAndSubmitController @Inject() (
             )
           ) =>
         CompleteSingleIndirectDisposalReturn
+          .fromDraftReturn(draftReturn)
+          .fold[Future[Result]](
+            Redirect(routes.TaskListController.taskList())
+          )(f(s, r, _))
+
+      case Some(
+            (
+              s,
+              r @ FillingOutReturn(
+                _,
+                _,
+                _,
+                draftReturn: DraftMultipleIndirectDisposalsReturn
+              )
+            )
+          ) =>
+        CompleteMultipleIndirectDisposalReturn
           .fromDraftReturn(draftReturn)
           .fold[Future[Result]](
             Redirect(routes.TaskListController.taskList())
