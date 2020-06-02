@@ -74,7 +74,7 @@ object AddressJourneyType {
 
     final case class EnteringCompanyDetails(
       journey: FillingOutReturn,
-      draftReturn: DraftSingleIndirectDisposalReturn,
+      draftReturn: Either[DraftMultipleIndirectDisposalsReturn, DraftSingleIndirectDisposalReturn],
       representativeType: Option[
         Either[PersonalRepresentative.type, Capacitor.type]
       ],
@@ -102,7 +102,12 @@ object AddressJourneyType {
             _ => "returns.property-details.multipleDisposals.caption",
             _ => "returns.property-address.singleDisposal.caption"
           )
-        case _: EnteringCompanyDetails                   => "companyDetails.caption"
+        case c: EnteringCompanyDetails                   =>
+          c.draftReturn.fold(
+            _ => "returns.company-details.multipleIndirectDisposals.caption",
+            _ => "companyDetails.caption"
+          )
+
         case _: ChangingRepresenteeContactAddressJourney =>
           "representee.caption"
       }

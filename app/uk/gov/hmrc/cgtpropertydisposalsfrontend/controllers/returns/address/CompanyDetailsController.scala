@@ -16,25 +16,32 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
+import cats.syntax.order._
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.Inject
+import play.api.data.Form
+import play.api.data.Forms.{mapping, of}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleIndirectDisposalReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftMultipleIndirectDisposalsReturn, DraftSingleIndirectDisposalReturn, ExampleCompanyDetailsAnswers, ExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.EnteringCompanyDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{EnteringCompanyDetails, FillingOutReturnAddressJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -52,6 +59,10 @@ class CompanyDetailsController @Inject() (
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
   val isUkPage: views.html.address.isUk,
+  val multipleIndirectDisposalsGuidancePage: views.html.returns.address.multiple_indirect_disposals_guidance,
+  val multipleIndirectDisposalPricePage: views.html.returns.address.multiple_indirect_disposals_disposal_price,
+  val multipleIndirectAcquisitionPricePage: views.html.returns.address.multiple_indirect_disposals_acquisition_price,
+  val multipleIndirectCheckYourAnswersPage: views.html.returns.address.multiple_indirect_disposals_check_your_answers,
   checkYourAnswersPage: views.html.returns.address.single_indirect_disposal_check_your_answers
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
@@ -84,7 +95,27 @@ class CompanyDetailsController @Inject() (
         Right(
           sessionData -> EnteringCompanyDetails(
             f,
-            i,
+            Right(i),
+            i.triageAnswers.representativeType(),
+            f.subscribedDetails.isATrust
+          )
+        )
+
+      case Some(
+            (
+              sessionData,
+              f @ FillingOutReturn(
+                _,
+                _,
+                _,
+                i: DraftMultipleIndirectDisposalsReturn
+              )
+            )
+          ) =>
+        Right(
+          sessionData -> EnteringCompanyDetails(
+            f,
+            Left(i),
             i.triageAnswers.representativeType(),
             f.subscribedDetails.isATrust
           )
@@ -102,8 +133,15 @@ class CompanyDetailsController @Inject() (
     request: Request[_]
   ): EitherT[Future, Error, JourneyStatus] = {
     val newJourney = journey.journey.copy(
-      draftReturn = journey.draftReturn.copy(
-        companyAddress = Some(address)
+      draftReturn = journey.draftReturn.fold(
+        _.copy(exampleCompanyDetailsAnswers =
+          Some(
+            IncompleteExampleCompanyDetailsAnswers.empty.copy(
+              address = Some(address)
+            )
+          )
+        ),
+        _.copy(companyAddress = Some(address))
       )
     )
 
@@ -130,14 +168,367 @@ class CompanyDetailsController @Inject() (
   override def selectAddressSubmit(): Action[AnyContent] =
     redirectToEnterUkAddress
 
+  def multipleIndirectDisposalsGuidance(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleIndirectDisposalsReturn) =>
+            val backLink =
+              m.exampleCompanyDetailsAnswers
+                .fold(controllers.returns.routes.TaskListController.taskList())(_ =>
+                  routes.CompanyDetailsController.checkYourAnswers()
+                )
+
+            Ok(
+              multipleIndirectDisposalsGuidancePage(
+                backLink,
+                r.journey.subscribedDetails.isATrust,
+                r.representativeType
+              )
+            )
+        }
+      }
+    }
+
+  def multipleIndirectDisposalsGuidanceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+            Redirect(routes.CompanyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleIndirectDisposalsReturn) =>
+            val redirectTo =
+              m.exampleCompanyDetailsAnswers
+                .getOrElse(IncompleteExampleCompanyDetailsAnswers.empty)
+                .fold(
+                  _ => routes.CompanyDetailsController.isUk(),
+                  _ => routes.CompanyDetailsController.checkYourAnswers()
+                )
+
+            Redirect(redirectTo)
+        }
+      }
+    }
+
+  private def disposalPriceBackLink(
+    answers: ExampleCompanyDetailsAnswers
+  ): Call =
+    answers.fold(
+      _ => routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+      _ => routes.CompanyDetailsController.checkYourAnswers()
+    )
+
+  def multipleIndirectDisposalPrice(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case Left(m: DraftMultipleIndirectDisposalsReturn) =>
+            val answers = m.exampleCompanyDetailsAnswers
+              .getOrElse(IncompleteExampleCompanyDetailsAnswers.empty)
+
+            val backLink = disposalPriceBackLink(answers)
+
+            val disposalPrice = answers
+              .fold(_.disposalPrice, c => Some(c.disposalPrice))
+
+            val form = disposalPrice.fold(multipleIndirectDisposalPriceForm)(c =>
+              multipleIndirectDisposalPriceForm.fill(c.inPounds)
+            )
+
+            Ok(
+              multipleIndirectDisposalPricePage(
+                form,
+                backLink,
+                r.journey.subscribedDetails.isATrust,
+                r.representativeType
+              )
+            )
+        }
+      }
+    }
+
+  def multipleIndirectDisposalPriceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+
+          case Left(m: DraftMultipleIndirectDisposalsReturn) =>
+            val answers  = m.exampleCompanyDetailsAnswers
+              .getOrElse(IncompleteExampleCompanyDetailsAnswers.empty)
+            val backLink = disposalPriceBackLink(answers)
+
+            multipleIndirectDisposalPriceForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    multipleIndirectDisposalPricePage(
+                      formWithErrors,
+                      backLink,
+                      r.journey.subscribedDetails.isATrust,
+                      r.representativeType
+                    )
+                  ),
+                disposalPrice =>
+                  if (
+                    answers
+                      .fold(_.disposalPrice, c => Some(c.disposalPrice))
+                      .contains(AmountInPence.fromPounds(disposalPrice))
+                  )
+                    Redirect(
+                      routes.CompanyDetailsController.checkYourAnswers()
+                    )
+                  else {
+                    val updatedAnswers     =
+                      answers
+                        .fold(
+                          _.copy(disposalPrice = Some(AmountInPence.fromPounds(disposalPrice))),
+                          _.copy(disposalPrice = AmountInPence.fromPounds(disposalPrice))
+                        )
+                    val updatedDraftReturn = m.copy(
+                      exampleCompanyDetailsAnswers = Some(updatedAnswers),
+                      yearToDateLiabilityAnswers = None
+                    )
+                    val result             = for {
+                      _ <- returnsService.storeDraftReturn(
+                             updatedDraftReturn,
+                             r.journey.subscribedDetails.cgtReference,
+                             r.journey.agentReferenceNumber
+                           )
+                      _ <- EitherT(
+                             updateSession(sessionStore, request)(
+                               _.copy(journeyStatus =
+                                 Some(
+                                   r.journey.copy(draftReturn = updatedDraftReturn)
+                                 )
+                               )
+                             )
+                           )
+                    } yield ()
+
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not update draft return", e)
+                        errorHandler.errorResult()
+                      },
+                      _ =>
+                        Redirect(
+                          routes.CompanyDetailsController.checkYourAnswers()
+                        )
+                    )
+                  }
+              )
+        }
+      }
+    }
+
+  private def acquisitionPriceBackLink(
+    answers: ExampleCompanyDetailsAnswers
+  ): Call =
+    answers.fold(
+      _ => routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+      _ => routes.CompanyDetailsController.checkYourAnswers()
+    )
+
+  def multipleIndirectAcquisitionPrice(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+
+          case Left(m: DraftMultipleIndirectDisposalsReturn) =>
+            val answers = m.exampleCompanyDetailsAnswers
+              .getOrElse(IncompleteExampleCompanyDetailsAnswers.empty)
+
+            val backLink = acquisitionPriceBackLink(answers)
+
+            val acquisitionPrice = answers
+              .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+
+            val form = acquisitionPrice.fold(multipleIndirectAcquisitionPriceForm)(c =>
+              multipleIndirectAcquisitionPriceForm.fill(c.inPounds)
+            )
+
+            Ok(
+              multipleIndirectAcquisitionPricePage(
+                form,
+                backLink,
+                r.journey.subscribedDetails.isATrust,
+                r.representativeType
+              )
+            )
+        }
+      }
+    }
+
+  def multipleIndirectAcquisitionPriceSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidJourney(request) { (_, r) =>
+        r.draftReturn match {
+          case Right(_: DraftSingleIndirectDisposalReturn)   =>
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+
+          case Left(m: DraftMultipleIndirectDisposalsReturn) =>
+            val answers  = m.exampleCompanyDetailsAnswers
+              .getOrElse(IncompleteExampleCompanyDetailsAnswers.empty)
+            val backLink = acquisitionPriceBackLink(answers)
+
+            multipleIndirectAcquisitionPriceForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    multipleIndirectAcquisitionPricePage(
+                      formWithErrors,
+                      backLink,
+                      r.journey.subscribedDetails.isATrust,
+                      r.representativeType
+                    )
+                  ),
+                acquisitionPrice =>
+                  if (
+                    answers
+                      .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+                      .contains(AmountInPence.fromPounds(acquisitionPrice))
+                  )
+                    Redirect(
+                      routes.CompanyDetailsController.checkYourAnswers()
+                    )
+                  else {
+                    val updatedAnswers     =
+                      answers
+                        .fold(
+                          _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(acquisitionPrice))),
+                          _.copy(acquisitionPrice = AmountInPence.fromPounds(acquisitionPrice))
+                        )
+                    val updatedDraftReturn = m.copy(
+                      exampleCompanyDetailsAnswers = Some(updatedAnswers),
+                      yearToDateLiabilityAnswers = None
+                    )
+                    val result             = for {
+                      _ <- returnsService.storeDraftReturn(
+                             updatedDraftReturn,
+                             r.journey.subscribedDetails.cgtReference,
+                             r.journey.agentReferenceNumber
+                           )
+                      _ <- EitherT(
+                             updateSession(sessionStore, request)(
+                               _.copy(journeyStatus =
+                                 Some(
+                                   r.journey.copy(draftReturn = updatedDraftReturn)
+                                 )
+                               )
+                             )
+                           )
+                    } yield ()
+
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not update draft return", e)
+                        errorHandler.errorResult()
+                      },
+                      _ =>
+                        Redirect(
+                          routes.CompanyDetailsController.checkYourAnswers()
+                        )
+                    )
+                  }
+              )
+        }
+      }
+    }
+
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
         case (_, journey) =>
-          journey.draftReturn.companyAddress.fold(
-            Redirect(routes.CompanyDetailsController.isUk())
-          )(companyAddress => Ok(checkYourAnswersPage(companyAddress)))
+          journey.draftReturn match {
 
+            case Right(singleIndirect)  =>
+              singleIndirect.companyAddress.fold(
+                Redirect(routes.CompanyDetailsController.isUk())
+              )(companyAddress => Ok(checkYourAnswersPage(companyAddress)))
+
+            case Left(multipleIndirect) =>
+              multipleIndirect.exampleCompanyDetailsAnswers.fold[Future[Result]](
+                Redirect(routes.CompanyDetailsController.multipleIndirectDisposalsGuidance())
+              ) {
+
+                case IncompleteExampleCompanyDetailsAnswers(None, _, _)                  =>
+                  Redirect(
+                    routes.CompanyDetailsController.multipleIndirectDisposalsGuidance()
+                  )
+
+                case IncompleteExampleCompanyDetailsAnswers(_, None, _)                  =>
+                  Redirect(
+                    routes.CompanyDetailsController.multipleIndirectDisposalPrice()
+                  )
+
+                case IncompleteExampleCompanyDetailsAnswers(_, _, None)                  =>
+                  Redirect(
+                    routes.CompanyDetailsController.multipleIndirectAcquisitionPrice()
+                  )
+
+                case IncompleteExampleCompanyDetailsAnswers(Some(a), Some(dp), Some(ap)) =>
+                  val completeAnswers    = CompleteExampleCompanyDetailsAnswers(a, dp, ap)
+                  val updatedDraftReturn = multipleIndirect.copy(
+                    exampleCompanyDetailsAnswers = Some(completeAnswers)
+                  )
+
+                  val result = for {
+                    _ <- returnsService.storeDraftReturn(
+                           updatedDraftReturn,
+                           journey.journey.subscribedDetails.cgtReference,
+                           journey.journey.agentReferenceNumber
+                         )
+                    _ <- EitherT(
+                           updateSession(sessionStore, request)(
+                             _.copy(journeyStatus =
+                               Some(
+                                 journey.journey.copy(
+                                   draftReturn = updatedDraftReturn
+                                 )
+                               )
+                             )
+                           )
+                         )
+                  } yield ()
+
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not update draft return", e)
+                      errorHandler.errorResult()
+                    },
+                    _ =>
+                      Ok(
+                        multipleIndirectCheckYourAnswersPage(
+                          completeAnswers,
+                          true, //TODO: check it "shouldAskIfPostcodeExists(assetTypes)"
+                          journey.journey.subscribedDetails.isATrust,
+                          journey.representativeType
+                        )
+                      )
+                  )
+
+                case c: CompleteExampleCompanyDetailsAnswers                             =>
+                  Ok(
+                    multipleIndirectCheckYourAnswersPage(
+                      c,
+                      true, //TODO: check it "shouldAskIfPostcodeExists(assetTypes)"
+                      journey.journey.subscribedDetails.isATrust,
+                      journey.representativeType
+                    )
+                  )
+
+              }
+          }
       }
     }
 
@@ -150,9 +541,14 @@ class CompanyDetailsController @Inject() (
     }
 
   protected def backLinkCall: EnteringCompanyDetails => Call =
-    _.draftReturn.companyAddress.fold(
-      controllers.returns.routes.TaskListController.taskList()
-    )(_ => routes.CompanyDetailsController.checkYourAnswers())
+    _.draftReturn.fold(
+      _.exampleCompanyDetailsAnswers.fold(
+        controllers.returns.routes.TaskListController.taskList()
+      )(_ => routes.CompanyDetailsController.checkYourAnswers()),
+      _.companyAddress.fold(
+        controllers.returns.routes.TaskListController.taskList()
+      )(_ => routes.CompanyDetailsController.checkYourAnswers())
+    )
 
   protected lazy val isUkCall: Call                                                 = routes.CompanyDetailsController.isUk()
   protected lazy val isUkSubmitCall: Call                                           =
@@ -176,4 +572,29 @@ class CompanyDetailsController @Inject() (
   protected lazy val continueCall: Call                                             =
     routes.CompanyDetailsController.checkYourAnswers()
   override protected val enterUkAddressBackLinkCall: EnteringCompanyDetails => Call = _ => isUkCall
+
+}
+
+object CompanyDetailsController {
+
+  val multipleIndirectDisposalPriceForm: Form[BigDecimal] =
+    Form(
+      mapping(
+        "multipleIndirectDisposalsDisposalPrice" -> of(
+          MoneyUtils
+            .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
+        )
+      )(identity)(Some(_))
+    )
+
+  val multipleIndirectAcquisitionPriceForm: Form[BigDecimal] =
+    Form(
+      mapping(
+        "multipleIndirectDisposalsAcquisitionPrice" -> of(
+          MoneyUtils
+            .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
+        )
+      )(identity)(Some(_))
+    )
+
 }

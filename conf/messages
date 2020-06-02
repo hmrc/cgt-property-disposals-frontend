@@ -976,6 +976,7 @@ task-list.indirect.enter-example-property-address.link=Enter details of one comp
 
 returns.property-address.singleDisposal.caption=Property address
 returns.property-details.multipleDisposals.caption=Details of one property disposal
+returns.company-details.multipleIndirectDisposals.caption=Details of one company
 
 property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
 property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.

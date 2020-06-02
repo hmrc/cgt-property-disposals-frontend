@@ -1,0 +1,78 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+
+@this(
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+)
+
+@(
+    answers: CompleteExampleCompanyDetailsAnswers,
+    shouldAskIfPostcodeExists: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages)
+
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else ""
+}
+
+@cyaSection() {
+@cyaRow(
+        messages("returns.property-address.cyaLabel.property-address"),
+        addressDisplay(answers.address, DisplayFormat.Block),
+        Some(cyaChange(messages("returns.property-address.cyaChange.property-address"),
+            if(shouldAskIfPostcodeExists) routes.CompanyDetailsController.isUk().url
+            else routes.CompanyDetailsController.enterPostcode().url
+        )),
+        "property-address"
+    )
+
+    @cyaRow(
+        messages("multipleDisposalsDisposalPrice.title"),
+        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
+        Some(cyaChange(messages("multipleDisposalsDisposalPrice.cyaChange"), returns.address.routes.CompanyDetailsController.multipleIndirectDisposalPrice().url)),
+        "multipleDisposalsDisposalPrice"
+    )
+
+    @cyaRow(
+        messages("multipleDisposalsAcquisitionPrice.title"),
+        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
+        Some(cyaChange(messages("multipleDisposalsAcquisitionPrice.cyaChange"), returns.address.routes.CompanyDetailsController.multipleIndirectAcquisitionPrice().url)),
+        "multipleDisposalsAcquisitionPrice"
+    )
+
+}
