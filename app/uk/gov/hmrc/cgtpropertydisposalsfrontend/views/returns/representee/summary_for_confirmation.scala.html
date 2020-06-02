@@ -16,8 +16,6 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.NINO
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -31,19 +29,17 @@
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
 cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
         id: RepresenteeReferenceId,
-        name: IndividualName,
-        representativeType: Either[PersonalRepresentative.type, Capacitor.type]
+        name: IndividualName
 )(implicit messages: Messages)
 @isDisplayedWithLabelAndId = @{
     {
         id match {
-            case RepresenteeNino(NINO(value)) => (false, "", "")
-            case RepresenteeSautr(SAUTR(value)) => (false, "", "")
+            case RepresenteeNino(NINO(_)) => (false, "", "")
+            case RepresenteeSautr(SAUTR(_)) => (false, "", "")
             case RepresenteeCgtReference(CgtReference(value)) => (true, messages("representeeConfirmPerson.summaryLine2.cgtReferenceId"), value)
             case NoReferenceId => (false, "", "")
         }

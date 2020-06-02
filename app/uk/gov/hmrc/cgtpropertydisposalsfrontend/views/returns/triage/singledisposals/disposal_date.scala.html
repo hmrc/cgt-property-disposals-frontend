@@ -24,7 +24,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
@@ -43,7 +42,6 @@
   form: Form[LocalDate],
   backLink: Call,
   displayReturnToSummaryLink: Boolean,
-  assetType: AssetType,
   isATrust: Boolean,
   representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)

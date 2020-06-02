@@ -27,7 +27,6 @@
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
@@ -36,7 +35,6 @@
 @(
         answers: CompleteRepresenteeAnswers,
         representativeType: Either[PersonalRepresentative.type, Capacitor.type],
-        displayReturnToSummaryLink: Boolean,
         backLink: Call
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 

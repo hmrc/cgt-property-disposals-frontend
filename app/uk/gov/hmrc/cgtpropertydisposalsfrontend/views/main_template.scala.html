@@ -21,7 +21,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
-        uiSidebar: uk.gov.hmrc.play.views.html.layouts.Sidebar,
         uiArticle: uk.gov.hmrc.play.views.html.layouts.Article,
         govUkWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.govuk_wrapper
 )
@@ -29,7 +28,6 @@
 @(title: String,
         hasErrors: Boolean = false,
         userType: Option[UserType],
-        sidebarLinks: Option[Html] = None,
         contentHeader: Option[Html] = None,
         bodyClasses: Option[String] = None,
         mainClass: Option[String] = None,
@@ -44,7 +42,6 @@
 
 @govUkWrapper(appConfig = appConfig,
     title = title,
-    userType = userType,
     hasErrors = hasErrors,
     mainClass = mainClass,
     bodyClasses = bodyClasses,

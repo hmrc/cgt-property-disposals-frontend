@@ -480,7 +480,7 @@ class SupportingEvidenceController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withUploadSupportingEvidenceAnswers(request) { (_, fillingOutReturn, answers) =>
+      withUploadSupportingEvidenceAnswers(request) { (_, _, answers) =>
         checkYourAnswersHandler(answers)
       }
     }

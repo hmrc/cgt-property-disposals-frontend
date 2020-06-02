@@ -35,7 +35,6 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
@@ -57,7 +56,6 @@
 @(
 id: RepresenteeReferenceId,
 name: IndividualName,
-representativeType: Either[PersonalRepresentative.type, Capacitor.type],
 displayReturnToSummaryLink: Boolean,
 form: Form[Boolean],
 backLink: Call
@@ -83,7 +81,7 @@ backLink: Call
 
     @warning(messages("representeeConfirmPerson.warning"))
 
-    @summary_for_confirmation(id, name, representativeType)
+    @summary_for_confirmation(id, name)
 
     @formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
         @yesNo(

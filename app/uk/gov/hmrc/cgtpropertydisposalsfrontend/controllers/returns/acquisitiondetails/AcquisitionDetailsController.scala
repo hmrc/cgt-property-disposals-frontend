@@ -737,7 +737,7 @@ class AcquisitionDetailsController @Inject() (
 
   def shouldUseRebase(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, state, answers) =>
+      withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, _, state, _) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasAUkResident) =>
           if (wasAUkResident)
             Redirect(routes.AcquisitionDetailsController.checkYourAnswers())

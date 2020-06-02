@@ -222,7 +222,7 @@ class RepresenteeController @Inject() (
 
   def confirmPerson(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
         answers match {
           case IncompleteRepresenteeAnswers(
                 Some(name),
@@ -236,7 +236,6 @@ class RepresenteeController @Inject() (
               confirmPersonPage(
                 id,
                 name,
-                representativeType,
                 journey.isRight,
                 confirmPersonForm,
                 routes.RepresenteeController.enterId()
@@ -250,7 +249,7 @@ class RepresenteeController @Inject() (
 
   def confirmPersonSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
         answers match {
           case incompleteRepresenteeAnswers @ IncompleteRepresenteeAnswers(
                 Some(name),
@@ -268,7 +267,6 @@ class RepresenteeController @Inject() (
                     confirmPersonPage(
                       id,
                       name,
-                      representativeType,
                       journey.isRight,
                       formWithErrors,
                       routes.RepresenteeController.enterId()
@@ -748,7 +746,6 @@ class RepresenteeController @Inject() (
                   cyaPage(
                     completeAnswers,
                     representativeType,
-                    journey.isRight,
                     triageRoutes.CommonTriageQuestionsController
                       .whoIsIndividualRepresenting()
                   )
@@ -760,7 +757,6 @@ class RepresenteeController @Inject() (
               cyaPage(
                 completeAnswers,
                 representativeType,
-                journey.isRight,
                 triageRoutes.CommonTriageQuestionsController
                   .whoIsIndividualRepresenting()
               )

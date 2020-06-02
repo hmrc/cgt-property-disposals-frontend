@@ -52,10 +52,7 @@ class HomePageController @Inject() (
   returnsService: ReturnsService,
   paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
-  manageYourDetailsPage: views.html.account.manage_your_details,
   homePage: views.html.account.home,
-  detailUpdatedPage: views.html.account.details_updated,
-  signedOutPage: views.html.account.signed_out,
   subsequentReturnExitPage: views.html.returns.subsequent_return_exit
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
