@@ -58,19 +58,19 @@ trait AddressController[A <: AddressJourneyType] {
   implicit val ec: ExecutionContext
 
   def validJourney(
-                    request: RequestWithSessionData[_]
-                  ): Either[Result, (SessionData, A)]
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, A)]
 
   def isATrust(journey: A): Boolean
 
   def updateAddress(
-                     journey: A,
-                     address: Address,
-                     isManuallyEnteredAddress: Boolean
-                   )(implicit
-                     hc: HeaderCarrier,
-                     request: Request[_]
-                   ): EitherT[Future, Error, JourneyStatus]
+    journey: A,
+    address: Address,
+    isManuallyEnteredAddress: Boolean
+  )(implicit
+    hc: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, JourneyStatus]
 
   protected def backLinkCall: A => Call
 
@@ -88,7 +88,7 @@ trait AddressController[A <: AddressJourneyType] {
   protected val exitPageCall: Call
 
   protected val enterUkAddressBackLinkCall: A => Call = backLinkCall
-  protected val enterPostcodePageBackLink: A => Call = _ => isUkCall
+  protected val enterPostcodePageBackLink: A => Call  = _ => isUkCall
 
   protected def withValidJourney(request: RequestWithSessionData[_])(
     f: (SessionData, A) => Future[Result]
@@ -108,7 +108,7 @@ trait AddressController[A <: AddressJourneyType] {
             updateSession(sessionStore, request)(
               _.copy(addressLookupResult = None)
             ).map {
-              case Left(e) =>
+              case Left(e)  =>
                 logger.warn(s"Could not clear addressLookupResult", e)
                 errorHandler.errorResult()
               case Right(_) =>
@@ -150,11 +150,11 @@ trait AddressController[A <: AddressJourneyType] {
                   )
                 ),
               {
-                case true =>
+                case true  =>
                   registeredWithId(journey) match {
                     case Some(isRegisteredWithId) =>
                       if (isRegisteredWithId) Redirect(enterPostcodeCall) else Redirect(exitPageCall)
-                    case None =>
+                    case None                     =>
                       logger.error("could not determine if user is registered with or without id")
                       errorHandler.errorResult()
                   }
@@ -309,14 +309,14 @@ trait AddressController[A <: AddressJourneyType] {
                       if (a.addresses.isEmpty) handleEmptyAddresses(a)
                       else Redirect(selectAddressCall)
 
-                    case _ =>
+                    case _                                                                                          =>
                       val result = for {
                         addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
-                        _ <- EitherT(
-                          updateSession(sessionStore, request)(
-                            _.copy(addressLookupResult = Some(addressLookupResult))
-                          )
-                        )
+                        _                   <- EitherT(
+                                                 updateSession(sessionStore, request)(
+                                                   _.copy(addressLookupResult = Some(addressLookupResult))
+                                                 )
+                                               )
                       } yield addressLookupResult
 
                       result.fold(
@@ -344,7 +344,7 @@ trait AddressController[A <: AddressJourneyType] {
       withValidJourney(request) {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
-            case None =>
+            case None                                       =>
               Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
@@ -370,7 +370,7 @@ trait AddressController[A <: AddressJourneyType] {
       withValidJourney(request) {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
-            case None =>
+            case None                                       =>
               Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
@@ -398,22 +398,22 @@ trait AddressController[A <: AddressJourneyType] {
     }
 
   protected def storeAddress(
-                              continue: Call,
-                              currentJourneyStatus: A,
-                              isManuallyEnteredAddress: Boolean
-                            )(
-                              address: Address
-                            )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+    continue: Call,
+    currentJourneyStatus: A,
+    isManuallyEnteredAddress: Boolean
+  )(
+    address: Address
+  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
       journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address, isManuallyEnteredAddress)
-      _ <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
-        EitherT.pure[Future, Error](())
-      else
-        EitherT[Future, Error, Unit](
-          updateSession(sessionStore, request)(
-            _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
-          )
-        )
+      _                         <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
+                                     EitherT.pure[Future, Error](())
+                                   else
+                                     EitherT[Future, Error, Unit](
+                                       updateSession(sessionStore, request)(
+                                         _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
+                                       )
+                                     )
     } yield ()
 
     result.fold(
@@ -427,37 +427,37 @@ trait AddressController[A <: AddressJourneyType] {
   }
 
   private def extractRepresentitiveType(
-                                         journey: AddressJourneyType
-                                       ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    journey: AddressJourneyType
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
     journey match {
       case j: FillingOutReturnAddressJourney =>
         j.individualUserType match {
           case Some(value) =>
             value match {
-              case IndividualUserType.Capacitor =>
+              case IndividualUserType.Capacitor              =>
                 Some(Right(IndividualUserType.Capacitor))
               case IndividualUserType.PersonalRepresentative =>
                 Some(Left(IndividualUserType.PersonalRepresentative))
-              case _ => None
+              case _                                         => None
             }
-          case _ => None
+          case _           => None
         }
-      case _ => None
+      case _                                 => None
     }
 
   private def registeredWithId(journey: AddressJourneyType): Option[Boolean] =
     journey match {
-      case onboarding: AddressJourneyType.Onboarding =>
+      case onboarding: AddressJourneyType.Onboarding             =>
         onboarding match {
-          case Onboarding.RegistrationReadyAddressJourney(_) => Some(false)
+          case Onboarding.RegistrationReadyAddressJourney(_)              => Some(false)
           case Onboarding.IndividualSupplyingInformationAddressJourney(_) => Some(false)
-          case Onboarding.SubscriptionReadyAddressJourney(_) => Some(true)
+          case Onboarding.SubscriptionReadyAddressJourney(_)              => Some(true)
         }
       case subscription: AddressJourneyType.ManagingSubscription =>
         subscription match {
           case ManagingSubscription.SubscribedAddressJourney(subscribed) =>
             Some(subscribed.subscribedDetails.registeredWithId)
         }
-      case _: AddressJourneyType.Returns => Some(true)
+      case _: AddressJourneyType.Returns                         => Some(true)
     }
 }
