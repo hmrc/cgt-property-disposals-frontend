@@ -559,6 +559,8 @@ object ReliefDetailsController {
     draftReturn.fold(
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType()
     )
 

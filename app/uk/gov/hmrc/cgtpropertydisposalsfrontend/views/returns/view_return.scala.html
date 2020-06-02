@@ -21,8 +21,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, ReturnSummary}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteSingleDisposalReturn, CompleteMultipleDisposalsReturn}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteSingleDisposalReturn, CompleteMultipleDisposalsReturn, CompleteSingleIndirectDisposalReturn}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
@@ -49,6 +50,7 @@
         disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
         reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
+        singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
         printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
@@ -92,6 +94,7 @@
             completeReturn match {
                 case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
                 case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
+                case c: CompleteSingleIndirectDisposalReturn => addressDisplay(c.companyAddress, Line)
             },
             None,
             "property-address-table"
@@ -131,7 +134,8 @@
               rebasingEligibilityUtil.isUk(s),
               rebasingEligibilityUtil.isEligibleForRebase(s),
               subscribedDetails.isATrust,
-              representativeType
+              representativeType,
+              s.triageAnswers.assetType
           )
 
           <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
@@ -147,11 +151,12 @@
           )
 
           @if(s.hasAttachments) {
-
+              <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
+              <p>@messages(s"$key.hasAttachments.p1")</p>
           }
       }
 
-      case m: CompleteMultipleDisposalsReturn => {
+    case m: CompleteMultipleDisposalsReturn => {
           <h2>@messages("task-list.triage.link")</h2>
           @multipleDisposalsTriageSummary(m.triageAnswers, subscribedDetails.isATrust)
 
@@ -169,7 +174,48 @@
             <p>@messages(s"$key.hasAttachments.p1")</p>
           }
       }
-  }
+
+    case s: CompleteSingleIndirectDisposalReturn => {
+        <h2>@messages("task-list.triage.link")</h2>
+        @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.enter-company-details.link")</h2>
+        @singleIndirectDisposalAddressSummary(s.companyAddress)
+
+        <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
+        @disposalDetailsSummary(
+            s.disposalDetails,
+            s.triageAnswers.disposalMethod,
+            subscribedDetails.isATrust,
+            representativeType,
+            isIndirectDisposal
+        )
+
+        <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
+        @acquisitionDetailsSummary(s.acquisitionDetails,
+            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
+            isUk = false,
+            rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate.value),
+            subscribedDetails.isATrust,
+            representativeType,
+            s.triageAnswers.assetType
+        )
+
+        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType),
+
+        @if(s.hasAttachments) {
+            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
+            <p>@messages(s"$key.hasAttachments.p1")</p>
+        }
+
+    }
+
+
+    }
 
   </div>
 

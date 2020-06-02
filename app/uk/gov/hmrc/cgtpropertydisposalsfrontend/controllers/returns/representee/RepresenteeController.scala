@@ -123,10 +123,14 @@ class RepresenteeController @Inject() (
           fillingOutReturn.draftReturn.fold(
             _.triageAnswers.fold(_.individualUserType, _.individualUserType),
             _.triageAnswers.fold(_.individualUserType, _.individualUserType),
+            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
+            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
             _.triageAnswers.fold(_.individualUserType, _.individualUserType)
           )
         val answers            = fillingOutReturn.draftReturn
           .fold(
+            _.representeeAnswers,
+            _.representeeAnswers,
             _.representeeAnswers,
             _.representeeAnswers,
             _.representeeAnswers
@@ -642,6 +646,8 @@ class RepresenteeController @Inject() (
           val individualUserType = fillingOutReturn.draftReturn.fold(
             _.triageAnswers.fold(_.individualUserType, _.individualUserType),
             _.triageAnswers.fold(_.individualUserType, _.individualUserType),
+            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
+            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
             _.triageAnswers.fold(_.individualUserType, _.individualUserType)
           )
 
@@ -656,6 +662,8 @@ class RepresenteeController @Inject() (
               )
             else
               fillingOutReturn.draftReturn.fold(
+                _.copy(representeeAnswers = Some(newAnswers)),
+                _.copy(representeeAnswers = Some(newAnswers)),
                 _.copy(representeeAnswers = Some(newAnswers)),
                 _.copy(representeeAnswers = Some(newAnswers)),
                 _.copy(representeeAnswers = Some(newAnswers))

@@ -100,6 +100,8 @@ class PropertyDetailsController @Inject() (
         val draftReturn = r.draftReturn.fold(
           m => Some(Left(m)),
           s => Some(Right(s)),
+          _ => None,
+          _ => None,
           _ => None
         )
 
@@ -249,14 +251,10 @@ class PropertyDetailsController @Inject() (
   }
 
   def singleDisposalHasUkPostcode(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      commonHasUkPostcodeBehaviour()
-    }
+    authenticatedActionWithSessionData.async(implicit request => commonHasUkPostcodeBehaviour())
 
   def multipleDisposalsHasUkPostcode(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      commonHasUkPostcodeBehaviour()
-    }
+    authenticatedActionWithSessionData.async(implicit request => commonHasUkPostcodeBehaviour())
 
   private def commonHasUkPostcodeBehaviour()(implicit
     request: RequestWithSessionData[_]
@@ -264,8 +262,7 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.journey.draftReturn
-            .fold(_ => false, _ => true, _ => true)
+          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
           Ok(
             hasValidPostcodePage(
               hasValidPostcodeForm,
@@ -279,14 +276,10 @@ class PropertyDetailsController @Inject() (
     }
 
   def singleDisposalHasUkPostcodeSubmit(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      commonHasUkPostcodeSubmitBehaviour()
-    }
+    authenticatedActionWithSessionData.async(implicit request => commonHasUkPostcodeSubmitBehaviour())
 
   def multipleDisposalsHasUkPostcodeSubmit(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      commonHasUkPostcodeSubmitBehaviour()
-    }
+    authenticatedActionWithSessionData.async(implicit request => commonHasUkPostcodeSubmitBehaviour())
 
   private def commonHasUkPostcodeSubmitBehaviour()(implicit
     request: RequestWithSessionData[_]
@@ -294,8 +287,7 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) { (_, fillingOutReturn) =>
       withAssetTypes(fillingOutReturn) { assetTypes =>
         if (shouldAskIfPostcodeExists(assetTypes)) {
-          val isSingleDisposal = fillingOutReturn.journey.draftReturn
-            .fold(_ => false, _ => true, _ => true)
+          val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
 
           hasValidPostcodeForm
             .bindFromRequest()
@@ -326,14 +318,10 @@ class PropertyDetailsController @Inject() (
     }
 
   def singleDisposalEnterLandUprn(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      commonEnterLandUprnBehaviour()
-    }
+    authenticatedActionWithSessionData.async(implicit request => commonEnterLandUprnBehaviour())
 
   def multipleDisposalsEnterLandUprn(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      commonEnterLandUprnBehaviour()
-    }
+    authenticatedActionWithSessionData.async(implicit request => commonEnterLandUprnBehaviour())
 
   private def commonEnterLandUprnBehaviour()(implicit
     request: RequestWithSessionData[_]
@@ -356,14 +344,10 @@ class PropertyDetailsController @Inject() (
     }
 
   def singleDisposalEnterLandUprnSubmit(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      commonEnterLandUprnSubmitBehaviour()
-    }
+    authenticatedActionWithSessionData.async(implicit request => commonEnterLandUprnSubmitBehaviour())
 
   def multipleDisposalsEnterLandUprnSubmit(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      commonEnterLandUprnSubmitBehaviour()
-    }
+    authenticatedActionWithSessionData.async(implicit request => commonEnterLandUprnSubmitBehaviour())
 
   private def commonEnterLandUprnSubmitBehaviour()(implicit
     request: RequestWithSessionData[_]
@@ -795,11 +779,7 @@ class PropertyDetailsController @Inject() (
       withValidJourney(request) { (_, r) =>
         withAssetTypes(r) { assetTypes =>
           lazy val representeeAnswers =
-            r.journey.draftReturn.fold(
-              _.representeeAnswers,
-              _.representeeAnswers,
-              _.representeeAnswers
-            )
+            r.draftReturn.fold(_.representeeAnswers, _.representeeAnswers)
 
           r.draftReturn match {
             case Left(m: DraftMultipleDisposalsReturn) =>

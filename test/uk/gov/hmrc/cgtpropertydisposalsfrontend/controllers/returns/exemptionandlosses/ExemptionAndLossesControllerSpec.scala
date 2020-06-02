@@ -35,14 +35,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
@@ -113,6 +111,27 @@ class ExemptionAndLossesControllerSpec
       case other                       => sys.error(s"User type '$other' not handled")
     }
 
+  private def sampleSingleDisposalTriageAnswers(
+    disposalDate: Option[DisposalDate],
+    individualUserType: Option[IndividualUserType]
+  ): IncompleteSingleDisposalTriageAnswers =
+    sample[IncompleteSingleDisposalTriageAnswers].copy(
+      disposalDate = disposalDate,
+      countryOfResidence = Some(Country.uk),
+      wasAUKResident = Some(true),
+      individualUserType = individualUserType
+    )
+
+  private def sampleFillingOutReturn(
+    draftReturn: DraftReturn,
+    userType: UserType
+  ) =
+    sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType)),
+      agentReferenceNumber = setAgentReferenceNumber(userType)
+    )
+
   def sessionWithSingleDisposalsState(
     answers: Option[ExemptionAndLossesAnswers],
     disposalDate: Option[DisposalDate],
@@ -121,30 +140,11 @@ class ExemptionAndLossesControllerSpec
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn =
       sample[DraftSingleDisposalReturn].copy(
-        triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
-          disposalDate = disposalDate,
-          countryOfResidence = Some(Country.uk),
-          wasAUKResident = Some(true),
-          individualUserType = individualUserType
-        ),
+        triageAnswers = sampleSingleDisposalTriageAnswers(disposalDate, individualUserType),
         exemptionAndLossesAnswers = answers
       )
 
-    val subscribe = SubscribedDetails(
-      setNameForUserType(userType),
-      sample[Email],
-      sample[UkAddress],
-      sample[ContactName],
-      sample[CgtReference],
-      None,
-      sample[Boolean]
-    )
-
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn = draftReturn,
-      subscribedDetails = subscribe,
-      agentReferenceNumber = setAgentReferenceNumber(userType)
-    )
+    val journey = sampleFillingOutReturn(draftReturn, userType)
 
     val sessionData = SessionData.empty.copy(
       journeyStatus = Some(journey),
@@ -189,20 +189,7 @@ class ExemptionAndLossesControllerSpec
         )
       )
 
-    val subscribe = SubscribedDetails(
-      setNameForUserType(userType),
-      sample[Email],
-      sample[UkAddress],
-      sample[ContactName],
-      sample[CgtReference],
-      None,
-      sample[Boolean]
-    )
-    val journey   = sample[FillingOutReturn].copy(
-      draftReturn = draftReturn,
-      subscribedDetails = subscribe,
-      agentReferenceNumber = setAgentReferenceNumber(userType)
-    )
+    val journey = sampleFillingOutReturn(draftReturn, userType)
 
     val sessionData = SessionData.empty.copy(
       journeyStatus = Some(journey),
@@ -225,6 +212,64 @@ class ExemptionAndLossesControllerSpec
       individualUserType
     )
 
+  def sessionWithSingleIndirectDisposalsState(
+    answers: ExemptionAndLossesAnswers,
+    disposalDate: DisposalDate,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType]
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+
+    val draftReturn =
+      sample[DraftSingleIndirectDisposalReturn].copy(
+        exemptionAndLossesAnswers = Some(answers),
+        triageAnswers = sampleSingleDisposalTriageAnswers(Some(disposalDate), individualUserType)
+      )
+
+    val subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType))
+
+    val journey = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = subscribedDetails,
+      agentReferenceNumber = setAgentReferenceNumber(userType)
+    )
+
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(journey),
+      userType = Some(userType)
+    )
+
+    (sessionData, journey, draftReturn)
+  }
+
+  def sessionWithSingleMixedUseDisposalsState(
+    answers: ExemptionAndLossesAnswers,
+    disposalDate: DisposalDate,
+    userType: UserType,
+    individualUserType: Option[IndividualUserType]
+  ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
+
+    val draftReturn =
+      sample[DraftSingleMixedUseDisposalReturn].copy(
+        exemptionAndLossesAnswers = Some(answers),
+        triageAnswers = sampleSingleDisposalTriageAnswers(Some(disposalDate), individualUserType)
+      )
+
+    val subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType))
+
+    val journey = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = subscribedDetails,
+      agentReferenceNumber = setAgentReferenceNumber(userType)
+    )
+
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(journey),
+      userType = Some(userType)
+    )
+
+    (sessionData, journey, draftReturn)
+  }
+
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
     case UserType.Agent | UserType.Organisation | UserType.Individual => true
     case _                                                            => false
@@ -236,7 +281,7 @@ class ExemptionAndLossesControllerSpec
       case _                                         => false
     }
 
-  "AcquisitionDetailsController" when {
+  "ExemptionAndLossesController" when {
 
     "handling requests to display the in year losses page" must {
 
@@ -367,7 +412,7 @@ class ExemptionAndLossesControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  sessionWithSingleDisposalState(
+                  sessionWithSingleIndirectDisposalsState(
                     sample[IncompleteExemptionAndLossesAnswers].copy(
                       inYearLosses = Some(AmountInPence.zero)
                     ),
@@ -403,7 +448,7 @@ class ExemptionAndLossesControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  sessionWithMultipleDisposalsState(
+                  sessionWithSingleMixedUseDisposalsState(
                     sample[IncompleteExemptionAndLossesAnswers].copy(
                       inYearLosses = Some(amountInPence)
                     ),
@@ -557,7 +602,7 @@ class ExemptionAndLossesControllerSpec
             inYearLosses = AmountInPence(newAmount.value + 1L)
           )
 
-          val (session, journey, draftReturn) = sessionWithSingleDisposalState(
+          val (session, journey, draftReturn) = sessionWithSingleIndirectDisposalsState(
             completeAnswers,
             sample[DisposalDate],
             userType,
@@ -727,7 +772,7 @@ class ExemptionAndLossesControllerSpec
                 inYearLosses = AmountInPence.zero
               )
 
-              val session = sessionWithSingleDisposalState(
+              val session = sessionWithSingleMixedUseDisposalsState(
                 answers,
                 sample[DisposalDate],
                 userType,
@@ -836,7 +881,7 @@ class ExemptionAndLossesControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  sessionWithSingleDisposalState(
+                  sessionWithSingleIndirectDisposalsState(
                     sample[CompleteExemptionAndLossesAnswers],
                     sample[DisposalDate],
                     userType,
@@ -874,7 +919,7 @@ class ExemptionAndLossesControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  sessionWithSingleDisposalState(
+                  sessionWithSingleMixedUseDisposalsState(
                     sample[IncompleteExemptionAndLossesAnswers].copy(
                       inYearLosses = Some(sample[AmountInPence]),
                       previousYearsLosses = Some(AmountInPence.zero)
@@ -1058,7 +1103,7 @@ class ExemptionAndLossesControllerSpec
               previousYearsLosses = AmountInPence(newAmount.value + 1L)
             )
 
-          val (session, journey, draftReturn) = sessionWithSingleDisposalState(
+          val (session, journey, draftReturn) = sessionWithSingleIndirectDisposalsState(
             answers,
             sample[DisposalDate],
             userType,
@@ -1370,7 +1415,7 @@ class ExemptionAndLossesControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  sessionWithSingleDisposalState(
+                  sessionWithSingleIndirectDisposalsState(
                     sample[CompleteExemptionAndLossesAnswers].copy(
                       annualExemptAmount = amount
                     ),
@@ -1415,7 +1460,7 @@ class ExemptionAndLossesControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    sessionWithSingleDisposalState(
+                    sessionWithSingleMixedUseDisposalsState(
                       sample[CompleteExemptionAndLossesAnswers]
                         .copy(annualExemptAmount = amount),
                       sample[DisposalDate],
@@ -2173,22 +2218,34 @@ class ExemptionAndLossesControllerSpec
       case (session, journey, draftReturn) =>
         withClue(s"For initial session $session: ") {
           val updatedDraftReturn = draftReturn.fold(
-            m =>
-              m.copy(
+            multiple =>
+              multiple.copy(
                 exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = m.yearToDateLiabilityAnswers
+                yearToDateLiabilityAnswers = multiple.yearToDateLiabilityAnswers
                   .flatMap(_.unsetAllButIncomeDetails())
               ),
-            s =>
-              s.copy(
+            single =>
+              single.copy(
                 exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers
+                yearToDateLiabilityAnswers = single.yearToDateLiabilityAnswers
                   .flatMap(_.unsetAllButIncomeDetails())
               ),
-            i =>
-              i.copy(
+            singleIndirect =>
+              singleIndirect.copy(
                 exemptionAndLossesAnswers = Some(newAnswers),
-                yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
+                yearToDateLiabilityAnswers = singleIndirect.yearToDateLiabilityAnswers
+                  .flatMap(_.unsetAllButIncomeDetails())
+              ),
+            multipleIndirect =>
+              multipleIndirect.copy(
+                exemptionAndLossesAnswers = Some(newAnswers),
+                yearToDateLiabilityAnswers = multipleIndirect.yearToDateLiabilityAnswers
+                  .flatMap(_.unsetAllButIncomeDetails())
+              ),
+            singleMixedUse =>
+              singleMixedUse.copy(
+                exemptionAndLossesAnswers = Some(newAnswers),
+                yearToDateLiabilityAnswers = singleMixedUse.yearToDateLiabilityAnswers
                   .flatMap(_.unsetAllButIncomeDetails())
               )
           )

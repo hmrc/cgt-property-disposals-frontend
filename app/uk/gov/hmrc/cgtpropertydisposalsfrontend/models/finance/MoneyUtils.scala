@@ -115,7 +115,8 @@ object MoneyUtils {
   def amountInPoundsYesNoForm(
     optionId: String,
     valueId: String,
-    maybeInnerOption: Option[InnerOption[BigDecimal]] = None
+    maybeInnerOption: Option[InnerOption[BigDecimal]] = None,
+    requiredErrorArgs: Seq[String] = Seq.empty
   ): Form[BigDecimal] = {
     val innerOption = maybeInnerOption.getOrElse(InnerOption { data =>
       FormUtils
@@ -131,7 +132,7 @@ object MoneyUtils {
     })
 
     val formatter =
-      ConditionalRadioUtils.formatter(optionId)(
+      ConditionalRadioUtils.formatter(optionId, requiredErrorArgs)(
         List(
           Left(innerOption),
           Right(BigDecimal("0"))

@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{tasklist => taskListPages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -52,9 +52,11 @@ class TaskListController @Inject() (
   configuration: Configuration,
   returnsService: ReturnsService,
   cc: MessagesControllerComponents,
-  singleDisposalTaskListPage: views.html.returns.single_disposal_task_list,
-  multipleDisposalsTaskListPage: views.html.returns.multiple_disposals_task_list,
-  singleIndirectDisposalTaskListPage: views.html.returns.single_indirect_disposal_task_list
+  singleDisposalTaskListPage: taskListPages.single_disposal_task_list,
+  multipleDisposalsTaskListPage: taskListPages.multiple_disposals_task_list,
+  singleIndirectDisposalTaskListPage: taskListPages.single_indirect_disposal_task_list,
+  singleMixedUseDisposalTaskListPage: taskListPages.single_mixed_use_disposal_task_list,
+  multipleIndirectDisposalTaskListPage: taskListPages.multiple_indirect_disposals_task_list
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -81,7 +83,9 @@ class TaskListController @Inject() (
             _.fold(
               m => Ok(multipleDisposalsTaskListPage(m)),
               s => Ok(singleDisposalTaskListPage(s)),
-              i => Ok(singleIndirectDisposalTaskListPage(i))
+              si => Ok(singleIndirectDisposalTaskListPage(si)),
+              mi => Ok(multipleIndirectDisposalTaskListPage(mi)),
+              sm => Ok(singleMixedUseDisposalTaskListPage(sm))
             )
           )
 
@@ -138,29 +142,46 @@ class TaskListController @Inject() (
       EitherT.pure[Future, Error](draftReturn)
     else {
       val updatedDraftReturn = draftReturn.fold(
-        m =>
-          m.copy(
+        multiple =>
+          multiple.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
-              m.yearToDateLiabilityAnswers
+              multiple.yearToDateLiabilityAnswers
             )(Some(_)),
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
-              .fold(m.supportingEvidenceAnswers)(Some(_))
+              .fold(multiple.supportingEvidenceAnswers)(Some(_))
           ),
-        s =>
-          s.copy(
+        single =>
+          single.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
-              s.yearToDateLiabilityAnswers
+              single.yearToDateLiabilityAnswers
             )(Some(_)),
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
-              .fold(s.supportingEvidenceAnswers)(Some(_))
+              .fold(single.supportingEvidenceAnswers)(Some(_))
           ),
-        i =>
-          i.copy(
+        singleIndirect =>
+          singleIndirect.copy(
             yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
-              i.yearToDateLiabilityAnswers
+              singleIndirect.yearToDateLiabilityAnswers
             )(Some(_)),
             supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers.fold(
-              i.supportingEvidenceAnswers
+              singleIndirect.supportingEvidenceAnswers
+            )(Some(_))
+          ),
+        multipleIndirect =>
+          multipleIndirect.copy(
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
+              multipleIndirect.yearToDateLiabilityAnswers
+            )(Some(_)),
+            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers
+              .fold(multipleIndirect.supportingEvidenceAnswers)(Some(_))
+          ),
+        singleMixedUse =>
+          singleMixedUse.copy(
+            yearToDateLiabilityAnswers = updatedYearToDateAnswers.fold(
+              singleMixedUse.yearToDateLiabilityAnswers
+            )(Some(_)),
+            supportingEvidenceAnswers = updatedUploadSupportingEvidenceAnswers.fold(
+              singleMixedUse.supportingEvidenceAnswers
             )(Some(_))
           )
       )
@@ -188,6 +209,8 @@ class TaskListController @Inject() (
       .fold(
         _.supportingEvidenceAnswers,
         _.supportingEvidenceAnswers,
+        _.supportingEvidenceAnswers,
+        _.supportingEvidenceAnswers,
         _.supportingEvidenceAnswers
       )
       .flatMap { answers =>
@@ -203,6 +226,8 @@ class TaskListController @Inject() (
   ): Option[(MandatoryEvidence, YearToDateLiabilityAnswers)] =
     draftReturn
       .fold(
+        _.yearToDateLiabilityAnswers,
+        _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers,
         _.yearToDateLiabilityAnswers

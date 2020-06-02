@@ -31,7 +31,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
@@ -40,13 +40,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiond
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, _}
@@ -88,6 +89,8 @@ class AcquisitionDetailsControllerSpec
       case (_, UserType.Agent)         => ".agent"
       case other                       => sys.error(s"User type '$other' not handled")
     }
+
+  def assetTypeMessageKey(assetType: AssetType): String = if (assetType === IndirectDisposal) ".indirect" else ""
 
   def setAgentReferenceNumber(
     userType: UserType
@@ -190,6 +193,11 @@ class AcquisitionDetailsControllerSpec
       case _                                         => false
     }
 
+  val acceptedAssetTypeGenerator: Gen[AssetType] = assetTypeGen.filter {
+    case IndirectDisposal | Residential | NonResidential => true
+    case _                                               => false
+  }
+
   "AcquisitionDetailsController" when {
 
     "handling requests to display the acquisition method page" must {
@@ -204,8 +212,8 @@ class AcquisitionDetailsControllerSpec
       "display the page" when {
 
         "the user has not completed the acquisition details section of the return" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               List(Some(IncompleteAcquisitionDetailsAnswers.empty), None)
                 .foreach { answers =>
                   withClue(s"For answers $answers: ") {
@@ -214,7 +222,7 @@ class AcquisitionDetailsControllerSpec
                       mockGetSession(
                         sessionWithState(
                           answers,
-                          None,
+                          Some(assetType),
                           None,
                           userType,
                           individualUserType,
@@ -223,12 +231,13 @@ class AcquisitionDetailsControllerSpec
                       )
                     }
 
-                    val userMsgKey =
+                    val userMsgKey   =
                       userMessageKey(individualUserType, userType)
+                    val assetTypeKey = assetTypeMessageKey(assetType)
 
                     checkPageIsDisplayed(
                       performAction(),
-                      messageFromMessageKey(s"$key$userMsgKey.title"),
+                      messageFromMessageKey(s"$key$userMsgKey$assetTypeKey.title"),
                       { doc =>
                         doc
                           .select("#back")
@@ -254,13 +263,14 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType) =>
               List(Some(IncompleteAcquisitionDetailsAnswers.empty), None)
                 .foreach { answers =>
+                  val assetType = sample[AssetType]
                   withClue(s"For answers $answers: ") {
                     inSequence {
                       mockAuthWithNoRetrievals()
                       mockGetSession(
                         sessionWithState(
                           sample[CompleteAcquisitionDetailsAnswers],
-                          sample[AssetType],
+                          assetType,
                           sample[Boolean],
                           userType,
                           individualUserType,
@@ -269,11 +279,12 @@ class AcquisitionDetailsControllerSpec
                       )
                     }
 
-                    val userKey = userMessageKey(individualUserType, userType)
+                    val userKey      = userMessageKey(individualUserType, userType)
+                    val assetTypeKey = assetTypeMessageKey(assetType)
 
                     checkPageIsDisplayed(
                       performAction(),
-                      messageFromMessageKey(s"$key$userKey.title"),
+                      messageFromMessageKey(s"$key$userKey$assetTypeKey.title"),
                       { doc =>
                         doc
                           .select("#back")
@@ -319,34 +330,39 @@ class AcquisitionDetailsControllerSpec
         )(
           userType: UserType,
           individualUserType: IndividualUserType,
+          assetType: AssetType,
           userKey: String
         ): Unit =
-          testFormError(data: _*)(userType, individualUserType)(
+          testFormError(data: _*)(userType, individualUserType, assetType)(
             expectedErrorMessageKey
           )(
             s"$key$userKey.title"
           )(performAction)
 
         "nothing is submitted" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              test()(s"$key$userKey.error.required")(
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              test()(s"$key$userKey$assetTypeKey.error.required")(
                 userType,
                 individualUserType,
-                userKey
+                assetType,
+                userKey + assetTypeKey
               )
           }
         }
 
         "an unknown value is submitted" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              test("acquisitionMethod" -> "4")(s"$key$userKey.error.required")(
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              test("acquisitionMethod" -> "4")(s"$key$userKey$assetTypeKey.error.required")(
                 userType,
                 individualUserType,
-                userKey
+                assetType,
+                userKey + assetTypeKey
               )
           }
         }
@@ -354,48 +370,54 @@ class AcquisitionDetailsControllerSpec
         "other is selected with a value" that {
 
           "the user enters acquisition method that doesn't exist" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                val userKey = userMessageKey(individualUserType, userType)
-                test(key -> "3")(s"$otherKey$userKey.error.required")(
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+              (userType: UserType, individualUserType: IndividualUserType, assetType) =>
+                val assetTypeKey = assetTypeMessageKey(assetType)
+                val userKey      = userMessageKey(individualUserType, userType)
+                test(key -> "3")(s"$otherKey$userKey$assetTypeKey.error.required")(
                   userType,
                   individualUserType,
-                  userKey
+                  assetType,
+                  userKey + assetTypeKey
                 )
             }
           }
 
           "the user enters acquisition method that is empty" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                val userKey = userMessageKey(individualUserType, userType)
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+              (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+                val assetTypeKey = assetTypeMessageKey(assetType)
+                val userKey      = userMessageKey(individualUserType, userType)
                 test(key -> "3", otherKey -> "")(
-                  s"$otherKey$userKey.error.required"
+                  s"$otherKey$userKey$assetTypeKey.error.required"
                 )(
                   userType,
                   individualUserType,
-                  userKey
+                  assetType,
+                  userKey + assetTypeKey
                 )
             }
           }
 
           "the user enters acquisition method that contains invalid characters" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                val userKey = userMessageKey(individualUserType, userType)
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+              (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+                val assetTypeKey = assetTypeMessageKey(assetType)
+                val userKey      = userMessageKey(individualUserType, userType)
                 test(key -> "3", otherKey -> "1,234")(
-                  s"$otherKey$userKey.error.invalid"
-                )(userType, individualUserType, userKey)
+                  s"$otherKey$userKey$assetTypeKey.error.invalid"
+                )(userType, individualUserType, assetType, userKey + assetTypeKey)
             }
           }
 
           "the  user enters acquisition method that is too long" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
-                val userKey = userMessageKey(individualUserType, userType)
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+              (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+                val assetTypeKey = assetTypeMessageKey(assetType)
+                val userKey      = userMessageKey(individualUserType, userType)
                 test(key -> "3", otherKey -> ("a" * 36))(
-                  s"$otherKey$userKey.error.tooLong"
-                )(userType, individualUserType, userKey)
+                  s"$otherKey$userKey$assetTypeKey.error.tooLong"
+                )(userType, individualUserType, assetType, userKey + assetTypeKey)
             }
           }
 
@@ -409,11 +431,12 @@ class AcquisitionDetailsControllerSpec
 
         def getSessionDataJourneyAndDraftReturn(
           userType: UserType,
-          individualUserType: IndividualUserType
+          individualUserType: IndividualUserType,
+          assetType: AssetType
         ): (SessionData, FillingOutReturn, DraftReturn) = {
           val (session, journey, draftReturn) = sessionWithState(
             None,
-            None,
+            Some(assetType),
             None,
             userType,
             individualUserType,
@@ -429,12 +452,13 @@ class AcquisitionDetailsControllerSpec
         }
 
         "there is an error updating the draft return" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val (session, journey, updatedDraftReturn) =
                 getSessionDataJourneyAndDraftReturn(
                   userType,
-                  individualUserType
+                  individualUserType,
+                  assetType
                 )
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -453,12 +477,13 @@ class AcquisitionDetailsControllerSpec
         }
 
         "there is an error updating the session" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val (session, journey, updatedDraftReturn) =
                 getSessionDataJourneyAndDraftReturn(
                   userType,
-                  individualUserType
+                  individualUserType,
+                  assetType
                 )
               val updatedSession                         = session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -490,11 +515,12 @@ class AcquisitionDetailsControllerSpec
             data: (String, String)*
           )(method: AcquisitionMethod)(
             userType: UserType,
-            individualUserType: IndividualUserType
+            individualUserType: IndividualUserType,
+            assetType: AssetType
           ): Unit = {
             val (session, journey, draftReturn) = sessionWithState(
               None,
-              None,
+              Some(assetType),
               None,
               userType,
               individualUserType,
@@ -525,11 +551,12 @@ class AcquisitionDetailsControllerSpec
           }
 
           "the user selects bought it" in {
-            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-              (userType: UserType, individualUserType: IndividualUserType) =>
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+              (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
                 test(key -> "0")(AcquisitionMethod.Bought)(
                   userType,
-                  individualUserType
+                  individualUserType,
+                  assetType
                 )
             }
           }
@@ -539,7 +566,8 @@ class AcquisitionDetailsControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 test(key -> "1")(AcquisitionMethod.Inherited)(
                   userType,
-                  individualUserType
+                  individualUserType,
+                  Residential
                 )
             }
           }
@@ -549,7 +577,8 @@ class AcquisitionDetailsControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 test("acquisitionMethod" -> "2")(AcquisitionMethod.Gifted)(
                   userType,
-                  individualUserType
+                  individualUserType,
+                  Residential
                 )
             }
           }
@@ -559,7 +588,7 @@ class AcquisitionDetailsControllerSpec
               (userType: UserType, individualUserType: IndividualUserType) =>
                 test(key -> "3", otherKey -> "things")(
                   AcquisitionMethod.Other("things")
-                )(userType, individualUserType)
+                )(userType, individualUserType, Residential)
             }
           }
 
@@ -774,8 +803,8 @@ class AcquisitionDetailsControllerSpec
       "display the page" when {
 
         "the user has not yet completed the acquisition details section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -783,7 +812,7 @@ class AcquisitionDetailsControllerSpec
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
                       acquisitionMethod = Some(AcquisitionMethod.Bought)
                     ),
-                    sample[AssetType],
+                    assetType,
                     sample[Boolean],
                     userType,
                     individualUserType
@@ -791,11 +820,12 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
+                messageFromMessageKey(s"$key$userKey$assetTypeKey.title"),
                 { doc =>
                   doc
                     .select("#back")
@@ -813,14 +843,14 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the user has already completed the acquisition details section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
                   sessionWithState(
                     sample[CompleteAcquisitionDetailsAnswers],
-                    sample[AssetType],
+                    assetType,
                     sample[Boolean],
                     userType,
                     individualUserType
@@ -828,11 +858,12 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(individualUserType, userType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
+                messageFromMessageKey(s"$key$userKey$assetTypeKey.title"),
                 { doc =>
                   doc
                     .select("#back")
@@ -908,15 +939,16 @@ class AcquisitionDetailsControllerSpec
         )(
           userType: UserType,
           individualUserType: IndividualUserType,
+          assetType: AssetType,
           userKey: String
         )(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(userType, individualUserType)(
+          testFormError(data: _*)(userType, individualUserType, assetType)(
             expectedErrorKey
           )(s"$key$userKey.title")(
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers],
-              sample[AssetType],
+              assetType,
               sample[Boolean],
               userType,
               individualUserType,
@@ -925,10 +957,11 @@ class AcquisitionDetailsControllerSpec
           )
 
         "individual enters date that is invalid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              dateErrorScenarios(key, userKey).foreach {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              dateErrorScenarios(key, userKey + assetTypeKey).foreach {
                 case d @ DateErrorScenario(
                       dayString,
                       monthString,
@@ -943,7 +976,7 @@ class AcquisitionDetailsControllerSpec
                         "acquisitionDate-year"  -> yearString
                       ).collect { case (id, Some(input)) => id -> input }
 
-                    test(formData: _*)(userType, individualUserType, userKey)(
+                    test(formData: _*)(userType, individualUserType, assetType, userKey + assetTypeKey)(
                       expectedErrorKey
                     )
                   }
@@ -952,15 +985,17 @@ class AcquisitionDetailsControllerSpec
         }
 
         "individual enters date that is after the disposal date" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey  = userMessageKey(individualUserType, userType)
-              val tomorrow = disposalDate.value.plusDays(1L)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              val tomorrow     = disposalDate.value.plusDays(1L)
               test(formData(tomorrow): _*)(
                 userType,
                 individualUserType,
-                userKey
-              )(s"$key$userKey.error.tooFarInFuture")
+                assetType,
+                userKey + assetTypeKey
+              )(s"$key$userKey$assetTypeKey.error.tooFarInFuture")
           }
         }
 
@@ -1169,6 +1204,7 @@ class AcquisitionDetailsControllerSpec
         def incompleteSection(
           userType: UserType,
           individualUserType: IndividualUserType,
+          assetType: AssetType,
           userKey: String
         ): Unit =
           forAll { acquisitionMethod: AcquisitionMethod =>
@@ -1183,7 +1219,7 @@ class AcquisitionDetailsControllerSpec
               mockGetSession(
                 sessionWithState(
                   answers,
-                  sample[AssetType],
+                  assetType,
                   sample[Boolean],
                   userType,
                   individualUserType
@@ -1220,16 +1256,18 @@ class AcquisitionDetailsControllerSpec
           }
 
         "the user has not yet completed the acquisition details section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              incompleteSection(userType, individualUserType, userKey)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              incompleteSection(userType, individualUserType, assetType, userKey + assetTypeKey)
           }
         }
 
         def sectionCompleted(
           userType: UserType,
           individualUserType: IndividualUserType,
+          assetType: AssetType,
           userKey: String
         ): Unit = {
           val answers = sample[CompleteAcquisitionDetailsAnswers]
@@ -1238,7 +1276,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 answers,
-                sample[AssetType],
+                assetType,
                 sample[Boolean],
                 userType,
                 individualUserType
@@ -1275,10 +1313,11 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the user has already completed the acquisition details section" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              sectionCompleted(userType, individualUserType, userKey)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              sectionCompleted(userType, individualUserType, assetType, userKey + assetTypeKey)
           }
         }
 
@@ -1304,20 +1343,21 @@ class AcquisitionDetailsControllerSpec
         def invalidPrice(
           userType: UserType,
           individualUserType: IndividualUserType,
+          assetType: AssetType,
           userKey: String
         ): Unit =
           forAll { answers: CompleteAcquisitionDetailsAnswers =>
             val scenarioSession = sessionWithState(
               answers,
-              sample[AssetType],
+              assetType,
               sample[Boolean],
               userType,
               individualUserType
             )._1
-
-            val contextKey = answers.acquisitionMethod match {
-              case AcquisitionMethod.Bought => s"acquisitionPriceBought$userKey"
-              case _                        => s"acquisitionPriceNotBought$userKey"
+            val assetTypeKey    = assetTypeMessageKey(assetType)
+            val contextKey      = answers.acquisitionMethod match {
+              case AcquisitionMethod.Bought => s"acquisitionPriceBought$userKey$assetTypeKey"
+              case _                        => s"acquisitionPriceNotBought$userKey$assetTypeKey"
             }
 
             amountOfMoneyErrorScenarios(
@@ -1327,7 +1367,8 @@ class AcquisitionDetailsControllerSpec
               withClue(s"For $scenario: ") {
                 testFormError(scenario.formData: _*)(
                   userType,
-                  individualUserType
+                  individualUserType,
+                  assetType
                 )(scenario.expectedErrorMessageKey)(
                   s"$contextKey.title",
                   TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
@@ -1340,22 +1381,23 @@ class AcquisitionDetailsControllerSpec
           }
 
         "the user provides an invalid data" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              invalidPrice(userType, individualUserType, userKey)
+              invalidPrice(userType, individualUserType, assetType, userKey)
           }
         }
 
         def amountZero(
           userType: UserType,
           individualUserType: IndividualUserType,
+          assetType: AssetType,
           userKey: String
         ): Unit =
           forAll { answers: CompleteAcquisitionDetailsAnswers =>
             val scenarioSession = sessionWithState(
               answers,
-              sample[AssetType],
+              assetType,
               sample[Boolean],
               userType,
               individualUserType
@@ -1367,7 +1409,8 @@ class AcquisitionDetailsControllerSpec
             }
             testFormError("acquisitionPrice" -> "0")(
               userType,
-              individualUserType
+              individualUserType,
+              assetType
             )(
               s"$contextKey.error.tooSmall"
             )(
@@ -1380,10 +1423,11 @@ class AcquisitionDetailsControllerSpec
           }
 
         "the user enters zero for amount" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              amountZero(userType, individualUserType, userKey)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              amountZero(userType, individualUserType, assetType, userKey + assetTypeKey)
           }
         }
 
@@ -1697,7 +1741,9 @@ class AcquisitionDetailsControllerSpec
         def incompleteSectionUkResident(
           userType: UserType,
           individualUserType: IndividualUserType,
-          userKey: String
+          assetType: AssetType,
+          userKey: String,
+          displayHelpText: Boolean
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1712,7 +1758,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = Some(sample[AmountInPence]),
                   acquisitionMethod = Some(AcquisitionMethod.Bought)
                 ),
-                AssetType.Residential,
+                assetType,
                 true,
                 userType,
                 individualUserType
@@ -1723,7 +1769,7 @@ class AcquisitionDetailsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "rebaseAcquisitionPrice.title",
+              s"rebaseAcquisitionPrice${assetTypeMessageKey(assetType)}.title",
               TimeUtils.govDisplayFormat(ukResidents)
             ),
             { doc =>
@@ -1737,20 +1783,28 @@ class AcquisitionDetailsControllerSpec
                 .attr("action") shouldBe routes.AcquisitionDetailsController
                 .rebasedAcquisitionPriceSubmit()
                 .url
-              doc
-                .select("#rebaseAcquisitionPrice-form-hint")
-                .text()         shouldBe messageFromMessageKey(
-                s"rebaseAcquisitionPrice$userKey.helpText"
-              )
+              if (displayHelpText)
+                doc
+                  .select("#rebaseAcquisitionPrice-form-hint")
+                  .text()       shouldBe messageFromMessageKey(
+                  s"rebaseAcquisitionPrice$userKey.helpText"
+                )
             }
           )
         }
 
         "the user has not yet completed the rebase acquisition details section for uk resident" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              incompleteSectionUkResident(userType, individualUserType, userKey)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              incompleteSectionUkResident(
+                userType,
+                individualUserType,
+                assetType,
+                userKey + assetTypeKey,
+                assetType !== IndirectDisposal
+              )
           }
         }
 
@@ -1780,7 +1834,7 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               TimeUtils.govDisplayFormat(
-                nonUkResidentsResidentialProperty.minusDays(1)
+                nonUkResidentsResidentialProperty
               )
             ),
             { doc =>
@@ -1866,6 +1920,7 @@ class AcquisitionDetailsControllerSpec
         def amountNonZero(
           userType: UserType,
           individualUserType: IndividualUserType,
+          assetType: AssetType,
           userKey: String
         ): Unit = {
           inSequence {
@@ -1876,18 +1931,20 @@ class AcquisitionDetailsControllerSpec
                   acquisitionDate = acquisitionDate,
                   rebasedAcquisitionPrice = Some(AmountInPence(1L))
                 ),
-                AssetType.Residential,
+                assetType,
                 true,
                 userType,
                 individualUserType
               )._1
             )
           }
-
+          val expectedTitleKey =
+            if (assetType === IndirectDisposal) "rebaseAcquisitionPrice.indirect.title"
+            else "rebaseAcquisitionPrice.title"
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "rebaseAcquisitionPrice.title",
+              expectedTitleKey,
               TimeUtils.govDisplayFormat(ukResidents)
             ),
             doc =>
@@ -1898,10 +1955,10 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the amount in the session is non-zero" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              amountNonZero(userType, individualUserType, userKey)
+              amountNonZero(userType, individualUserType, assetType, userKey)
           }
         }
 
@@ -2619,40 +2676,42 @@ class AcquisitionDetailsControllerSpec
         )(
           userType: UserType,
           individualUserType: IndividualUserType,
+          assetType: AssetType,
           userKey: String
         )(expectedErrorKey: String) =
-          testFormError(data: _*)(userType, individualUserType)(
+          testFormError(data: _*)(userType, individualUserType, assetType)(
             expectedErrorKey
           )(s"$key$userKey.title")(performAction)
 
         "no option has been selected" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              test()(userType, individualUserType, userKey)(
-                s"$key.error.required"
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              test()(userType, individualUserType, assetType, userKey)(
+                s"$key$assetTypeKey.error.required"
               )
           }
         }
 
         "the option selected is not valid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "2")(userType, individualUserType, userKey)(
+              test(key -> "2")(userType, individualUserType, assetType, userKey)(
                 s"$key.error.invalid"
               )
           }
         }
 
         "the amount of money is invalid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey = userMessageKey(individualUserType, userType)
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(userType, individualUserType, userKey)(
+                  test(data: _*)(userType, individualUserType, assetType, userKey)(
                     scenario.expectedErrorMessageKey
                   )
                 }
@@ -2661,12 +2720,13 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the amount of money is zero" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey = userMessageKey(individualUserType, userType)
               test(key -> "0", valueKey -> "0")(
                 userType,
                 individualUserType,
+                assetType,
                 userKey
               )(
                 s"$valueKey.error.tooSmall"
@@ -3074,8 +3134,8 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the amount in the session is zero" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3087,7 +3147,7 @@ class AcquisitionDetailsControllerSpec
                       acquisitionFees = AmountInPence.zero,
                       shouldUseRebase = false
                     ),
-                    sample[AssetType],
+                    assetType,
                     sample[Boolean],
                     userType,
                     individualUserType
@@ -3095,11 +3155,12 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(individualUserType, userType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key$userKey.title"),
+                messageFromMessageKey(s"$key$userKey$assetTypeKey.title"),
                 doc =>
                   doc
                     .select("#acquisitionFees-1")
@@ -3109,8 +3170,8 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the amount in the session is non-zero" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3122,7 +3183,7 @@ class AcquisitionDetailsControllerSpec
                       acquisitionFees = AmountInPence(3L),
                       shouldUseRebase = false
                     ),
-                    sample[AssetType],
+                    assetType,
                     sample[Boolean],
                     userType,
                     individualUserType
@@ -3130,12 +3191,13 @@ class AcquisitionDetailsControllerSpec
                 )
               }
 
-              val userKey = userMessageKey(individualUserType, userType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
 
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey(
-                  s"$key$userKey.title"
+                  s"$key$userKey$assetTypeKey.title"
                 ),
                 { doc =>
                   doc
@@ -3201,40 +3263,48 @@ class AcquisitionDetailsControllerSpec
         )(
           userType: UserType,
           individualUserType: IndividualUserType,
-          userKey: String
-        )(expectedErrorKey: String) =
-          testFormError(data: _*)(userType, individualUserType)(
-            expectedErrorKey
+          assetType: AssetType,
+          userKey: String,
+          wasUkResident: Boolean
+        )(expectedErrorKey: String, errorArgs: String*) =
+          testFormError(data: _*)(userType, individualUserType, assetType, wasUkResident)(
+            expectedErrorKey,
+            models.TimeUtils.govDisplayFormat(mockRebasingUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident))
           )(s"$key$userKey.title")(performAction)
 
         "no option has been selected" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              test()(userType, individualUserType, userKey)(
-                s"$key.error.required"
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              test()(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
+                s"$key$assetTypeKey.error.required",
+                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getDisplayRebasingCutOffDate(assetType, false))
               )
           }
         }
 
         "the option selected is not valid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              test(key -> "2")(userType, individualUserType, userKey)(
-                s"$key.error.invalid"
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              test(key -> "2")(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
+                s"$key$assetTypeKey.error.invalid",
+                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getDisplayRebasingCutOffDate(assetType, false))
               )
           }
         }
 
         "the amount of money is invalid" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val userKey      = userMessageKey(individualUserType, userType)
+              val assetTypeKey = assetTypeMessageKey(assetType)
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(userType, individualUserType, userKey)(
+                  test(data: _*)(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
                     scenario.expectedErrorMessageKey
                   )
                 }
@@ -3243,15 +3313,18 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the amount of money is zero" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
               test(key -> "0", valueKey -> "0")(
                 userType,
                 individualUserType,
-                userKey
+                assetType,
+                userKey + assetTypeKey,
+                false
               )(
-                s"$valueKey.error.tooSmall"
+                s"$valueKey$assetTypeKey.error.tooSmall"
               )
           }
         }
@@ -3474,7 +3547,7 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(
                   "shouldUseRebase.title",
                   TimeUtils.govDisplayFormat(
-                    nonUkResidentsResidentialProperty.minusDays(1)
+                    nonUkResidentsResidentialProperty
                   )
                 )
               )
@@ -3505,7 +3578,7 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(
                   "shouldUseRebase.title",
                   TimeUtils.govDisplayFormat(
-                    nonUkResidentsNonResidentialProperty.minusDays(1)
+                    nonUkResidentsNonResidentialProperty
                   )
                 )
               )
@@ -3554,7 +3627,7 @@ class AcquisitionDetailsControllerSpec
       "show a form error for non residential non uk" when {
 
         val date: String = TimeUtils.govDisplayFormat(
-          nonUkResidentsNonResidentialProperty.minusDays(1)
+          nonUkResidentsNonResidentialProperty
         )
 
         def test(
@@ -3562,7 +3635,7 @@ class AcquisitionDetailsControllerSpec
         )(userType: UserType, individualUserType: IndividualUserType)(
           expectedErrorKey: String
         ) =
-          testFormError(data: _*)(userType, individualUserType)(
+          testFormError(data: _*)(userType, individualUserType, NonResidential)(
             expectedErrorKey
           )("shouldUseRebase.title", date)(
             performAction,
@@ -3570,10 +3643,10 @@ class AcquisitionDetailsControllerSpec
               sample[CompleteAcquisitionDetailsAnswers]
                 .copy(acquisitionDate =
                   AcquisitionDate(
-                    nonUkResidentsNonResidentialProperty.minusDays(1)
+                    nonUkResidentsNonResidentialProperty.minusDays(2)
                   )
                 ),
-              AssetType.NonResidential,
+              NonResidential,
               false,
               userType,
               individualUserType,
@@ -3594,26 +3667,22 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error for residential non uk" when {
         val date: String = TimeUtils.govDisplayFormat(
-          nonUkResidentsResidentialProperty.minusDays(1)
+          nonUkResidentsResidentialProperty
         )
 
         def test(
           data: (String, String)*
-        )(userType: UserType, individualUserType: IndividualUserType)(
+        )(userType: UserType, individualUserType: IndividualUserType, assetType: AssetType)(
           expectedErrorKey: String
         ) =
-          testFormError(data: _*)(userType, individualUserType)(
+          testFormError(data: _*)(userType, individualUserType, Residential)(
             expectedErrorKey
           )("shouldUseRebase.title", date)(
             performAction,
             sessionWithState(
               sample[CompleteAcquisitionDetailsAnswers]
-                .copy(acquisitionDate =
-                  AcquisitionDate(
-                    nonUkResidentsResidentialProperty.minusDays(1)
-                  )
-                ),
-              AssetType.Residential,
+                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.minusDays(1))),
+              Residential,
               false,
               userType,
               individualUserType,
@@ -3622,9 +3691,9 @@ class AcquisitionDetailsControllerSpec
           )
 
         "no option has been selected" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              test()(userType, individualUserType)(
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              test()(userType, individualUserType, assetType)(
                 "shouldUseRebase.error.required"
               )
           }
@@ -4406,7 +4475,9 @@ class AcquisitionDetailsControllerSpec
 
   def testFormError(data: (String, String)*)(
     userType: UserType,
-    individualUserType: IndividualUserType
+    individualUserType: IndividualUserType,
+    assetType: AssetType,
+    wasUkResident: Boolean = sample[Boolean]
   )(
     expectedErrorMessageKey: String,
     errorArgs: String*
@@ -4417,8 +4488,8 @@ class AcquisitionDetailsControllerSpec
         rebasedAcquisitionPrice = Some(sample[AmountInPence]),
         shouldUseRebase = false
       ),
-      sample[AssetType],
-      sample[Boolean],
+      assetType,
+      wasUkResident,
       userType,
       individualUserType
     )._1

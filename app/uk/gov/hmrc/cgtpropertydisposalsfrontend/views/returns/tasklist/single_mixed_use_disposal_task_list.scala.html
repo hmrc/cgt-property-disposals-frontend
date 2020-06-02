@@ -1,0 +1,175 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleMixedUseDisposalReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
+        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+)
+
+@(draftReturn: DraftSingleMixedUseDisposalReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+
+@title = @{messages("service.title")}
+@representeeState = @{
+    draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType) match {
+        case Some(Capacitor) | Some(PersonalRepresentative) =>
+            Some(draftReturn.representeeAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete)))
+        case _ =>
+            None
+    }
+}
+
+@triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
+
+@propertyDetailsState = @{
+    draftReturn.examplePropertyDetailsAnswers.fold[TaskListStatus](ToDo)(
+        _.fold(_ => InProgress, _ => Complete)
+    )
+}
+
+@exemptionsAndLossesState = @{
+    propertyDetailsState match {
+        case Complete =>
+            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+        case _ =>
+            CannotStart
+    }
+}
+
+@ytdLiabilityState = @{
+    exemptionsAndLossesState match {
+        case Complete =>
+            draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](ToDo) {
+                case c: CalculatedYTDAnswers => c.fold(_ => InProgress, _ => Complete)
+                case n: NonCalculatedYTDAnswers => n.fold(_ => InProgress, _ => Complete)
+            }
+        case _ => CannotStart
+    }
+}
+
+@uploadSupportingDocsState = @{
+    draftReturn.supportingEvidenceAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+}
+
+@checkAndSendReturnState = @{
+    (propertyDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
+        case (Complete, Complete, Complete, Complete) => ToDo
+        case _                                        => CannotStart
+    }
+}
+
+
+@mainTemplate(title = title, userType = request.userType) {
+
+    @pageHeading(title)
+
+    <ol class="app-task-list">
+        <li>
+            <h2 class="app-task-list__section">
+                <span class="app-task-list__section-number">
+                    1.
+                </span>
+                @messages("triage.caption")
+            </h2>
+
+            <ul class="app-task-list__items">
+
+                @representeeState.map { state =>
+                    <li id="representee" class="app-task-list__item">
+                        @taskLink(messages("task-list.representee.link"), returns.representee.routes.RepresenteeController.checkYourAnswers().url, state)
+                    </li>
+                }
+
+                @if(!representeeState.forall(_.isComplete)) {
+                </ul>
+        @warning(messages("task-list.incompleteTriage"))
+        } else {
+        <li id="canTheyUseOurService" class="app-task-list__item">
+        @taskLink(messages("task-list.triage.link"), returns.triage.routes.SingleDisposalsTriageController.checkYourAnswers().url, triageState)
+        </li>
+        </ul>
+
+
+    @if(!triageState.isComplete) {
+        @warning(messages("task-list.incompleteTriage"))
+    } else {
+        <li>
+            <h2 class="app-task-list__section">
+                <span class="app-task-list__section-number">
+                    2.
+                </span>
+                @messages("task-list.provide-details.heading")
+            </h2>
+            <ul class="app-task-list__items">
+                <li id="propertyDetails" class="app-task-list__item">
+                @taskLink(
+                    messages("task-list.enter-property-details.link"),
+                    "#",
+                    propertyDetailsState
+                )
+                </li>
+            </ul>
+        </li>
+
+
+        <li>
+            <h2 class="app-task-list__section">
+                <span class="app-task-list__section-number">
+                    3.
+                </span>
+                @messages("task-list.report-and-pay-the-tax.heading")
+            </h2>
+            <ul class="app-task-list__items">
+
+                <li id="exemptionsAndLosses" class="app-task-list__item">
+                @taskLink(messages("task-list.exemptions-and-losses.link"),
+                    returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
+                </li>
+
+                <li id="enterCgtLiability" class="app-task-list__item">
+                @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityController.checkYourAnswers().url, ytdLiabilityState)
+                </li>
+
+                <li id="uploadSupportingDocs" class="app-task-list__item">
+                @taskLink(messages("task-list.upload-supporting-docs.link"), returns.supportingevidence.routes.SupportingEvidenceController.checkYourAnswers().url, uploadSupportingDocsState)
+                </li>
+
+                <li id="checkAndSendReturn" class="app-task-list__item">
+                @taskLink(messages("task-list.check-and-send-return.link"), returns.routes.CheckAllAnswersAndSubmitController.checkAllAnswers().url, checkAndSendReturnState)
+                </li>
+            </ul>
+        </li>
+    }
+    }
+
+    </ol>
+
+    <p><a id="saveAndComeBackLater" href="@{
+        returns.routes.DraftReturnSavedController.draftReturnSaved()
+    }">@messages("task-list.save-and-come-back.link")</a></p>
+
+}

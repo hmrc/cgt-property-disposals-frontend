@@ -28,6 +28,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -42,7 +43,8 @@
     isUk: Boolean,
     canRebase: Boolean,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    assetType: AssetType
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
@@ -54,6 +56,11 @@
     else ""
 }
 
+@assetTypeKey = @{assetType match {
+    case AssetType.IndirectDisposal => ".indirect"
+    case _ => ""
+}}
+
 @rebasingKey = @{if(canRebase && answers.shouldUseRebase) ".rebased" else ""}
 @acquisitionDate = @{TimeUtils.govDisplayFormat(answers.acquisitionDate.value)}
 @rebasingDate = @{TimeUtils.govDisplayFormat(cutoffDate)}
@@ -62,22 +69,22 @@
   answers.acquisitionMethod match {
     case AcquisitionMethod.Bought => (
       messages("returns.acquisitionMethod.Bought"),
-      messages(s"acquisitionPriceBought$userKey.title"),
+      messages(s"acquisitionPriceBought$userKey$assetTypeKey.title"),
       messages("acquisitionPriceBought.cyaChange")
     )
     case AcquisitionMethod.Inherited => (
       messages("returns.acquisitionMethod.Inherited"),
-      messages(s"acquisitionPriceNotBought$userKey.title", acquisitionDate),
+      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey.title", acquisitionDate),
       messages("acquisitionPriceNotBought.cyaChange", acquisitionDate)
     )
     case AcquisitionMethod.Gifted => (
       messages("returns.acquisitionMethod.Gifted"),
-      messages(s"acquisitionPriceNotBought$userKey.title", acquisitionDate),
+      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey.title", acquisitionDate),
       messages("acquisitionPriceNotBought.cyaChange", acquisitionDate)
     )
     case AcquisitionMethod.Other(value) => (
       value,
-      messages(s"acquisitionPriceNotBought$userKey.title", acquisitionDate),
+      messages(s"acquisitionPriceNotBought$userKey$assetTypeKey.title", acquisitionDate),
       messages("acquisitionPriceNotBought.cyaChange", acquisitionDate)
     )
   }
@@ -85,7 +92,7 @@
 
 @cyaSection() {
   @cyaRow(
-    messages(s"acquisitionMethod$userKey.title"),
+    messages(s"acquisitionMethod$userKey$assetTypeKey.title"),
     Html(acquisitionMethodAndPriceTitle._1),
     Some(cyaChange(
       messages("acquisitionMethod.cyaChange"),
@@ -94,7 +101,7 @@
     "acquisitionMethod"
   )
   @cyaRow(
-    messages(s"acquisitionDate$userKey.title"),
+    messages(s"acquisitionDate$userKey$assetTypeKey.title"),
     Html(TimeUtils.govDisplayFormat(answers.acquisitionDate.value)),
     Some(cyaChange(
       messages("acquisitionDate.cyaChange"),
@@ -118,7 +125,7 @@
 @if(canRebase) {
   @answers.rebasedAcquisitionPrice.map{ rebasedValue =>
     @cyaRow(
-      messages("rebaseAcquisitionPrice.title", rebasingDate),
+      messages(s"rebaseAcquisitionPrice$assetTypeKey.title", rebasingDate),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(rebasedValue.inPounds())),
       Some(cyaChange(
         messages("rebaseAcquisitionPrice.cyaChange", rebasingDate),
@@ -173,7 +180,7 @@
   }
   @if(answers.acquisitionFees.value === 0L){
     @cyaRow(
-      messages(s"acquisitionFees$userKey$rebasingKey.title"),
+      messages(s"acquisitionFees$assetTypeKey$userKey$rebasingKey.title"),
       Html(messages("generic.no")),
       Some(cyaChange(
         messages(s"acquisitionFees$rebasingKey.cyaChange"),
@@ -183,7 +190,7 @@
     )
   } else {
     @cyaRow(
-      messages(s"acquisitionFees$userKey$rebasingKey.title"),
+      messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title"),
       Html(messages("generic.yes")),
       Some(cyaChange(
         messages(s"acquisitionFees$rebasingKey.cyaChange"),

@@ -458,6 +458,8 @@ class CommonTriageQuestionsController @Inject() (
                 fillingOutReturn.draftReturn.fold(
                   _.representeeAnswers,
                   _.representeeAnswers,
+                  _.representeeAnswers,
+                  _.representeeAnswers,
                   _.representeeAnswers
                 )
               )
@@ -478,6 +480,8 @@ class CommonTriageQuestionsController @Inject() (
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
                 fillingOutReturn.draftReturn.fold(
+                  _.representeeAnswers,
+                  _.representeeAnswers,
                   _.representeeAnswers,
                   _.representeeAnswers,
                   _.representeeAnswers
@@ -529,33 +533,49 @@ class CommonTriageQuestionsController @Inject() (
       r =>
         r.copy(
           draftReturn = r.draftReturn.fold[DraftReturn](
-            m =>
-              m.copy(
-                triageAnswers = updateMultipleDisposalAnswers(m.triageAnswers),
+            multiple =>
+              multiple.copy(
+                triageAnswers = updateMultipleDisposalAnswers(multiple.triageAnswers),
                 representeeAnswers = None,
                 examplePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None
               ),
-            s =>
-              s.copy(
-                triageAnswers = updateSingleDisposalAnswers(s.triageAnswers),
+            single =>
+              single.copy(
+                triageAnswers = updateSingleDisposalAnswers(single.triageAnswers),
                 representeeAnswers = None,
                 propertyAddress = None,
                 disposalDetailsAnswers = None,
                 acquisitionDetailsAnswers = None,
-                reliefDetailsAnswers = s.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                reliefDetailsAnswers = single.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss = None,
                 supportingEvidenceAnswers = None
               ),
-            i =>
-              i.copy(
-                triageAnswers = updateSingleDisposalAnswers(i.triageAnswers),
+            singleIndirect =>
+              singleIndirect.copy(
+                triageAnswers = updateSingleDisposalAnswers(singleIndirect.triageAnswers),
                 representeeAnswers = None,
                 companyAddress = None,
                 disposalDetailsAnswers = None,
                 acquisitionDetailsAnswers = None,
+                yearToDateLiabilityAnswers = None,
+                supportingEvidenceAnswers = None
+              ),
+            multipleIndirect =>
+              multipleIndirect.copy(
+                triageAnswers = updateMultipleDisposalAnswers(multipleIndirect.triageAnswers),
+                representeeAnswers = None,
+                exampleCompanyDetailsAnswers = None,
+                yearToDateLiabilityAnswers = None,
+                supportingEvidenceAnswers = None
+              ),
+            singleMixedUse =>
+              singleMixedUse.copy(
+                triageAnswers = updateSingleDisposalAnswers(singleMixedUse.triageAnswers),
+                representeeAnswers = None,
+                examplePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None
               )
@@ -594,6 +614,8 @@ class CommonTriageQuestionsController @Inject() (
       _.draftReturn.fold(
         _ => Some(NumberOfProperties.MoreThanOne),
         s => numberOfProperties(s.triageAnswers),
+        s => numberOfProperties(s.triageAnswers),
+        _ => Some(NumberOfProperties.MoreThanOne),
         s => numberOfProperties(s.triageAnswers)
       )
     )
@@ -609,6 +631,8 @@ class CommonTriageQuestionsController @Inject() (
           r.draftReturn.fold(
             m => Left(m.triageAnswers),
             s => Right(s.triageAnswers),
+            s => Right(s.triageAnswers),
+            m => Left(m.triageAnswers),
             s => Right(s.triageAnswers)
           )
       )

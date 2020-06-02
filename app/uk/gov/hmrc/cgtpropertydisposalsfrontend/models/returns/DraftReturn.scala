@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import java.time.LocalDate
 import java.util.UUID
-
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
@@ -140,31 +139,88 @@ object DraftSingleIndirectDisposalReturn {
 
 }
 
+final case class DraftMultipleIndirectDisposalsReturn(
+  id: UUID,
+  triageAnswers: MultipleDisposalsTriageAnswers,
+  exampleCompanyDetailsAnswers: Option[ExampleCompanyDetailsAnswers],
+  exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
+  yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+  supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
+  representeeAnswers: Option[RepresenteeAnswers],
+  lastUpdatedDate: LocalDate
+) extends DraftReturn
+
+object DraftMultipleIndirectDisposalsReturn {
+
+  def newDraftReturn(
+    id: UUID,
+    triageAnswers: MultipleDisposalsTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): DraftMultipleIndirectDisposalsReturn =
+    DraftMultipleIndirectDisposalsReturn(
+      id,
+      triageAnswers,
+      None,
+      None,
+      None,
+      None,
+      representeeAnswers,
+      TimeUtils.today()
+    )
+
+}
+
+final case class DraftSingleMixedUseDisposalReturn(
+  id: UUID,
+  triageAnswers: SingleDisposalTriageAnswers,
+  examplePropertyDetailsAnswers: Option[ExamplePropertyDetailsAnswers],
+  exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
+  yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+  supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
+  representeeAnswers: Option[RepresenteeAnswers],
+  lastUpdatedDate: LocalDate
+) extends DraftReturn
+
+object DraftSingleMixedUseDisposalReturn {
+
+  def newDraftReturn(
+    id: UUID,
+    triageAnswers: SingleDisposalTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): DraftSingleMixedUseDisposalReturn =
+    DraftSingleMixedUseDisposalReturn(
+      id,
+      triageAnswers,
+      None,
+      None,
+      None,
+      None,
+      representeeAnswers,
+      TimeUtils.today()
+    )
+
+}
+
 object DraftReturn {
 
   implicit class DraftReturnOps(private val d: DraftReturn) extends AnyVal {
     def fold[A](
       whenMultiple: DraftMultipleDisposalsReturn => A,
       whenSingle: DraftSingleDisposalReturn => A,
-      whenSingleIndirect: DraftSingleIndirectDisposalReturn => A
+      whenSingleIndirect: DraftSingleIndirectDisposalReturn => A,
+      whenMultipleIndirect: DraftMultipleIndirectDisposalsReturn => A,
+      whenSingleMixedUse: DraftSingleMixedUseDisposalReturn => A
     ): A =
       d match {
-        case m: DraftMultipleDisposalsReturn      => whenMultiple(m)
-        case s: DraftSingleDisposalReturn         => whenSingle(s)
-        case s: DraftSingleIndirectDisposalReturn => whenSingleIndirect(s)
+        case m: DraftMultipleDisposalsReturn         => whenMultiple(m)
+        case s: DraftSingleDisposalReturn            => whenSingle(s)
+        case s: DraftSingleIndirectDisposalReturn    => whenSingleIndirect(s)
+        case m: DraftMultipleIndirectDisposalsReturn => whenMultipleIndirect(m)
+        case s: DraftSingleMixedUseDisposalReturn    => whenSingleMixedUse(s)
       }
 
     def isMultipleIndirectDisposal(): Boolean =
-      d.fold(m => isMultipleIndirectDisposal(m.triageAnswers), _ => false, _ => false)
-
-    private def isMultipleIndirectDisposal(m: MultipleDisposalsTriageAnswers): Boolean =
-      m.fold(
-        _.assetTypes,
-        c => Some(c.assetTypes)
-      ) match {
-        case Some(assetTypes) if assetTypes.contains(AssetType.IndirectDisposal) => true
-        case _                                                                   => false
-      }
+      d.fold(_ => false, _ => false, _ => false, _ => true, _ => false)
 
   }
 

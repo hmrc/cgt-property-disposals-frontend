@@ -147,6 +147,8 @@ class DraftReturnSavedControllerSpec
             journey.draftReturn.fold(
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today())
             ),
             "draftReturnSaved.warning"
@@ -163,6 +165,8 @@ class DraftReturnSavedControllerSpec
             ),
             journey,
             journey.draftReturn.fold(
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today())
@@ -185,6 +189,8 @@ class DraftReturnSavedControllerSpec
             journey.draftReturn.fold(
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today())
             ),
             "draftReturnSaved.agent.warning"
@@ -198,6 +204,8 @@ class DraftReturnSavedControllerSpec
         "there is an error updating the draft return" in {
           val journey            = sample[FillingOutReturn]
           val updatedDraftReturn = journey.draftReturn.fold(
+            _.copy(lastUpdatedDate = TimeUtils.today()),
+            _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today())

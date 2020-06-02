@@ -53,7 +53,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
@@ -64,7 +65,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, JourneyStatus, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -504,6 +506,174 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       }
 
+      "the user is on a single indirect disposal journey" must {
+
+        val completeReturn = sample[CompleteSingleIndirectDisposalReturn].copy(
+          triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            .copy(individualUserType = Some(PersonalRepresentative)),
+          representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
+          yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers],
+          hasAttachments = true
+        )
+
+        val completeDraftReturn = DraftSingleIndirectDisposalReturn(
+          UUID.randomUUID(),
+          completeReturn.triageAnswers,
+          Some(completeReturn.companyAddress),
+          Some(completeReturn.disposalDetails),
+          Some(completeReturn.acquisitionDetails),
+          Some(completeReturn.exemptionsAndLossesDetails),
+          Some(completeReturn.yearToDateLiabilityAnswers),
+          Some(completeReturn.supportingDocumentAnswers),
+          completeReturn.representeeAnswers,
+          TimeUtils.today()
+        )
+
+        val completeFillingOutReturn =
+          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+
+        behave like redirectToStartWhenInvalidJourney(
+          performAction,
+          {
+            case _: FillingOutReturn => true
+            case _                   => false
+          }
+        )
+
+        behave like incompleteSingleIndirectDisposalJourneyBehaviour(
+          performAction,
+          completeDraftReturn
+        )
+
+        "display the page" when {
+
+          def test(
+            sessionData: SessionData,
+            expectedTitleKey: String,
+            userType: Option[UserType],
+            isATrust: Boolean
+          ): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionData)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(expectedTitleKey),
+              { doc =>
+                validateSingleIndirectDisposalCheckAllYourAnswersSections(
+                  doc,
+                  completeReturn,
+                  userType,
+                  rebasingEligibilityUtil.isEligibleForRebase(
+                    wasAUkResident = false,
+                    IndirectDisposal,
+                    completeReturn.acquisitionDetails.acquisitionDate.value
+                  ),
+                  isATrust
+                )
+                doc
+                  .select("#back")
+                  .attr("href") shouldBe routes.TaskListController
+                  .taskList()
+                  .url
+                doc
+                  .select("#content > article > form")
+                  .attr(
+                    "action"
+                  )             shouldBe routes.CheckAllAnswersAndSubmitController
+                  .checkAllAnswersSubmit()
+                  .url
+              }
+            )
+          }
+
+          "the return is complete" in {
+            test(
+              sessionWithJourney(completeFillingOutReturn),
+              "checkAllAnswers.title",
+              None,
+              completeFillingOutReturn.subscribedDetails.isATrust
+            )
+          }
+
+          "the return is complete and the user is an agent" in {
+            val userType          = UserType.Agent
+            val subscribedDetails = sample[SubscribedDetails].copy(
+              name = setNameForUserType(userType)
+            )
+
+            test(
+              sessionWithJourney(
+                completeFillingOutReturn.copy(
+                  agentReferenceNumber = setAgentReferenceNumber(userType),
+                  subscribedDetails = subscribedDetails
+                ),
+                userType = userType
+              ).copy(userType = Some(userType)),
+              "checkAllAnswers.title",
+              Some(userType),
+              subscribedDetails.isATrust
+            )
+          }
+
+        }
+
+        "redirect to the task list page" when {
+
+          "the user has chosen a user type of capacitor or personal rep and" when {
+
+            "there are no representee answers" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithJourney(
+                    completeFillingOutReturn.copy(
+                      draftReturn = completeDraftReturn.copy(
+                        triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                          .copy(individualUserType = Some(Capacitor)),
+                        representeeAnswers = None
+                      )
+                    )
+                  )
+                )
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.TaskListController.taskList()
+              )
+            }
+
+            "the representee answers are incomplete" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithJourney(
+                    completeFillingOutReturn.copy(
+                      draftReturn = completeDraftReturn.copy(
+                        triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                          .copy(individualUserType = Some(PersonalRepresentative)),
+                        representeeAnswers = Some(sample[IncompleteRepresenteeAnswers])
+                      )
+                    )
+                  )
+                )
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.TaskListController.taskList()
+              )
+            }
+
+          }
+
+        }
+
+      }
+
     }
 
     "handling submits on the check all answers page" must {
@@ -569,7 +739,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             completeReturn,
             instanceOf[RebasingEligibilityUtil],
             completeFillingOutReturn.subscribedDetails.isATrust,
-            representativeType(completeReturn),
+            completeReturn.representativeType(),
             completeReturn.isIndirectDisposal()
           ).toString
 
@@ -1244,17 +1414,68 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   }
 
+  def incompleteSingleIndirectDisposalJourneyBehaviour(
+    performAction: () => Future[Result],
+    completeDraftReturn: DraftSingleIndirectDisposalReturn
+  ) = {
+    val makeIncompleteFunctions =
+      List[DraftSingleIndirectDisposalReturn => DraftSingleIndirectDisposalReturn](
+        _.copy(triageAnswers = sample[IncompleteSingleDisposalTriageAnswers]),
+        _.copy(companyAddress = None),
+        _.copy(disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])),
+        _.copy(disposalDetailsAnswers = None),
+        _.copy(acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])),
+        _.copy(acquisitionDetailsAnswers = None),
+        _.copy(exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])),
+        _.copy(exemptionAndLossesAnswers = None),
+        _.copy(yearToDateLiabilityAnswers = Some(sample[IncompleteNonCalculatedYTDAnswers])),
+        _.copy(yearToDateLiabilityAnswers = None)
+      )
+
+    "redirect to the task list" when {
+
+      "the return is not complete" in {
+        makeIncompleteFunctions.foreach { makeIncomplete =>
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithJourney(
+                sample[FillingOutReturn].copy(
+                  draftReturn = makeIncomplete(completeDraftReturn)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.TaskListController.taskList())
+        }
+
+      }
+
+      "the return contains calculated answers" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithJourney(
+              sample[FillingOutReturn].copy(
+                draftReturn =
+                  completeDraftReturn.copy(yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]))
+              )
+            )
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.TaskListController.taskList())
+
+      }
+
+    }
+
+  }
+
 }
 
 object CheckAllAnswersAndSubmitControllerSpec {
-
-  def representativeType(
-    completeReturn: CompleteReturn
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-    completeReturn.fold(
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType()
-    )
 
   def validateSingleDisposalCheckAllYourAnswersSections(
     doc: Document,
@@ -1350,6 +1571,55 @@ object CheckAllAnswersAndSubmitControllerSpec {
       )
     }
 
+  }
+
+  def validateSingleIndirectDisposalCheckAllYourAnswersSections(
+    doc: Document,
+    completeReturn: CompleteSingleIndirectDisposalReturn,
+    userType: Option[UserType],
+    isRebasing: Boolean,
+    isATrust: Boolean
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+
+    completeReturn.representeeAnswers.foreach(
+      RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
+    )
+
+    validateSingleDisposalTriageCheckYourAnswersPage(
+      completeReturn.triageAnswers,
+      userType,
+      doc
+    )
+
+    validateAcquisitionDetailsCheckYourAnswersPage(
+      completeReturn.acquisitionDetails,
+      doc,
+      isUk = false,
+      isRebasing
+    )
+
+    validateDisposalDetailsCheckYourAnswersPage(
+      completeReturn.disposalDetails,
+      doc,
+      completeReturn.isIndirectDisposal()
+    )
+
+    completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>
+      validateExemptionAndLossesCheckYourAnswersPage(
+        completeReturn.exemptionsAndLossesDetails,
+        doc,
+        isATrust,
+        userType.contains(UserType.Agent),
+        individualUserType
+      )
+
+      validateNonCalculatedYearToDateLiabilityPage(
+        completeReturn.yearToDateLiabilityAnswers,
+        doc,
+        userType,
+        Some(individualUserType)
+      )
+    }
   }
 
 }

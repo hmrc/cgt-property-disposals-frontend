@@ -38,8 +38,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
@@ -82,6 +83,7 @@ object Generators
     with ExemptionAndLossesAnswersGen
     with YearToDateLiabilityAnswersGen
     with ExamplePropertyDetailsAnswersGen
+    with ExampleCompanyDetailsAnswersGen
     with RepresenteeAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
@@ -355,11 +357,20 @@ trait LowerPriorityReturnGen { this: GenUtils =>
 
   implicit val multipleDisposalDraftReturnGen: Gen[DraftMultipleDisposalsReturn] = gen[DraftMultipleDisposalsReturn]
 
+  implicit val multipleIndirectDisposalDraftReturnGen: Gen[DraftMultipleIndirectDisposalsReturn] =
+    gen[DraftMultipleIndirectDisposalsReturn]
+
   implicit val completeMultipleDisposalsReturnGen: Gen[CompleteMultipleDisposalsReturn] =
     gen[CompleteMultipleDisposalsReturn]
 
   implicit val singleIndirectDisposalDraftReturnGen: Gen[DraftSingleIndirectDisposalReturn] =
     gen[DraftSingleIndirectDisposalReturn]
+
+  implicit val completeSingleIndirectDisposalReturnGen: Gen[CompleteSingleIndirectDisposalReturn] =
+    gen[CompleteSingleIndirectDisposalReturn]
+
+  implicit val singleMixedUseDraftReturnGen: Gen[DraftSingleMixedUseDisposalReturn] =
+    gen[DraftSingleMixedUseDisposalReturn]
 
 }
 
@@ -554,6 +565,16 @@ trait ExamplePropertyDetailsAnswersGen { this: GenUtils =>
 
   implicit val completeExamplePropertyDetailsAnswersGen: Gen[CompleteExamplePropertyDetailsAnswers] =
     gen[CompleteExamplePropertyDetailsAnswers]
+
+}
+
+trait ExampleCompanyDetailsAnswersGen { this: GenUtils =>
+
+  implicit val incompleteExampleCompanyDetailsAnswersGen: Gen[IncompleteExampleCompanyDetailsAnswers] =
+    gen[IncompleteExampleCompanyDetailsAnswers]
+
+  implicit val completeExampleCompanyDetailsAnswersGen: Gen[CompleteExampleCompanyDetailsAnswers] =
+    gen[CompleteExampleCompanyDetailsAnswers]
 
 }
 

@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -38,7 +39,8 @@
     isUk: Boolean,
     isRebasing: Boolean,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    assetType: AssetType
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("acquisitionDetails.cya.title")}
@@ -47,7 +49,7 @@
 
     @pageHeading(title, Some(messages("acquisitionDetails.caption")))
 
-    @summary(answers, rebaseCutoffDate, isUk, isRebasing, isATrust, representativeType)
+    @summary(answers, rebaseCutoffDate, isUk, isRebasing, isATrust, representativeType, assetType)
 
     @formWrapper(routes.AcquisitionDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))
