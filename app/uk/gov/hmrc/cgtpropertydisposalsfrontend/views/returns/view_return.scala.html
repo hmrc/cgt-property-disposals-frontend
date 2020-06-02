@@ -134,7 +134,8 @@
               rebasingEligibilityUtil.isUk(s),
               rebasingEligibilityUtil.isEligibleForRebase(s),
               subscribedDetails.isATrust,
-              representativeType
+              representativeType,
+              s.triageAnswers.assetType
           )
 
           <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
@@ -196,7 +197,8 @@
             isUk = false,
             rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate.value),
             subscribedDetails.isATrust,
-            representativeType
+            representativeType,
+            s.triageAnswers.assetType
         )
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>

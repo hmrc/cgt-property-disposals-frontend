@@ -55,8 +55,8 @@
     </span>
     }
     @errorIdWithError.map { case (id, e) =>
-      @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${e.message}", e.args))
-    }
+      @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${e.message}", e.args: _*))
+      }
 
     @options.zipWithIndex.map{ case (option, index) =>
       <div class="multiple-choice"@if(option.content.nonEmpty){ data-target="@{fieldId}-@{index}-content" }>
