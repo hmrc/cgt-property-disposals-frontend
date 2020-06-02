@@ -109,4 +109,14 @@ object Address {
       )(identity)(Some(_))
     )
 
+  implicit class AddressOps(private val a: Address) extends AnyVal {
+    def getAddressLines: List[String] = {
+      val lines = a match {
+        case u: UkAddress    => List(Some(u.line1), u.line2, u.town, u.county, Some(u.postcode.value))
+        case n: NonUkAddress => List(Some(n.line1), n.line2, n.line3, n.line4, n.country.name)
+      }
+      lines.collect { case Some(s) => s }
+    }
+  }
+
 }

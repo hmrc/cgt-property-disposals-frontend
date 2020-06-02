@@ -302,32 +302,6 @@ class HomePageControllerSpec
           )
         }
 
-        def addressWithoutLine1(a: Address): String =
-          a match {
-            case u: Address.UkAddress    =>
-              s"${u.line2 match {
-                case Some(l2) => s"$l2, "
-                case _        => ""
-              }}${u.town match {
-                case Some(t) => s"$t, "
-                case _       => ""
-              }}${u.county match {
-                case Some(c) => s"$c, "
-                case _       => ""
-              }}${u.postcode.value}"
-            case n: Address.NonUkAddress =>
-              s"${n.line2 match {
-                case Some(l2) => s"$l2, "
-                case _        => ""
-              }}${n.line3 match {
-                case Some(l3) => s"$l3, "
-                case _        => ""
-              }}${n.line4 match {
-                case Some(l4) => s"$l4, "
-                case _        => ""
-              }}${n.country.name.getOrElse("")}"
-          }
-
         checkPageIsDisplayed(
           performAction(),
           messageFromMessageKey("account.home.title"),
@@ -349,7 +323,7 @@ class HomePageControllerSpec
               .select(s"#draftReturn-${sampleDraftReturn.id} > h3")
               .text() shouldBe messages(
               "drafts.list.disposalDetails"
-            ) + " " + propertyAddress.line1 + " " + addressWithoutLine1(propertyAddress)
+            ) + " " + propertyAddress.line1 + " " + propertyAddress.getAddressLines.drop(1).mkString(", ")
           }
         )
       }

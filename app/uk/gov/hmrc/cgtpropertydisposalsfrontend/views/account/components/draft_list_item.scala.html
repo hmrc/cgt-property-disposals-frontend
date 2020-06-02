@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
 @this()
@@ -78,28 +77,7 @@
 @dueDate = @{completionDate._1.map(d => d.plusDays(30L))}
 
 @getAddressLines(a: Address) = @{
-    a match {
-      case u: UkAddress => s"${u.line2 match {
-        case Some(l2) => s"${l2}, "
-        case _ => ""
-      }}${u.town match {
-        case Some(l3) => s"${l3}, "
-        case _ => ""
-      }}${u.county match {
-        case Some(l4) => s"${l4}, "
-        case _ => ""
-      }}${u.postcode.value}" -> s"${u.line1}"
-      case n: NonUkAddress => s"${n.line2 match {
-        case Some(l2) => s"${l2}, "
-        case _ => ""
-      }}${n.line3 match {
-        case Some(l3) => s"${l3}, "
-        case _ => ""
-      }}${n.line4 match {
-        case Some(l4) => s"${l4}, "
-        case _ => ""
-      }}${n.country.name.getOrElse("")}" -> s"${n.line1}"
-    }
+  a.getAddressLines.drop(1).mkString(", ") -> a.getAddressLines.headOption.getOrElse("")
 }
 
 <li class="single-return form-bundle">

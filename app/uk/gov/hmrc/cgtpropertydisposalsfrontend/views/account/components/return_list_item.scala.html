@@ -19,7 +19,6 @@
 @import cats.syntax.order._
 @import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
@@ -32,38 +31,14 @@
 
 @totalOutstanding = @{ sentReturn.totalOutstanding() }
 @numberOfOutstandingCharges = @{ sentReturn.charges.count(_.totalOutstanding() > AmountInPence.zero) }
-@addressLines = @{
-    sentReturn.propertyAddress match {
-        case u: UkAddress => s"${u.line2 match {
-          case Some(l2) => s"${l2}, "
-          case _ => ""
-        }}${u.town match {
-          case Some(l3) => s"${l3}, "
-          case _ => ""
-        }}${u.county match {
-          case Some(l4) => s"${l4}, "
-          case _ => ""
-        }}${u.postcode.value}" -> u.line1
-        case n: NonUkAddress => s"${n.line1}${n.line2 match {
-          case Some(l2) => s"${l2}, "
-          case _ => ""
-        }}${n.line3 match {
-          case Some(l3) => s"${l3}, "
-          case _ => ""
-        }}${n.line4 match {
-          case Some(l4) => s"${l4}, "
-          case _ => ""
-        }}${n.country.name.getOrElse("")}" -> n.line1
-    }
-}
 
 <li class="single-return form-bundle">
   <div class="grid-row">
     <div class="column-three-quarters submission-summary">
       <h3>
         <span class="caption">@messages("returns.list.disposalDetails")</span>
-        @addressLines._2
-        <span class="sub-heading">@addressLines._1</span>
+        @sentReturn.propertyAddress.getAddressLines.headOption.getOrElse("")
+        <span class="sub-heading">@sentReturn.propertyAddress.getAddressLines.drop(1).mkString(", ")</span>
       </h3>
       <h4 id="taxOwed-@sentReturn.submissionId" class="cgt-liability">
         <span class="caption">@messages("returns.list.taxOwed")</span>
