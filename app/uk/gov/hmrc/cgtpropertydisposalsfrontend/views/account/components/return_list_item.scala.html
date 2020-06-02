@@ -19,7 +19,6 @@
 @import cats.syntax.order._
 @import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
@@ -32,19 +31,14 @@
 
 @totalOutstanding = @{ sentReturn.totalOutstanding() }
 @numberOfOutstandingCharges = @{ sentReturn.charges.count(_.totalOutstanding() > AmountInPence.zero) }
-@addressLines = @{
-    sentReturn.propertyAddress match {
-        case u: UkAddress => s"${u.line1}, ${u.postcode.value}"
-        case n: NonUkAddress => s"${n.line1}, ${n.country.name.getOrElse("")}"
-    }
-}
 
 <li class="single-return form-bundle">
   <div class="grid-row">
     <div class="column-three-quarters submission-summary">
       <h3>
-        <span class="caption">@messages("returns.list.propertyAddress")</span>
-        @addressLines
+        <span class="caption">@messages("returns.list.disposalDetails")</span>
+        @sentReturn.propertyAddress.getAddressLines.headOption.getOrElse("")
+        <span class="sub-heading">@sentReturn.propertyAddress.getAddressLines.drop(1).mkString(", ")</span>
       </h3>
       <h4 id="taxOwed-@sentReturn.submissionId" class="cgt-liability">
         <span class="caption">@messages("returns.list.taxOwed")</span>

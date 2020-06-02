@@ -774,7 +774,8 @@ details dl.govuk-check-your-answers {
     margin-bottom: 0;
 }
 
-h1 > .sub-heading {
+.sub-heading {
+    display: block;
     font-weight: normal;
     font-size: 19px;
 }

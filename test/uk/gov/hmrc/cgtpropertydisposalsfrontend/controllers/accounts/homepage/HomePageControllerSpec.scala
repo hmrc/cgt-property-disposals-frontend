@@ -321,8 +321,8 @@ class HomePageControllerSpec
             doc
               .select(s"#draftReturn-${sampleDraftReturn.id} > h3")
               .text() shouldBe messages(
-              "drafts.list.propertyAddress"
-            ) + " " + propertyAddress.line1 + ", " + propertyAddress.postcode.value
+              "drafts.list.disposalDetails"
+            ) + " " + propertyAddress.line1 + " " + propertyAddress.getAddressLines.drop(1).mkString(", ")
           }
         )
       }
