@@ -63,7 +63,7 @@
 
 @rebasingKey = @{if(canRebase && answers.shouldUseRebase) ".rebased" else ""}
 @acquisitionDate = @{TimeUtils.govDisplayFormat(answers.acquisitionDate.value)}
-@rebasingDate = @{TimeUtils.govDisplayFormat(cutoffDate)}
+@rebasingDate = @{TimeUtils.govDisplayFormat(cutoffDate.minusDays(1))}
 
 @acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
@@ -180,7 +180,7 @@
   }
   @if(answers.acquisitionFees.value === 0L){
     @cyaRow(
-      messages(s"acquisitionFees$assetTypeKey$userKey$rebasingKey.title"),
+      messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title", rebasingDate),
       Html(messages("generic.no")),
       Some(cyaChange(
         messages(s"acquisitionFees$rebasingKey.cyaChange"),
@@ -190,7 +190,7 @@
     )
   } else {
     @cyaRow(
-      messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title"),
+      messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title", rebasingDate),
       Html(messages("generic.yes")),
       Some(cyaChange(
         messages(s"acquisitionFees$rebasingKey.cyaChange"),

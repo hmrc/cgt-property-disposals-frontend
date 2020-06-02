@@ -1752,7 +1752,7 @@ class AcquisitionDetailsControllerSpec
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
                   acquisitionDate = Some(
                     AcquisitionDate(
-                      RebasingCutoffDates.ukResidents.minusDays(2)
+                      RebasingCutoffDates.ukResidents.minusDays(1)
                     )
                   ),
                   acquisitionPrice = Some(sample[AmountInPence]),
@@ -1770,7 +1770,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               s"rebaseAcquisitionPrice${assetTypeMessageKey(assetType)}.title",
-              TimeUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(ukResidents.minusDays(1))
             ),
             { doc =>
               doc
@@ -1834,7 +1834,7 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               TimeUtils.govDisplayFormat(
-                nonUkResidentsResidentialProperty
+                nonUkResidentsResidentialProperty.minusDays(1)
               )
             ),
             { doc =>
@@ -1892,7 +1892,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              TimeUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(ukResidents.minusDays(1))
             ),
             { doc =>
               doc
@@ -1945,7 +1945,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               expectedTitleKey,
-              TimeUtils.govDisplayFormat(ukResidents)
+              TimeUtils.govDisplayFormat(ukResidents.minusDays(1))
             ),
             doc =>
               doc
@@ -2041,7 +2041,7 @@ class AcquisitionDetailsControllerSpec
             )
           }
 
-          val formattedRebaseDate = TimeUtils.govDisplayFormat(ukResidents)
+          val formattedRebaseDate = TimeUtils.govDisplayFormat(ukResidents.minusDays(1))
           checkPageIsDisplayed(
             performAction(data: _*),
             messageFromMessageKey(
@@ -3547,7 +3547,7 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(
                   "shouldUseRebase.title",
                   TimeUtils.govDisplayFormat(
-                    nonUkResidentsResidentialProperty
+                    nonUkResidentsResidentialProperty.minusDays(1)
                   )
                 )
               )
@@ -3578,7 +3578,7 @@ class AcquisitionDetailsControllerSpec
                 messageFromMessageKey(
                   "shouldUseRebase.title",
                   TimeUtils.govDisplayFormat(
-                    nonUkResidentsNonResidentialProperty
+                    nonUkResidentsNonResidentialProperty.minusDays(1)
                   )
                 )
               )
@@ -3627,7 +3627,7 @@ class AcquisitionDetailsControllerSpec
       "show a form error for non residential non uk" when {
 
         val date: String = TimeUtils.govDisplayFormat(
-          nonUkResidentsNonResidentialProperty
+          nonUkResidentsNonResidentialProperty.minusDays(1)
         )
 
         def test(
@@ -3643,7 +3643,7 @@ class AcquisitionDetailsControllerSpec
               sample[CompleteAcquisitionDetailsAnswers]
                 .copy(acquisitionDate =
                   AcquisitionDate(
-                    nonUkResidentsNonResidentialProperty.minusDays(2)
+                    nonUkResidentsNonResidentialProperty.minusDays(1)
                   )
                 ),
               NonResidential,
@@ -3667,7 +3667,7 @@ class AcquisitionDetailsControllerSpec
 
       "show a form error for residential non uk" when {
         val date: String = TimeUtils.govDisplayFormat(
-          nonUkResidentsResidentialProperty
+          nonUkResidentsResidentialProperty.minusDays(1)
         )
 
         def test(

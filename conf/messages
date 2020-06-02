@@ -1562,7 +1562,7 @@ acquisitionDate-month.personalRep.error.monthAndYearRequired=The date the person
 
 acquisitionDate-month.indirect.error.monthAndYearRequired=The date you got the shares must include a month and a year
 acquisitionDate-month.agent.indirect.error.monthAndYearRequired=The date your client acquired the shares must include a month and a year
-acquisitionDate-month.trust.indirect.error.monthAndYearRequired=The date your client acquired the shares must include a month and a year
+acquisitionDate-month.trust.indirect.error.monthAndYearRequired=The date your trust acquired the shares must include a month and a year
 acquisitionDate-month.capacitor.indirect.error.monthAndYearRequired=The date the person got the shares must include a month and a year
 acquisitionDate-month.personalRep.indirect.error.monthAndYearRequired=The date the person got the shares must include a month and a year
 
@@ -1574,7 +1574,7 @@ acquisitionDate-day.personalRep.error.dayAndYearRequired=The date the person acq
 
 acquisitionDate-day.indirect.error.dayAndYearRequired=The date you got the shares must include a day and a year
 acquisitionDate-day.agent.indirect.error.dayAndYearRequired=The date your client acquired the shares must include a day and a year
-acquisitionDate-day.trust.indirect.error.dayAndYearRequired=The date your client acquired the shares must include a day and a year
+acquisitionDate-day.trust.indirect.error.dayAndYearRequired=The date your trust acquired the shares must include a day and a year
 acquisitionDate-day.capacitor.indirect.error.dayAndYearRequired=The date the person got the shares must include a day and a year
 acquisitionDate-day.personalRep.indirect.error.dayAndYearRequired=The date the person got the shares must include a day and a year
 
@@ -1683,8 +1683,8 @@ acquisitionPriceNotBought.capacitor.title=What was the market value of the prope
 acquisitionPriceNotBought.personalRep.title=What was the market value of the property when it was acquired?
 
 acquisitionPriceNotBought.indirect.title=What was the market value of the shares when you bought or acquired them?
-acquisitionPriceNotBought.agent.indirect.title=What was the market value of the shares when they were bought or acquired?
-acquisitionPriceNotBought.trust.indirect.title=What was the market value of the shares when they were bought or acquired?
+acquisitionPriceNotBought.agent.indirect.title=What was the acquisition amount?
+acquisitionPriceNotBought.trust.indirect.title=What was the acquisition amount?
 acquisitionPriceNotBought.capacitor.indirect.title=What was the market value of the shares when the person bought or acquired them?
 acquisitionPriceNotBought.personalRep.indirect.title=What was the market value of the property when it was acquired?
 
