@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.{ManagingSubscription, Onboarding}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -51,26 +52,28 @@ trait AddressController[A <: AddressJourneyType] {
   val enterUkAddressPage: views.html.address.enter_uk_address
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address
   val isUkPage: views.html.address.isUk
+  val exitPage: views.html.address.exit_page
   val toJourneyStatus: A => JourneyStatus
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
 
   def validJourney(
-    request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, A)]
+                    request: RequestWithSessionData[_]
+                  ): Either[Result, (SessionData, A)]
 
   def isATrust(journey: A): Boolean
 
   def updateAddress(
-    journey: A,
-    address: Address,
-    isManuallyEnteredAddress: Boolean
-  )(implicit
-    hc: HeaderCarrier,
-    request: Request[_]
-  ): EitherT[Future, Error, JourneyStatus]
+                     journey: A,
+                     address: Address,
+                     isManuallyEnteredAddress: Boolean
+                   )(implicit
+                     hc: HeaderCarrier,
+                     request: Request[_]
+                   ): EitherT[Future, Error, JourneyStatus]
 
   protected def backLinkCall: A => Call
+
   protected val isUkCall: Call
   protected val isUkSubmitCall: Call
   protected val enterUkAddressCall: Call
@@ -82,14 +85,20 @@ trait AddressController[A <: AddressJourneyType] {
   protected val selectAddressCall: Call
   protected val selectAddressSubmitCall: Call
   protected val continueCall: Call
+  protected val exitPageCall: Call
 
   protected val enterUkAddressBackLinkCall: A => Call = backLinkCall
-  protected val enterPostcodePageBackLink: A => Call  = _ => isUkCall
+  protected val enterPostcodePageBackLink: A => Call = _ => isUkCall
 
   protected def withValidJourney(request: RequestWithSessionData[_])(
     f: (SessionData, A) => Future[Result]
   ): Future[Result] =
     validJourney(request).fold[Future[Result]](toFuture, f.tupled)
+
+  def showExitPage() =
+    authenticatedActionWithSessionData.async { implicit request =>
+      Ok(exitPage(isUkCall))
+    }
 
   def isUk(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -99,7 +108,7 @@ trait AddressController[A <: AddressJourneyType] {
             updateSession(sessionStore, request)(
               _.copy(addressLookupResult = None)
             ).map {
-              case Left(e)  =>
+              case Left(e) =>
                 logger.warn(s"Could not clear addressLookupResult", e)
                 errorHandler.errorResult()
               case Right(_) =>
@@ -141,7 +150,14 @@ trait AddressController[A <: AddressJourneyType] {
                   )
                 ),
               {
-                case true  => Redirect(enterPostcodeCall)
+                case true =>
+                  registeredWithId(journey) match {
+                    case Some(isRegisteredWithId) =>
+                      if (isRegisteredWithId) Redirect(enterPostcodeCall) else Redirect(exitPageCall)
+                    case None =>
+                      logger.error("could not determine if user is registered with or without id")
+                      errorHandler.errorResult()
+                  }
                 case false => Redirect(enterNonUkAddressCall)
               }
             )
@@ -293,14 +309,14 @@ trait AddressController[A <: AddressJourneyType] {
                       if (a.addresses.isEmpty) handleEmptyAddresses(a)
                       else Redirect(selectAddressCall)
 
-                    case _                                                                                          =>
+                    case _ =>
                       val result = for {
                         addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
-                        _                   <- EitherT(
-                                                 updateSession(sessionStore, request)(
-                                                   _.copy(addressLookupResult = Some(addressLookupResult))
-                                                 )
-                                               )
+                        _ <- EitherT(
+                          updateSession(sessionStore, request)(
+                            _.copy(addressLookupResult = Some(addressLookupResult))
+                          )
+                        )
                       } yield addressLookupResult
 
                       result.fold(
@@ -328,7 +344,7 @@ trait AddressController[A <: AddressJourneyType] {
       withValidJourney(request) {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
-            case None                                       =>
+            case None =>
               Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
@@ -354,7 +370,7 @@ trait AddressController[A <: AddressJourneyType] {
       withValidJourney(request) {
         case (sessionData, journey) =>
           sessionData.addressLookupResult match {
-            case None                                       =>
+            case None =>
               Redirect(backLinkCall(journey))
 
             case Some(AddressLookupResult(_, _, addresses)) =>
@@ -382,22 +398,22 @@ trait AddressController[A <: AddressJourneyType] {
     }
 
   protected def storeAddress(
-    continue: Call,
-    currentJourneyStatus: A,
-    isManuallyEnteredAddress: Boolean
-  )(
-    address: Address
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+                              continue: Call,
+                              currentJourneyStatus: A,
+                              isManuallyEnteredAddress: Boolean
+                            )(
+                              address: Address
+                            )(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
       journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address, isManuallyEnteredAddress)
-      _                         <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
-                                     EitherT.pure[Future, Error](())
-                                   else
-                                     EitherT[Future, Error, Unit](
-                                       updateSession(sessionStore, request)(
-                                         _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
-                                       )
-                                     )
+      _ <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus))
+        EitherT.pure[Future, Error](())
+      else
+        EitherT[Future, Error, Unit](
+          updateSession(sessionStore, request)(
+            _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
+          )
+        )
     } yield ()
 
     result.fold(
@@ -411,22 +427,37 @@ trait AddressController[A <: AddressJourneyType] {
   }
 
   private def extractRepresentitiveType(
-    journey: AddressJourneyType
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+                                         journey: AddressJourneyType
+                                       ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
     journey match {
       case j: FillingOutReturnAddressJourney =>
         j.individualUserType match {
           case Some(value) =>
             value match {
-              case IndividualUserType.Capacitor              =>
+              case IndividualUserType.Capacitor =>
                 Some(Right(IndividualUserType.Capacitor))
               case IndividualUserType.PersonalRepresentative =>
                 Some(Left(IndividualUserType.PersonalRepresentative))
-              case _                                         => None
+              case _ => None
             }
-          case _           => None
+          case _ => None
         }
-      case _                                 => None
+      case _ => None
     }
 
+  private def registeredWithId(journey: AddressJourneyType): Option[Boolean] =
+    journey match {
+      case onboarding: AddressJourneyType.Onboarding =>
+        onboarding match {
+          case Onboarding.RegistrationReadyAddressJourney(_) => Some(false)
+          case Onboarding.IndividualSupplyingInformationAddressJourney(_) => Some(false)
+          case Onboarding.SubscriptionReadyAddressJourney(_) => Some(true)
+        }
+      case subscription: AddressJourneyType.ManagingSubscription =>
+        subscription match {
+          case ManagingSubscription.SubscribedAddressJourney(subscribed) =>
+            Some(subscribed.subscribedDetails.registeredWithId)
+        }
+      case _: AddressJourneyType.Returns => Some(true)
+    }
 }

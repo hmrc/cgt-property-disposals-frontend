@@ -86,7 +86,8 @@ class RegistrationChangeAddressControllerSpec
       behave like submitIsUkBehaviour(
         performAction,
         addressRoutes.RegistrationChangeAddressController.enterPostcode(),
-        addressRoutes.RegistrationChangeAddressController.enterNonUkAddress()
+        addressRoutes.RegistrationChangeAddressController.enterNonUkAddress(),
+        addressRoutes.RegistrationChangeAddressController.showExitPage()
       )
 
     }

@@ -19,6 +19,7 @@ GET  /account-home/manage-account/enter-uk-contact-address                      
 POST /account-home/manage-account/enter-uk-contact-addresss                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeAddressController.enterUkAddressSubmit()
 GET  /account-home/manage-account/enter-non-uk-contact-address                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeAddressController.enterNonUkAddress()
 POST /account-home/manage-account/enter-non-uk-contact-address                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeAddressController.enterNonUkAddressSubmit()
+GET  /exit/cannot-use-service-non-resident-uk-address                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeAddressController.showExitPage()
 
 # Change email
 GET /subscribed/amend-details/verify-email                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeEmailController.verifyEmail(p: java.util.UUID)

@@ -101,7 +101,8 @@ class RegistrationEnterAddressControllerSpec
       behave like submitIsUkBehaviour(
         performAction,
         addressRoutes.RegistrationEnterAddressController.enterPostcode(),
-        addressRoutes.RegistrationEnterAddressController.enterNonUkAddress()
+        addressRoutes.RegistrationEnterAddressController.enterNonUkAddress(),
+        addressRoutes.RegistrationEnterAddressController.showExitPage()
       )
 
     }

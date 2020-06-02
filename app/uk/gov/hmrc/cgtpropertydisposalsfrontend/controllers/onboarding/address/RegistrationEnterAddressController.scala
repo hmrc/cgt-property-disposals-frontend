@@ -49,7 +49,8 @@ class RegistrationEnterAddressController @Inject() (
   val selectAddressPage: views.html.address.select_address,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-  val isUkPage: views.html.address.isUk
+  val isUkPage: views.html.address.isUk,
+  val exitPage: views.html.address.exit_page
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -116,6 +117,8 @@ class RegistrationEnterAddressController @Inject() (
     routes.RegistrationEnterAddressController.selectAddress()
   protected lazy val selectAddressSubmitCall: Call     =
     routes.RegistrationEnterAddressController.selectAddressSubmit()
+  protected lazy val exitPageCall: Call                =
+    routes.RegistrationEnterAddressController.showExitPage()
   protected lazy val continueCall: Call                =
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()
 

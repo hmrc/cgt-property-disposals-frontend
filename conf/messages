@@ -3255,3 +3255,6 @@ companyDetails.cya.title=Check your answers
 companyDetails.cyaLabel.company-address=Company name and address
 companyDetails.cyaChange.company-address=the company name and address
 
+non-uk-resident.change-address-to-uk-address.title=You cannot use this service
+non-uk-resident.change-address-to-uk-address.p1=You cannot use this service to report Capitals Gains Tax on UK property sales or disposals. This is because your address is in the UK.
+non-uk-resident.change-address-to-uk-address.p2=You’ll need to <a href="{0}">contact HMRC</a> to find out how to report the tax.

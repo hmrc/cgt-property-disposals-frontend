@@ -53,7 +53,8 @@ class SubscribedChangeAddressController @Inject() (
   val selectAddressPage: views.html.address.select_address,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-  val isUkPage: views.html.address.isUk
+  val isUkPage: views.html.address.isUk,
+  val exitPage: views.html.address.exit_page
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -138,4 +139,6 @@ class SubscribedChangeAddressController @Inject() (
     routes.SubscribedChangeAddressController.selectAddressSubmit()
   protected lazy val continueCall: Call                =
     controllers.accounts.routes.AccountController.contactAddressUpdated()
+  protected lazy val exitPageCall: Call                =
+    routes.SubscribedChangeAddressController.showExitPage()
 }

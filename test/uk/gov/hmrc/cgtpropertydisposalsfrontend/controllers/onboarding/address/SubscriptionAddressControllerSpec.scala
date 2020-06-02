@@ -96,7 +96,8 @@ class SubscriptionAddressControllerSpec
       behave like submitIsUkBehaviour(
         performAction,
         routes.SubscriptionAddressController.enterPostcode(),
-        routes.SubscriptionAddressController.enterNonUkAddress()
+        routes.SubscriptionAddressController.enterNonUkAddress(),
+        routes.SubscriptionAddressController.showExitPage()
       )
 
     }

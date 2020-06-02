@@ -35,6 +35,7 @@ GET  /registration/create-account/enter-uk-contact-address                      
 POST /registration/create-account/enter-uk-contact-address                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterUkAddressSubmit()
 GET  /registration/create-account/enter-non-UK-contact-address                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterNonUkAddress()
 POST /registration/create-account/enter-non-UK-contact-address                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterNonUkAddressSubmit()
+GET  /exit/cannot-use-service-non-resident-uk-address                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.showExitPage()
 GET  /registration/create-account/change-contact-address                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.isUk()
 POST /registration/create-account/change-contact-address                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.isUkSubmit()
 GET  /registration/create-account/find-different-contact-address                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterPostcode()
@@ -45,7 +46,7 @@ GET  /registration/create-account/enter-different-uk-contact-address            
 POST /registration/create-account/enter-different-uk-contact-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterUkAddressSubmit()
 GET  /registration/create-account/enter-different-non-UK-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterNonUkAddress()
 POST /registration/create-account/enter-different-non-UK-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterNonUkAddressSubmit()
-
+GET  /exit/cannot-use-service-non-resident-uk-address                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.showExitPage()
 
 # Subscription
 GET  /exit/sign-in-with-correct-user-id                                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
@@ -76,6 +77,7 @@ GET  /subscription/create-account/enter-uk-contact-address                      
 POST /subscription/create-account/enter-uk-contact-address                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterUkAddressSubmit()
 GET  /subscription/create-account/enter-different-non-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterNonUkAddress()
 POST /subscription/create-account/enter-different-non-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterNonUkAddressSubmit()
+GET  /exit/cannot-use-service-non-resident-uk-address                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.showExitPage()
 
 # Name
 GET  /subscription/create-account/enter-different-contact-name                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.SubscriptionChangeContactNameController.enterContactName()

@@ -53,7 +53,8 @@ class ChangeRepresenteeContactAddressController @Inject() (
   val selectAddressPage: views.html.address.select_address,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-  val isUkPage: views.html.address.isUk
+  val isUkPage: views.html.address.isUk,
+  val exitPage: views.html.address.exit_page
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -193,6 +194,8 @@ class ChangeRepresenteeContactAddressController @Inject() (
     routes.ChangeRepresenteeContactAddressController.selectAddress()
   protected lazy val selectAddressSubmitCall: Call     =
     routes.ChangeRepresenteeContactAddressController.selectAddressSubmit()
+  protected lazy val exitPageCall: Call                =
+    routes.ChangeRepresenteeContactAddressController.showExitPage()
   protected lazy val continueCall: Call                =
     routes.RepresenteeController.checkYourAnswers()
 }

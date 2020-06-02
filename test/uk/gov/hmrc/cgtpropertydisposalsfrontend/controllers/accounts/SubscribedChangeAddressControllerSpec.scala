@@ -119,7 +119,8 @@ class SubscribedChangeAddressControllerSpec
       behave like submitIsUkBehaviour(
         performAction,
         accounts.routes.SubscribedChangeAddressController.enterPostcode(),
-        accounts.routes.SubscribedChangeAddressController.enterNonUkAddress()
+        accounts.routes.SubscribedChangeAddressController.enterNonUkAddress(),
+        accounts.routes.SubscribedChangeAddressController.showExitPage()
       )
 
     }
