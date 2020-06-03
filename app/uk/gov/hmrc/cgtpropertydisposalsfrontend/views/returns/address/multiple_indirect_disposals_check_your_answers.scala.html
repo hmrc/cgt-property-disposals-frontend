@@ -33,9 +33,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
 
 @(
     answers: CompleteExampleCompanyDetailsAnswers,
-    shouldAskIfPostcodeExists: Boolean,
-    isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    shouldAskIfPostcodeExists: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 
@@ -43,13 +41,13 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @pageHeading(title, Some(messages("returns.property-details.multipleDisposals.caption")))
+    @pageHeading(title, Some(messages("returns.company-details.multipleIndirectDisposals.caption")))
 
     <p>
         <a href="@routes.CompanyDetailsController.multipleIndirectDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
     </p>
 
-    @summary(answers, shouldAskIfPostcodeExists, isATrust, representativeType)
+    @summary(answers, shouldAskIfPostcodeExists)
 
     @formWrapper(routes.CompanyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

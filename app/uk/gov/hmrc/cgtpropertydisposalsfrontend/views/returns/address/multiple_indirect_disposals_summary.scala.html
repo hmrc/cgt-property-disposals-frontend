@@ -28,51 +28,42 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 @this(
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+    addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
 @(
     answers: CompleteExampleCompanyDetailsAnswers,
-    shouldAskIfPostcodeExists: Boolean,
-    isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    shouldAskIfPostcodeExists: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages)
-
-@isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{
-    if (representativeType.exists(_.isLeft)) ".personalRep"
-    else if (isAgent) ".agent"
-    else if (isATrust) ".trust"
-    else if (representativeType.exists(_.isRight)) ".capacitor"
-    else ""
-}
 
 @cyaSection() {
 @cyaRow(
-        messages("returns.property-address.cyaLabel.property-address"),
+        messages("returns.company-address.cyaLabel.company-address"),
         addressDisplay(answers.address, DisplayFormat.Block),
-        Some(cyaChange(messages("returns.property-address.cyaChange.property-address"),
+        Some(cyaChange(messages("returns.company-address.cyaChange.company-address"),
             if(shouldAskIfPostcodeExists) routes.CompanyDetailsController.isUk().url
             else routes.CompanyDetailsController.enterPostcode().url
         )),
-        "property-address"
+        "company-address"
     )
 
     @cyaRow(
-        messages("multipleDisposalsDisposalPrice.title"),
+        messages("returns.company-address.cyaLabel.disposal-price"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
-        Some(cyaChange(messages("multipleDisposalsDisposalPrice.cyaChange"), returns.address.routes.CompanyDetailsController.multipleIndirectDisposalPrice().url)),
-        "multipleDisposalsDisposalPrice"
+        Some(cyaChange(messages("returns.company-address.cyaChange.disposal-price"),
+            returns.address.routes.CompanyDetailsController.multipleIndirectDisposalPrice().url)),
+        "multipleIndirectDisposalsDisposalPrice"
     )
 
     @cyaRow(
-        messages("multipleDisposalsAcquisitionPrice.title"),
+        messages("returns.company-address.cyaLabel.acquisition-price"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
-        Some(cyaChange(messages("multipleDisposalsAcquisitionPrice.cyaChange"), returns.address.routes.CompanyDetailsController.multipleIndirectAcquisitionPrice().url)),
-        "multipleDisposalsAcquisitionPrice"
+        Some(cyaChange(messages("returns.company-address.cyaChange.acquisition-price"),
+            returns.address.routes.CompanyDetailsController.multipleIndirectAcquisitionPrice().url)),
+        "multipleIndirectDisposalsAcquisitionPrice"
     )
 
 }

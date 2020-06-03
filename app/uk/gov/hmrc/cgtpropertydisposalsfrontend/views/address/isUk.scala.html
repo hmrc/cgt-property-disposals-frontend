@@ -43,7 +43,8 @@
     case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => ".representee"
 
     case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-      if(c.representativeType.exists(_.isLeft))       ".companyDetails.personalRep."
+      if(c.draftReturn.isLeft)                        ".multipleIndirect."
+      else if(c.representativeType.exists(_.isLeft))  ".companyDetails.personalRep."
       else if(c.representativeType.exists(_.isRight)) ".companyDetails.capacitor."
       else if(c.isATrust)                             ".companyDetails.trust."
       else if(request.userType.exists(_ === Agent))   ".companyDetails.agent."
@@ -55,7 +56,8 @@
   addressJourneyType match {
       case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => messages("isUk.representee.title")
       case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-          if(c.representativeType.exists(_.isLeft))       messages("companyDetails.isUk.personalRep.title")
+          if(c.draftReturn.isLeft)                        messages("companyDetails.isUk.multipleIndirect.title")
+          else if(c.representativeType.exists(_.isLeft))  messages("companyDetails.isUk.personalRep.title")
           else if(c.representativeType.exists(_.isRight)) messages("companyDetails.isUk.capacitor.title")
           else if(c.isATrust)                             messages("companyDetails.isUk.trust.title")
           else if(request.userType.exists(_ === Agent))   messages("companyDetails.isUk.agent.title")

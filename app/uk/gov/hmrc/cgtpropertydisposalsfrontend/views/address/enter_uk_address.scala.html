@@ -73,7 +73,8 @@
       _ => messages(s"address.uk.returns$userKey.singleDisposal.title")
     )
   case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-    if(c.representativeType.exists(_.isLeft))       messages("address.uk.companyDetails.personalRep.title")
+    if(c.draftReturn.isLeft)                        messages("address.uk.companyDetails.multipleIndirect.title")
+    else if(c.representativeType.exists(_.isLeft))  messages("address.uk.companyDetails.personalRep.title")
     else if(c.representativeType.exists(_.isRight)) messages("address.uk.companyDetails.capacitor.title")
     else if(c.isATrust)                             messages("address.uk.companyDetails.trust.title")
     else if(request.userType.exists(_ === Agent))   messages("address.uk.companyDetails.agent.title")
@@ -83,10 +84,18 @@
   case _ => messages("address.uk.title")
 }}
 
+@helpText = @{
+  addressJourneyType match {
+    case c: AddressJourneyType.Returns.EnteringCompanyDetails if c.draftReturn.isLeft =>
+      Some(messages("companyDetails.isUk.multipleIndirect.helpText"))
+    case _ => None
+  }
+}
+
 @showFindAddressLink = @{ addressJourneyType match {
   case _: AddressJourneyType.Returns.EnteringCompanyDetails => false
   case _ => true
-}
+ }
 }
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -103,7 +112,7 @@
   @formWrapper(submit, 'novalidate -> "novalidate") {
     <fieldset id="@key">
       <legend>
-        @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())))
+        @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())), helpText)
       </legend>
       @textInput(
         fieldId = line1Key,

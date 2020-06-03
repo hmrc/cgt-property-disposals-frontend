@@ -3257,3 +3257,46 @@ companyDetails.cya.title=Check your answers
 companyDetails.cyaLabel.company-address=Company name and address
 companyDetails.cyaChange.company-address=the company name and address
 
+company-details.multiple-indirect-disposals.guidance.title=You’ll need to enter details for one of the disposals
+company-details.multiple-indirect-disposals.guidance.p1=You should enter the details of the disposal that gave the largest gain or the smallest loss.
+company-details.multiple-indirect-disposals.guidance.p2=For that one disposal, you’ll need to enter the:
+company-details.multiple-indirect-disposals.guidance.li1=name and address of the company the shares were held in
+company-details.multiple-indirect-disposals.guidance.li2=disposal date of the shares
+company-details.multiple-indirect-disposals.guidance.li3=disposal value, less disposal costs
+company-details.multiple-indirect-disposals.guidance.li4=acquisition value, plus acquisition costs
+company-details.multiple-indirect-disposals.guidance.p3=You’ll also need to upload a document later providing details of the other UK property disposals you’re including in this return.
+
+multipleIndirectDisposalsDisposalPrice.title=What was the disposal value of the shares?
+multipleIndirectDisposalsDisposalPrice.helpText=This is the amount the shares were sold for, or their market value if they were disposed of another way. You should subtract any selling or disposal costs, for example, stock broker’s fees.
+
+multipleIndirectDisposalsDisposalPrice.error.required=Enter the disposal value of the shares
+multipleIndirectDisposalsDisposalPrice.error.invalid=The disposal value of the shares must be an amount of money, like 160,000 or 23,040.50
+multipleIndirectDisposalsDisposalPrice.error.tooManyDecimals=The disposal value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleIndirectDisposalsDisposalPrice.error.tooLarge=The disposal value of the shares must be an amount of money between 1 and 50,000,000,000
+multipleIndirectDisposalsDisposalPrice.error.tooSmall=The disposal value of the shares must be an amount of money between 1 and 50,000,000,000
+
+multipleIndirectDisposalsAcquisitionPrice.title=What was the acquisition value of the shares?
+multipleIndirectDisposalsAcquisitionPrice.helpText=This is the amount paid to buy the shares, or their market value if they were inherited or received as a gift. You should add on any acquisition costs, for example, stock broker’s fees.
+
+multipleIndirectDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the shares
+multipleIndirectDisposalsAcquisitionPrice.error.invalid=The acquisition value of the shares must be an amount of money, like 160,000 or 23,040.50
+multipleIndirectDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleIndirectDisposalsAcquisitionPrice.error.tooLarge=The acquisition value of the shares must be an amount of money between 1 and 50,000,000,000
+multipleIndirectDisposalsAcquisitionPrice.error.tooSmall=The acquisition value of the shares must be an amount of money between 1 and 50,000,000,000
+
+returns.company-address.cya.title=Check your answers
+
+companyDetails.isUk.multipleIndirect.title=Do any of the companies the shares were sold in have a registered address in the UK?
+companyDetails.isUk.multipleIndirect.helpText=This should be the company’s registered address.
+isUk.multipleIndirect.error.required=Select yes if any of the companies the shares were sold in have a registered address in the UK
+address.uk.companyDetails.multipleIndirect.title=Enter the name and address of one of the companies the shares were held in
+nonUkAddress.companyDetails.multipleIndirect.title=Enter the name and address of one of the companies the shares were held in
+
+returns.company-address.cyaLabel.company-address=Company name and address
+returns.company-address.cyaChange.company-address=the address of the property
+returns.company-address.cyaLabel.disposal-price=What was the disposal amount?
+returns.company-address.cyaLabel.acquisition-price=What was the acquisition amount?
+
+##### TODO
+##nonUkAddress-line2.companyDetails.multipleIndirect.error.pattern=Street address must only include letters a to z, spaces and numbers
+

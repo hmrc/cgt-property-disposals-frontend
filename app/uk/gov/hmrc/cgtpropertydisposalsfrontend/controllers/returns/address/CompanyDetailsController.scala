@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
-import cats.syntax.order._
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.Inject
@@ -30,14 +29,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftMultipleIndirectDisposalsReturn, DraftSingleIndirectDisposalReturn, ExampleCompanyDetailsAnswers, ExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleIndirectDisposalsReturn, DraftSingleIndirectDisposalReturn, ExampleCompanyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{EnteringCompanyDetails, FillingOutReturnAddressJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.EnteringCompanyDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -181,13 +180,7 @@ class CompanyDetailsController @Inject() (
                   routes.CompanyDetailsController.checkYourAnswers()
                 )
 
-            Ok(
-              multipleIndirectDisposalsGuidancePage(
-                backLink,
-                r.journey.subscribedDetails.isATrust,
-                r.representativeType
-              )
-            )
+            Ok(multipleIndirectDisposalsGuidancePage(backLink))
         }
       }
     }
@@ -239,14 +232,7 @@ class CompanyDetailsController @Inject() (
               multipleIndirectDisposalPriceForm.fill(c.inPounds)
             )
 
-            Ok(
-              multipleIndirectDisposalPricePage(
-                form,
-                backLink,
-                r.journey.subscribedDetails.isATrust,
-                r.representativeType
-              )
-            )
+            Ok(multipleIndirectDisposalPricePage(form, backLink))
         }
       }
     }
@@ -268,12 +254,7 @@ class CompanyDetailsController @Inject() (
               .fold(
                 formWithErrors =>
                   BadRequest(
-                    multipleIndirectDisposalPricePage(
-                      formWithErrors,
-                      backLink,
-                      r.journey.subscribedDetails.isATrust,
-                      r.representativeType
-                    )
+                    multipleIndirectDisposalPricePage(formWithErrors, backLink)
                   ),
                 disposalPrice =>
                   if (
@@ -356,14 +337,7 @@ class CompanyDetailsController @Inject() (
               multipleIndirectAcquisitionPriceForm.fill(c.inPounds)
             )
 
-            Ok(
-              multipleIndirectAcquisitionPricePage(
-                form,
-                backLink,
-                r.journey.subscribedDetails.isATrust,
-                r.representativeType
-              )
-            )
+            Ok(multipleIndirectAcquisitionPricePage(form, backLink))
         }
       }
     }
@@ -387,9 +361,7 @@ class CompanyDetailsController @Inject() (
                   BadRequest(
                     multipleIndirectAcquisitionPricePage(
                       formWithErrors,
-                      backLink,
-                      r.journey.subscribedDetails.isATrust,
-                      r.representativeType
+                      backLink
                     )
                   ),
                 acquisitionPrice =>
@@ -510,9 +482,7 @@ class CompanyDetailsController @Inject() (
                       Ok(
                         multipleIndirectCheckYourAnswersPage(
                           completeAnswers,
-                          true, //TODO: check it "shouldAskIfPostcodeExists(assetTypes)"
-                          journey.journey.subscribedDetails.isATrust,
-                          journey.representativeType
+                          true //TODO: check it "shouldAskIfPostcodeExists(assetTypes)"
                         )
                       )
                   )
@@ -521,9 +491,7 @@ class CompanyDetailsController @Inject() (
                   Ok(
                     multipleIndirectCheckYourAnswersPage(
                       c,
-                      true, //TODO: check it "shouldAskIfPostcodeExists(assetTypes)"
-                      journey.journey.subscribedDetails.isATrust,
-                      journey.representativeType
+                      true //TODO: check it "shouldAskIfPostcodeExists(assetTypes)"
                     )
                   )
 
