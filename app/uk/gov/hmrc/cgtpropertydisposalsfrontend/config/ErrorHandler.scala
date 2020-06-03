@@ -41,14 +41,13 @@ class ErrorHandler @Inject() (
   )(implicit
     request: Request[_]
   ): Html =
-    error_template(None, pageTitle, heading, message)
+    error_template(pageTitle, heading, message)
 
   def errorResult[R <: Request[_]](
     userType: Option[UserType]
   )(implicit request: R): Result =
     InternalServerError(
       error_template(
-        userType,
         Messages("global.error.InternalServerError500.title"),
         Messages("global.error.InternalServerError500.heading"),
         Messages("global.error.InternalServerError500.message")
@@ -58,7 +57,6 @@ class ErrorHandler @Inject() (
   def tmpErrorResult()(implicit request: Request[_]): Result =
     InternalServerError(
       error_template(
-        None,
         Messages("tmpCustomError.title"),
         Messages("tmpCustomError.heading"),
         Messages("tmpCustomError.p1"),

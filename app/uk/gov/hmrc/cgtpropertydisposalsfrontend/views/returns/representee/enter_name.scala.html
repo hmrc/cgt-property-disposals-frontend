@@ -52,7 +52,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @title = @{messages(s"$key$representativeTypeInterpolator.title")}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 

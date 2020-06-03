@@ -18,7 +18,6 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -26,7 +25,7 @@
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
-@(details: NeedMoreDetailsDetails)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(details: NeedMoreDetailsDetails)(implicit messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("weNeedMoreDetails.title")}
 @affinity = @{details.affinityGroup match {
@@ -34,7 +33,7 @@
   case _ => "individual"
 }}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title) {
  @pageHeading(title, Some(messages("weNeedMoreDetails.caption")))
  <p>
   @messages("weNeedMoreDetails.p")

@@ -41,7 +41,7 @@
 @affinity = @{details.name.fold(_ => "organisation", _ => "individual")}
 @title = @{messages(s"subscription.${affinity}.title")}
 
-@mainTemplate(title = title, userType = request.sessionData.userType) {
+@mainTemplate(title = title) {
 
  @pageHeading(title, Some(messages("subscription.caption")))
 

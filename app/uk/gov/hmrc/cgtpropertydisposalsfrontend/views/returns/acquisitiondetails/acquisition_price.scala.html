@@ -66,7 +66,7 @@
   case _ => (messages(s"${key}NotBought$userKey.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought$userKey.helpText")), s"acquisitionPriceNotBought$userKey")
 }}
 
-@mainTemplate(title = titleWithHelpTextAndContext._1, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = titleWithHelpTextAndContext._1, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 

@@ -1726,7 +1726,6 @@ object SingleDisposalsTriageController {
     mapping(
       "individualUserType" -> of(
         FormUtils.radioFormFormatter(
-          "individualUserType",
           List(Self, Capacitor, PersonalRepresentative)
         )
       )
@@ -1737,7 +1736,7 @@ object SingleDisposalsTriageController {
     mapping(
       "numberOfProperties" -> of(
         FormUtils
-          .radioFormFormatter("numberOfProperties", List(One, MoreThanOne))
+          .radioFormFormatter(List(One, MoreThanOne))
       )
     )(identity)(Some(_))
   )
@@ -1746,7 +1745,7 @@ object SingleDisposalsTriageController {
     mapping(
       "disposalMethod" -> of(
         FormUtils
-          .radioFormFormatter("disposalMethod", List(Sold, Gifted, Other))
+          .radioFormFormatter(List(Sold, Gifted, Other))
       )
     )(identity)(Some(_))
   )
@@ -1808,7 +1807,6 @@ object SingleDisposalsTriageController {
     mapping(
       "assetTypeForNonUkResidents" -> of(
         FormUtils.radioFormFormatter(
-          "assetTypeForNonUkResidents",
           List(Residential, NonResidential, MixedUse, IndirectDisposal)
         )
       )

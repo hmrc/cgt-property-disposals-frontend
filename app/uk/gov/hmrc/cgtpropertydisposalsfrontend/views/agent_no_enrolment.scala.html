@@ -20,7 +20,6 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -35,7 +34,7 @@
 @key = @{ "agentNoEnrolment" }
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = Some(UserType.Agent), withSignOutLink = false) {
+@mainTemplate(title = title, withSignOutLink = false) {
 
     @pageHeading(title)
     <p>@Html(messages(s"$key.p1", viewConfig.createAgentsAccountUrl))</p>

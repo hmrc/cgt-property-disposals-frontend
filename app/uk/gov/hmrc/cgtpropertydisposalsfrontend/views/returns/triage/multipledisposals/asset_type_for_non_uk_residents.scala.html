@@ -93,7 +93,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     )
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
@@ -111,9 +111,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
             selected = form.value.map(_.map(toIndex)).getOrElse(List.empty),
             helpText = Some(Html(messages(s"$key.helpText"))),
             label = pageHeading(title),
-            labelAsHeading = true,
             error = form.error(key),
-            hasErrors = hasErrors
         )
 
         @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))

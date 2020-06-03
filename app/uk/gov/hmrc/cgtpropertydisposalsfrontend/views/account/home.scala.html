@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 
 @this(
@@ -32,13 +31,13 @@ draftReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.co
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(subscribed: Subscribed)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(subscribed: Subscribed)(implicit messages: Messages, appConfig: ViewConfig)
 
 @isAnAgent = @{subscribed.agentReferenceNumber.isDefined}
 @title = @{messages(s"account.home.title")}
 @subtitle = @{messages("account.home.subtitle", subscribed.subscribedDetails.cgtReference.value)}
 
-@mainTemplate(title = title, userType = request.userType, mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
+@mainTemplate(title = title, mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
 
  <div class="grid-row">
   <div class="column-two-thirds account-header">

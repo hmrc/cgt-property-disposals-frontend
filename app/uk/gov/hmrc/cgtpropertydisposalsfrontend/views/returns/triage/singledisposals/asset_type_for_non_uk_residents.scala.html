@@ -95,7 +95,7 @@
     )
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
@@ -109,9 +109,7 @@
             options = options,
             selected = selectedIndex,
             label = pageHeading(title, Some(messages("triage.caption"))),
-            labelAsHeading = true,
             error = form.error(key),
-            hasErrors = hasErrors,
             customErrorKey = Some(s"$key$userKey")
         )
 

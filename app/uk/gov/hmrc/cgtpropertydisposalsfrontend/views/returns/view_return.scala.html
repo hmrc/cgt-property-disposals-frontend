@@ -64,7 +64,7 @@
 
 @key= @{ "viewReturn" }
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
+@mainTemplate(title = title, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
   @returnHeading(title, returnSummary, subscribedDetails, request.userType)
   

@@ -57,7 +57,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 }
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 
@@ -71,7 +71,6 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
         @yesNo(
             fieldId = key,
             label = pageHeading(title),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,

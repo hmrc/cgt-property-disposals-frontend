@@ -60,7 +60,7 @@
 @hasErrors = @{form.hasErrors}
 @errorKey = @{List("completionDate-day", "completionDate-month", "completionDate-year", "completionDate").map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
  @backLinkComponent(backLink)
 
@@ -76,7 +76,6 @@
    monthValue = form.data.get("completionDate-month"),
    yearValue = form.data.get("completionDate-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-   labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )

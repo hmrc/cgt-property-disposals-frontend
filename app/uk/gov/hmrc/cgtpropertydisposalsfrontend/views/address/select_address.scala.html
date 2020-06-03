@@ -56,7 +56,7 @@ representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
  else ""
 }
 @journeyErrorKey = @{ addressJourneyType match {
- case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
+ case _: AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
  case _ => ""
 }}
 @title = @{ addressJourneyType match {
@@ -73,7 +73,7 @@ representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
 @menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
 
  @backLinkComponent(backLink)
 
@@ -87,7 +87,6 @@ representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
    options = addresses.map(a => addressDisplay(a, Line)),
    selected = form.value.map(addresses.indexOf(_)),
    label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
-   labelAsHeading = true,
    errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${userKey.stripPrefix(".")}${e.message}"),
    hasErrors = hasErrors
   )

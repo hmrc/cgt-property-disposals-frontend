@@ -81,7 +81,7 @@
 @menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
 
   @backLinkComponent(backLink)
 

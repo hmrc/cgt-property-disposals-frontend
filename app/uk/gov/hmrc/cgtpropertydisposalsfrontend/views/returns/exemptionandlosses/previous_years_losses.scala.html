@@ -96,7 +96,7 @@
     })
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
@@ -112,7 +112,6 @@
             label = pageHeading(title),
             selected = selectedIndex,
             error = form.error(key),
-            hasErrors = hasErrors,
             options = options,
             helpText = Some(Html(messages(s"$residentSpecificKey.helpText"))),
             customErrorKey = Some(s"$key$userKey")

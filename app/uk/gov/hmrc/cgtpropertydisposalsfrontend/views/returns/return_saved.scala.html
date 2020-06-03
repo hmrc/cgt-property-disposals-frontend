@@ -36,7 +36,7 @@ warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 @title = @{messages("draftReturnSaved.title")}
 @isAnAgent = @{ request.userType.contains(UserType.Agent)}
 @warningMessageKey = @{ s"draftReturnSaved${if(isAnAgent) ".agent" else if (isATrust) ".trust" else ""}.warning" }
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title) {
 
   @backLinkComponent(returns.routes.TaskListController.taskList())
 

@@ -45,7 +45,7 @@
 @title = @{messages(s"$key.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
  @backLinkComponent(backLink)
 
@@ -59,7 +59,6 @@
   @yesNo(
    fieldId = key,
    label = pageHeading(title),
-   labelAsHeading = true,
    errorKey = form.error(key).map(e => e.message),
    hasErrors = hasErrors,
    selected = form.value,

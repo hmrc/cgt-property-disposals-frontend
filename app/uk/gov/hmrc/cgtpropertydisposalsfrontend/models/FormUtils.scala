@@ -42,7 +42,6 @@ object FormUtils {
       }
 
   def radioFormFormatter[A : Eq](
-    id: String,
     orderedOptions: List[A]
   ): Formatter[A] =
     new Formatter[A] {

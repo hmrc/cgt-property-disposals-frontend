@@ -16,7 +16,6 @@
 
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleIndirectDisposalReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
@@ -31,7 +30,7 @@
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(draftReturn: DraftSingleIndirectDisposalReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftSingleIndirectDisposalReturn)(implicit messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("service.title")}
 
@@ -85,7 +84,7 @@
 }
 
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title) {
 
     @pageHeading(title)
 
