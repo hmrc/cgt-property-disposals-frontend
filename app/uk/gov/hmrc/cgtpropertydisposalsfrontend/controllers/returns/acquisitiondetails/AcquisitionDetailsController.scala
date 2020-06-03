@@ -106,7 +106,7 @@ class AcquisitionDetailsController @Inject() (
             )
           ) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
-          f(s, r, Left(d), IncompleteAcquisitionDetailsAnswers.empty)
+          f(s, r, Left(d), IncompleteAcquisitionDetailsAnswers.empty.copy(improvementCosts = Some(AmountInPence.zero)))
         )(f(s, r, Left(d), _))
 
       case _ => Redirect(controllers.routes.StartController.start())
@@ -543,10 +543,11 @@ class AcquisitionDetailsController @Inject() (
                   page = rebasedAcquisitionPricePage(
                     _,
                     _,
-                    rebasingEligibilityUtil.getDisplayRebasingCutOffDate(
-                      assetType,
-                      wasUkResident
-                    ),
+                    rebasingEligibilityUtil
+                      .getDisplayRebasingCutOffDate(
+                        assetType,
+                        wasUkResident
+                      ),
                     fillingOutReturn.subscribedDetails.isATrust,
                     representativeType(state),
                     assetType
@@ -813,10 +814,11 @@ class AcquisitionDetailsController @Inject() (
                   shouldUseRebasePage(
                     _,
                     _,
-                    rebasingEligibilityUtil.getDisplayRebasingCutOffDate(
-                      assetType,
-                      wasUkResident
-                    ),
+                    rebasingEligibilityUtil
+                      .getDisplayRebasingCutOffDate(
+                        assetType,
+                        wasUkResident
+                      ),
                     assetType
                   )
                 )(
