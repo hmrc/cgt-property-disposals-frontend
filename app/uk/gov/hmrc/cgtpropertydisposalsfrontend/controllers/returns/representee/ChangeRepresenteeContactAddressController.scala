@@ -53,7 +53,8 @@ class ChangeRepresenteeContactAddressController @Inject() (
   val selectAddressPage: views.html.address.select_address,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-  val isUkPage: views.html.address.isUk
+  val isUkPage: views.html.address.isUk,
+  val exitPage: views.html.address.exit_page
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -177,26 +178,28 @@ class ChangeRepresenteeContactAddressController @Inject() (
   protected lazy val backLinkCall: ChangingRepresenteeContactAddressJourney => Call =
     _ => routes.RepresenteeController.checkYourAnswers()
 
-  protected lazy val isUkCall: Call                    =
+  protected lazy val isUkCall: Call                                =
     routes.ChangeRepresenteeContactAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call              =
+  protected lazy val isUkSubmitCall: Call                          =
     routes.ChangeRepresenteeContactAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          =
+  protected lazy val enterUkAddressCall: Call                      =
     routes.ChangeRepresenteeContactAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call    =
+  protected lazy val enterUkAddressSubmitCall: Call                =
     routes.ChangeRepresenteeContactAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call       =
+  protected lazy val enterNonUkAddressCall: Call                   =
     routes.ChangeRepresenteeContactAddressController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call =
+  protected lazy val enterNonUkAddressSubmitCall: Call             =
     routes.ChangeRepresenteeContactAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call           =
+  protected lazy val enterPostcodeCall: Call                       =
     routes.ChangeRepresenteeContactAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call     =
+  protected lazy val enterPostcodeSubmitCall: Call                 =
     routes.ChangeRepresenteeContactAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call           =
+  protected lazy val selectAddressCall: Call                       =
     routes.ChangeRepresenteeContactAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call     =
+  protected lazy val selectAddressSubmitCall: Call                 =
     routes.ChangeRepresenteeContactAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call                =
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call] =
+    None
+  protected lazy val continueCall: Call                            =
     routes.RepresenteeController.checkYourAnswers()
 }

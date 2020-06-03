@@ -154,7 +154,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
         case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
-
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn)
+            if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
+          true
         case _ => false
       }
     )
@@ -181,7 +183,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
       behave like submitIsUkBehaviour(
         performAction,
         routes.ChangeRepresenteeContactAddressController.enterPostcode(),
-        routes.ChangeRepresenteeContactAddressController.enterNonUkAddress()
+        routes.ChangeRepresenteeContactAddressController.enterNonUkAddress(),
+        None
       )
 
     }

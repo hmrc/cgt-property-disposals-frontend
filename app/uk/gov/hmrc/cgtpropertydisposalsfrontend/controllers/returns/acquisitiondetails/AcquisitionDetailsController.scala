@@ -106,7 +106,7 @@ class AcquisitionDetailsController @Inject() (
             )
           ) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
-          f(s, r, Left(d), IncompleteAcquisitionDetailsAnswers.empty)
+          f(s, r, Left(d), IncompleteAcquisitionDetailsAnswers.empty.copy(improvementCosts = Some(AmountInPence.zero)))
         )(f(s, r, Left(d), _))
 
       case _ => Redirect(controllers.routes.StartController.start())
@@ -123,6 +123,20 @@ class AcquisitionDetailsController @Inject() (
       ) match {
       case (Some(a), Some(w)) => f(a, w)
       case _                  =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
+    }
+
+  private def withAssetType(
+    state: JourneyState
+  )(f: AssetType => Future[Result]): Future[Result] =
+    state
+      .fold(_.triageAnswers, _.triageAnswers)
+      .fold(
+        i => i.assetType,
+        c => Some(c.assetType)
+      ) match {
+      case Some(a) => f(a)
+      case _       =>
         Redirect(controllers.returns.routes.TaskListController.taskList())
     }
 
@@ -263,23 +277,26 @@ class AcquisitionDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
-          commonDisplayBehaviour(answers)(
-            form = _.fold(
-              _.acquisitionMethod
-                .fold(acquisitionMethodForm)(acquisitionMethodForm.fill),
-              c => acquisitionMethodForm.fill(c.acquisitionMethod)
+          withAssetType(state) { assetType =>
+            commonDisplayBehaviour(answers)(
+              form = _.fold(
+                _.acquisitionMethod
+                  .fold(acquisitionMethodForm)(acquisitionMethodForm.fill),
+                c => acquisitionMethodForm.fill(c.acquisitionMethod)
+              )
+            )(
+              page = acquisitionMethodPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                representativeType(state),
+                assetType
+              )
+            )(
+              requiredPreviousAnswer = _ => true,
+              controllers.returns.routes.TaskListController.taskList()
             )
-          )(
-            page = acquisitionMethodPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(state)
-            )
-          )(
-            requiredPreviousAnswer = _ => Some(()).isDefined,
-            controllers.returns.routes.TaskListController.taskList()
-          )
+          }
       }
     }
 
@@ -287,42 +304,45 @@ class AcquisitionDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
-          commonSubmitBehaviour(
-            fillingOutReturn,
-            state,
-            answers
-          )(
-            acquisitionMethodForm
-          )(
-            acquisitionMethodPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(state)
+          withAssetType(state) { assetType =>
+            commonSubmitBehaviour(
+              fillingOutReturn,
+              state,
+              answers
+            )(
+              acquisitionMethodForm
+            )(
+              acquisitionMethodPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                representativeType(state),
+                assetType
+              )
+            )(
+              requiredPreviousAnswer = _ => noAnswersRequired,
+              controllers.returns.routes.TaskListController.taskList()
+            )(
+              updateState = {
+                case (m, answers, draftReturn) =>
+                  if (
+                    answers
+                      .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
+                      .contains(m)
+                  )
+                    draftReturn
+                  else {
+                    val newAnswers = answers
+                      .unset(_.acquisitionPrice)
+                      .unset(_.rebasedAcquisitionPrice)
+                      .unset(_.shouldUseRebase)
+                      .unset(_.acquisitionFees)
+                      .copy(acquisitionMethod = Some(m))
+                    commonUpdateDraftReturn(draftReturn, newAnswers)
+                  }
+              }
             )
-          )(
-            requiredPreviousAnswer = _ => noAnswersRequired,
-            controllers.returns.routes.TaskListController.taskList()
-          )(
-            updateState = {
-              case (m, answers, draftReturn) =>
-                if (
-                  answers
-                    .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
-                    .contains(m)
-                )
-                  draftReturn
-                else {
-                  val newAnswers = answers
-                    .unset(_.acquisitionPrice)
-                    .unset(_.rebasedAcquisitionPrice)
-                    .unset(_.shouldUseRebase)
-                    .unset(_.acquisitionFees)
-                    .copy(acquisitionMethod = Some(m))
-                  commonUpdateDraftReturn(draftReturn, newAnswers)
-                }
-            }
-          )
+          }
       }
     }
 
@@ -330,28 +350,32 @@ class AcquisitionDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
-          withDisposalDate(state) { disposalDate =>
-            val form = acquisitionDateForm(disposalDate.value)
+          withDisposalDate(state) {
+            case (disposalDate) =>
+              withAssetType(state) { assetType =>
+                val form = acquisitionDateForm(disposalDate.value)
 
-            commonDisplayBehaviour(answers)(
-              form = _.fold(
-                _.acquisitionDate.fold(form)(form.fill),
-                c => form.fill(c.acquisitionDate)
-              )
-            )(
-              page = acquisitionDatePage(
-                _,
-                _,
-                fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(state)
-              )
-            )(
-              requiredPreviousAnswer = _.fold(
-                _.acquisitionMethod,
-                c => Some(c.acquisitionMethod)
-              ).isDefined,
-              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
-            )
+                commonDisplayBehaviour(answers)(
+                  form = _.fold(
+                    _.acquisitionDate.fold(form)(form.fill),
+                    c => form.fill(c.acquisitionDate)
+                  )
+                )(
+                  page = acquisitionDatePage(
+                    _,
+                    _,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    representativeType(state),
+                    assetType
+                  )
+                )(
+                  requiredPreviousAnswer = _.fold(
+                    _.acquisitionMethod,
+                    c => Some(c.acquisitionMethod)
+                  ).isDefined,
+                  redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
+                )
+              }
           }
       }
     }
@@ -360,49 +384,52 @@ class AcquisitionDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
-          withDisposalDate(state) { disposalDate =>
-            commonSubmitBehaviour(
-              fillingOutReturn,
-              state,
-              answers
-            )(
-              form = acquisitionDateForm(disposalDate.value)
-            )(
-              acquisitionDatePage(
-                _,
-                _,
-                fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(state)
-              )
-            )(
-              requiredPreviousAnswer = _.fold(
-                _.acquisitionMethod,
-                c => Some(c.acquisitionMethod)
-              ).isDefined,
-              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
-            )(
-              updateState = {
-                case (d, answers, draftReturn) =>
-                  val existingAcquisitionDate =
-                    answers
-                      .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
+          withDisposalDate(state) {
+            case (disposalDate) =>
+              withAssetType(state) { assetType =>
+                commonSubmitBehaviour(
+                  fillingOutReturn,
+                  state,
+                  answers
+                )(
+                  form = acquisitionDateForm(disposalDate.value)
+                )(
+                  acquisitionDatePage(
+                    _,
+                    _,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    representativeType(state),
+                    assetType
+                  )
+                )(
+                  requiredPreviousAnswer = _.fold(
+                    _.acquisitionMethod,
+                    c => Some(c.acquisitionMethod)
+                  ).isDefined,
+                  redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
+                )(
+                  updateState = {
+                    case (d, answers, draftReturn) =>
+                      val existingAcquisitionDate =
+                        answers
+                          .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
 
-                  if (existingAcquisitionDate.contains(d))
-                    draftReturn
-                  else {
-                    val newAnswers = answers
-                      .unset(_.acquisitionPrice)
-                      .unset(_.rebasedAcquisitionPrice)
-                      .unset(_.shouldUseRebase)
-                      .unset(_.improvementCosts)
-                      .unset(_.acquisitionFees)
-                      .copy(acquisitionDate = Some(d))
+                      if (existingAcquisitionDate.contains(d))
+                        draftReturn
+                      else {
+                        val newAnswers = answers
+                          .unset(_.acquisitionPrice)
+                          .unset(_.rebasedAcquisitionPrice)
+                          .unset(_.shouldUseRebase)
+                          .unset(_.improvementCosts)
+                          .unset(_.acquisitionFees)
+                          .copy(acquisitionDate = Some(d))
 
-                    commonUpdateDraftReturn(draftReturn, newAnswers)
+                        commonUpdateDraftReturn(draftReturn, newAnswers)
+                      }
                   }
+                )
               }
-            )
-
           }
       }
     }
@@ -412,27 +439,30 @@ class AcquisitionDetailsController @Inject() (
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           withAcquisitionMethod(answers) { acquisitionMethod =>
-            commonDisplayBehaviour(answers)(
-              form = _.fold(
-                _.acquisitionPrice.fold(acquisitionPriceForm)(p => acquisitionPriceForm.fill(p.inPounds)),
-                c => acquisitionPriceForm.fill(c.acquisitionPrice.inPounds())
+            withAssetType(state) { assetType =>
+              commonDisplayBehaviour(answers)(
+                form = _.fold(
+                  _.acquisitionPrice.fold(acquisitionPriceForm)(p => acquisitionPriceForm.fill(p.inPounds)),
+                  c => acquisitionPriceForm.fill(c.acquisitionPrice.inPounds())
+                )
+              )(
+                page = acquisitionPricePage(
+                  _,
+                  _,
+                  acquisitionMethod,
+                  acquisitionDate,
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  representativeType(state),
+                  assetType
+                )
+              )(
+                requiredPreviousAnswer = _.fold(
+                  _.acquisitionDate,
+                  c => Some(c.acquisitionDate)
+                ).isDefined,
+                redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
               )
-            )(
-              page = acquisitionPricePage(
-                _,
-                _,
-                acquisitionMethod,
-                acquisitionDate,
-                fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(state)
-              )
-            )(
-              requiredPreviousAnswer = _.fold(
-                _.acquisitionDate,
-                c => Some(c.acquisitionDate)
-              ).isDefined,
-              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
-            )
+            }
           }
         }
       }
@@ -443,45 +473,48 @@ class AcquisitionDetailsController @Inject() (
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           withAcquisitionMethod(answers) { acquisitionMethod =>
-            commonSubmitBehaviour(
-              fillingOutReturn,
-              state,
-              answers
-            )(
-              acquisitionPriceForm
-            )(page =
-              acquisitionPricePage(
-                _,
-                _,
-                acquisitionMethod,
-                acquisitionDate,
-                fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(state)
-              )
-            )(
-              requiredPreviousAnswer = _.fold(
-                _.acquisitionDate,
-                c => Some(c.acquisitionDate)
-              ).isDefined,
-              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
-            )(
-              updateState = { (p, answers, draftReturn) =>
-                if (
-                  answers
-                    .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
-                    .map(_.inPounds())
-                    .contains(p)
+            withAssetType(state) { assetType =>
+              commonSubmitBehaviour(
+                fillingOutReturn,
+                state,
+                answers
+              )(
+                acquisitionPriceForm
+              )(page =
+                acquisitionPricePage(
+                  _,
+                  _,
+                  acquisitionMethod,
+                  acquisitionDate,
+                  fillingOutReturn.subscribedDetails.isATrust,
+                  representativeType(state),
+                  assetType
                 )
-                  draftReturn
-                else {
-                  val newAnswers = answers.fold(
-                    _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(p))),
-                    _.copy(acquisitionPrice = AmountInPence.fromPounds(p))
+              )(
+                requiredPreviousAnswer = _.fold(
+                  _.acquisitionDate,
+                  c => Some(c.acquisitionDate)
+                ).isDefined,
+                redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
+              )(
+                updateState = { (p, answers, draftReturn) =>
+                  if (
+                    answers
+                      .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+                      .map(_.inPounds())
+                      .contains(p)
                   )
-                  commonUpdateDraftReturn(draftReturn, newAnswers)
+                    draftReturn
+                  else {
+                    val newAnswers = answers.fold(
+                      _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(p))),
+                      _.copy(acquisitionPrice = AmountInPence.fromPounds(p))
+                    )
+                    commonUpdateDraftReturn(draftReturn, newAnswers)
+                  }
                 }
-              }
-            )
+              )
+            }
           }
         }
       }
@@ -510,12 +543,14 @@ class AcquisitionDetailsController @Inject() (
                   page = rebasedAcquisitionPricePage(
                     _,
                     _,
-                    rebasingEligibilityUtil.getDisplayRebasingCutOffDate(
-                      assetType,
-                      wasUkResident
-                    ),
+                    rebasingEligibilityUtil
+                      .getDisplayRebasingCutOffDate(
+                        assetType,
+                        wasUkResident
+                      ),
                     fillingOutReturn.subscribedDetails.isATrust,
-                    representativeType(state)
+                    representativeType(state),
+                    assetType
                   )
                 )(
                   requiredPreviousAnswer = answers =>
@@ -563,7 +598,8 @@ class AcquisitionDetailsController @Inject() (
                       backLink,
                       rebaseDate,
                       fillingOutReturn.subscribedDetails.isATrust,
-                      representativeType(state)
+                      representativeType(state),
+                      assetType
                     )
                   }
                 )(
@@ -748,7 +784,8 @@ class AcquisitionDetailsController @Inject() (
                 routes.AcquisitionDetailsController
                   .rebasedAcquisitionPrice(),
                 rebasingEligibilityUtil
-                  .getDisplayRebasingCutOffDate(assetType, wasAUkResident)
+                  .getDisplayRebasingCutOffDate(assetType, wasAUkResident),
+                assetType
               )
             )
         }
@@ -777,10 +814,12 @@ class AcquisitionDetailsController @Inject() (
                   shouldUseRebasePage(
                     _,
                     _,
-                    rebasingEligibilityUtil.getDisplayRebasingCutOffDate(
-                      assetType,
-                      wasUkResident
-                    )
+                    rebasingEligibilityUtil
+                      .getDisplayRebasingCutOffDate(
+                        assetType,
+                        wasUkResident
+                      ),
+                    assetType
                   )
                 )(
                   requiredPreviousAnswer = _ => noAnswersRequired,
@@ -818,8 +857,8 @@ class AcquisitionDetailsController @Inject() (
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
           commonDisplayBehaviour(answers)(
             form = _.fold(
-              _.acquisitionFees.fold(acquisitionFeesForm)(p => acquisitionFeesForm.fill(p.inPounds())),
-              c => acquisitionFeesForm.fill(c.acquisitionFees.inPounds())
+              _.acquisitionFees.fold(acquisitionFeesForm())(p => acquisitionFeesForm().fill(p.inPounds())),
+              c => acquisitionFeesForm().fill(c.acquisitionFees.inPounds())
             )
           )(
             page = acquisitionFeesPage(
@@ -830,7 +869,8 @@ class AcquisitionDetailsController @Inject() (
               rebasingEligibilityUtil
                 .getDisplayRebasingCutOffDate(assetType, wasUkResident),
               wasUkResident,
-              representativeType(state)
+              representativeType(state),
+              assetType
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -852,7 +892,12 @@ class AcquisitionDetailsController @Inject() (
             state,
             answers
           )(
-            acquisitionFeesForm
+            acquisitionFeesForm(
+              Seq(
+                TimeUtils
+                  .govDisplayFormat(rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident))
+              )
+            )
           )(page =
             acquisitionFeesPage(
               _,
@@ -862,7 +907,8 @@ class AcquisitionDetailsController @Inject() (
               rebasingEligibilityUtil
                 .getDisplayRebasingCutOffDate(assetType, wasUkResident),
               wasUkResident,
-              representativeType(state)
+              representativeType(state),
+              assetType
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -911,7 +957,8 @@ class AcquisitionDetailsController @Inject() (
                     c.acquisitionDate.value
                   ),
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(state)
+                  representativeType(state),
+                  assetType
                 )
               )
 
@@ -1085,7 +1132,8 @@ class AcquisitionDetailsController @Inject() (
                           completeAnswers.acquisitionDate.value
                         ),
                       fillingOutReturn.subscribedDetails.isATrust,
-                      representativeType(state)
+                      representativeType(state),
+                      assetType
                     )
                   )
               )
@@ -1216,8 +1264,8 @@ object AcquisitionDetailsController {
     MoneyUtils
       .amountInPoundsYesNoForm("improvementCosts", "improvementCostsValue")
 
-  val acquisitionFeesForm: Form[BigDecimal] =
+  def acquisitionFeesForm(errorArgs: Seq[String] = Seq.empty): Form[BigDecimal] =
     MoneyUtils
-      .amountInPoundsYesNoForm("acquisitionFees", "acquisitionFeesValue")
+      .amountInPoundsYesNoForm("acquisitionFees", "acquisitionFeesValue", None, errorArgs)
 
 }

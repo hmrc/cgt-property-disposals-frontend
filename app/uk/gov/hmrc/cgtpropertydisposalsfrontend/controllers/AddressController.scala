@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.{ManagingSubscription, Onboarding}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -51,6 +52,7 @@ trait AddressController[A <: AddressJourneyType] {
   val enterUkAddressPage: views.html.address.enter_uk_address
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address
   val isUkPage: views.html.address.isUk
+  val exitPage: views.html.address.exit_page
   val toJourneyStatus: A => JourneyStatus
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
@@ -71,6 +73,7 @@ trait AddressController[A <: AddressJourneyType] {
   ): EitherT[Future, Error, JourneyStatus]
 
   protected def backLinkCall: A => Call
+
   protected val isUkCall: Call
   protected val isUkSubmitCall: Call
   protected val enterUkAddressCall: Call
@@ -82,6 +85,7 @@ trait AddressController[A <: AddressJourneyType] {
   protected val selectAddressCall: Call
   protected val selectAddressSubmitCall: Call
   protected val continueCall: Call
+  protected val ukAddressNotAllowedExitPageCall: Option[Call]
 
   protected val enterUkAddressBackLinkCall: A => Call = backLinkCall
   protected val enterPostcodePageBackLink: A => Call  = _ => isUkCall
@@ -90,6 +94,11 @@ trait AddressController[A <: AddressJourneyType] {
     f: (SessionData, A) => Future[Result]
   ): Future[Result] =
     validJourney(request).fold[Future[Result]](toFuture, f.tupled)
+
+  def showExitPage() =
+    authenticatedActionWithSessionData.async { implicit request =>
+      Ok(exitPage(isUkCall))
+    }
 
   def isUk(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -141,7 +150,9 @@ trait AddressController[A <: AddressJourneyType] {
                   )
                 ),
               {
-                case true  => Redirect(enterPostcodeCall)
+                case true  =>
+                  if (registeredWithId(journey)) Redirect(enterPostcodeCall)
+                  else Redirect(ukAddressNotAllowedExitPageCall.getOrElse(enterPostcodeCall))
                 case false => Redirect(enterNonUkAddressCall)
               }
             )
@@ -429,4 +440,19 @@ trait AddressController[A <: AddressJourneyType] {
       case _                                 => None
     }
 
+  private def registeredWithId(journey: AddressJourneyType): Boolean =
+    journey match {
+      case onboarding: AddressJourneyType.Onboarding             =>
+        onboarding match {
+          case Onboarding.RegistrationReadyAddressJourney(_)              => false
+          case Onboarding.IndividualSupplyingInformationAddressJourney(_) => false
+          case Onboarding.SubscriptionReadyAddressJourney(_)              => true
+        }
+      case subscription: AddressJourneyType.ManagingSubscription =>
+        subscription match {
+          case ManagingSubscription.SubscribedAddressJourney(subscribed) =>
+            subscribed.subscribedDetails.registeredWithId
+        }
+      case _: AddressJourneyType.Returns                         => true
+    }
 }

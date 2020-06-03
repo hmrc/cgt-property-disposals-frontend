@@ -22,6 +22,7 @@ import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
@@ -58,6 +59,7 @@ class CompanyDetailsController @Inject() (
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
   val isUkPage: views.html.address.isUk,
+  val exitPage: views.html.address.exit_page,
   val multipleIndirectDisposalsGuidancePage: views.html.returns.address.multiple_indirect_disposals_guidance,
   val multipleIndirectDisposalPricePage: views.html.returns.address.multiple_indirect_disposals_disposal_price,
   val multipleIndirectAcquisitionPricePage: views.html.returns.address.multiple_indirect_disposals_acquisition_price,
@@ -512,7 +514,8 @@ class CompanyDetailsController @Inject() (
       )(_ => routes.CompanyDetailsController.checkYourAnswers())
     )
 
-  protected lazy val isUkCall: Call                                                 = routes.CompanyDetailsController.isUk()
+  protected lazy val isUkCall: Call                                                 =
+    routes.CompanyDetailsController.isUk()
   protected lazy val isUkSubmitCall: Call                                           =
     routes.CompanyDetailsController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call                                       =
@@ -533,8 +536,10 @@ class CompanyDetailsController @Inject() (
     routes.CompanyDetailsController.selectAddressSubmit()
   protected lazy val continueCall: Call                                             =
     routes.CompanyDetailsController.checkYourAnswers()
-  override protected val enterUkAddressBackLinkCall: EnteringCompanyDetails => Call = _ => isUkCall
-
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call]                  =
+    None
+  override protected val enterUkAddressBackLinkCall: EnteringCompanyDetails => Call =
+    _ => isUkCall
 }
 
 object CompanyDetailsController {

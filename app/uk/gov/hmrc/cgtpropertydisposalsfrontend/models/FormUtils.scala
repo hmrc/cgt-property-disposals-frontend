@@ -29,13 +29,14 @@ object FormUtils {
   def readValue[T](
     key: String,
     data: Map[String, String],
-    f: String => T
+    f: String => T,
+    requiredErrorArgs: Seq[String] = Seq.empty
   ): Either[FormError, T] =
     data
       .get(key)
       .map(_.trim())
       .filter(_.nonEmpty)
-      .fold[Either[FormError, T]](Left(FormError(key, "error.required"))) { stringValue =>
+      .fold[Either[FormError, T]](Left(FormError(key, "error.required", requiredErrorArgs))) { stringValue =>
         Either
           .fromTry(Try(f(stringValue)))
           .leftMap(_ => FormError(key, "error.invalid"))
