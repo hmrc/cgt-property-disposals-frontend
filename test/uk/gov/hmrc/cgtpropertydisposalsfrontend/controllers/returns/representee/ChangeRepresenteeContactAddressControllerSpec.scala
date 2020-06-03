@@ -183,7 +183,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
       behave like submitIsUkBehaviour(
         performAction,
         routes.ChangeRepresenteeContactAddressController.enterPostcode(),
-        routes.ChangeRepresenteeContactAddressController.enterNonUkAddress()
+        routes.ChangeRepresenteeContactAddressController.enterNonUkAddress(),
+        None
       )
 
     }

@@ -30,10 +30,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, IndividualUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, IndividualUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
@@ -215,7 +215,8 @@ trait AddressControllerSpec[A <: AddressJourneyType]
   def submitIsUkBehaviour(
     performAction: Seq[(String, String)] => Future[Result],
     enterPostcode: Call,
-    enterNonUkAddress: Call
+    enterNonUkAddress: Call,
+    exitPage: Option[Call]
   )(implicit messagesApi: MessagesApi): Unit = {
 
     "return a form error" when {
@@ -238,14 +239,79 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       }
     }
 
+    "redirect to the exit page" when {
+      "a registered without id user attempts to change their address to a UK address" in {
+        validJourneyStatus match {
+          case j: AddressJourneyType.ManagingSubscription.SubscribedAddressJourney =>
+            val subscribedDetails: SubscribedDetails = sample[SubscribedDetails].copy(registeredWithId = false)
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithValidJourneyStatus
+                  .copy(journeyStatus = Some(j.journey.copy(subscribedDetails = subscribedDetails)))
+              )
+            }
+            val result                               = performAction(Seq("isUk" -> "true"))
+            checkIsRedirect(result, exitPage.getOrElse(enterPostcode))
+          case _: AddressJourneyType.Onboarding.IndividualSupplyingInformationAddressJourney |
+              _: AddressJourneyType.Onboarding.RegistrationReadyAddressJourney =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithValidJourneyStatus
+              )
+            }
+            val result = performAction(Seq("isUk" -> "true"))
+            checkIsRedirect(result, exitPage.getOrElse(enterPostcode))
+          case _                                                                   =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithValidJourneyStatus
+              )
+            }
+            val result = performAction(Seq("isUk" -> "true"))
+            checkIsRedirect(result, enterPostcode)
+        }
+      }
+    }
+
     "redirect to the enter postcode page" when {
       "Uk address has been selected" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithValidJourneyStatus)
+        validJourneyStatus match {
+          case j: AddressJourneyType.ManagingSubscription.SubscribedAddressJourney =>
+            val subscribedDetails: SubscribedDetails = sample[SubscribedDetails].copy(registeredWithId = true)
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithValidJourneyStatus
+                  .copy(journeyStatus = Some(j.journey.copy(subscribedDetails = subscribedDetails)))
+              )
+            }
+            val result                               = performAction(Seq("isUk" -> "true"))
+            checkIsRedirect(result, enterPostcode)
+          case _: AddressJourneyType.Onboarding.IndividualSupplyingInformationAddressJourney |
+              _: AddressJourneyType.Onboarding.RegistrationReadyAddressJourney =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithValidJourneyStatus
+              )
+            }
+            val result = performAction(Seq("isUk" -> "true"))
+            checkIsRedirect(result, exitPage.getOrElse(enterPostcode))
+          case _                                                                   =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithValidJourneyStatus
+              )
+            }
+            val result = performAction(Seq("isUk" -> "true"))
+            checkIsRedirect(result, enterPostcode)
+
         }
-        val result = performAction(Seq("isUk" -> "true"))
-        checkIsRedirect(result, enterPostcode)
+
       }
     }
 

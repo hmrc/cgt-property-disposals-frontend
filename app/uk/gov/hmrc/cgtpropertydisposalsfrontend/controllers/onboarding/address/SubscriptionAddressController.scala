@@ -52,7 +52,8 @@ class SubscriptionAddressController @Inject() (
   val selectAddressPage: views.html.address.select_address,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-  val isUkPage: views.html.address.isUk
+  val isUkPage: views.html.address.isUk,
+  val exitPage: views.html.address.exit_page
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -112,27 +113,29 @@ class SubscriptionAddressController @Inject() (
   protected lazy val backLinkCall: SubscriptionReadyAddressJourney => Call =
     _ => controllers.onboarding.routes.SubscriptionController.checkYourDetails()
 
-  protected lazy val isUkCall: Call                    =
+  protected lazy val isUkCall: Call                                =
     routes.SubscriptionAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call              =
+  protected lazy val isUkSubmitCall: Call                          =
     routes.SubscriptionAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          =
+  protected lazy val enterUkAddressCall: Call                      =
     routes.SubscriptionAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call    =
+  protected lazy val enterUkAddressSubmitCall: Call                =
     routes.SubscriptionAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call       =
+  protected lazy val enterNonUkAddressCall: Call                   =
     routes.SubscriptionAddressController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call =
+  protected lazy val enterNonUkAddressSubmitCall: Call             =
     routes.SubscriptionAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call           =
+  protected lazy val enterPostcodeCall: Call                       =
     routes.SubscriptionAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call     =
+  protected lazy val enterPostcodeSubmitCall: Call                 =
     routes.SubscriptionAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call           =
+  protected lazy val selectAddressCall: Call                       =
     routes.SubscriptionAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call     =
+  protected lazy val selectAddressSubmitCall: Call                 =
     routes.SubscriptionAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call                =
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call] =
+    None
+  protected lazy val continueCall: Call                            =
     controllers.onboarding.routes.SubscriptionController.checkYourDetails()
 
 }

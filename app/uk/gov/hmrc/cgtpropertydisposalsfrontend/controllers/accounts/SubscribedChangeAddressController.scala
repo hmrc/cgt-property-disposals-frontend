@@ -53,7 +53,8 @@ class SubscribedChangeAddressController @Inject() (
   val selectAddressPage: views.html.address.select_address,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-  val isUkPage: views.html.address.isUk
+  val isUkPage: views.html.address.isUk,
+  val exitPage: views.html.address.exit_page
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -116,26 +117,28 @@ class SubscribedChangeAddressController @Inject() (
   protected lazy val backLinkCall: SubscribedAddressJourney => Call =
     _ => controllers.accounts.routes.AccountController.manageYourDetails()
 
-  protected lazy val isUkCall: Call                    =
+  protected lazy val isUkCall: Call                                =
     routes.SubscribedChangeAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call              =
+  protected lazy val isUkSubmitCall: Call                          =
     routes.SubscribedChangeAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          =
+  protected lazy val enterUkAddressCall: Call                      =
     routes.SubscribedChangeAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call    =
+  protected lazy val enterUkAddressSubmitCall: Call                =
     routes.SubscribedChangeAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call       =
+  protected lazy val enterNonUkAddressCall: Call                   =
     routes.SubscribedChangeAddressController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call =
+  protected lazy val enterNonUkAddressSubmitCall: Call             =
     routes.SubscribedChangeAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call           =
+  protected lazy val enterPostcodeCall: Call                       =
     routes.SubscribedChangeAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call     =
+  protected lazy val enterPostcodeSubmitCall: Call                 =
     routes.SubscribedChangeAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call           =
+  protected lazy val selectAddressCall: Call                       =
     routes.SubscribedChangeAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call     =
+  protected lazy val selectAddressSubmitCall: Call                 =
     routes.SubscribedChangeAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call                =
+  protected lazy val continueCall: Call                            =
     controllers.accounts.routes.AccountController.contactAddressUpdated()
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call] =
+    Some(routes.SubscribedChangeAddressController.showExitPage())
 }
