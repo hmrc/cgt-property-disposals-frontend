@@ -120,7 +120,7 @@ class SubscribedChangeAddressControllerSpec
         performAction,
         accounts.routes.SubscribedChangeAddressController.enterPostcode(),
         accounts.routes.SubscribedChangeAddressController.enterNonUkAddress(),
-        accounts.routes.SubscribedChangeAddressController.showExitPage()
+        Some(accounts.routes.SubscribedChangeAddressController.showExitPage())
       )
 
     }

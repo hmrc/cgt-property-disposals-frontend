@@ -216,7 +216,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     performAction: Seq[(String, String)] => Future[Result],
     enterPostcode: Call,
     enterNonUkAddress: Call,
-    exitPage: Call
+    exitPage: Option[Call]
   )(implicit messagesApi: MessagesApi): Unit = {
 
     "return a form error" when {
@@ -252,7 +252,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
               )
             }
             val result                               = performAction(Seq("isUk" -> "true"))
-            checkIsRedirect(result, exitPage)
+            checkIsRedirect(result, exitPage.getOrElse(enterPostcode))
           case _: AddressJourneyType.Onboarding.IndividualSupplyingInformationAddressJourney |
               _: AddressJourneyType.Onboarding.RegistrationReadyAddressJourney =>
             inSequence {
@@ -262,7 +262,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
               )
             }
             val result = performAction(Seq("isUk" -> "true"))
-            checkIsRedirect(result, exitPage)
+            checkIsRedirect(result, exitPage.getOrElse(enterPostcode))
           case _                                                                   =>
             inSequence {
               mockAuthWithNoRetrievals()
@@ -299,7 +299,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
               )
             }
             val result = performAction(Seq("isUk" -> "true"))
-            checkIsRedirect(result, exitPage)
+            checkIsRedirect(result, exitPage.getOrElse(enterPostcode))
           case _                                                                   =>
             inSequence {
               mockAuthWithNoRetrievals()

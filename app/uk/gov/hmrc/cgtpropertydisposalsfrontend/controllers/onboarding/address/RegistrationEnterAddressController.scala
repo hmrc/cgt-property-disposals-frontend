@@ -97,29 +97,29 @@ class RegistrationEnterAddressController @Inject() (
       controllers.onboarding.name.routes.RegistrationEnterIndividualNameController
         .enterIndividualName()
 
-  protected lazy val isUkCall: Call                    =
+  protected lazy val isUkCall: Call                                =
     routes.RegistrationEnterAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call              =
+  protected lazy val isUkSubmitCall: Call                          =
     routes.RegistrationEnterAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          =
+  protected lazy val enterUkAddressCall: Call                      =
     routes.RegistrationEnterAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call    =
+  protected lazy val enterUkAddressSubmitCall: Call                =
     routes.RegistrationEnterAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call       =
+  protected lazy val enterNonUkAddressCall: Call                   =
     routes.RegistrationEnterAddressController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call =
+  protected lazy val enterNonUkAddressSubmitCall: Call             =
     routes.RegistrationEnterAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call           =
+  protected lazy val enterPostcodeCall: Call                       =
     routes.RegistrationEnterAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call     =
+  protected lazy val enterPostcodeSubmitCall: Call                 =
     routes.RegistrationEnterAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call           =
+  protected lazy val selectAddressCall: Call                       =
     routes.RegistrationEnterAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call     =
+  protected lazy val selectAddressSubmitCall: Call                 =
     routes.RegistrationEnterAddressController.selectAddressSubmit()
-  protected lazy val exitPageCall: Call                =
-    routes.RegistrationEnterAddressController.showExitPage()
-  protected lazy val continueCall: Call                =
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call] =
+    Some(routes.RegistrationEnterAddressController.showExitPage())
+  protected lazy val continueCall: Call                            =
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()
 
 }

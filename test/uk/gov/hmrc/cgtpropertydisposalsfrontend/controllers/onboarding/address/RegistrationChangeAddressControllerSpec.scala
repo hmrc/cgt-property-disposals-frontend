@@ -87,7 +87,7 @@ class RegistrationChangeAddressControllerSpec
         performAction,
         addressRoutes.RegistrationChangeAddressController.enterPostcode(),
         addressRoutes.RegistrationChangeAddressController.enterNonUkAddress(),
-        addressRoutes.RegistrationChangeAddressController.showExitPage()
+        Some(addressRoutes.RegistrationChangeAddressController.showExitPage())
       )
 
     }

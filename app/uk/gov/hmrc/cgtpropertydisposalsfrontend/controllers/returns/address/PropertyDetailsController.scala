@@ -946,7 +946,7 @@ class PropertyDetailsController @Inject() (
   protected lazy val enterNonUkAddressCall: Call                          = enterPostcodeCall
   protected lazy val enterNonUkAddressSubmitCall: Call                    = enterPostcodeCall
   protected lazy val backLinkCall: FillingOutReturnAddressJourney => Call = _ => enterPostcodeCall
-  protected lazy val exitPageCall: Call                                   = routes.PropertyDetailsController.showExitPage()
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call]        = None
 }
 
 object PropertyDetailsController {

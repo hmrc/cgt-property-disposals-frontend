@@ -177,8 +177,8 @@ class CompanyDetailsController @Inject() (
     routes.CompanyDetailsController.selectAddressSubmit()
   protected lazy val continueCall: Call                                             =
     routes.CompanyDetailsController.checkYourAnswers()
-  protected lazy val exitPageCall: Call                                             =
-    routes.CompanyDetailsController.showExitPage()
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call]                  =
+    None
   override protected val enterUkAddressBackLinkCall: EnteringCompanyDetails => Call =
     _ => isUkCall
 }

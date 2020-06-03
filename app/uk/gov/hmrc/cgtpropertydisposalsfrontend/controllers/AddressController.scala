@@ -85,7 +85,7 @@ trait AddressController[A <: AddressJourneyType] {
   protected val selectAddressCall: Call
   protected val selectAddressSubmitCall: Call
   protected val continueCall: Call
-  protected val exitPageCall: Call
+  protected val ukAddressNotAllowedExitPageCall: Option[Call]
 
   protected val enterUkAddressBackLinkCall: A => Call = backLinkCall
   protected val enterPostcodePageBackLink: A => Call  = _ => isUkCall
@@ -153,7 +153,8 @@ trait AddressController[A <: AddressJourneyType] {
                 case true  =>
                   registeredWithId(journey) match {
                     case Some(isRegisteredWithId) =>
-                      if (isRegisteredWithId) Redirect(enterPostcodeCall) else Redirect(exitPageCall)
+                      if (isRegisteredWithId) Redirect(enterPostcodeCall)
+                      else Redirect(ukAddressNotAllowedExitPageCall.getOrElse(enterPostcodeCall))
                     case None                     =>
                       logger.error("could not determine if user is registered with or without id")
                       errorHandler.errorResult()

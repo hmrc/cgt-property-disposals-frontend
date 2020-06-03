@@ -97,7 +97,7 @@ class SubscriptionAddressControllerSpec
         performAction,
         routes.SubscriptionAddressController.enterPostcode(),
         routes.SubscriptionAddressController.enterNonUkAddress(),
-        routes.SubscriptionAddressController.showExitPage()
+        None
       )
 
     }

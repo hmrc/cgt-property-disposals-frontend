@@ -184,7 +184,7 @@ trait ChangeRepresenteeContactAddressControllerSpec
         performAction,
         routes.ChangeRepresenteeContactAddressController.enterPostcode(),
         routes.ChangeRepresenteeContactAddressController.enterNonUkAddress(),
-        routes.ChangeRepresenteeContactAddressController.showExitPage()
+        None
       )
 
     }

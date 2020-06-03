@@ -102,7 +102,7 @@ class RegistrationEnterAddressControllerSpec
         performAction,
         addressRoutes.RegistrationEnterAddressController.enterPostcode(),
         addressRoutes.RegistrationEnterAddressController.enterNonUkAddress(),
-        addressRoutes.RegistrationEnterAddressController.showExitPage()
+        Some(addressRoutes.RegistrationEnterAddressController.showExitPage())
       )
 
     }
