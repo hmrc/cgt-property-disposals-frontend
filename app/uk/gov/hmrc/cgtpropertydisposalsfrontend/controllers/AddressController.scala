@@ -151,14 +151,8 @@ trait AddressController[A <: AddressJourneyType] {
                 ),
               {
                 case true  =>
-                  registeredWithId(journey) match {
-                    case Some(isRegisteredWithId) =>
-                      if (isRegisteredWithId) Redirect(enterPostcodeCall)
-                      else Redirect(ukAddressNotAllowedExitPageCall.getOrElse(enterPostcodeCall))
-                    case None                     =>
-                      logger.error("could not determine if user is registered with or without id")
-                      errorHandler.errorResult()
-                  }
+                  if (registeredWithId(journey)) Redirect(enterPostcodeCall)
+                  else Redirect(ukAddressNotAllowedExitPageCall.getOrElse(enterPostcodeCall))
                 case false => Redirect(enterNonUkAddressCall)
               }
             )
@@ -446,19 +440,19 @@ trait AddressController[A <: AddressJourneyType] {
       case _                                 => None
     }
 
-  private def registeredWithId(journey: AddressJourneyType): Option[Boolean] =
+  private def registeredWithId(journey: AddressJourneyType): Boolean =
     journey match {
       case onboarding: AddressJourneyType.Onboarding             =>
         onboarding match {
-          case Onboarding.RegistrationReadyAddressJourney(_)              => Some(false)
-          case Onboarding.IndividualSupplyingInformationAddressJourney(_) => Some(false)
-          case Onboarding.SubscriptionReadyAddressJourney(_)              => Some(true)
+          case Onboarding.RegistrationReadyAddressJourney(_)              => false
+          case Onboarding.IndividualSupplyingInformationAddressJourney(_) => false
+          case Onboarding.SubscriptionReadyAddressJourney(_)              => true
         }
       case subscription: AddressJourneyType.ManagingSubscription =>
         subscription match {
           case ManagingSubscription.SubscribedAddressJourney(subscribed) =>
-            Some(subscribed.subscribedDetails.registeredWithId)
+            subscribed.subscribedDetails.registeredWithId
         }
-      case _: AddressJourneyType.Returns                         => Some(true)
+      case _: AddressJourneyType.Returns                         => true
     }
 }
