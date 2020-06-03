@@ -3295,8 +3295,6 @@ nonUkAddress.companyDetails.multipleIndirect.title=Enter the name and address of
 returns.company-address.cyaLabel.company-address=Company name and address
 returns.company-address.cyaChange.company-address=the address of the property
 returns.company-address.cyaLabel.disposal-price=What was the disposal amount?
+returns.company-address.cyaChange.disposal-price=the disposal amount
 returns.company-address.cyaLabel.acquisition-price=What was the acquisition amount?
-
-##### TODO
-##nonUkAddress-line2.companyDetails.multipleIndirect.error.pattern=Street address must only include letters a to z, spaces and numbers
-
+returns.company-address.cyaChange.acquisition-price=the acquisition amount

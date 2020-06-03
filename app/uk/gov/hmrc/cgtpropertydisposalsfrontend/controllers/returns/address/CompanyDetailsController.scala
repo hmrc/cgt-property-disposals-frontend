@@ -480,19 +480,13 @@ class CompanyDetailsController @Inject() (
                     },
                     _ =>
                       Ok(
-                        multipleIndirectCheckYourAnswersPage(
-                          completeAnswers,
-                          true //TODO: check it "shouldAskIfPostcodeExists(assetTypes)"
-                        )
+                        multipleIndirectCheckYourAnswersPage(completeAnswers, true)
                       )
                   )
 
                 case c: CompleteExampleCompanyDetailsAnswers                             =>
                   Ok(
-                    multipleIndirectCheckYourAnswersPage(
-                      c,
-                      true //TODO: check it "shouldAskIfPostcodeExists(assetTypes)"
-                    )
+                    multipleIndirectCheckYourAnswersPage(c, true)
                   )
 
               }
