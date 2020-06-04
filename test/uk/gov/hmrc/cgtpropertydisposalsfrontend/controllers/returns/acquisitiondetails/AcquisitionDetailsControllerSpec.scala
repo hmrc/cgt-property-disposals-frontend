@@ -3351,7 +3351,8 @@ class AcquisitionDetailsControllerSpec
           individualUserType: IndividualUserType
         ): (SessionData, FillingOutReturn, DraftReturn) = {
           val answers                         = IncompleteAcquisitionDetailsAnswers.empty.copy(
-            improvementCosts = Some(sample[AmountInPence])
+            improvementCosts = Some(sample[AmountInPence]),
+            acquisitionDate = Some(sample[AcquisitionDate])
           )
           val (session, journey, draftReturn) = sessionWithState(
             answers,
@@ -3438,7 +3439,8 @@ class AcquisitionDetailsControllerSpec
                   ) {
                     val answers                         =
                       IncompleteAcquisitionDetailsAnswers.empty.copy(
-                        improvementCosts = Some(sample[AmountInPence])
+                        improvementCosts = Some(sample[AmountInPence]),
+                        acquisitionDate = Some(sample[AcquisitionDate])
                       )
                     val (session, journey, draftReturn) = sessionWithState(
                       answers,
