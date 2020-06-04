@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDet
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleIndirectDisposalReturn, IndividualUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleIndirectDisposalReturn, IndividualUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -115,14 +115,15 @@ class CompanyDetailsControllerSpec
       companyAddress
     )
 
-  def sessionWithDraftSingleIndirectDisposalForMultipleIndirect(
-    name: Either[TrustName, IndividualName],
-    userType: UserType,
-    individualUserType: Option[IndividualUserType],
-    companyAddress: Address
+  def sessionWithDraftMultipleIndirectDisposals(
+    companyAddress: Address = sample[Address]
   ): (SessionData, FillingOutReturn, DraftMultipleIndirectDisposalsReturn) = {
+    val country          = Country("HK", Some("Hong Kong"))
     val draftReturn      = sample[DraftMultipleIndirectDisposalsReturn].copy(
-      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers],
+      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+        countryOfResidence = country,
+        assetTypes = List(AssetType.IndirectDisposal)
+      ),
       exampleCompanyDetailsAnswers = Some(
         sample[CompleteExampleCompanyDetailsAnswers].copy(
           address = companyAddress
@@ -130,28 +131,14 @@ class CompanyDetailsControllerSpec
       )
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
-      draftReturn = draftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      agentReferenceNumber =
-        if (Eq.eqv(userType, Agent)) Some(sample[AgentReferenceNumber])
-        else None
+      draftReturn = draftReturn
     )
     val sessionData      = SessionData.empty.copy(
-      journeyStatus = Some(fillingOutReturn),
-      userType = Some(userType)
+      journeyStatus = Some(fillingOutReturn)
     )
+
     (sessionData, fillingOutReturn, draftReturn)
   }
-
-  def individualStateForMultipleIndirect(
-    companyAddress: Address
-  ): (SessionData, FillingOutReturn, DraftMultipleIndirectDisposalsReturn) =
-    sessionWithDraftSingleIndirectDisposalForMultipleIndirect(
-      Right(sample[IndividualName]),
-      UserType.Individual,
-      Some(Self),
-      companyAddress
-    )
 
   def capacitorState(): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
     sessionWithDraftSingleIndirectDisposal(
@@ -299,6 +286,35 @@ class CompanyDetailsControllerSpec
 
       }
 
+      "display the page for multiple indirect disposals" when {
+
+        def test(result: Future[Result], expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey),
+            doc =>
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
+                .isUkSubmit()
+                .url
+          )
+
+        "handling all users" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDraftMultipleIndirectDisposals(
+                sample[UkAddress]
+              )._1
+            )
+          }
+
+          test(performAction(), "companyDetails.isUk.multipleIndirect.title")
+        }
+
+      }
+
     }
 
     "handling submits on the is uk page" must {
@@ -392,6 +408,39 @@ class CompanyDetailsControllerSpec
 
       }
 
+      "show a form error for multiple indirect disposals" when {
+
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(expectedTitleKey),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+
+        "nothing is selected" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test()(
+            "isUk.multipleIndirect.error.required",
+            "companyDetails.isUk.multipleIndirect.title"
+          )
+
+        }
+
+      }
+
       "redirect to the enter postcode endpoint" when {
 
         "the user selects yes" in {
@@ -407,12 +456,43 @@ class CompanyDetailsControllerSpec
         }
       }
 
+      "redirect to the enter postcode endpoint for multiple indirect disposals" when {
+
+        "the user selects yes" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          checkIsRedirect(
+            performAction("isUk" -> "true"),
+            routes.CompanyDetailsController.enterPostcode()
+          )
+        }
+      }
+
       "redirect to the enter non uk address page" when {
 
         "the user selects no" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(individualState()._1)
+          }
+
+          checkIsRedirect(
+            performAction("isUk" -> "false"),
+            routes.CompanyDetailsController.enterNonUkAddress()
+          )
+        }
+
+      }
+
+      "redirect to the enter non uk address page for multiple indirect disposals" when {
+
+        "the user selects no" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
           }
 
           checkIsRedirect(
@@ -509,6 +589,50 @@ class CompanyDetailsControllerSpec
 
           test(performAction(), "address.uk.companyDetails.trust.title")
 
+        }
+
+      }
+
+      "display the page for multiple indirect disposals" when {
+
+        def test(result: Future[Result], expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc
+                .select("#address > legend > h1 > span")
+                .text() shouldBe messageFromMessageKey(
+                "returns.company-details.multipleIndirectDisposals.caption"
+              )
+
+              doc
+                .select("#address > div:nth-child(2) > label")
+                .text() shouldBe messageFromMessageKey(
+                "address.uk.companyDetails.line1.label"
+              )
+
+              doc
+                .select("#address > div:nth-child(3) > label")
+                .text() shouldBe messageFromMessageKey(
+                "address.uk.companyDetails.line2.label"
+              )
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
+                .enterUkAddressSubmit()
+                .url
+            }
+          )
+
+        "handling all users" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(performAction(), "address.uk.companyDetails.multipleIndirect.title")
         }
 
       }
@@ -720,6 +844,202 @@ class CompanyDetailsControllerSpec
 
       }
 
+      "return a form error for multiple indirect disposals" when {
+
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(expectedTitleKey),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+
+        "address line 1 is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test("postcode" -> "W1A2HV")(
+            "address-line1.companyDetails.error.required",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 1 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> ("a" * 100),
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-line1.companyDetails.error.tooLong",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 1 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "ab%csd",
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-line1.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 2 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "address-line1" -> "Company name",
+            "address-line2" -> ("a" * 100),
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-line2.companyDetails.error.tooLong",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 2 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "Company name",
+            "address-line2" -> "fsdhio*fde@df",
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-line2.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 3 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "address-line1" -> "Company name",
+            "address-town"  -> ("a" * 100),
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-town.companyDetails.error.tooLong",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 3 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "Company name",
+            "address-town"  -> "fsdhio*fde@df",
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-town.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 4 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "address-line1"  -> "Company name",
+            "address-county" -> ("a" * 100),
+            "postcode"       -> "W1A2HV"
+          )(
+            "address-county.companyDetails.error.tooLong",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 4 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1"  -> "Company name",
+            "address-county" -> "fsdhio*fde@df",
+            "postcode"       -> "W1A2HV"
+          )(
+            "address-county.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address postcode is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test("address-line1" -> "1 the Street")(
+            "postcode.companyDetails.error.required",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "the address postcode contains invalid characters" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "1 the Street",
+            "postcode"      -> "W1A,2HV"
+          )(
+            "postcode.companyDetails.error.invalidCharacters",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "the address postcode does not have a valid format" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "1 the Street",
+            "postcode"      -> "ABC123"
+          )(
+            "postcode.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+      }
+
       "show an error page" when {
 
         val (session, journey, draftReturn) = individualState()
@@ -896,6 +1216,50 @@ class CompanyDetailsControllerSpec
 
           test(performAction(), "nonUkAddress.companyDetails.trust.title")
 
+        }
+
+      }
+
+      "display the page for multiple indirect disposals" when {
+
+        def test(result: Future[Result], expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc
+                .select("#nonUkAddress > legend > h1 > span")
+                .text() shouldBe messageFromMessageKey(
+                "returns.company-details.multipleIndirectDisposals.caption"
+              )
+
+              doc
+                .select("#nonUkAddress > div:nth-child(2) > label")
+                .text() shouldBe messageFromMessageKey(
+                "nonUkAddress.companyDetails.line1.label"
+              )
+
+              doc
+                .select("#nonUkAddress > div:nth-child(3) > label")
+                .text() shouldBe messageFromMessageKey(
+                "nonUkAddress.companyDetails.line2.label"
+              )
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
+                .enterNonUkAddressSubmit()
+                .url
+            }
+          )
+
+        "handling all users" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(performAction(), "nonUkAddress.companyDetails.multipleIndirect.title")
         }
 
       }
@@ -1089,6 +1453,189 @@ class CompanyDetailsControllerSpec
           )(
             "countryCode.companyDetails.error.notFound",
             "nonUkAddress.companyDetails.capacitor.title"
+          )
+        }
+
+      }
+
+      "return a form error for multiple indirect disposal" when {
+
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(expectedTitleKey),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+
+        "address line 1 is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test("countryCode" -> "HK")(
+            "nonUkAddress-line1.companyDetails.error.required",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 1 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> ("a" * 100),
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line1.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 1 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "ab%csd",
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line1.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 2 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line2" -> ("a" * 100),
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line2.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 2 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line2" -> "fsdhio*fde@df",
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line2.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 3 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line3" -> ("a" * 100),
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line3.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 3 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line3" -> "fsdhio*fde@df",
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line3.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 4 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line4" -> ("a" * 100),
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line4.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 4 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line4" -> "fsdhio*fde@df",
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line4.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "a country is not selected" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name"
+          )(
+            "countryCode.companyDetails.error.required",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "the country cannot be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "countryCode"        -> "ZZ"
+          )(
+            "countryCode.companyDetails.error.notFound",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
           )
         }
 
@@ -2090,7 +2637,7 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              individualStateForMultipleIndirect(
+              sessionWithDraftMultipleIndirectDisposals(
                 companyAddress = address
               )._1
             )
@@ -2132,7 +2679,7 @@ class CompanyDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            individualStateForMultipleIndirect(
+            sessionWithDraftMultipleIndirectDisposals(
               companyAddress = sample[Address]
             )._1
           )
