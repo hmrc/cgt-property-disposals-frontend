@@ -1015,23 +1015,24 @@ class AcquisitionDetailsControllerSpec
           )
 
           val wasUkResident                   = sample[Boolean]
+          val assetType                       = sample[AssetType]
           val (session, journey, draftReturn) =
             sessionWithState(
               answers,
-              sample[AssetType],
+              assetType,
               wasUkResident,
               userType,
               individualUserType,
               disposalDate
             )
-
-          val newAnswers =
+          val improvementCosts                = if (assetType === IndirectDisposal) Some(answers.improvementCosts) else None
+          val newAnswers                      =
             IncompleteAcquisitionDetailsAnswers(
               Some(answers.acquisitionMethod),
               Some(acquisitionDate),
               None,
               None,
-              None,
+              improvementCosts,
               None,
               None
             )
@@ -1112,9 +1113,18 @@ class AcquisitionDetailsControllerSpec
             individualUserType,
             disposalDate
           )
+          val updatedNewAnswers               =
+            if (assetType === IndirectDisposal)
+              newAnswers.fold(
+                _.copy(improvementCosts = oldAnswers.fold(_.improvementCosts, e => Some(e.improvementCosts))),
+                _.copy(improvementCosts =
+                  oldAnswers.fold(_.improvementCosts.getOrElse(AmountInPence.zero), _.improvementCosts)
+                )
+              )
+            else newAnswers
 
           val updatedDraftReturn =
-            commonUpdateDraftReturn(draftReturn, newAnswers)
+            commonUpdateDraftReturn(draftReturn, updatedNewAnswers)
           val updatedSession     = session.copy(
             journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
           )
@@ -1161,6 +1171,7 @@ class AcquisitionDetailsControllerSpec
           val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
             acquisitionDate = AcquisitionDate(date.minusDays(1L))
           )
+          val assetType  = sample[AssetType]
           val newAnswers = IncompleteAcquisitionDetailsAnswers(
             Some(oldAnswers.acquisitionMethod),
             Some(AcquisitionDate(date)),
@@ -1173,7 +1184,7 @@ class AcquisitionDetailsControllerSpec
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               test(
-                sample[AssetType],
+                assetType,
                 sample[Boolean],
                 date,
                 oldAnswers,
@@ -2944,7 +2955,8 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      improvementCosts = None
+                      improvementCosts = None,
+                      acquisitionDate = Some(sample[AcquisitionDate])
                     ),
                     sample[AssetType],
                     sample[Boolean],
@@ -3269,7 +3281,7 @@ class AcquisitionDetailsControllerSpec
         )(expectedErrorKey: String, errorArgs: String*) =
           testFormError(data: _*)(userType, individualUserType, assetType, wasUkResident)(
             expectedErrorKey,
-            models.TimeUtils.govDisplayFormat(mockRebasingUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident))
+            models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, wasUkResident))
           )(s"$key$userKey.title")(performAction)
 
         "no option has been selected" in {
@@ -3279,7 +3291,7 @@ class AcquisitionDetailsControllerSpec
               val assetTypeKey = assetTypeMessageKey(assetType)
               test()(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
                 s"$key$assetTypeKey.error.required",
-                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getDisplayRebasingCutOffDate(assetType, false))
+                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, false))
               )
           }
         }
@@ -3291,7 +3303,7 @@ class AcquisitionDetailsControllerSpec
               val userKey      = userMessageKey(individualUserType, userType)
               test(key -> "2")(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
                 s"$key$assetTypeKey.error.invalid",
-                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getDisplayRebasingCutOffDate(assetType, false))
+                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, false))
               )
           }
         }
@@ -4065,7 +4077,8 @@ class AcquisitionDetailsControllerSpec
                     nonUkRebasing,
                     doc,
                     false,
-                    true
+                    true,
+                    assetType
                   )
                   doc
                     .select("#content > article > form")
@@ -4111,7 +4124,8 @@ class AcquisitionDetailsControllerSpec
                     nonUkRebasing,
                     doc,
                     true,
-                    true
+                    true,
+                    assetType
                   )
                   doc
                     .select("#content > article > form")
@@ -4157,7 +4171,8 @@ class AcquisitionDetailsControllerSpec
                     nonUkRebasing,
                     doc,
                     true,
-                    false
+                    false,
+                    assetType
                   )
                   doc
                     .select("#content > article > form")
@@ -4205,7 +4220,8 @@ class AcquisitionDetailsControllerSpec
                     nonUkRebasing,
                     doc,
                     false,
-                    false
+                    false,
+                    assetType
                   )
                   doc
                     .select("#content > article > form")
@@ -4525,7 +4541,8 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers,
     doc: Document,
     isUk: Boolean,
-    isRebasing: Boolean
+    isRebasing: Boolean,
+    assetType: AssetType
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     val expectedAcquisitionMethodDisplayName =
       acquisitionDetailsAnswers.acquisitionMethod match {
@@ -4551,16 +4568,17 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     else
       doc.select("#acquisitionPrice-answer").text() shouldBe ""
 
-    if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero)
-      doc.select("#improvementCosts-answer").text shouldBe "No"
-    else {
-      doc.select("#improvementCosts-answer").text shouldBe "Yes"
-      doc
-        .select("#improvementCosts-value-answer")
-        .text                                     shouldBe formatAmountOfMoneyWithPoundSign(
-        acquisitionDetailsAnswers.improvementCosts.inPounds()
-      )
-    }
+    if (!(assetType === IndirectDisposal) || isUk || (!isUk && !isRebasing))
+      if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero)
+        doc.select("#improvementCosts-answer").text shouldBe "No"
+      else {
+        doc.select("#improvementCosts-answer").text shouldBe "Yes"
+        doc
+          .select("#improvementCosts-value-answer")
+          .text                                     shouldBe formatAmountOfMoneyWithPoundSign(
+          acquisitionDetailsAnswers.improvementCosts.inPounds()
+        )
+      }
 
     if (acquisitionDetailsAnswers.acquisitionFees === AmountInPence.zero)
       doc.select("#acquisitionFees-answer").text shouldBe "No"

@@ -315,7 +315,8 @@ class ViewReturnControllerSpec
             Some(userType),
             rebasingUtil.isUk(completeSingleDisposalReturn),
             rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn),
-            viewingReturn.subscribedDetails.isATrust
+            viewingReturn.subscribedDetails.isATrust,
+            completeSingleDisposalReturn.triageAnswers.assetType
           )
         }
 

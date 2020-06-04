@@ -22,7 +22,7 @@ import cats.syntax.eq._
 import com.google.inject.Singleton
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftSingleIndirectDisposalReturn}
 
 @Singleton
 class RebasingEligibilityUtil {
@@ -108,24 +108,6 @@ class RebasingEligibilityUtil {
     )
 
   def getRebasingCutOffDate(
-    assetType: AssetType,
-    wasUkResident: Boolean
-  ): LocalDate =
-    if (wasUkResident)
-      RebasingCutoffDates.ukResidents
-    else if (assetType === AssetType.Residential)
-      RebasingCutoffDates.nonUkResidentsResidentialProperty
-    else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
-
-  def getDisplayRebasingCutOffDate(
-    completeReturn: CompleteSingleDisposalReturn
-  ): LocalDate =
-    getDisplayRebasingCutOffDate(
-      extractAssetType(completeReturn),
-      isUk(completeReturn)
-    )
-
-  def getDisplayRebasingCutOffDate(
     assetType: AssetType,
     wasUkResident: Boolean
   ): LocalDate =

@@ -545,14 +545,16 @@ class SingleDisposalsTriageController @Inject() (
       case Right(currentDraftReturn: DraftSingleDisposalReturn)               =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
-            _.unset(_.acquisitionDate)
+          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map { e =>
+            val answer = e
+              .unset(_.acquisitionDate)
               .unset(_.acquisitionPrice)
               .unset(_.rebasedAcquisitionPrice)
               .unset(_.shouldUseRebase)
               .unset(_.improvementCosts)
               .unset(_.acquisitionFees)
-          ),
+            if (newAnswers.assetType.contains(AssetType.IndirectDisposal)) answer else answer.unset(_.improvementCosts)
+          },
           initialGainOrLoss = None,
           reliefDetailsAnswers = currentDraftReturn.reliefDetailsAnswers
             .map(_.unsetPrrAndLettingRelief()),
@@ -564,14 +566,15 @@ class SingleDisposalsTriageController @Inject() (
       case Left(Right(currentDraftReturn: DraftSingleIndirectDisposalReturn)) =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
-            _.unset(_.acquisitionDate)
+          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map { e =>
+            val answer = e
+              .unset(_.acquisitionDate)
               .unset(_.acquisitionPrice)
               .unset(_.rebasedAcquisitionPrice)
               .unset(_.shouldUseRebase)
-              .unset(_.improvementCosts)
               .unset(_.acquisitionFees)
-          ),
+            if (newAnswers.assetType.contains(AssetType.IndirectDisposal)) answer else answer.unset(_.improvementCosts)
+          },
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
           supportingEvidenceAnswers = None

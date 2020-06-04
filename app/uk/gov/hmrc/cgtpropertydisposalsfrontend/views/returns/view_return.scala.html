@@ -132,7 +132,7 @@
 
           <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
           @acquisitionDetailsSummary(s.acquisitionDetails,
-              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(s),
+              rebasingEligibilityUtil.getRebasingCutOffDate(s),
               rebasingEligibilityUtil.isUk(s),
               rebasingEligibilityUtil.isEligibleForRebase(s),
               subscribedDetails.isATrust,
@@ -195,7 +195,7 @@
 
         <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
         @acquisitionDetailsSummary(s.acquisitionDetails,
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
+            rebasingEligibilityUtil.getRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
             isUk = false,
             rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate.value),
             subscribedDetails.isATrust,
