@@ -244,7 +244,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   userType,
                   rebasingEligibilityUtil.isUk(completeReturn),
                   rebasingEligibilityUtil.isEligibleForRebase(completeReturn),
-                  isATrust
+                  isATrust,
+                  completeReturn.triageAnswers.assetType
                 )
                 doc
                   .select("#back")
@@ -572,7 +573,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                     IndirectDisposal,
                     completeReturn.acquisitionDetails.acquisitionDate.value
                   ),
-                  isATrust
+                  isATrust,
+                  IndirectDisposal
                 )
                 doc
                   .select("#back")
@@ -1683,7 +1685,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     userType: Option[UserType],
     isUk: Boolean,
     isRebasing: Boolean,
-    isATrust: Boolean
+    isATrust: Boolean,
+    assetType: AssetType
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     completeReturn.representeeAnswers.foreach(
@@ -1700,7 +1703,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.acquisitionDetails,
       doc,
       isUk,
-      isRebasing
+      isRebasing,
+      assetType
     )
 
     validateDisposalDetailsCheckYourAnswersPage(
@@ -1778,7 +1782,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     completeReturn: CompleteSingleIndirectDisposalReturn,
     userType: Option[UserType],
     isRebasing: Boolean,
-    isATrust: Boolean
+    isATrust: Boolean,
+    assetType: AssetType
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     completeReturn.representeeAnswers.foreach(
@@ -1795,7 +1800,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.acquisitionDetails,
       doc,
       isUk = false,
-      isRebasing
+      isRebasing,
+      assetType
     )
 
     validateDisposalDetailsCheckYourAnswersPage(

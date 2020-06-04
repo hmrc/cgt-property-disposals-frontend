@@ -148,7 +148,7 @@
     )
 }
 
-@if(isUk || (!isUk && !canRebase)) {
+@if(assetTypeKey.isEmpty || isUk || (!isUk && !canRebase)) {
   @if(answers.improvementCosts.value === 0L){
     @cyaRow(
         messages(s"improvementCosts$userKey.title"),

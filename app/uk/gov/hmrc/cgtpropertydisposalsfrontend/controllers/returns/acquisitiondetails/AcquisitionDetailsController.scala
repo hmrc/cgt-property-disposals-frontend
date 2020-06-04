@@ -885,7 +885,8 @@ class AcquisitionDetailsController @Inject() (
                 case _: DraftSingleIndirectDisposalReturn
                     if rebasingEligibilityUtil.isEligibleForRebase(wasUkResident, assetType, acquisitionDate.value) =>
                   routes.AcquisitionDetailsController.rebasedAcquisitionPrice()
-                case _ => routes.AcquisitionDetailsController.improvementCosts()
+                case _: DraftSingleIndirectDisposalReturn => routes.AcquisitionDetailsController.acquisitionPrice()
+                case _                                    => routes.AcquisitionDetailsController.improvementCosts()
               }
             )
           }

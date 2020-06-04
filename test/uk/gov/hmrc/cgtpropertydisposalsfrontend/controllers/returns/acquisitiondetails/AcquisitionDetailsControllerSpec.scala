@@ -2955,7 +2955,8 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      improvementCosts = None
+                      improvementCosts = None,
+                      acquisitionDate = Some(sample[AcquisitionDate])
                     ),
                     sample[AssetType],
                     sample[Boolean],
@@ -4076,7 +4077,8 @@ class AcquisitionDetailsControllerSpec
                     nonUkRebasing,
                     doc,
                     false,
-                    true
+                    true,
+                    assetType
                   )
                   doc
                     .select("#content > article > form")
@@ -4122,7 +4124,8 @@ class AcquisitionDetailsControllerSpec
                     nonUkRebasing,
                     doc,
                     true,
-                    true
+                    true,
+                    assetType
                   )
                   doc
                     .select("#content > article > form")
@@ -4168,7 +4171,8 @@ class AcquisitionDetailsControllerSpec
                     nonUkRebasing,
                     doc,
                     true,
-                    false
+                    false,
+                    assetType
                   )
                   doc
                     .select("#content > article > form")
@@ -4216,7 +4220,8 @@ class AcquisitionDetailsControllerSpec
                     nonUkRebasing,
                     doc,
                     false,
-                    false
+                    false,
+                    assetType
                   )
                   doc
                     .select("#content > article > form")
@@ -4536,7 +4541,8 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers,
     doc: Document,
     isUk: Boolean,
-    isRebasing: Boolean
+    isRebasing: Boolean,
+    assetType: AssetType
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     val expectedAcquisitionMethodDisplayName =
       acquisitionDetailsAnswers.acquisitionMethod match {
@@ -4562,7 +4568,7 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     else
       doc.select("#acquisitionPrice-answer").text() shouldBe ""
 
-    if (isUk || (!isUk && !isRebasing))
+    if (!(assetType === IndirectDisposal) || isUk || (!isUk && !isRebasing))
       if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero)
         doc.select("#improvementCosts-answer").text shouldBe "No"
       else {
