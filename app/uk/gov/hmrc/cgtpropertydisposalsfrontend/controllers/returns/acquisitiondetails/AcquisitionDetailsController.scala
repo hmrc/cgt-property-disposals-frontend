@@ -421,11 +421,14 @@ class AcquisitionDetailsController @Inject() (
                           .unset(_.acquisitionPrice)
                           .unset(_.rebasedAcquisitionPrice)
                           .unset(_.shouldUseRebase)
-                          .unset(_.improvementCosts)
                           .unset(_.acquisitionFees)
                           .copy(acquisitionDate = Some(d))
 
-                        commonUpdateDraftReturn(draftReturn, newAnswers)
+                        commonUpdateDraftReturn(
+                          draftReturn,
+                          if (assetType === AssetType.IndirectDisposal) newAnswers
+                          else newAnswers.unset(_.improvementCosts)
+                        )
                       }
                   }
                 )
@@ -544,7 +547,7 @@ class AcquisitionDetailsController @Inject() (
                     _,
                     _,
                     rebasingEligibilityUtil
-                      .getDisplayRebasingCutOffDate(
+                      .getRebasingCutOffDate(
                         assetType,
                         wasUkResident
                       ),
@@ -677,7 +680,7 @@ class AcquisitionDetailsController @Inject() (
                 answers
                   .fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
                 rebasingEligibilityUtil
-                  .getDisplayRebasingCutOffDate(assetType, wasUkResident),
+                  .getRebasingCutOffDate(assetType, wasUkResident),
                 representativeType(state)
               )
             )(
@@ -724,7 +727,7 @@ class AcquisitionDetailsController @Inject() (
                 answers
                   .fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
                 rebasingEligibilityUtil
-                  .getDisplayRebasingCutOffDate(assetType, wasUkResident),
+                  .getRebasingCutOffDate(assetType, wasUkResident),
                 representativeType(state)
               )
             )(
@@ -784,7 +787,7 @@ class AcquisitionDetailsController @Inject() (
                 routes.AcquisitionDetailsController
                   .rebasedAcquisitionPrice(),
                 rebasingEligibilityUtil
-                  .getDisplayRebasingCutOffDate(assetType, wasAUkResident),
+                  .getRebasingCutOffDate(assetType, wasAUkResident),
                 assetType
               )
             )
@@ -815,7 +818,7 @@ class AcquisitionDetailsController @Inject() (
                     _,
                     _,
                     rebasingEligibilityUtil
-                      .getDisplayRebasingCutOffDate(
+                      .getRebasingCutOffDate(
                         assetType,
                         wasUkResident
                       ),
@@ -855,30 +858,38 @@ class AcquisitionDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
-          commonDisplayBehaviour(answers)(
-            form = _.fold(
-              _.acquisitionFees.fold(acquisitionFeesForm())(p => acquisitionFeesForm().fill(p.inPounds())),
-              c => acquisitionFeesForm().fill(c.acquisitionFees.inPounds())
+          withAcquisitionDate(answers) { acquisitionDate =>
+            commonDisplayBehaviour(answers)(
+              form = _.fold(
+                _.acquisitionFees.fold(acquisitionFeesForm())(p => acquisitionFeesForm().fill(p.inPounds())),
+                c => acquisitionFeesForm().fill(c.acquisitionFees.inPounds())
+              )
+            )(
+              page = acquisitionFeesPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+                rebasingEligibilityUtil
+                  .getRebasingCutOffDate(assetType, wasUkResident),
+                wasUkResident,
+                representativeType(state),
+                assetType
+              )
+            )(
+              requiredPreviousAnswer = _.fold(
+                _.improvementCosts,
+                c => Some(c.improvementCosts)
+              ).isDefined,
+              redirectToIfNoRequiredPreviousAnswer = fillingOutReturn.draftReturn match {
+                case _: DraftSingleIndirectDisposalReturn
+                    if rebasingEligibilityUtil.isEligibleForRebase(wasUkResident, assetType, acquisitionDate.value) =>
+                  routes.AcquisitionDetailsController.rebasedAcquisitionPrice()
+                case _: DraftSingleIndirectDisposalReturn => routes.AcquisitionDetailsController.acquisitionPrice()
+                case _                                    => routes.AcquisitionDetailsController.improvementCosts()
+              }
             )
-          )(
-            page = acquisitionFeesPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-              rebasingEligibilityUtil
-                .getDisplayRebasingCutOffDate(assetType, wasUkResident),
-              wasUkResident,
-              representativeType(state),
-              assetType
-            )
-          )(
-            requiredPreviousAnswer = _.fold(
-              _.improvementCosts,
-              c => Some(c.improvementCosts)
-            ).isDefined,
-            redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
-          )
+          }
         }
       }
     }
@@ -895,7 +906,7 @@ class AcquisitionDetailsController @Inject() (
             acquisitionFeesForm(
               Seq(
                 TimeUtils
-                  .govDisplayFormat(rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident))
+                  .govDisplayFormat(rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasUkResident))
               )
             )
           )(page =
@@ -905,7 +916,7 @@ class AcquisitionDetailsController @Inject() (
               fillingOutReturn.subscribedDetails.isATrust,
               answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
               rebasingEligibilityUtil
-                .getDisplayRebasingCutOffDate(assetType, wasUkResident),
+                .getRebasingCutOffDate(assetType, wasUkResident),
               wasUkResident,
               representativeType(state),
               assetType

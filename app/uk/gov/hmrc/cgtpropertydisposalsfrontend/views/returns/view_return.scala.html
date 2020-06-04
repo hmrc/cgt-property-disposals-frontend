@@ -133,7 +133,7 @@
 
           <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
           @acquisitionDetailsSummary(s.acquisitionDetails,
-              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(s),
+              rebasingEligibilityUtil.getRebasingCutOffDate(s),
               rebasingEligibilityUtil.isUk(s),
               rebasingEligibilityUtil.isEligibleForRebase(s),
               subscribedDetails.isATrust,
@@ -196,7 +196,7 @@
 
         <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
         @acquisitionDetailsSummary(s.acquisitionDetails,
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
+            rebasingEligibilityUtil.getRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
             isUk = false,
             rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate.value),
             subscribedDetails.isATrust,
@@ -208,7 +208,7 @@
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType),
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType)
 
         @if(s.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
