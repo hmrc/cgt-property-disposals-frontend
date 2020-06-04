@@ -4562,16 +4562,17 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     else
       doc.select("#acquisitionPrice-answer").text() shouldBe ""
 
-    if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero)
-      doc.select("#improvementCosts-answer").text shouldBe "No"
-    else {
-      doc.select("#improvementCosts-answer").text shouldBe "Yes"
-      doc
-        .select("#improvementCosts-value-answer")
-        .text                                     shouldBe formatAmountOfMoneyWithPoundSign(
-        acquisitionDetailsAnswers.improvementCosts.inPounds()
-      )
-    }
+    if (isUk || (!isUk && !isRebasing))
+      if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero)
+        doc.select("#improvementCosts-answer").text shouldBe "No"
+      else {
+        doc.select("#improvementCosts-answer").text shouldBe "Yes"
+        doc
+          .select("#improvementCosts-value-answer")
+          .text                                     shouldBe formatAmountOfMoneyWithPoundSign(
+          acquisitionDetailsAnswers.improvementCosts.inPounds()
+        )
+      }
 
     if (acquisitionDetailsAnswers.acquisitionFees === AmountInPence.zero)
       doc.select("#acquisitionFees-answer").text shouldBe "No"

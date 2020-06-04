@@ -858,30 +858,37 @@ class AcquisitionDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
-          commonDisplayBehaviour(answers)(
-            form = _.fold(
-              _.acquisitionFees.fold(acquisitionFeesForm())(p => acquisitionFeesForm().fill(p.inPounds())),
-              c => acquisitionFeesForm().fill(c.acquisitionFees.inPounds())
+          withAcquisitionDate(answers) { acquisitionDate =>
+            commonDisplayBehaviour(answers)(
+              form = _.fold(
+                _.acquisitionFees.fold(acquisitionFeesForm())(p => acquisitionFeesForm().fill(p.inPounds())),
+                c => acquisitionFeesForm().fill(c.acquisitionFees.inPounds())
+              )
+            )(
+              page = acquisitionFeesPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+                rebasingEligibilityUtil
+                  .getRebasingCutOffDate(assetType, wasUkResident),
+                wasUkResident,
+                representativeType(state),
+                assetType
+              )
+            )(
+              requiredPreviousAnswer = _.fold(
+                _.improvementCosts,
+                c => Some(c.improvementCosts)
+              ).isDefined,
+              redirectToIfNoRequiredPreviousAnswer = fillingOutReturn.draftReturn match {
+                case _: DraftSingleIndirectDisposalReturn
+                    if rebasingEligibilityUtil.isEligibleForRebase(wasUkResident, assetType, acquisitionDate.value) =>
+                  routes.AcquisitionDetailsController.rebasedAcquisitionPrice()
+                case _ => routes.AcquisitionDetailsController.improvementCosts()
+              }
             )
-          )(
-            page = acquisitionFeesPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-              rebasingEligibilityUtil
-                .getRebasingCutOffDate(assetType, wasUkResident),
-              wasUkResident,
-              representativeType(state),
-              assetType
-            )
-          )(
-            requiredPreviousAnswer = _.fold(
-              _.improvementCosts,
-              c => Some(c.improvementCosts)
-            ).isDefined,
-            redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
-          )
+          }
         }
       }
     }

@@ -148,64 +148,66 @@
     )
 }
 
-@if(answers.improvementCosts.value === 0L){
-  @cyaRow(
-      messages(s"improvementCosts$userKey.title"),
-      Html(messages("generic.no")),
-      Some(cyaChange(
-        messages("improvementCosts.cyaChange"),
-        routes.AcquisitionDetailsController.improvementCosts().url
-      )),
-      "improvementCosts"
-    )
-  } else {
+@if(isUk || (!isUk && !canRebase)) {
+  @if(answers.improvementCosts.value === 0L){
     @cyaRow(
-      messages(s"improvementCosts$userKey.title"),
-      Html(messages("generic.yes")),
-      Some(cyaChange(
-        messages("improvementCosts.cyaChange"),
-        routes.AcquisitionDetailsController.improvementCosts().url
-      )),
-      "improvementCosts"
-    )
-    @cyaRow(
-      messages("improvementCostsValue.label"),
-      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.improvementCosts.inPounds())),
-      Some(cyaChange(
-        messages("improvementCostsValue.cyaChange"),
-        routes.AcquisitionDetailsController.improvementCosts().url
-      )),
-      "improvementCosts-value"
-    )
-  }
-  @if(answers.acquisitionFees.value === 0L){
-    @cyaRow(
-      messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title", rebasingDate),
-      Html(messages("generic.no")),
-      Some(cyaChange(
-        messages(s"acquisitionFees$rebasingKey.cyaChange"),
-        routes.AcquisitionDetailsController.acquisitionFees().url
-      )),
-      "acquisitionFees"
-    )
-  } else {
-    @cyaRow(
-      messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title", rebasingDate),
-      Html(messages("generic.yes")),
-      Some(cyaChange(
-        messages(s"acquisitionFees$rebasingKey.cyaChange"),
-        routes.AcquisitionDetailsController.acquisitionFees().url
-      )),
-      "acquisitionFees"
-    )
-    @cyaRow(
-      messages("acquisitionFeesValue.label"),
-      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionFees.inPounds())),
-      Some(cyaChange(
-        messages("acquisitionFeesValue.cyaChange"),
-        routes.AcquisitionDetailsController.acquisitionFees().url
-      )),
-      "acquisitionFees-value"
-    )
-  }
+        messages(s"improvementCosts$userKey.title"),
+        Html(messages("generic.no")),
+        Some(cyaChange(
+          messages("improvementCosts.cyaChange"),
+          routes.AcquisitionDetailsController.improvementCosts().url
+        )),
+        "improvementCosts"
+      )
+    } else {
+      @cyaRow(
+        messages(s"improvementCosts$userKey.title"),
+        Html(messages("generic.yes")),
+        Some(cyaChange(
+          messages("improvementCosts.cyaChange"),
+          routes.AcquisitionDetailsController.improvementCosts().url
+        )),
+        "improvementCosts"
+      )
+      @cyaRow(
+        messages("improvementCostsValue.label"),
+        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.improvementCosts.inPounds())),
+        Some(cyaChange(
+          messages("improvementCostsValue.cyaChange"),
+          routes.AcquisitionDetailsController.improvementCosts().url
+        )),
+        "improvementCosts-value"
+      )
+    }
+}
+@if(answers.acquisitionFees.value === 0L){
+      @cyaRow(
+        messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title", rebasingDate),
+        Html(messages("generic.no")),
+        Some(cyaChange(
+          messages(s"acquisitionFees$rebasingKey.cyaChange"),
+          routes.AcquisitionDetailsController.acquisitionFees().url
+        )),
+        "acquisitionFees"
+      )
+    } else {
+      @cyaRow(
+        messages(s"acquisitionFees$userKey$assetTypeKey$rebasingKey.title", rebasingDate),
+        Html(messages("generic.yes")),
+        Some(cyaChange(
+          messages(s"acquisitionFees$rebasingKey.cyaChange"),
+          routes.AcquisitionDetailsController.acquisitionFees().url
+        )),
+        "acquisitionFees"
+      )
+      @cyaRow(
+        messages("acquisitionFeesValue.label"),
+        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionFees.inPounds())),
+        Some(cyaChange(
+          messages("acquisitionFeesValue.cyaChange"),
+          routes.AcquisitionDetailsController.acquisitionFees().url
+        )),
+        "acquisitionFees-value"
+      )
+    }
 }
