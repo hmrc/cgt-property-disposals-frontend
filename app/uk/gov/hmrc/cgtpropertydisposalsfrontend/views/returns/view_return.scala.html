@@ -207,7 +207,7 @@
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType),
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType)
 
         @if(s.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
