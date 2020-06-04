@@ -221,8 +221,8 @@
         <h2>@messages("task-list.triage.link")</h2>
         @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, subscribedDetails.isATrust)
 
-        <h2 class="heading-medium">Example company details</h2>
-        @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers, true)
+        <h2 class="heading-medium">@messages("task-list.example-company-details.link")</h2>
+        @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(multipleIndirect.exemptionsAndLossesDetails, DisposalDate(multipleIndirect.triageAnswers.completionDate.value, multipleIndirect.triageAnswers.taxYear), subscribedDetails.isATrust, representativeType)

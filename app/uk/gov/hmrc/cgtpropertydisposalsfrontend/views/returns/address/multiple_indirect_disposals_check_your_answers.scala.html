@@ -30,10 +30,7 @@
     summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary
 )
 
-@(
-    answers: CompleteExampleCompanyDetailsAnswers,
-    shouldAskIfPostcodeExists: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteExampleCompanyDetailsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("returns.company-address.cya.title")}
@@ -46,7 +43,7 @@
         <a href="@routes.CompanyDetailsController.multipleIndirectDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
     </p>
 
-    @summary(answers, shouldAskIfPostcodeExists)
+    @summary(answers)
 
     @formWrapper(routes.CompanyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

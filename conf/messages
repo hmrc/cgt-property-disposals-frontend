@@ -959,6 +959,7 @@ task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss
 task-list.enter-property-address.link=Enter property address
 task-list.enter-property-details.link=Enter property details
 task-list.enter-company-details.link=Enter company details
+task-list.example-company-details.link=Example company details
 task-list.disposals-details.link=Enter sale or disposal details
 task-list.acquisition-details.link=Enter purchase or acquisition details
 task-list.exemptions-and-losses.link=Enter losses and exemptions

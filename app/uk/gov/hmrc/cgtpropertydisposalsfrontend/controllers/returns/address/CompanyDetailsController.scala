@@ -135,13 +135,17 @@ class CompanyDetailsController @Inject() (
   ): EitherT[Future, Error, JourneyStatus] = {
     val newJourney = journey.journey.copy(
       draftReturn = journey.draftReturn.fold(
-        _.copy(exampleCompanyDetailsAnswers =
-          Some(
-            IncompleteExampleCompanyDetailsAnswers.empty.copy(
-              address = Some(address)
+        multipleIndirect =>
+          multipleIndirect.copy(
+            exampleCompanyDetailsAnswers = Some(
+              multipleIndirect.exampleCompanyDetailsAnswers
+                .getOrElse(IncompleteExampleCompanyDetailsAnswers.empty)
+                .fold(
+                  _.copy(address = Some(address)),
+                  _.copy(address = address)
+                )
             )
-          )
-        ),
+          ),
         _.copy(companyAddress = Some(address))
       )
     )
@@ -482,13 +486,13 @@ class CompanyDetailsController @Inject() (
                     },
                     _ =>
                       Ok(
-                        multipleIndirectCheckYourAnswersPage(completeAnswers, true)
+                        multipleIndirectCheckYourAnswersPage(completeAnswers)
                       )
                   )
 
                 case c: CompleteExampleCompanyDetailsAnswers                             =>
                   Ok(
-                    multipleIndirectCheckYourAnswersPage(c, true)
+                    multipleIndirectCheckYourAnswersPage(c)
                   )
 
               }

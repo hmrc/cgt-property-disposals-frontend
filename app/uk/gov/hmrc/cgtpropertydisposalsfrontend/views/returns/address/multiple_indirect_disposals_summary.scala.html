@@ -30,16 +30,13 @@
     addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteExampleCompanyDetailsAnswers, shouldAskIfPostcodeExists: Boolean)(implicit messages:Messages)
+@(answers: CompleteExampleCompanyDetailsAnswers)(implicit messages:Messages)
 
 @cyaSection() {
 @cyaRow(
         messages("returns.company-address.cyaLabel.company-address"),
         addressDisplay(answers.address, DisplayFormat.Block),
-        Some(cyaChange(messages("returns.company-address.cyaChange.company-address"),
-            if(shouldAskIfPostcodeExists) routes.CompanyDetailsController.isUk().url
-            else routes.CompanyDetailsController.enterPostcode().url
-        )),
+        Some(cyaChange(messages("returns.company-address.cyaChange.company-address"), routes.CompanyDetailsController.isUk().url)),
         "company-address"
     )
 
