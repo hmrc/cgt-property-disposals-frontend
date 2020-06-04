@@ -117,24 +117,6 @@ class RebasingEligibilityUtil {
       RebasingCutoffDates.nonUkResidentsResidentialProperty
     else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
 
-  def getDisplayRebasingCutOffDate(
-    completeReturn: CompleteSingleDisposalReturn
-  ): LocalDate =
-    getDisplayRebasingCutOffDate(
-      extractAssetType(completeReturn),
-      isUk(completeReturn)
-    )
-
-  def getDisplayRebasingCutOffDate(
-    assetType: AssetType,
-    wasUkResident: Boolean
-  ): LocalDate =
-    if (wasUkResident)
-      RebasingCutoffDates.ukResidents
-    else if (assetType === AssetType.Residential)
-      RebasingCutoffDates.nonUkResidentsResidentialProperty
-    else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
-
   private def extractIsUk(
     completeReturn: CompleteSingleDisposalReturn
   ): Boolean =

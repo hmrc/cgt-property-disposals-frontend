@@ -421,11 +421,14 @@ class AcquisitionDetailsController @Inject() (
                           .unset(_.acquisitionPrice)
                           .unset(_.rebasedAcquisitionPrice)
                           .unset(_.shouldUseRebase)
-                          .unset(_.improvementCosts)
                           .unset(_.acquisitionFees)
                           .copy(acquisitionDate = Some(d))
 
-                        commonUpdateDraftReturn(draftReturn, newAnswers)
+                        commonUpdateDraftReturn(
+                          draftReturn,
+                          if (assetType === AssetType.IndirectDisposal) newAnswers
+                          else newAnswers.unset(_.improvementCosts)
+                        )
                       }
                   }
                 )
@@ -544,7 +547,7 @@ class AcquisitionDetailsController @Inject() (
                     _,
                     _,
                     rebasingEligibilityUtil
-                      .getDisplayRebasingCutOffDate(
+                      .getRebasingCutOffDate(
                         assetType,
                         wasUkResident
                       ),
@@ -677,7 +680,7 @@ class AcquisitionDetailsController @Inject() (
                 answers
                   .fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
                 rebasingEligibilityUtil
-                  .getDisplayRebasingCutOffDate(assetType, wasUkResident),
+                  .getRebasingCutOffDate(assetType, wasUkResident),
                 representativeType(state)
               )
             )(
@@ -724,7 +727,7 @@ class AcquisitionDetailsController @Inject() (
                 answers
                   .fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
                 rebasingEligibilityUtil
-                  .getDisplayRebasingCutOffDate(assetType, wasUkResident),
+                  .getRebasingCutOffDate(assetType, wasUkResident),
                 representativeType(state)
               )
             )(
@@ -784,7 +787,7 @@ class AcquisitionDetailsController @Inject() (
                 routes.AcquisitionDetailsController
                   .rebasedAcquisitionPrice(),
                 rebasingEligibilityUtil
-                  .getDisplayRebasingCutOffDate(assetType, wasAUkResident),
+                  .getRebasingCutOffDate(assetType, wasAUkResident),
                 assetType
               )
             )
@@ -815,7 +818,7 @@ class AcquisitionDetailsController @Inject() (
                     _,
                     _,
                     rebasingEligibilityUtil
-                      .getDisplayRebasingCutOffDate(
+                      .getRebasingCutOffDate(
                         assetType,
                         wasUkResident
                       ),
@@ -867,7 +870,7 @@ class AcquisitionDetailsController @Inject() (
               fillingOutReturn.subscribedDetails.isATrust,
               answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
               rebasingEligibilityUtil
-                .getDisplayRebasingCutOffDate(assetType, wasUkResident),
+                .getRebasingCutOffDate(assetType, wasUkResident),
               wasUkResident,
               representativeType(state),
               assetType
@@ -895,7 +898,7 @@ class AcquisitionDetailsController @Inject() (
             acquisitionFeesForm(
               Seq(
                 TimeUtils
-                  .govDisplayFormat(rebasingEligibilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident))
+                  .govDisplayFormat(rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasUkResident))
               )
             )
           )(page =
@@ -905,7 +908,7 @@ class AcquisitionDetailsController @Inject() (
               fillingOutReturn.subscribedDetails.isATrust,
               answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
               rebasingEligibilityUtil
-                .getDisplayRebasingCutOffDate(assetType, wasUkResident),
+                .getRebasingCutOffDate(assetType, wasUkResident),
               wasUkResident,
               representativeType(state),
               assetType
