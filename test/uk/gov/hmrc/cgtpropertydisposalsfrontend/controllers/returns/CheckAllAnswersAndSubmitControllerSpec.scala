@@ -1700,7 +1700,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.acquisitionDetails,
       doc,
       isUk,
-      isRebasing
+      isRebasing,
+      completeReturn.triageAnswers.assetType
     )
 
     validateDisposalDetailsCheckYourAnswersPage(
@@ -1795,7 +1796,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.acquisitionDetails,
       doc,
       isUk = false,
-      isRebasing
+      isRebasing,
+      completeReturn.triageAnswers.assetType
     )
 
     validateDisposalDetailsCheckYourAnswersPage(
