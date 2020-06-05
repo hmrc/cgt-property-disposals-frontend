@@ -881,13 +881,8 @@ class AcquisitionDetailsController @Inject() (
                 _.improvementCosts,
                 c => Some(c.improvementCosts)
               ).isDefined,
-              redirectToIfNoRequiredPreviousAnswer = fillingOutReturn.draftReturn match {
-                case _: DraftSingleIndirectDisposalReturn
-                    if rebasingEligibilityUtil.isEligibleForRebase(wasUkResident, assetType, acquisitionDate.value) =>
-                  routes.AcquisitionDetailsController.rebasedAcquisitionPrice()
-                case _: DraftSingleIndirectDisposalReturn => routes.AcquisitionDetailsController.acquisitionPrice()
-                case _                                    => routes.AcquisitionDetailsController.improvementCosts()
-              }
+              redirectToIfNoRequiredPreviousAnswer =
+                acquisitionFeeBacklink(fillingOutReturn, wasUkResident, assetType, acquisitionDate)
             )
           }
         }
@@ -898,56 +893,72 @@ class AcquisitionDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) { (_, fillingOutReturn, state, answers) =>
         withAssetTypeAndResidentialStatus(state) { (assetType, wasUkResident) =>
-          commonSubmitBehaviour(
-            fillingOutReturn,
-            state,
-            answers
-          )(
-            acquisitionFeesForm(
-              Seq(
-                TimeUtils
-                  .govDisplayFormat(rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasUkResident))
-              )
-            )
-          )(page =
-            acquisitionFeesPage(
-              _,
-              _,
-              fillingOutReturn.subscribedDetails.isATrust,
-              answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
-              rebasingEligibilityUtil
-                .getRebasingCutOffDate(assetType, wasUkResident),
-              wasUkResident,
-              representativeType(state),
-              assetType
-            )
-          )(
-            requiredPreviousAnswer = _.fold(
-              _.improvementCosts,
-              c => Some(c.improvementCosts)
-            ).isDefined,
-            redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
-          )(
-            updateState = { (p, answers, draftReturn) =>
-              if (
-                answers
-                  .fold(_.acquisitionFees, c => Some(c.acquisitionFees))
-                  .map(_.inPounds())
-                  .contains(p)
-              )
-                draftReturn
-              else {
-                val newAnswers = answers.fold(
-                  _.copy(acquisitionFees = Some(AmountInPence.fromPounds(p))),
-                  _.copy(acquisitionFees = AmountInPence.fromPounds(p))
+          withAcquisitionDate(answers) { acquisitionDate =>
+            commonSubmitBehaviour(
+              fillingOutReturn,
+              state,
+              answers
+            )(
+              acquisitionFeesForm(
+                Seq(
+                  TimeUtils
+                    .govDisplayFormat(rebasingEligibilityUtil.getRebasingCutOffDate(assetType, wasUkResident))
                 )
-
-                commonUpdateDraftReturn(draftReturn, newAnswers)
+              )
+            )(page =
+              acquisitionFeesPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                answers.fold(_.shouldUseRebase, r => Some(r.shouldUseRebase)),
+                rebasingEligibilityUtil
+                  .getRebasingCutOffDate(assetType, wasUkResident),
+                wasUkResident,
+                representativeType(state),
+                assetType
+              )
+            )(
+              requiredPreviousAnswer = _.fold(
+                _.improvementCosts,
+                c => Some(c.improvementCosts)
+              ).isDefined,
+              redirectToIfNoRequiredPreviousAnswer =
+                acquisitionFeeBacklink(fillingOutReturn, wasUkResident, assetType, acquisitionDate)
+            )(
+              updateState = { (p, answers, draftReturn) =>
+                if (
+                  answers
+                    .fold(_.acquisitionFees, c => Some(c.acquisitionFees))
+                    .map(_.inPounds())
+                    .contains(p)
+                )
+                  draftReturn
+                else {
+                  val newAnswers = answers.fold(
+                    _.copy(acquisitionFees = Some(AmountInPence.fromPounds(p))),
+                    _.copy(acquisitionFees = AmountInPence.fromPounds(p))
+                  )
+                  commonUpdateDraftReturn(draftReturn, newAnswers)
+                }
               }
-            }
-          )
+            )
+          }
         }
       }
+    }
+
+  private def acquisitionFeeBacklink(
+    fillingOutReturn: FillingOutReturn,
+    wasUkResident: Boolean,
+    assetType: AssetType,
+    acquisitionDate: AcquisitionDate
+  ): Call =
+    fillingOutReturn.draftReturn match {
+      case _: DraftSingleIndirectDisposalReturn
+          if rebasingEligibilityUtil.isEligibleForRebase(wasUkResident, assetType, acquisitionDate.value) =>
+        routes.AcquisitionDetailsController.rebasedAcquisitionPrice()
+      case _: DraftSingleIndirectDisposalReturn => routes.AcquisitionDetailsController.acquisitionPrice()
+      case _                                    => routes.AcquisitionDetailsController.improvementCosts()
     }
 
   def checkYourAnswers(): Action[AnyContent] =
