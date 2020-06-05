@@ -543,14 +543,16 @@ class SingleDisposalsTriageController @Inject() (
       case Right(currentDraftReturn: DraftSingleDisposalReturn)               =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
-            _.unset(_.acquisitionDate)
+          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map { e =>
+            val answer = e
+              .unset(_.acquisitionDate)
               .unset(_.acquisitionPrice)
               .unset(_.rebasedAcquisitionPrice)
               .unset(_.shouldUseRebase)
               .unset(_.improvementCosts)
               .unset(_.acquisitionFees)
-          ),
+            if (newAnswers.assetType.contains(AssetType.IndirectDisposal)) answer else answer.unset(_.improvementCosts)
+          },
           initialGainOrLoss = None,
           reliefDetailsAnswers = currentDraftReturn.reliefDetailsAnswers
             .map(_.unsetPrrAndLettingRelief()),
@@ -562,14 +564,15 @@ class SingleDisposalsTriageController @Inject() (
       case Left(Right(currentDraftReturn: DraftSingleIndirectDisposalReturn)) =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map(
-            _.unset(_.acquisitionDate)
+          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map { e =>
+            val answer = e
+              .unset(_.acquisitionDate)
               .unset(_.acquisitionPrice)
               .unset(_.rebasedAcquisitionPrice)
               .unset(_.shouldUseRebase)
-              .unset(_.improvementCosts)
               .unset(_.acquisitionFees)
-          ),
+            if (newAnswers.assetType.contains(AssetType.IndirectDisposal)) answer else answer.unset(_.improvementCosts)
+          },
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
           supportingEvidenceAnswers = None
@@ -1726,7 +1729,6 @@ object SingleDisposalsTriageController {
     mapping(
       "individualUserType" -> of(
         FormUtils.radioFormFormatter(
-          "individualUserType",
           List(Self, Capacitor, PersonalRepresentative)
         )
       )
@@ -1737,7 +1739,7 @@ object SingleDisposalsTriageController {
     mapping(
       "numberOfProperties" -> of(
         FormUtils
-          .radioFormFormatter("numberOfProperties", List(One, MoreThanOne))
+          .radioFormFormatter(List(One, MoreThanOne))
       )
     )(identity)(Some(_))
   )
@@ -1746,7 +1748,7 @@ object SingleDisposalsTriageController {
     mapping(
       "disposalMethod" -> of(
         FormUtils
-          .radioFormFormatter("disposalMethod", List(Sold, Gifted, Other))
+          .radioFormFormatter(List(Sold, Gifted, Other))
       )
     )(identity)(Some(_))
   )
@@ -1808,7 +1810,6 @@ object SingleDisposalsTriageController {
     mapping(
       "assetTypeForNonUkResidents" -> of(
         FormUtils.radioFormFormatter(
-          "assetTypeForNonUkResidents",
           List(Residential, NonResidential, MixedUse, IndirectDisposal)
         )
       )

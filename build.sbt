@@ -55,13 +55,8 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(routesImport := Seq.empty)
   .settings(TwirlKeys.templateImports := Seq.empty)
-  .settings(
-    scalacOptions ++= Seq(
-      "-Ypartial-unification",
-      "-Yrangepos",
-      "-Ywarn-unused:imports"
-    )
-  )
+  .settings(scalacOptions ++= Seq("-Yrangepos"))
+  .settings(scalacOptions in Test --= Seq("-Ywarn-value-discard"))
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
@@ -79,8 +74,3 @@ dependencyOverrides += "com.typesafe.akka" %% "akka-protobuf"  % akkaVersion
 dependencyOverrides += "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion
 dependencyOverrides += "com.typesafe.akka" %% "akka-actor"     % akkaVersion
 dependencyOverrides += "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
-
-scalacOptions ++= Seq("-Ywarn-unused:params",
-  "-Ywarn-unused:privates",
-  "-Ywarn-unused:locals",
-  "-Ywarn-unused:patvars")

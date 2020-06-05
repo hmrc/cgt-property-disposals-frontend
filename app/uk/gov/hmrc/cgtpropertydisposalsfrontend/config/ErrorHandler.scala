@@ -21,8 +21,6 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results.InternalServerError
 import play.api.mvc.{Request, Result}
 import play.twirl.api.Html
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 
@@ -41,14 +39,12 @@ class ErrorHandler @Inject() (
   )(implicit
     request: Request[_]
   ): Html =
-    error_template(None, pageTitle, heading, message)
+    error_template(pageTitle, heading, message)
 
   def errorResult[R <: Request[_]](
-    userType: Option[UserType]
   )(implicit request: R): Result =
     InternalServerError(
       error_template(
-        userType,
         Messages("global.error.InternalServerError500.title"),
         Messages("global.error.InternalServerError500.heading"),
         Messages("global.error.InternalServerError500.message")
@@ -58,15 +54,10 @@ class ErrorHandler @Inject() (
   def tmpErrorResult()(implicit request: Request[_]): Result =
     InternalServerError(
       error_template(
-        None,
         Messages("tmpCustomError.title"),
         Messages("tmpCustomError.heading"),
         Messages("tmpCustomError.p1"),
         Some(Messages("tmpCustomError.p2"))
       )
     )
-
-  def errorResult()(implicit request: RequestWithSessionData[_]): Result =
-    errorResult(request.userType)
-
 }

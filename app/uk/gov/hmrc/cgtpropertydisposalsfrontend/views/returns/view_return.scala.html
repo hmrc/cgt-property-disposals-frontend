@@ -22,8 +22,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, ReturnSummary}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteSingleDisposalReturn, CompleteMultipleDisposalsReturn, CompleteSingleIndirectDisposalReturn}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
@@ -37,6 +38,7 @@
         singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary,
         multipleDisposalsTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary,
         addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
+        exampleCompanyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary,
         examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary,
         calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -64,7 +66,7 @@
 
 @key= @{ "viewReturn" }
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
+@mainTemplate(title = title, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
   @returnHeading(title, returnSummary, subscribedDetails, request.userType)
   
@@ -91,6 +93,7 @@
                 case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
                 case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
                 case c: CompleteSingleIndirectDisposalReturn => addressDisplay(c.companyAddress, Line)
+                case c: CompleteMultipleIndirectDisposalReturn => addressDisplay(c.exampleCompanyDetailsAnswers.address, Line)
             },
             None,
             "property-address-table"
@@ -126,11 +129,12 @@
 
           <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
           @acquisitionDetailsSummary(s.acquisitionDetails,
-              rebasingEligibilityUtil.getDisplayRebasingCutOffDate(s),
+              rebasingEligibilityUtil.getRebasingCutOffDate(s),
               rebasingEligibilityUtil.isUk(s),
               rebasingEligibilityUtil.isEligibleForRebase(s),
               subscribedDetails.isATrust,
-              representativeType
+              representativeType,
+              s.triageAnswers.assetType
           )
 
           <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
@@ -188,21 +192,19 @@
 
         <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
         @acquisitionDetailsSummary(s.acquisitionDetails,
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
+            rebasingEligibilityUtil.getRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
             isUk = false,
             rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate.value),
             subscribedDetails.isATrust,
-            representativeType
+            representativeType,
+            s.triageAnswers.assetType
         )
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @s.yearToDateLiabilityAnswers.fold(
-            nonCalculatedYearToDateLiabilitySummary(_, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType),
-            calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = false, subscribedDetails.isATrust, representativeType, s.triageAnswers.countryOfResidence.isUk())
-        )
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType)
 
         @if(s.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
@@ -211,6 +213,24 @@
 
     }
 
+    case multipleIndirect: CompleteMultipleIndirectDisposalReturn => {
+        <h2>@messages("task-list.triage.link")</h2>
+        @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, subscribedDetails.isATrust)
+
+        <h2 class="heading-medium">@messages("task-list.example-company-details.link")</h2>
+        @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)
+
+        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        @lossesSummary(multipleIndirect.exemptionsAndLossesDetails, DisposalDate(multipleIndirect.triageAnswers.completionDate.value, multipleIndirect.triageAnswers.taxYear), subscribedDetails.isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType)
+
+        @if(multipleIndirect.hasAttachments) {
+            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
+            <p>@messages(s"$key.hasAttachments.p1")</p>
+        }
+    }
 
     }
 

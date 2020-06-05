@@ -68,6 +68,7 @@ class PropertyDetailsController @Inject() (
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
   val isUkPage: views.html.address.isUk,
+  val exitPage: views.html.address.exit_page,
   multipleDisposalsGuidancePage: views.html.returns.address.multiple_disposals_guidance,
   multipleDisposalsDisposalDatePage: views.html.returns.address.disposal_date,
   multipleDisposalsDisposalPricePage: views.html.returns.address.disposal_price,
@@ -99,6 +100,7 @@ class PropertyDetailsController @Inject() (
         val draftReturn = r.draftReturn.fold(
           m => Some(Left(m)),
           s => Some(Right(s)),
+          _ => None,
           _ => None,
           _ => None
         )
@@ -920,9 +922,10 @@ class PropertyDetailsController @Inject() (
         Some(Left(IndividualUserType.PersonalRepresentative))
       case _                                               => None
     }
+
   private def disposalPriceBackLink(
     answers: ExamplePropertyDetailsAnswers
-  ): Call                                                        =
+  ): Call =
     answers
       .fold(
         _ => routes.PropertyDetailsController.disposalDate(),
@@ -944,7 +947,7 @@ class PropertyDetailsController @Inject() (
   protected lazy val enterNonUkAddressCall: Call                          = enterPostcodeCall
   protected lazy val enterNonUkAddressSubmitCall: Call                    = enterPostcodeCall
   protected lazy val backLinkCall: FillingOutReturnAddressJourney => Call = _ => enterPostcodeCall
-
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call]        = None
 }
 
 object PropertyDetailsController {

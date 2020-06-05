@@ -39,7 +39,7 @@
 @title = @{messages("haveATrn.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 
@@ -51,11 +51,10 @@
         @yesNo(
             fieldId = key,
             label = pageHeading(title, Some(messages("subscription.caption"))),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
+            helpText = Some(Html(messages("haveATrn.helpText"))),
             hasErrors = hasErrors,
-            selected = form.value,
-            helpText = Some(Html(messages("haveATrn.helpText")))
+            selected = form.value
         )
         @submitButton(messages("button.continue"))
     }

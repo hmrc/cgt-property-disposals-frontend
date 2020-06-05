@@ -615,7 +615,7 @@ class YearToDateLiabilityControllerSpec
 
       "redirect the page" when {
         "the user is a Trust" in {
-          val (session, fillingOutReturn, _) = sessionWithSingleDisposalState(
+          val (session, _, _) = sessionWithSingleDisposalState(
             None,
             Some(sample[DisposalDate]),
             UserType.Organisation,
@@ -2386,7 +2386,7 @@ class YearToDateLiabilityControllerSpec
           expectedRedirect: Call
         ): Unit = {
 
-          val (sessionData, fillingOutReturn, _) =
+          val (sessionData, _, _) =
             sessionWithSingleDisposalState(
               answers,
               sample[DisposalDate],

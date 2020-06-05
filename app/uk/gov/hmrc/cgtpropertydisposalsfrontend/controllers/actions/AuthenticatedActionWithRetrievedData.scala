@@ -109,7 +109,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
 
               case other                            =>
                 logger.warn(s"User has usupported affinity group type $other")
-                Future.successful(Left(errorHandler.errorResult(None)(request)))
+                Future.successful(Left(errorHandler.errorResult()(request)))
             }
           }
       }
@@ -184,12 +184,12 @@ class AuthenticatedActionWithRetrievedData @Inject() (
             Future.successful(Right(Some(CgtReference(cgtReference.value))))
           case None               =>
             logger.warn(s"CGT identifier value is missing from the enrolment")
-            Future.successful(Left(errorHandler.errorResult(None)(request)))
+            Future.successful(Left(errorHandler.errorResult()(request)))
         }
       case None               =>
         subscriptionService
           .hasFailedCgtEnrolment()
-          .leftMap(_ => errorHandler.errorResult(None)(request))
+          .leftMap(_ => errorHandler.errorResult()(request))
           .value
     }
 
@@ -231,7 +231,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     credentials match {
       case None                                       =>
         logger.warn("No credentials were retrieved")
-        Future.successful(Left(errorHandler.errorResult(None)(request)))
+        Future.successful(Left(errorHandler.errorResult()(request)))
 
       case Some(Credentials(id, "GovernmentGateway")) =>
         f(GGCredId(id))
@@ -270,7 +270,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     maybeArn.fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]](
       { e =>
         logger.warn(e)
-        Left(errorHandler.errorResult(Some(UserType.Agent))(request))
+        Left(errorHandler.errorResult()(request))
       },
       arn =>
         Right(
@@ -309,7 +309,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
                 s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
             )
-            Left(errorHandler.errorResult(Some(Organisation))(request))
+            Left(errorHandler.errorResult()(request))
           }(id =>
             Right(
               AuthenticatedRequestWithRetrievedData(

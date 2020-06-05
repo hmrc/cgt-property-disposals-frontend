@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -41,7 +42,8 @@
     form: Form[AcquisitionDate],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    assetType: AssetType
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{"acquisitionDate"}
@@ -55,16 +57,22 @@
     else ""
 }
 
-@hasErrors = @{form.hasErrors}
-@title = @{messages(s"$key$userKey.title")}
-@errorKey = @{List("acquisitionDate-day", "acquisitionDate-month", "acquisitionDate-year", "acquisitionDate").map(form.error).find(_.isDefined).flatten}
+@assetTypeKey = @{assetType match {
+  case AssetType.IndirectDisposal => ".indirect"
+  case _ => ""
+}}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+
+@hasErrors = @{form.hasErrors}
+@title = @{messages(s"$key$userKey$assetTypeKey.title")}
+@errorKey = @{List(s"acquisitionDate-day", s"acquisitionDate-month", s"acquisitionDate-year", "acquisitionDate").map(form.error).find(_.isDefined).flatten}
+
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, errorKey.map(e => s"${e.key}$userKey"))
+        @errorSummary(form, errorKey.map(e => s"${e.key}$userKey$assetTypeKey"))
     }
 
     @formWrapper(routes.AcquisitionDetailsController.acquisitionDateSubmit(), 'novalidate -> "novalidate") {
@@ -74,14 +82,12 @@
             dayValue = form.data.get("acquisitionDate-day"),
             monthValue = form.data.get("acquisitionDate-month"),
             yearValue = form.data.get("acquisitionDate-year"),
-            helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-            labelAsHeading = true,
-            errorKey = errorKey.map(e => s"${e.key}$userKey.${e.message}"),
+            helpText = Some(Html(messages(s"$key$userKey$assetTypeKey.helpText"))),
+            errorKey = errorKey.map(e => s"${e.key}$userKey$assetTypeKey.${e.message}"),
             hasErrors = hasErrors
         )
         @submitButton(messages("button.saveAndContinue"))
     }
-
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

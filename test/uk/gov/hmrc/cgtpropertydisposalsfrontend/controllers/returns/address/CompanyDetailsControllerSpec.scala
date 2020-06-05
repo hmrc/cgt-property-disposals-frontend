@@ -23,7 +23,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -31,20 +31,24 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftSingleIndirectDisposalReturn, IndividualUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftMultipleIndirectDisposalsReturn, DraftReturn, DraftSingleIndirectDisposalReturn, IndividualUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 
 import scala.concurrent.Future
 
@@ -60,9 +64,9 @@ class CompanyDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn) =>
-          true
-        case _                                                               => false
+        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn)    => true
+        case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn) => true
+        case _                                                                  => false
       }
     )
 
@@ -110,6 +114,31 @@ class CompanyDetailsControllerSpec
       Some(Self),
       companyAddress
     )
+
+  def sessionWithDraftMultipleIndirectDisposals(
+    companyAddress: Address = sample[Address]
+  ): (SessionData, FillingOutReturn, DraftMultipleIndirectDisposalsReturn) = {
+    val country          = Country("HK", Some("Hong Kong"))
+    val draftReturn      = sample[DraftMultipleIndirectDisposalsReturn].copy(
+      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+        countryOfResidence = country,
+        assetTypes = List(AssetType.IndirectDisposal)
+      ),
+      exampleCompanyDetailsAnswers = Some(
+        sample[CompleteExampleCompanyDetailsAnswers].copy(
+          address = companyAddress
+        )
+      )
+    )
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn
+    )
+    val sessionData      = SessionData.empty.copy(
+      journeyStatus = Some(fillingOutReturn)
+    )
+
+    (sessionData, fillingOutReturn, draftReturn)
+  }
 
   def capacitorState(): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
     sessionWithDraftSingleIndirectDisposal(
@@ -257,6 +286,35 @@ class CompanyDetailsControllerSpec
 
       }
 
+      "display the page for multiple indirect disposals" when {
+
+        def test(result: Future[Result], expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey),
+            doc =>
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
+                .isUkSubmit()
+                .url
+          )
+
+        "handling all users" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDraftMultipleIndirectDisposals(
+                sample[UkAddress]
+              )._1
+            )
+          }
+
+          test(performAction(), "companyDetails.isUk.multipleIndirect.title")
+        }
+
+      }
+
     }
 
     "handling submits on the is uk page" must {
@@ -350,6 +408,39 @@ class CompanyDetailsControllerSpec
 
       }
 
+      "show a form error for multiple indirect disposals" when {
+
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(expectedTitleKey),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+
+        "nothing is selected" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test()(
+            "isUk.multipleIndirect.error.required",
+            "companyDetails.isUk.multipleIndirect.title"
+          )
+
+        }
+
+      }
+
       "redirect to the enter postcode endpoint" when {
 
         "the user selects yes" in {
@@ -365,12 +456,43 @@ class CompanyDetailsControllerSpec
         }
       }
 
+      "redirect to the enter postcode endpoint for multiple indirect disposals" when {
+
+        "the user selects yes" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          checkIsRedirect(
+            performAction("isUk" -> "true"),
+            routes.CompanyDetailsController.enterPostcode()
+          )
+        }
+      }
+
       "redirect to the enter non uk address page" when {
 
         "the user selects no" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(individualState()._1)
+          }
+
+          checkIsRedirect(
+            performAction("isUk" -> "false"),
+            routes.CompanyDetailsController.enterNonUkAddress()
+          )
+        }
+
+      }
+
+      "redirect to the enter non uk address page for multiple indirect disposals" when {
+
+        "the user selects no" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
           }
 
           checkIsRedirect(
@@ -467,6 +589,50 @@ class CompanyDetailsControllerSpec
 
           test(performAction(), "address.uk.companyDetails.trust.title")
 
+        }
+
+      }
+
+      "display the page for multiple indirect disposals" when {
+
+        def test(result: Future[Result], expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc
+                .select("#address > legend > h1 > span")
+                .text() shouldBe messageFromMessageKey(
+                "returns.company-details.multipleIndirectDisposals.caption"
+              )
+
+              doc
+                .select("#address > div:nth-child(2) > label")
+                .text() shouldBe messageFromMessageKey(
+                "address.uk.companyDetails.line1.label"
+              )
+
+              doc
+                .select("#address > div:nth-child(3) > label")
+                .text() shouldBe messageFromMessageKey(
+                "address.uk.companyDetails.line2.label"
+              )
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
+                .enterUkAddressSubmit()
+                .url
+            }
+          )
+
+        "handling all users" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(performAction(), "address.uk.companyDetails.multipleIndirect.title")
         }
 
       }
@@ -678,6 +844,202 @@ class CompanyDetailsControllerSpec
 
       }
 
+      "return a form error for multiple indirect disposals" when {
+
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(expectedTitleKey),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+
+        "address line 1 is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test("postcode" -> "W1A2HV")(
+            "address-line1.companyDetails.error.required",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 1 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> ("a" * 100),
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-line1.companyDetails.error.tooLong",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 1 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "ab%csd",
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-line1.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 2 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "address-line1" -> "Company name",
+            "address-line2" -> ("a" * 100),
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-line2.companyDetails.error.tooLong",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 2 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "Company name",
+            "address-line2" -> "fsdhio*fde@df",
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-line2.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 3 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "address-line1" -> "Company name",
+            "address-town"  -> ("a" * 100),
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-town.companyDetails.error.tooLong",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 3 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "Company name",
+            "address-town"  -> "fsdhio*fde@df",
+            "postcode"      -> "W1A2HV"
+          )(
+            "address-town.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 4 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "address-line1"  -> "Company name",
+            "address-county" -> ("a" * 100),
+            "postcode"       -> "W1A2HV"
+          )(
+            "address-county.companyDetails.error.tooLong",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 4 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1"  -> "Company name",
+            "address-county" -> "fsdhio*fde@df",
+            "postcode"       -> "W1A2HV"
+          )(
+            "address-county.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address postcode is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test("address-line1" -> "1 the Street")(
+            "postcode.companyDetails.error.required",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "the address postcode contains invalid characters" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "1 the Street",
+            "postcode"      -> "W1A,2HV"
+          )(
+            "postcode.companyDetails.error.invalidCharacters",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "the address postcode does not have a valid format" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "address-line1" -> "1 the Street",
+            "postcode"      -> "ABC123"
+          )(
+            "postcode.companyDetails.error.pattern",
+            "address.uk.companyDetails.multipleIndirect.title"
+          )
+        }
+
+      }
+
       "show an error page" when {
 
         val (session, journey, draftReturn) = individualState()
@@ -854,6 +1216,50 @@ class CompanyDetailsControllerSpec
 
           test(performAction(), "nonUkAddress.companyDetails.trust.title")
 
+        }
+
+      }
+
+      "display the page for multiple indirect disposals" when {
+
+        def test(result: Future[Result], expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc
+                .select("#nonUkAddress > legend > h1 > span")
+                .text() shouldBe messageFromMessageKey(
+                "returns.company-details.multipleIndirectDisposals.caption"
+              )
+
+              doc
+                .select("#nonUkAddress > div:nth-child(2) > label")
+                .text() shouldBe messageFromMessageKey(
+                "nonUkAddress.companyDetails.line1.label"
+              )
+
+              doc
+                .select("#nonUkAddress > div:nth-child(3) > label")
+                .text() shouldBe messageFromMessageKey(
+                "nonUkAddress.companyDetails.line2.label"
+              )
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.CompanyDetailsController
+                .enterNonUkAddressSubmit()
+                .url
+            }
+          )
+
+        "handling all users" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(performAction(), "nonUkAddress.companyDetails.multipleIndirect.title")
         }
 
       }
@@ -1052,6 +1458,189 @@ class CompanyDetailsControllerSpec
 
       }
 
+      "return a form error for multiple indirect disposal" when {
+
+        def test(
+          formData: (String, String)*
+        )(expectedErrorMessageKey: String, expectedTitleKey: String): Unit =
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(expectedTitleKey),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+
+        "address line 1 is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test("countryCode" -> "HK")(
+            "nonUkAddress-line1.companyDetails.error.required",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 1 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> ("a" * 100),
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line1.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 1 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "ab%csd",
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line1.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 2 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line2" -> ("a" * 100),
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line2.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 2 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line2" -> "fsdhio*fde@df",
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line2.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 3 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line3" -> ("a" * 100),
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line3.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 3 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line3" -> "fsdhio*fde@df",
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line3.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 4 is too long" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line4" -> ("a" * 100),
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line4.companyDetails.error.tooLong",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "address line 4 is invalid" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "nonUkAddress-line4" -> "fsdhio*fde@df",
+            "countryCode"        -> "HK"
+          )(
+            "nonUkAddress-line4.companyDetails.error.pattern",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "a country is not selected" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name"
+          )(
+            "countryCode.companyDetails.error.required",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+        "the country cannot be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithDraftMultipleIndirectDisposals()._1)
+          }
+
+          test(
+            "nonUkAddress-line1" -> "Company name",
+            "countryCode"        -> "ZZ"
+          )(
+            "countryCode.companyDetails.error.notFound",
+            "nonUkAddress.companyDetails.multipleIndirect.title"
+          )
+        }
+
+      }
+
       "show an error page" when {
 
         val (session, journey, draftReturn) = individualState()
@@ -1156,6 +1745,846 @@ class CompanyDetailsControllerSpec
 
     }
 
+    "handling requests to display the multiple indirect disposal price page" must {
+
+      val key = "multipleIndirectDisposalsDisposalPrice"
+
+      def performAction(): Future[Result] =
+        controller.multipleIndirectDisposalPrice()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(
+          draftReturn: DraftMultipleIndirectDisposalsReturn,
+          expectedBackLink: Call,
+          userType: UserType
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                userType = Some(userType),
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = draftReturn,
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name =
+                        if (userType === Organisation) Left(sample[TrustName])
+                        else Right(sample[IndividualName])
+                    ),
+                    agentReferenceNumber =
+                      if (userType === Agent) Some(sample[AgentReferenceNumber])
+                      else None
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"$key.title"),
+            { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.CompanyDetailsController
+                .multipleIndirectDisposalPriceSubmit()
+                .url
+              doc
+                .select(s"#$key-form-hint")
+                .text()                        shouldBe messageFromMessageKey(s"$key.helpText")
+            }
+          )
+        }
+
+        "individual user has not started this section before" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = None,
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            Individual
+          )
+        }
+
+        "trust user has not started this section before" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = None,
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            Organisation
+          )
+        }
+
+        "agent user has not started this section before" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = None,
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            Agent
+          )
+        }
+
+        "individual user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  disposalPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            Individual
+          )
+        }
+
+        "trust user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  disposalPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            Organisation
+          )
+        }
+
+        "agent user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  disposalPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            Agent
+          )
+        }
+
+        "individual user has completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[CompleteExampleCompanyDetailsAnswers].copy(
+                  disposalPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+
+        "trust user has completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[CompleteExampleCompanyDetailsAnswers].copy(
+                  disposalPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.checkYourAnswers(),
+            Organisation
+          )
+        }
+
+        "agent user has completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[CompleteExampleCompanyDetailsAnswers].copy(
+                  disposalPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.checkYourAnswers(),
+            Agent
+          )
+        }
+
+      }
+
+    }
+
+    "handling submitted answers to the multiple indirect disposal price page" must {
+
+      val key = "multipleIndirectDisposalsDisposalPrice"
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.multipleIndirectDisposalPriceSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      "not update the session" when {
+
+        "the data submitted is the same as one that already exists in session" in {
+
+          val disposalPrice = AmountInPence.fromPounds(1000)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+                      exampleCompanyDetailsAnswers = Some(
+                        sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                          disposalPrice = Some(disposalPrice)
+                        )
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(key -> "1000"),
+            routes.CompanyDetailsController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error for amount" when {
+
+        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+                      exampleCompanyDetailsAnswers = Some(
+                        sample[CompleteExampleCompanyDetailsAnswers]
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(data: _*),
+            messageFromMessageKey(s"$key.title"),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+        }
+
+        "the data is invalid" in {
+          amountOfMoneyErrorScenarios(key).foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val data = scenario.formData
+              test(data: _*)(scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+      }
+
+      "redirect to the cya page" when {
+
+        def test(
+          result: => Future[Result],
+          oldDraftReturn: DraftReturn,
+          updatedDraftReturn: DraftReturn
+        ): Unit = {
+
+          val journey = sample[FillingOutReturn].copy(
+            draftReturn = oldDraftReturn
+          )
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(journey)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(
+              session
+                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            result,
+            routes.CompanyDetailsController.checkYourAnswers()
+          )
+        }
+
+        "the user is on a multiple disposals journey and has completed this section" in {
+
+          val answers = sample[CompleteExampleCompanyDetailsAnswers].copy(
+            disposalPrice = AmountInPence.fromPounds(1)
+          )
+
+          val oldDraftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+            exampleCompanyDetailsAnswers = Some(answers)
+          )
+
+          val updatedDraftReturn = oldDraftReturn.copy(
+            exampleCompanyDetailsAnswers = Some(
+              answers.copy(
+                disposalPrice = AmountInPence.fromPounds(10)
+              )
+            ),
+            yearToDateLiabilityAnswers = None
+          )
+
+          test(
+            performAction(key -> "10"),
+            oldDraftReturn,
+            updatedDraftReturn
+          )
+        }
+
+        "the user hasn't ever answered the disposal price question " +
+          "and the draft return and session data has been successfully updated" in {
+
+          val answers = sample[IncompleteExampleCompanyDetailsAnswers].copy(
+            address = Some(sample[UkAddress]),
+            disposalPrice = Some(AmountInPence.fromPounds(1))
+          )
+
+          val oldDraftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+            exampleCompanyDetailsAnswers = Some(answers)
+          )
+
+          val updatedDraftReturn = oldDraftReturn.copy(
+            exampleCompanyDetailsAnswers = Some(
+              answers.copy(
+                disposalPrice = Some(AmountInPence.fromPounds(10))
+              )
+            ),
+            yearToDateLiabilityAnswers = None
+          )
+
+          test(
+            performAction(key -> "10"),
+            oldDraftReturn,
+            updatedDraftReturn
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to display the multiple indirect acquisition price page" must {
+
+      val key = "multipleIndirectDisposalsAcquisitionPrice"
+
+      def performAction(): Future[Result] =
+        controller.multipleIndirectAcquisitionPrice()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(
+          draftReturn: DraftMultipleIndirectDisposalsReturn,
+          expectedBackLink: Call,
+          userType: UserType
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                userType = Some(userType),
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = draftReturn,
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name =
+                        if (userType === Organisation) Left(sample[TrustName])
+                        else Right(sample[IndividualName])
+                    ),
+                    agentReferenceNumber =
+                      if (userType === Agent) Some(sample[AgentReferenceNumber])
+                      else None
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"$key.title"),
+            { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action")                shouldBe routes.CompanyDetailsController
+                .multipleIndirectAcquisitionPriceSubmit()
+                .url
+              doc
+                .select(s"#$key-form-hint")
+                .text()                        shouldBe messageFromMessageKey(s"$key.helpText")
+            }
+          )
+        }
+
+        "individual user has not started this section before" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = None,
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Individual
+          )
+        }
+
+        "trust user has not started this section before" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = None,
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Organisation
+          )
+        }
+
+        "agent user has not started this section before" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = None,
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Agent
+          )
+        }
+
+        "capacitor user has not started this section before" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = None,
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(Capacitor))
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Individual
+          )
+        }
+
+        "personal representative user has not started this section before" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = None,
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentative))
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Individual
+          )
+        }
+
+        "individual user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              )
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Individual
+          )
+        }
+
+        "trust user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Organisation
+          )
+        }
+
+        "agent user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Agent
+          )
+        }
+
+        "capacitor user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(Capacitor))
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Individual
+          )
+        }
+
+        "personal representative user has started but not completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentative))
+            ),
+            routes.CompanyDetailsController.multipleIndirectDisposalPrice(),
+            Individual
+          )
+        }
+
+        "individual user has completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[CompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+
+        "trust user has completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[CompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.checkYourAnswers(),
+            Organisation
+          )
+        }
+
+        "agent user has completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[CompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = None)
+            ),
+            routes.CompanyDetailsController.checkYourAnswers(),
+            Agent
+          )
+        }
+
+        "capacitor user has completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[CompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(Capacitor))
+            ),
+            routes.CompanyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+
+        "personal representative user has completed this section" in {
+          test(
+            sample[DraftMultipleIndirectDisposalsReturn].copy(
+              exampleCompanyDetailsAnswers = Some(
+                sample[CompleteExampleCompanyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentative))
+            ),
+            routes.CompanyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+
+      }
+
+    }
+
+    "handling submitted answers to the multiple indirect acquisition price page" must {
+
+      val key = "multipleIndirectDisposalsAcquisitionPrice"
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.multipleIndirectAcquisitionPriceSubmit()(
+          FakeRequest().withFormUrlEncodedBody(formData: _*)
+        )
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      "not update the session" when {
+
+        "the data submitted is the same as one that already exists in session" in {
+
+          val acquisitionPrice = AmountInPence.fromPounds(1000)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+                      exampleCompanyDetailsAnswers = Some(
+                        sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                          acquisitionPrice = Some(acquisitionPrice)
+                        )
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(key -> "1000"),
+            routes.CompanyDetailsController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error for amount" when {
+
+        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+                      exampleCompanyDetailsAnswers = Some(
+                        sample[CompleteExampleCompanyDetailsAnswers]
+                      )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(data: _*),
+            messageFromMessageKey(s"$key.title"),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              ),
+            BAD_REQUEST
+          )
+        }
+
+        "the data is invalid" in {
+          amountOfMoneyErrorScenarios(key).foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val data = scenario.formData
+              test(data: _*)(scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+      }
+
+      "redirect to the cya page" when {
+
+        def test(
+          result: => Future[Result],
+          oldDraftReturn: DraftReturn,
+          updatedDraftReturn: DraftReturn
+        ): Unit = {
+          val journey =
+            sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
+          val session = SessionData.empty.copy(journeyStatus = Some(journey))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(
+              session
+                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            result,
+            routes.CompanyDetailsController.checkYourAnswers()
+          )
+        }
+
+        "the user is on a multiple disposals journey and has completed this section" in {
+          val answers = sample[CompleteExampleCompanyDetailsAnswers].copy(
+            acquisitionPrice = AmountInPence.fromPounds(10)
+          )
+
+          val oldDraftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+            exampleCompanyDetailsAnswers = Some(answers)
+          )
+
+          val newDraftReturn = oldDraftReturn.copy(
+            exampleCompanyDetailsAnswers = Some(
+              answers.copy(
+                acquisitionPrice = AmountInPence.fromPounds(100)
+              )
+            ),
+            yearToDateLiabilityAnswers = None
+          )
+
+          test(
+            performAction(key -> "100"),
+            oldDraftReturn,
+            newDraftReturn
+          )
+        }
+
+        "the user hasn't ever answered the acquisition price question " +
+          "and the draft return and session data has been successfully updated" in {
+
+          val answers = sample[IncompleteExampleCompanyDetailsAnswers].copy(
+            acquisitionPrice = Some(AmountInPence.fromPounds(10))
+          )
+
+          val oldDraftReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
+            exampleCompanyDetailsAnswers = Some(answers)
+          )
+
+          val newDraftReturn = oldDraftReturn.copy(
+            exampleCompanyDetailsAnswers = Some(
+              answers.copy(
+                acquisitionPrice = Some(AmountInPence.fromPounds(100))
+              )
+            ),
+            yearToDateLiabilityAnswers = None
+          )
+
+          test(
+            performAction(key -> "100"),
+            oldDraftReturn,
+            newDraftReturn
+          )
+        }
+
+      }
+
+    }
+
     "handling requests to display the cya page" must {
 
       def performAction(): Future[Result] =
@@ -1176,6 +2605,7 @@ class CompanyDetailsControllerSpec
             routes.CompanyDetailsController.isUk()
           )
         }
+
       }
 
       "display the page" when {
@@ -1186,6 +2616,31 @@ class CompanyDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(individualState(companyAddress = Some(address))._1)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("companyDetails.cya.title"),
+            doc =>
+              CompanyDetailsControllerSpec
+                .validatePropertyAddressPage(address, doc)
+          )
+
+        }
+      }
+
+      "display the page for multiple indirect" when {
+
+        "there is an address in session" in {
+          val address = sample[Address]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithDraftMultipleIndirectDisposals(
+                companyAddress = address
+              )._1
+            )
           }
 
           checkPageIsDisplayed(
@@ -1212,6 +2667,22 @@ class CompanyDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(individualState()._1)
+        }
+
+        checkIsRedirect(
+          performAction(),
+          controllers.returns.routes.TaskListController.taskList()
+        )
+      }
+
+      "redirect to the tasklist for multiple indirect journey" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithDraftMultipleIndirectDisposals(
+              companyAddress = sample[Address]
+            )._1
+          )
         }
 
         checkIsRedirect(

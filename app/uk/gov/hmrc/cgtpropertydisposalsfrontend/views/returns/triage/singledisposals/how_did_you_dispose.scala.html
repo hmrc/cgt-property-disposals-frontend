@@ -82,7 +82,7 @@
     ).map(messageKey =>Html(messages(messageKey)))
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
@@ -96,7 +96,6 @@
             options = options,
             selected = form.value.map(optionIndex),
             label = pageHeading(title, Some(messages("triage.caption"))),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
             hasErrors = hasErrors
         )

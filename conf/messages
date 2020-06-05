@@ -959,6 +959,7 @@ task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss
 task-list.enter-property-address.link=Enter property address
 task-list.enter-property-details.link=Enter property details
 task-list.enter-company-details.link=Enter company details
+task-list.example-company-details.link=Example company details
 task-list.disposals-details.link=Enter sale or disposal details
 task-list.acquisition-details.link=Enter purchase or acquisition details
 task-list.exemptions-and-losses.link=Enter losses and exemptions
@@ -972,10 +973,11 @@ task-list.check-and-send-return.link=Check and send return, pay any tax due
 task-list.upload-supporting-docs.link=Upload Your Supporting Documents
 
 task-list.enter-example-property-address.link=Enter details of one property
-task-list.indirect.enter-example-property-address.link=Enter details of one company
+task-list.indirect.enter-example-company-address.link=Enter details of one company
 
 returns.property-address.singleDisposal.caption=Property address
 returns.property-details.multipleDisposals.caption=Details of one property disposal
+returns.company-details.multipleIndirectDisposals.caption=Details of one company
 
 property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
 property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.
@@ -1285,9 +1287,9 @@ disposalFees.agent.indirect.error.invalid=The additional costs when the shares w
 disposalFees.trust.error.invalid=How much the trust paid for additional disposal costs must be an amount of money, like 160,000 or 23,040.50
 disposalFees.trust.indirect.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
 disposalFees.capacitor.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
-disposalFees.capacitor.indirect.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
+disposalFees.capacitor.indirect.error.invalid=The person’s additional costs when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalFees.personalRep.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
-disposalFees.personalRep.indirect.error.invalid=The person’s additional costs when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
+disposalFees.personalRep.indirect.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
 
 disposalFees.error.tooSmall=How much you paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.indirect.error.tooSmall=The additional costs when you sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
@@ -1335,16 +1337,31 @@ acquisitionMethod.trust.title=How did the trust acquire the property?
 acquisitionMethod.capacitor.title=How did the person acquire the property?
 acquisitionMethod.personalRep.title=How did the person acquire the property?
 
+acquisitionMethod.indirect.title=How did you get the shares?
+acquisitionMethod.agent.indirect.title=How did your client acquire the shares?
+acquisitionMethod.trust.indirect.title=How did the trust acquire the shares?
+acquisitionMethod.capacitor.indirect.title=How did the person acquire the shares?
+acquisitionMethod.personalRep.indirect.title=How did the person acquire the shares?
+
 returns.acquisitionMethod.Bought=Bought it
 returns.acquisitionMethod.Inherited=Inherited it
 returns.acquisitionMethod.Gifted=Got it as a gift
 returns.acquisitionMethod.Other=Other
+
+returns.acquisitionMethod.indirect.Bought=Bought them
+returns.acquisitionMethod.indirect.Inherited=Inherited them
+returns.acquisitionMethod.indirect.Gifted=Got them as a gift
 
 returns.otherAcquisitionMethod.label=How you got the property
 returns.otherAcquisitionMethod.agent.label=How your client acquired the property
 returns.otherAcquisitionMethod.trust.label=How the trust acquired the property
 returns.otherAcquisitionMethod.capacitor.label=How the person acquired the property
 returns.otherAcquisitionMethod.personalRep.label=How the person acquired the property
+returns.otherAcquisitionMethod.indirect.label=How you got the shares
+returns.otherAcquisitionMethod.agent.indirect.label=How your client acquired the shares
+returns.otherAcquisitionMethod.trust.indirect.label=How the trust acquired the shares
+returns.otherAcquisitionMethod.capacitor.indirect.label=How the person got the shares
+returns.otherAcquisitionMethod.personalRep.indirect.label=How the person got the shares
 
 acquisitionMethod.cyaChange=how the property was acquired
 
@@ -1353,6 +1370,18 @@ acquisitionMethod.agent.error.required=Select how your client acquired the prope
 acquisitionMethod.trust.error.required=Select how the trust acquired the property
 acquisitionMethod.capacitor.error.required=Select how the person acquired the property
 acquisitionMethod.personalRep.error.required=Select how the person acquired the property
+
+acquisitionMethod.indirect.error.required=Select how you got the shares
+acquisitionMethod.agent.indirect.error.required=Select how your client acquired the shares
+acquisitionMethod.trust.indirect.error.required=Select how the trust acquired the shares
+acquisitionMethod.capacitor.indirect.error.required=Select how the person acquired the shares
+acquisitionMethod.personalRep.indirect.error.required=Select how the person acquired the shares
+
+acquisitionMethod.indirect.error.invalid=Select how you got the shares
+acquisitionMethod.agent.indirect.error.invalid=Select how your client acquired the shares
+acquisitionMethod.trust.indirect.error.invalid=Select how the trust acquired the shares
+acquisitionMethod.capacitor.indirect.error.invalid=Select how the person acquired the shares
+acquisitionMethod.personalRep.indirect.error.invalid=Select how the person acquired the shares
 
 acquisitionMethod.error.invalid=Select how you got the property
 acquisitionMethod.agent.error.invalid=Select how your client acquired the property
@@ -1366,17 +1395,41 @@ otherAcquisitionMethod.trust.error.required=Enter how the trust acquired the pro
 otherAcquisitionMethod.capacitor.error.required=Enter how the person acquired the property
 otherAcquisitionMethod.personalRep.error.required=Enter how the person acquired the property
 
+otherAcquisitionMethod.indirect.error.required=Enter how you got the shares
+otherAcquisitionMethod.agent.indirect.error.required=Enter how your client acquired the shares
+otherAcquisitionMethod.trust.indirect.error.required=Enter how the trust acquired the shares
+otherAcquisitionMethod.capacitor.indirect.error.required=Enter how the person got the shares
+otherAcquisitionMethod.personalRep.indirect.error.required=Enter how the person got the shares
+
 otherAcquisitionMethod.error.invalid=How you got the property must only include letters a to z, spaces and numbers
 otherAcquisitionMethod.agent.error.invalid=How your client acquired the property must only include letters a to z, spaces and numbers
 otherAcquisitionMethod.trust.error.invalid=How the trust acquired the property must only include letters a to z, spaces and numbers
 otherAcquisitionMethod.capacitor.error.invalid=How the person acquired the property must only include letters a to z, spaces and numbers
 otherAcquisitionMethod.personalRep.error.invalid=How the person acquired the property must only include letters a to z, spaces and numbers
 
+otherAcquisitionMethod.indirect.error.invalid=How you got the shares must only include letters a to z, spaces and numbers
+otherAcquisitionMethod.agent.indirect.error.invalid=How your client acquired the shares must only include letters a to z, spaces and numbers
+otherAcquisitionMethod.trust.indirect.error.invalid=How the trust acquired the shares must only include letters a to z, spaces and numbers
+otherAcquisitionMethod.capacitor.indirect.error.invalid=How the person got the shares must only include letters a to z, spaces and numbers
+otherAcquisitionMethod.personalRep.indirect.error.invalid=How the person got the shares must only include letters a to z, spaces and numbers
+
 otherAcquisitionMethod.error.tooLong=How you got the property must be 35 characters or less
 otherAcquisitionMethod.agent.error.tooLong=How your client acquired the property must be 35 characters or less
 otherAcquisitionMethod.trust.error.tooLong=How the trust acquired the property must be 35 characters or less
 otherAcquisitionMethod.capacitor.error.tooLong=How the person acquired the property must be 35 characters or less
 otherAcquisitionMethod.personalRep.error.tooLong=How the person acquired the property must be 35 characters or less
+
+otherAcquisitionMethod.indirect.error.tooLong=How you got the shares must be 35 characters or less
+otherAcquisitionMethod.agent.indirect.error.tooLong=How your client acquired the shares must be 35 characters or less
+otherAcquisitionMethod.trust.indirect.error.tooLong=How the trust acquired the shares must be 35 characters or less
+otherAcquisitionMethod.capacitor.indirect.error.tooLong=How the person got the shares must be 35 characters or less
+otherAcquisitionMethod.personalRep.indirect.error.tooLong=How the person got the shares must be 35 characters or less
+
+acquisitionDate.indirect.title=What date did you get the shares?
+acquisitionDate.agent.indirect.title=What date did your client acquire the shares?
+acquisitionDate.trust.indirect.title=What date did the trust acquire the shares?
+acquisitionDate.capacitor.indirect.title=What date did the person get the shares?
+acquisitionDate.personalRep.indirect.title=What date did the person get the shares?
 
 acquisitionDate.title=What date did you get the property?
 acquisitionDate.agent.title=What date did your client acquire the property?
@@ -1390,11 +1443,22 @@ acquisitionDate.trust.helpText=This is the date the property was transferred int
 acquisitionDate.capacitor.helpText=This is the date the property was transferred into the person’s name. For example, 21 5 2004.
 acquisitionDate.personalRep.helpText=This is the date the property was transferred into the person’s name. For example, 21 5 2004.
 
+acquisitionDate.indirect.helpText=For example, 21 5 2004
+acquisitionDate.agent.indirect.helpText=For example, 21 5 2004
+acquisitionDate.trust.indirect.helpText=For example, 21 5 2004
+acquisitionDate.capacitor.indirect.helpText=For example, 21 5 2004
+acquisitionDate.personalRep.indirect.helpText=For example, 21 5 2004
+
 acquisitionDate.error.required=Enter the date you got the property
 acquisitionDate.agent.error.required=Enter the date your client acquired the property
 acquisitionDate.trust.error.required=Enter the date the trust acquired the property
 acquisitionDate.capacitor.error.required=Enter the date the person acquired the property
 acquisitionDate.personalRep.error.required=Enter the date the person acquired the property
+acquisitionDate.indirect.error.required=Enter the date you got the shares
+acquisitionDate.agent.indirect.error.required=Enter the date your client acquired the shares
+acquisitionDate.trust.indirect.error.required=Enter the date the trust acquired the shares
+acquisitionDate.capacitor.indirect.error.required=Enter the date the person got the shares
+acquisitionDate.personalRep.indirect.error.required=Enter the date the person got the shares
 
 acquisitionDate.error.invalid=The date you got the property must be a real date
 acquisitionDate.agent.error.invalid=The date your client acquired the property must be a real date
@@ -1402,11 +1466,23 @@ acquisitionDate.trust.error.invalid=The date the trust acquired the property mus
 acquisitionDate.capacitor.error.invalid=The date the person acquired the property must be a real date
 acquisitionDate.personalRep.error.invalid=The date the person acquired the property must be a real date
 
+acquisitionDate.indirect.error.invalid=The date you got the shares must be a real date
+acquisitionDate.agent.indirect.error.invalid=The date your client acquired the shares must be a real date
+acquisitionDate.trust.indirect.error.invalid=The date the trust acquired the shares must be a real date
+acquisitionDate.capacitor.indirect.error.invalid=The date the person got the shares must be a real date
+acquisitionDate.personalRep.indirect.error.invalid=The date the person got the shares must be a real date
+
 acquisitionDate.error.tooFarInFuture=The date you got the property must be before you disposed of the property
 acquisitionDate.agent.error.tooFarInFuture=The date your client acquired the property must be before they disposed of the property
 acquisitionDate.trust.error.tooFarInFuture=The date the trust acquired the property must be before it disposed of the property
 acquisitionDate.capacitor.error.tooFarInFuture=The date the person acquired the property must be before you disposed of the property
 acquisitionDate.personalRep.error.tooFarInFuture=The date the person acquired the property must be before they disposed of the property
+
+acquisitionDate.indirect.error.tooFarInFuture=The date you got the shares must be before the day you sold or disposed of them
+acquisitionDate.agent.indirect.error.tooFarInFuture=The date your client acquired the shares must be before the day they sold or disposed of them
+acquisitionDate.trust.indirect.error.tooFarInFuture=The date the trust acquired the shares must be before the day it sold or disposed of them
+acquisitionDate.capacitor.indirect.error.tooFarInFuture=The date the person got the shares must be before the day they sold or disposed of them
+acquisitionDate.personalRep.indirect.error.tooFarInFuture=The date the person got the shares must be before the day they sold or disposed of them
 
 acquisitionDate-day.error.required=The date you got the property must include a day
 acquisitionDate-day.agent.error.required=The date your client acquired the property must include a day
@@ -1414,11 +1490,23 @@ acquisitionDate-day.trust.error.required=The date the trust acquired the propert
 acquisitionDate-day.capacitor.error.required=The date the person acquired the property must include a day
 acquisitionDate-day.personalRep.error.required=The date the person acquired the property must include a day
 
+acquisitionDate-day.indirect.error.required=The date you got the shares must include a day
+acquisitionDate-day.agent.indirect.error.required=The date your client acquired the shares must include a day
+acquisitionDate-day.trust.indirect.error.required=The date the trust acquired the shares must include a day
+acquisitionDate-day.capacitor.indirect.error.required=The date the person got the shares must include a day
+acquisitionDate-day.personalRep.indirect.error.required=The date the person got the shares must include a day
+
 acquisitionDate-month.error.required=The date you got the property must include a month
 acquisitionDate-month.agent.error.required=The date your client acquired the property must include a month
 acquisitionDate-month.trust.error.required=The date the trust acquired the property must include a month
 acquisitionDate-month.capacitor.error.required=The date the person acquired the property must include a month
 acquisitionDate-month.personalRep.error.required=The date the person acquired the property must include a month
+
+acquisitionDate-month.indirect.error.required=The date you got the shares must include a month
+acquisitionDate-month.agent.indirect.error.required=The date your client acquired the shares must include a month
+acquisitionDate-month.trust.indirect.error.required=The date the trust acquired the shares must include a month
+acquisitionDate-month.capacitor.indirect.error.required=The date the person got the shares must include a month
+acquisitionDate-month.personalRep.indirect.error.required=The date the person got the shares must include a month
 
 acquisitionDate-year.error.required=The date you got the property must include a year
 acquisitionDate-year.agent.error.required=The date your client acquired the property must include a year
@@ -1426,11 +1514,23 @@ acquisitionDate-year.trust.error.required=The date the trust acquired the proper
 acquisitionDate-year.capacitor.error.required=The date the person acquired the property must include a year
 acquisitionDate-year.personalRep.error.required=The date the person acquired the property must include a year
 
+acquisitionDate-year.indirect.error.required=The date you got the shares must include a year
+acquisitionDate-year.agent.indirect.error.required=The date your client acquired the shares must include a year
+acquisitionDate-year.trust.indirect.error.required=The date the trust acquired the shares must include a year
+acquisitionDate-year.capacitor.indirect.error.required=The date the person got the shares must include a year
+acquisitionDate-year.personalRep.indirect.error.required=The date the person got the shares must include a year
+
 acquisitionDate-day.error.invalid=The date you got the property must be a real date
 acquisitionDate-day.agent.error.invalid=The date your client acquired the property must be a real date
 acquisitionDate-day.trust.error.invalid=The date the trust acquired the property must be a real date
 acquisitionDate-day.capacitor.error.invalid=The date the person acquired the property must be a real date
 acquisitionDate-day.personalRep.error.invalid=The date the person acquired the property must be a real date
+
+acquisitionDate-day.indirect.error.invalid=The date you got the shares must be a real date
+acquisitionDate-day.agent.indirect.error.invalid=The date your client acquired the shares must be a real date
+acquisitionDate-day.trust.indirect.error.invalid=The date the trust acquired the shares must be a real date
+acquisitionDate-day.capacitor.indirect.error.invalid=The date the person got the shares must be a real date
+acquisitionDate-day.personalRep.indirect.error.invalid=The date the person got the shares must be a real date
 
 acquisitionDate-month.error.invalid=The date you got the property must be a real date
 acquisitionDate-month.agent.error.invalid=The date your client acquired the property must be a real date
@@ -1438,11 +1538,23 @@ acquisitionDate-month.trust.error.invalid=The date the trust acquired the proper
 acquisitionDate-month.capacitor.error.invalid=The date the person acquired the property must be a real date
 acquisitionDate-month.personalRep.error.invalid=The date the person acquired the property must be a real date
 
+acquisitionDate-month.indirect.error.invalid=The date you got the shares must be a real date
+acquisitionDate-month.agent.indirect.error.invalid=The date your client acquired the shares must be a real date
+acquisitionDate-month.trust.indirect.error.invalid=The date the trust acquired the shares must be a real date
+acquisitionDate-month.capacitor.indirect.error.invalid=The date the person got the shares must be a real date
+acquisitionDate-month.personalRep.indirect.error.invalid=The date the person got the shares must be a real date
+
 acquisitionDate-year.error.invalid=The date you got the property must be a real date
 acquisitionDate-year.agent.error.invalid=The date your client acquired the property must be a real date
 acquisitionDate-year.trust.error.invalid=The date the trust acquired the property must be a real date
 acquisitionDate-year.capacitor.error.invalid=The date the person acquired the property must be a real date
 acquisitionDate-year.personalRep.error.invalid=The date the person acquired the property must be a real date
+
+acquisitionDate-year.indirect.error.invalid=The date you got the shares must be a real date
+acquisitionDate-year.agent.indirect.error.invalid= The date your client acquired the shares must be a real date
+acquisitionDate-year.trust.indirect.error.invalid=The date the trust acquired the shares must be a real date
+acquisitionDate-year.capacitor.indirect.error.invalid=The date the person got the shares must be a real date
+acquisitionDate-year.personalRep.indirect.error.invalid=The date the person got the shares must be a real date
 
 acquisitionDate-month.error.monthAndYearRequired=The date you got the property must include a month and a year
 acquisitionDate-month.agent.error.monthAndYearRequired=The date your client acquired the property must include a month and a year
@@ -1450,17 +1562,35 @@ acquisitionDate-month.trust.error.monthAndYearRequired=The date the trust acquir
 acquisitionDate-month.capacitor.error.monthAndYearRequired=The date the person acquired the property must include a month and a year
 acquisitionDate-month.personalRep.error.monthAndYearRequired=The date the person acquired the property must include a month and a year
 
+acquisitionDate-month.indirect.error.monthAndYearRequired=The date you got the shares must include a month and a year
+acquisitionDate-month.agent.indirect.error.monthAndYearRequired=The date your client acquired the shares must include a month and a year
+acquisitionDate-month.trust.indirect.error.monthAndYearRequired=The date your trust acquired the shares must include a month and a year
+acquisitionDate-month.capacitor.indirect.error.monthAndYearRequired=The date the person got the shares must include a month and a year
+acquisitionDate-month.personalRep.indirect.error.monthAndYearRequired=The date the person got the shares must include a month and a year
+
 acquisitionDate-day.error.dayAndYearRequired=The date you got the property must include a day and a year
 acquisitionDate-day.agent.error.dayAndYearRequired=The date your client acquired the property must include a day and a year
 acquisitionDate-day.trust.error.dayAndYearRequired=The date the trust acquired the property must include a day and a year
 acquisitionDate-day.capacitor.error.dayAndYearRequired=The date the person acquired the property must include a day and a year
 acquisitionDate-day.personalRep.error.dayAndYearRequired=The date the person acquired the property must include a day and a year
 
+acquisitionDate-day.indirect.error.dayAndYearRequired=The date you got the shares must include a day and a year
+acquisitionDate-day.agent.indirect.error.dayAndYearRequired=The date your client acquired the shares must include a day and a year
+acquisitionDate-day.trust.indirect.error.dayAndYearRequired=The date your trust acquired the shares must include a day and a year
+acquisitionDate-day.capacitor.indirect.error.dayAndYearRequired=The date the person got the shares must include a day and a year
+acquisitionDate-day.personalRep.indirect.error.dayAndYearRequired=The date the person got the shares must include a day and a year
+
 acquisitionDate-day.error.dayAndMonthRequired=The date you got the property must include a day and a month
 acquisitionDate-day.agent.error.dayAndMonthRequired=The date your client acquired the property must include a day and a month
 acquisitionDate-day.trust.error.dayAndMonthRequired=The date the trust acquired the property must include a day and a month
 acquisitionDate-day.capacitor.error.dayAndMonthRequired=The date the person acquired the property must include a day and a month
 acquisitionDate-day.personalRep.error.dayAndMonthRequired=The date the person acquired the property must include a day and a month
+
+acquisitionDate-day.indirect.error.dayAndMonthRequired=The date you got the shares must include a day and a month
+acquisitionDate-day.agent.indirect.error.dayAndMonthRequired=The date your client acquired the shares must include a day and a month
+acquisitionDate-day.trust.indirect.error.dayAndMonthRequired=The date the trust acquired the shares must include a day and a month
+acquisitionDate-day.capacitor.indirect.error.dayAndMonthRequired=The date the person got the shares must include a day and a month
+acquisitionDate-day.personalRep.indirect.error.dayAndMonthRequired=The date the person got the shares must include a day and a month
 
 acquisitionDate.cyaChange=the date the property was acquired
 
@@ -1470,11 +1600,23 @@ acquisitionPriceBought.trust.title=How much did the trust pay for the property?
 acquisitionPriceBought.capacitor.title=How much did the person pay for the property?
 acquisitionPriceBought.personalRep.title=How much did the person pay for the property?
 
+acquisitionPriceBought.indirect.title=How much did you pay for the shares?
+acquisitionPriceBought.agent.indirect.title=What was the acquisition amount?
+acquisitionPriceBought.trust.indirect.title=What was the acquisition amount?
+acquisitionPriceBought.capacitor.indirect.title=How much did the person pay for the shares?
+acquisitionPriceBought.personalRep.indirect.title=How much did the person pay for the shares?
+
 acquisitionPriceBought.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
 acquisitionPriceBought.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your client’s share.
 acquisitionPriceBought.trust.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the trust’s share.
 acquisitionPriceBought.capacitor.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
 acquisitionPriceBought.personalRep.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
+
+acquisitionPriceBought.indirect.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
+acquisitionPriceBought.indirect.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your client’s share.
+acquisitionPriceBought.indirect.trust.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the trust’s share.
+acquisitionPriceBought.indirect.capacitor.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
+acquisitionPriceBought.indirect.personalRep.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter the person’s share.
 
 acquisitionPriceBought.error.required=Enter how much you paid for your share of the property
 acquisitionPriceBought.agent.error.required=Enter how much your client paid for the property
@@ -1482,11 +1624,23 @@ acquisitionPriceBought.trust.error.required=Enter how much the trust paid for th
 acquisitionPriceBought.capacitor.error.required=Enter how much the person paid for the property
 acquisitionPriceBought.personalRep.error.required=Enter how much the person paid for the property
 
+acquisitionPriceBought.indirect.error.required=Enter how much you paid for the shares
+acquisitionPriceBought.agent.indirect.error.required=Enter the acquisition amount
+acquisitionPriceBought.trust.indirect.error.required=Enter the acquisition amount
+acquisitionPriceBought.capacitor.indirect.error.required=Enter how much the person paid for the shares
+acquisitionPriceBought.personalRep.indirect.error.required=Enter how much the person paid for the shares
+
 acquisitionPriceBought.error.invalid=How much you paid for the property must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceBought.agent.error.invalid=How much your client paid for the property must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceBought.trust.error.invalid=How much the trust paid for the property must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceBought.capacitor.error.invalid=How much the person paid for the property must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceBought.personalRep.error.invalid=The market value of the property must be an amount of money, like 160,000 or 23,040.50
+
+acquisitionPriceBought.indirect.error.invalid=How much you paid for the shares must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceBought.agent.indirect.error.invalid=The acquisition amount must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceBought.trust.indirect.error.invalid=The acquisition amount must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceBought.capacitor.indirect.error.invalid=How much the person paid for the shares must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceBought.personalRep.indirect.error.invalid=How much the person paid for the shares must be an amount of money, like 160,000 or 23,040.50
 
 acquisitionPriceBought.error.tooSmall=How much you paid for the property must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceBought.agent.error.tooSmall=How much your client paid for the property must be an amount of money between 1 and 50,000,000,000
@@ -1494,11 +1648,23 @@ acquisitionPriceBought.trust.error.tooSmall=How much the trust paid for the prop
 acquisitionPriceBought.capacitor.error.tooSmall=How much the person paid for the property must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceBought.personalRep.error.tooSmall=The market value of the property must be an amount of money between 1 and 50,000,000,000
 
+acquisitionPriceBought.indirect.error.tooSmall=How much you paid for the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.agent.indirect.error.tooSmall=The acquisition amount must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.trust.indirect.error.tooSmall=The acquisition amount must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.capacitor.indirect.error.tooSmall=How much the person paid for the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.personalRep.indirect.error.tooSmall=How much the person paid for the shares must be an amount of money between 1 and 50,000,000,000
+
 acquisitionPriceBought.error.tooLarge=How much you paid for the property must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceBought.agent.error.tooLarge=How much your client paid for the property must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceBought.trust.error.tooLarge=How much the trust paid for the property must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceBought.capacitor.error.tooLarge=How much the person paid for the property must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceBought.personalRep.error.tooLarge=The market value of the property must be an amount of money between 1 and 50,000,000,000
+
+acquisitionPriceBought.indirect.error.tooLarge=How much you paid for the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.agent.indirect.error.tooLarge=The acquisition amount must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.trust.indirect.error.tooLarge=The acquisition amount must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.capacitor.indirect.error.tooLarge=How much the person paid for the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceBought.personalRep.indirect.error.tooLarge=How much the person paid for the shares must be an amount of money between 1 and 50,000,000,000
 
 acquisitionPriceBought.error.tooManyDecimals=How much you paid for the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceBought.agent.error.tooManyDecimals=How much your client paid for the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -1506,6 +1672,11 @@ acquisitionPriceBought.trust.error.tooManyDecimals=How much the trust paid for t
 acquisitionPriceBought.capacitor.error.tooManyDecimals=How much the person paid for the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceBought.personalRep.error.tooManyDecimals=The market value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
+acquisitionPriceBought.indirect.error.tooManyDecimals=How much you paid for the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
+acquisitionPriceBought.agent.indirect.error.tooManyDecimals=The acquisition amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+acquisitionPriceBought.trust.indirect.error.tooManyDecimals=The acquisition amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+acquisitionPriceBought.capacitor.indirect.error.tooManyDecimals=How much the person paid for the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+acquisitionPriceBought.personalRep.indirect.error.tooManyDecimals=How much the person paid for the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 acquisitionPriceNotBought.title=What was the market value of the property on {0}?
 acquisitionPriceNotBought.agent.title=What was the market value of the property on {0}?
@@ -1513,11 +1684,23 @@ acquisitionPriceNotBought.trust.title=What was the market value of the property 
 acquisitionPriceNotBought.capacitor.title=What was the market value of the property when it was acquired?
 acquisitionPriceNotBought.personalRep.title=What was the market value of the property when it was acquired?
 
+acquisitionPriceNotBought.indirect.title=What was the market value of the shares when you bought or acquired them?
+acquisitionPriceNotBought.agent.indirect.title=What was the acquisition amount?
+acquisitionPriceNotBought.trust.indirect.title=What was the acquisition amount?
+acquisitionPriceNotBought.capacitor.indirect.title=What was the market value of the shares when the person bought or acquired them?
+acquisitionPriceNotBought.personalRep.indirect.title=What was the market value of the property when it was acquired?
+
 acquisitionPriceNotBought.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your share.
 acquisitionPriceNotBought.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your client’s share.
 acquisitionPriceNotBought.trust.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the trust’s share.
 acquisitionPriceNotBought.capacitor.helpText=The person can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
 acquisitionPriceNotBought.personalRep.helpText=The person can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
+
+acquisitionPriceNotBought.indirect.helpText=You can provide a valuation or a realistic estimate
+acquisitionPriceNotBought.agent.indirect.helpText=You can provide a valuation or a realistic estimate
+acquisitionPriceNotBought.trust.indirect.helpText=You can provide a valuation or a realistic estimate
+acquisitionPriceNotBought.capacitor.indirect.helpText=You can provide a valuation or a realistic estimate
+acquisitionPriceNotBought.personalRep.indirect.helpText=You can provide a valuation or a realistic estimate
 
 acquisitionPriceNotBought.error.required=Enter the market value of the property on the date you got it
 acquisitionPriceNotBought.agent.error.required=Enter the market value of the property when it was acquired
@@ -1525,11 +1708,23 @@ acquisitionPriceNotBought.trust.error.required=Enter the market value of the pro
 acquisitionPriceNotBought.capacitor.error.required=Enter the market value of the property when it was acquired
 acquisitionPriceNotBought.personalRep.error.required=Enter the market value of the property when it was acquired
 
+acquisitionPriceNotBought.indirect.error.required=Enter the market value of the shares when you bought or acquired them
+acquisitionPriceNotBought.agent.indirect.error.required=Enter the market value of the shares when they were bought or acquired
+acquisitionPriceNotBought.trust.indirect.error.required=Enter the market value of the shares when they were bought or acquired
+acquisitionPriceNotBought.capacitor.indirect.error.required=Enter the market value of the shares when the person bought or acquired them
+acquisitionPriceNotBought.personalRep.indirect.error.required=Enter the market value of the shares when they were bought or acquired
+
 acquisitionPriceNotBought.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceNotBought.agent.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceNotBought.trust.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceNotBought.capacitor.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 acquisitionPriceNotBought.personalRep.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+
+acquisitionPriceNotBought.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceNotBought.agent.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceNotBought.trust.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceNotBought.capacitor.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
+acquisitionPriceNotBought.personalRep.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 
 acquisitionPriceNotBought.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceNotBought.agent.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
@@ -1537,17 +1732,35 @@ acquisitionPriceNotBought.trust.error.tooSmall=The market value must be an amoun
 acquisitionPriceNotBought.capacitor.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceNotBought.personalRep.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 
+acquisitionPriceNotBought.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.agent.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.trust.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.capacitor.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.personalRep.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+
 acquisitionPriceNotBought.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceNotBought.agent.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceNotBought.trust.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceNotBought.capacitor.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 acquisitionPriceNotBought.personalRep.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 
+acquisitionPriceNotBought.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.agent.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.trust.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.capacitor.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+acquisitionPriceNotBought.personalRep.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+
 acquisitionPriceNotBought.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceNotBought.agent.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceNotBought.trust.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceNotBought.capacitor.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 acquisitionPriceNotBought.personalRep.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+acquisitionPriceNotBought.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
+acquisitionPriceNotBought.agent.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
+acquisitionPriceNotBought.trust.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
+acquisitionPriceNotBought.capacitor.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
+acquisitionPriceNotBought.personalRep.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
 
 acquisitionPriceBought.cyaChange=how much was paid for the property
 acquisitionPriceNotBought.cyaChange=the market value of the property on {0}
@@ -1576,6 +1789,12 @@ improvementCosts.trust.error.required=Select yes if there were improvement costs
 improvementCosts.capacitor.error.required=Select yes if there were any improvement costs
 improvementCosts.personalRep.error.required=Select yes if there were any improvement costs
 
+improvementCosts.indirect.error.required=Select yes if you want to claim any improvement costs
+improvementCosts.agent.indirect.error.required=Select yes if there were improvement costs
+improvementCosts.trust.indirect.error.required=Select yes if there were improvement costs
+improvementCosts.capacitor.indirect.error.required=Select yes if there were any improvement costs
+improvementCosts.personalRep.indirect.error.required=Select yes if there were any improvement costs
+
 improvementCosts.error.invalid=Select yes if you want to claim any improvement costs
 improvementCosts.agent.error.invalid=Select yes if there were improvement costs
 improvementCosts.trust.error.invalid=Select yes if there were improvement costs
@@ -1601,11 +1820,25 @@ acquisitionFees.capacitor.title=Does the person want to claim for any additional
 acquisitionFees.personalRep.title=Are you including any additional acquisition costs?
 acquisitionFees.capacitor.details.p1=The person owned the property on or before {0}.
 acquisitionFees.personalRep.details.p1=The person owned the property on or before {0}.
+
+acquisitionFees.indirect.title=Do you want to claim any additional costs you paid when you got the shares?
+acquisitionFees.agent.indirect.title=Were there any additional acquisition costs?
+acquisitionFees.trust.indirect.title=Were there any additional acquisition costs?
+acquisitionFees.capacitor.indirect.title=Select yes if the person wants to claim any additional costs they paid when they got the shares
+acquisitionFees.personalRep.indirect.title=Were there any additional acquisition costs?
+
+
 acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
 acquisitionFees.agent.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
 acquisitionFees.trust.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share.
 acquisitionFees.capacitor.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, they can only claim their share.
 acquisitionFees.personalRep.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share.
+
+acquisitionFees.indirect.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
+acquisitionFees.agent.indirect.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
+acquisitionFees.trust.indirect.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share.
+acquisitionFees.capacitor.indirect.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, they can only claim their share.
+acquisitionFees.personalRep.indirect.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share.
 
 acquisitionFees.rebased.title=Do you want to claim any additional costs you paid when you rebased the property?
 acquisitionFees.agent.rebased.title=Were there any additional rebasing costs?
@@ -1613,11 +1846,24 @@ acquisitionFees.trust.rebased.title=Were there any additional rebasing costs?
 acquisitionFees.capacitor.rebased.title=Does the person want to claim for any additional rebasing costs?
 acquisitionFees.personalRep.rebased.title=Does the person want to claim for any additional rebasing costs?
 
+acquisitionFees.indirect.rebased.title=Do you want to claim any additional costs for working out the value of the shares on {0}?
+acquisitionFees.agent.indirect.rebased.title=Were there any additional costs paid to rebase the shares?
+acquisitionFees.trust.indirect.rebased.title=Were there any additional costs paid to rebase the shares?
+acquisitionFees.capacitor.indirect.rebased.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
+acquisitionFees.personalRep.indirect.rebased.title=Does the person want to claim any additional costs for working out the value of the shares on {0}?
+
+
 acquisitionFees.rebased.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share. You cannot claim for any additional costs you paid for when you got the property.
 acquisitionFees.agent.rebased.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share. Your client cannot claim for any additional costs they paid for when they acquired the property.
 acquisitionFees.trust.rebased.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share. The trust cannot claim for any additional costs it paid for when it acquired the property.
 acquisitionFees.capacitor.rebased.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, they can only claim their share. The person cannot claim for any additional costs they paid for when they got the property.
 acquisitionFees.personalRep.rebased.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share. You cannot include any additional costs the person paid for when they got the property.
+
+acquisitionFees.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
+acquisitionFees.agent.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
+acquisitionFees.trust.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
+acquisitionFees.capacitor.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
+acquisitionFees.personalRep.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
 
 acquisitionFees.allowableCostsLinkText=	<a href="{0}" target="_blank">Find out about additional allowable costs (opens in a new window)</a>
 acquisitionFees.details.header=What is rebasing?
@@ -1627,6 +1873,9 @@ acquisitionFees.trust.details.p1=The trust owned the property on or before {0}.
 acquisitionFees.details.p2=This means when you work out your Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.agent.details.p2=To work out your client’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.trust.details.p2=To work out the trust’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.indirect.details.p2=This means when you work out your Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.indirect.agent.p2=To work out your client’s Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+acquisitionFees.indirect.trust.details.p2=To work out the trust’s Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.details.p3=This process is called rebasing.
 acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
 
@@ -1635,6 +1884,7 @@ acquisitionFees.rebased.cyaChange=if there were any additional rebasing costs
 
 acquisitionFees.error.required=Select yes if there are additional costs
 acquisitionFees.error.invalid=Select yes if there are additional costs
+acquisitionFees.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
 acquisitionFeesValue.label=Amount of additional costs
 acquisitionFeesValue.error.required=Enter how much was paid in additional costs
 acquisitionFeesValue.error.invalid=Additional costs must be an amount of money, like 1,480 or 900.50
@@ -1642,9 +1892,19 @@ acquisitionFeesValue.error.tooSmall=Additional costs must be an amount of money 
 acquisitionFeesValue.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
 acquisitionFeesValue.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 1,480 or 900.50
 
+acquisitionFees.indirect.error.required=Select yes if want to claim any additional costs for working out the value of the shares on {0}
+acquisitionFees.indirect.error.invalid=Select yes if want to claim any additional costs for working out the value of the shares on {0}
+acquisitionFees.indirect.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
+acquisitionFeesValue.indirect.error.required=Enter how much was paid in additional costs
+acquisitionFeesValue.indirect.error.invalid=Additional costs must be an amount of money, like 1,480 or 900.50
+acquisitionFeesValue.indirect.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
+acquisitionFeesValue.indirect.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
+acquisitionFeesValue.indirect.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 1,480 or 900.50
+
 acquisitionFeesValue.cyaChange=the amount of additional costs
 
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
+rebaseAcquisitionPrice.indirect.title=What was the market value of the shares on {0}?
 
 rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
 rebaseAcquisitionPrice.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
@@ -1660,17 +1920,31 @@ rebaseAcquisitionPrice.error.tooLarge=The property’s market value must be an a
 rebaseAcquisitionPrice.error.tooManyDecimals=The property’s market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 rebaseAcquisitionPrice.dropdown.header=Why you need to enter this amount
 
+rebaseAcquisitionPrice.indirect.error.required=Enter the market value of the shares on {0}
+rebaseAcquisitionPrice.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
+rebaseAcquisitionPrice.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+rebaseAcquisitionPrice.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+rebaseAcquisitionPrice.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
+
 rebaseAcquisitionPrice.dropdown.p1=You owned the property on or before {0}.
 rebaseAcquisitionPrice.agent.dropdown.p1=Your client owned the property on or before {0}.
 rebaseAcquisitionPrice.trust.dropdown.p1=The trust owned the property on or before {0}.
 rebaseAcquisitionPrice.capacitor.dropdown.p1=The person owned the property on or before {0}.
 rebaseAcquisitionPrice.personalRep.dropdown.p1=The person owned the property on or before {0}.
 
+rebaseAcquisitionPrice.indirect.dropdown.p1=As you owned the shares on or before {0}, you can use their value on that date when you work out your gain or loss. This is known as rebasing.
+rebaseAcquisitionPrice.agent.indirect.dropdown.p1=As your client owned the shares on or before {0}, you can use their value on that date when you work out your gain or loss. This is known as rebasing.
+rebaseAcquisitionPrice.trust.indirect.dropdown.p1=As the trust owned the shares on or before {0}, you can use their value on that date when you work out its gain or loss. This is known as rebasing.
+rebaseAcquisitionPrice.capacitor.indirect.dropdown.p1=As the person owned the shares on or before {0}, you can use their value on that date when you work out its gain or loss. This is known as rebasing.
+rebaseAcquisitionPrice.personalRep.indirect.dropdown.p1=As the person owned the shares on or before {0}, you can use their value on that date when you work out its gain or loss. This is known as rebasing.
+
 rebaseAcquisitionPrice.dropdown.p2=This means when you work out your gain or loss. You must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.agent.dropdown.p2=To work out your client’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.trust.dropdown.p2=To work out the trust’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.capacitor.dropdown.p2=To work out the person’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 rebaseAcquisitionPrice.personalRep.dropdown.p2=To work out the person’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+
+rebaseAcquisitionPrice.indirect.dropdown.p2=Learn about rebasing (opens in a new window or tab).
 
 rebaseAcquisitionPrice.dropdown.p3=This process is called rebasing.
 rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.
@@ -1686,6 +1960,10 @@ rebaseAcquisitionPrice.cyaChange=the market value of the property on {0}
 shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
 shouldUseRebase.helpText=You can use the rebased value or the actual cost of the property in your workings out. The amount you use could mean your gain or loss is lower.
 shouldUseRebase.error.required=Select whether you are using the rebased valued in your calculation
+
+shouldUseRebase.indirect.title=Are you using the value of the shares on {0} to work out the gain or loss?
+shouldUseRebase.indirect.helpText=You can use the value of the property on {0} (date rebased) or the actual cost on the acquisition date in your workings out.
+shouldUseRebase.indirect.error.required=Select yes if you are using the value of the shares on {0} to work out the gain or loss
 
 shouldUseRebase.cyaChange=whether you are using the rebased value in your calculation
 
@@ -2598,13 +2876,13 @@ returns.list.noTaxDue=You did not owe any tax for this return
 returns.list.leftToPay=Total left to pay
 returns.list.taxOwed=Tax owed for return
 returns.list.sentDate=Sent to HMRC on {0}
-returns.list.propertyAddress=Property address
+returns.list.disposalDetails=Disposal details
 returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
 
 drafts.list.title=Draft returns
 drafts.list.completionDate=Property completion date
 drafts.list.shareDisposalDate=Date of disposal
-drafts.list.propertyAddress=Property address
+drafts.list.disposalDetails=Disposal details
 drafts.list.lastUpdated=Draft last saved on {0}
 drafts.list.sendAndPayBy=Send and pay by
 drafts.list.resume=Complete return
@@ -3256,3 +3534,49 @@ companyDetails.cya.title=Check your answers
 companyDetails.cyaLabel.company-address=Company name and address
 companyDetails.cyaChange.company-address=the company name and address
 
+non-uk-resident.change-address-to-uk-address.title=You cannot use this service
+non-uk-resident.change-address-to-uk-address.p1=You cannot use this service to report Capitals Gains Tax on UK property sales or disposals. This is because your address is in the UK.
+non-uk-resident.change-address-to-uk-address.p2=You’ll need to <a href="{0}">contact HMRC</a> to find out how to report the tax.
+
+
+company-details.multiple-indirect-disposals.guidance.title=You’ll need to enter details for one of the disposals
+company-details.multiple-indirect-disposals.guidance.p1=You should enter the details of the disposal that gave the largest gain or the smallest loss.
+company-details.multiple-indirect-disposals.guidance.p2=For that one disposal, you’ll need to enter the:
+company-details.multiple-indirect-disposals.guidance.li1=name and address of the company the shares were held in
+company-details.multiple-indirect-disposals.guidance.li2=disposal date of the shares
+company-details.multiple-indirect-disposals.guidance.li3=disposal value, less disposal costs
+company-details.multiple-indirect-disposals.guidance.li4=acquisition value, plus acquisition costs
+company-details.multiple-indirect-disposals.guidance.p3=You’ll also need to upload a document later providing details of the other UK property disposals you’re including in this return.
+
+multipleIndirectDisposalsDisposalPrice.title=What was the disposal value of the shares?
+multipleIndirectDisposalsDisposalPrice.helpText=This is the amount the shares were sold for, or their market value if they were disposed of another way. You should subtract any selling or disposal costs, for example, stock broker’s fees.
+
+multipleIndirectDisposalsDisposalPrice.error.required=Enter the disposal value of the shares
+multipleIndirectDisposalsDisposalPrice.error.invalid=The disposal value of the shares must be an amount of money, like 160,000 or 23,040.50
+multipleIndirectDisposalsDisposalPrice.error.tooManyDecimals=The disposal value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleIndirectDisposalsDisposalPrice.error.tooLarge=The disposal value of the shares must be an amount of money between 1 and 50,000,000,000
+multipleIndirectDisposalsDisposalPrice.error.tooSmall=The disposal value of the shares must be an amount of money between 1 and 50,000,000,000
+
+multipleIndirectDisposalsAcquisitionPrice.title=What was the acquisition value of the shares?
+multipleIndirectDisposalsAcquisitionPrice.helpText=This is the amount paid to buy the shares, or their market value if they were inherited or received as a gift. You should add on any acquisition costs, for example, stock broker’s fees.
+
+multipleIndirectDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the shares
+multipleIndirectDisposalsAcquisitionPrice.error.invalid=The acquisition value of the shares must be an amount of money, like 160,000 or 23,040.50
+multipleIndirectDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleIndirectDisposalsAcquisitionPrice.error.tooLarge=The acquisition value of the shares must be an amount of money between 1 and 50,000,000,000
+multipleIndirectDisposalsAcquisitionPrice.error.tooSmall=The acquisition value of the shares must be an amount of money between 1 and 50,000,000,000
+
+returns.company-address.cya.title=Check your answers
+
+companyDetails.isUk.multipleIndirect.title=Do any of the companies the shares were sold in have a registered address in the UK?
+companyDetails.isUk.multipleIndirect.helpText=This should be the company’s registered address.
+isUk.multipleIndirect.error.required=Select yes if any of the companies the shares were sold in have a registered address in the UK
+address.uk.companyDetails.multipleIndirect.title=Enter the name and address of one of the companies the shares were held in
+nonUkAddress.companyDetails.multipleIndirect.title=Enter the name and address of one of the companies the shares were held in
+
+returns.company-address.cyaLabel.company-address=Company name and address
+returns.company-address.cyaChange.company-address=the address of the property
+returns.company-address.cyaLabel.disposal-price=What was the disposal amount?
+returns.company-address.cyaChange.disposal-price=the disposal amount
+returns.company-address.cyaLabel.acquisition-price=What was the acquisition amount?
+returns.company-address.cyaChange.acquisition-price=the acquisition amount

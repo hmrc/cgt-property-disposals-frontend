@@ -17,12 +17,11 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(govUkWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.govuk_wrapper)
 
 
-@(userType: Option[UserType], pageTitle: String, heading: String, message: String, extraMessage: Option[String] = None)(implicit messages: Messages, appConfig: ViewConfig)
+@(pageTitle: String, heading: String, message: String, extraMessage: Option[String] = None)(implicit messages: Messages, appConfig: ViewConfig)
 
 @contentHeader = {
   <h1>@heading</h1>

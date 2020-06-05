@@ -68,7 +68,8 @@
           messages(s"$key.representee.title")
 
       case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-          if(c.representativeType.exists(_.isLeft))       messages("nonUkAddress.companyDetails.personalRep.title")
+          if(c.draftReturn.isLeft)                        messages("nonUkAddress.companyDetails.multipleIndirect.title")
+          else if(c.representativeType.exists(_.isLeft))  messages("nonUkAddress.companyDetails.personalRep.title")
           else if(c.representativeType.exists(_.isRight)) messages("nonUkAddress.companyDetails.capacitor.title")
           else if(c.isATrust)                             messages("nonUkAddress.companyDetails.trust.title")
           else if(request.userType.exists(_ === Agent))   messages("nonUkAddress.companyDetails.agent.title")
@@ -81,7 +82,7 @@
 @menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
 
   @backLinkComponent(backLink)
 

@@ -60,7 +60,7 @@
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
  @backLinkComponent(backLink)
 
@@ -76,7 +76,6 @@
    monthValue = form.data.get("disposalDate-month"),
    yearValue = form.data.get("disposalDate-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-   labelAsHeading = true,
    errorKey = form.error(key).map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )

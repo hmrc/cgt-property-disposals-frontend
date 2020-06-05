@@ -33,7 +33,9 @@ object ConditionalRadioUtils {
       )
   }
 
-  def formatter[A](outerKey: String)(options: List[Either[InnerOption[A], A]])(
+  def formatter[A](outerKey: String, requiredErrorArgs: Seq[String] = Seq.empty)(
+    options: List[Either[InnerOption[A], A]]
+  )(
     unbindValue: A => Map[String, String]
   ): Formatter[A] =
     new Formatter[A] {
@@ -46,10 +48,10 @@ object ConditionalRadioUtils {
           .get(key)
           .map(_.trim())
           .filter(_.nonEmpty)
-          .fold[Either[FormError, T]](Left(FormError(key, "error.required"))) { stringValue =>
+          .fold[Either[FormError, T]](Left(FormError(key, "error.required", requiredErrorArgs))) { stringValue =>
             Either
               .fromTry(Try(f(stringValue)))
-              .leftMap(_ => FormError(key, "error.invalid"))
+              .leftMap(_ => FormError(key, "error.invalid", requiredErrorArgs))
           }
 
       override def bind(
@@ -64,7 +66,7 @@ object ConditionalRadioUtils {
               case Some(Left(innerOption)) =>
                 innerOption.readValue(data)
 
-              case None                    => Left(Seq(FormError(outerKey, "error.invalid")))
+              case None                    => Left(Seq(FormError(outerKey, "error.invalid", requiredErrorArgs)))
             }
           }
 

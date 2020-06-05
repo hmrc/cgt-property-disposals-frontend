@@ -46,7 +46,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @options = @{List(EntityType.Trust, EntityType.Individual).map(toMessage)}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
   @backLinkComponent(backLink)
   @if(hasErrors) {
@@ -58,7 +58,6 @@
       fieldId = key,
       label = pageHeading(title, Some(messages("subscription.caption"))),
       options = options,
-      labelAsHeading = true,
       errorKey = form.error(key).map(e => e.message),
       hasErrors = hasErrors,
       selected = form.value.map(entity => options.indexOf(toMessage(entity)))

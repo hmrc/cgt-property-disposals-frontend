@@ -48,7 +48,7 @@
 @title = @{messages(s"$key$userKey.title")}
 @errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
  @if(hasErrors) {
   @errorSummary(form)
@@ -64,7 +64,6 @@
    monthValue = form.data.get(s"$key-month"),
    yearValue = form.data.get(s"$key-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-   labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )

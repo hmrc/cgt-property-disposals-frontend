@@ -50,7 +50,7 @@
 }
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
+@mainTemplate(title = title, withSignOutLink = true) {
     @backLinkComponent(backLink)
 
     @caption(messages("returns.property-details.multipleDisposals.caption"))

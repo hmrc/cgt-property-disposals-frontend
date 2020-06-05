@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -44,7 +45,8 @@
     form: Form[AcquisitionMethod],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    assetType: AssetType
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"acquisitionMethod"}
@@ -58,6 +60,16 @@
     else ""
 }
 
+@assetTypeKey = @{assetType match {
+    case AssetType.IndirectDisposal => ".indirect"
+    case _ => ""
+}}
+
+@assetTypeKeyForErrors = @{assetType match {
+    case AssetType.IndirectDisposal => "indirect."
+    case _ => ""
+}}
+
 @userErrorPrefix = @{
     if (representativeType.exists(_.isLeft)) "personalRep."
     else if (representativeType.exists(_.isRight)) "capacitor."
@@ -68,22 +80,22 @@
 
 @otherMethodKey = @{"otherAcquisitionMethod" }
 @relevantErrorKey = @{if (form.error(otherMethodKey).nonEmpty) otherMethodKey else key }
-@title = @{messages(s"$key$userKey.title")}
+@title = @{messages(s"$key$userKey$assetTypeKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @options = @{List(
     RadioOption(
-        label = messages(s"returns.$key.Bought"),
+        label = messages(s"returns.$key$assetTypeKey.Bought"),
         content = None,
         optionHelpText = None
     ),
     RadioOption(
-        label = messages(s"returns.$key.Inherited"),
+        label = messages(s"returns.$key$assetTypeKey.Inherited"),
         content = None,
         optionHelpText = None
     ),
     RadioOption(
-        label = messages(s"returns.$key.Gifted"),
+        label = messages(s"returns.$key$assetTypeKey.Gifted"),
         content = None,
         optionHelpText = None
     ),
@@ -91,10 +103,10 @@
         label = messages(s"returns.$key.Other"),
         content = Some(textInput(
             fieldId = otherMethodKey,
-            label = Html(messages(s"returns.$otherMethodKey$userKey.label")),
+            label = Html(messages(s"returns.$otherMethodKey$userKey$assetTypeKey.label")),
             helpText = None,
             labelAsHeading = false,
-            errorKey = form.error(otherMethodKey).map(e => s"$userErrorPrefix${e.message}"),
+            errorKey = form.error(otherMethodKey).map(e => s"$userErrorPrefix$assetTypeKeyForErrors${e.message}"),
             value = form.data.getOrElse(otherMethodKey, ""),
             hasErrors = hasErrors,
             extraContent = None,
@@ -113,12 +125,12 @@
     })
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, Some(s"$relevantErrorKey$userKey"))
+        @errorSummary(form, Some(s"$relevantErrorKey$userKey$assetTypeKey"))
     }
 
     @caption(messages("acquisitionDetails.caption"))
@@ -129,9 +141,8 @@
             label = pageHeading(title),
             selected = selectedIndex,
             error = form.error(key),
-            hasErrors = hasErrors,
             options = options,
-            customErrorKey = Some(s"$key$userKey")
+            customErrorKey = Some(s"$key$userKey$assetTypeKey")
         )
 
         @submitButton(messages("button.saveAndContinue"))

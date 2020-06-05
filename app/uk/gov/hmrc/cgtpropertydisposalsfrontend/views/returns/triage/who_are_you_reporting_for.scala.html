@@ -66,7 +66,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
    messageKeys.map(messageKey =>Html(messages(messageKey)))
 }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = false) {
 
     @backLink.map(backLinkComponent(_))
 
@@ -80,7 +80,6 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
             options = options,
             selected = form.value.map(optionIndex),
             label = pageHeading(title, Some(messages("triage.caption"))),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors
         )

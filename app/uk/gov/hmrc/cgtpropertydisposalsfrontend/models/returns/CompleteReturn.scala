@@ -26,6 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
@@ -191,10 +192,7 @@ object CompleteReturn {
     disposalDetails: CompleteDisposalDetailsAnswers,
     acquisitionDetails: CompleteAcquisitionDetailsAnswers,
     exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-    yearToDateLiabilityAnswers: Either[
-      CompleteNonCalculatedYTDAnswers,
-      CompleteCalculatedYTDAnswers
-    ],
+    yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     hasAttachments: Boolean
@@ -225,7 +223,7 @@ object CompleteReturn {
               d,
               a,
               e,
-              Left(y),
+              y,
               u,
               maybeCompleteRepresenteeAnswers,
               hasAttachments = true
@@ -246,27 +244,75 @@ object CompleteReturn {
     }
   }
 
+  final case class CompleteMultipleIndirectDisposalReturn(
+    triageAnswers: CompleteMultipleDisposalsTriageAnswers,
+    exampleCompanyDetailsAnswers: CompleteExampleCompanyDetailsAnswers,
+    exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
+    yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
+    supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
+    representeeAnswers: Option[CompleteRepresenteeAnswers],
+    hasAttachments: Boolean
+  ) extends CompleteReturn
+
+  object CompleteMultipleIndirectDisposalReturn {
+
+    def fromDraftReturn(
+      draftReturn: DraftMultipleIndirectDisposalsReturn
+    ): Option[CompleteMultipleIndirectDisposalReturn] =
+      draftReturn match {
+        case DraftMultipleIndirectDisposalsReturn(
+              _,
+              t: CompleteMultipleDisposalsTriageAnswers,
+              Some(c: CompleteExampleCompanyDetailsAnswers),
+              Some(e: CompleteExemptionAndLossesAnswers),
+              Some(y: CompleteNonCalculatedYTDAnswers),
+              Some(u: CompleteSupportingEvidenceAnswers),
+              representeeAnswers,
+              _
+            ) =>
+          validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
+            CompleteMultipleIndirectDisposalReturn(
+              t,
+              c,
+              e,
+              y,
+              u,
+              maybeCompleteRepresenteeAnswers,
+              hasAttachments = true
+            )
+          )
+
+        case _ =>
+          None
+      }
+
+  }
+
   implicit class CompleteReturnOps(private val c: CompleteReturn) extends AnyVal {
     def fold[A](
       whenMultiple: CompleteMultipleDisposalsReturn => A,
       whenSingle: CompleteSingleDisposalReturn => A,
-      whenSingleIndirect: CompleteSingleIndirectDisposalReturn => A
+      whenSingleIndirect: CompleteSingleIndirectDisposalReturn => A,
+      whenMultipleIndirect: CompleteMultipleIndirectDisposalReturn => A
     ): A =
       c match {
-        case m: CompleteMultipleDisposalsReturn      => whenMultiple(m)
-        case s: CompleteSingleDisposalReturn         => whenSingle(s)
-        case s: CompleteSingleIndirectDisposalReturn => whenSingleIndirect(s)
+        case m: CompleteMultipleDisposalsReturn        => whenMultiple(m)
+        case s: CompleteSingleDisposalReturn           => whenSingle(s)
+        case s: CompleteSingleIndirectDisposalReturn   => whenSingleIndirect(s)
+        case m: CompleteMultipleIndirectDisposalReturn => whenMultipleIndirect(m)
       }
 
     def isIndirectDisposal(): Boolean =
       c.fold[Boolean](
         m => m.triageAnswers.isIndirectDisposal(),
         _ => false,
+        _ => true,
         _ => true
       )
 
     def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
       c.fold(
+        _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType()
@@ -294,20 +340,21 @@ object CompleteReturn {
 
   @silent
   implicit val format: OFormat[CompleteReturn] = {
-    implicit val singleDisposalTriageFormat: OFormat[CompleteSingleDisposalTriageAnswers]         = Json.format
-    implicit val multipleDisposalsTriageFormat: OFormat[CompleteMultipleDisposalsTriageAnswers]   = Json.format
-    implicit val ukAddressFormat: OFormat[UkAddress]                                              = Json.format
-    implicit val examplePropertyDetailsFormat: OFormat[CompleteExamplePropertyDetailsAnswers]     = Json.format
-    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]                   = Json.format
-    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]             = Json.format
-    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                       =
+    implicit val singleDisposalTriageFormat: OFormat[CompleteSingleDisposalTriageAnswers]          = Json.format
+    implicit val multipleDisposalsTriageFormat: OFormat[CompleteMultipleDisposalsTriageAnswers]    = Json.format
+    implicit val ukAddressFormat: OFormat[UkAddress]                                               = Json.format
+    implicit val examplePropertyDetailsFormat: OFormat[CompleteExamplePropertyDetailsAnswers]      = Json.format
+    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]                    = Json.format
+    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]              = Json.format
+    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                        =
       Json.format
-    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]             = Json.format
-    implicit val nonCalculatedYearToDateLiabilityFormat: OFormat[CompleteNonCalculatedYTDAnswers] = Json.format
-    implicit val calculatedYearToDateLiabilityFormat: OFormat[CompleteCalculatedYTDAnswers]       = Json.format
-    implicit val supportingDocumentsFormat: OFormat[CompleteSupportingEvidenceAnswers]            = Json.format
-    implicit val representeeAnswersFormat: OFormat[CompleteRepresenteeAnswers]                    =
+    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]              = Json.format
+    implicit val nonCalculatedYearToDateLiabilityFormat: OFormat[CompleteNonCalculatedYTDAnswers]  = Json.format
+    implicit val calculatedYearToDateLiabilityFormat: OFormat[CompleteCalculatedYTDAnswers]        = Json.format
+    implicit val supportingDocumentsFormat: OFormat[CompleteSupportingEvidenceAnswers]             = Json.format
+    implicit val representeeAnswersFormat: OFormat[CompleteRepresenteeAnswers]                     =
       Json.format
+    implicit val exampleCompanyDetailsAnswersFormat: OFormat[CompleteExampleCompanyDetailsAnswers] = Json.format
     derived.oformat()
   }
 

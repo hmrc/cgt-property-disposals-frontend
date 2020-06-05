@@ -111,7 +111,7 @@ class RegistrationControllerSpec
                 _
               ) =>
             true
-          case r: RegistrationStatus => true
+          case _: RegistrationStatus => true
           case _                     => false
         }
       )

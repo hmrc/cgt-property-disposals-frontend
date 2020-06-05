@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, DraftSingleMixedUseDisposalReturn, RepresenteeAnswers, RepresenteeContactDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftMultipleIndirectDisposalsReturn, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, DraftSingleMixedUseDisposalReturn, RepresenteeAnswers, RepresenteeContactDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney
@@ -94,6 +94,9 @@ trait ChangeRepresenteeContactAddressControllerSpec
         ),
         _.copy(
           representeeAnswers = Some(answers)
+        ),
+        _.copy(
+          representeeAnswers = Some(answers)
         )
       )
     )
@@ -144,10 +147,16 @@ trait ChangeRepresenteeContactAddressControllerSpec
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
 
-        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn)
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
 
+        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn)
+            if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
+          true
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn)
+            if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
+          true
         case _ => false
       }
     )
@@ -174,7 +183,8 @@ trait ChangeRepresenteeContactAddressControllerSpec
       behave like submitIsUkBehaviour(
         performAction,
         routes.ChangeRepresenteeContactAddressController.enterPostcode(),
-        routes.ChangeRepresenteeContactAddressController.enterNonUkAddress()
+        routes.ChangeRepresenteeContactAddressController.enterNonUkAddress(),
+        None
       )
 
     }

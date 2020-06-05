@@ -41,7 +41,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @title = @{messages(s"$key.title")}
 @errorKey = @{List(s"$key-day", s"$key-month", s"$key-year", key).map(form.error).find(_.isDefined).flatten}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
 
 @backLinkComponent(backLink)
@@ -58,7 +58,6 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   monthValue = form.data.get(s"$key-month"),
   yearValue = form.data.get(s"$key-year"),
   helpText = Some(Html(messages(s"$key.helpText"))),
-  labelAsHeading = true,
   errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
   hasErrors = hasErrors
  )

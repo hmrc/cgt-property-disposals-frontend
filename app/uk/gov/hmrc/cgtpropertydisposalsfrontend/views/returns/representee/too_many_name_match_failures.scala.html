@@ -17,7 +17,6 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -25,12 +24,12 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@()(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@()(implicit messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "representeeTooManyNameMatchFailures" }
 @title = @{messages(s"$key.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title) {
 
     @caption(messages("representee.caption"))
 

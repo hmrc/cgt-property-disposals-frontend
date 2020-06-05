@@ -1817,8 +1817,7 @@ class AcquisitionDetailsControllerSpec
 
         def sectionCompleted(
           userType: UserType,
-          individualUserType: IndividualUserType,
-          userKey: String
+          individualUserType: IndividualUserType
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1858,15 +1857,13 @@ class AcquisitionDetailsControllerSpec
         "the user has already completed the acquisition details section" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              sectionCompleted(userType, individualUserType, userKey)
+              sectionCompleted(userType, individualUserType)
           }
         }
 
         def amountNonZero(
           userType: UserType,
-          individualUserType: IndividualUserType,
-          userKey: String
+          individualUserType: IndividualUserType
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1900,8 +1897,7 @@ class AcquisitionDetailsControllerSpec
         "the amount in the session is non-zero" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              amountNonZero(userType, individualUserType, userKey)
+              amountNonZero(userType, individualUserType)
           }
         }
 
@@ -1965,8 +1961,7 @@ class AcquisitionDetailsControllerSpec
 
         def test(data: (String, String)*)(
           userType: UserType,
-          individualUserType: IndividualUserType,
-          userKey: String
+          individualUserType: IndividualUserType
         )(
           expectedErrorMessageKey: String
         ) = {
@@ -2005,11 +2000,9 @@ class AcquisitionDetailsControllerSpec
         "the amount of money is zero" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
               test("rebaseAcquisitionPrice" -> "0")(
                 userType,
-                individualUserType,
-                userKey
+                individualUserType
               )(
                 s"$key.error.tooSmall"
               )
@@ -2160,54 +2153,53 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the price submitted is valid and the journey was complete" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
-              scenarios.foreach {
-                case (formData, expectedAmountInPence) =>
-                  withClue(
-                    s"For form data $formData and expected amount in pence $expectedAmountInPence: "
-                  ) {
-                    val answers                         =
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate = acquisitionDate,
-                        rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
-                      )
-                    val (session, journey, draftReturn) = sessionWithState(
-                      answers,
-                      AssetType.Residential,
-                      true,
-                      UserType.Individual,
-                      individualUserType
+          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+            scenarios.foreach {
+              case (formData, expectedAmountInPence) =>
+                withClue(
+                  s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+                ) {
+                  val answers                         =
+                    sample[CompleteAcquisitionDetailsAnswers].copy(
+                      acquisitionDate = acquisitionDate,
+                      rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
                     )
-                    val updatedDraftReturn              = commonUpdateDraftReturn(
-                      draftReturn,
-                      answers.copy(
-                        rebasedAcquisitionPrice = Some(expectedAmountInPence),
-                        acquisitionPrice = expectedAmountInPence,
-                        shouldUseRebase = true
-                      )
+                  val (session, journey, draftReturn) = sessionWithState(
+                    answers,
+                    AssetType.Residential,
+                    true,
+                    UserType.Individual,
+                    individualUserType
+                  )
+                  val updatedDraftReturn              = commonUpdateDraftReturn(
+                    draftReturn,
+                    answers.copy(
+                      rebasedAcquisitionPrice = Some(expectedAmountInPence),
+                      acquisitionPrice = expectedAmountInPence,
+                      shouldUseRebase = true
                     )
-                    val updatedSession                  = session.copy(
-                      journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
-                    )
+                  )
+                  val updatedSession                  = session.copy(
+                    journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
+                  )
 
-                    inSequence {
-                      mockAuthWithNoRetrievals()
-                      mockGetSession(session)
-                      mockStoreDraftReturn(
-                        updatedDraftReturn,
-                        journey.subscribedDetails.cgtReference,
-                        journey.agentReferenceNumber
-                      )(Right(()))
-                      mockStoreSession(updatedSession)(Right(()))
-                    }
-
-                    checkIsRedirect(
-                      performAction(formData: _*),
-                      routes.AcquisitionDetailsController.checkYourAnswers()
-                    )
+                  inSequence {
+                    mockAuthWithNoRetrievals()
+                    mockGetSession(session)
+                    mockStoreDraftReturn(
+                      updatedDraftReturn,
+                      journey.subscribedDetails.cgtReference,
+                      journey.agentReferenceNumber
+                    )(Right(()))
+                    mockStoreSession(updatedSession)(Right(()))
                   }
-              }
+
+                  checkIsRedirect(
+                    performAction(formData: _*),
+                    routes.AcquisitionDetailsController.checkYourAnswers()
+                  )
+                }
+            }
           }
         }
 

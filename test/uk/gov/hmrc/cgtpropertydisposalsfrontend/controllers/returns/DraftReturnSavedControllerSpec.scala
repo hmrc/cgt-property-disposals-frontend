@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
@@ -27,14 +28,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, accounts, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.concurrent.Future
 
@@ -148,6 +147,7 @@ class DraftReturnSavedControllerSpec
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today())
             ),
             "draftReturnSaved.warning"
@@ -167,30 +167,10 @@ class DraftReturnSavedControllerSpec
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today()),
+              _.copy(lastUpdatedDate = TimeUtils.today()),
               _.copy(lastUpdatedDate = TimeUtils.today())
             ),
             "draftReturnSaved.trust.warning"
-          )
-        }
-
-        "the user is an agent" in {
-          val journey =
-            fillingOutReturn(Left(sample[TrustName]))
-              .copy(agentReferenceNumber = Some(sample[AgentReferenceNumber]))
-
-          test(
-            SessionData.empty.copy(
-              journeyStatus = Some(journey),
-              userType = Some(UserType.Agent)
-            ),
-            journey,
-            journey.draftReturn.fold(
-              _.copy(lastUpdatedDate = TimeUtils.today()),
-              _.copy(lastUpdatedDate = TimeUtils.today()),
-              _.copy(lastUpdatedDate = TimeUtils.today()),
-              _.copy(lastUpdatedDate = TimeUtils.today())
-            ),
-            "draftReturnSaved.agent.warning"
           )
         }
 
@@ -201,6 +181,7 @@ class DraftReturnSavedControllerSpec
         "there is an error updating the draft return" in {
           val journey            = sample[FillingOutReturn]
           val updatedDraftReturn = journey.draftReturn.fold(
+            _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today()),
             _.copy(lastUpdatedDate = TimeUtils.today()),

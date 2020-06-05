@@ -67,7 +67,7 @@
   }
  }
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !isManagingSubscriptionJourney, accountMenu = menu) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !isManagingSubscriptionJourney, accountMenu = menu) {
 
  @backLink.map(link => backLinkComponent(link))
 

@@ -18,7 +18,6 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MandatoryEvidence
 
 @this(
@@ -29,12 +28,12 @@
         cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row
 )
 
-@(expired : MandatoryEvidence)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(expired : MandatoryEvidence)(implicit messages: Messages, viewConfig: ViewConfig)
 
 @key = @{ "mandatoryEvidenceExpired" }
 @title = @{ messages(s"$key.title") }
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title) {
 
     @caption(messages("ytdLiability.caption"))
 

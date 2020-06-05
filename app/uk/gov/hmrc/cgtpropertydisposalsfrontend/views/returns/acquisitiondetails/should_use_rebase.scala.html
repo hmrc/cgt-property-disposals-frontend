@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -38,14 +39,18 @@
  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Boolean], backLink: Call, rebaseCutOffDate: LocalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, rebaseCutOffDate: LocalDate, assetType: AssetType)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "shouldUseRebase" }
-@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate)}
-@title = @{messages(s"$key.title", rebaseCutOffDateDisplayString)}
+@assetTypeKey = @{assetType match {
+ case AssetType.IndirectDisposal => ".indirect"
+ case _ => ""
+}}
+@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate.minusDays(1))}
+@title = @{messages(s"$key$assetTypeKey.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
  @backLinkComponent(backLink)
 
@@ -59,7 +64,6 @@
   @yesNo(
    fieldId = key,
    label = pageHeading(title),
-   labelAsHeading = true,
    errorKey = form.error(key).map(e => e.message),
    hasErrors = hasErrors,
    selected = form.value,

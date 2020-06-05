@@ -111,7 +111,7 @@ class SubscriptionController @Inject() (
       result.fold(
         { e =>
           logger.warn("Could not subscribe", e)
-          errorHandler.errorResult(request.sessionData.userType)
+          errorHandler.errorResult()
         },
         {
           case SubscriptionSuccessful(cgtReferenceNumber) =>

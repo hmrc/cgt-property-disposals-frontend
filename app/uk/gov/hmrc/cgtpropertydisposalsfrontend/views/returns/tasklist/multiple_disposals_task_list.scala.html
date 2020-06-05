@@ -16,7 +16,6 @@
 
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftMultipleDisposalsReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
@@ -31,7 +30,7 @@
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(draftReturn: DraftMultipleDisposalsReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftMultipleDisposalsReturn)(implicit messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("service.title")}
 @representeeState = @{
@@ -53,7 +52,7 @@
 
 @examplePropertyDetailsTaskName = @{
     if(draftReturn.isMultipleIndirectDisposal)
-        messages("task-list.indirect.enter-example-property-address.link")
+        messages("task-list.indirect.enter-example-company-address.link")
     else
         messages("task-list.enter-example-property-address.link")
 }
@@ -90,7 +89,7 @@
 }
 
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title) {
 
     @pageHeading(title)
 

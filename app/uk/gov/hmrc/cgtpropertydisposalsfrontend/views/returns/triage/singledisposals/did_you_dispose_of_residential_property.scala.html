@@ -69,7 +69,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
@@ -81,7 +81,6 @@
         @yesNo(
             fieldId = key,
             label = pageHeading(title, Some(messages("triage.caption"))),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,

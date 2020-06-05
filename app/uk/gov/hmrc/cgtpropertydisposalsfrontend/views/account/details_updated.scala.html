@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,11 +27,11 @@
     accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(detailChanged: SubscriptionDetail)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(detailChanged: SubscriptionDetail)(implicit messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages(s"account.manageYourDetails.$detailChanged.changed")}
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu = Some(accountMenu(None))) {
+@mainTemplate(title = title, withSignOutLink = false, accountMenu = Some(accountMenu(None))) {
 
   @pageHeading(title)
 

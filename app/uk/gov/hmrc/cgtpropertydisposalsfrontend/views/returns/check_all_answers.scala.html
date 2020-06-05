@@ -22,12 +22,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 
 @this(
+
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
@@ -36,6 +38,7 @@
         singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary,
         multipleDisposalsTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary,
         addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
+        exampleCompanyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary,
         examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary,
         calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
         nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary,
@@ -48,6 +51,7 @@
         representeeSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
         singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
         printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
+
 )
 
 @(
@@ -60,7 +64,7 @@
 
 @title = @{ messages("checkAllAnswers.title") }
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title) {
 
  @backLinkComponent(routes.TaskListController.taskList())
 
@@ -87,11 +91,12 @@
 
 <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
      @acquisitionDetailsSummary(s.acquisitionDetails,
-        rebasingEligibilityUtil.getDisplayRebasingCutOffDate(s),
+        rebasingEligibilityUtil.getRebasingCutOffDate(s),
         rebasingEligibilityUtil.isUk(s),
         rebasingEligibilityUtil.isEligibleForRebase(s),
         isATrust,
-        representativeType
+        representativeType,
+        s.triageAnswers.assetType
       )
 
      <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
@@ -161,25 +166,49 @@
 
         <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
         @acquisitionDetailsSummary(s.acquisitionDetails,
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
+            rebasingEligibilityUtil.getRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
             isUk = false,
             rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate.value),
             isATrust,
-            representativeType
+            representativeType,
+            s.triageAnswers.assetType
         )
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust, representativeType)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-        @s.yearToDateLiabilityAnswers.fold(
-            nonCalculatedYearToDateLiabilitySummary(_, showFiles = true, isMultiple = false, isATrust, representativeType),
-            calculatedYearToDateLiabilitySummary(_, s.triageAnswers.disposalDate, showFiles = true, isATrust, representativeType, s.triageAnswers.countryOfResidence.isUk())
-        )
+        @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType),
 
         <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
         @supportingEvidenceSummary(s.supportingDocumentAnswers)
 
+    }
+
+    case multipleIndirect: CompleteMultipleIndirectDisposalReturn => {
+        @multipleIndirect.representeeAnswers.map { representeeAnswers =>
+            <h2 class="heading-medium">@messages("task-list.representee.link")</h2>
+        @representeeSummary(
+            representeeAnswers,
+            Either.fromOption(representeeAnswers.dateOfDeath.map(_ => PersonalRepresentative), Capacitor).swap
+        )
+        }
+
+        <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
+        @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, isATrust)
+
+        <h2 class="heading-medium">Example company details</h2>
+        @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)
+
+
+        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        @lossesSummary(multipleIndirect.exemptionsAndLossesDetails, DisposalDate(multipleIndirect.triageAnswers.completionDate.value, multipleIndirect.triageAnswers.taxYear), isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+        @supportingEvidenceSummary(multipleIndirect.supportingDocumentAnswers)
     }
 
 

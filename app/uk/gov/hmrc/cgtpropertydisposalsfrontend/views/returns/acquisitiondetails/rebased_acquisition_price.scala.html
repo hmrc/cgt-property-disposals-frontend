@@ -28,6 +28,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -46,7 +47,8 @@
     backLink: Call,
     rebaseCutOffDate: LocalDate,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    assetType: AssetType
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "rebaseAcquisitionPrice" }
@@ -60,16 +62,21 @@
     else ""
 }
 
-@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate)}
-@title = @{messages(s"$key.title", rebaseCutOffDateDisplayString)}
+@assetTypeKey = @{assetType match {
+    case AssetType.IndirectDisposal => ".indirect"
+    case _ => ""
+}}
+
+@rebaseCutOffDateDisplayString = @{TimeUtils.govDisplayFormat(rebaseCutOffDate.minusDays(1))}
+@title = @{messages(s"$key$assetTypeKey.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$key$assetTypeKey"))
     }
 
 @caption(messages("acquisitionDetails.caption"))
@@ -84,21 +91,30 @@
             labelAsHeading = true,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
-            helpText = Some(Html(messages(s"$key$userKey.helpText"))),
+            helpText = if(assetTypeKey.isEmpty) Some(Html(messages(s"$key$userKey$assetTypeKey.helpText"))) else None,
             aspect = "left",
             unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
+            assistiveText = messages("unit-input.assistive.pounds"),
+            customErrorKey = Some(s"$key$assetTypeKey")
         )
 
-        @details(messages(s"$key.dropdown.header"),
-        Html(s"""|
-        |<p> ${messages(s"$key$userKey.dropdown.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))} </p>
-        |<p> ${messages(s"$key$userKey.dropdown.p2")} </p>
-        |<p> ${messages(s"$key.dropdown.p3")} </p>
-        |<p> ${Html(messages(s"$key.dropdown.p4", appConfig.marketValue))} </p>
-        |<p> ${messages(s"$key$userKey.dropdown.p5")} </p>
-        |""".stripMargin ))
 
+    @if(assetTypeKey.isEmpty) {
+        @details(messages(s"$key.dropdown.header"),
+            Html(s"""|
+            |<p> ${messages(s"$key$userKey.dropdown.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))} </p>
+            |<p> ${messages(s"$key$userKey.dropdown.p2")} </p>
+            |<p> ${messages(s"$key.dropdown.p3")} </p>
+            |<p> ${Html(messages(s"$key.dropdown.p4", appConfig.marketValue))} </p>
+            |<p> ${messages(s"$key$userKey.dropdown.p5")} </p>
+            |""".stripMargin ))
+        } else {
+            @details(messages(s"$key.dropdown.header"),
+            Html(s"""|
+            |<p> ${messages(s"$key$userKey$assetTypeKey.dropdown.p1", TimeUtils.govDisplayFormat(rebaseCutOffDate))} </p>
+            |<p> ${messages(s"$key$assetTypeKey.dropdown.p2")} </p>
+            |""".stripMargin ))
+        }
         @submitButton(messages("button.saveAndContinue"))
     }
 

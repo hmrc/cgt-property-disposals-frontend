@@ -17,18 +17,17 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
-@()(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@()(implicit messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("iv.insufficientEvidence.title")}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title) {
 
    @pageHeading(title)
   <p>@messages("iv.insufficientEvidence.p1"))</p>

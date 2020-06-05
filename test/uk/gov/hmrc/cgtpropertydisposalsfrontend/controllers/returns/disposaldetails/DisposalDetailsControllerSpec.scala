@@ -377,14 +377,16 @@ class DisposalDetailsControllerSpec
       ) =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
-          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
-            _.unset(_.acquisitionDate)
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map { e =>
+            val answer    = e
+              .unset(_.acquisitionDate)
               .unset(_.acquisitionPrice)
               .unset(_.rebasedAcquisitionPrice)
               .unset(_.shouldUseRebase)
-              .unset(_.improvementCosts)
               .unset(_.acquisitionFees)
-          ),
+            val assetType = d.triageAnswers.fold(_.assetType, e => Some(e.assetType))
+            if (assetType.contains(AssetType.IndirectDisposal)) answer else answer.unset(_.improvementCosts)
+          },
           initialGainOrLoss = None,
           reliefDetailsAnswers = d.reliefDetailsAnswers.map(
             _.unset(_.privateResidentsRelief)
@@ -1115,12 +1117,10 @@ class DisposalDetailsControllerSpec
           "not completed the disposal details section" in {
           forAll(
             acceptedUserTypeGen,
-            disposalMethodGen,
             individualUserTypeGen
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1162,12 +1162,10 @@ class DisposalDetailsControllerSpec
           "completed the disposal details section" in {
           forAll(
             acceptedUserTypeGen,
-            disposalMethodGen,
             individualUserTypeGen
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1276,12 +1274,18 @@ class DisposalDetailsControllerSpec
           checkPageIsDisplayed(
             performAction(data),
             messageFromMessageKey(s"$key$userKey$disposalMethodKey.title"),
-            doc =>
+            doc => {
               doc
                 .select("#error-summary-display > ul > li > a")
-                .text() shouldBe messageFromMessageKey(
+                .text()       shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
-              ),
+              )
+              doc
+                .select("#back")
+                .attr("href") shouldBe routes.DisposalDetailsController
+                .checkYourAnswers()
+                .url
+            },
             BAD_REQUEST
           )
         }
@@ -1789,12 +1793,10 @@ class DisposalDetailsControllerSpec
           "not completed the disposal details section" in {
           forAll(
             acceptedUserTypeGen,
-            disposalMethodGen,
             individualUserTypeGen
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1836,12 +1838,10 @@ class DisposalDetailsControllerSpec
           "completed the disposal details section" in {
           forAll(
             acceptedUserTypeGen,
-            disposalMethodGen,
             individualUserTypeGen
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -2570,12 +2570,10 @@ class DisposalDetailsControllerSpec
           "completed the disposal detail section" in {
           forAll(
             acceptedUserTypeGen,
-            disposalMethodGen,
             individualUserTypeGen
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalFeesTitleScenarios(individualUserType, userType).foreach {
@@ -3416,7 +3414,6 @@ class DisposalDetailsControllerSpec
         def testIsCheckYourAnswers(
           result: Future[Result],
           completeDisposalDetailsAnswers: CompleteDisposalDetailsAnswers,
-          expectedTitleKey: String,
           expectedDisposalPriceTitleKey: String,
           expectedDisposalFeesTitleKey: String,
           userType: UserType,
@@ -3481,15 +3478,12 @@ class DisposalDetailsControllerSpec
               testIsCheckYourAnswers(
                 performAction(),
                 completeAnswers,
-                "returns.disposal-details.cya.title",
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
                 )._1,
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
@@ -3552,15 +3546,12 @@ class DisposalDetailsControllerSpec
               testIsCheckYourAnswers(
                 performAction(),
                 completeAnswers,
-                "returns.disposal-details.cya.title",
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
                 )._1,
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
@@ -3737,7 +3728,6 @@ object DisposalDetailsControllerSpec extends Matchers {
   }
 
   def expectedTitles(
-    completeAnswers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     userType: UserType,
     individualUserType: IndividualUserType

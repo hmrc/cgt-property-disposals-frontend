@@ -113,9 +113,10 @@ class MultipleDisposalsTriageControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
-      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn)   => true
-      case _                                                            => false
+      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft       => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn)         => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn) => true
+      case _                                                                  => false
     }
 
   def setIndividualUserType(
@@ -618,7 +619,8 @@ class MultipleDisposalsTriageControllerSpec
             )
             val (session, journey, draftReturn) =
               sessionDataWithFillingOutReturn(answers)
-            val updatedDraftReturn              = draftReturn.copy(
+
+            val updatedDraftReturn = draftReturn.copy(
               triageAnswers = answers.copy(numberOfProperties = Some(5)),
               examplePropertyDetailsAnswers = None,
               exemptionAndLossesAnswers = None,
@@ -626,7 +628,7 @@ class MultipleDisposalsTriageControllerSpec
               supportingEvidenceAnswers = None,
               lastUpdatedDate = TimeUtils.today()
             )
-            val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -2455,8 +2457,6 @@ class MultipleDisposalsTriageControllerSpec
 
     "handling requests to display the asset type for non-uk residents page" must {
 
-      val (countryCode, countryName) = "HK" -> "Hong Kong"
-
       def performAction(): Future[Result] =
         controller.assetTypeForNonUkResidents()(FakeRequest())
 
@@ -3285,10 +3285,10 @@ class MultipleDisposalsTriageControllerSpec
       "not perform any updates" when {
 
         "the date submitted is the same as one that already exists in session" in {
-          val answers            =
+          val answers      =
             sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(completionDate = CompletionDate(TimeUtils.today()))
-          val (session, journey) =
+          val (session, _) =
             sessionDataWithStartingNewDraftReturn(answers)
 
           inSequence {
@@ -3303,6 +3303,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
       }
+
     }
 
     "handling requests to display the share disposal page for non uk residents page" must {
@@ -3525,10 +3526,10 @@ class MultipleDisposalsTriageControllerSpec
       "not perform any updates" when {
 
         "the date submitted is the same as one that already exists in session" in {
-          val answers            =
+          val answers      =
             sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(completionDate = CompletionDate(TimeUtils.today()))
-          val (session, journey) =
+          val (session, _) =
             sessionDataWithStartingNewDraftReturn(answers)
 
           inSequence {
@@ -4104,7 +4105,11 @@ class MultipleDisposalsTriageControllerSpec
 
       "the user has not started a new draft return yet" must {
 
-        val completeAnswers    = sample[CompleteMultipleDisposalsTriageAnswers]
+        val completeAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          countryOfResidence = Country.uk,
+          assetTypes = List(AssetType.Residential)
+        )
+
         val (session, journey) =
           sessionDataWithStartingNewDraftReturn(completeAnswers)
         val draftId            = UUID.randomUUID()
@@ -4114,7 +4119,8 @@ class MultipleDisposalsTriageControllerSpec
             completeAnswers,
             journey.representeeAnswers
           )
-        val newJourney         = FillingOutReturn(
+
+        val newJourney = FillingOutReturn(
           journey.subscribedDetails,
           journey.ggCredId,
           journey.agentReferenceNumber,

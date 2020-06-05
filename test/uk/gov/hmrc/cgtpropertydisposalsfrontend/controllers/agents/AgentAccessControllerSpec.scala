@@ -100,12 +100,11 @@ class AgentAccessControllerSpec
 
   val ukAddress = sample[UkAddress].copy(postcode = Postcode("ZZ011ZZ"))
 
-  val ukClientDetails = newClientDetails(validCgtReference, ukAddress)
+  val ukClientDetails = newClientDetails(ukAddress)
 
-  val nonUkClientDetails = newClientDetails(validCgtReference, nonUkAddress)
+  val nonUkClientDetails = newClientDetails(nonUkAddress)
 
   def newClientDetails(
-    cgtReference: CgtReference,
     address: Address
   ): SubscribedDetails =
     sample[SubscribedDetails]
@@ -334,7 +333,7 @@ class AgentAccessControllerSpec
         "the cgt reference is valid and the agent has permission to access the client " +
           "but the session data cannot be updated" in {
           val clientDetails =
-            newClientDetails(validCgtReference, sample[Address](addressGen))
+            newClientDetails(sample[Address](addressGen))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -425,7 +424,7 @@ class AgentAccessControllerSpec
         "the value submitted is valid and the agent has permission for the client and the client's " +
           "address is in the uk" in {
           val ukClientDetails =
-            newClientDetails(validCgtReference, sample[UkAddress])
+            newClientDetails(sample[UkAddress])
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -461,7 +460,7 @@ class AgentAccessControllerSpec
         "the value submitted is valid and the agent has permission for the client and the client's " +
           "address is not in the uk" in {
           val nonUkClientDetails =
-            newClientDetails(validCgtReference, sample[NonUkAddress])
+            newClientDetails(sample[NonUkAddress])
 
           inSequence {
             mockAuthWithNoRetrievals()

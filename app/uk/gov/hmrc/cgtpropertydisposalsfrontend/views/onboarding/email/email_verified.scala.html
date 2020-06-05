@@ -21,7 +21,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -30,7 +29,7 @@
  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(email: Email, continueCall: Call, emailJourneyType: EmailJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(email: Email, continueCall: Call, emailJourneyType: EmailJourneyType)(implicit messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("confirmEmail.verified.title")}
 
@@ -46,7 +45,7 @@
  else None
 }
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = !isManagingSubscriptionJourney, accountMenu = menu) {
+@mainTemplate(title = title, withSignOutLink = !isManagingSubscriptionJourney, accountMenu = menu) {
 
   @caption(messages(emailJourneyType.captionMessageKey))
 

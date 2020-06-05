@@ -69,7 +69,7 @@ backLink: Call
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @formTitle = @{messages("representeeConfirmPerson.formTitle")}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
@@ -87,7 +87,6 @@ backLink: Call
         @yesNo(
             fieldId = key,
             label = Html(s"<h2>$formTitle</h2>"),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,

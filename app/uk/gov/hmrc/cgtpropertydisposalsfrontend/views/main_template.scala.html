@@ -18,7 +18,6 @@
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         uiArticle: uk.gov.hmrc.play.views.html.layouts.Article,
@@ -27,7 +26,6 @@
 
 @(title: String,
         hasErrors: Boolean = false,
-        userType: Option[UserType],
         contentHeader: Option[Html] = None,
         bodyClasses: Option[String] = None,
         mainClass: Option[String] = None,

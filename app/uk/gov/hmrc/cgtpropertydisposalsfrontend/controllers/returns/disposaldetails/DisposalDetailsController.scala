@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -288,28 +288,43 @@ class DisposalDetailsController @Inject() (
                   i =>
                     i.copy(
                       disposalDetailsAnswers = Some(newAnswers),
-                      acquisitionDetailsAnswers = i.acquisitionDetailsAnswers.map(
-                        _.unset(_.acquisitionDate)
-                          .unset(_.acquisitionPrice)
-                          .unset(_.rebasedAcquisitionPrice)
-                          .unset(_.shouldUseRebase)
-                          .unset(_.improvementCosts)
-                          .unset(_.acquisitionFees)
-                      ),
+                      acquisitionDetailsAnswers = i.acquisitionDetailsAnswers.map {
+                        e =>
+                          val answers   = e
+                            .unset(_.acquisitionDate)
+                            .unset(_.acquisitionPrice)
+                            .unset(_.rebasedAcquisitionPrice)
+                            .unset(_.shouldUseRebase)
+                            .unset(_.acquisitionFees)
+                          val assetType = state.fold(
+                            e => e.triageAnswers.fold(_.assetType, e => Some(e.assetType)),
+                            _.triageAnswers.fold(_.assetType, e => Some(e.assetType))
+                          )
+                          if (assetType.contains(AssetType.IndirectDisposal)) answers
+                          else answers.unset(_.improvementCosts)
+                      },
                       yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
                         .flatMap(_.unsetAllButIncomeDetails())
                     ),
                   s =>
                     s.copy(
                       disposalDetailsAnswers = Some(newAnswers),
-                      acquisitionDetailsAnswers = s.acquisitionDetailsAnswers.map(
-                        _.unset(_.acquisitionDate)
-                          .unset(_.acquisitionPrice)
-                          .unset(_.rebasedAcquisitionPrice)
-                          .unset(_.shouldUseRebase)
-                          .unset(_.improvementCosts)
-                          .unset(_.acquisitionFees)
-                      ),
+                      acquisitionDetailsAnswers = s.acquisitionDetailsAnswers.map {
+                        e =>
+                          val answers = e
+                            .unset(_.acquisitionDate)
+                            .unset(_.acquisitionPrice)
+                            .unset(_.rebasedAcquisitionPrice)
+                            .unset(_.shouldUseRebase)
+                            .unset(_.acquisitionFees)
+
+                          val assetType = state.fold(
+                            e => e.triageAnswers.fold(_.assetType, e => Some(e.assetType)),
+                            _.triageAnswers.fold(_.assetType, e => Some(e.assetType))
+                          )
+                          if (assetType.contains(AssetType.IndirectDisposal)) answers
+                          else answers.unset(_.improvementCosts)
+                      },
                       initialGainOrLoss = None,
                       reliefDetailsAnswers = s.reliefDetailsAnswers
                         .map(_.unsetPrrAndLettingRelief()),
@@ -323,16 +338,16 @@ class DisposalDetailsController @Inject() (
       }
     }
 
+  private def disposalPriceBackLink(state: JourneyState): Call =
+    if (isIndirectDisposal(state))
+      controllers.returns.routes.TaskListController.taskList()
+    else
+      controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+
   def whatWasDisposalPrice(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndDisposalDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
-          val backLink =
-            if (isIndirectDisposal(state))
-              controllers.returns.routes.TaskListController.taskList()
-            else
-              controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
-
           withDisposalMethodAndShareOfProperty(state, answers) {
             case (disposalMethod, _) =>
               displayPage(answers)(
@@ -351,7 +366,7 @@ class DisposalDetailsController @Inject() (
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
-                redirectToIfNoRequiredPreviousAnswer = backLink
+                redirectToIfNoRequiredPreviousAnswer = disposalPriceBackLink(state)
               )
           }
       }
@@ -376,9 +391,7 @@ class DisposalDetailsController @Inject() (
                 )
               )(
                 requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
-                redirectToIfNoRequiredPreviousAnswer =
-                  controllers.returns.disposaldetails.routes.DisposalDetailsController
-                    .howMuchDidYouOwn()
+                redirectToIfNoRequiredPreviousAnswer = disposalPriceBackLink(state)
               )(
                 updateAnswers = { (price, answers, draftReturn) =>
                   if (
@@ -563,7 +576,7 @@ class DisposalDetailsController @Inject() (
                   result.fold(
                     { e =>
                       logger.warn("Could not update session", e)
-                      errorHandler.errorResult
+                      errorHandler.errorResult()
                     },
                     _ =>
                       Ok(

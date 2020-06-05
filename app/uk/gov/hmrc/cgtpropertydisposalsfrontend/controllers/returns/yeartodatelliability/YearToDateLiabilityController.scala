@@ -97,6 +97,7 @@ class YearToDateLiabilityController @Inject() (
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType(),
+      _.triageAnswers.representativeType(),
       _.triageAnswers.representativeType()
     )
 
@@ -152,6 +153,21 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 d: DraftSingleIndirectDisposalReturn
+              )
+            )
+          ) =>
+        d.yearToDateLiabilityAnswers.fold[Future[Result]](
+          f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
+        )(f(s, r, _))
+
+      case Some(
+            (
+              s,
+              r @ FillingOutReturn(
+                _,
+                _,
+                _,
+                d: DraftMultipleIndirectDisposalsReturn
               )
             )
           ) =>
@@ -915,6 +931,7 @@ class YearToDateLiabilityController @Inject() (
           _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
         )
       }
@@ -1222,6 +1239,7 @@ class YearToDateLiabilityController @Inject() (
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
     )
 
@@ -1260,11 +1278,11 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
                 fillingOutReturn.draftReturn match {
-                  case _: DraftMultipleDisposalsReturn      => true
-                  case _: DraftSingleDisposalReturn         => false
-                  case _: DraftSingleIndirectDisposalReturn => false
-                  case _: DraftSingleMixedUseDisposalReturn => false
-
+                  case _: DraftMultipleDisposalsReturn         => true
+                  case _: DraftSingleDisposalReturn            => false
+                  case _: DraftSingleIndirectDisposalReturn    => false
+                  case _: DraftMultipleIndirectDisposalsReturn => true
+                  case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 representativeType(fillingOutReturn.draftReturn)
               )
@@ -1294,10 +1312,11 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 fillingOutReturn.subscribedDetails.isATrust,
                 fillingOutReturn.draftReturn match {
-                  case _: DraftMultipleDisposalsReturn      => true
-                  case _: DraftSingleDisposalReturn         => false
-                  case _: DraftSingleIndirectDisposalReturn => false
-                  case _: DraftSingleMixedUseDisposalReturn => false
+                  case _: DraftMultipleDisposalsReturn         => true
+                  case _: DraftSingleDisposalReturn            => false
+                  case _: DraftSingleIndirectDisposalReturn    => false
+                  case _: DraftMultipleIndirectDisposalsReturn => true
+                  case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 representativeType(fillingOutReturn.draftReturn)
               )
@@ -1322,6 +1341,7 @@ class YearToDateLiabilityController @Inject() (
                   .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
 
                 draftReturn.fold(
+                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
@@ -1395,6 +1415,7 @@ class YearToDateLiabilityController @Inject() (
                   .unset(_.pendingUpscanUpload)
                   .copy(taxDue = Some(taxDue))
                 draftReturn.fold(
+                  _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
                   _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
@@ -1577,6 +1598,7 @@ class YearToDateLiabilityController @Inject() (
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
     )
 
@@ -1633,6 +1655,7 @@ class YearToDateLiabilityController @Inject() (
       }
 
     val newDraftReturn = fillingOutReturn.draftReturn.fold(
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
       _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
@@ -1695,6 +1718,15 @@ class YearToDateLiabilityController @Inject() (
               ) =>
             logger.warn(
               "Found calculated year to date liability answers on a single indirect disposal draft return"
+            )
+            errorHandler.errorResult()
+
+          case (
+                _: CalculatedYTDAnswers,
+                _: DraftMultipleIndirectDisposalsReturn
+              ) =>
+            logger.warn(
+              "Found calculated year to date liability answers on a multiple indirect disposals draft return"
             )
             errorHandler.errorResult()
 
@@ -1767,6 +1799,7 @@ class YearToDateLiabilityController @Inject() (
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
+          _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
         )
         val updatedJourney     =
@@ -1795,10 +1828,11 @@ class YearToDateLiabilityController @Inject() (
               nonCalculatedCheckYourAnswersPage(
                 completeAnswers,
                 fillingOutReturn.draftReturn match {
-                  case _: DraftMultipleDisposalsReturn      => true
-                  case _: DraftSingleDisposalReturn         => false
-                  case _: DraftSingleIndirectDisposalReturn => false
-                  case _: DraftSingleMixedUseDisposalReturn => false
+                  case _: DraftMultipleDisposalsReturn         => true
+                  case _: DraftSingleDisposalReturn            => false
+                  case _: DraftSingleIndirectDisposalReturn    => false
+                  case _: DraftMultipleIndirectDisposalsReturn => true
+                  case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 fillingOutReturn.subscribedDetails.isATrust,
                 representativeType(draftReturn)
@@ -1811,10 +1845,11 @@ class YearToDateLiabilityController @Inject() (
           nonCalculatedCheckYourAnswersPage(
             c,
             fillingOutReturn.draftReturn match {
-              case _: DraftMultipleDisposalsReturn      => true
-              case _: DraftSingleDisposalReturn         => false
-              case _: DraftSingleIndirectDisposalReturn => false
-              case _: DraftSingleMixedUseDisposalReturn => false
+              case _: DraftMultipleDisposalsReturn         => true
+              case _: DraftSingleDisposalReturn            => false
+              case _: DraftSingleIndirectDisposalReturn    => false
+              case _: DraftMultipleIndirectDisposalsReturn => true
+              case _: DraftSingleMixedUseDisposalReturn    => false
             },
             fillingOutReturn.subscribedDetails.isATrust,
             representativeType(draftReturn)

@@ -63,7 +63,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 @title = @{messages(s"$key$userKey$nrKey.title", taxYearStartYear, taxYearEndYear)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = false) {
 
     @backLinkComponent(backLink)
 

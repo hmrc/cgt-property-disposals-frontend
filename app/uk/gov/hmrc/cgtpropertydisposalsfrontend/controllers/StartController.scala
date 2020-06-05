@@ -237,7 +237,7 @@ class StartController @Inject() (
         ).map {
           case Left(e)  =>
             logger.warn("Could not update session", e)
-            errorHandler.errorResult(Some(UserType.Agent))
+            errorHandler.errorResult()
 
           case Right(_) =>
             Redirect(journeyStatusWithRedirect._2)
@@ -290,7 +290,7 @@ class StartController @Inject() (
     ).map {
       case Left(e)  =>
         logger.warn("Could not update session", e)
-        errorHandler.errorResult(request.authenticatedRequest.userType)
+        errorHandler.errorResult()
 
       case Right(_) =>
         Redirect(routes.StartController.weOnlySupportGG())
@@ -338,7 +338,7 @@ class StartController @Inject() (
     result.fold(
       { e =>
         logger.warn("Could not get subscribed details", e)
-        errorHandler.errorResult(request.authenticatedRequest.userType)
+        errorHandler.errorResult()
       },
       _ =>
         Redirect(
@@ -377,7 +377,7 @@ class StartController @Inject() (
     ).map {
       case Left(e)  =>
         logger.warn("Could not update session", e)
-        errorHandler.errorResult(request.authenticatedRequest.userType)
+        errorHandler.errorResult()
 
       case Right(_) =>
         Redirect(routes.StartController.weNeedMoreDetails())
@@ -424,7 +424,7 @@ class StartController @Inject() (
                   "Could not update session with insufficient confidence level",
                   e
                 )
-                errorHandler.errorResult(request.authenticatedRequest.userType)
+                errorHandler.errorResult()
 
               case Right(_) =>
                 Redirect(routes.StartController.weNeedMoreDetails())
