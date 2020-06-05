@@ -922,9 +922,10 @@ class PropertyDetailsController @Inject() (
         Some(Left(IndividualUserType.PersonalRepresentative))
       case _                                               => None
     }
+
   private def disposalPriceBackLink(
     answers: ExamplePropertyDetailsAnswers
-  ): Call                                                        =
+  ): Call =
     answers
       .fold(
         _ => routes.PropertyDetailsController.disposalDate(),

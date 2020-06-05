@@ -1916,10 +1916,14 @@ class TaskListControllerSpec
 
       "display the page with the enter details of one company section status" when {
 
+        val country = Country("ZA", Some("South Africa"))
+
         "the session data indicates that they are filling in a return and" +
           " the enter details of one company section is incomplete" in {
-          val incompletePropertyDetails = sample[DraftMultipleIndirectDisposalsReturn].copy(
+          val multipleIndirectDisposalsReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
             triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              numberOfProperties = 2,
+              countryOfResidence = country,
               assetTypes = List(AssetType.IndirectDisposal),
               individualUserType = None
             ),
@@ -1927,11 +1931,11 @@ class TaskListControllerSpec
           )
 
           testStateOfSection(
-            incompletePropertyDetails
+            multipleIndirectDisposalsReturn
           )(
-            "examplePropertyDetails",
-            messageFromMessageKey("task-list.indirect.enter-example-property-address.link"),
-            address.routes.PropertyDetailsController.checkYourAnswers(),
+            "exampleCompanyDetails",
+            messageFromMessageKey("task-list.indirect.enter-example-company-address.link"),
+            address.routes.CompanyDetailsController.checkYourAnswers(),
             TaskListStatus.InProgress,
             _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
           )
@@ -1940,8 +1944,10 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and" +
           " the enter details of one company section is complete" in {
-          val completePropertyDetails = sample[DraftMultipleIndirectDisposalsReturn].copy(
+          val multipleIndirectDisposalsReturn = sample[DraftMultipleIndirectDisposalsReturn].copy(
             triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              numberOfProperties = 2,
+              countryOfResidence = country,
               assetTypes = List(AssetType.IndirectDisposal),
               individualUserType = None
             ),
@@ -1949,11 +1955,11 @@ class TaskListControllerSpec
           )
 
           testStateOfSection(
-            completePropertyDetails
+            multipleIndirectDisposalsReturn
           )(
-            "examplePropertyDetails",
-            messageFromMessageKey("task-list.indirect.enter-example-property-address.link"),
-            address.routes.PropertyDetailsController.checkYourAnswers(),
+            "exampleCompanyDetails",
+            messageFromMessageKey("task-list.indirect.enter-example-company-address.link"),
+            address.routes.CompanyDetailsController.checkYourAnswers(),
             TaskListStatus.Complete
           )
 
