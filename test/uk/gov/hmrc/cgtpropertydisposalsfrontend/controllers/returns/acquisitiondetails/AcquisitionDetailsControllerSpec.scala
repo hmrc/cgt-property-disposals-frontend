@@ -3249,7 +3249,8 @@ class AcquisitionDetailsControllerSpec
                 mockGetSession(
                   sessionWithState(
                     sample[IncompleteAcquisitionDetailsAnswers].copy(
-                      improvementCosts = None
+                      improvementCosts = None,
+                      acquisitionDate = Some(sample[AcquisitionDate])
                     ),
                     sample[AssetType],
                     sample[Boolean],
