@@ -116,6 +116,7 @@ object AddressJourneyType {
       a match {
         case _: FillingOutReturnAddressJourney           => true
         case c: ChangingRepresenteeContactAddressJourney => c.journey.isRight
+        case _: EnteringCompanyDetails                   => true
         case _                                           => false
       }
   }
