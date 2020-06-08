@@ -42,6 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.CompanyDetailsController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -215,7 +216,12 @@ class CompanyDetailsController @Inject() (
     answers: ExampleCompanyDetailsAnswers
   ): Call =
     answers.fold(
-      _ => routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+      i =>
+        i.address match {
+          case Some(UkAddress(_, _, _, _, _))       => routes.CompanyDetailsController.enterUkAddress()
+          case Some(NonUkAddress(_, _, _, _, _, _)) => routes.CompanyDetailsController.enterNonUkAddress()
+          case None                                 => routes.CompanyDetailsController.isUk()
+        },
       _ => routes.CompanyDetailsController.checkYourAnswers()
     )
 

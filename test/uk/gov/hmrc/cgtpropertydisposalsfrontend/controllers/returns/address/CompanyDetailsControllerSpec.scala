@@ -1807,7 +1807,7 @@ class CompanyDetailsControllerSpec
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            routes.CompanyDetailsController.isUk(),
             Individual
           )
         }
@@ -1819,7 +1819,7 @@ class CompanyDetailsControllerSpec
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            routes.CompanyDetailsController.isUk(),
             Organisation
           )
         }
@@ -1831,7 +1831,7 @@ class CompanyDetailsControllerSpec
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            routes.CompanyDetailsController.isUk(),
             Agent
           )
         }
@@ -1841,13 +1841,14 @@ class CompanyDetailsControllerSpec
             sample[DraftMultipleIndirectDisposalsReturn].copy(
               exampleCompanyDetailsAnswers = Some(
                 sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  address = Some(sample[UkAddress]),
                   disposalPrice = None
                 )
               ),
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            routes.CompanyDetailsController.enterUkAddress(),
             Individual
           )
         }
@@ -1857,13 +1858,14 @@ class CompanyDetailsControllerSpec
             sample[DraftMultipleIndirectDisposalsReturn].copy(
               exampleCompanyDetailsAnswers = Some(
                 sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  address = Some(sample[NonUkAddress]),
                   disposalPrice = None
                 )
               ),
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            routes.CompanyDetailsController.enterNonUkAddress(),
             Organisation
           )
         }
@@ -1873,13 +1875,14 @@ class CompanyDetailsControllerSpec
             sample[DraftMultipleIndirectDisposalsReturn].copy(
               exampleCompanyDetailsAnswers = Some(
                 sample[IncompleteExampleCompanyDetailsAnswers].copy(
+                  address = Some(sample[UkAddress]),
                   disposalPrice = None
                 )
               ),
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.CompanyDetailsController.multipleIndirectDisposalsGuidance(),
+            routes.CompanyDetailsController.enterUkAddress(),
             Agent
           )
         }
