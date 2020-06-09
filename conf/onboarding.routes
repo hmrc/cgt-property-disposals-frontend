@@ -67,14 +67,26 @@ GET  /subscription/create-account/email-confirmed                               
 GET  /subscription/create-account/confirm-email                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionEnterEmailController.checkYourInbox()
 
 ## Address
+GET  /subscription/create-account/is-uk-contact-address               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.isUk()
+POST /subscription/create-account/is-uk-contact-address               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.isUkSubmit()
+GET  /subscription/create-account/find-uk-contact-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.enterPostcode()
+POST /subscription/create-account/find-uk-contact-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.enterPostcodeSubmit()
+GET  /subscription/create-account/select-contact-address              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.selectAddress()
+POST /subscription/create-account/select-contact-address              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.selectAddressSubmit()
+GET  /subscription/create-account/enter-uk-contact-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.enterUkAddress()
+POST /subscription/create-account/enter-uk-contact-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.enterUkAddressSubmit()
+GET  /subscription/create-account/enter-non-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.enterNonUkAddress()
+POST /subscription/create-account/enter-non-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionEnterAddressController.enterNonUkAddressSubmit()
+
+
 GET  /subscription/create-account/is-different-uk-contact-address               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.isUk()
 POST /subscription/create-account/is-different-uk-contact-address               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.isUkSubmit()
 GET  /subscription/create-account/find-different-uk-contact-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterPostcode()
 POST /subscription/create-account/find-different-uk-contact-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterPostcodeSubmit()
 GET  /subscription/create-account/select-different-contact-address              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.selectAddress()
 POST /subscription/create-account/select-different-contact-address              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.selectAddressSubmit()
-GET  /subscription/create-account/enter-uk-contact-address                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterUkAddress()
-POST /subscription/create-account/enter-uk-contact-address                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterUkAddressSubmit()
+GET  /subscription/create-account/enter-different-uk-contact-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterUkAddress()
+POST /subscription/create-account/enter-different-uk-contact-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterUkAddressSubmit()
 GET  /subscription/create-account/enter-different-non-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterNonUkAddress()
 POST /subscription/create-account/enter-different-non-uk-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterNonUkAddressSubmit()
 

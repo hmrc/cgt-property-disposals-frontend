@@ -404,6 +404,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                        SubscriptionStatus.SubscriptionMissingData(
                                          bprWithCgtReference._1,
                                          None,
+                                         None,
                                          ggCredId,
                                          ggEmail
                                        )
