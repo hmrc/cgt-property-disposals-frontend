@@ -2738,6 +2738,8 @@ confirmationOfSubmission.taxOwed=Tax owed
 confirmationOfSubmission.returnReference=Return reference number
 confirmationOfSubmission.paymentReference=Payment reference number
 confirmationOfSubmission.propertyAddress=Property address
+confirmationOfSubmission.companyAddress=Company address
+
 confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due by
@@ -2844,7 +2846,7 @@ viewReturn.agentNameLine=Client: {0}
 viewReturn.sentToHmrc=Return sent to HMRC
 viewReturn.returnReference=Return reference number
 viewReturn.propertyAddress=Property address
-
+viewReturn.companyAddress=Company address
 
 viewReturn.summaryHeading=Your return
 viewReturn.hasAttachments=Uploaded files and documents
