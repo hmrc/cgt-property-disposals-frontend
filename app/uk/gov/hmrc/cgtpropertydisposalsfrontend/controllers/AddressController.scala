@@ -447,6 +447,7 @@ trait AddressController[A <: AddressJourneyType] {
           case Onboarding.RegistrationReadyAddressJourney(_)              => false
           case Onboarding.IndividualSupplyingInformationAddressJourney(_) => false
           case Onboarding.SubscriptionReadyAddressJourney(_)              => true
+          case Onboarding.SubscriptionEnterAddressJourney(_)              => true
         }
       case subscription: AddressJourneyType.ManagingSubscription =>
         subscription match {

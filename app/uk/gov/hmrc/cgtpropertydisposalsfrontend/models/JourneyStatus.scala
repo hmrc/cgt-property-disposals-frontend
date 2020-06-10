@@ -57,6 +57,7 @@ object JourneyStatus {
     final case class SubscriptionMissingData(
       businessPartnerRecord: BusinessPartnerRecord,
       manuallyEnteredEmail: Option[Email],
+      manuallyEnteredAddress: Option[Address],
       ggCredId: GGCredId,
       ggEmail: Option[Email]
     ) extends SubscriptionStatus

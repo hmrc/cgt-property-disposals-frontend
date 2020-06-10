@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 
-import cats.data.NonEmptyList
-import cats.syntax.either._
+import cats.data.{NonEmptyList, ValidatedNel}
+import cats.syntax.apply._
+import cats.syntax.option._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName, TrustName}
@@ -45,28 +46,36 @@ object SubscriptionDetails {
   def apply(
     bpr: BusinessPartnerRecord,
     ggEmail: Option[Email],
-    enteredEmail: Option[Email]
-  ): Either[NonEmptyList[MissingData], SubscriptionDetails] =
-    Either
-      .fromOption(
-        enteredEmail
-          .map(_ -> EmailSource.ManuallyEntered)
-          .orElse(bpr.emailAddress.map(_ -> EmailSource.BusinessPartnerRecord))
-          .orElse(ggEmail.map(_ -> EmailSource.GovernmentGateway)),
-        NonEmptyList.one(MissingData.Email)
-      )
-      .map { emailWithSource =>
+    enteredEmail: Option[Email],
+    enteredAddress: Option[Address]
+  ): Either[NonEmptyList[MissingData], SubscriptionDetails] = {
+    val emailValidation: ValidatedNel[MissingData, (Email, EmailSource)] =
+      enteredEmail
+        .map(_ -> EmailSource.ManuallyEntered)
+        .orElse(bpr.emailAddress.map(_ -> EmailSource.BusinessPartnerRecord))
+        .orElse(ggEmail.map(_ -> EmailSource.GovernmentGateway))
+        .toValidNel(MissingData.Email)
+
+    val addressValidation: ValidatedNel[MissingData, (Address, AddressSource)] =
+      bpr.address
+        .map(_ -> AddressSource.BusinessPartnerRecord)
+        .orElse(enteredAddress.map(_ -> AddressSource.ManuallyEntered))
+        .toValidNel(MissingData.Address)
+
+    (addressValidation, emailValidation).mapN {
+      case ((address, addressSource), (email, emailSource)) =>
         SubscriptionDetails(
           bpr.name,
-          emailWithSource._1,
-          bpr.address,
+          email,
+          address,
           ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
           bpr.sapNumber,
-          emailWithSource._2,
-          AddressSource.BusinessPartnerRecord,
+          emailSource,
+          addressSource,
           ContactNameSource.DerivedFromBusinessPartnerRecord
         )
-      }
+    }.toEither
+  }
 
   sealed trait MissingData extends Product with Serializable
 
@@ -74,6 +83,7 @@ object SubscriptionDetails {
 
     case object Email extends MissingData
 
+    case object Address extends MissingData
   }
 
 }

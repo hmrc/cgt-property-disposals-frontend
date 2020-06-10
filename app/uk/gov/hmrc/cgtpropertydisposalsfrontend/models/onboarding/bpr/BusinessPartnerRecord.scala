@@ -25,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 
 final case class BusinessPartnerRecord(
   emailAddress: Option[Email],
-  address: Address,
+  address: Option[Address],
   sapNumber: SapNumber,
   name: Either[TrustName, IndividualName]
 )

@@ -1065,7 +1065,7 @@ class InsufficientConfidenceLevelControllerSpec
               Right(bpr -> None)
             )
             mockStoreSession(
-              session(SubscriptionMissingData(bpr, None, ggCredId, None))
+              session(SubscriptionMissingData(bpr, None, None, ggCredId, None))
             )(Left(Error("")))
           }
 
@@ -1125,7 +1125,7 @@ class InsufficientConfidenceLevelControllerSpec
               Right(bpr -> None)
             )
             mockStoreSession(
-              session(SubscriptionMissingData(bpr, None, ggCredId, None))
+              session(SubscriptionMissingData(bpr, None, None, ggCredId, None))
             )(Right(()))
           }
 
