@@ -515,7 +515,7 @@ class StartController @Inject() (
           s"Could not build subscription data for trust with SAUTR ${trust.sautr}",
           e
         )
-        errorHandler.tmpErrorResult()
+        errorHandler.tmpErrorResult(request.authenticatedRequest.userType)
       // errorHandler.errorResult(request.authenticatedRequest.userType)
       },
       {
@@ -610,7 +610,7 @@ class StartController @Inject() (
       { e =>
         logger.warn("Error while getting subscription details", e)
         // errorHandler.errorResult(request.authenticatedRequest.userType)
-        errorHandler.tmpErrorResult()
+        errorHandler.tmpErrorResult(request.authenticatedRequest.userType)
       },
       {
         case Left(BuildSubscriptionDataError.DataMissing(_)) =>
