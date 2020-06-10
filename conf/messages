@@ -1018,12 +1018,11 @@ returns.property-details.multipleDisposals.caption=Details of one property dispo
 returns.company-details.multipleIndirectDisposals.caption=Details of one company
 
 property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
-property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.
-property-details.multiple-disposals.guidance.agent.p1=You should enter the details of the property that gave your client the largest gain or the smallest loss.
-property-details.multiple-disposals.guidance.trust.p1=You should enter the details of the property that gave the trust the largest gain or the smallest loss.
-property-details.multiple-disposals.guidance.capacitor.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss.
-property-details.multiple-disposals.guidance.personalRep.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss.
-property-details.multiple-disposals.guidance.p1.lastSentence=If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+property-details.multiple-disposals.guidance.agent.p1=You should enter the details of the property that gave your client the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+property-details.multiple-disposals.guidance.trust.p1=You should enter the details of the property that gave the trust the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+property-details.multiple-disposals.guidance.capacitor.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+property-details.multiple-disposals.guidance.personalRep.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
 property-details.multiple-disposals.guidance.p2=For that one property, you’ll need to enter:
 property-details.multiple-disposals.guidance.li1=property’s UK address
 property-details.multiple-disposals.guidance.li2=contract exchange date
