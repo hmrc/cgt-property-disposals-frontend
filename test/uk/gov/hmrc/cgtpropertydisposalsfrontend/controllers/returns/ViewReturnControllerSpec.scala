@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.govShortDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
@@ -48,8 +48,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteMultipleDisposalsReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
@@ -330,7 +331,11 @@ class ViewReturnControllerSpec
           )
 
           val completeMultipleDisposalsReturn = c.copy(
-            triageAnswers = c.triageAnswers.copy(individualUserType = None),
+            triageAnswers = c.triageAnswers.copy(
+              countryOfResidence = Country("NZ", Some("New Zeland")),
+              assetTypes = List(AssetType.Residential),
+              individualUserType = None
+            ),
             representeeAnswers = None
           )
 
@@ -422,11 +427,121 @@ class ViewReturnControllerSpec
             subscribedDetails.isATrust
           )
         }
+
+      }
+
+      "display the page for a multiple indirect disposals journey" in {
+
+        forAll(acceptedUserTypeGen, completeMultipleIndirectDisposalReturnGen) { (userType, c) =>
+          val subscribedDetails = sample[SubscribedDetails].copy(
+            name = setNameForUserType(userType)
+          )
+
+          val completeMultipleIndirectDisposalsReturn: CompleteMultipleIndirectDisposalReturn = c.copy(
+            triageAnswers = c.triageAnswers.copy(
+              individualUserType = None
+            ),
+            exampleCompanyDetailsAnswers = sample[CompleteExampleCompanyDetailsAnswers].copy(
+              address = sample[UkAddress]
+            ),
+            representeeAnswers = None
+          )
+
+          val sampleViewingReturn = sample[ViewingReturn]
+            .copy(
+              completeReturn = completeMultipleIndirectDisposalsReturn,
+              agentReferenceNumber = setAgentReferenceNumber(userType),
+              subscribedDetails = subscribedDetails
+            )
+
+          val viewingReturn =
+            sampleViewingReturn.copy(returnSummary = sentReturn)
+
+          val sessionData = SessionData.empty.copy(
+            journeyStatus = Some(viewingReturn),
+            userType = Some(userType)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          val result   = performAction()
+          val document = Jsoup.parse(contentAsString(result))
+
+          document
+            .select("#date-sent-table-question")
+            .text()                                         shouldBe "Return sent to HMRC"
+          document.select("#date-sent-table-answer").text() shouldBe TimeUtils
+            .govDisplayFormat(
+              sentReturn.submissionDate
+            )
+          val address = generateAddressLineForMultipleIndirectDisposals(
+            completeMultipleIndirectDisposalsReturn
+          )
+          document
+            .select("#property-address-table-question")
+            .text() shouldBe "Company address"
+          document
+            .select("#property-address-table-answer")
+            .text() shouldBe address
+          document
+            .select("#return-reference-table-question")
+            .text() shouldBe "Return reference number"
+          document
+            .select("#return-reference-table-answer")
+            .text() shouldBe sentReturn.submissionId
+
+          document
+            .select(
+              "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
+            )
+            .text() shouldBe messageFromMessageKey(
+            "viewReturn.title"
+          )
+
+          val expectedName = viewingReturn.subscribedDetails.name
+            .fold(_.value, e => e.makeSingleName)
+          val actualName   = document.select("#user-details-name").text()
+
+          if (subscribedDetails.isATrust)
+            actualName                                shouldBe s"Trust: $expectedName"
+          else if (Some(userType).contains(UserType.Agent))
+            actualName shouldBe s"Client: $expectedName"
+          else
+            actualName shouldBe expectedName
+
+          if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
+            document
+              .select("#heading-reference")
+              .text()                                 shouldBe viewingReturn.subscribedDetails.cgtReference.value
+          else
+            document
+              .select("#heading-reference")
+              .text()                                 shouldBe viewingReturn.returnSummary.submissionId
+          document.select("#heading-tax-owed").text() shouldBe MoneyUtils
+            .formatAmountOfMoneyWithPoundSign(
+              viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero
+                .inPounds()
+            )
+
+          validatePaymentsSection(document, viewingReturn)
+
+          validateMultipleIndirectDisposalsCheckAllYourAnswersSections(
+            document,
+            completeMultipleIndirectDisposalsReturn,
+            Some(userType),
+            subscribedDetails.isATrust
+          )
+        }
+
       }
 
     }
 
     "handling requests to pay a charge" must {
+
       def performAction(chargeReference: String): Future[Result] =
         controller.payCharge(chargeReference)(FakeRequest())
 
@@ -518,16 +633,13 @@ class ViewReturnControllerSpec
   private def generateAddressLineForMultipleDisposals(
     completeMultipleDisposalsReturn: CompleteMultipleDisposalsReturn
   ): String =
-    List(
-      Some(
-        completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line1
-      ),
-      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line2,
-      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.town,
-      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.county,
-      Some(
-        completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.postcode.value
-      )
-    ).collect { case Some(s) => s.trim }
+    completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.getAddressLines
       .mkString(", ")
+
+  private def generateAddressLineForMultipleIndirectDisposals(
+    completeMultipleIndirectDisposalsReturn: CompleteMultipleIndirectDisposalReturn
+  ): String =
+    completeMultipleIndirectDisposalsReturn.exampleCompanyDetailsAnswers.address.getAddressLines
+      .mkString(", ")
+
 }

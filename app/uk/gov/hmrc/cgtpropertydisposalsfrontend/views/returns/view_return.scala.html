@@ -70,6 +70,11 @@
 
 @key= @{ "viewReturn" }
 
+@propertyAddressLabel = @{
+    if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
+    else messages(s"$key.propertyAddress")
+}
+
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
   @returnHeading(title, returnSummary, subscribedDetails, request.userType)
@@ -92,7 +97,7 @@
             )
         }}
         @cyaRow(
-            messages(s"$key.propertyAddress"),
+            propertyAddressLabel,
             completeReturn match {
                 case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
                 case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
