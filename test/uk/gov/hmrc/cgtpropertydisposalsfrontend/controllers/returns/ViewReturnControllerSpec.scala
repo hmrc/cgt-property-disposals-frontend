@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.govShortDisplayFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
@@ -633,42 +633,13 @@ class ViewReturnControllerSpec
   private def generateAddressLineForMultipleDisposals(
     completeMultipleDisposalsReturn: CompleteMultipleDisposalsReturn
   ): String =
-    List(
-      Some(
-        completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line1
-      ),
-      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.line2,
-      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.town,
-      completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.county,
-      Some(
-        completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.postcode.value
-      )
-    ).collect { case Some(s) => s.trim }
+    completeMultipleDisposalsReturn.examplePropertyDetailsAnswers.address.getAddressLines
       .mkString(", ")
 
   private def generateAddressLineForMultipleIndirectDisposals(
     completeMultipleIndirectDisposalsReturn: CompleteMultipleIndirectDisposalReturn
   ): String =
-    completeMultipleIndirectDisposalsReturn.exampleCompanyDetailsAnswers.address match {
-      case uk: UkAddress       =>
-        List(
-          Some(uk.line1),
-          uk.line2,
-          uk.town,
-          uk.county,
-          Some(uk.postcode.value)
-        ).collect { case Some(s) => s }
-          .mkString(", ")
-      case nonUk: NonUkAddress =>
-        List(
-          Some(nonUk.line1),
-          nonUk.line2,
-          nonUk.line3,
-          nonUk.line4,
-          nonUk.postcode
-        ).collect { case Some(s) => s }
-          .mkString(", ")
-
-    }
+    completeMultipleIndirectDisposalsReturn.exampleCompanyDetailsAnswers.address.getAddressLines
+      .mkString(", ")
 
 }
