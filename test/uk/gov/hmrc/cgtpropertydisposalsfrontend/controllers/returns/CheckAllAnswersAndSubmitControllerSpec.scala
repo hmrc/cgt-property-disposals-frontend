@@ -56,7 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.IncompleteExampleCompanyDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
@@ -1327,6 +1327,297 @@ class CheckAllAnswersAndSubmitControllerSpec
                 subscribedDetails = sample[SubscribedDetails].copy(name = name),
                 completeReturn = sample[CompleteSingleDisposalReturn].copy(
                   propertyAddress = address,
+                  triageAnswers = triageAnswers,
+                  representeeAnswers = representeeAnswers
+                ),
+                agentReferenceNumber =
+                  if (userType === UserType.Agent)
+                    Some(sample[AgentReferenceNumber])
+                  else None
+              )
+
+              val userKey = userMessageKey(individualUserType, userType)
+
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithJourney(justSubmittedReturn)
+                    .copy(userType = Some(userType))
+                )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey("confirmationOfSubmission.title"),
+                { doc =>
+                  val expectedName =
+                    representeeAnswers
+                      .map(_.name.makeSingleName())
+                      .getOrElse(
+                        namePrefix + name.fold(_.value, _.makeSingleName())
+                      )
+
+                  doc.select("#user-details-name").text() shouldBe expectedName
+                  doc.select("#ref-id").text()            shouldBe reference
+
+                  expectedTable.map { tableDetails =>
+                    doc
+                      .select(s"#${tableDetails._1}-question")
+                      .text() shouldBe tableDetails._2
+                    doc
+                      .select(s"#${tableDetails._1}-answer")
+                      .text() shouldBe tableDetails._3
+                  }
+
+                  doc
+                    .select("#printPage")
+                    .html() shouldBe messageFromMessageKey(
+                    if (
+                      individualUserType
+                        .contains(Capacitor) && representeeAnswers
+                        .exists(
+                          _.fold(_.id, c => Some(c.id)).contains(NoReferenceId)
+                        )
+                    )
+                      s"confirmationOfSubmission.capacitor.noId.printPage"
+                    else
+                      s"confirmationOfSubmission$userKey.printPage",
+                    "JavaScript: window.print();"
+                  )
+
+                  doc.select("#howToPay").html() shouldBe messageFromMessageKey(
+                    s"confirmationOfSubmission$userKey.howToPay.p1",
+                    chargeReference
+                  )
+
+                  doc
+                    .select("#ifSaHeading")
+                    .text() shouldBe messageFromMessageKey(
+                    s"confirmationOfSubmission$userKey.ifSa"
+                  )
+                }
+              )
+            }
+        }
+      }
+
+      "confirmation of submission is correct for multiple indirect disposal" in {
+
+        val noTaxDueRefLine             = "Return reference number form bundle id"
+        val taxDueRefLine               = "Payment reference number charge ref"
+        val submissionLine              =
+          ("sent-date-table", "Return sent to HMRC", "2 February 2020")
+        val addressLine                 = (
+          "property-address-table",
+          "Company address",
+          "123 fake street, abc123"
+        )
+        val returnReferenceWithBundleId = (
+          "return-reference-table",
+          "Return reference number",
+          "form bundle id"
+        )
+        val taxDueDateLine              =
+          ("tax-due-date-table", "Tax due by", "1 January 2020")
+
+        sealed case class TestScenario(
+          description: String,
+          userType: UserType,
+          taxOwed: AmountInPence,
+          prefix: String,
+          submissionLine: String,
+          tableLines: List[(String, String, String)],
+          name: Either[TrustName, IndividualName],
+          individualUserType: Option[IndividualUserType]
+        )
+
+        val scenarios = Seq(
+          TestScenario(
+            "user with no tax due",
+            UserType.Individual,
+            AmountInPence(0),
+            "",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
+          ),
+          TestScenario(
+            "user with tax due",
+            UserType.Individual,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
+          ),
+          TestScenario(
+            "agent for individual with no tax due",
+            UserType.Agent,
+            AmountInPence(0),
+            "Client: ",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
+          ),
+          TestScenario(
+            "agent for individual with tax due",
+            UserType.Agent,
+            AmountInPence(10000),
+            "Client: ",
+            taxDueRefLine,
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
+            Right(IndividualName("John", "Doe")),
+            Some(Self)
+          ),
+          TestScenario(
+            "organisation with no tax due",
+            UserType.Organisation,
+            AmountInPence(0),
+            "Trust: ",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Left(TrustName("trust")),
+            None
+          ),
+          TestScenario(
+            "organisation with tax due",
+            UserType.Organisation,
+            AmountInPence(10000),
+            "Trust: ",
+            taxDueRefLine,
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
+            Left(TrustName("trust")),
+            None
+          ),
+          TestScenario(
+            "capacitor with no tax due",
+            UserType.Individual,
+            AmountInPence(0),
+            "",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe")),
+            Some(Capacitor)
+          ),
+          TestScenario(
+            "capacitor with tax due",
+            UserType.Individual,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
+            Right(IndividualName("John", "Doe")),
+            Some(Capacitor)
+          ),
+          TestScenario(
+            "personal representative with no tax due",
+            UserType.Individual,
+            AmountInPence(0),
+            "",
+            noTaxDueRefLine,
+            List(submissionLine, addressLine),
+            Right(IndividualName("John", "Doe")),
+            Some(PersonalRepresentative)
+          ),
+          TestScenario(
+            "personal representative with tax due",
+            UserType.Individual,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
+            Right(IndividualName("John", "Doe")),
+            Some(PersonalRepresentative)
+          )
+        )
+
+        scenarios.foreach {
+          case TestScenario(
+                description,
+                userType,
+                taxOwed,
+                namePrefix,
+                reference,
+                expectedTable,
+                name,
+                individualUserType
+              ) =>
+            withClue(description) {
+              val address = sample[UkAddress].copy(
+                line1 = "123 fake street",
+                line2 = None,
+                town = None,
+                county = None,
+                postcode = Postcode("abc123")
+              )
+
+              val exampleCompanyDetailsAnswers = sample[CompleteExampleCompanyDetailsAnswers].copy(
+                address = address
+              )
+              val processingDate               = LocalDate.of(2020, 2, 2)
+              val dueDate                      = LocalDate.of(2020, 1, 1)
+              val chargeReference              = "charge ref"
+              val returnResponse               = sample[SubmitReturnResponse].copy(
+                formBundleId = "form bundle id",
+                processingDate = LocalDateTime.of(processingDate, LocalTime.of(1, 1)),
+                charge = Some(
+                  sample[ReturnCharge].copy(
+                    amount = taxOwed,
+                    chargeReference = chargeReference,
+                    dueDate = dueDate
+                  )
+                )
+              )
+              val representeeAnswers           = individualUserType match {
+                case Some(PersonalRepresentative) =>
+                  Some(
+                    sample[CompleteRepresenteeAnswers]
+                      .copy(dateOfDeath = Some(sample[DateOfDeath]))
+                  )
+                case Some(Capacitor)              =>
+                  Some(
+                    sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+                  )
+
+                case _                            => None
+              }
+              val triageAnswers                =
+                sample[CompleteMultipleDisposalsTriageAnswers]
+                  .copy(individualUserType = individualUserType)
+
+              val justSubmittedReturn = sample[JustSubmittedReturn].copy(
+                submissionResponse = returnResponse,
+                subscribedDetails = sample[SubscribedDetails].copy(name = name),
+                completeReturn = sample[CompleteMultipleIndirectDisposalReturn].copy(
+                  exampleCompanyDetailsAnswers = exampleCompanyDetailsAnswers,
                   triageAnswers = triageAnswers,
                   representeeAnswers = representeeAnswers
                 ),
