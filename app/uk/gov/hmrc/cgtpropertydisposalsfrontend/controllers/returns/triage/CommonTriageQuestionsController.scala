@@ -182,11 +182,30 @@ class CommonTriageQuestionsController @Inject() (
             howManyPropertiesBackLink(state),
             state.isRight,
             state
-              .fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
+              .fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust),
+            getRepresentativeType(state)
           )
         )
       }
     }
+
+  def getRepresentativeType(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    state
+      .fold(
+        _.newReturnTriageAnswers.fold(
+          _.representativeType(),
+          _.representativeType()
+        ),
+        _.draftReturn.fold(
+          _.triageAnswers.representativeType(),
+          _.triageAnswers.representativeType(),
+          _.triageAnswers.representativeType(),
+          _.triageAnswers.representativeType(),
+          _.triageAnswers.representativeType()
+        )
+      )
 
   def howManyPropertiesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -203,7 +222,8 @@ class CommonTriageQuestionsController @Inject() (
                   state.fold(
                     _.subscribedDetails.isATrust,
                     _.subscribedDetails.isATrust
-                  )
+                  ),
+                  getRepresentativeType(state)
                 )
               ),
             numberOfProperties =>

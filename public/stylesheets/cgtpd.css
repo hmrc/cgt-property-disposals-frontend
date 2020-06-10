@@ -6,7 +6,8 @@ h1.heading-xlarge, h1 {
     margin-bottom: 50px;
 }
 h1>label.heading-xlarge,
-legend>h1.heading-xlarge {
+legend>h1.heading-xlarge,
+legend>h2.heading-medium {
     margin-bottom: 15px;
 }
 .form-group-error legend>h1.heading-xlarge,
@@ -20,6 +21,9 @@ h1 > span.heading-medium,
 .returns-list-header h2,
 .returns-list-header h3 {
     margin-top: 0;
+}
+ul+form legend>h2.heading-medium {
+    margin-top: 1.125em;
 }
 .returns-list-header h3 {
     font-size: 24px;

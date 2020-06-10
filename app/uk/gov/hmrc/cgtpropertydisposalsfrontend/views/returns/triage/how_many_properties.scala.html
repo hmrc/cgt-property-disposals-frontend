@@ -24,26 +24,50 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[NumberOfProperties], backLink: Option[Call], displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(
+    form: Form[NumberOfProperties],
+    backLink: Option[Call],
+    displayReturnToSummaryLink: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
+@key = @{"numberOfProperties"}
+@title = @{messages("numberOfProperties.main.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@subtitle = @{
+    s"""
+      <h2 class="heading-medium">
+        ${messages("numberOfProperties.title")}
+      </h2>
+    """
+}
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
-@key = @{"numberOfProperties"}
-@title = @{messages("numberOfProperties.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@userKey = @{
+    if (representativeType.exists(_.isLeft)) ".personalRep"
+    else if (representativeType.exists(_.isRight)) ".capacitor"
+    else if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else ""
+}
 
 @optionIndex(value: NumberOfProperties) = @{
     value match {
@@ -66,19 +90,47 @@
         @errorSummary(form)
     }
 
+    @caption(messages("triage.caption"))
+    @pageHeading(title)
+
+    <h2 class="heading-medium">
+        @messages("numberOfProperties.helpText.p1.heading")
+    </h2>
+    <p>
+        @messages("numberOfProperties.helpText.p1.text")
+    </p>
+    <h2 class="heading-medium">
+        @messages("numberOfProperties.helpText.p2.heading")
+    </h2>
+    <p>
+        @messages("numberOfProperties.helpText.p2.text")
+    </p>
+   <h2 class="heading-medium">
+        @messages(s"numberOfProperties.helpText${userKey}.p3.heading")
+    </h2>
+    <p>
+        @messages(s"numberOfProperties.helpText${userKey}.p3.text")
+    </p>
+    <ul class="list-bullet">
+        <li>@messages(s"numberOfProperties.helpText${userKey}.p3.li1")</li>
+        <li>@messages(s"numberOfProperties.helpText${userKey}.p3.li2")</li>
+    </ul>
+
     @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit(), 'novalidate -> "novalidate") {
         @radioGroup(
             fieldId = key,
             options = options,
             selected = form.value.map(optionIndex),
-            label = pageHeading(title, Some(messages("triage.caption"))),
+            label = Html(subtitle),
             labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors,
-            helpText = Some(Html(messages("numberOfProperties.helpText")))
+            hasErrors = hasErrors
         )
 
-        @details(messages(s"$key.details.summary"), Html(messages(s"$key$userKey.details.p1", appConfig.tranferringOwnershipHelp)))
+        @details(
+            messages(s"$key.details.summary"),
+            Html(messages(s"$key$userKey.details.p1", appConfig.tranferringOwnershipHelp))
+        )
 
         @submitButton(messages(if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
