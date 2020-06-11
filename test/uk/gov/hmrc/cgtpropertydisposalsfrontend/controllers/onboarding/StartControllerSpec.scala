@@ -576,9 +576,11 @@ class StartControllerSpec
 
         "the session data indicates that some subscription details are missing" must {
 
+          val address = sample[Address]
+
           val bprWithNoEmail = BusinessPartnerRecord(
             None,
-            sample[Address],
+            Some(address),
             sample[SapNumber],
             Right(name)
           )
@@ -591,7 +593,7 @@ class StartControllerSpec
                 SubscriptionDetails(
                   Right(name),
                   emailAddress,
-                  bprWithNoEmail.address,
+                  address,
                   ContactName(name.makeSingleName),
                   bprWithNoEmail.sapNumber,
                   EmailSource.ManuallyEntered,
@@ -604,6 +606,7 @@ class StartControllerSpec
                   SubscriptionMissingData(
                     bprWithNoEmail,
                     Some(emailAddress),
+                    None,
                     ggCredId,
                     None
                   )
@@ -649,6 +652,7 @@ class StartControllerSpec
                     SubscriptionMissingData(
                       bprWithNoEmail,
                       None,
+                      None,
                       ggCredId,
                       None
                     )
@@ -685,9 +689,11 @@ class StartControllerSpec
 
         val name = sample[IndividualName]
 
+        val address = sample[UkAddress]
+
         val bpr = models.onboarding.bpr.BusinessPartnerRecord(
           Some(emailAddress),
-          sample[UkAddress],
+          Some(address),
           sample[SapNumber],
           Right(name)
         )
@@ -697,7 +703,7 @@ class StartControllerSpec
           val individualSubscriptionDetails = SubscriptionDetails(
             Right(name),
             emailAddress,
-            bpr.address,
+            address,
             ContactName(name.makeSingleName()),
             bpr.sapNumber,
             EmailSource.BusinessPartnerRecord,
@@ -895,13 +901,14 @@ class StartControllerSpec
               )
             }
 
-            "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
+            "the session data indicates there is an email address missing and there is now an email to proceed" in {
               val session =
                 SessionData.empty.copy(
                   journeyStatus = Some(
                     SubscriptionMissingData(
-                      bpr,
+                      bpr.copy(emailAddress = None),
                       Some(emailAddress),
+                      None,
                       ggCredId,
                       None
                     )
@@ -915,6 +922,48 @@ class StartControllerSpec
                     SubscriptionReady(
                       individualSubscriptionDetails
                         .copy(emailSource = EmailSource.ManuallyEntered),
+                      ggCredId
+                    )
+                  )
+                )
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(session)
+                mockStoreSession(updatedSession)(Right(()))
+              }
+              checkIsRedirect(
+                performAction(),
+                onboardingRoutes.SubscriptionController.checkYourDetails()
+              )
+            }
+
+            "the session data indicates there is an address missing and there is now an address to proceed" in {
+              val session =
+                SessionData.empty.copy(
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bpr.copy(address = None),
+                      None,
+                      Some(address),
+                      ggCredId,
+                      None
+                    )
+                  )
+                )
+
+              val updatedSession =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionReady(
+                      individualSubscriptionDetails
+                        .copy(address = address, addressSource = AddressSource.ManuallyEntered),
                       ggCredId
                     )
                   )
@@ -1270,6 +1319,7 @@ class StartControllerSpec
                     SubscriptionMissingData(
                       bprWithNoEmail,
                       None,
+                      None,
                       ggCredId,
                       None
                     )
@@ -1315,6 +1365,7 @@ class StartControllerSpec
                     SubscriptionMissingData(
                       bprWithNoEmail,
                       None,
+                      None,
                       ggCredId,
                       None
                     )
@@ -1358,7 +1409,106 @@ class StartControllerSpec
               )
             }
 
-            "the session data indicates there is data missing for subscription and the email address " +
+            "there is no address in the BPR or the auth record for a user with CL 200" in {
+              val bprWithNoAddress = bpr.copy(address = None)
+              val updatedSession   =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoAddress,
+                      None,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  ),
+                  needMoreDetailsDetails = Some(
+                    NeedMoreDetailsDetails(
+                      controllers.routes.StartController.start().url,
+                      NeedMoreDetailsDetails.AffinityGroup.Individual
+                    )
+                  )
+                )
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(SessionData.empty)
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(Right(nino), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None)
+                  )
+                )
+                mockStoreSession(updatedSession)(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.weNeedMoreDetails()
+              )
+            }
+
+            "there is no address in the BPR for a user with CL < 200" in {
+              val bprWithNoAddress = bpr.copy(address = None)
+              val updatedSession   =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoAddress,
+                      None,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  ),
+                  needMoreDetailsDetails = Some(
+                    NeedMoreDetailsDetails(
+                      controllers.routes.StartController.start().url,
+                      NeedMoreDetailsDetails.AffinityGroup.Individual
+                    )
+                  )
+                )
+
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L50,
+                  Some(AffinityGroup.Individual),
+                  None,
+                  Some("sautr"),
+                  None,
+                  Set.empty,
+                  Some(retrievedGGCredId)
+                )
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(SessionData.empty)
+                mockGetBusinessPartnerRecord(
+                  IndividualBusinessPartnerRecordRequest(
+                    Left(SAUTR("sautr")),
+                    None
+                  )
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None)
+                  )
+                )
+                mockStoreSession(updatedSession)(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.weNeedMoreDetails()
+              )
+            }
+
+            "the session data indicates there is an email missing for subscription and the email address " +
               "is still missing" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val sessionData    =
@@ -1367,6 +1517,7 @@ class StartControllerSpec
                   journeyStatus = Some(
                     SubscriptionMissingData(
                       bprWithNoEmail,
+                      None,
                       None,
                       ggCredId,
                       None
@@ -1392,6 +1543,76 @@ class StartControllerSpec
 
           }
 
+          "redirect to the address journey" when {
+
+            "the session data indicates there is an address missing for subscription and the address " +
+              "is still missing" in {
+              val bprWithNoAddress = bpr.copy(address = None)
+              val sessionData      =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoAddress,
+                      None,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
+                )
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(sessionData)
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.onboarding.address.routes.SubscriptionEnterAddressController.isUk().url
+              )
+            }
+
+            "the session data indicates there is an address and email missing for subscription and the address and email" +
+              "is still missing" in {
+              val bprWithNoAddressOrEmail = bpr.copy(emailAddress = None, address = None)
+              val sessionData             =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Individual),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoAddressOrEmail,
+                      None,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
+                )
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(
+                  nino.value,
+                  None,
+                  retrievedGGCredId
+                )
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(sessionData)
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.onboarding.address.routes.SubscriptionEnterAddressController.isUk().url
+              )
+            }
+
+          }
+
         }
 
         "handling trusts" must {
@@ -1403,7 +1624,7 @@ class StartControllerSpec
           val sapNumber                = SapNumber("sap")
           val bpr                      = BusinessPartnerRecord(
             Some(emailAddress),
-            address,
+            Some(address),
             sapNumber,
             Left(trustName)
           )
@@ -1411,7 +1632,7 @@ class StartControllerSpec
             SubscriptionDetails(
               Left(trustName),
               emailAddress,
-              bpr.address,
+              address,
               ContactName(trustName.value),
               bpr.sapNumber,
               EmailSource.BusinessPartnerRecord,
@@ -1622,13 +1843,14 @@ class StartControllerSpec
               )
             }
 
-            "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
+            "the session data indicates there is an email and address missing and there is now enough data to proceed" in {
               val session = SessionData.empty.copy(
                 userType = Some(UserType.Organisation),
                 journeyStatus = Some(
                   SubscriptionMissingData(
                     bpr.copy(emailAddress = None),
                     Some(emailAddress),
+                    None,
                     ggCredId,
                     None
                   )
@@ -1659,14 +1881,16 @@ class StartControllerSpec
               )
             }
 
-            "the session data indicates there is subscription data missing and there is now enough data to proceed " +
+            "the session data indicates an email is missing and there is now enough data to proceed " +
               "for a trust without a trust enrolment" in {
+              val address        = sample[Address]
               val session        = SessionData.empty.copy(
                 userType = Some(UserType.Organisation),
                 journeyStatus = Some(
                   SubscriptionMissingData(
-                    bpr.copy(emailAddress = None),
+                    bpr.copy(emailAddress = None, address = None),
                     Some(emailAddress),
+                    Some(address),
                     ggCredId,
                     None
                   )
@@ -1678,7 +1902,11 @@ class StartControllerSpec
                   journeyStatus = Some(
                     SubscriptionReady(
                       trustSubscriptionDetails
-                        .copy(emailSource = EmailSource.ManuallyEntered),
+                        .copy(
+                          emailSource = EmailSource.ManuallyEntered,
+                          address = address,
+                          addressSource = AddressSource.ManuallyEntered
+                        ),
                       ggCredId
                     )
                   )
@@ -1718,6 +1946,7 @@ class StartControllerSpec
                     SubscriptionMissingData(
                       bpr.copy(emailAddress = None),
                       None,
+                      None,
                       ggCredId,
                       None
                     )
@@ -1741,6 +1970,82 @@ class StartControllerSpec
               checkIsRedirect(
                 performAction(),
                 emailRoutes.SubscriptionEnterEmailController.enterEmail()
+              )
+            }
+
+          }
+
+          "redirect to the enter address page" when {
+
+            "the session data indicates there is subscription data missing and no address can be found " +
+              "for a trust without a trust enrolment" in {
+              val session =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Organisation),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bpr.copy(address = None),
+                      None,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
+                )
+
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L50,
+                  Some(AffinityGroup.Organisation),
+                  None,
+                  None,
+                  None,
+                  Set.empty,
+                  Some(retrievedGGCredId)
+                )
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(session)
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.onboarding.address.routes.SubscriptionEnterAddressController.isUk()
+              )
+            }
+
+            "the session data indicates there is subscription no address and no email can be found " +
+              "for a trust without a trust enrolment" in {
+              val session =
+                SessionData.empty.copy(
+                  userType = Some(UserType.Organisation),
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bpr.copy(address = None, emailAddress = None),
+                      None,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
+                )
+
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L50,
+                  Some(AffinityGroup.Organisation),
+                  None,
+                  None,
+                  None,
+                  Set.empty,
+                  Some(retrievedGGCredId)
+                )
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(session)
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.onboarding.address.routes.SubscriptionEnterAddressController.isUk()
               )
             }
 
@@ -1812,6 +2117,7 @@ class StartControllerSpec
                       SubscriptionMissingData(
                         bprWithNoEmail,
                         None,
+                        None,
                         ggCredId,
                         None
                       )
@@ -1841,6 +2147,7 @@ class StartControllerSpec
                     SubscriptionMissingData(
                       bprWithNoEmail,
                       None,
+                      None,
                       ggCredId,
                       None
                     )
@@ -1856,6 +2163,77 @@ class StartControllerSpec
               checkIsRedirect(
                 performAction(),
                 emailRoutes.SubscriptionEnterEmailController.enterEmail().url
+              )
+            }
+
+            "there is no address in the BPR" in {
+              val bprWithNoAddress = bpr.copy(address = None)
+
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(Right(None))
+                mockGetBusinessPartnerRecord(
+                  TrustBusinessPartnerRecordRequest(Right(sautr), None)
+                )(
+                  Right(
+                    BusinessPartnerRecordResponse(Some(bprWithNoAddress), None)
+                  )
+                )
+                mockStoreSession(
+                  SessionData.empty.copy(
+                    userType = Some(UserType.Organisation),
+                    journeyStatus = Some(
+                      SubscriptionMissingData(
+                        bprWithNoAddress,
+                        None,
+                        None,
+                        ggCredId,
+                        None
+                      )
+                    ),
+                    needMoreDetailsDetails = Some(
+                      NeedMoreDetailsDetails(
+                        controllers.routes.StartController.start().url,
+                        NeedMoreDetailsDetails.AffinityGroup.Organisation
+                      )
+                    )
+                  )
+                )(Right(()))
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.routes.StartController.weNeedMoreDetails()
+              )
+            }
+
+            "the session data indicates there is data missing for subscription and the address " +
+              "is still missing" in {
+              val bprWithNoAddress = bpr.copy(address = None)
+
+              val sessionData =
+                SessionData.empty.copy(
+                  journeyStatus = Some(
+                    SubscriptionMissingData(
+                      bprWithNoAddress,
+                      None,
+                      None,
+                      ggCredId,
+                      None
+                    )
+                  )
+                )
+
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
+                mockHasFailedCgtEnrolment()(Right(None))
+                mockGetSession(sessionData)
+              }
+
+              checkIsRedirect(
+                performAction(),
+                controllers.onboarding.address.routes.SubscriptionEnterAddressController.isUk()
               )
             }
 

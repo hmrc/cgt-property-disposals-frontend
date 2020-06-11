@@ -469,38 +469,46 @@ class StartController @Inject() (
                                           )
                                         )
                                     )
-        maybeSubscriptionDetails <- EitherT.pure(
-                                      bprWithTrustName._1.emailAddress
-                                        .map(_ -> EmailSource.BusinessPartnerRecord)
-                                        .orElse(trust.email.map(_ -> EmailSource.GovernmentGateway))
-                                        .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
-                                          Left(
-                                            BuildSubscriptionDataError.DataMissing(bprWithTrustName._1)
-                                          )
-                                        ) { emailWithSource =>
-                                          bprResponse.cgtReference.fold[
-                                            Either[BuildSubscriptionDataError, SubscriptionDetails]
-                                          ](
-                                            Right(
-                                              SubscriptionDetails(
-                                                Left(bprWithTrustName._2),
-                                                emailWithSource._1,
-                                                bprWithTrustName._1.address,
-                                                ContactName(bprWithTrustName._2.value),
-                                                bprWithTrustName._1.sapNumber,
-                                                emailWithSource._2,
-                                                AddressSource.BusinessPartnerRecord,
-                                                ContactNameSource.DerivedFromBusinessPartnerRecord
-                                              )
-                                            )
-                                          )(cgtReference =>
-                                            Left(
-                                              BuildSubscriptionDataError
-                                                .AlreadySubscribedToCGT(cgtReference)
-                                            )
-                                          )
-                                        }
-                                    )
+        maybeSubscriptionDetails <- {
+          val emailAndAddress = for {
+            emailWithSource <- bprWithTrustName._1.emailAddress
+                                 .map(_ -> EmailSource.BusinessPartnerRecord)
+                                 .orElse(trust.email.map(_ -> EmailSource.GovernmentGateway))
+            address         <- bprWithTrustName._1.address.map(_ -> AddressSource.BusinessPartnerRecord)
+          } yield emailWithSource -> address
+
+          EitherT.pure[Future, Error](
+            emailAndAddress
+              .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
+                Left(
+                  BuildSubscriptionDataError.DataMissing(bprWithTrustName._1)
+                )
+              ) {
+                case (emailWithSource, addressWithSource) =>
+                  bprResponse.cgtReference.fold[
+                    Either[BuildSubscriptionDataError, SubscriptionDetails]
+                  ](
+                    Right(
+                      SubscriptionDetails(
+                        Left(bprWithTrustName._2),
+                        emailWithSource._1,
+                        addressWithSource._1,
+                        ContactName(bprWithTrustName._2.value),
+                        bprWithTrustName._1.sapNumber,
+                        emailWithSource._2,
+                        addressWithSource._2,
+                        ContactNameSource.DerivedFromBusinessPartnerRecord
+                      )
+                    )
+                  )(cgtReference =>
+                    Left(
+                      BuildSubscriptionDataError
+                        .AlreadySubscribedToCGT(cgtReference)
+                    )
+                  )
+              }
+          )
+        }
         _                        <- updateSession(
                                       maybeSubscriptionDetails,
                                       trust.email,
@@ -515,7 +523,7 @@ class StartController @Inject() (
           s"Could not build subscription data for trust with SAUTR ${trust.sautr}",
           e
         )
-        errorHandler.tmpErrorResult()
+        errorHandler.tmpErrorResult(request.authenticatedRequest.userType)
       // errorHandler.errorResult(request.authenticatedRequest.userType)
       },
       {
@@ -547,14 +555,21 @@ class StartController @Inject() (
     SubscriptionDetails(
       s.businessPartnerRecord,
       s.ggEmail,
-      s.manuallyEnteredEmail
+      s.manuallyEnteredEmail,
+      s.manuallyEnteredAddress
     ).fold(
       { missingData =>
         logger.info(
           s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}"
         )
         missingData.head match {
-          case MissingData.Email =>
+          case MissingData.Address =>
+            Redirect(
+              onboarding.address.routes.SubscriptionEnterAddressController
+                .isUk()
+            )
+
+          case MissingData.Email   =>
             Redirect(
               onboarding.email.routes.SubscriptionEnterEmailController
                 .enterEmail()
@@ -590,7 +605,7 @@ class StartController @Inject() (
       maybeSubscriptionDetails <- EitherT.pure(
                                     bprResponse.cgtReference
                                       .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
-                                        SubscriptionDetails(bpr, individual.email, None)
+                                        SubscriptionDetails(bpr, individual.email, None, None)
                                           .leftMap(_ => BuildSubscriptionDataError.DataMissing(bpr))
                                       )(cgtReference =>
                                         Left(
@@ -610,7 +625,7 @@ class StartController @Inject() (
       { e =>
         logger.warn("Error while getting subscription details", e)
         // errorHandler.errorResult(request.authenticatedRequest.userType)
-        errorHandler.tmpErrorResult()
+        errorHandler.tmpErrorResult(request.authenticatedRequest.userType)
       },
       {
         case Left(BuildSubscriptionDataError.DataMissing(_)) =>
@@ -654,7 +669,7 @@ class StartController @Inject() (
               _.copy(
                 journeyStatus = Some(
                   SubscriptionStatus
-                    .SubscriptionMissingData(bpr, None, ggCredId, ggEmail)
+                    .SubscriptionMissingData(bpr, None, None, ggCredId, ggEmail)
                 ),
                 needMoreDetailsDetails = Some(
                   NeedMoreDetailsDetails(

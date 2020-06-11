@@ -88,6 +88,11 @@
   }
 }
 
+@propertyAddressLabel = @{
+    if(justSubmittedReturn.completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
+    else messages(s"$key.propertyAddress")
+}
+
 @mainTemplate(title = title, userType = request.userType) {
 
 <div class="govuk-box-highlight">
@@ -149,7 +154,7 @@
             )
         }
         @cyaRow(
-            messages(s"$key.propertyAddress"),
+            propertyAddressLabel,
             justSubmittedReturn.completeReturn match {
                 case c: CompleteMultipleDisposalsReturn => addressDisplay(c.examplePropertyDetailsAnswers.address, Line)
                 case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)

@@ -948,431 +948,164 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       "redirect to the start endpoint" when {
 
-        "redirect to the start endpoint" when {
+        def test(hasTrn: Option[Boolean]) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStatus(
+                DeterminingIfOrganisationIsTrust(
+                  ggCredId,
+                  None,
+                  Some(true),
+                  hasTrn
+                )
+              )
+            )
+          }
 
-          def test(hasTrn: Option[Boolean]) = {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionDataWithStatus(
-                  DeterminingIfOrganisationIsTrust(
-                    ggCredId,
-                    None,
-                    Some(true),
-                    hasTrn
+          val result = performAction()
+          checkIsRedirect(
+            result,
+            cgtpropertydisposalsfrontend.controllers.routes.StartController
+              .start()
+          )
+        }
+
+        "the user has not answered the do you have a TRN question" in {
+          test(None)
+        }
+
+        "the user has answered that they do not have a TRN" in {
+          test(Some(false))
+        }
+
+      }
+
+      "show a form error" when {
+
+        def mockActions(): Unit =
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Right(
+                Some(
+                  UnsuccessfulNameMatchAttempts(
+                    1,
+                    2,
+                    TrustNameMatchDetails(validTrustName, validTrn)
                   )
                 )
               )
-            }
-
-            val result = performAction()
-            checkIsRedirect(
-              result,
-              cgtpropertydisposalsfrontend.controllers.routes.StartController
-                .start()
             )
           }
 
-          "the user has not answered the do you have a TRN question" in {
-            test(None)
-          }
+        "an TRN is not submitted" in {
+          mockActions()
 
-          "the user has answered that they do not have a TRN" in {
-            test(Some(false))
-          }
-
+          val result = performAction("trustName" -> validTrustName.value)
+          status(result)        shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trn.error.required")
+          )
         }
 
-        "show a form error" when {
+        "the TRN is an empty string" in {
+          mockActions()
 
-          def mockActions(): Unit =
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Right(
-                  Some(
-                    UnsuccessfulNameMatchAttempts(
-                      1,
-                      2,
-                      TrustNameMatchDetails(validTrustName, validTrn)
-                    )
-                  )
-                )
-              )
-            }
-
-          "an TRN is not submitted" in {
-            mockActions()
-
-            val result = performAction("trustName" -> validTrustName.value)
-            status(result)        shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trn.error.required")
-            )
-          }
-
-          "the TRN is an empty string" in {
-            mockActions()
-
-            val result =
-              performAction("trustName" -> validTrustName.value, "trn" -> "")
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trn.error.required")
-            )
-          }
-
-          "the TRN is non empty but less than 15 characters" in {
-            val trn = "1" + (" " * 15) + "23"
-            mockActions()
-
-            val result =
-              performAction("trustName" -> validTrustName.value, "trn" -> trn)
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trn.error.tooShort")
-            )
-            // make sure trn is displayed as submitted by the user
-            contentAsString(result) should include(trn)
-          }
-
-          "the TRN is more than 15 characters" in {
-            mockActions()
-
-            val result = performAction(
-              "trustName" -> validTrustName.value,
-              "trn"       -> ("1" * 16)
-            )
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trn.error.tooLong")
-            )
-          }
-
-          "the TRN contains invalid characters" in {
-            mockActions()
-
-            val result = performAction(
-              "trustName" -> validTrustName.value,
-              "trn"       -> ("?" * 15)
-            )
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trn.error.pattern")
-            )
-          }
-
-          "a trust name is not submitted" in {
-            mockActions()
-
-            val result = performAction("trn" -> validTrn.value)
-            status(result)        shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trustName.error.required")
-            )
-          }
-
-          "a trust name is submitted but it is an empty string" in {
-            mockActions()
-
-            val result =
-              performAction("trustName" -> "", "trn" -> validTrn.value)
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trustName.error.required")
-            )
-          }
-
-          "a trust name is submitted but it is more than 105 characters" in {
-            mockActions()
-
-            val result =
-              performAction("trustName" -> ("a" * 106), "trn" -> validTrn.value)
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trustName.error.tooLong")
-            )
-          }
-
-          "a trust name is submitted but it contains invalid characters" in {
-            mockActions()
-
-            val result =
-              performAction("trustName" -> "???", "trn" -> validTrn.value)
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("trustName.error.pattern")
-            )
-          }
-
-          "a valid SA UTR and name are entered but they cannot be matched to a BPR and the " +
-            "user has not yet made too many unsuccessful attempts" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Right(Some(previousUnsuccessfulNameMatchAttempt))
-              )
-              mockAttemptNameMatch(
-                validTrn,
-                validTrustName,
-                ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
-              )(
-                Left(
-                  NameMatchServiceError.NameMatchFailed(
-                    UnsuccessfulNameMatchAttempts(
-                      2,
-                      3,
-                      TrustNameMatchDetails(validTrustName, validTrn)
-                    )
-                  )
-                )
-              )
-            }
-
-            val result = performAction(
-              "trustName" -> validTrustName.value,
-              "trn"       -> validTrn.value
-            )
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("enterTrn.error.notFound", 2, 3)
-            )
-          }
-
+          val result =
+            performAction("trustName" -> validTrustName.value, "trn" -> "")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trn.error.required")
+          )
         }
 
-        "display an error page" when {
+        "the TRN is non empty but less than 15 characters" in {
+          val trn = "1" + (" " * 15) + "23"
+          mockActions()
 
-          "there is an error retrieving the number of previous unsuccessful attempts" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Left(NameMatchServiceError.BackendError(Error("")))
-              )
-            }
-
-            val result = performAction()
-
-            checkIsTechnicalErrorPage(result)
-          }
-
-          "there is an error getting the BPR" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Right(Some(previousUnsuccessfulNameMatchAttempt))
-              )
-              mockAttemptNameMatch(
-                validTrn,
-                validTrustName,
-                ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
-              )(
-                Left(NameMatchServiceError.BackendError(Error("")))
-              )
-            }
-
-            val result = performAction(
-              "trustName" -> validTrustName.value,
-              "trn"       -> validTrn.value
-            )
-            checkIsTechnicalErrorPage(result)
-          }
-
-          "there is an error storing a retrieved BPR in mongo" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Right(Some(previousUnsuccessfulNameMatchAttempt))
-              )
-              mockAttemptNameMatch(
-                validTrn,
-                validTrustName,
-                ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
-              )(
-                Right(bpr -> None)
-              )
-              mockStoreSession(
-                sessionDataWithStatus(
-                  SubscriptionMissingData(bpr, None, ggCredId, None)
-                )
-              )(
-                Left(Error(""))
-              )
-            }
-
-            val result = performAction(
-              "trustName" -> validTrustName.value,
-              "trn"       -> validTrn.value
-            )
-            checkIsTechnicalErrorPage(result)
-          }
-
-          "a BPR is found but it is one for an individual instead of a trust" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Right(Some(previousUnsuccessfulNameMatchAttempt))
-              )
-              mockAttemptNameMatch(
-                validTrn,
-                validTrustName,
-                ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
-              )(
-                Right(
-                  bpr.copy(name = Right(IndividualName("Name", "Wame"))) -> None
-                )
-              )
-            }
-
-            val result = performAction(
-              "trustName" -> validTrustName.value,
-              "trn"       -> validTrn.value
-            )
-            checkIsTechnicalErrorPage(result)
-
-          }
-
+          val result =
+            performAction("trustName" -> validTrustName.value, "trn" -> trn)
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trn.error.tooShort")
+          )
+          // make sure trn is displayed as submitted by the user
+          contentAsString(result) should include(trn)
         }
 
-        "update the session and redirect to the start endpoint" when {
+        "the TRN is more than 15 characters" in {
+          mockActions()
 
-          "the user submits a valid TRN and trust name and a BPR can be retrieved and the user does not already have a cgt reference" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Right(Some(previousUnsuccessfulNameMatchAttempt))
-              )
-              mockAttemptNameMatch(
-                validTrn,
-                validTrustName,
-                ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
-              )(
-                Right(bpr -> None)
-              )
-              mockStoreSession(
-                sessionDataWithStatus(
-                  SubscriptionMissingData(bpr, None, ggCredId, None)
-                )
-              )(Right(()))
-            }
-
-            val result = performAction(
-              "trustName" -> validTrustName.value,
-              "trn"       -> validTrn.value
-            )
-            checkIsRedirect(
-              result,
-              cgtpropertydisposalsfrontend.controllers.routes.StartController
-                .start()
-            )
-          }
-
+          val result = performAction(
+            "trustName" -> validTrustName.value,
+            "trn"       -> ("1" * 16)
+          )
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trn.error.tooLong")
+          )
         }
 
-        "update the session and redirect to the already subscribed page" when {
+        "the TRN contains invalid characters" in {
+          mockActions()
 
-          "the user submits a valid TRN and trust name and a BPR can be retrieved and the user already has a cgt reference" in {
-            val cgtReference = sample[CgtReference]
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Right(Some(previousUnsuccessfulNameMatchAttempt))
-              )
-              mockAttemptNameMatch(
-                validTrn,
-                validTrustName,
-                ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
-              )(
-                Right(bpr -> Some(cgtReference))
-              )
-              mockStoreSession(
-                sessionDataWithStatus(
-                  AlreadySubscribedWithDifferentGGAccount(
-                    ggCredId,
-                    Some(cgtReference)
-                  )
-                )
-              )(Right(()))
-            }
-
-            val result = performAction(
-              "trustName" -> validTrustName.value,
-              "trn"       -> validTrn.value
-            )
-            checkIsRedirect(
-              result,
-              routes.SubscriptionController
-                .alreadySubscribedWithDifferentGGAccount()
-            )
-          }
-
+          val result = performAction(
+            "trustName" -> validTrustName.value,
+            "trn"       -> ("?" * 15)
+          )
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trn.error.pattern")
+          )
         }
 
-        "redirect to the too many attempts page" when {
+        "a trust name is not submitted" in {
+          mockActions()
 
-          "the user has attempted to perform a name match too many times" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
-              )
-            }
-
-            checkIsRedirect(
-              performAction(),
-              onboardingRoutes.DeterminingIfOrganisationIsTrustController
-                .tooManyAttempts()
-            )
-          }
-
-          "the user has not initially made too many unsuccessful attempts but submits " +
-            "details which do not match a BPR and have now made too many attempts" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(expectedSessionData)
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                Right(Some(previousUnsuccessfulNameMatchAttempt))
-              )
-              mockAttemptNameMatch(
-                validTrn,
-                validTrustName,
-                ggCredId,
-                Some(previousUnsuccessfulNameMatchAttempt)
-              )(
-                Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
-              )
-            }
-
-            checkIsRedirect(
-              performAction(
-                "trustName" -> validTrustName.value,
-                "trn"       -> validTrn.value
-              ),
-              onboardingRoutes.DeterminingIfOrganisationIsTrustController
-                .tooManyAttempts()
-            )
-          }
-
+          val result = performAction("trn" -> validTrn.value)
+          status(result)        shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trustName.error.required")
+          )
         }
 
-        "be able to handle submitted TRN's with spaces" in {
-          val validTrnWithSpaces = TRN("1234567890     12 345")
+        "a trust name is submitted but it is an empty string" in {
+          mockActions()
+
+          val result =
+            performAction("trustName" -> "", "trn" -> validTrn.value)
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trustName.error.required")
+          )
+        }
+
+        "a trust name is submitted but it is more than 105 characters" in {
+          mockActions()
+
+          val result =
+            performAction("trustName" -> ("a" * 106), "trn" -> validTrn.value)
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trustName.error.tooLong")
+          )
+        }
+
+        "a trust name is submitted but it contains invalid characters" in {
+          mockActions()
+
+          val result =
+            performAction("trustName" -> "???", "trn" -> validTrn.value)
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trustName.error.pattern")
+          )
+        }
+
+        "a valid SA UTR and name are entered but they cannot be matched to a BPR and the " +
+          "user has not yet made too many unsuccessful attempts" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(expectedSessionData)
@@ -1380,7 +1113,84 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Right(Some(previousUnsuccessfulNameMatchAttempt))
             )
             mockAttemptNameMatch(
-              validTrnWithSpaces,
+              validTrn,
+              validTrustName,
+              ggCredId,
+              Some(previousUnsuccessfulNameMatchAttempt)
+            )(
+              Left(
+                NameMatchServiceError.NameMatchFailed(
+                  UnsuccessfulNameMatchAttempts(
+                    2,
+                    3,
+                    TrustNameMatchDetails(validTrustName, validTrn)
+                  )
+                )
+              )
+            )
+          }
+
+          val result = performAction(
+            "trustName" -> validTrustName.value,
+            "trn"       -> validTrn.value
+          )
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("enterTrn.error.notFound", 2, 3)
+          )
+        }
+
+      }
+
+      "display an error page" when {
+
+        "there is an error retrieving the number of previous unsuccessful attempts" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Left(NameMatchServiceError.BackendError(Error("")))
+            )
+          }
+
+          val result = performAction()
+
+          checkIsTechnicalErrorPage(result)
+        }
+
+        "there is an error getting the BPR" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Right(Some(previousUnsuccessfulNameMatchAttempt))
+            )
+            mockAttemptNameMatch(
+              validTrn,
+              validTrustName,
+              ggCredId,
+              Some(previousUnsuccessfulNameMatchAttempt)
+            )(
+              Left(NameMatchServiceError.BackendError(Error("")))
+            )
+          }
+
+          val result = performAction(
+            "trustName" -> validTrustName.value,
+            "trn"       -> validTrn.value
+          )
+          checkIsTechnicalErrorPage(result)
+        }
+
+        "there is an error storing a retrieved BPR in mongo" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Right(Some(previousUnsuccessfulNameMatchAttempt))
+            )
+            mockAttemptNameMatch(
+              validTrn,
               validTrustName,
               ggCredId,
               Some(previousUnsuccessfulNameMatchAttempt)
@@ -1389,24 +1199,212 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )
             mockStoreSession(
               sessionDataWithStatus(
-                SubscriptionMissingData(bpr, None, ggCredId, None)
+                SubscriptionMissingData(bpr, None, None, ggCredId, None)
+              )
+            )(
+              Left(Error(""))
+            )
+          }
+
+          val result = performAction(
+            "trustName" -> validTrustName.value,
+            "trn"       -> validTrn.value
+          )
+          checkIsTechnicalErrorPage(result)
+        }
+
+        "a BPR is found but it is one for an individual instead of a trust" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Right(Some(previousUnsuccessfulNameMatchAttempt))
+            )
+            mockAttemptNameMatch(
+              validTrn,
+              validTrustName,
+              ggCredId,
+              Some(previousUnsuccessfulNameMatchAttempt)
+            )(
+              Right(
+                bpr.copy(name = Right(IndividualName("Name", "Wame"))) -> None
+              )
+            )
+          }
+
+          val result = performAction(
+            "trustName" -> validTrustName.value,
+            "trn"       -> validTrn.value
+          )
+          checkIsTechnicalErrorPage(result)
+
+        }
+
+      }
+
+      "update the session and redirect to the start endpoint" when {
+
+        "the user submits a valid TRN and trust name and a BPR can be retrieved and the " +
+          "user does not already have a cgt reference" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Right(Some(previousUnsuccessfulNameMatchAttempt))
+            )
+            mockAttemptNameMatch(
+              validTrn,
+              validTrustName,
+              ggCredId,
+              Some(previousUnsuccessfulNameMatchAttempt)
+            )(
+              Right(bpr -> None)
+            )
+            mockStoreSession(
+              sessionDataWithStatus(
+                SubscriptionMissingData(bpr, None, None, ggCredId, None)
               )
             )(Right(()))
           }
 
           val result = performAction(
             "trustName" -> validTrustName.value,
-            "trn"       -> validTrnWithSpaces.value
+            "trn"       -> validTrn.value
           )
           checkIsRedirect(
             result,
             cgtpropertydisposalsfrontend.controllers.routes.StartController
               .start()
           )
-
         }
 
       }
+
+      "update the session and redirect to the already subscribed page" when {
+
+        "the user submits a valid TRN and trust name and a BPR can be retrieved and the user already has a cgt reference" in {
+          val cgtReference = sample[CgtReference]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Right(Some(previousUnsuccessfulNameMatchAttempt))
+            )
+            mockAttemptNameMatch(
+              validTrn,
+              validTrustName,
+              ggCredId,
+              Some(previousUnsuccessfulNameMatchAttempt)
+            )(
+              Right(bpr -> Some(cgtReference))
+            )
+            mockStoreSession(
+              sessionDataWithStatus(
+                AlreadySubscribedWithDifferentGGAccount(
+                  ggCredId,
+                  Some(cgtReference)
+                )
+              )
+            )(Right(()))
+          }
+
+          val result = performAction(
+            "trustName" -> validTrustName.value,
+            "trn"       -> validTrn.value
+          )
+          checkIsRedirect(
+            result,
+            routes.SubscriptionController
+              .alreadySubscribedWithDifferentGGAccount()
+          )
+        }
+
+      }
+
+      "redirect to the too many attempts page" when {
+
+        "the user has attempted to perform a name match too many times" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            onboardingRoutes.DeterminingIfOrganisationIsTrustController
+              .tooManyAttempts()
+          )
+        }
+
+        "the user has not initially made too many unsuccessful attempts but submits " +
+          "details which do not match a BPR and have now made too many attempts" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(expectedSessionData)
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+              Right(Some(previousUnsuccessfulNameMatchAttempt))
+            )
+            mockAttemptNameMatch(
+              validTrn,
+              validTrustName,
+              ggCredId,
+              Some(previousUnsuccessfulNameMatchAttempt)
+            )(
+              Left(NameMatchServiceError.TooManyUnsuccessfulAttempts())
+            )
+          }
+
+          checkIsRedirect(
+            performAction(
+              "trustName" -> validTrustName.value,
+              "trn"       -> validTrn.value
+            ),
+            onboardingRoutes.DeterminingIfOrganisationIsTrustController
+              .tooManyAttempts()
+          )
+        }
+
+      }
+
+      "be able to handle submitted TRN's with spaces" in {
+        val validTrnWithSpaces = TRN("1234567890     12 345")
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(expectedSessionData)
+          mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+            Right(Some(previousUnsuccessfulNameMatchAttempt))
+          )
+          mockAttemptNameMatch(
+            validTrnWithSpaces,
+            validTrustName,
+            ggCredId,
+            Some(previousUnsuccessfulNameMatchAttempt)
+          )(
+            Right(bpr -> None)
+          )
+          mockStoreSession(
+            sessionDataWithStatus(
+              SubscriptionMissingData(bpr, None, None, ggCredId, None)
+            )
+          )(Right(()))
+        }
+
+        val result = performAction(
+          "trustName" -> validTrustName.value,
+          "trn"       -> validTrnWithSpaces.value
+        )
+        checkIsRedirect(
+          result,
+          cgtpropertydisposalsfrontend.controllers.routes.StartController
+            .start()
+        )
+
+      }
+
     }
 
     "handling requests to display the too many attempts page" must {

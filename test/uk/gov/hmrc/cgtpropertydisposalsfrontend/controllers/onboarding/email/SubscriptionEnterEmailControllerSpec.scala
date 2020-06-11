@@ -52,6 +52,7 @@ class SubscriptionEnterEmailControllerSpec
       SubscriptionMissingData(
         sample[BusinessPartnerRecord].copy(emailAddress = None),
         None,
+        None,
         sample[GGCredId],
         None
       )
@@ -62,6 +63,7 @@ class SubscriptionEnterEmailControllerSpec
       SubscriptionMissingData(
         sample[BusinessPartnerRecord].copy(emailAddress = None),
         Some(sample[Email]),
+        None,
         sample[GGCredId],
         None
       )

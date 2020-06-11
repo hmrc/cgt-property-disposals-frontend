@@ -380,6 +380,7 @@ class InsufficientConfidenceLevelController @Inject() (
                                        SubscriptionStatus.SubscriptionMissingData(
                                          bprWithCgtReference._1,
                                          None,
+                                         None,
                                          ggCredId,
                                          ggEmail
                                        )
@@ -404,7 +405,7 @@ class InsufficientConfidenceLevelController @Inject() (
       case NameMatchServiceError.BackendError(error)                   =>
         logger.warn("Could not get BPR with entered SA UTR", error)
         // errorHandler.errorResult()
-        errorHandler.tmpErrorResult()
+        errorHandler.tmpErrorResult(request.userType)
 
       case NameMatchServiceError.NameMatchFailed(unsuccessfulAttempts) =>
         val form = InsufficientConfidenceLevelController.sautrAndNameForm
