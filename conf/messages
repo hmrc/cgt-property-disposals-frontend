@@ -677,7 +677,7 @@ numberOfProperties.helpText.p3.li2=shares all had the same sale or disposal date
 
 numberOfProperties.helpText.agent.p3.heading=Indirect disposals
 numberOfProperties.helpText.agent.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as the:
-numberOfProperties.helpText.agent.p3.li1=your client were a non-resident on the disposal date
+numberOfProperties.helpText.agent.p3.li1=your client was a non-resident on the disposal date
 numberOfProperties.helpText.agent.p3.li2=shares all had the same sale or disposal date
 
 numberOfProperties.helpText.trust.p3.heading=Indirect disposals
@@ -687,7 +687,7 @@ numberOfProperties.helpText.trust.p3.li2=shares all had the same sale or disposa
 
 numberOfProperties.helpText.capacitor.p3.heading=Indirect disposals
 numberOfProperties.helpText.capacitor.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as the:
-numberOfProperties.helpText.capacitor.p3.li1=the person were a non-resident on the disposal date
+numberOfProperties.helpText.capacitor.p3.li1=the person was a non-resident on the disposal date
 numberOfProperties.helpText.capacitor.p3.li2=shares all had the same sale or disposal date
 
 numberOfProperties.helpText.personalRep.p3.heading=Indirect disposals
