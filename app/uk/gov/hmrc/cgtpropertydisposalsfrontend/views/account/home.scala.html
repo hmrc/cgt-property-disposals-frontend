@@ -63,7 +63,9 @@ totalLeftHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.co
    }
   </div>
   <div class="column-one-third account-due">
-   @totalLeftHeading(subscribed.totalLeftToPay())
+   @if(subscribed.sentReturns.nonEmpty) {
+    @totalLeftHeading(subscribed.totalLeftToPay())
+   }
   </div>
  </div>
 

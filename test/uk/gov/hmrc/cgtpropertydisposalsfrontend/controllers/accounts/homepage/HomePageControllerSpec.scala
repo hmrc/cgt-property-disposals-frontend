@@ -734,7 +734,7 @@ class HomePageControllerSpec
                 } else
                   doc.body().text shouldNot include(
                     messageFromMessageKey(
-                      "account.make.payment.link"
+                      "account.totalLeftToPay"
                     )
                   )
               }
