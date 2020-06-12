@@ -28,7 +28,7 @@ sentReturnItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.comp
 sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.returns_list_header
 )
 
-@(sentReturns: List[ReturnSummary], totalLeftToPay: AmountInPence)(implicit messages:Messages)
+@(sentReturns: List[ReturnSummary])(implicit messages:Messages)
 
 @optionalDateOrdering = @{ (date1: Option[LocalDate], date2: Option[LocalDate]) =>
     (date1, date2) match {
@@ -60,12 +60,10 @@ sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.c
  }
 
 
-@sentReturnsHeader(totalLeftToPay)
+@sentReturnsHeader()
 
 <ul class="return-list">
   @ordered.map{ case (sentReturn, paymentDueDate) =>
     @sentReturnItem(sentReturn, paymentDueDate)
   }
 </ul>
-
-<p>@messages("returns.paymentTakes3Days")</p>
