@@ -28,6 +28,8 @@ sealed trait Address extends Product with Serializable
 
 object Address {
 
+  val addressLineRegexPredicate = "^[A-Za-z0-9 \\-,.&'/]{0,35}$".r.pattern.asPredicate()
+
   final case class UkAddress(
     line1: String,
     line2: Option[String],
@@ -65,13 +67,10 @@ object Address {
     )
 
   val addressLineMapping: Mapping[String] = {
-    val addressLineRegex =
-      "^[A-Za-z0-9 \\-,.&'/]{0,35}$".r.pattern
-        .asPredicate()
 
     def validateName(s: String): ValidationResult =
       if (s.length > 35) Invalid("error.tooLong")
-      else if (!addressLineRegex.test(s)) Invalid("error.pattern")
+      else if (!addressLineRegexPredicate.test(s)) Invalid("error.pattern")
       else Valid
 
     nonEmptyText

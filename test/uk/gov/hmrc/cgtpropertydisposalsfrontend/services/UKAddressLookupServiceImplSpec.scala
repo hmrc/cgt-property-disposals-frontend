@@ -119,6 +119,10 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
           ).isLeft shouldBe true
         }
 
+      }
+
+      "filter out invalid addresses" when {
+
         "address line1 is more than 35 characters" in {
           val json = Json.parse(
             """
@@ -139,7 +143,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
 
           await(
             service.lookupAddress(postcode, None).value
-          ).exists(_.addresses.isEmpty) shouldBe true
+          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
         }
 
         "address line2 is more than 35 characters" in {
@@ -162,7 +166,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
 
           await(
             service.lookupAddress(postcode, None).value
-          ).exists(_.addresses.isEmpty) shouldBe true
+          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
         }
 
         "town is more than 35 characters" in {
@@ -185,7 +189,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
 
           await(
             service.lookupAddress(postcode, None).value
-          ).exists(_.addresses.isEmpty) shouldBe true
+          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
         }
 
         "county is more than 35 characters" in {
@@ -208,7 +212,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
 
           await(
             service.lookupAddress(postcode, None).value
-          ).exists(_.addresses.isEmpty) shouldBe true
+          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
         }
 
         "postcode is not valid" in {
@@ -231,8 +235,9 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
 
           await(
             service.lookupAddress(postcode, None).value
-          ).exists(_.addresses.isEmpty) shouldBe true
+          ) shouldBe Right(AddressLookupResult(postcode, None, List.empty))
         }
+
       }
 
       "return a successful response when a 200 status is returned and the JSON can be parsed" in {
