@@ -31,11 +31,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnecto
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{AddressLookupResult, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.addressLineRegexPredicate
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode.postcodeRegexPredicate
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[UKAddressLookupServiceImpl])
@@ -87,7 +88,17 @@ class UKAddressLookupServiceImpl @Inject() (
     postcode: Postcode,
     filter: Option[String]
   ): Either[String, AddressLookupResult] = {
-    def toAddress(a: RawAddress): Either[String, Address] = {
+
+    def validateAddressFields(address: UkAddress): Boolean =
+      List(
+        addressLineRegexPredicate.test(address.line1),
+        postcodeRegexPredicate.test(address.postcode.value),
+        address.line2.forall(addressLineRegexPredicate.test),
+        address.town.forall(addressLineRegexPredicate.test),
+        address.county.forall(addressLineRegexPredicate.test)
+      ).forall(identity)
+
+    def toAddress(a: RawAddress): Either[String, UkAddress] = {
       val lines: Either[String, (String, Option[String])] = a.lines match {
         case Nil       => Left("Could not find any lines of address")
         case a1 :: Nil => Right(a1 -> None)
@@ -102,8 +113,14 @@ class UKAddressLookupServiceImpl @Inject() (
 
     r.addresses
       .map(toAddress)
-      .sequence[Either[String, ?], Address]
-      .map(AddressLookupResult(postcode, filter, _))
+      .sequence[Either[String, ?], UkAddress]
+      .map(addresses =>
+        AddressLookupResult(
+          postcode,
+          filter,
+          addresses.filter(validateAddressFields)
+        )
+      )
   }
 
 }
