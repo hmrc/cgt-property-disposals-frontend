@@ -119,6 +119,120 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
           ).isLeft shouldBe true
         }
 
+        "address line1 is more than 35 characters" in {
+          val json = Json.parse(
+            """
+              |[
+              |  {
+              |    "address": {
+              |      "lines": [ "address line1 is more than 35 characters" ],
+              |      "town": "town",
+              |      "county" : "county",
+              |      "postcode": "ZZ1Z 4AB"
+              |    }
+              |  }
+              |]
+              |""".stripMargin
+          )
+
+          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+
+          await(
+            service.lookupAddress(postcode, None).value
+          ).exists(_.addresses.isEmpty) shouldBe true
+        }
+
+        "address line2 is more than 35 characters" in {
+          val json = Json.parse(
+            """
+              |[
+              |  {
+              |    "address": {
+              |      "lines": [ "line1", "address line2 is more than 35 characters" ],
+              |      "town": "town",
+              |      "county" : "county",
+              |      "postcode": "ZZ1Z 4AB"
+              |    }
+              |  }
+              |]
+              |""".stripMargin
+          )
+
+          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+
+          await(
+            service.lookupAddress(postcode, None).value
+          ).exists(_.addresses.isEmpty) shouldBe true
+        }
+
+        "town is more than 35 characters" in {
+          val json = Json.parse(
+            """
+              |[
+              |  {
+              |    "address": {
+              |      "lines": [ "line1", "line2" ],
+              |      "town": "town field length is more than 35 characters",
+              |      "county" : "county",
+              |      "postcode": "ZZ1Z 4AB"
+              |    }
+              |  }
+              |]
+              |""".stripMargin
+          )
+
+          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+
+          await(
+            service.lookupAddress(postcode, None).value
+          ).exists(_.addresses.isEmpty) shouldBe true
+        }
+
+        "county is more than 35 characters" in {
+          val json = Json.parse(
+            """
+              |[
+              |  {
+              |    "address": {
+              |      "lines": [ "line1", "line2" ],
+              |      "town": "town",
+              |      "county" : "county field length is more than 35 characters",
+              |      "postcode": "ZZ1Z 4AB"
+              |    }
+              |  }
+              |]
+              |""".stripMargin
+          )
+
+          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+
+          await(
+            service.lookupAddress(postcode, None).value
+          ).exists(_.addresses.isEmpty) shouldBe true
+        }
+
+        "postcode is not valid" in {
+          val json = Json.parse(
+            """
+              |[
+              |  {
+              |    "address": {
+              |      "lines": [ "line1", "line2" ],
+              |      "town": "town",
+              |      "county" : "county",
+              |      "postcode": "AB 123"
+              |    }
+              |  }
+              |]
+              |""".stripMargin
+          )
+
+          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+
+          await(
+            service.lookupAddress(postcode, None).value
+          ).exists(_.addresses.isEmpty) shouldBe true
+        }
       }
 
       "return a successful response when a 200 status is returned and the JSON can be parsed" in {
@@ -130,14 +244,14 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
             |      "lines": [ "line1", "line2" ],
             |      "town": "town",
             |      "county" :"county",
-            |      "postcode": "ABC 123"
+            |      "postcode": "ZZ1Z 4AB"
             |    }
             |  },
             |  {
             |    "address": {
             |      "lines": [ "line1" ],
             |      "town": "town",
-            |      "postcode": "ABC 123"
+            |      "postcode": "ZZ1Z 4AB"
             |    }
             |  },
             |  {
@@ -145,21 +259,21 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
             |      "lines": [ "line1" ],
             |      "town": "town",
             |      "county" : "county",
-            |      "postcode": "ABC 123"
+            |      "postcode": "ZZ1Z 4AB"
             |    }
             |  },
             |  {
             |    "address": {
             |      "lines": [ "line1", "line2" ],
             |      "town": "town",
-            |      "postcode": "ABC 123"
+            |      "postcode": "ZZ1Z 4AB"
             |    }
             |  },
             |  {
             |    "address": {
             |      "lines": [ "line1", "line2", "line3" ],
             |      "town": "town",
-            |      "postcode": "ABC 123"
+            |      "postcode": "ZZ1Z 4AB"
             |    }
             |  }
             |]
@@ -178,29 +292,35 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
                 Some("line2"),
                 Some("town"),
                 Some("county"),
-                Postcode("ABC 123")
+                Postcode("ZZ1Z 4AB")
               ),
-              UkAddress("line1", None, Some("town"), None, Postcode("ABC 123")),
+              UkAddress(
+                "line1",
+                None,
+                Some("town"),
+                None,
+                Postcode("ZZ1Z 4AB")
+              ),
               UkAddress(
                 "line1",
                 None,
                 Some("town"),
                 Some("county"),
-                Postcode("ABC 123")
+                Postcode("ZZ1Z 4AB")
               ),
               UkAddress(
                 "line1",
                 Some("line2"),
                 Some("town"),
                 None,
-                Postcode("ABC 123")
+                Postcode("ZZ1Z 4AB")
               ),
               UkAddress(
                 "line1",
                 Some("line2, line3"),
                 Some("town"),
                 None,
-                Postcode("ABC 123")
+                Postcode("ZZ1Z 4AB")
               )
             )
           )
