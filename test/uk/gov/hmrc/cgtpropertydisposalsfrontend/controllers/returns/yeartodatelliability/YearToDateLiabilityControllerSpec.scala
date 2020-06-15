@@ -154,6 +154,42 @@ class YearToDateLiabilityControllerSpec
       }
     )
 
+  def singleDisposalTriageAnswers(
+    disposalDate: Option[DisposalDate],
+    wasUkResident: Boolean,
+    individualUserType: Option[IndividualUserType]
+  ) =
+    sample[IncompleteSingleDisposalTriageAnswers].copy(
+      individualUserType = individualUserType,
+      hasConfirmedSingleDisposal = true,
+      disposalMethod = Some(sample[DisposalMethod]),
+      assetType = Some(AssetType.Residential),
+      wasAUKResident = Some(wasUkResident),
+      countryOfResidence = if (wasUkResident) Some(Country.uk) else Some(sample[Country]),
+      disposalDate = disposalDate
+    )
+
+  def representeeAnswers(individualUserType: Option[IndividualUserType]) =
+    individualUserType match {
+      case Some(PersonalRepresentative) =>
+        Some(
+          sample[CompleteRepresenteeAnswers]
+            .copy(dateOfDeath = Some(sample[DateOfDeath]))
+        )
+      case Some(Capacitor)              =>
+        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+      case _                            => None
+    }
+
+  def fillingOutReturn(draftReturn: DraftReturn, userType: UserType) =
+    sample[FillingOutReturn].copy(
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      subscribedDetails = sample[SubscribedDetails].copy(
+        name = setNameForUserType(userType)
+      ),
+      draftReturn = draftReturn
+    )
+
   def sessionWithSingleIndirectDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: Option[DisposalDate] = Some(sample[DisposalDate]),
@@ -165,25 +201,8 @@ class YearToDateLiabilityControllerSpec
     )
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
     val draftReturn = sample[DraftSingleIndirectDisposalReturn].copy(
-      triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
-        individualUserType = individualUserType,
-        hasConfirmedSingleDisposal = true,
-        disposalMethod = Some(sample[DisposalMethod]),
-        assetType = Some(AssetType.Residential),
-        wasAUKResident = Some(wasUkResident),
-        countryOfResidence = if (wasUkResident) Some(Country.uk) else Some(sample[Country]),
-        disposalDate = disposalDate
-      ),
-      representeeAnswers = individualUserType match {
-        case Some(PersonalRepresentative) =>
-          Some(
-            sample[CompleteRepresenteeAnswers]
-              .copy(dateOfDeath = Some(sample[DateOfDeath]))
-          )
-        case Some(Capacitor)              =>
-          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-        case _                            => None
-      },
+      triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType),
+      representeeAnswers = representeeAnswers(individualUserType),
       companyAddress = address,
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
@@ -217,6 +236,50 @@ class YearToDateLiabilityControllerSpec
       wasUkResident
     )
 
+  def sessionWithSingleMixedUseDisposalState(
+    ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+    disposalDate: Option[DisposalDate] = Some(sample[DisposalDate]),
+    userType: UserType,
+    wasUkResident: Boolean,
+    individualUserType: Option[IndividualUserType] = Some(
+      IndividualUserType.Self
+    )
+  ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
+    val draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
+      triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType),
+      representeeAnswers = representeeAnswers(individualUserType),
+      yearToDateLiabilityAnswers = ytdLiabilityAnswers
+    )
+    val journey     = sample[FillingOutReturn].copy(
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      subscribedDetails = sample[SubscribedDetails].copy(
+        name = setNameForUserType(userType)
+      ),
+      draftReturn = draftReturn
+    )
+    (
+      SessionData.empty.copy(
+        userType = Some(userType),
+        journeyStatus = Some(journey)
+      ),
+      journey,
+      draftReturn
+    )
+  }
+
+  def sessionWithSingleMixedUseDisposalState(
+    ytdLiabilityAnswers: YearToDateLiabilityAnswers,
+    disposalDate: DisposalDate,
+    userType: UserType,
+    wasUkResident: Boolean
+  ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) =
+    sessionWithSingleMixedUseDisposalState(
+      Some(ytdLiabilityAnswers),
+      Some(disposalDate),
+      userType,
+      wasUkResident
+    )
+
   def sessionWithSingleDisposalState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: Option[DisposalDate] = Some(sample[DisposalDate]),
@@ -230,25 +293,8 @@ class YearToDateLiabilityControllerSpec
     )
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
-      triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
-        individualUserType = individualUserType,
-        hasConfirmedSingleDisposal = true,
-        disposalMethod = Some(sample[DisposalMethod]),
-        assetType = Some(AssetType.Residential),
-        wasAUKResident = Some(wasUkResident),
-        countryOfResidence = if (wasUkResident) Some(Country.uk) else Some(sample[Country]),
-        disposalDate = disposalDate
-      ),
-      representeeAnswers = individualUserType match {
-        case Some(PersonalRepresentative) =>
-          Some(
-            sample[CompleteRepresenteeAnswers]
-              .copy(dateOfDeath = Some(sample[DateOfDeath]))
-          )
-        case Some(Capacitor)              =>
-          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-        case _                            => None
-      },
+      triageAnswers = singleDisposalTriageAnswers(disposalDate, wasUkResident, individualUserType),
+      representeeAnswers = representeeAnswers(individualUserType),
       reliefDetailsAnswers = reliefDetailsAnswers,
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
@@ -3311,14 +3357,15 @@ class YearToDateLiabilityControllerSpec
 
         "the user has completed this uncalculated section" in {
           test(
-            sessionWithMultipleDisposalsState(
+            sessionWithSingleMixedUseDisposalState(
               sample[CompleteNonCalculatedYTDAnswers]
                 .copy(taxableGainOrLoss = AmountInPence(0L)),
+              sample[DisposalDate],
               UserType.Individual,
               wasUkResident = true
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(),
-            "taxableGainOrLoss.multiple.title",
+            "taxableGainOrLoss.title",
             doc =>
               doc
                 .select("#taxableGainOrLoss-2")
@@ -3596,6 +3643,18 @@ class YearToDateLiabilityControllerSpec
         "the user has answered this question before for single indirect disposal" in {
           test(
             sessionWithSingleIndirectDisposalState(
+              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true
+            )._1,
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+
+        "the user has answered this question before for single mixed use disposal" in {
+          test(
+            sessionWithSingleMixedUseDisposalState(
               Some(sample[CompleteNonCalculatedYTDAnswers]),
               Some(sample[DisposalDate]),
               UserType.Individual,
@@ -4179,6 +4238,43 @@ class YearToDateLiabilityControllerSpec
             )
           }
 
+          "the user is in on a single mixed use disposal journey" in {
+            val answers =
+              sample[IncompleteNonCalculatedYTDAnswers]
+                .copy(pendingUpscanUpload = Some(sample[UpscanUpload]))
+
+            val (session, journey, draftReturn) =
+              sessionWithSingleMixedUseDisposalState(
+                answers,
+                sample[DisposalDate],
+                sample[UserType],
+                wasUkResident = sample[Boolean]
+              )
+
+            val newAnswers     = answers.copy(pendingUpscanUpload = None)
+            val newDraftReturn =
+              draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+            val newJourney     = journey.copy(draftReturn = newDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(
+                Right(())
+              )
+            }
+
+            checkIsRedirect(
+              performAction(),
+              routes.YearToDateLiabilityController.documentDidNotUpload()
+            )
+          }
+
           "the user is on a multiple disposal journey" in {
             val answers =
               sample[IncompleteNonCalculatedYTDAnswers]
@@ -4593,6 +4689,44 @@ class YearToDateLiabilityControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithSingleDisposalState(
+              sample[CompleteNonCalculatedYTDAnswers],
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
+            )._1
+          )
+        }
+
+        checkIsRedirect(
+          performAction(),
+          routes.YearToDateLiabilityController.checkYourAnswers()
+        )
+      }
+
+      "the user has started this section and is on a single indirect disposal non calculated journey" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithSingleIndirectDisposalState(
+              sample[CompleteNonCalculatedYTDAnswers],
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
+            )._1
+          )
+        }
+
+        checkIsRedirect(
+          performAction(),
+          routes.YearToDateLiabilityController.checkYourAnswers()
+        )
+      }
+
+      "the user has started this section and is on a single mixed use non calculated journey" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithSingleMixedUseDisposalState(
               sample[CompleteNonCalculatedYTDAnswers],
               sample[DisposalDate],
               UserType.Individual,
