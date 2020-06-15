@@ -710,7 +710,7 @@ class HomePageControllerSpec
                   )
                 )
                 if (subscribed.sentReturns.nonEmpty) {
-                  doc.select("h3").text should include(
+                  doc.select("h2").text should include(
                     messageFromMessageKey(
                       "account.totalLeftToPay"
                     )
@@ -718,7 +718,7 @@ class HomePageControllerSpec
                   if (subscribed.totalLeftToPay() > AmountInPence.zero)
                     doc
                       .select(
-                        "#content > article > div.grid-row.returns-list-header > div.column-quarter > div > a"
+                        "#content > article > div.grid-row.account-home-heading > div.column-one-third.account-due > a"
                       )
                       .attr(
                         "href"
