@@ -16,34 +16,14 @@
 
 @import play.api.i18n.Messages
 
-@import cats.syntax.order._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-
 @this()
 
-@(totalLeftToPay: AmountInPence)(implicit messages: Messages)
+@()(implicit messages: Messages)
 
 <div class="grid-row returns-list-header">
-  <div class="column-three-quarters">
+  <div class="column-full">
     <h2 class="heading-large">
       @messages("returns.list.title")
     </h2>
-  </div>
-  <div class="column-quarter">
-    <div class="due-on-account-summary">
-      <h3>
-        <span class="form-hint">
-        @messages("account.totalLeftToPay")
-        </span>
-        @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
-      </h3>
-      @if(totalLeftToPay > AmountInPence.zero) {
-        <a href="@homepage.routes.HomePageController.payTotalAmountLeftToPay()">
-        @messages("account.make.payment.link")
-        </a>
-      }
-    </div>
   </div>
 </div>

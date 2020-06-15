@@ -1,0 +1,52 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.i18n.Messages
+
+@import cats.syntax.order._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+
+@this()
+
+@(totalLeftToPay: AmountInPence)(implicit messages: Messages)
+
+@numberClass = @{
+  if(totalLeftToPay.inPounds() > 999999999) "very-large-number"
+  else if (totalLeftToPay.inPounds() > 99999999) "large-number"
+  else "regular-number"
+}
+
+<h2 class="@numberClass">
+  <span class="govuk-caption-xl">
+    @messages("account.totalLeftToPay")
+  </span>
+  @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
+  <span class="sub-heading">
+    @messages("account.totalLeftToPay.penalties")
+  </span>
+</h2>
+@if(totalLeftToPay > AmountInPence.zero) {
+  <a href="@homepage.routes.HomePageController.payTotalAmountLeftToPay()">
+    @messages("account.make.payment.link")
+  </a>
+}
+<p>
+  <span class="caption">
+    @messages("account.totalLeftToPay.payments")
+  </span>
+</p>
