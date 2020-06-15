@@ -35,39 +35,35 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        summary_for_confirmation: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary_for_confirmation,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    summary_for_confirmation: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary_for_confirmation,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(
-id: RepresenteeReferenceId,
-name: IndividualName,
-representativeType: Either[PersonalRepresentative.type, Capacitor.type],
-displayReturnToSummaryLink: Boolean,
-form: Form[Boolean],
-backLink: Call
-    )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
-@title = @{
-    messages("representeeConfirmPerson.title")
-}
-@key = @{
-    "confirmed"
-}
+    id: RepresenteeReferenceId,
+    name: IndividualName,
+    displayReturnToSummaryLink: Boolean,
+    form: Form[Boolean],
+    backLink: Call
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+
+@title = @{ messages("representeeConfirmPerson.title") }
+@key = @{ "confirmed"}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @formTitle = @{messages("representeeConfirmPerson.formTitle")}
 
@@ -83,13 +79,12 @@ backLink: Call
 
     @warning(messages("representeeConfirmPerson.warning"))
 
-    @summary_for_confirmation(id, name, representativeType)
+    @summary_for_confirmation(id, name)
 
     @formWrapper(routes.RepresenteeController.confirmPersonSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = Html(s"<h2>$formTitle</h2>"),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,

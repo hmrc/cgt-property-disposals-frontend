@@ -83,7 +83,6 @@
             monthValue = form.data.get("acquisitionDate-month"),
             yearValue = form.data.get("acquisitionDate-year"),
             helpText = Some(Html(messages(s"$key$userKey$assetTypeKey.helpText"))),
-            labelAsHeading = true,
             errorKey = errorKey.map(e => s"${e.key}$userKey$assetTypeKey.${e.message}"),
             hasErrors = hasErrors
         )

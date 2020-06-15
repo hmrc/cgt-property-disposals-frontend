@@ -22,14 +22,13 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 
 @this(
-        calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+    calcSum: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum
 )
 
 
 @(
-        exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-        calculatedTax: CalculatedTaxDue
+    exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
+    calculatedTax: CalculatedTaxDue
 )(implicit messages: Messages)
 
 @glarGainType = @{

@@ -24,19 +24,23 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
- alertBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.alert_banner,
- accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
- caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+   submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+   accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(email: Email, backLink: Call, enterEmail: Call, enterEmailSubmit: Call, resent: Boolean, emailJourneyType: EmailJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
-
-
+@(
+  email: Email,
+  backLink: Call,
+  enterEmail: Call,
+  enterEmailSubmit: Call,
+  resent: Boolean,
+  emailJourneyType: EmailJourneyType
+)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{
   val prefix = if (resent) s"${messages("confirmEmail.resent")} " else ""

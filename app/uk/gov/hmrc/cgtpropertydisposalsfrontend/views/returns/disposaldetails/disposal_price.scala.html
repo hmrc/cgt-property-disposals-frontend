@@ -22,14 +22,13 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalMethod, ShareOfProperty}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
@@ -43,7 +42,6 @@
     form: Form[BigDecimal],
     backLink: Call,
     disposalMethod: DisposalMethod,
-    shareOfProperty: ShareOfProperty,
     isATrust: Boolean,
     representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
     isIndirectDisposal: Boolean

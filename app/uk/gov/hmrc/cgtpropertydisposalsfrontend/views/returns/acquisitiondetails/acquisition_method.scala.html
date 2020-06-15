@@ -34,7 +34,6 @@
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
     errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
     radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
@@ -142,7 +141,6 @@
             label = pageHeading(title),
             selected = selectedIndex,
             error = form.error(key),
-            hasErrors = hasErrors,
             options = options,
             customErrorKey = Some(s"$key$userKey$assetTypeKey")
         )

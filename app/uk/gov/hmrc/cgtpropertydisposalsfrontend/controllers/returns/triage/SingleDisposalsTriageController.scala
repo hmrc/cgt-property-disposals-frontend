@@ -430,7 +430,7 @@ class SingleDisposalsTriageController @Inject() (
           i => i.disposalDate.map(_.value).orElse(i.tooEarlyDisposalDate),
           c => Some(c.disposalDate.value)
         ),
-        page = { (journeyStatus, currentAnswers, form, isDraftReturn, assetType) =>
+        page = { (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
             .fold(
               _.subscribedDetails.isATrust,
@@ -440,7 +440,6 @@ class SingleDisposalsTriageController @Inject() (
             form,
             disposalDateBackLink(currentAnswers),
             isDraftReturn,
-            assetType,
             isATrust,
             currentAnswers.representativeType()
           )
@@ -457,8 +456,8 @@ class SingleDisposalsTriageController @Inject() (
             f => f._2.subscribedDetails.isATrust
           )
         triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
-          case None            => Redirect(disposalDateBackLink(triageAnswers))
-          case Some(assetType) =>
+          case None    => Redirect(disposalDateBackLink(triageAnswers))
+          case Some(_) =>
             disposalDateForm(TimeUtils.today())
               .bindFromRequest()
               .fold(
@@ -468,7 +467,6 @@ class SingleDisposalsTriageController @Inject() (
                       formWithErrors,
                       disposalDateBackLink(triageAnswers),
                       state.isRight,
-                      assetType,
                       isATrust,
                       triageAnswers.representativeType()
                     )
@@ -1150,7 +1148,7 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                __
+                _
               ) if isIndividual =>
             Redirect(
               routes.CommonTriageQuestionsController
@@ -1731,7 +1729,6 @@ object SingleDisposalsTriageController {
     mapping(
       "individualUserType" -> of(
         FormUtils.radioFormFormatter(
-          "individualUserType",
           List(Self, Capacitor, PersonalRepresentative)
         )
       )
@@ -1742,7 +1739,7 @@ object SingleDisposalsTriageController {
     mapping(
       "numberOfProperties" -> of(
         FormUtils
-          .radioFormFormatter("numberOfProperties", List(One, MoreThanOne))
+          .radioFormFormatter(List(One, MoreThanOne))
       )
     )(identity)(Some(_))
   )
@@ -1751,7 +1748,7 @@ object SingleDisposalsTriageController {
     mapping(
       "disposalMethod" -> of(
         FormUtils
-          .radioFormFormatter("disposalMethod", List(Sold, Gifted, Other))
+          .radioFormFormatter(List(Sold, Gifted, Other))
       )
     )(identity)(Some(_))
   )
@@ -1813,7 +1810,6 @@ object SingleDisposalsTriageController {
     mapping(
       "assetTypeForNonUkResidents" -> of(
         FormUtils.radioFormFormatter(
-          "assetTypeForNonUkResidents",
           List(Residential, NonResidential, MixedUse, IndirectDisposal)
         )
       )

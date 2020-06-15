@@ -1217,13 +1217,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        val triageAnswersWithTaxYear =
-          sample[CompleteMultipleDisposalsTriageAnswers]
-            .copy(taxYear = taxYear, individualUserType = None)
+        val triageAnswersWithTaxYear = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          taxYear = taxYear,
+          individualUserType = None
+        )
 
         def test(
           draftReturn: DraftMultipleDisposalsReturn,
-          expectedBackLink: Call,
           userType: UserType
         ): Unit = {
           inSequence {
@@ -1271,7 +1271,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Individual
           )
         }
@@ -1282,7 +1281,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Organisation
           )
         }
@@ -1293,7 +1291,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Agent
           )
         }
@@ -1308,7 +1305,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Individual
           )
         }
@@ -1323,7 +1319,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Organisation
           )
         }
@@ -1338,7 +1333,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Agent
           )
         }
@@ -1353,7 +1347,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers(),
             Individual
           )
         }
@@ -1368,7 +1361,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers(),
             Organisation
           )
         }
@@ -1383,7 +1375,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers(),
             Agent
           )
         }
