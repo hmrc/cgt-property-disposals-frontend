@@ -78,7 +78,6 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
         @yesNo(
             fieldId = key,
             label = pageHeading(title),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,

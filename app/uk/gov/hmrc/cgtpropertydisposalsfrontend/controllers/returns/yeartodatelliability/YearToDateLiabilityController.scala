@@ -1746,7 +1746,7 @@ class YearToDateLiabilityController @Inject() (
             _,
             _,
             _,
-            Some(expiredEvidence),
+            Some(_),
             _
           ) =>
         Redirect(
@@ -1759,7 +1759,7 @@ class YearToDateLiabilityController @Inject() (
             _,
             _,
             _,
-            Some(pendingUpscanUpload)
+            Some(_)
           ) =>
         removePendingUpscanUpload(Left(n), fillingOutReturn).fold(
           { e =>
@@ -1887,7 +1887,7 @@ class YearToDateLiabilityController @Inject() (
             _,
             _,
             _,
-            Some(expiredEvidence),
+            Some(_),
             _
           ) =>
         Redirect(
@@ -1902,7 +1902,7 @@ class YearToDateLiabilityController @Inject() (
             _,
             _,
             _,
-            Some(pendingUpscanUpload)
+            Some(_)
           ) =>
         removePendingUpscanUpload(Right(c), fillingOutReturn).fold(
           { e =>

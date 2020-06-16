@@ -495,14 +495,12 @@ class SupportingEvidenceControllerSpec
 
     "handling requests to upload supporting evidence" must {
 
-      def performAction(uploadReference: UploadReference): Future[Result] =
+      def performAction(): Future[Result] =
         controller.uploadSupportingEvidence()(FakeRequest())
 
       "show check your answers page" when {
 
         "the number of uploads have reached the maximum allowed" in {
-          val uploadReference = sample[UploadReference]
-
           val supportingEvidence = sample[SupportingEvidence]
 
           val answers = IncompleteSupportingEvidenceAnswers(
@@ -519,18 +517,16 @@ class SupportingEvidenceControllerSpec
           }
 
           checkIsRedirect(
-            performAction(uploadReference),
+            performAction(),
             routes.SupportingEvidenceController.checkYourAnswers()
           )
         }
+
       }
 
       "show technical error page" when {
 
         "upscan initiate call fails" in {
-
-          val uploadReference = sample[UploadReference]
-
           val answers = IncompleteSupportingEvidenceAnswers(
             doYouWantToUploadSupportingEvidence = Some(false),
             evidences = List.empty,
@@ -552,8 +548,9 @@ class SupportingEvidenceControllerSpec
               Left(Error("some upscan error"))
             )
           }
-          checkIsTechnicalErrorPage(performAction(uploadReference))
+          checkIsTechnicalErrorPage(performAction())
         }
+
       }
 
       "show file upload page" when {
@@ -570,8 +567,9 @@ class SupportingEvidenceControllerSpec
 
           val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
 
-          val upscanUpload =
-            sample[UpscanUpload].copy(uploadReference = uploadReference)
+          val upscanUpload = sample[UpscanUpload].copy(
+            uploadReference = uploadReference
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -586,7 +584,7 @@ class SupportingEvidenceControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(uploadReference),
+            performAction(),
             messageFromMessageKey("supporting-evidence.upload.title"),
             doc =>
               doc
@@ -596,6 +594,7 @@ class SupportingEvidenceControllerSpec
                 .url
           )
         }
+
       }
 
       "show the file upload failed page" when {
@@ -630,6 +629,7 @@ class SupportingEvidenceControllerSpec
             routes.SupportingEvidenceController.documentDidNotUpload()
           )
         }
+
       }
     }
 
@@ -1581,5 +1581,6 @@ class SupportingEvidenceControllerSpec
         }
       }
     }
+
   }
 }

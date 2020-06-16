@@ -1533,7 +1533,7 @@ object MultipleDisposalsTriageController {
       mapping(
         "multipleDisposalsTaxYear" -> of(
           FormUtils
-            .radioFormFormatter("multipleDisposalsTaxYear", List(true, false))
+            .radioFormFormatter(List(true, false))
         )
       )(identity)(Some(_))
     )

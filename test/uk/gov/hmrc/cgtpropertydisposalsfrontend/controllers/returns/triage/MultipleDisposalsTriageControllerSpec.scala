@@ -2457,8 +2457,6 @@ class MultipleDisposalsTriageControllerSpec
 
     "handling requests to display the asset type for non-uk residents page" must {
 
-      val (countryCode, countryName) = "HK" -> "Hong Kong"
-
       def performAction(): Future[Result] =
         controller.assetTypeForNonUkResidents()(FakeRequest())
 
@@ -3287,11 +3285,10 @@ class MultipleDisposalsTriageControllerSpec
       "not perform any updates" when {
 
         "the date submitted is the same as one that already exists in session" in {
-          val answers            =
-            sample[CompleteMultipleDisposalsTriageAnswers]
-              .copy(completionDate = CompletionDate(TimeUtils.today()))
-          val (session, journey) =
-            sessionDataWithStartingNewDraftReturn(answers)
+          val answers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            completionDate = CompletionDate(TimeUtils.today())
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3528,10 +3525,10 @@ class MultipleDisposalsTriageControllerSpec
       "not perform any updates" when {
 
         "the date submitted is the same as one that already exists in session" in {
-          val answers            =
+          val answers      =
             sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(completionDate = CompletionDate(TimeUtils.today()))
-          val (session, journey) =
+          val (session, _) =
             sessionDataWithStartingNewDraftReturn(answers)
 
           inSequence {

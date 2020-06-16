@@ -79,7 +79,6 @@
         @yesNo(
             fieldId = key,
             label = pageHeading(title, Some(messages("triage.caption"))),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => s"$userTypeErrorPrefix${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,

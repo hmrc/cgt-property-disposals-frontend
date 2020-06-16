@@ -20,24 +20,21 @@ import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.eq._
 import com.google.inject.Inject
-import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
+
 class DmsSubmissionController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cgtPropertyDisposalsConnector: CGTPropertyDisposalsConnector,
-  config: Configuration,
-  sessionStore: SessionStore,
   cc: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendController(cc)

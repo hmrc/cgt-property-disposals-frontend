@@ -76,7 +76,6 @@
    monthValue = form.data.get("completionDate-month"),
    yearValue = form.data.get("completionDate-year"),
    helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-   labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )

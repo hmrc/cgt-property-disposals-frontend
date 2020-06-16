@@ -71,7 +71,6 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
         @yesNo(
             fieldId = key,
             label = pageHeading(title),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,

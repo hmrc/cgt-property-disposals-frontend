@@ -1882,8 +1882,7 @@ class AcquisitionDetailsControllerSpec
 
         def sectionCompleted(
           userType: UserType,
-          individualUserType: IndividualUserType,
-          userKey: String
+          individualUserType: IndividualUserType
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1923,16 +1922,14 @@ class AcquisitionDetailsControllerSpec
         "the user has already completed the acquisition details section" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              sectionCompleted(userType, individualUserType, userKey)
+              sectionCompleted(userType, individualUserType)
           }
         }
 
         def amountNonZero(
           userType: UserType,
           individualUserType: IndividualUserType,
-          assetType: AssetType,
-          userKey: String
+          assetType: AssetType
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1968,8 +1965,7 @@ class AcquisitionDetailsControllerSpec
         "the amount in the session is non-zero" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              amountNonZero(userType, individualUserType, assetType, userKey)
+              amountNonZero(userType, individualUserType, assetType)
           }
         }
 
@@ -2033,8 +2029,7 @@ class AcquisitionDetailsControllerSpec
 
         def test(data: (String, String)*)(
           userType: UserType,
-          individualUserType: IndividualUserType,
-          userKey: String
+          individualUserType: IndividualUserType
         )(
           expectedErrorMessageKey: String
         ) = {
@@ -2073,11 +2068,9 @@ class AcquisitionDetailsControllerSpec
         "the amount of money is zero" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
               test("rebaseAcquisitionPrice" -> "0")(
                 userType,
-                individualUserType,
-                userKey
+                individualUserType
               )(
                 s"$key.error.tooSmall"
               )
@@ -2229,7 +2222,7 @@ class AcquisitionDetailsControllerSpec
 
         "the price submitted is valid and the journey was complete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+            (_: UserType, individualUserType: IndividualUserType) =>
               scenarios.foreach {
                 case (formData, expectedAmountInPence) =>
                   withClue(
@@ -3279,7 +3272,7 @@ class AcquisitionDetailsControllerSpec
           assetType: AssetType,
           userKey: String,
           wasUkResident: Boolean
-        )(expectedErrorKey: String, errorArgs: String*) =
+        )(expectedErrorKey: String): Unit =
           testFormError(data: _*)(userType, individualUserType, assetType, wasUkResident)(
             expectedErrorKey,
             models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, wasUkResident))
@@ -3291,8 +3284,7 @@ class AcquisitionDetailsControllerSpec
               val userKey      = userMessageKey(individualUserType, userType)
               val assetTypeKey = assetTypeMessageKey(assetType)
               test()(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
-                s"$key$assetTypeKey.error.required",
-                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, false))
+                s"$key$assetTypeKey.error.required"
               )
           }
         }
@@ -3303,8 +3295,7 @@ class AcquisitionDetailsControllerSpec
               val assetTypeKey = assetTypeMessageKey(assetType)
               val userKey      = userMessageKey(individualUserType, userType)
               test(key -> "2")(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
-                s"$key$assetTypeKey.error.invalid",
-                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, false))
+                s"$key$assetTypeKey.error.invalid"
               )
           }
         }
@@ -3687,7 +3678,7 @@ class AcquisitionDetailsControllerSpec
 
         def test(
           data: (String, String)*
-        )(userType: UserType, individualUserType: IndividualUserType, assetType: AssetType)(
+        )(userType: UserType, individualUserType: IndividualUserType)(
           expectedErrorKey: String
         ) =
           testFormError(data: _*)(userType, individualUserType, Residential)(
@@ -3706,9 +3697,9 @@ class AcquisitionDetailsControllerSpec
           )
 
         "no option has been selected" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
-            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
-              test()(userType, individualUserType, assetType)(
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              test()(userType, individualUserType)(
                 "shouldUseRebase.error.required"
               )
           }

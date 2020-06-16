@@ -686,7 +686,6 @@ object CommonTriageQuestionsController {
       mapping(
         "individualUserType" -> of(
           FormUtils.radioFormFormatter(
-            "individualUserType",
             if (isAgent) List(Self, PersonalRepresentative)
             else List(Self, Capacitor, PersonalRepresentative)
           )
@@ -698,7 +697,7 @@ object CommonTriageQuestionsController {
     mapping(
       "numberOfProperties" -> of(
         FormUtils
-          .radioFormFormatter("numberOfProperties", List(One, MoreThanOne))
+          .radioFormFormatter(List(One, MoreThanOne))
       )
     )(identity)(Some(_))
   )

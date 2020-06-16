@@ -79,7 +79,6 @@
    @yesNo(
     fieldId = key,
     label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
-    labelAsHeading = true,
     errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
     hasErrors = hasErrors,
     selected = form.value

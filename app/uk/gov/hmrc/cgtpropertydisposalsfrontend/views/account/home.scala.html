@@ -23,15 +23,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
-buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
-sentReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.sent_returns_list,
-draftReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_returns_list,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-totalLeftHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.total_left_to_pay
+  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+  buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
+  sentReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.sent_returns_list,
+  draftReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_returns_list,
+  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+  totalLeftHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.total_left_to_pay
 )
 
 @(subscribed: Subscribed)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)

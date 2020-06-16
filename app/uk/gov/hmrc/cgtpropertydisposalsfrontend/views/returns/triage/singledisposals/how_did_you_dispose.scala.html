@@ -96,7 +96,6 @@
             options = options,
             selected = form.value.map(optionIndex),
             label = pageHeading(title, Some(messages("triage.caption"))),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
             hasErrors = hasErrors
         )

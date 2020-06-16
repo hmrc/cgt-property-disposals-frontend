@@ -117,7 +117,7 @@ sealed trait GenUtils {
   )
 
   implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
-    Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
+    Gen.chooseNum(0L, 10000L).map(LocalDate.ofEpochDay(_))
   )
 
   implicit val localDateTimeArb: Arbitrary[LocalDateTime] =

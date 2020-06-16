@@ -25,12 +25,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+  textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+  submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
 @(form: Form[Answers])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)

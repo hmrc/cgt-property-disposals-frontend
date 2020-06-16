@@ -109,7 +109,7 @@ class AgentAccessControllerSpec
     address: Address
   ): SubscribedDetails =
     sample[SubscribedDetails]
-      .copy(cgtReference = validCgtReference, address = address)
+      .copy(cgtReference = cgtReference, address = address)
 
   def sessionData(
     clientDetails: SubscribedDetails,

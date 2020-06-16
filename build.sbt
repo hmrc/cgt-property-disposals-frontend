@@ -57,10 +57,10 @@ lazy val microservice = Project(appName, file("."))
   .settings(TwirlKeys.templateImports := Seq.empty)
   .settings(
     scalacOptions ++= Seq(
-      "-Ypartial-unification",
       "-Yrangepos",
-      "-Ywarn-unused:imports"
-    )
+      "-language:postfixOps"
+    ),
+    scalacOptions in Test --= Seq("-Ywarn-value-discard")
   )
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)

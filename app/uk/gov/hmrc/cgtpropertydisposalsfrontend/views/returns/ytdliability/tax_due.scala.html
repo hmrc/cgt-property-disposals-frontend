@@ -35,23 +35,22 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{ PersonalRepresentative, Capacitor }
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-        calcRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_row,
-        initialGainOrLossWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.initial_gain_or_loss_workings,
-        gainOrLossAfterReliefsWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_workings,
-        gainAfterLossesWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_after_losses_workings,
-        taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
-        taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-        printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
+    calcRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_row,
+    initialGainOrLossWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.initial_gain_or_loss_workings,
+    gainOrLossAfterReliefsWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_workings,
+    gainAfterLossesWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_after_losses_workings,
+    taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
+    taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
+    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
 @(form: Form[BigDecimal],
@@ -72,7 +71,7 @@
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{ triageAnswers.disposalDate.taxYear }
-@assetType = @{ triageAnswers.assetType }
+
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
   if (representativeType.exists(_.isLeft)) ".personalRep"
@@ -137,7 +136,7 @@
         @calcRow(calculatedTax.amountOfTaxDue, messages(s"$key.amountOfTaxDue"), showGainType = false)
         @details(
           messages("calculator.showWorkings"),
-          taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, assetType, isATrust),
+          taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, isATrust),
           Some(messages(s"$key.assistive.amountOfTaxDue"))
         )
       </li>

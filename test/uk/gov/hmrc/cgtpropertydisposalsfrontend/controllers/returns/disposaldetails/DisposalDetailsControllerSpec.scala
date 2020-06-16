@@ -1122,7 +1122,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1169,7 +1169,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1802,7 +1802,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1849,7 +1849,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -2583,7 +2583,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalFeesTitleScenarios(individualUserType, userType).foreach {
@@ -3424,7 +3424,6 @@ class DisposalDetailsControllerSpec
         def testIsCheckYourAnswers(
           result: Future[Result],
           completeDisposalDetailsAnswers: CompleteDisposalDetailsAnswers,
-          expectedTitleKey: String,
           expectedDisposalPriceTitleKey: String,
           expectedDisposalFeesTitleKey: String,
           userType: UserType,
@@ -3489,15 +3488,12 @@ class DisposalDetailsControllerSpec
               testIsCheckYourAnswers(
                 performAction(),
                 completeAnswers,
-                "returns.disposal-details.cya.title",
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
                 )._1,
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
@@ -3560,15 +3556,12 @@ class DisposalDetailsControllerSpec
               testIsCheckYourAnswers(
                 performAction(),
                 completeAnswers,
-                "returns.disposal-details.cya.title",
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
                 )._1,
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
@@ -3745,7 +3738,6 @@ object DisposalDetailsControllerSpec extends Matchers {
   }
 
   def expectedTitles(
-    completeAnswers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     userType: UserType,
     individualUserType: IndividualUserType

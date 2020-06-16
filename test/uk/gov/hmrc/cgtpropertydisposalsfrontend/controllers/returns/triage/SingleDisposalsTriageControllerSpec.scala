@@ -1568,7 +1568,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1589,7 +1589,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1610,7 +1610,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1634,7 +1634,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1660,7 +1660,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1686,7 +1686,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1703,7 +1703,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1724,7 +1724,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1745,7 +1745,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
@@ -1764,7 +1764,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          checkPrepopulatedContent(doc, disposalDate)
+          checkPrepopulatedContent(doc)
         }
       )
 
@@ -1784,7 +1784,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          checkPrepopulatedContent(doc, disposalDate)
+          checkPrepopulatedContent(doc)
         }
       )
 
@@ -1804,7 +1804,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          checkPrepopulatedContent(doc, disposalDate)
+          checkPrepopulatedContent(doc)
         }
       )
 
@@ -1864,7 +1864,7 @@ class SingleDisposalsTriageControllerSpec
           .url
       }
 
-      def checkPrepopulatedContent(doc: Document, date: DisposalDate) = {
+      def checkPrepopulatedContent(doc: Document) = {
         doc
           .select("#disposalDate-day")
           .attr("value") shouldBe disposalDate.value.getDayOfMonth.toString

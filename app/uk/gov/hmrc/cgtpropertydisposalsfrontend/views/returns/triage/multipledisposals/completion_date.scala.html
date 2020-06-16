@@ -62,7 +62,6 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
    monthValue = form.data.get(s"$key-month"),
    yearValue = form.data.get(s"$key-year"),
    helpText = Some(Html(messages(s"$key.helpText"))),
-   labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )

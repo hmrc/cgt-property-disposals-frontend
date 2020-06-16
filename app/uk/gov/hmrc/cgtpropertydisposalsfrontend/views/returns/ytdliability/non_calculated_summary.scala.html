@@ -24,21 +24,20 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{ PersonalRepresentative, Capacitor }
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
 
 @this(
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
-        answers: CompleteNonCalculatedYTDAnswers,
-        showFiles: Boolean,
-        isMultiple: Boolean,
-        isATrust: Boolean,
-        representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
+    answers: CompleteNonCalculatedYTDAnswers,
+    showFiles: Boolean,
+    isMultiple: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]]
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }

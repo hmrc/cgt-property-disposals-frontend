@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
-import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -26,7 +25,6 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 @Singleton
 class LandingPageController @Inject() (
   cc: MessagesControllerComponents,
-  config: Configuration,
   landing_page: views.html.landing_page,
   agents_landing_page: views.html.agents_landing_page
 )(implicit viewConfig: ViewConfig)
