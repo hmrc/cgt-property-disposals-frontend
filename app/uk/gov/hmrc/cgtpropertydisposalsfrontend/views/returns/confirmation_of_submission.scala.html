@@ -92,6 +92,11 @@
     else messages(s"$key.propertyAddress")
 }
 
+@printLinkMessageKey = @{(representativeType, representeeAnswers.map(_.id)) match {
+  case (Some(Right(Capacitor)), Some(NoReferenceId)) => s"$key$userKey.noId.printPage"
+  case _ => s"$key$userKey.printPage"
+  }}
+
 @mainTemplate(title = title, userType = request.userType) {
 
 <div class="govuk-box-highlight">
@@ -127,14 +132,8 @@
      @Html(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
     </p>
 
-    <p id="printPage">
-    @Html({
-      val messageKey = (representativeType, representeeAnswers.map(_.id)) match {
-          case (Some(Right(Capacitor)), Some(NoReferenceId)) => s"$key$userKey.noId.printPage"
-          case _ => s"$key$userKey.printPage"
-      }
-      messages(messageKey, "JavaScript: window.print();")
-    })
+    <p id="printPage" class="js-visible">
+      @Html(messages(printLinkMessageKey, "JavaScript: window.print();"))
     </p>
 
     @cyaSection() {
@@ -178,11 +177,11 @@
     @justSubmittedReturn.submissionResponse.charge.map { charge =>
       @representativeType match {
           case Some(Left(PersonalRepresentative)) => {
-              <h2 class="heading-medium">@messages(s"$key.howToPay.heading")</h2>
+            <h2 class="heading-medium">@messages(s"$key.howToPay.heading")</h2>
 
-              <p id="howToPay">@Html(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference))</p>
+            <p id="howToPay">@Html(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference))</p>
 
-              @payNowButton
+            @payNowButton
           }
 
           case Some(Right(Capacitor)) => {
@@ -210,6 +209,12 @@
               }
 
               <p id="howToPay">@Html(messages(s"$key$userKey.howToPay.p1", charge.chargeReference))</p>
+
+              @if(isATrust && isAgent) {
+                <span class="form-hint">@messages(s"$key.trust.paymentNotice")</span>
+              } else {
+                <span class="form-hint">@messages(s"$key$userKey.paymentNotice")</span>
+              }
 
               @{if (!isAgent) payNowButton }
           }

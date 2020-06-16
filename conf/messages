@@ -2810,6 +2810,10 @@ confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfe
 confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 
+confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
+confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
+confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account. 
+
 confirmationOfSubmission.agent.inset.heading=<strong class="bold">Self Assessment</strong>
 confirmationOfSubmission.trust.inset.heading=<strong class="bold">If the trust needs to send a Self Assessment tax return</strong>
 confirmationOfSubmission.agent.inset.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
