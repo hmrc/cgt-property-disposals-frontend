@@ -169,4 +169,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val userRecruitmentBannerEnabled: Boolean = servicesConfig.getBoolean("user-recruitment-banner.enabled")
   val userRecruitmentUrl: String            = getString("user-recruitment-banner.url")
 
+  val periodOfAdminEnabled: Boolean = servicesConfig.getBoolean("period-of-admin.enabled")
+
 }

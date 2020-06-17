@@ -28,6 +28,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -41,6 +42,7 @@
         accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
+
 
 @(form: Form[NonUkAddress],
         backLink: Call,
@@ -69,11 +71,17 @@
 
       case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
           if(c.draftReturn.isLeft)                        messages("nonUkAddress.companyDetails.multipleIndirect.title")
-          else if(c.representativeType.exists(_.isLeft))  messages("nonUkAddress.companyDetails.personalRep.title")
-          else if(c.representativeType.exists(_.isRight)) messages("nonUkAddress.companyDetails.capacitor.title")
-          else if(c.isATrust)                             messages("nonUkAddress.companyDetails.trust.title")
-          else if(request.userType.exists(_ === Agent))   messages("nonUkAddress.companyDetails.agent.title")
-          else                                            messages("nonUkAddress.companyDetails.title")
+          else
+              c.representativeType match {
+                  case Some(PersonalRepresentative)                => messages("nonUkAddress.companyDetails.personalRep.title")
+                  case Some(PersonalRepresentativeInPeriodOfAdmin) => messages("nonUkAddress.companyDetails.personalRep.title")
+                  case Some(Capacitor)                             => messages("nonUkAddress.companyDetails.capacitor.title")
+                  case None =>
+                      if (c.isATrust)                                 messages("nonUkAddress.companyDetails.trust.title")
+                      else if (request.userType.exists(_ === Agent))  messages("nonUkAddress.companyDetails.agent.title")
+                      else                                            messages("nonUkAddress.companyDetails.title")
+              }
+
       case _ =>
           messages(s"$key.title")
   }

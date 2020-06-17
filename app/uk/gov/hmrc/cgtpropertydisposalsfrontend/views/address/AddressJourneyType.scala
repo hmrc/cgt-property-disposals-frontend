@@ -20,7 +20,6 @@ import cats.Eq
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.{SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, EnteringCompanyDetails, FillingOutReturnAddressJourney}
 
@@ -77,9 +76,7 @@ object AddressJourneyType {
     final case class EnteringCompanyDetails(
       journey: FillingOutReturn,
       draftReturn: Either[DraftMultipleIndirectDisposalsReturn, DraftSingleIndirectDisposalReturn],
-      representativeType: Option[
-        Either[PersonalRepresentative.type, Capacitor.type]
-      ],
+      representativeType: Option[RepresentativeType],
       isATrust: Boolean
     ) extends Returns
 

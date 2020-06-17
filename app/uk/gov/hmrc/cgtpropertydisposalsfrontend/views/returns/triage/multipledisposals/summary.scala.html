@@ -19,41 +19,49 @@
 
 @import cats.instances.list._
 @import cats.syntax.eq._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 
 @this(
-    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
     answers: CompleteMultipleDisposalsTriageAnswers,
     isATrust: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @representativeType = @{answers.representativeType()}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
-  if (representativeType.exists(_.isLeft)) ".personalRep"
-  else if (representativeType.exists(_.isRight)) ".capacitor"
-  else if (isAgent) ".agent"
-    else if (isATrust) ".trust"
-      else ""
+    representativeType match {
+        case Some(PersonalRepresentative) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+        case Some(Capacitor) => ".capacitor"
+        case None =>
+            if (isAgent) ".agent"
+            else if (isATrust) ".trust"
+            else ""
+    }
 }
 @cyaSection() {
-  @answers.individualUserType.map{ individualUserType =>
+  @if(!viewConfig.periodOfAdminEnabled) {
+      @answers.individualUserType.map{ individualUserType =>
       @cyaRow(
           messages("who-are-you-reporting-for.title"),
           Html(messages(if(isAgent) s"individualUserType.agent.${individualUserType.toString}" else s"individualUserType.${individualUserType.toString}")),
           Some(cyaChange(messages("individualUserType.cyaChange"), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
           "individualUserType"
       )
+      }
   }
 
   @cyaRow(

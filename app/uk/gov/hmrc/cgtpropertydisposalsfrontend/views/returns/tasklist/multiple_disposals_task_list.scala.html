@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftMultipleDisposalsReturn
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
@@ -36,7 +36,7 @@
 @title = @{messages("service.title")}
 @representeeState = @{
     draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType) match {
-        case Some(Capacitor) | Some(PersonalRepresentative) =>
+        case Some(_: RepresentativeType) =>
             Some(draftReturn.representeeAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete)))
         case _ =>
             None

@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
@@ -103,9 +103,9 @@ class YearToDateLiabilityControllerSpec
     individualUserType: Option[IndividualUserType] = None
   ): String =
     individualUserType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(Capacitor)              => ".capacitor"
-      case _                            =>
+      case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(Capacitor)                                                      => ".capacitor"
+      case _                                                                    =>
         userType match {
           case UserType.Individual   => ""
           case UserType.Organisation => ".trust"
@@ -134,16 +134,9 @@ class YearToDateLiabilityControllerSpec
     }
 
   def setIndividualUserType(
-    representativeType: Option[
-      Either[PersonalRepresentative.type, Capacitor.type]
-    ]
-  ): Option[IndividualUserType] =
-    if (representativeType.exists(_.isLeft))
-      Some(PersonalRepresentative)
-    else if (representativeType.exists(_.isRight))
-      Some(Capacitor)
-    else
-      Some(Self)
+    representativeType: Option[RepresentativeType]
+  ): IndividualUserType =
+    representativeType.getOrElse(Self)
 
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
@@ -4969,9 +4962,9 @@ object YearToDateLiabilityControllerSpec extends Matchers {
     individualUserType: Option[IndividualUserType]
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     val userKey = individualUserType match {
-      case Some(PersonalRepresentative) => ".personalRep"
-      case Some(Capacitor)              => ".capacitor"
-      case _                            =>
+      case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(Capacitor)                                                      => ".capacitor"
+      case _                                                                    =>
         userType match {
           case Some(UserType.Individual)   => ""
           case Some(UserType.Organisation) => ".trust"

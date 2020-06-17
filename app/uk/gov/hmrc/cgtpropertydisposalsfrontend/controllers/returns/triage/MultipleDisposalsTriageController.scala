@@ -1034,23 +1034,7 @@ class MultipleDisposalsTriageController @Inject() (
             )
 
           case IncompleteMultipleDisposalsTriageAnswers(
-                Some(IndividualUserType.Capacitor),
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _
-              ) if representeeAnswersIncomplete =>
-            Redirect(
-              representee.routes.RepresenteeController
-                .enterName()
-            )
-
-          case IncompleteMultipleDisposalsTriageAnswers(
-                Some(IndividualUserType.PersonalRepresentative),
+                Some(_: RepresentativeType),
                 _,
                 _,
                 _,

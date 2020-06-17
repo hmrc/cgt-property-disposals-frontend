@@ -23,7 +23,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{ PersonalRepresentative, Capacitor }
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -36,7 +37,7 @@
     disposalDate: DisposalDate,
     showFiles: Boolean,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]],
+    representativeType: Option[RepresentativeType],
     wasUkResident: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
@@ -44,11 +45,15 @@
 @taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
-  if (representativeType.exists(_.isLeft)) ".personalRep"
-  else if (representativeType.exists(_.isRight)) ".capacitor"
-  else if (isAgent) ".agent"
-  else if (isATrust) ".trust"
-  else ""
+  representativeType match {
+      case Some(PersonalRepresentative) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(Capacitor) => ".capacitor"
+      case None =>
+          if (isAgent) ".agent"
+          else if (isATrust) ".trust"
+          else ""
+  }
 }
 @nrKey = @{ if(wasUkResident) "" else ".non-resident" }
 

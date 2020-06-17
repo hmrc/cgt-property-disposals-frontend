@@ -25,7 +25,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
@@ -45,7 +46,7 @@
     form: Form[AcquisitionMethod],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    representativeType: Option[RepresentativeType],
     assetType: AssetType
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
@@ -53,11 +54,15 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
-    if (representativeType.exists(_.isLeft)) ".personalRep"
-    else if (representativeType.exists(_.isRight)) ".capacitor"
-    else if (isAgent) ".agent"
-    else if (isATrust) ".trust"
-    else ""
+    representativeType match {
+      case Some(PersonalRepresentative) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(Capacitor) => ".capacitor"
+      case None =>
+          if (isAgent) ".agent"
+          else if (isATrust) ".trust"
+          else ""
+  }
 }
 
 @assetTypeKey = @{assetType match {
@@ -71,12 +76,16 @@
 }}
 
 @userErrorPrefix = @{
-    if (representativeType.exists(_.isLeft)) "personalRep."
-    else if (representativeType.exists(_.isRight)) "capacitor."
-    else if (isAgent) "agent."
-    else if (isATrust) "trust."
-    else ""
-}
+    representativeType match {
+        case Some(PersonalRepresentative) => "personalRep."
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => "personalRep."
+        case Some(Capacitor) => "capacitor."
+        case None =>
+            if (isAgent) "agent."
+            else if (isATrust) "trust."
+            else ""
+    }
+ }
 
 @otherMethodKey = @{"otherAcquisitionMethod" }
 @relevantErrorKey = @{if (form.error(otherMethodKey).nonEmpty) otherMethodKey else key }

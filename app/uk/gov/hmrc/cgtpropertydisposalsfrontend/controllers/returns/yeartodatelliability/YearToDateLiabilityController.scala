@@ -39,7 +39,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, M
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
@@ -89,17 +88,6 @@ class YearToDateLiabilityController @Inject() (
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
-
-  def representativeType(
-    draftReturn: DraftReturn
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-    draftReturn.fold(
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType()
-    )
 
   private def withFillingOutReturnAndYTDLiabilityAnswers(
     request: RequestWithSessionData[_]
@@ -485,7 +473,7 @@ class YearToDateLiabilityController @Inject() (
                     _,
                     disposalDate,
                     wasUkResident,
-                    representativeType(draftReturn)
+                    draftReturn.representativeType()
                   )
                 )(
                   requiredPreviousAnswer = _ => Some(()),
@@ -525,7 +513,7 @@ class YearToDateLiabilityController @Inject() (
                       backLink,
                       disposalDate,
                       wasUkResident,
-                      representativeType(draftReturn)
+                      draftReturn.representativeType()
                     )
                   }
                 )(
@@ -597,7 +585,7 @@ class YearToDateLiabilityController @Inject() (
                         _,
                         disposalDate,
                         wasUkResident,
-                        representativeType(draftReturn)
+                        draftReturn.representativeType()
                       )
                     )(
                       requiredPreviousAnswer = _.fold(
@@ -647,7 +635,7 @@ class YearToDateLiabilityController @Inject() (
                           backLink,
                           disposalDate,
                           wasUkResident,
-                          representativeType(draftReturn)
+                          draftReturn.representativeType()
                         )
                     )(
                       requiredPreviousAnswer = _.fold(
@@ -711,7 +699,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 isATrust(fillingOutReturn),
-                representativeType(fillingOutReturn.draftReturn)
+                fillingOutReturn.draftReturn.representativeType()
               )
             )(
               requiredPreviousAnswer = answers =>
@@ -773,7 +761,7 @@ class YearToDateLiabilityController @Inject() (
         _,
         _,
         isATrust(fillingOutReturn),
-        representativeType(fillingOutReturn.draftReturn)
+        fillingOutReturn.draftReturn.representativeType()
       )
     )(
       requiredPreviousAnswer = { a =>
@@ -857,7 +845,7 @@ class YearToDateLiabilityController @Inject() (
         _,
         _,
         isATrust(fillingOutReturn),
-        representativeType(draftReturn)
+        draftReturn.representativeType()
       )
     )(
       requiredPreviousAnswer = { a =>
@@ -905,7 +893,7 @@ class YearToDateLiabilityController @Inject() (
         _,
         _,
         isATrust(fillingOutReturn),
-        representativeType(draftReturn)
+        draftReturn.representativeType()
       )
     )(
       requiredPreviousAnswer = answers =>
@@ -1022,7 +1010,7 @@ class YearToDateLiabilityController @Inject() (
                 personalAllowance,
                 calculatedTaxDue,
                 fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(draftReturn)
+                draftReturn.representativeType()
               )
             )(
               _.fold(
@@ -1121,7 +1109,7 @@ class YearToDateLiabilityController @Inject() (
                 personalAllowance,
                 calculatedTaxDue,
                 fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(draftReturn)
+                draftReturn.representativeType()
               )
             )(
               _.fold(
@@ -1284,7 +1272,7 @@ class YearToDateLiabilityController @Inject() (
                   case _: DraftMultipleIndirectDisposalsReturn => true
                   case _: DraftSingleMixedUseDisposalReturn    => false
                 },
-                representativeType(fillingOutReturn.draftReturn)
+                fillingOutReturn.draftReturn.representativeType()
               )
             )(
               requiredPreviousAnswer = _ => Some(()),
@@ -1318,7 +1306,7 @@ class YearToDateLiabilityController @Inject() (
                   case _: DraftMultipleIndirectDisposalsReturn => true
                   case _: DraftSingleMixedUseDisposalReturn    => false
                 },
-                representativeType(fillingOutReturn.draftReturn)
+                fillingOutReturn.draftReturn.representativeType()
               )
             )(
               requiredPreviousAnswer = _ => Some(()),
@@ -1835,7 +1823,7 @@ class YearToDateLiabilityController @Inject() (
                   case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(draftReturn)
+                draftReturn.representativeType()
               )
             )
         )
@@ -1852,7 +1840,7 @@ class YearToDateLiabilityController @Inject() (
               case _: DraftSingleMixedUseDisposalReturn    => false
             },
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(draftReturn)
+            draftReturn.representativeType()
           )
         )
 
@@ -1875,7 +1863,7 @@ class YearToDateLiabilityController @Inject() (
             c,
             disposalDate,
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(draftReturn),
+            draftReturn.representativeType(),
             wasUkResident
           )
         )
@@ -2029,7 +2017,7 @@ class YearToDateLiabilityController @Inject() (
             completeAnswers,
             disposalDate,
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(draftReturn),
+            draftReturn.representativeType(),
             wasUkResident
           )
         )

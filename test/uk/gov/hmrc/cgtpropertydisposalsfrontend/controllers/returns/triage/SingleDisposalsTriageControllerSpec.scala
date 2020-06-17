@@ -4387,6 +4387,13 @@ class SingleDisposalsTriageControllerSpec
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
               Right(sample[IndividualName]),
               representee.routes.RepresenteeController.enterName()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType =
+                Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
+              ),
+              Right(sample[IndividualName]),
+              representee.routes.RepresenteeController.enterName()
             )
           ).foreach {
             case Scenario(state, name, expectedRedirect) =>
@@ -4504,8 +4511,7 @@ class SingleDisposalsTriageControllerSpec
         def testIsCheckYourAnswers(
           result: Future[Result],
           completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
-          expectedTitleKey: String,
-          userType: Option[UserType]
+          expectedTitleKey: String
         ): Unit =
           checkPageIsDisplayed(
             result,
@@ -4513,7 +4519,6 @@ class SingleDisposalsTriageControllerSpec
             doc =>
               validateSingleDisposalTriageCheckYourAnswersPage(
                 completeSingleDisposalTriageAnswers,
-                userType,
                 doc
               )
           )
@@ -4536,8 +4541,7 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title",
-            None
+            "triage.check-your-answers.title"
           )
         }
 
@@ -4560,8 +4564,7 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title",
-            None
+            "triage.check-your-answers.title"
           )
         }
 
@@ -4579,8 +4582,7 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title",
-            None
+            "triage.check-your-answers.title"
           )
         }
 
@@ -4598,8 +4600,7 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title",
-            None
+            "triage.check-your-answers.title"
           )
         }
 
@@ -4623,8 +4624,7 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestionsWithIndirectDisposal,
-            "triage.check-your-answers.title",
-            None
+            "triage.check-your-answers.title"
           )
         }
 
@@ -4642,8 +4642,7 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title",
-            Some(UserType.Agent)
+            "triage.check-your-answers.title"
           )
         }
 
@@ -4987,9 +4986,10 @@ class SingleDisposalsTriageControllerSpec
 
   private def userType(answers: SingleDisposalTriageAnswers) =
     answers.representativeType() match {
-      case Some(Left(PersonalRepresentative)) => "personal representative"
-      case Some(Right(Capacitor))             => "capacitor"
-      case None                               => "self"
+      case Some(PersonalRepresentative)                => "personal representative"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => "personal representative in period of admin"
+      case Some(Capacitor)                             => "capacitor"
+      case None                                        => "self"
     }
 
   def displayIndividualTriagePageBehaviorCompleteJourney(
@@ -5309,19 +5309,10 @@ class SingleDisposalsTriageControllerSpec
 object SingleDisposalsTriageControllerSpec extends Matchers {
   def validateSingleDisposalTriageCheckYourAnswersPage(
     completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
-    userType: Option[UserType],
     doc: Document
   )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
 
     implicit lazy val messages: Messages = MessagesImpl(lang, messagesApi)
-
-    completeSingleDisposalTriageAnswers.individualUserType.foreach { individualUserType =>
-      doc.select("#individualUserType-answer").text() shouldBe messages(
-        if (userType.contains(UserType.Agent))
-          s"individualUserType.agent.$individualUserType"
-        else s"individualUserType.$individualUserType"
-      )
-    }
 
     doc.select("#numberOfProperties-answer").text()   shouldBe "One"
     doc.select("#disposalMethod-answer").text()       shouldBe messages(
