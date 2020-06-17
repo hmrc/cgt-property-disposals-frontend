@@ -673,9 +673,9 @@ numberOfProperties.helpText.p2.heading=Mixed use property disposals
 numberOfProperties.helpText.p2.text=A mixed use property is part residential and part commercial. For this return, even if a property had both a commercial part and a residential part, it would still be considered ’one’ property.
 
 numberOfProperties.helpText.p3.heading=Indirect disposals
-numberOfProperties.helpText.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as the:
+numberOfProperties.helpText.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as:
 numberOfProperties.helpText.p3.li1=you were a non-resident on the disposal date
-numberOfProperties.helpText.p3.li2=shares all had the same sale or disposal date
+numberOfProperties.helpText.p3.li2=the shares all had the same sale or disposal date
 
 numberOfProperties.helpText.agent.p3.heading=Indirect disposals
 numberOfProperties.helpText.agent.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as:
