@@ -652,6 +652,7 @@ class InitialGainOrLossControllerSpec
         )
       }
     }
+
   }
 
   def generateTrustSubscribedDetails() =

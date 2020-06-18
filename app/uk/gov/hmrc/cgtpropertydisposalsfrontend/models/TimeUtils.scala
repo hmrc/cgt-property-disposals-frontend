@@ -37,6 +37,8 @@ object TimeUtils {
 
   val clock: Clock = Clock.systemUTC()
 
+  val minimumDate = LocalDate.of(1900, 1, 1)
+
   def today(): LocalDate = LocalDate.now(clock)
 
   def now(): LocalDateTime = LocalDateTime.now(clock)
@@ -101,6 +103,8 @@ object TimeUtils {
                        Left(FormError(dateKey, "error.tooFarInFuture"))
                      else if (minimumDateInclusive.exists(_.isAfter(date)))
                        Left(FormError(dateKey, "error.tooFarInPast"))
+                     else if (date.isBefore(minimumDate))
+                       Left(FormError(dateKey, "error.before1900"))
                      else Right(date)
                    )
         } yield date

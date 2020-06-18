@@ -90,7 +90,8 @@ class AcquisitionDetailsControllerSpec
       case other                                                               => sys.error(s"User type '$other' not handled")
     }
 
-  def assetTypeMessageKey(assetType: AssetType): String = if (assetType === IndirectDisposal) ".indirect" else ""
+  def assetTypeMessageKey(assetType: AssetType): String =
+    if (assetType === IndirectDisposal) ".indirect" else ""
 
   def setAgentReferenceNumber(
     userType: UserType
@@ -956,7 +957,7 @@ class AcquisitionDetailsControllerSpec
             )._1
           )
 
-        "individual enters date that is invalid" in {
+        "the user enters date that is invalid" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey      = userMessageKey(individualUserType, userType)
@@ -984,7 +985,7 @@ class AcquisitionDetailsControllerSpec
           }
         }
 
-        "individual enters date that is after the disposal date" in {
+        "the user enters date that is after the disposal date" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val assetTypeKey = assetTypeMessageKey(assetType)
@@ -996,6 +997,22 @@ class AcquisitionDetailsControllerSpec
                 assetType,
                 userKey + assetTypeKey
               )(s"$key$userKey$assetTypeKey.error.tooFarInFuture")
+          }
+        }
+
+        "the user enters date that is before 01-01-1900" in {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              val before1900   = LocalDate.of(1800, 1, 1)
+
+              test(formData(before1900): _*)(
+                userType,
+                individualUserType,
+                assetType,
+                userKey + assetTypeKey
+              )(s"$key$userKey$assetTypeKey.error.before1900")
           }
         }
 
@@ -4332,6 +4349,7 @@ class AcquisitionDetailsControllerSpec
             )
         }
       }
+
     }
 
     def missingAssetTypeAndResidentialStatusBehaviour(

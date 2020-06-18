@@ -245,7 +245,9 @@ trait ChangeRepresenteeEmailControllerSpec
         routes.ChangeRepresenteeEmailController.enterEmail()
       )
     }
+
   }
+
 }
 
 class StartingNewDraftReturnChangeRepresenteeEmailSpec extends ChangeRepresenteeEmailControllerSpec {
