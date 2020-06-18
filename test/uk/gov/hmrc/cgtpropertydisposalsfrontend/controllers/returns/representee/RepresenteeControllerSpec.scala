@@ -103,12 +103,12 @@ class RepresenteeControllerSpec
 
   def sessionWithStartingNewDraftReturn(
     answers: RepresenteeAnswers,
-    representativeType: Either[PersonalRepresentative.type, Capacitor.type],
+    representativeType: RepresentativeType,
     subscribedDetails: SubscribedDetails = sample[SubscribedDetails]
   ): (SessionData, StartingNewDraftReturn) =
     sessionWithStartingNewDraftReturn(
       Some(answers),
-      Some(representativeType.merge),
+      Some(representativeType),
       subscribedDetails
     )
 
@@ -131,12 +131,12 @@ class RepresenteeControllerSpec
 
   def sessionWithFillingOutReturn(
     answers: RepresenteeAnswers,
-    representativeType: Either[PersonalRepresentative.type, Capacitor.type],
+    representativeType: RepresentativeType,
     subscribedDetails: SubscribedDetails = sample[SubscribedDetails]
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) =
     sessionWithFillingOutReturn(
       Some(answers),
-      Some(representativeType.merge),
+      Some(representativeType),
       subscribedDetails
     )
 
@@ -204,7 +204,7 @@ class RepresenteeControllerSpec
           val session =
             sessionWithStartingNewDraftReturn(
               sample[IncompleteRepresenteeAnswers].copy(contactDetails = None),
-              Right(Capacitor)
+              Capacitor
             )._1
 
           inSequence {
@@ -256,7 +256,7 @@ class RepresenteeControllerSpec
           val session =
             sessionWithFillingOutReturn(
               sample[CompleteRepresenteeAnswers],
-              Right(Capacitor)
+              Capacitor
             )._1
 
           test(
@@ -272,7 +272,7 @@ class RepresenteeControllerSpec
             sessionWithStartingNewDraftReturn(
               sample[IncompleteRepresenteeAnswers]
                 .copy(contactDetails = Some(sample[RepresenteeContactDetails])),
-              Right(Capacitor)
+              Capacitor
             )
 
           test(
@@ -308,7 +308,7 @@ class RepresenteeControllerSpec
             mockGetSession(
               sessionWithFillingOutReturn(
                 sample[CompleteRepresenteeAnswers],
-                Right(Capacitor)
+                Capacitor
               )._1
             )
           }
@@ -327,7 +327,7 @@ class RepresenteeControllerSpec
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
                 incompleteRepresenteeAnswers,
-                Right(Capacitor)
+                Capacitor
               )
 
             val newContactName            = ContactName("First Last")
@@ -361,7 +361,7 @@ class RepresenteeControllerSpec
           "the section is complete" in {
             val answers               = sample[CompleteRepresenteeAnswers]
             val (session, journey)    =
-              sessionWithStartingNewDraftReturn(answers, Right(Capacitor))
+              sessionWithStartingNewDraftReturn(answers, Capacitor)
             val newContactName        = ContactName("First Last")
             val newRepresenteeAnswers =
               IncompleteRepresenteeAnswers(
@@ -457,7 +457,7 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
                 IncompleteRepresenteeAnswers.empty,
-                Right(Capacitor)
+                Capacitor
               )
 
             test(
@@ -476,7 +476,7 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
                 IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )
 
             test(
@@ -495,7 +495,7 @@ class RepresenteeControllerSpec
             val answers            = sample[CompleteRepresenteeAnswers]
             val (session, journey) = sessionWithStartingNewDraftReturn(
               answers,
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )
             test(
               session,
@@ -515,7 +515,7 @@ class RepresenteeControllerSpec
             val (session, journey, _) =
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty,
-                Right(Capacitor)
+                Capacitor
               )
 
             test(
@@ -535,7 +535,7 @@ class RepresenteeControllerSpec
             val (session, journey, _) =
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )
 
             test(
@@ -552,7 +552,7 @@ class RepresenteeControllerSpec
           "the section is complete" in {
             val answers               = sample[CompleteRepresenteeAnswers]
             val (session, journey, _) =
-              sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
+              sessionWithFillingOutReturn(answers, PersonalRepresentative)
 
             test(
               session,
@@ -597,7 +597,7 @@ class RepresenteeControllerSpec
         val (session, journey, _) =
           sessionWithFillingOutReturn(
             IncompleteRepresenteeAnswers.empty,
-            Right(Capacitor)
+            Capacitor
           )
 
         behave like nameFormValidationTests(
@@ -619,7 +619,7 @@ class RepresenteeControllerSpec
         val (session, journey, draftReturn) =
           sessionWithFillingOutReturn(
             sample[CompleteRepresenteeAnswers],
-            Right(Capacitor)
+            Capacitor
           )
 
         val newDraftReturn =
@@ -681,7 +681,7 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
                 IncompleteRepresenteeAnswers.empty,
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )
             val newJourney         = journey.copy(
               representeeAnswers = Some(
@@ -710,7 +710,7 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
                 sample[CompleteRepresenteeAnswers],
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )
             val newJourney         = journey.copy(
               representeeAnswers = Some(
@@ -743,7 +743,7 @@ class RepresenteeControllerSpec
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty,
-                Right(Capacitor)
+                Capacitor
               )
 
             val newDraftReturn =
@@ -784,7 +784,7 @@ class RepresenteeControllerSpec
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
                 sample[CompleteRepresenteeAnswers],
-                Right(Capacitor)
+                Capacitor
               )
 
             val newDraftReturn =
@@ -890,7 +890,7 @@ class RepresenteeControllerSpec
               sessionWithStartingNewDraftReturn(
                 IncompleteRepresenteeAnswers.empty
                   .copy(dateOfDeath = Some(date)),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1,
               "dateOfDeath.title",
               routes.RepresenteeController.enterName(),
@@ -905,7 +905,7 @@ class RepresenteeControllerSpec
             test(
               sessionWithStartingNewDraftReturn(
                 answers,
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1,
               "dateOfDeath.title",
               routes.RepresenteeController.checkYourAnswers(),
@@ -924,7 +924,7 @@ class RepresenteeControllerSpec
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty
                   .copy(dateOfDeath = Some(date)),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1,
               "dateOfDeath.title",
               routes.RepresenteeController.enterName(),
@@ -938,7 +938,7 @@ class RepresenteeControllerSpec
             test(
               sessionWithFillingOutReturn(
                 answers,
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1,
               "dateOfDeath.title",
               routes.RepresenteeController.checkYourAnswers(),
@@ -957,7 +957,7 @@ class RepresenteeControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithFillingOutReturn(answers, Right(Capacitor))._1
+              sessionWithFillingOutReturn(answers, Capacitor)._1
             )
           }
 
@@ -999,7 +999,7 @@ class RepresenteeControllerSpec
           .copy(dateOfDeath = Some(DateOfDeath(LocalDate.now())))
         val newDate                         = DateOfDeath(LocalDate.now().minusDays(1))
         val (session, journey, draftReturn) =
-          sessionWithFillingOutReturn(oldAnswers, Left(PersonalRepresentative))
+          sessionWithFillingOutReturn(oldAnswers, PersonalRepresentative)
 
         val newDraftReturn =
           DraftSingleDisposalReturn.newDraftReturn(
@@ -1051,7 +1051,7 @@ class RepresenteeControllerSpec
           val session = sessionWithFillingOutReturn(
             IncompleteRepresenteeAnswers.empty
               .copy(name = Some(sample[IndividualName])),
-            Left(PersonalRepresentative)
+            PersonalRepresentative
           )._1
 
           DateErrorScenarios
@@ -1092,7 +1092,7 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
                 IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )
             val newJourney         = journey.copy(
               representeeAnswers = Some(
@@ -1124,7 +1124,7 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
                 data,
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )
             val newJourney         = journey.copy(
               representeeAnswers = Some(
@@ -1158,7 +1158,7 @@ class RepresenteeControllerSpec
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )
 
             val newDraftReturn =
@@ -1198,7 +1198,7 @@ class RepresenteeControllerSpec
           "the section is complete" in {
             val oldData                         = sample[CompleteRepresenteeAnswers]
             val (session, journey, draftReturn) =
-              sessionWithFillingOutReturn(oldData, Left(PersonalRepresentative))
+              sessionWithFillingOutReturn(oldData, PersonalRepresentative)
 
             val newDraftReturn =
               DraftSingleDisposalReturn.newDraftReturn(
@@ -1311,9 +1311,9 @@ class RepresenteeControllerSpec
 
           "the user has not selected an option before" in {
             List(
-              Left(PersonalRepresentative) -> routes.RepresenteeController
+              PersonalRepresentative -> routes.RepresenteeController
                 .enterDateOfDeath(),
-              Right(Capacitor)             -> routes.RepresenteeController.enterName()
+              Capacitor              -> routes.RepresenteeController.enterName()
             ) foreach {
               case (representativeType, redirect) =>
                 val (session, journey) =
@@ -1334,9 +1334,9 @@ class RepresenteeControllerSpec
 
           "the user has previously submitted a cgt reference" in {
             List(
-              Left(PersonalRepresentative) -> routes.RepresenteeController
+              PersonalRepresentative -> routes.RepresenteeController
                 .enterDateOfDeath(),
-              Right(Capacitor)             -> routes.RepresenteeController.enterName()
+              Capacitor              -> routes.RepresenteeController.enterName()
             ) foreach {
               case (representativeType, redirect) =>
                 val cgtReference       = sample[RepresenteeCgtReference]
@@ -1360,7 +1360,7 @@ class RepresenteeControllerSpec
             val nino               = sample[RepresenteeNino]
             val (session, journey) = sessionWithStartingNewDraftReturn(
               requiredPreviousAnswers.copy(id = Some(nino)),
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )
 
             test(
@@ -1377,7 +1377,7 @@ class RepresenteeControllerSpec
             val sautr              = sample[RepresenteeSautr]
             val (session, journey) = sessionWithStartingNewDraftReturn(
               requiredPreviousAnswers.copy(id = Some(sautr)),
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )
 
             test(
@@ -1394,7 +1394,7 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
                 requiredPreviousAnswers.copy(id = Some(NoReferenceId)),
-                Right(Capacitor)
+                Capacitor
               )
 
             test(
@@ -1409,7 +1409,7 @@ class RepresenteeControllerSpec
           "the section is complete" in {
             val answers            = sample[CompleteRepresenteeAnswers]
             val (session, journey) =
-              sessionWithStartingNewDraftReturn(answers, Right(Capacitor))
+              sessionWithStartingNewDraftReturn(answers, Capacitor)
 
             test(
               session,
@@ -1431,7 +1431,7 @@ class RepresenteeControllerSpec
                 IncompleteRepresenteeAnswers.empty
                   .copy(name = Some(sample[IndividualName]))
                   .copy(id = Some(cgtReference)),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )
 
             test(
@@ -1446,7 +1446,7 @@ class RepresenteeControllerSpec
           "the section is complete" in {
             val answers               = sample[CompleteRepresenteeAnswers]
             val (session, journey, _) =
-              sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
+              sessionWithFillingOutReturn(answers, PersonalRepresentative)
 
             test(
               session,
@@ -1533,7 +1533,7 @@ class RepresenteeControllerSpec
             test(
               sessionWithStartingNewDraftReturn(
                 requiredPreviousAnswers,
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1,
               routes.RepresenteeController.enterId(),
               name,
@@ -1561,7 +1561,7 @@ class RepresenteeControllerSpec
               mockGetSession(
                 sessionWithStartingNewDraftReturn(
                   requiredPreviousAnswers,
-                  Left(PersonalRepresentative)
+                  PersonalRepresentative
                 )._1
               )
             }
@@ -1596,7 +1596,7 @@ class RepresenteeControllerSpec
             false,
             false
           ),
-          Right(Capacitor)
+          Capacitor
         )._1
 
         "nothing is selected" in {
@@ -1625,7 +1625,7 @@ class RepresenteeControllerSpec
 
           val (session, sndr) = sessionWithStartingNewDraftReturn(
             requiredPreviousAnswers,
-            Left(PersonalRepresentative)
+            PersonalRepresentative
           )
           val newSndr         =
             sndr.copy(representeeAnswers =
@@ -1665,7 +1665,7 @@ class RepresenteeControllerSpec
 
           val (session, sndr) = sessionWithStartingNewDraftReturn(
             requiredPreviousAnswers,
-            Left(PersonalRepresentative)
+            PersonalRepresentative
           )
 
           val newSndr =
@@ -1727,7 +1727,7 @@ class RepresenteeControllerSpec
         val (session, journey, _) = sessionWithFillingOutReturn(
           IncompleteRepresenteeAnswers.empty
             .copy(name = Some(sample[IndividualName])),
-          Right(Capacitor)
+          Capacitor
         )
 
         def test: (Seq[(String, String)], String) => Unit =
@@ -1816,7 +1816,7 @@ class RepresenteeControllerSpec
         val cgtRef  = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
         val (session, journey, draftReturn) =
-          sessionWithFillingOutReturn(answers, Right(Capacitor))
+          sessionWithFillingOutReturn(answers, Capacitor)
         val newDraftReturn                  =
           DraftSingleDisposalReturn.newDraftReturn(
             draftReturn.id,
@@ -1912,7 +1912,7 @@ class RepresenteeControllerSpec
           val nameMatchDetails      =
             IndividualRepresenteeNameMatchDetails(name, cgtRef)
           val (session, journey, _) =
-            sessionWithFillingOutReturn(answers, Right(Capacitor))
+            sessionWithFillingOutReturn(answers, Capacitor)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1941,7 +1941,7 @@ class RepresenteeControllerSpec
         val cgtRef  = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
         val (session, journey, _) =
-          sessionWithFillingOutReturn(answers, Right(Capacitor))
+          sessionWithFillingOutReturn(answers, Capacitor)
 
         "the name match service indicates that the user has already perform too many unsuccessful attempts" in {
           inSequence {
@@ -2003,7 +2003,7 @@ class RepresenteeControllerSpec
               RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
             val (session, journey, draftReturn) =
-              sessionWithFillingOutReturn(answers, Right(Capacitor))
+              sessionWithFillingOutReturn(answers, Capacitor)
             val newDraftReturn                  =
               DraftSingleDisposalReturn.newDraftReturn(
                 draftReturn.id,
@@ -2049,7 +2049,7 @@ class RepresenteeControllerSpec
             val nino      = RepresenteeNino(ninoValue)
 
             val (session, journey, draftReturn) =
-              sessionWithFillingOutReturn(answers, Left(PersonalRepresentative))
+              sessionWithFillingOutReturn(answers, PersonalRepresentative)
             val newDraftReturn                  = DraftSingleDisposalReturn.newDraftReturn(
               draftReturn.id,
               IncompleteSingleDisposalTriageAnswers.empty
@@ -2091,7 +2091,7 @@ class RepresenteeControllerSpec
             val sautrValue         = SAUTR("1234567890")
             val sautr              = RepresenteeSautr(sautrValue)
             val (session, journey) =
-              sessionWithStartingNewDraftReturn(answers, Right(Capacitor))
+              sessionWithStartingNewDraftReturn(answers, Capacitor)
             val newAnswers         = answers.copy(id = Some(sautr))
             val newJourney         = journey.copy(representeeAnswers = Some(newAnswers))
 
@@ -2122,7 +2122,7 @@ class RepresenteeControllerSpec
               IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
 
             val (session, journey) =
-              sessionWithStartingNewDraftReturn(answers, Right(Capacitor))
+              sessionWithStartingNewDraftReturn(answers, Capacitor)
             val newAnswers         = answers.copy(id = Some(NoReferenceId))
             val newJourney         = journey.copy(representeeAnswers = Some(newAnswers))
 
@@ -2173,7 +2173,7 @@ class RepresenteeControllerSpec
           val (session, journey, draftReturn) =
             sessionWithFillingOutReturn(
               answers,
-              Left(PersonalRepresentative),
+              PersonalRepresentative,
               sample[SubscribedDetails].copy(
                 contactName = contactDetails.contactName,
                 address = contactDetails.address,
@@ -2295,7 +2295,7 @@ class RepresenteeControllerSpec
           val session        =
             sessionWithStartingNewDraftReturn(
               answers,
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )._1
 
           inSequence {
@@ -2317,7 +2317,7 @@ class RepresenteeControllerSpec
           val session        =
             sessionWithFillingOutReturn(
               answers,
-              Right(Capacitor)
+              Capacitor
             )._1
 
           inSequence {
@@ -2342,7 +2342,7 @@ class RepresenteeControllerSpec
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
                 answers,
-                Left(PersonalRepresentative),
+                PersonalRepresentative,
                 sample[SubscribedDetails].copy(
                   contactName = contactDetails.contactName,
                   address = contactDetails.address,
@@ -2390,7 +2390,7 @@ class RepresenteeControllerSpec
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
                 answers,
-                Left(PersonalRepresentative),
+                PersonalRepresentative,
                 sample[SubscribedDetails].copy(
                   contactName = contactDetails.contactName,
                   address = contactDetails.address,
@@ -2441,7 +2441,7 @@ class RepresenteeControllerSpec
             hasConfirmedContactDetails = true
           )
           val session =
-            sessionWithFillingOutReturn(answers, Right(Capacitor))._1
+            sessionWithFillingOutReturn(answers, Capacitor)._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2458,7 +2458,7 @@ class RepresenteeControllerSpec
           val answers = sample[CompleteRepresenteeAnswers]
           val session = sessionWithFillingOutReturn(
             answers,
-            Left(PersonalRepresentative)
+            PersonalRepresentative
           )._1
 
           inSequence {
@@ -2483,7 +2483,7 @@ class RepresenteeControllerSpec
             hasConfirmedContactDetails = false
           )
           val (session, journey, draftReturn) =
-            sessionWithFillingOutReturn(answers, Right(Capacitor))
+            sessionWithFillingOutReturn(answers, Capacitor)
           val newAnswers                      = answers.copy(hasConfirmedContactDetails = true)
           val newDraftReturn                  =
             draftReturn.copy(representeeAnswers = Some(newAnswers))
@@ -2533,7 +2533,7 @@ class RepresenteeControllerSpec
             hasConfirmedContactDetails = false
           )
           val (session, journey, draftReturn) =
-            sessionWithFillingOutReturn(answers, Right(Capacitor))
+            sessionWithFillingOutReturn(answers, Capacitor)
           val newAnswers                      = answers.copy(hasConfirmedContactDetails = true)
           val newDraftReturn                  =
             draftReturn.copy(representeeAnswers = Some(newAnswers))
@@ -2590,7 +2590,7 @@ class RepresenteeControllerSpec
             mockGetSession(
               sessionWithFillingOutReturn(
                 allQuestionsAnswers.copy(name = None),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1
             )
           }
@@ -2610,7 +2610,7 @@ class RepresenteeControllerSpec
             mockGetSession(
               sessionWithFillingOutReturn(
                 allQuestionsAnswers.copy(id = None),
-                Right(Capacitor)
+                Capacitor
               )._1
             )
           }
@@ -2630,7 +2630,7 @@ class RepresenteeControllerSpec
             mockGetSession(
               sessionWithFillingOutReturn(
                 allQuestionsAnswers.copy(dateOfDeath = None),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1
             )
           }
@@ -2650,7 +2650,7 @@ class RepresenteeControllerSpec
             mockGetSession(
               sessionWithStartingNewDraftReturn(
                 allQuestionsAnswers.copy(hasConfirmedPerson = false),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1
             )
           }
@@ -2670,7 +2670,7 @@ class RepresenteeControllerSpec
             mockGetSession(
               sessionWithFillingOutReturn(
                 allQuestionsAnswers.copy(contactDetails = None),
-                Left(PersonalRepresentative)
+                PersonalRepresentative
               )._1
             )
           }
@@ -2687,7 +2687,7 @@ class RepresenteeControllerSpec
             mockGetSession(
               sessionWithFillingOutReturn(
                 allQuestionsAnswers.copy(hasConfirmedContactDetails = false),
-                Right(Capacitor)
+                Capacitor
               )._1
             )
           }
@@ -2709,7 +2709,7 @@ class RepresenteeControllerSpec
           val (session, journey, draftReturn) =
             sessionWithFillingOutReturn(
               updatedAllQuestionsAnswers,
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )
           val newDraftReturn                  =
             draftReturn.copy(representeeAnswers = Some(completeAnswers))
@@ -2753,7 +2753,7 @@ class RepresenteeControllerSpec
           forAll { completeAnswers: CompleteRepresenteeAnswers =>
             val (session, _, _) = sessionWithFillingOutReturn(
               completeAnswers,
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )
 
             inSequence {
@@ -2796,7 +2796,7 @@ class RepresenteeControllerSpec
           val (session, journey, draftReturn) =
             sessionWithFillingOutReturn(
               updatedAllQuestionsAnswers,
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )
 
           inSequence {
@@ -2821,7 +2821,7 @@ class RepresenteeControllerSpec
           val (session, journey, draftReturn) =
             sessionWithFillingOutReturn(
               updatedAllQuestionsAnswers,
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )
 
           inSequence {
@@ -2876,7 +2876,7 @@ class RepresenteeControllerSpec
           mockGetSession(
             sessionWithFillingOutReturn(
               allQuestionsAnswers,
-              Right(Capacitor)
+              Capacitor
             )._1
           )
         }
@@ -2904,7 +2904,7 @@ class RepresenteeControllerSpec
           mockGetSession(
             sessionWithFillingOutReturn(
               sample[RepresenteeAnswers],
-              Left(PersonalRepresentative)
+              PersonalRepresentative
             )._1
           )
         }
@@ -2939,7 +2939,7 @@ class RepresenteeControllerSpec
           mockGetSession(
             sessionWithStartingNewDraftReturn(
               sample[RepresenteeAnswers],
-              Right(Capacitor)
+              Capacitor
             )._1
           )
         }
@@ -2995,7 +2995,7 @@ class RepresenteeControllerSpec
     val (session, journey, _) =
       sessionWithFillingOutReturn(
         sample[IncompleteRepresenteeAnswers],
-        Left(PersonalRepresentative)
+        PersonalRepresentative
       )
     val ggCredId              = journey.ggCredId
 

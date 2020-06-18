@@ -39,7 +39,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReliefDetailsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -172,7 +171,7 @@ class ReliefDetailsController @Inject() (
 
   def privateResidentsRelief(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, _, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.privateResidentsRelief.fold(privateResidentsReliefForm)(a =>
@@ -188,7 +187,7 @@ class ReliefDetailsController @Inject() (
             _,
             _,
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(fillingOutReturn.draftReturn)
+            draftReturn.representativeType()
           )
         )(
           hasRequiredPreviousAnswer = _ => true,
@@ -208,7 +207,7 @@ class ReliefDetailsController @Inject() (
               form,
               backLink,
               fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(fillingOutReturn.draftReturn)
+              draftReturn.representativeType()
             )
           }
         )(
@@ -263,7 +262,7 @@ class ReliefDetailsController @Inject() (
               _,
               _,
               fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(fillingOutReturn.draftReturn)
+              draftReturn.representativeType()
             )
           )(
             hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForLettingsReliefs,
@@ -284,7 +283,7 @@ class ReliefDetailsController @Inject() (
               _,
               _,
               fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(fillingOutReturn.draftReturn)
+              draftReturn.representativeType()
             )
           )(
             hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForLettingsReliefs,
@@ -328,7 +327,7 @@ class ReliefDetailsController @Inject() (
 
   def otherReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, _, answers) =>
+      withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.otherReliefs.fold(otherReliefsForm)(
@@ -356,7 +355,7 @@ class ReliefDetailsController @Inject() (
             _,
             _,
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(fillingOutReturn.draftReturn)
+            draftReturn.representativeType()
           )
         )(
           hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForOtherReliefs,
@@ -375,7 +374,7 @@ class ReliefDetailsController @Inject() (
             _,
             _,
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(fillingOutReturn.draftReturn)
+            draftReturn.representativeType()
           )
         )(
           hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForOtherReliefs,
@@ -466,7 +465,7 @@ class ReliefDetailsController @Inject() (
               checkYouAnswersPage(
                 c,
                 fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(fillingOutReturn.draftReturn)
+                draftReturn.representativeType()
               )
             )
 
@@ -536,7 +535,7 @@ class ReliefDetailsController @Inject() (
           checkYouAnswersPage(
             completeAnswers,
             fillingOutReturn.subscribedDetails.isATrust,
-            representativeType(fillingOutReturn.draftReturn)
+            draftReturn.representativeType()
           )
         )
     )
@@ -552,17 +551,6 @@ class ReliefDetailsController @Inject() (
 }
 
 object ReliefDetailsController {
-
-  def representativeType(
-    draftReturn: DraftReturn
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-    draftReturn.fold(
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType()
-    )
 
   val privateResidentsReliefForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm(

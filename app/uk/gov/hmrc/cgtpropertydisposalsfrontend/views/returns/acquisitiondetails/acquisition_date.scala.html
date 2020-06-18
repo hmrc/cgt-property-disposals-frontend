@@ -24,7 +24,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
@@ -42,7 +43,7 @@
     form: Form[AcquisitionDate],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]],
+    representativeType: Option[RepresentativeType],
     assetType: AssetType
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
@@ -50,11 +51,15 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
 @userKey = @{
-    if (representativeType.exists(_.isLeft)) ".personalRep"
-    else if (representativeType.exists(_.isRight)) ".capacitor"
-    else if (isAgent) ".agent"
-    else if (isATrust) ".trust"
-    else ""
+    representativeType match {
+      case Some(PersonalRepresentative) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(Capacitor) => ".capacitor"
+      case None =>
+          if (isAgent) ".agent"
+          else if (isATrust) ".trust"
+          else ""
+  }
 }
 
 @assetTypeKey = @{assetType match {

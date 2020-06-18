@@ -24,6 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -31,7 +32,7 @@ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page
 submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
 errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
+radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
@@ -49,21 +50,88 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         case IndividualUserType.Self => 0
         case IndividualUserType.Capacitor => 1
         case IndividualUserType.PersonalRepresentative => if(isAgent) 1 else 2
-    }}
+        case IndividualUserType.PersonalRepresentativeInPeriodOfAdmin => if(isAgent) 2 else 3
+    }
+}
 
 @options = @{
-   val messageKeys = if(isAgent)
-       List(
-           s"$key.agent.Self",
-           s"$key.agent.PersonalRepresentative"
-       )
-   else
-       List(
-           s"$key.Self",
-           s"$key.Capacitor",
-           s"$key.PersonalRepresentative"
-       )
-   messageKeys.map(messageKey =>Html(messages(messageKey)))
+  if(appConfig.periodOfAdminEnabled){
+    if(isAgent){
+      List(
+          RadioOption(
+              label = messages(s"$key.agent.Self"),
+              content = None,
+              optionHelpText = Some(Html(messages(s"$key.agent.Self.helpText")))
+          ),
+          RadioOption(
+              label = Html(messages(s"$key.agent.PersonalRepresentative")).toString(),
+              content = None,
+              optionHelpText = Some(Html(messages(s"$key.agent.PersonalRepresentative.helpText")))
+          ),
+          RadioOption(
+              label = Html(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin")).toString,
+              content = None,
+              optionHelpText = Some(Html(messages(s"$key.agent.PersonalRepresentativeInPeriodOfAdmin.helpText")))
+          )
+      )
+    } else {
+        List(
+            RadioOption(
+                label = messages(s"$key.Self"),
+                content = None,
+                optionHelpText = None
+            ),
+            RadioOption(
+                label = messages(s"$key.Capacitor"),
+                content = None,
+                optionHelpText = Some(Html(messages(s"$key.Capacitor.helpText")))
+            ),
+            RadioOption(
+                label = Html(messages(s"$key.PersonalRepresentative")).toString,
+                content = None,
+                optionHelpText = Some(Html(messages(s"$key.PersonalRepresentative.helpText")))
+            ),
+            RadioOption(
+                label = messages(s"$key.PersonalRepresentativeInPeriodOfAdmin"),
+                content = None,
+                optionHelpText = Some(Html(messages(s"$key.PersonalRepresentativeInPeriodOfAdmin.helpText")))
+            )
+        )
+    }
+  } else {
+    if(isAgent){
+        List(
+            RadioOption(
+                label = messages(s"$key.periodOfAdminDisabled.agent.Self"),
+                content = None,
+                optionHelpText = None
+            ),
+            RadioOption(
+                label = messages(s"$key.periodOfAdminDisabled.agent.PersonalRepresentative"),
+                content = None,
+                optionHelpText = None
+            )
+        )
+    } else {
+        List(
+            RadioOption(
+                label = messages(s"$key.periodOfAdminDisabled.Self"),
+                content = None,
+                optionHelpText = None
+            ),
+            RadioOption(
+                label = messages(s"$key.periodOfAdminDisabled.Capacitor"),
+                content = None,
+                optionHelpText = None
+            ),
+            RadioOption(
+                label = messages(s"$key.periodOfAdminDisabled.PersonalRepresentative"),
+                content = None,
+                optionHelpText = None
+            ),
+        )
+    }
+  }
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
@@ -75,13 +143,12 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     }
 
     @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
-        @radioGroup(
+        @radioGroupConditional(
             fieldId = key,
             options = options,
             selected = form.value.map(optionIndex),
             label = pageHeading(title, Some(messages("triage.caption"))),
-            errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors
+            error = form.error(key),
         )
 
         @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))

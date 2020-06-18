@@ -24,7 +24,6 @@ import monocle.Lens
 import monocle.macros.Lenses
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 sealed trait SingleDisposalTriageAnswers extends Product with Serializable
 
@@ -114,14 +113,13 @@ object SingleDisposalTriageAnswers {
         )
       )
 
-    def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    def representativeType(): Option[RepresentativeType] =
       s.fold[Option[IndividualUserType]](
         _.individualUserType,
         _.individualUserType
       ) match {
-        case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
-        case Some(Capacitor)              => Some(Right(Capacitor))
-        case _                            => None
+        case Some(r: RepresentativeType) => Some(r)
+        case _                           => None
       }
 
     def isIndirectDisposal(): Boolean =

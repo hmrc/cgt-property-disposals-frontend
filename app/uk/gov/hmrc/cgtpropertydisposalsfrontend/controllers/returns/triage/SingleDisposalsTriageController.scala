@@ -1156,23 +1156,7 @@ class SingleDisposalsTriageController @Inject() (
             )
 
           case IncompleteSingleDisposalTriageAnswers(
-                Some(IndividualUserType.Capacitor),
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                _
-              ) if representeeAnswersIncomplete =>
-            Redirect(
-              representee.routes.RepresenteeController
-                .enterName()
-            )
-
-          case IncompleteSingleDisposalTriageAnswers(
-                Some(IndividualUserType.PersonalRepresentative),
+                Some(_: RepresentativeType),
                 _,
                 _,
                 _,

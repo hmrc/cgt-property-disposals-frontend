@@ -45,7 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
@@ -80,13 +80,13 @@ class MultipleDisposalsTriageControllerSpec
   val personalRepDisplay =
     UserTypeDisplay(
       UserType.Individual,
-      Some(Left(PersonalRepresentative)),
+      Some(PersonalRepresentative),
       Right(sample[IndividualName])
     )
   val capacitorDisplay   =
     UserTypeDisplay(
       UserType.Individual,
-      Some(Right(Capacitor)),
+      Some(Capacitor),
       Right(sample[IndividualName])
     )
 
@@ -121,21 +121,14 @@ class MultipleDisposalsTriageControllerSpec
 
   def setIndividualUserType(
     displayType: UserTypeDisplay
-  ): Option[IndividualUserType] =
-    if (displayType.representativeType.exists(_.isLeft))
-      Some(PersonalRepresentative)
-    else if (displayType.representativeType.exists(_.isRight))
-      Some(Capacitor)
-    else
-      Some(Self)
+  ): IndividualUserType =
+    displayType.representativeType.getOrElse(Self)
 
   def sessionDataWithStartingNewDraftReturn(
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
-    representativeType: Option[
-      Either[PersonalRepresentative.type, Capacitor.type]
-    ] = None
+    representativeType: Option[RepresentativeType] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers),
@@ -144,12 +137,15 @@ class MultipleDisposalsTriageControllerSpec
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
       representeeAnswers =
-        if (representativeType.exists(_.isLeft))
+        if (
+          representativeType.contains(PersonalRepresentative) || representativeType
+            .contains(PersonalRepresentativeInPeriodOfAdmin)
+        )
           Some(
             sample[CompleteRepresenteeAnswers]
               .copy(dateOfDeath = Some(sample[DateOfDeath]))
           )
-        else if (representativeType.exists(_.isRight))
+        else if (representativeType.contains(Capacitor))
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
         else None
     )
@@ -163,19 +159,20 @@ class MultipleDisposalsTriageControllerSpec
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
-    representativeType: Option[
-      Either[PersonalRepresentative.type, Capacitor.type]
-    ] = None
+    representativeType: Option[RepresentativeType] = None
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
       triageAnswers = multipleDisposalsAnswers,
       representeeAnswers =
-        if (representativeType.exists(_.isLeft))
+        if (
+          representativeType.contains(PersonalRepresentative) || representativeType
+            .contains(PersonalRepresentativeInPeriodOfAdmin)
+        )
           Some(
             sample[CompleteRepresenteeAnswers]
               .copy(dateOfDeath = Some(sample[DateOfDeath]))
           )
-        else if (representativeType.exists(_.isRight))
+        else if (representativeType.contains(Capacitor))
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
         else None
     )
@@ -287,7 +284,7 @@ class MultipleDisposalsTriageControllerSpec
               ) {
 
                 val answers = sample[CompleteMultipleDisposalsTriageAnswers]
-                  .copy(individualUserType = setIndividualUserType(displayType))
+                  .copy(individualUserType = Some(setIndividualUserType(displayType)))
 
                 test(
                   sessionDataWithStartingNewDraftReturn(
@@ -334,7 +331,7 @@ class MultipleDisposalsTriageControllerSpec
                 test(
                   sessionDataWithFillingOutReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers]
-                      .copy(individualUserType = setIndividualUserType(displayType)),
+                      .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
@@ -833,7 +830,7 @@ class MultipleDisposalsTriageControllerSpec
                 test(
                   sessionDataWithStartingNewDraftReturn(
                     IncompleteMultipleDisposalsTriageAnswers.empty
-                      .copy(individualUserType = setIndividualUserType(displayType)),
+                      .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
@@ -861,7 +858,7 @@ class MultipleDisposalsTriageControllerSpec
                 test(
                   sessionDataWithStartingNewDraftReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers]
-                      .copy(individualUserType = setIndividualUserType(displayType)),
+                      .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
@@ -906,7 +903,7 @@ class MultipleDisposalsTriageControllerSpec
                 test(
                   sessionDataWithFillingOutReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers]
-                      .copy(individualUserType = setIndividualUserType(displayType)),
+                      .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
@@ -1110,7 +1107,7 @@ class MultipleDisposalsTriageControllerSpec
               s"For user type ${displayType.getSubKey}"
             ) {
               val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                individualUserType = setIndividualUserType(displayType),
+                individualUserType = Some(setIndividualUserType(displayType)),
                 numberOfProperties = Some(2)
               )
               val session = sessionDataWithStartingNewDraftReturn(
@@ -2066,7 +2063,7 @@ class MultipleDisposalsTriageControllerSpec
                 test(
                   sessionDataWithStartingNewDraftReturn(
                     incompleteAnswers.copy(
-                      individualUserType = setIndividualUserType(displayType),
+                      individualUserType = Some(setIndividualUserType(displayType)),
                       numberOfProperties = Some(2),
                       wasAUKResident = Some(false)
                     ),
@@ -2098,7 +2095,7 @@ class MultipleDisposalsTriageControllerSpec
                 test(
                   sessionDataWithStartingNewDraftReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers]
-                      .copy(individualUserType = setIndividualUserType(displayType)),
+                      .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
@@ -2519,7 +2516,7 @@ class MultipleDisposalsTriageControllerSpec
                 test(
                   sessionDataWithStartingNewDraftReturn(
                     IncompleteMultipleDisposalsTriageAnswers.empty
-                      .copy(individualUserType = setIndividualUserType(displayType)),
+                      .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
@@ -2548,7 +2545,7 @@ class MultipleDisposalsTriageControllerSpec
                 test(
                   sessionDataWithStartingNewDraftReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers]
-                      .copy(individualUserType = setIndividualUserType(displayType)),
+                      .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
@@ -2855,7 +2852,7 @@ class MultipleDisposalsTriageControllerSpec
               s"For user type ${displayType.getSubKey}"
             ) {
               val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-                individualUserType = setIndividualUserType(displayType),
+                individualUserType = Some(setIndividualUserType(displayType)),
                 numberOfProperties = Some(2),
                 wasAUKResident = Some(false),
                 countryOfResidence = Some(country),
@@ -3641,6 +3638,15 @@ class MultipleDisposalsTriageControllerSpec
 
         }
 
+        "an individual user type of personal representative in period admin is found" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk
+              .copy(individualUserType = Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)),
+            representee.routes.RepresenteeController.enterName()
+          )
+
+        }
+
       }
 
       "redirect to the multiple disposals guidance page when no answer for the number of properties can be found" in {
@@ -3883,7 +3889,6 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersUk,
-                    None,
                     doc
                   )
               }
@@ -3917,7 +3922,6 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersNonUk,
-                    None,
                     doc
                   )
               }
@@ -3954,7 +3958,6 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersNonUk,
-                    Some(UserType.Agent),
                     doc
                   )
               }
@@ -3994,7 +3997,6 @@ class MultipleDisposalsTriageControllerSpec
                 .validateMultipleDisposalsTriageCheckYourAnswersPage(
                   completeAnswersNonUk
                     .copy(assetTypes = List(IndirectDisposal)),
-                  Some(UserType.Agent),
                   doc
                 )
             }
@@ -4041,7 +4043,6 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersUk,
-                    None,
                     doc
                   )
               }
@@ -4081,7 +4082,6 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersNonUk,
-                    None,
                     doc
                   )
               }
@@ -4269,33 +4269,26 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
 
   final case class UserTypeDisplay(
     userType: UserType,
-    representativeType: Option[
-      Either[PersonalRepresentative.type, Capacitor.type]
-    ],
+    representativeType: Option[RepresentativeType],
     name: Either[TrustName, IndividualName]
   ) {
     def getSubKey: String =
-      if (representativeType.exists(_.isLeft)) ".personalRep"
-      else if (representativeType.exists(_.isRight)) ".capacitor"
-      else if (userType === UserType.Agent) ".agent"
-      else if (name.isLeft) ".trust"
-      else ""
+      representativeType match {
+        case Some(PersonalRepresentative)                => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+        case Some(Capacitor)                             => ".capacitor"
+        case None                                        =>
+          if (userType === UserType.Agent) ".agent"
+          else if (name.isLeft) ".trust"
+          else ""
+      }
   }
 
   def validateMultipleDisposalsTriageCheckYourAnswersPage(
     answers: CompleteMultipleDisposalsTriageAnswers,
-    userType: Option[UserType],
     doc: Document
   )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
     implicit val messages = MessagesImpl(lang, messagesApi)
-
-    answers.individualUserType.foreach { individualUserType =>
-      doc.select("#individualUserType-answer").text() shouldBe messages(
-        if (userType.contains(UserType.Agent))
-          s"individualUserType.agent.$individualUserType"
-        else s"individualUserType.$individualUserType"
-      )
-    }
 
     doc.select("#numberOfProperties-answer").text() shouldBe messages(
       "numberOfProperties.MoreThanOne"

@@ -34,7 +34,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, ExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -291,7 +290,7 @@ class ExemptionAndLossesController @Inject() (
                 _,
                 disposalDate,
                 fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(draftReturn)
+                draftReturn.representativeType()
               )
             )(
               _ => Some(()),
@@ -317,7 +316,7 @@ class ExemptionAndLossesController @Inject() (
                 _,
                 disposalDate,
                 fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(draftReturn)
+                draftReturn.representativeType()
               )
             )(
               _ => Some(()),
@@ -351,7 +350,7 @@ class ExemptionAndLossesController @Inject() (
               _,
               wasAukResident,
               fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(draftReturn)
+              draftReturn.representativeType()
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -378,7 +377,7 @@ class ExemptionAndLossesController @Inject() (
               _,
               wasAUkResident,
               fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(draftReturn)
+              draftReturn.representativeType()
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -416,7 +415,7 @@ class ExemptionAndLossesController @Inject() (
               _,
               disposalDate,
               fillingOutReturn.subscribedDetails.isATrust,
-              representativeType(draftReturn)
+              draftReturn.representativeType()
             )
           )(
             requiredPreviousAnswer = _.fold(
@@ -461,7 +460,7 @@ class ExemptionAndLossesController @Inject() (
                 backlink,
                 disposalDate,
                 fillingOutReturn.subscribedDetails.isATrust,
-                representativeType(draftReturn)
+                draftReturn.representativeType()
               )
             }
           )(
@@ -491,7 +490,7 @@ class ExemptionAndLossesController @Inject() (
                   c,
                   disposalDate,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  representativeType(draftReturn)
+                  draftReturn.representativeType()
                 )
               )
 
@@ -551,7 +550,7 @@ class ExemptionAndLossesController @Inject() (
                       completeAnswers,
                       disposalDate,
                       fillingOutReturn.subscribedDetails.isATrust,
-                      representativeType(draftReturn)
+                      draftReturn.representativeType()
                     )
                   )
               )
@@ -572,17 +571,6 @@ class ExemptionAndLossesController @Inject() (
 }
 
 object ExemptionAndLossesController {
-
-  def representativeType(
-    draftReturn: DraftReturn
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
-    draftReturn.fold(
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType(),
-      _.triageAnswers.representativeType()
-    )
 
   val inYearLossesForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("inYearLosses", "inYearLossesValue")

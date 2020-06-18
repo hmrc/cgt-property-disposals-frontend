@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -209,7 +210,7 @@ class CommonTriageQuestionsControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("who-are-you-reporting-for.title"),
-              doc =>
+              { doc =>
                 doc
                   .select("#content > article > form")
                   .attr(
@@ -217,6 +218,28 @@ class CommonTriageQuestionsControllerSpec
                   ) shouldBe routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresentingSubmit()
                   .url
+
+                doc
+                  .select("#individualUserType > div:nth-child(2) > label")
+                  .text() shouldBe messageFromMessageKey(
+                  s"individualUserType.${IndividualUserType.Self}"
+                )
+                doc
+                  .select("#individualUserType > div:nth-child(3) > label")
+                  .html() shouldBe messageFromMessageKey(
+                  s"individualUserType.${IndividualUserType.Capacitor}"
+                )
+                doc
+                  .select("#individualUserType > div:nth-child(4) > label")
+                  .html() shouldBe messageFromMessageKey(
+                  s"individualUserType.${IndividualUserType.PersonalRepresentative}"
+                )
+                doc
+                  .select("#individualUserType > div:nth-child(5) > label")
+                  .html() shouldBe messageFromMessageKey(
+                  s"individualUserType.${IndividualUserType.PersonalRepresentativeInPeriodOfAdmin}"
+                )
+              }
             )
           }
 
@@ -338,7 +361,7 @@ class CommonTriageQuestionsControllerSpec
                     )
                     doc
                       .select("#individualUserType > div:nth-child(3) > label")
-                      .text()          shouldBe messageFromMessageKey(
+                      .html()          shouldBe messageFromMessageKey(
                       s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
                     )
                     doc.body().text() shouldNot include(
@@ -427,7 +450,7 @@ class CommonTriageQuestionsControllerSpec
         }
 
         "the option submitted has not been recognised" in {
-          test("individualUserType" -> "3")("individualUserType.error.invalid")
+          test("individualUserType" -> "10")("individualUserType.error.invalid")
         }
 
       }
@@ -2065,6 +2088,144 @@ class CommonTriageQuestionsControllerSpec
     }
 
     checkIsRedirect(performAction, expectedRedirect)
+  }
+
+}
+
+class PeriodOfAdminDisabledCommonTriageQuestionsControllerSpec
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with ScalaCheckDrivenPropertyChecks
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
+
+  override val overrideBindings =
+    List[GuiceableModule](
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[ReturnsService].toInstance(mockReturnsService)
+    )
+
+  override lazy val additionalConfig: Configuration = Configuration(
+    "period-of-admin.enabled" -> false
+  )
+
+  lazy val controller = instanceOf[CommonTriageQuestionsController]
+
+  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
+  "CommonTriageQuestionsController" when {
+
+    "displaying the 'who are you reporting for?' page" when {
+
+      def performAction(): Future[Result] =
+        controller.whoIsIndividualRepresenting()(FakeRequest())
+
+      "period of admin is disabled" must {
+
+        "show the correct options for an individual" in {
+          val startingNewDraftReturn =
+            sample[StartingNewDraftReturn].copy(
+              subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+              newReturnTriageAnswers = Right(IncompleteSingleDisposalTriageAnswers.empty),
+              agentReferenceNumber = None
+            )
+
+          val sessionData = SessionData.empty.copy(
+            journeyStatus = Some(startingNewDraftReturn),
+            userType = Some(UserType.Individual)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("who-are-you-reporting-for.title"),
+            { doc =>
+              doc
+                .select("#content > article > form")
+                .attr(
+                  "action"
+                ) shouldBe routes.CommonTriageQuestionsController
+                .whoIsIndividualRepresentingSubmit()
+                .url
+
+              doc
+                .select("#individualUserType > div:nth-child(2) > label")
+                .text() shouldBe messageFromMessageKey(
+                s"individualUserType.periodOfAdminDisabled.${IndividualUserType.Self}"
+              )
+              doc
+                .select("#individualUserType > div:nth-child(3) > label")
+                .html() shouldBe messageFromMessageKey(
+                s"individualUserType.periodOfAdminDisabled.${IndividualUserType.Capacitor}"
+              )
+              doc
+                .select("#individualUserType > div:nth-child(4) > label")
+                .html() shouldBe messageFromMessageKey(
+                s"individualUserType.periodOfAdminDisabled.${IndividualUserType.PersonalRepresentative}"
+              )
+            }
+          )
+
+        }
+
+        "show the correct options for an agent" in {
+          val startingNewDraftReturn =
+            sample[StartingNewDraftReturn].copy(
+              subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+              newReturnTriageAnswers = Right(IncompleteSingleDisposalTriageAnswers.empty),
+              agentReferenceNumber = Some(sample[AgentReferenceNumber])
+            )
+
+          val sessionData = SessionData.empty.copy(
+            journeyStatus = Some(startingNewDraftReturn),
+            userType = Some(UserType.Agent)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("who-are-you-reporting-for.title"),
+            { doc =>
+              doc
+                .select("#content > article > form")
+                .attr(
+                  "action"
+                ) shouldBe routes.CommonTriageQuestionsController
+                .whoIsIndividualRepresentingSubmit()
+                .url
+
+              doc
+                .select("#individualUserType > div:nth-child(2) > label")
+                .text() shouldBe messageFromMessageKey(
+                s"individualUserType.periodOfAdminDisabled.agent.${IndividualUserType.Self}"
+              )
+              doc
+                .select("#individualUserType > div:nth-child(3) > label")
+                .html() shouldBe messageFromMessageKey(
+                s"individualUserType.periodOfAdminDisabled.agent.${IndividualUserType.PersonalRepresentative}"
+              )
+              doc.body().text() shouldNot include(
+                messageFromMessageKey(
+                  s"individualUserTypeperiodOfAdminDisabled.${IndividualUserType.Capacitor}"
+                )
+              )
+            }
+          )
+        }
+
+      }
+
+    }
   }
 
 }

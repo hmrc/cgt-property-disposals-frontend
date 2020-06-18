@@ -22,15 +22,21 @@ import play.api.libs.json.OFormat
 
 sealed trait IndividualUserType extends Product with Serializable
 
+sealed trait RepresentativeType extends IndividualUserType
+
 object IndividualUserType {
 
   case object Self extends IndividualUserType
 
-  case object Capacitor extends IndividualUserType
+  case object Capacitor extends RepresentativeType
 
-  case object PersonalRepresentative extends IndividualUserType
+  case object PersonalRepresentative extends RepresentativeType
 
-  implicit val eq: Eq[IndividualUserType] = Eq.fromUniversalEquals
+  case object PersonalRepresentativeInPeriodOfAdmin extends RepresentativeType
+
+  implicit val individualUserTypeEq: Eq[IndividualUserType] = Eq.fromUniversalEquals
+
+  implicit val representativeTypeEq: Eq[RepresentativeType] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[IndividualUserType] = derived.oformat()

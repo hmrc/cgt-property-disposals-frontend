@@ -21,10 +21,10 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Capacitor
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentative
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
 cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -32,15 +32,19 @@ cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
 cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: AmountInPence, isATrust: Boolean, representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]])(implicit request: RequestWithSessionData[_], messages: Messages)
+@(answers: AmountInPence, isATrust: Boolean, representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages)
 @isAgent = @{request.userType.contains(UserType.Agent)}
 
 @userKey = @{
-    if(representativeType.exists(_.isLeft)) ".personalRep"
-    else if(isAgent) ".agent"
-    else if(isATrust) ".trust"
-        else if(representativeType.exists(_.isRight)) ".capacitor"
+    representativeType match {
+        case Some(PersonalRepresentative) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+        case Some(Capacitor) => ".capacitor"
+        case None =>
+            if (isAgent) ".agent"
+            else if (isATrust) ".trust"
             else ""
+    }
 }
 @initialGainOrLossLabelWithAmount = @{
   Some(answers).map { answer =>

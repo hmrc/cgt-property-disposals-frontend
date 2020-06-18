@@ -310,7 +310,7 @@ object CompleteReturn {
         _ => true
       )
 
-    def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    def representativeType(): Option[RepresentativeType] =
       c.fold(
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),

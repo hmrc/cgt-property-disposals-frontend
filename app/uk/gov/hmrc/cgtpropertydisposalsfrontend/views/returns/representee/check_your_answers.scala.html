@@ -18,7 +18,7 @@
 @import play.api.mvc.Call
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 
@@ -34,7 +34,7 @@
 
 @(
     answers: CompleteRepresenteeAnswers,
-    representativeType: Either[PersonalRepresentative.type, Capacitor.type],
+    representativeType: RepresentativeType,
     backLink: Call
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 

@@ -220,8 +220,16 @@ object DraftReturn {
       }
 
     def isMultipleIndirectDisposal(): Boolean =
-      d.fold(_ => false, _ => false, _ => false, _ => true, _ => false)
+      fold(_ => false, _ => false, _ => false, _ => true, _ => false)
 
+    def representativeType(): Option[RepresentativeType] =
+      fold(
+        _.triageAnswers.representativeType(),
+        _.triageAnswers.representativeType(),
+        _.triageAnswers.representativeType(),
+        _.triageAnswers.representativeType(),
+        _.triageAnswers.representativeType()
+      )
   }
 
   implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals

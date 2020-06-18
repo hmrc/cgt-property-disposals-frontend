@@ -18,12 +18,11 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 
-@import cats.syntax.eq._
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -39,16 +38,23 @@
 @(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"isUk"}
+@isAgent = @{ request.userType.contains(Agent) }
+
 @journeyErrorKey = @{ addressJourneyType match {
     case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => ".representee"
 
     case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-      if(c.draftReturn.isLeft)                        ".multipleIndirect."
-      else if(c.representativeType.exists(_.isLeft))  ".companyDetails.personalRep."
-      else if(c.representativeType.exists(_.isRight)) ".companyDetails.capacitor."
-      else if(c.isATrust)                             ".companyDetails.trust."
-      else if(request.userType.exists(_ === Agent))   ".companyDetails.agent."
-      else                                            ".companyDetails."
+        if(c.draftReturn.isLeft)                       ".multipleIndirect."
+        else
+            c.representativeType match {
+                case Some(PersonalRepresentative) => ".companyDetails.personalRep."
+                case Some(PersonalRepresentativeInPeriodOfAdmin) => ".companyDetails.personalRep."
+                case Some(Capacitor) => ".companyDetails.capacitor."
+                case None =>
+                    if (c.isATrust) ".companyDetails.trust."
+                    else if (isAgent) ".companyDetails.agent."
+                    else ".companyDetails."
+            }
 
     case _ => ""
 }}
@@ -57,11 +63,17 @@
       case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => messages("isUk.representee.title")
       case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
           if(c.draftReturn.isLeft)                        messages("companyDetails.isUk.multipleIndirect.title")
-          else if(c.representativeType.exists(_.isLeft))  messages("companyDetails.isUk.personalRep.title")
-          else if(c.representativeType.exists(_.isRight)) messages("companyDetails.isUk.capacitor.title")
-          else if(c.isATrust)                             messages("companyDetails.isUk.trust.title")
-          else if(request.userType.exists(_ === Agent))   messages("companyDetails.isUk.agent.title")
-          else                                            messages("companyDetails.isUk.title")
+          else
+              c.representativeType match {
+                  case Some(PersonalRepresentative)                => messages("companyDetails.isUk.personalRep.title")
+                  case Some(PersonalRepresentativeInPeriodOfAdmin) => messages("companyDetails.isUk.personalRep.title")
+                  case Some(Capacitor)                             => messages("companyDetails.isUk.capacitor.title")
+                  case None =>
+                      if (c.isATrust)                                 messages("companyDetails.isUk.trust.title")
+                      else if (isAgent)                        messages("companyDetails.isUk.agent.title")
+                      else                                            messages("companyDetails.isUk.title")
+              }
+
       case _ => messages("subscription.isUk.title")
   }
 }

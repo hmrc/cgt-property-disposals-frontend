@@ -27,7 +27,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -57,7 +57,7 @@
     returnSummary: ReturnSummary,
     rebasingEligibilityUtil: RebasingEligibilityUtil,
     subscribedDetails: SubscribedDetails,
-    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]],
+    representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 

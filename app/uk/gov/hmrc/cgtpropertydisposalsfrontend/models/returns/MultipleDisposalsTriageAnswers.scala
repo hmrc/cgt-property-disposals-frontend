@@ -25,7 +25,6 @@ import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 
 sealed trait MultipleDisposalsTriageAnswers
 
@@ -113,14 +112,13 @@ object MultipleDisposalsTriageAnswers {
         )
       )
 
-    def representativeType(): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+    def representativeType(): Option[RepresentativeType] =
       m.fold[Option[IndividualUserType]](
         _.individualUserType,
         _.individualUserType
       ) match {
-        case Some(PersonalRepresentative) => Some(Left(PersonalRepresentative))
-        case Some(Capacitor)              => Some(Right(Capacitor))
-        case _                            => None
+        case Some(r: RepresentativeType) => Some(r)
+        case _                           => None
       }
 
     def isIndirectDisposal(): Boolean =

@@ -637,11 +637,27 @@ triage.caption=Before you start
 
 who-are-you-reporting-for.title=Who are you completing this return for?
 
+individualUserType.periodOfAdminDisabled.Self=Yourself
+individualUserType.periodOfAdminDisabled.Capacitor=Someone else
+individualUserType.periodOfAdminDisabled.PersonalRepresentative=Someone who has died
+individualUserType.periodOfAdminDisabled.agent.Self=Your client
+individualUserType.periodOfAdminDisabled.agent.PersonalRepresentative=Someone who has died
+
 individualUserType.Self=Yourself
-individualUserType.Capacitor=Someone else
-individualUserType.PersonalRepresentative=Someone who has died
+individualUserType.Capacitor=Someone you’re helping
+individualUserType.Capacitor.helpText=You’re a capacitor
+individualUserType.PersonalRepresentative=A person who made the disposal <strong class="bold">before they died</strong>
+individualUserType.PersonalRepresentative.helpText=You’re a personal representative
+individualUserType.PersonalRepresentativeInPeriodOfAdmin=The estate of a person and the property was sold <strong class="bold">after they died</strong>
+individualUserType.PersonalRepresentativeInPeriodOfAdmin.helpText=You’re a personal representative
 individualUserType.agent.Self=Your client
-individualUserType.agent.PersonalRepresentative=Someone who has died
+individualUserType.agent.Self.helpText=Who is not a personal representative
+individualUserType.agent.PersonalRepresentative=A person who made the disposal <strong class="bold">before they died</strong>
+individualUserType.agent.PersonalRepresentative.helpText=Your client is a personal representative
+individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin=The estate of a person and the property was sold <strong class="bold">after they died</strong>
+individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin.helpText=Your client is a personal representative
+
+
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 

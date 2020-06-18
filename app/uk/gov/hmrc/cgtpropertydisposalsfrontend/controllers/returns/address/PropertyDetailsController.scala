@@ -38,7 +38,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus, SessionData, TaxYear, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -914,13 +913,10 @@ class PropertyDetailsController @Inject() (
 
   private def extractIndividualUserType(
     f: FillingOutReturnAddressJourney
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+  ): Option[RepresentativeType] =
     f.individualUserType match {
-      case Some(IndividualUserType.Capacitor)              =>
-        Some(Right(IndividualUserType.Capacitor))
-      case Some(IndividualUserType.PersonalRepresentative) =>
-        Some(Left(IndividualUserType.PersonalRepresentative))
-      case _                                               => None
+      case Some(r: RepresentativeType) => Some(r)
+      case _                           => None
     }
 
   private def disposalPriceBackLink(

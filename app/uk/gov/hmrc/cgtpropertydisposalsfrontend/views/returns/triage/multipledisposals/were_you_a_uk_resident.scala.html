@@ -23,7 +23,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -42,24 +43,32 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
         backLink: Call,
         hasCreatedDraftReturn: Boolean,
         isATrust: Boolean,
-        representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+        representativeType: Option[RepresentativeType]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsWereYouAUKResident"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
-  if (representativeType.exists(_.isLeft)) ".personalRep"
-  else if (representativeType.exists(_.isRight)) ".capacitor"
-  else if (isAgent) ".agent"
-  else if (isATrust) ".trust"
-  else ""
+  representativeType match {
+      case Some(PersonalRepresentative) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(Capacitor) => ".capacitor"
+      case None =>
+          if (isAgent) ".agent"
+          else if (isATrust) ".trust"
+          else ""
+  }
 }
 @userErrorKey = @{
-  if (representativeType.exists(_.isLeft)) "personalRep."
-  else if (representativeType.exists(_.isRight)) "capacitor."
-  else if (isAgent) "agent."
-    else if (isATrust) "trust."
-      else ""
+    representativeType match {
+        case Some(PersonalRepresentative) => "personalRep."
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => "personalRep."
+        case Some(Capacitor) => "capacitor."
+        case None =>
+            if (isAgent) "agent."
+            else if (isATrust) "trust."
+            else ""
+    }
 }
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
