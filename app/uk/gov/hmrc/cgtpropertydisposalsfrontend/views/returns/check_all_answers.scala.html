@@ -14,19 +14,19 @@
  * limitations under the License.
  *@
 
-@import cats.syntax.either._
-
 @import play.api.i18n.Messages
+@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -56,11 +56,26 @@
     completeReturn: CompleteReturn,
     rebasingEligibilityUtil: RebasingEligibilityUtil,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]],
+    representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{ messages("checkAllAnswers.title") }
+
+@representeeSection(representeeAnswers: Option[CompleteRepresenteeAnswers]) = @{
+    (representeeAnswers, representativeType) match {
+        case (Some(answers), Some(repType)) =>
+          Html(
+            s"""
+                 |<h2 class="heading-medium">${messages("task-list.representee.link")}</h2>
+                 |${representeeSummary(answers, repType)}
+                 |""".stripMargin
+          )
+
+        case _ => Html("")
+    }
+}
+
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -70,13 +85,7 @@
 
   @completeReturn match {
     case s: CompleteSingleDisposalReturn => {
-      @s.representeeAnswers.map { representeeAnswers =>
-       <h2 class="heading-medium">@messages("task-list.representee.link")</h2>
-      @representeeSummary(
-       representeeAnswers,
-       Either.fromOption(representeeAnswers.dateOfDeath.map(_ => PersonalRepresentative), Capacitor).swap
-      )
-      }
+        @representeeSection(s.representeeAnswers)
 
      <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
      @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType)
@@ -120,13 +129,7 @@
     }
 
     case m: CompleteMultipleDisposalsReturn => {
-       @m.representeeAnswers.map { representeeAnswers =>
-        <h2 class="heading-medium">@messages("task-list.representee.link")</h2>
-       @representeeSummary(
-        representeeAnswers,
-        Either.fromOption(representeeAnswers.dateOfDeath.map(_ => PersonalRepresentative), Capacitor).swap
-       )
-       }
+        @representeeSection(m.representeeAnswers)
 
        <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
        @multipleDisposalsTriageSummary(m.triageAnswers, isATrust)
@@ -145,13 +148,7 @@
       }
 
     case s: CompleteSingleIndirectDisposalReturn => {
-        @s.representeeAnswers.map { representeeAnswers =>
-            <h2 class="heading-medium">@messages("task-list.representee.link")</h2>
-        @representeeSummary(
-            representeeAnswers,
-            Either.fromOption(representeeAnswers.dateOfDeath.map(_ => PersonalRepresentative), Capacitor).swap
-        )
-        }
+        @representeeSection(s.representeeAnswers)
 
         <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
         @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType)
@@ -184,13 +181,7 @@
     }
 
     case multipleIndirect: CompleteMultipleIndirectDisposalReturn => {
-        @multipleIndirect.representeeAnswers.map { representeeAnswers =>
-            <h2 class="heading-medium">@messages("task-list.representee.link")</h2>
-        @representeeSummary(
-            representeeAnswers,
-            Either.fromOption(representeeAnswers.dateOfDeath.map(_ => PersonalRepresentative), Capacitor).swap
-        )
-        }
+      @representeeSection(multipleIndirect.representeeAnswers)
 
         <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
         @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, isATrust)

@@ -19,7 +19,18 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components
 import play.twirl.api.Html
 
 final case class RadioOption(
-  label: String,
+  label: Html,
   content: Option[Html],
   optionHelpText: Option[Html]
 )
+
+object RadioOption {
+
+  def apply(
+    label: String,
+    content: Option[Html],
+    optionHelpText: Option[Html]
+  ): RadioOption =
+    RadioOption(Html(label), content, optionHelpText)
+
+}

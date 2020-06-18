@@ -4435,6 +4435,13 @@ class SingleDisposalsTriageControllerSpec
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
               Right(sample[IndividualName]),
               representee.routes.RepresenteeController.enterName()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType =
+                Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
+              ),
+              Right(sample[IndividualName]),
+              representee.routes.RepresenteeController.enterName()
             )
           ).foreach {
             case Scenario(state, name, expectedRedirect) =>
@@ -5035,9 +5042,10 @@ class SingleDisposalsTriageControllerSpec
 
   private def userType(answers: SingleDisposalTriageAnswers) =
     answers.representativeType() match {
-      case Some(Left(PersonalRepresentative)) => "personal representative"
-      case Some(Right(Capacitor))             => "capacitor"
-      case None                               => "self"
+      case Some(PersonalRepresentative)                => "personal representative"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => "personal representative in period of admin"
+      case Some(Capacitor)                             => "capacitor"
+      case None                                        => "self"
     }
 
   def displayIndividualTriagePageBehaviorCompleteJourney(
@@ -5363,13 +5371,12 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
 
     implicit lazy val messages: Messages = MessagesImpl(lang, messagesApi)
 
-    completeSingleDisposalTriageAnswers.individualUserType.foreach { individualUserType =>
+    if (completeSingleDisposalTriageAnswers.individualUserType.contains(Self))
       doc.select("#individualUserType-answer").text() shouldBe messages(
         if (userType.contains(UserType.Agent))
-          s"individualUserType.agent.$individualUserType"
-        else s"individualUserType.$individualUserType"
+          s"individualUserType.agent.Self"
+        else s"individualUserType.Self"
       )
-    }
 
     doc.select("#numberOfProperties-answer").text()   shouldBe "One"
     doc.select("#disposalMethod-answer").text()       shouldBe messages(

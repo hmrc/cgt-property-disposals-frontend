@@ -25,8 +25,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
@@ -423,20 +422,11 @@ trait AddressController[A <: AddressJourneyType] {
 
   private def extractRepresentitiveType(
     journey: AddressJourneyType
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+  ): Option[RepresentativeType] =
     journey match {
       case j: FillingOutReturnAddressJourney =>
-        j.individualUserType match {
-          case Some(value) =>
-            value match {
-              case IndividualUserType.Capacitor              =>
-                Some(Right(IndividualUserType.Capacitor))
-              case IndividualUserType.PersonalRepresentative =>
-                Some(Left(IndividualUserType.PersonalRepresentative))
-              case _                                         => None
-            }
-          case _           => None
-        }
+        j.draftReturn.fold(_.triageAnswers.representativeType(), _.triageAnswers.representativeType())
+
       case _                                 => None
     }
 

@@ -26,7 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
@@ -47,7 +47,7 @@
     
 @representeeState = @{
   draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType) match {
-      case Some(Capacitor) | Some(PersonalRepresentative) =>
+      case Some(_: RepresentativeType) =>
         Some(draftReturn.representeeAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete)))
       case _ =>
           None

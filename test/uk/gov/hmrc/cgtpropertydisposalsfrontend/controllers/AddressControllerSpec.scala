@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, IndividualUserType}
@@ -96,12 +96,12 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Some(PersonalRepresentative), _) => ".personalRep"
-      case (Some(Capacitor), _)              => ".capacitor"
-      case (_, UserType.Individual)          => ""
-      case (_, UserType.Organisation)        => ".trust"
-      case (_, UserType.Agent)               => ".agent"
-      case other                             => sys.error(s"User type '$other' not handled")
+      case (Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin), _) => ".personalRep"
+      case (Some(Capacitor), _)                                                      => ".capacitor"
+      case (_, UserType.Individual)                                                  => ""
+      case (_, UserType.Organisation)                                                => ".trust"
+      case (_, UserType.Agent)                                                       => ".agent"
+      case other                                                                     => sys.error(s"User type '$other' not handled")
     }
 
   def getUserClue(

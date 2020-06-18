@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, Tru
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -103,12 +103,12 @@ class ExemptionAndLossesControllerSpec
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Capacitor, _)              => ".capacitor"
-      case (PersonalRepresentative, _) => ".personalRep"
-      case (_, UserType.Individual)    => ""
-      case (_, UserType.Organisation)  => ".trust"
-      case (_, UserType.Agent)         => ".agent"
-      case other                       => sys.error(s"User type '$other' not handled")
+      case (Capacitor, _)                                                      => ".capacitor"
+      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
+      case (_, UserType.Individual)                                            => ""
+      case (_, UserType.Organisation)                                          => ".trust"
+      case (_, UserType.Agent)                                                 => ".agent"
+      case other                                                               => sys.error(s"User type '$other' not handled")
     }
 
   private def sampleSingleDisposalTriageAnswers(
@@ -2307,7 +2307,9 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       )
     }
 
-    if (individualUserType === IndividualUserType.PersonalRepresentative)
+    if (
+      individualUserType === IndividualUserType.PersonalRepresentative || individualUserType === IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
+    )
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"

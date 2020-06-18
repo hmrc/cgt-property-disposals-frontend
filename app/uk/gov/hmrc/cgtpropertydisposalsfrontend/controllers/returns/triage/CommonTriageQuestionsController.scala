@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
@@ -89,7 +89,8 @@ class CommonTriageQuestionsController @Inject() (
         else {
           val form = {
             val f = whoAreYouReportingForForm(
-              request.userType.contains(UserType.Agent)
+              request.userType.contains(UserType.Agent),
+              viewConfig.periodOfAdminEnabled
             )
             getIndividualUserType(state).fold(f)(f.fill)
           }
@@ -111,7 +112,7 @@ class CommonTriageQuestionsController @Inject() (
         if (!isIndividual(state))
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
         else
-          whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
+          whoAreYouReportingForForm(request.userType.contains(UserType.Agent), viewConfig.periodOfAdminEnabled)
             .bindFromRequest()
             .fold(
               formWithErrors =>
@@ -191,7 +192,7 @@ class CommonTriageQuestionsController @Inject() (
 
   def getRepresentativeType(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
-  ): Option[Either[PersonalRepresentative.type, Capacitor.type]] =
+  ): Option[RepresentativeType] =
     state
       .fold(
         _.newReturnTriageAnswers.fold(
@@ -681,17 +682,21 @@ class CommonTriageQuestionsController @Inject() (
 }
 object CommonTriageQuestionsController {
 
-  def whoAreYouReportingForForm(isAgent: Boolean): Form[IndividualUserType] =
+  def whoAreYouReportingForForm(isAgent: Boolean, periodOfAdminEnabled: Boolean): Form[IndividualUserType] = {
+    val options =
+      if (isAgent) List(Self, PersonalRepresentative)
+      else List(Self, Capacitor, PersonalRepresentative)
+
     Form(
       mapping(
         "individualUserType" -> of(
           FormUtils.radioFormFormatter(
-            if (isAgent) List(Self, PersonalRepresentative)
-            else List(Self, Capacitor, PersonalRepresentative)
+            if (periodOfAdminEnabled) options :+ PersonalRepresentativeInPeriodOfAdmin else options
           )
         )
       )(identity)(Some(_))
     )
+  }
 
   val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
     mapping(

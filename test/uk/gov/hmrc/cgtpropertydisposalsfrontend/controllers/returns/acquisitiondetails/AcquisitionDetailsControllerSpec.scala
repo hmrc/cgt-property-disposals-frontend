@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, Tru
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, NonResidential, Residential}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -82,12 +82,12 @@ class AcquisitionDetailsControllerSpec
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Capacitor, _)              => ".capacitor"
-      case (PersonalRepresentative, _) => ".personalRep"
-      case (_, UserType.Individual)    => ""
-      case (_, UserType.Organisation)  => ".trust"
-      case (_, UserType.Agent)         => ".agent"
-      case other                       => sys.error(s"User type '$other' not handled")
+      case (Capacitor, _)                                                      => ".capacitor"
+      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
+      case (_, UserType.Individual)                                            => ""
+      case (_, UserType.Organisation)                                          => ".trust"
+      case (_, UserType.Agent)                                                 => ".agent"
+      case other                                                               => sys.error(s"User type '$other' not handled")
     }
 
   def assetTypeMessageKey(assetType: AssetType): String =
