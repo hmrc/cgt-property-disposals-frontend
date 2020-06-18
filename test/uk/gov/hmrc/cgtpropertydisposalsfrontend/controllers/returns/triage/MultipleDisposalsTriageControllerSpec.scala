@@ -3889,6 +3889,7 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersUk,
+                    None,
                     doc
                   )
               }
@@ -3922,6 +3923,7 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersNonUk,
+                    None,
                     doc
                   )
               }
@@ -3958,6 +3960,7 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersNonUk,
+                    Some(UserType.Agent),
                     doc
                   )
               }
@@ -3997,6 +4000,7 @@ class MultipleDisposalsTriageControllerSpec
                 .validateMultipleDisposalsTriageCheckYourAnswersPage(
                   completeAnswersNonUk
                     .copy(assetTypes = List(IndirectDisposal)),
+                  Some(UserType.Agent),
                   doc
                 )
             }
@@ -4043,6 +4047,7 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersUk,
+                    None,
                     doc
                   )
               }
@@ -4082,6 +4087,7 @@ class MultipleDisposalsTriageControllerSpec
                 MultipleDisposalsTriageControllerSpec
                   .validateMultipleDisposalsTriageCheckYourAnswersPage(
                     completeAnswersNonUk,
+                    None,
                     doc
                   )
               }
@@ -4286,9 +4292,17 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
 
   def validateMultipleDisposalsTriageCheckYourAnswersPage(
     answers: CompleteMultipleDisposalsTriageAnswers,
+    userType: Option[UserType],
     doc: Document
   )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
     implicit val messages = MessagesImpl(lang, messagesApi)
+
+    if (answers.individualUserType.contains(Self))
+      doc.select("#individualUserType-answer").text() shouldBe messages(
+        if (userType.contains(UserType.Agent))
+          s"individualUserType.agent.Self"
+        else s"individualUserType.Self"
+      )
 
     doc.select("#numberOfProperties-answer").text() shouldBe messages(
       "numberOfProperties.MoreThanOne"

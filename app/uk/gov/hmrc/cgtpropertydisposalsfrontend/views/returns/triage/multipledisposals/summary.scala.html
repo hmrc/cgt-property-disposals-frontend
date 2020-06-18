@@ -53,8 +53,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
     }
 }
 @cyaSection() {
-  @if(!viewConfig.periodOfAdminEnabled) {
-      @answers.individualUserType.map{ individualUserType =>
+      @answers.individualUserType.filter(i => !viewConfig.periodOfAdminEnabled || i === Self).map { individualUserType =>
       @cyaRow(
           messages("who-are-you-reporting-for.title"),
           Html(messages(if(isAgent) s"individualUserType.agent.${individualUserType.toString}" else s"individualUserType.${individualUserType.toString}")),
@@ -62,7 +61,6 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
           "individualUserType"
       )
       }
-  }
 
   @cyaRow(
     messages("numberOfProperties.title"),
