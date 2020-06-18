@@ -2510,11 +2510,13 @@ class SingleDisposalsTriageControllerSpec
 
       "show a form error with self" when {
 
-        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+        def test(formData: Seq[(String, String)], expectedErrorKey: String)(
+          requiredPreviousTriageAnswers: SingleDisposalTriageAnswers
+        ): Unit =
           testFormError(performAction, "completionDate.title")(
             formData,
             expectedErrorKey,
-            requiredPreviousAnswers
+            requiredPreviousTriageAnswers
           )
 
         "the date is invalid" in {
@@ -2525,31 +2527,47 @@ class SingleDisposalsTriageControllerSpec
                 "completionDate-month" -> scenario.monthInput,
                 "completionDate-year"  -> scenario.yearInput
               ).collect { case (id, Some(input)) => id -> input }
-              test(formData, scenario.expectedErrorMessageKey)
+              test(formData, scenario.expectedErrorMessageKey)(requiredPreviousAnswers)
             }
           }
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+        }
+
+        "the completion date is before 01-01-1900" in {
+          val date = LocalDate.of(1800, 1, 1)
+
+          test(formData(date), "completionDate.error.before1900")(
+            requiredPreviousAnswers.copy(
+              disposalDate = Some(
+                disposalDate.copy(
+                  value = LocalDate.of(1800, 1, 1)
+                )
+              )
+            )
+          )
         }
 
         "the completion date is before the disposal date" in {
           test(
             formData(dayBeforeDisposalDate),
             "completionDate.error.tooFarInPast"
-          )
+          )(requiredPreviousAnswers)
         }
 
       }
 
       "show a form error with capacitor" when {
 
-        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+        def test(formData: Seq[(String, String)], expectedErrorKey: String)(
+          requiredPreviousTriageAnswers: IncompleteSingleDisposalTriageAnswers
+        ): Unit =
           testFormError(performAction, "completionDate.capacitor.title")(
             formData,
             expectedErrorKey,
-            requiredPreviousAnswers.copy(
+            requiredPreviousTriageAnswers.copy(
               individualUserType = Some(Capacitor)
             )
           )
@@ -2562,31 +2580,47 @@ class SingleDisposalsTriageControllerSpec
                 "completionDate-month" -> scenario.monthInput,
                 "completionDate-year"  -> scenario.yearInput
               ).collect { case (id, Some(input)) => id -> input }
-              test(formData, scenario.expectedErrorMessageKey)
+              test(formData, scenario.expectedErrorMessageKey)(requiredPreviousAnswers)
             }
           }
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+        }
+
+        "the completion date is before 01-01-1900" in {
+          val date = LocalDate.of(1800, 1, 1)
+
+          test(formData(date), "completionDate.error.before1900")(
+            requiredPreviousAnswers.copy(
+              disposalDate = Some(
+                disposalDate.copy(
+                  value = LocalDate.of(1800, 1, 1)
+                )
+              )
+            )
+          )
         }
 
         "the completion date is before the disposal date" in {
           test(
             formData(dayBeforeDisposalDate),
             "completionDate.error.tooFarInPast"
-          )
+          )(requiredPreviousAnswers)
         }
 
       }
 
       "show a form error with personal representative" when {
 
-        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+        def test(formData: Seq[(String, String)], expectedErrorKey: String)(
+          requiredPreviousTriageAnswers: IncompleteSingleDisposalTriageAnswers
+        ): Unit =
           testFormError(performAction, "completionDate.personalRep.title")(
             formData,
             expectedErrorKey,
-            requiredPreviousAnswers.copy(
+            requiredPreviousTriageAnswers.copy(
               individualUserType = Some(PersonalRepresentative)
             )
           )
@@ -2599,20 +2633,34 @@ class SingleDisposalsTriageControllerSpec
                 "completionDate-month" -> scenario.monthInput,
                 "completionDate-year"  -> scenario.yearInput
               ).collect { case (id, Some(input)) => id -> input }
-              test(formData, scenario.expectedErrorMessageKey)
+              test(formData, scenario.expectedErrorMessageKey)(requiredPreviousAnswers)
             }
           }
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+        }
+
+        "the completion date is before 01-01-1900" in {
+          val date = LocalDate.of(1800, 1, 1)
+
+          test(formData(date), "completionDate.error.before1900")(
+            requiredPreviousAnswers.copy(
+              disposalDate = Some(
+                disposalDate.copy(
+                  value = LocalDate.of(1800, 1, 1)
+                )
+              )
+            )
+          )
         }
 
         "the completion date is before the disposal date" in {
           test(
             formData(dayBeforeDisposalDate),
             "completionDate.error.tooFarInPast"
-          )
+          )(requiredPreviousAnswers)
         }
 
       }

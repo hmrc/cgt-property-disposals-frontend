@@ -37,6 +37,8 @@ object TimeUtils {
 
   val clock: Clock = Clock.systemUTC()
 
+  val minimumDate = LocalDate.of(1900, 1, 1)
+
   def today(): LocalDate = LocalDate.now(clock)
 
   def now(): LocalDateTime = LocalDateTime.now(clock)
@@ -88,8 +90,7 @@ object TimeUtils {
         key: String,
         data: Map[String, String]
       ): Either[Seq[FormError], LocalDate] = {
-        val minimumDate = LocalDate.of(1900, 1, 1)
-        val result      = for {
+        val result = for {
           dateFieldStrings <- dateFieldStringValues(data)
           day ← toValidInt(dayKey, dateFieldStrings._1, Some(31))
           month ← toValidInt(monthKey, dateFieldStrings._2, Some(12))
@@ -100,10 +101,10 @@ object TimeUtils {
                    .flatMap(date =>
                      if (maximumDateInclusive.exists(_.isBefore(date)))
                        Left(FormError(dateKey, "error.tooFarInFuture"))
-                     else if (date.isBefore(minimumDate))
-                       Left(FormError(dateKey, "error.before1900"))
                      else if (minimumDateInclusive.exists(_.isAfter(date)))
                        Left(FormError(dateKey, "error.tooFarInPast"))
+                     else if (date.isBefore(minimumDate))
+                       Left(FormError(dateKey, "error.before1900"))
                      else Right(date)
                    )
         } yield date

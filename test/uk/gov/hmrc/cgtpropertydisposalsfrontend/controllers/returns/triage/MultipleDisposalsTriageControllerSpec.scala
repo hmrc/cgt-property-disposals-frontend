@@ -3127,6 +3127,14 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
+        "the date entered is before 01-01-1900" in {
+          val date = LocalDate.of(1800, 1, 1)
+
+          testFormError(formData(date))(
+            "multipleDisposalsCompletionDate.error.before1900"
+          )
+        }
+
       }
 
       "show an error page" when {
