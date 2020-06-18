@@ -844,6 +844,7 @@ sharesDisposalDate-month.error.monthAndYearRequired=Date of disposal must includ
 sharesDisposalDate-day.error.dayAndYearRequired=Date of disposal must include a day and a year
 sharesDisposalDate-day.error.dayAndMonthRequired=Date of disposal must include a day and a month
 sharesDisposalDate.error.tooFarInFuture=The date you disposed of the shares cannot be in the future
+sharesDisposalDate.error.before1900=The date you disposed of the shares must be on or after 01 01 1900, contact HMRC if the date is before this
 sharesDisposalDate.cyaChange=when the shares were sold
 
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
@@ -897,6 +898,7 @@ disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exc
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
+disposalDate.error.before1900=The contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
 
 disposalDate-day.error.required=Contract exchange date must include a day
 disposalDate-month.error.required=Contract exchange date must include a month
@@ -927,6 +929,7 @@ completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
 completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date
 completionDate.error.tooFarInFuture=Completion date must be today or in the past
+completionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
 
 completionDate-day.error.required=Completion date must include a day
 completionDate-month.error.required=Completion date must include a month
@@ -1518,11 +1521,23 @@ acquisitionDate.trust.error.tooFarInFuture=The date the trust acquired the prope
 acquisitionDate.capacitor.error.tooFarInFuture=The date the person acquired the property must be before you disposed of the property
 acquisitionDate.personalRep.error.tooFarInFuture=The date the person acquired the property must be before they disposed of the property
 
+acquisitionDate.error.before1900=The date you got the property must be on or after 01 01 1900, contact HMRC if the date is before this
+acquisitionDate.agent.error.before1900=The date your client got the property must be on or after 01 01 1900, contact HMRC if the date is before this
+acquisitionDate.trust.error.before1900=The date the trust acquired the property must be on or after 01 01 1900, contact HMRC if the date is before this
+acquisitionDate.capacitor.error.before1900=The date the person acquired the property must be on or after 01 01 1900, contact HMRC if the date is before this
+acquisitionDate.personalRep.error.before1900=The date the person acquired the property must be on or after 01 01 1900, contact HMRC if the date is before this
+
 acquisitionDate.indirect.error.tooFarInFuture=The date you got the shares must be before the day you sold or disposed of them
 acquisitionDate.agent.indirect.error.tooFarInFuture=The date your client acquired the shares must be before the day they sold or disposed of them
 acquisitionDate.trust.indirect.error.tooFarInFuture=The date the trust acquired the shares must be before the day it sold or disposed of them
 acquisitionDate.capacitor.indirect.error.tooFarInFuture=The date the person got the shares must be before the day they sold or disposed of them
 acquisitionDate.personalRep.indirect.error.tooFarInFuture=The date the person got the shares must be before the day they sold or disposed of them
+
+acquisitionDate.indirect.error.before1900=The date you got the shares must be on or after 01 01 1900, contact HMRC if the date is before this
+acquisitionDate.agent.indirect.error.before1900=The date your client got the shares must be on or after 01 01 1900, contact HMRC if the date is before this
+acquisitionDate.trust.indirect.error.before1900=The date the trust acquired the shares must be on or after 01 01 1900, contact HMRC if the date is before this
+acquisitionDate.capacitor.indirect.error.before1900=The date the person acquired the shares must be on or after 01 01 1900, contact HMRC if the date is before this
+acquisitionDate.personalRep.indirect.error.before1900=The date the person acquired the shares must be on or after 01 01 1900, contact HMRC if the date is before this
 
 acquisitionDate-day.error.required=The date you got the property must include a day
 acquisitionDate-day.agent.error.required=The date your client acquired the property must include a day
@@ -3123,6 +3138,8 @@ multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘co
 multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
+multipleDisposalsCompletionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
+
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
 multipleDisposalsCompletionDate-year.error.required=Completion date must include a year
@@ -3168,6 +3185,8 @@ multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what h
 multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
 multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
+multipleDisposalsDisposalDate.error.before1900=Contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
+
 multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
@@ -3444,6 +3463,7 @@ dateOfDeath-month.error.monthAndYearRequired=Date must include a month and a yea
 dateOfDeath-day.error.dayAndYearRequired=Date must include a day and a year
 dateOfDeath-day.error.dayAndMonthRequired=Date must include a day and a month
 dateOfDeath.error.tooFarInFuture=Date must be today or in the past
+dateOfDeath.error.before1900=Date must be on or after 01 01 1900, contact HMRC if the date is before this
 
 representeeReferenceIdType.title=Select if you have one of these reference numbers for the person
 representeeReferenceIdType.helpText=The reference number you enter must match the name you entered and the details we hold about the person.

@@ -227,6 +227,13 @@ object DateErrorScenarios {
         Some("2"),
         Some("2019"),
         s"$dateKey$userTypeKey.error.invalid"
+      ),
+      // invalid date before 01-01-1900
+      DateErrorScenario(
+        Some("1"),
+        Some("1"),
+        Some("1800"),
+        s"$dateKey$userTypeKey.error.before1900"
       )
     )
 

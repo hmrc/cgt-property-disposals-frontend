@@ -3126,6 +3126,7 @@ class MultipleDisposalsTriageControllerSpec
             "multipleDisposalsCompletionDate.error.tooFarInFuture"
           )
         }
+
       }
 
       "show an error page" when {
