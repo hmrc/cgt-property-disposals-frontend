@@ -201,7 +201,7 @@ class SingleDisposalsTriageController @Inject() (
                   r.copy(
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
-                      examplePropertyDetailsAnswers = d.examplePropertyDetailsAnswers.map(_.unset(_.disposalPrice)),
+                      mixedUsePropertyDetailsAnswers = d.mixedUsePropertyDetailsAnswers.map(_.unset(_.disposalPrice)),
                       exemptionAndLossesAnswers = None,
                       yearToDateLiabilityAnswers = None,
                       supportingEvidenceAnswers = None
@@ -309,7 +309,7 @@ class SingleDisposalsTriageController @Inject() (
                   r.copy(draftReturn =
                     mixedUseDraftReturn.copy(
                       triageAnswers = newAnswers,
-                      examplePropertyDetailsAnswers = None,
+                      mixedUsePropertyDetailsAnswers = None,
                       exemptionAndLossesAnswers = None,
                       yearToDateLiabilityAnswers = None,
                       supportingEvidenceAnswers = None
@@ -581,8 +581,8 @@ class SingleDisposalsTriageController @Inject() (
       case Left(Left(currentDraftReturn: DraftSingleMixedUseDisposalReturn))  =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
-          examplePropertyDetailsAnswers =
-            currentDraftReturn.examplePropertyDetailsAnswers.map(_.unset(_.acquisitionPrice)),
+          mixedUsePropertyDetailsAnswers =
+            currentDraftReturn.mixedUsePropertyDetailsAnswers.map(_.unset(_.acquisitionPrice)),
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
           supportingEvidenceAnswers = None
@@ -710,7 +710,7 @@ class SingleDisposalsTriageController @Inject() (
                   r.copy(
                     draftReturn = mixedUseDraftReturn.copy(
                       triageAnswers = newAnswers,
-                      examplePropertyDetailsAnswers = mixedUseDraftReturn.examplePropertyDetailsAnswers.map(
+                      mixedUsePropertyDetailsAnswers = mixedUseDraftReturn.mixedUsePropertyDetailsAnswers.map(
                         _.unset(_.acquisitionPrice)
                       ),
                       yearToDateLiabilityAnswers = mixedUseDraftReturn.yearToDateLiabilityAnswers

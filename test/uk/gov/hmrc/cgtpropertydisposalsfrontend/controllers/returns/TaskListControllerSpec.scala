@@ -42,6 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDet
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.{CompleteMixedUsePropertyDetailsAnswers, IncompleteMixedUsePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
@@ -2246,7 +2247,7 @@ class TaskListControllerSpec
               assetType = AssetType.MixedUse,
               individualUserType = None
             ),
-            examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+            mixedUsePropertyDetailsAnswers = Some(sample[IncompleteMixedUsePropertyDetailsAnswers])
           )
 
           testStateOfSection(
@@ -2254,7 +2255,7 @@ class TaskListControllerSpec
           )(
             "propertyDetails",
             messageFromMessageKey("task-list.enter-property-details.link"),
-            Call("", "#"),
+            address.routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             TaskListStatus.InProgress,
             _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
           )
@@ -2267,7 +2268,7 @@ class TaskListControllerSpec
               assetType = AssetType.MixedUse,
               individualUserType = None
             ),
-            examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+            mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers])
           )
 
           testStateOfSection(
@@ -2275,7 +2276,7 @@ class TaskListControllerSpec
           )(
             "propertyDetails",
             messageFromMessageKey("task-list.enter-property-details.link"),
-            Call("", "#"),
+            address.routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             TaskListStatus.Complete
           )
 
@@ -2290,8 +2291,8 @@ class TaskListControllerSpec
             sample[DraftSingleMixedUseDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None),
-              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
-              exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])
+              exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers]),
+              mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers])
             )
 
           testStateOfSection(
@@ -2313,7 +2314,7 @@ class TaskListControllerSpec
             sample[DraftSingleMixedUseDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None),
-              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers]),
               exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
             )
 
@@ -2339,7 +2340,7 @@ class TaskListControllerSpec
             sample[DraftSingleMixedUseDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None),
-              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
+              mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers]),
               exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
               yearToDateLiabilityAnswers = Some(sample[NonCalculatedYTDAnswers])
             )
@@ -2366,10 +2367,10 @@ class TaskListControllerSpec
             sample[DraftSingleMixedUseDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None),
-              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers]),
               exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
               yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers]),
-              supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers])
+              supportingEvidenceAnswers = Some(sample[CompleteSupportingEvidenceAnswers]),
+              mixedUsePropertyDetailsAnswers = Some(sample[CompleteMixedUsePropertyDetailsAnswers])
             )
 
           testStateOfSection(

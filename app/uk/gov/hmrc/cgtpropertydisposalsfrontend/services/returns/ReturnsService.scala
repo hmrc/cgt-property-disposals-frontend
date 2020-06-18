@@ -223,7 +223,7 @@ class ReturnsServiceImpl @Inject() (
               c => Some(extractCountryCodeOrPostcode(c.address))
             )
           ),
-        _.examplePropertyDetailsAnswers
+        _.mixedUsePropertyDetailsAnswers
           .flatMap(
             _.fold(_.address.map(_.postcode), c => Some(c.address.postcode))
           )

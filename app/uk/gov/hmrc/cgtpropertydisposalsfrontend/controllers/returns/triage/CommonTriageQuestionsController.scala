@@ -596,7 +596,7 @@ class CommonTriageQuestionsController @Inject() (
               singleMixedUse.copy(
                 triageAnswers = updateSingleDisposalAnswers(singleMixedUse.triageAnswers),
                 representeeAnswers = None,
-                examplePropertyDetailsAnswers = None,
+                mixedUsePropertyDetailsAnswers = None,
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None
               )

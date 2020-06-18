@@ -21,7 +21,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registratio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.{SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, EnteringCompanyDetails, FillingOutReturnAddressJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{ChangingRepresenteeContactAddressJourney, EnteringCompanyDetails, EnteringSingleMixedUsePropertyDetails, FillingOutReturnAddressJourney}
 
 sealed trait AddressJourneyType extends Product with Serializable
 
@@ -80,6 +80,16 @@ object AddressJourneyType {
       isATrust: Boolean
     ) extends Returns
 
+    final case class EnteringSingleMixedUsePropertyDetails(
+      journey: FillingOutReturn,
+      draftReturn: DraftSingleMixedUseDisposalReturn,
+      representativeType: Option[
+        Either[PersonalRepresentative.type, Capacitor.type]
+      ],
+      isATrust: Boolean,
+      answers: MixedUsePropertyDetailsAnswers
+    ) extends Returns
+
   }
 
   implicit val eq: Eq[AddressJourneyType] =
@@ -109,6 +119,7 @@ object AddressJourneyType {
 
         case _: ChangingRepresenteeContactAddressJourney =>
           "representee.caption"
+        case _: EnteringSingleMixedUsePropertyDetails    => "singleMixedUse.caption"
       }
 
     def showReturnToSummaryLink(): Boolean =
