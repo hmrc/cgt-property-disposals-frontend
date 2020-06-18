@@ -19,11 +19,8 @@
 @import play.api.mvc.Call
 @import play.twirl.api.Html
 
-@import cats.syntax.eq._
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
@@ -86,7 +83,7 @@
             case Some(Capacitor) => messages("address.uk.companyDetails.capacitor.title")
             case None =>
                 if(c.isATrust)                                  messages("address.uk.companyDetails.trust.title")
-                else if(request.userType.exists(_ === Agent))   messages("address.uk.companyDetails.agent.title")
+                else if(isAgent)                                messages("address.uk.companyDetails.agent.title")
                 else                                            messages("address.uk.companyDetails.title")
         }
 

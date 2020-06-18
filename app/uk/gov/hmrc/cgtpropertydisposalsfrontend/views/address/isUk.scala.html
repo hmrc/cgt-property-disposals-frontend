@@ -18,8 +18,6 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 
-@import cats.syntax.eq._
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
@@ -40,6 +38,8 @@
 @(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"isUk"}
+@isAgent = @{ request.userType.contains(Agent) }
+
 @journeyErrorKey = @{ addressJourneyType match {
     case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => ".representee"
 
@@ -52,7 +52,7 @@
                 case Some(Capacitor) => ".companyDetails.capacitor."
                 case None =>
                     if (c.isATrust) ".companyDetails.trust."
-                    else if (request.userType.exists(_ === Agent)) ".companyDetails.agent."
+                    else if (isAgent) ".companyDetails.agent."
                     else ".companyDetails."
             }
 
@@ -70,7 +70,7 @@
                   case Some(Capacitor)                             => messages("companyDetails.isUk.capacitor.title")
                   case None =>
                       if (c.isATrust)                                 messages("companyDetails.isUk.trust.title")
-                      else if (request.userType.exists(_ === Agent))  messages("companyDetails.isUk.agent.title")
+                      else if (isAgent)                        messages("companyDetails.isUk.agent.title")
                       else                                            messages("companyDetails.isUk.title")
               }
 
