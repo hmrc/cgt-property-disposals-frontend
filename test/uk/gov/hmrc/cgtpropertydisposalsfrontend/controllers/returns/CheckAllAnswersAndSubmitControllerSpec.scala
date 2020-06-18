@@ -1986,6 +1986,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
 
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
+      userType,
       doc
     )
 
@@ -2040,6 +2041,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
 
     validateMultipleDisposalsTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
+      userType,
       doc
     )
 
@@ -2081,6 +2083,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
 
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
+      userType,
       doc
     )
 
@@ -2128,6 +2131,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
 
     validateMultipleDisposalsTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
+      userType,
       doc
     )
 

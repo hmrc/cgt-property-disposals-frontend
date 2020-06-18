@@ -4511,7 +4511,8 @@ class SingleDisposalsTriageControllerSpec
         def testIsCheckYourAnswers(
           result: Future[Result],
           completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
-          expectedTitleKey: String
+          expectedTitleKey: String,
+          userType: Option[UserType]
         ): Unit =
           checkPageIsDisplayed(
             result,
@@ -4519,6 +4520,7 @@ class SingleDisposalsTriageControllerSpec
             doc =>
               validateSingleDisposalTriageCheckYourAnswersPage(
                 completeSingleDisposalTriageAnswers,
+                userType,
                 doc
               )
           )
@@ -4541,7 +4543,8 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title"
+            "triage.check-your-answers.title",
+            None
           )
         }
 
@@ -4564,7 +4567,8 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title"
+            "triage.check-your-answers.title",
+            None
           )
         }
 
@@ -4582,7 +4586,8 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title"
+            "triage.check-your-answers.title",
+            None
           )
         }
 
@@ -4600,7 +4605,8 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title"
+            "triage.check-your-answers.title",
+            None
           )
         }
 
@@ -4624,7 +4630,8 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestionsWithIndirectDisposal,
-            "triage.check-your-answers.title"
+            "triage.check-your-answers.title",
+            None
           )
         }
 
@@ -4642,7 +4649,8 @@ class SingleDisposalsTriageControllerSpec
           testIsCheckYourAnswers(
             performAction(),
             completeTriageQuestions,
-            "triage.check-your-answers.title"
+            "triage.check-your-answers.title",
+            Some(UserType.Agent)
           )
         }
 
@@ -5309,10 +5317,18 @@ class SingleDisposalsTriageControllerSpec
 object SingleDisposalsTriageControllerSpec extends Matchers {
   def validateSingleDisposalTriageCheckYourAnswersPage(
     completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
+    userType: Option[UserType],
     doc: Document
   )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
 
     implicit lazy val messages: Messages = MessagesImpl(lang, messagesApi)
+
+    if (completeSingleDisposalTriageAnswers.individualUserType.contains(Self))
+      doc.select("#individualUserType-answer").text() shouldBe messages(
+        if (userType.contains(UserType.Agent))
+          s"individualUserType.agent.Self"
+        else s"individualUserType.Self"
+      )
 
     doc.select("#numberOfProperties-answer").text()   shouldBe "One"
     doc.select("#disposalMethod-answer").text()       shouldBe messages(
