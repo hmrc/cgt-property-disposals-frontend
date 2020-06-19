@@ -691,7 +691,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             Individual
           )
         }
@@ -707,7 +707,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             Organisation
           )
         }
@@ -723,7 +723,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             Agent
           )
         }

@@ -38,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -62,7 +63,6 @@ class MixedUsePropertyDetailsController @Inject() (
   val isUkPage: views.html.address.isUk,
   val exitPage: views.html.address.exit_page,
   singleMixedUseGuidance: views.html.returns.address.single_mixed_use_guidance,
-  enterUPRNPage: views.html.returns.address.enter_uprn,
   disposalValuePage: views.html.returns.address.single_mixed_use_disposal_price,
   acquisitionValuePage: views.html.returns.address.single_mixed_use_acquisition_price,
   singleMixedUseCheckYourAnswersPage: views.html.returns.address.single_mixed_use_check_your_answers
@@ -172,7 +172,10 @@ class MixedUsePropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { (_, r) =>
         val answers       = r.answers
-        val backLink      = routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
+        val backLink      = answers.fold(
+          _ => routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+          _ => routes.MixedUsePropertyDetailsController.checkYourAnswers()
+        )
         val disposalPrice = answers.fold(_.disposalPrice, c => Some(c.disposalPrice))
         val form          = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
         Ok(
@@ -229,7 +232,10 @@ class MixedUsePropertyDetailsController @Inject() (
                 val result             = updateDraftReturnAndSession(r, updatedDraftReturn)
 
                 result.fold(
-                  e => errorHandler.errorResult(),
+                  { e =>
+                    logger.warn("Could not update draft return", e)
+                    errorHandler.errorResult()
+                  },
                   _ =>
                     Redirect(
                       routes.MixedUsePropertyDetailsController.checkYourAnswers()
@@ -328,7 +334,10 @@ class MixedUsePropertyDetailsController @Inject() (
                 val result             = updateDraftReturnAndSession(r, updatedDraftReturn)
 
                 result.fold(
-                  e => errorHandler.errorResult(),
+                  { e =>
+                    logger.warn("Could not update draft return", e)
+                    errorHandler.errorResult()
+                  },
                   _ =>
                     Redirect(
                       routes.MixedUsePropertyDetailsController.checkYourAnswers()

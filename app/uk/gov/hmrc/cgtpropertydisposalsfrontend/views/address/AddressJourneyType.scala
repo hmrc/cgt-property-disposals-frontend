@@ -83,9 +83,7 @@ object AddressJourneyType {
     final case class EnteringSingleMixedUsePropertyDetails(
       journey: FillingOutReturn,
       draftReturn: DraftSingleMixedUseDisposalReturn,
-      representativeType: Option[
-        Either[PersonalRepresentative.type, Capacitor.type]
-      ],
+      representativeType: Option[RepresentativeType],
       isATrust: Boolean,
       answers: MixedUsePropertyDetailsAnswers
     ) extends Returns
