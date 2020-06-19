@@ -22,9 +22,10 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -41,12 +42,17 @@
 @(
   form: Form[IndividualName],
    backLink: Call,
-   representativeType: Either[PersonalRepresentative.type, Capacitor.type],
+   representativeType: RepresentativeType,
    displayReturnToSummaryLink: Boolean
 )(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{ "representee.enterName" }
-@representativeTypeInterpolator = @{ representativeType.fold(_ => ".personalRep",_  =>  ".capacitor") }
+@representativeTypeInterpolator = @{
+    representativeType match {
+        case Capacitor => ".capacitor"
+        case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin  => ".personalRep"
+    }
+}
 @firstNameKey = @{"representeeFirstName"}
 @lastNameKey = @{"representeeLastName"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

@@ -20,8 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentative
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Capacitor
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -34,7 +33,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(answers: AmountInPence, isATrust: Boolean,
-        representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+        representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{
     messages("initialGainOrLoss.cya.title")

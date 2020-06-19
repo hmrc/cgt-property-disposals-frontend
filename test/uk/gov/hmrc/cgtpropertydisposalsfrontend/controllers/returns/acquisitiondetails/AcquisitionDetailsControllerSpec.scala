@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, Tru
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, NonResidential, Residential}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -82,15 +82,16 @@ class AcquisitionDetailsControllerSpec
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Capacitor, _)              => ".capacitor"
-      case (PersonalRepresentative, _) => ".personalRep"
-      case (_, UserType.Individual)    => ""
-      case (_, UserType.Organisation)  => ".trust"
-      case (_, UserType.Agent)         => ".agent"
-      case other                       => sys.error(s"User type '$other' not handled")
+      case (Capacitor, _)                                                      => ".capacitor"
+      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
+      case (_, UserType.Individual)                                            => ""
+      case (_, UserType.Organisation)                                          => ".trust"
+      case (_, UserType.Agent)                                                 => ".agent"
+      case other                                                               => sys.error(s"User type '$other' not handled")
     }
 
-  def assetTypeMessageKey(assetType: AssetType): String = if (assetType === IndirectDisposal) ".indirect" else ""
+  def assetTypeMessageKey(assetType: AssetType): String =
+    if (assetType === IndirectDisposal) ".indirect" else ""
 
   def setAgentReferenceNumber(
     userType: UserType
@@ -956,7 +957,7 @@ class AcquisitionDetailsControllerSpec
             )._1
           )
 
-        "individual enters date that is invalid" in {
+        "the user enters date that is invalid" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey      = userMessageKey(individualUserType, userType)
@@ -984,7 +985,7 @@ class AcquisitionDetailsControllerSpec
           }
         }
 
-        "individual enters date that is after the disposal date" in {
+        "the user enters date that is after the disposal date" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val assetTypeKey = assetTypeMessageKey(assetType)
@@ -996,6 +997,22 @@ class AcquisitionDetailsControllerSpec
                 assetType,
                 userKey + assetTypeKey
               )(s"$key$userKey$assetTypeKey.error.tooFarInFuture")
+          }
+        }
+
+        "the user enters date that is before 01-01-1900" in {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+              val assetTypeKey = assetTypeMessageKey(assetType)
+              val userKey      = userMessageKey(individualUserType, userType)
+              val before1900   = LocalDate.of(1800, 1, 1)
+
+              test(formData(before1900): _*)(
+                userType,
+                individualUserType,
+                assetType,
+                userKey + assetTypeKey
+              )(s"$key$userKey$assetTypeKey.error.before1900")
           }
         }
 
@@ -1882,8 +1899,7 @@ class AcquisitionDetailsControllerSpec
 
         def sectionCompleted(
           userType: UserType,
-          individualUserType: IndividualUserType,
-          userKey: String
+          individualUserType: IndividualUserType
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1923,16 +1939,14 @@ class AcquisitionDetailsControllerSpec
         "the user has already completed the acquisition details section" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              sectionCompleted(userType, individualUserType, userKey)
+              sectionCompleted(userType, individualUserType)
           }
         }
 
         def amountNonZero(
           userType: UserType,
           individualUserType: IndividualUserType,
-          assetType: AssetType,
-          userKey: String
+          assetType: AssetType
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1968,8 +1982,7 @@ class AcquisitionDetailsControllerSpec
         "the amount in the session is non-zero" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
-              val userKey = userMessageKey(individualUserType, userType)
-              amountNonZero(userType, individualUserType, assetType, userKey)
+              amountNonZero(userType, individualUserType, assetType)
           }
         }
 
@@ -2033,8 +2046,7 @@ class AcquisitionDetailsControllerSpec
 
         def test(data: (String, String)*)(
           userType: UserType,
-          individualUserType: IndividualUserType,
-          userKey: String
+          individualUserType: IndividualUserType
         )(
           expectedErrorMessageKey: String
         ) = {
@@ -2073,11 +2085,9 @@ class AcquisitionDetailsControllerSpec
         "the amount of money is zero" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val userKey = userMessageKey(individualUserType, userType)
               test("rebaseAcquisitionPrice" -> "0")(
                 userType,
-                individualUserType,
-                userKey
+                individualUserType
               )(
                 s"$key.error.tooSmall"
               )
@@ -2229,7 +2239,7 @@ class AcquisitionDetailsControllerSpec
 
         "the price submitted is valid and the journey was complete" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
-            (userType: UserType, individualUserType: IndividualUserType) =>
+            (_: UserType, individualUserType: IndividualUserType) =>
               scenarios.foreach {
                 case (formData, expectedAmountInPence) =>
                   withClue(
@@ -3279,7 +3289,7 @@ class AcquisitionDetailsControllerSpec
           assetType: AssetType,
           userKey: String,
           wasUkResident: Boolean
-        )(expectedErrorKey: String, errorArgs: String*) =
+        )(expectedErrorKey: String): Unit =
           testFormError(data: _*)(userType, individualUserType, assetType, wasUkResident)(
             expectedErrorKey,
             models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, wasUkResident))
@@ -3291,8 +3301,7 @@ class AcquisitionDetailsControllerSpec
               val userKey      = userMessageKey(individualUserType, userType)
               val assetTypeKey = assetTypeMessageKey(assetType)
               test()(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
-                s"$key$assetTypeKey.error.required",
-                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, false))
+                s"$key$assetTypeKey.error.required"
               )
           }
         }
@@ -3303,8 +3312,7 @@ class AcquisitionDetailsControllerSpec
               val assetTypeKey = assetTypeMessageKey(assetType)
               val userKey      = userMessageKey(individualUserType, userType)
               test(key -> "2")(userType, individualUserType, assetType, userKey + assetTypeKey, false)(
-                s"$key$assetTypeKey.error.invalid",
-                models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, false))
+                s"$key$assetTypeKey.error.invalid"
               )
           }
         }
@@ -3687,7 +3695,7 @@ class AcquisitionDetailsControllerSpec
 
         def test(
           data: (String, String)*
-        )(userType: UserType, individualUserType: IndividualUserType, assetType: AssetType)(
+        )(userType: UserType, individualUserType: IndividualUserType)(
           expectedErrorKey: String
         ) =
           testFormError(data: _*)(userType, individualUserType, Residential)(
@@ -3706,9 +3714,9 @@ class AcquisitionDetailsControllerSpec
           )
 
         "no option has been selected" in {
-          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
-            (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
-              test()(userType, individualUserType, assetType)(
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              test()(userType, individualUserType)(
                 "shouldUseRebase.error.required"
               )
           }
@@ -4341,6 +4349,7 @@ class AcquisitionDetailsControllerSpec
             )
         }
       }
+
     }
 
     def missingAssetTypeAndResidentialStatusBehaviour(

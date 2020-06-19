@@ -165,7 +165,7 @@ class StartController @Inject() (
       case _: SubscriptionStatus.SubscriptionReady                                                    =>
         Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
 
-      case i: SubscriptionStatus.TryingToGetIndividualsFootprint                                      =>
+      case _: SubscriptionStatus.TryingToGetIndividualsFootprint                                      =>
         // this is not the first time a person with individual insufficient confidence level has come to start
         Redirect(
           onboarding.routes.InsufficientConfidenceLevelController

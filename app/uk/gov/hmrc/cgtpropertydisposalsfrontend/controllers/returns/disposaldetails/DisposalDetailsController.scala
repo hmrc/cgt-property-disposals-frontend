@@ -349,7 +349,7 @@ class DisposalDetailsController @Inject() (
       withFillingOutReturnAndDisposalDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethodAndShareOfProperty(state, answers) {
-            case (disposalMethod, shareOfProperty) =>
+            case (disposalMethod, _) =>
               displayPage(answers)(
                 form = _.fold(
                   _.disposalPrice.fold(disposalPriceForm)(a => disposalPriceForm.fill(a.inPounds())),
@@ -360,7 +360,6 @@ class DisposalDetailsController @Inject() (
                   _,
                   _,
                   disposalMethod,
-                  shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
                   isIndirectDisposal(state)
@@ -378,7 +377,7 @@ class DisposalDetailsController @Inject() (
       withFillingOutReturnAndDisposalDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethodAndShareOfProperty(state, answers) {
-            case (disposalMethod, shareOfProperty) =>
+            case (disposalMethod, _) =>
               submitBehaviour(fillingOutReturn, state, answers)(
                 form = disposalPriceForm
               )(
@@ -386,7 +385,6 @@ class DisposalDetailsController @Inject() (
                   _,
                   _,
                   disposalMethod,
-                  shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
                   isIndirectDisposal(state)
@@ -438,7 +436,7 @@ class DisposalDetailsController @Inject() (
       withFillingOutReturnAndDisposalDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethodAndShareOfProperty(state, answers) {
-            case (disposalMethod, shareOfProperty) =>
+            case (_, _) =>
               displayPage(answers)(
                 form = _.fold(
                   _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
@@ -448,8 +446,6 @@ class DisposalDetailsController @Inject() (
                 page = disposalFeesPage(
                   _,
                   _,
-                  disposalMethod,
-                  shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
                   isIndirectDisposal(state)
@@ -469,15 +465,13 @@ class DisposalDetailsController @Inject() (
       withFillingOutReturnAndDisposalDetailsAnswers(request) {
         case (_, fillingOutReturn, state, answers) =>
           withDisposalMethodAndShareOfProperty(state, answers) {
-            case (disposalMethod, shareOfProperty) =>
+            case (_, _) =>
               submitBehaviour(fillingOutReturn, state, answers)(
                 form = disposalFeesForm
               )(
                 page = disposalFeesPage(
                   _,
                   _,
-                  disposalMethod,
-                  shareOfProperty,
                   fillingOutReturn.subscribedDetails.isATrust,
                   representativeType(state),
                   isIndirectDisposal(state)

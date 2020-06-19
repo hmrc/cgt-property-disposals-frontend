@@ -1568,7 +1568,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1589,7 +1589,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1610,7 +1610,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1634,7 +1634,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1660,7 +1660,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1686,7 +1686,7 @@ class SingleDisposalsTriageControllerSpec
           _,
           routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1703,7 +1703,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1724,7 +1724,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -1745,7 +1745,7 @@ class SingleDisposalsTriageControllerSpec
           routes.SingleDisposalsTriageController
             .didYouDisposeOfAResidentialProperty()
         ),
-        checkPrepopulatedContent(_, disposalDate)
+        checkPrepopulatedContent(_)
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
@@ -1764,7 +1764,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          checkPrepopulatedContent(doc, disposalDate)
+          checkPrepopulatedContent(doc)
         }
       )
 
@@ -1784,7 +1784,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          checkPrepopulatedContent(doc, disposalDate)
+          checkPrepopulatedContent(doc)
         }
       )
 
@@ -1804,7 +1804,7 @@ class SingleDisposalsTriageControllerSpec
             doc,
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
-          checkPrepopulatedContent(doc, disposalDate)
+          checkPrepopulatedContent(doc)
         }
       )
 
@@ -1864,7 +1864,7 @@ class SingleDisposalsTriageControllerSpec
           .url
       }
 
-      def checkPrepopulatedContent(doc: Document, date: DisposalDate) = {
+      def checkPrepopulatedContent(doc: Document) = {
         doc
           .select("#disposalDate-day")
           .attr("value") shouldBe disposalDate.value.getDayOfMonth.toString
@@ -2510,11 +2510,13 @@ class SingleDisposalsTriageControllerSpec
 
       "show a form error with self" when {
 
-        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+        def test(formData: Seq[(String, String)], expectedErrorKey: String)(
+          requiredPreviousTriageAnswers: SingleDisposalTriageAnswers
+        ): Unit =
           testFormError(performAction, "completionDate.title")(
             formData,
             expectedErrorKey,
-            requiredPreviousAnswers
+            requiredPreviousTriageAnswers
           )
 
         "the date is invalid" in {
@@ -2525,31 +2527,47 @@ class SingleDisposalsTriageControllerSpec
                 "completionDate-month" -> scenario.monthInput,
                 "completionDate-year"  -> scenario.yearInput
               ).collect { case (id, Some(input)) => id -> input }
-              test(formData, scenario.expectedErrorMessageKey)
+              test(formData, scenario.expectedErrorMessageKey)(requiredPreviousAnswers)
             }
           }
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+        }
+
+        "the completion date is before 01-01-1900" in {
+          val date = LocalDate.of(1800, 1, 1)
+
+          test(formData(date), "completionDate.error.before1900")(
+            requiredPreviousAnswers.copy(
+              disposalDate = Some(
+                disposalDate.copy(
+                  value = LocalDate.of(1800, 1, 1)
+                )
+              )
+            )
+          )
         }
 
         "the completion date is before the disposal date" in {
           test(
             formData(dayBeforeDisposalDate),
             "completionDate.error.tooFarInPast"
-          )
+          )(requiredPreviousAnswers)
         }
 
       }
 
       "show a form error with capacitor" when {
 
-        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+        def test(formData: Seq[(String, String)], expectedErrorKey: String)(
+          requiredPreviousTriageAnswers: IncompleteSingleDisposalTriageAnswers
+        ): Unit =
           testFormError(performAction, "completionDate.capacitor.title")(
             formData,
             expectedErrorKey,
-            requiredPreviousAnswers.copy(
+            requiredPreviousTriageAnswers.copy(
               individualUserType = Some(Capacitor)
             )
           )
@@ -2562,31 +2580,47 @@ class SingleDisposalsTriageControllerSpec
                 "completionDate-month" -> scenario.monthInput,
                 "completionDate-year"  -> scenario.yearInput
               ).collect { case (id, Some(input)) => id -> input }
-              test(formData, scenario.expectedErrorMessageKey)
+              test(formData, scenario.expectedErrorMessageKey)(requiredPreviousAnswers)
             }
           }
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+        }
+
+        "the completion date is before 01-01-1900" in {
+          val date = LocalDate.of(1800, 1, 1)
+
+          test(formData(date), "completionDate.error.before1900")(
+            requiredPreviousAnswers.copy(
+              disposalDate = Some(
+                disposalDate.copy(
+                  value = LocalDate.of(1800, 1, 1)
+                )
+              )
+            )
+          )
         }
 
         "the completion date is before the disposal date" in {
           test(
             formData(dayBeforeDisposalDate),
             "completionDate.error.tooFarInPast"
-          )
+          )(requiredPreviousAnswers)
         }
 
       }
 
       "show a form error with personal representative" when {
 
-        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+        def test(formData: Seq[(String, String)], expectedErrorKey: String)(
+          requiredPreviousTriageAnswers: IncompleteSingleDisposalTriageAnswers
+        ): Unit =
           testFormError(performAction, "completionDate.personalRep.title")(
             formData,
             expectedErrorKey,
-            requiredPreviousAnswers.copy(
+            requiredPreviousTriageAnswers.copy(
               individualUserType = Some(PersonalRepresentative)
             )
           )
@@ -2599,20 +2633,34 @@ class SingleDisposalsTriageControllerSpec
                 "completionDate-month" -> scenario.monthInput,
                 "completionDate-year"  -> scenario.yearInput
               ).collect { case (id, Some(input)) => id -> input }
-              test(formData, scenario.expectedErrorMessageKey)
+              test(formData, scenario.expectedErrorMessageKey)(requiredPreviousAnswers)
             }
           }
         }
 
         "the completion date is in the future" in {
-          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")(requiredPreviousAnswers)
+        }
+
+        "the completion date is before 01-01-1900" in {
+          val date = LocalDate.of(1800, 1, 1)
+
+          test(formData(date), "completionDate.error.before1900")(
+            requiredPreviousAnswers.copy(
+              disposalDate = Some(
+                disposalDate.copy(
+                  value = LocalDate.of(1800, 1, 1)
+                )
+              )
+            )
+          )
         }
 
         "the completion date is before the disposal date" in {
           test(
             formData(dayBeforeDisposalDate),
             "completionDate.error.tooFarInPast"
-          )
+          )(requiredPreviousAnswers)
         }
 
       }
@@ -4387,6 +4435,13 @@ class SingleDisposalsTriageControllerSpec
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
               Right(sample[IndividualName]),
               representee.routes.RepresenteeController.enterName()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType =
+                Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
+              ),
+              Right(sample[IndividualName]),
+              representee.routes.RepresenteeController.enterName()
             )
           ).foreach {
             case Scenario(state, name, expectedRedirect) =>
@@ -4987,9 +5042,10 @@ class SingleDisposalsTriageControllerSpec
 
   private def userType(answers: SingleDisposalTriageAnswers) =
     answers.representativeType() match {
-      case Some(Left(PersonalRepresentative)) => "personal representative"
-      case Some(Right(Capacitor))             => "capacitor"
-      case None                               => "self"
+      case Some(PersonalRepresentative)                => "personal representative"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => "personal representative in period of admin"
+      case Some(Capacitor)                             => "capacitor"
+      case None                                        => "self"
     }
 
   def displayIndividualTriagePageBehaviorCompleteJourney(
@@ -5315,13 +5371,12 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
 
     implicit lazy val messages: Messages = MessagesImpl(lang, messagesApi)
 
-    completeSingleDisposalTriageAnswers.individualUserType.foreach { individualUserType =>
+    if (completeSingleDisposalTriageAnswers.individualUserType.contains(Self))
       doc.select("#individualUserType-answer").text() shouldBe messages(
         if (userType.contains(UserType.Agent))
-          s"individualUserType.agent.$individualUserType"
-        else s"individualUserType.$individualUserType"
+          s"individualUserType.agent.Self"
+        else s"individualUserType.Self"
       )
-    }
 
     doc.select("#numberOfProperties-answer").text()   shouldBe "One"
     doc.select("#disposalMethod-answer").text()       shouldBe messages(

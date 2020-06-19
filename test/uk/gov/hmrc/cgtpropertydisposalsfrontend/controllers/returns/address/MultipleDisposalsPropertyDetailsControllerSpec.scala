@@ -45,7 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
@@ -101,12 +101,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     individualUserType: Option[IndividualUserType]
   ) =
     (userType, individualUserType) match {
-      case (_, Some(Capacitor))              => ".capacitor"
-      case (_, Some(PersonalRepresentative)) => ".personalRep"
-      case (Individual, _)                   => ""
-      case (Organisation, _)                 => ".trust"
-      case (Agent, _)                        => ".agent"
-      case other                             => sys.error(s"User type '$other' not handled")
+      case (_, Some(Capacitor))                                                      => ".capacitor"
+      case (_, Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin)) => ".personalRep"
+      case (Individual, _)                                                           => ""
+      case (Organisation, _)                                                         => ".trust"
+      case (Agent, _)                                                                => ".agent"
+      case other                                                                     => sys.error(s"User type '$other' not handled")
     }
 
   override def updateAddress(
@@ -1217,13 +1217,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        val triageAnswersWithTaxYear =
-          sample[CompleteMultipleDisposalsTriageAnswers]
-            .copy(taxYear = taxYear, individualUserType = None)
+        val triageAnswersWithTaxYear = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          taxYear = taxYear,
+          individualUserType = None
+        )
 
         def test(
           draftReturn: DraftMultipleDisposalsReturn,
-          expectedBackLink: Call,
           userType: UserType
         ): Unit = {
           inSequence {
@@ -1271,7 +1271,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Individual
           )
         }
@@ -1282,7 +1281,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Organisation
           )
         }
@@ -1293,7 +1291,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Agent
           )
         }
@@ -1308,7 +1305,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Individual
           )
         }
@@ -1323,7 +1319,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Organisation
           )
         }
@@ -1338,7 +1333,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.enterUkAddress(),
             Agent
           )
         }
@@ -1353,7 +1347,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers(),
             Individual
           )
         }
@@ -1368,7 +1361,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers(),
             Organisation
           )
         }
@@ -1383,7 +1375,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               )
             ),
-            routes.PropertyDetailsController.checkYourAnswers(),
             Agent
           )
         }

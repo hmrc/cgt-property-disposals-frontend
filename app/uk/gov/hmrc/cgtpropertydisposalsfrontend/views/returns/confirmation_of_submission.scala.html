@@ -26,21 +26,20 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => accountRoutes}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey,
-        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-        buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey,
+    addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
+    buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
 )
 
 @(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -63,11 +62,15 @@
 }
 
 @userKey = @{
-    if (representativeType.exists(_.isLeft)) ".personalRep"
-    else if (representativeType.exists(_.isRight)) ".capacitor"
-    else if (isAgent) ".agent"
-    else if (isATrust) ".trust"
-    else ""
+    representativeType match {
+      case Some(PersonalRepresentative) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(Capacitor) => ".capacitor"
+      case None =>
+          if (isAgent) ".agent"
+          else if (isATrust) ".trust"
+          else ""
+  }
 }
 
 @name = @{
@@ -92,6 +95,11 @@
     if(justSubmittedReturn.completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     else messages(s"$key.propertyAddress")
 }
+
+@printLinkMessageKey = @{(representativeType, representeeAnswers.map(_.id)) match {
+  case (Some(Capacitor), Some(NoReferenceId)) => s"$key$userKey.noId.printPage"
+  case _ => s"$key$userKey.printPage"
+  }}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -128,14 +136,8 @@
      @Html(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
     </p>
 
-    <p id="printPage">
-    @Html({
-      val messageKey = (representativeType, representeeAnswers.map(_.id)) match {
-          case (Some(Right(Capacitor)), Some(NoReferenceId)) => s"$key$userKey.noId.printPage"
-          case _ => s"$key$userKey.printPage"
-      }
-      messages(messageKey, "JavaScript: window.print();")
-    })
+    <p id="printPage" class="js-visible">
+      @Html(messages(printLinkMessageKey, "JavaScript: window.print();"))
     </p>
 
     @cyaSection() {
@@ -178,15 +180,15 @@
 
     @justSubmittedReturn.submissionResponse.charge.map { charge =>
       @representativeType match {
-          case Some(Left(PersonalRepresentative)) => {
-              <h2 class="heading-medium">@messages(s"$key.howToPay.heading")</h2>
+          case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) => {
+            <h2 class="heading-medium">@messages(s"$key.howToPay.heading")</h2>
 
-              <p id="howToPay">@Html(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference))</p>
+            <p id="howToPay">@Html(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference))</p>
 
-              @payNowButton
+            @payNowButton
           }
 
-          case Some(Right(Capacitor)) => {
+          case Some(Capacitor) => {
               <h2 class="heading-medium">@messages(s"$key.capacitor.whatNext")</h2>
 
               @warning(messages(s"$key.capacitor.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
@@ -211,6 +213,12 @@
               }
 
               <p id="howToPay">@Html(messages(s"$key$userKey.howToPay.p1", charge.chargeReference))</p>
+
+              @if(isATrust && isAgent) {
+                <span class="form-hint">@messages(s"$key.trust.paymentNotice")</span>
+              } else {
+                <span class="form-hint">@messages(s"$key$userKey.paymentNotice")</span>
+              }
 
               @{if (!isAgent) payNowButton }
           }

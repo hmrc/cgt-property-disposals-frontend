@@ -21,6 +21,7 @@ import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
@@ -85,7 +86,7 @@ class RepresenteeController @Inject() (
     request: RequestWithSessionData[_]
   )(
     f: (
-      Either[PersonalRepresentative.type, Capacitor.type],
+      RepresentativeType,
       Either[StartingNewDraftReturn, FillingOutReturn],
       RepresenteeAnswers
     ) => Future[Result]
@@ -96,13 +97,10 @@ class RepresenteeController @Inject() (
       answers: RepresenteeAnswers
     ): Future[Result] =
       individualUserType match {
-        case Some(PersonalRepresentative) =>
-          f(Left(PersonalRepresentative), journey, answers)
+        case Some(r: RepresentativeType) =>
+          f(r, journey, answers)
 
-        case Some(Capacitor)              =>
-          f(Right(Capacitor), journey, answers)
-
-        case _                            =>
+        case _                           =>
           Redirect(controllers.returns.routes.TaskListController.taskList())
       }
 
@@ -224,7 +222,7 @@ class RepresenteeController @Inject() (
 
   def confirmPerson(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
         answers match {
           case IncompleteRepresenteeAnswers(
                 Some(name),
@@ -238,7 +236,6 @@ class RepresenteeController @Inject() (
               confirmPersonPage(
                 id,
                 name,
-                representativeType,
                 journey.isRight,
                 confirmPersonForm,
                 routes.RepresenteeController.enterId()
@@ -252,7 +249,7 @@ class RepresenteeController @Inject() (
 
   def confirmPersonSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
+      withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
         answers match {
           case incompleteRepresenteeAnswers @ IncompleteRepresenteeAnswers(
                 Some(name),
@@ -270,7 +267,6 @@ class RepresenteeController @Inject() (
                     confirmPersonPage(
                       id,
                       name,
-                      representativeType,
                       journey.isRight,
                       formWithErrors,
                       routes.RepresenteeController.enterId()
@@ -315,10 +311,11 @@ class RepresenteeController @Inject() (
         ) { _ =>
           val backLink = answers.fold(
             _ =>
-              representativeType.fold(
-                _ => routes.RepresenteeController.enterDateOfDeath(),
-                _ => routes.RepresenteeController.enterName()
-              ),
+              representativeType match {
+                case Capacitor                                                      => routes.RepresenteeController.enterName()
+                case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
+                  routes.RepresenteeController.enterDateOfDeath()
+              },
             _ => routes.RepresenteeController.checkYourAnswers()
           )
           val form     =
@@ -341,10 +338,11 @@ class RepresenteeController @Inject() (
             case Some(name) =>
               lazy val backLink = answers.fold(
                 _ =>
-                  representativeType.fold(
-                    _ => routes.RepresenteeController.enterDateOfDeath(),
-                    _ => routes.RepresenteeController.enterDateOfDeath()
-                  ),
+                  representativeType match {
+                    case Capacitor                                                      => routes.RepresenteeController.enterName()
+                    case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
+                      routes.RepresenteeController.enterDateOfDeath()
+                  },
                 _ => routes.RepresenteeController.checkYourAnswers()
               )
 
@@ -405,9 +403,9 @@ class RepresenteeController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         representativeType match {
-          case Right(Capacitor)             =>
+          case Capacitor                                                      =>
             Redirect(routes.RepresenteeController.checkYourAnswers())
-          case Left(PersonalRepresentative) =>
+          case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
             val form     =
               answers
                 .fold(_.dateOfDeath, c => c.dateOfDeath)
@@ -425,9 +423,9 @@ class RepresenteeController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         representativeType match {
-          case Right(Capacitor)             =>
+          case Capacitor                                                      =>
             Redirect(routes.RepresenteeController.checkYourAnswers())
-          case Left(PersonalRepresentative) =>
+          case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
             lazy val backLink = answers.fold(
               _ => routes.RepresenteeController.enterName(),
               _ => routes.RepresenteeController.checkYourAnswers()
@@ -694,13 +692,13 @@ class RepresenteeController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         answers match {
-          case IncompleteRepresenteeAnswers(None, _, _, _, _, _)                              =>
+          case IncompleteRepresenteeAnswers(None, _, _, _, _, _)                                     =>
             Redirect(routes.RepresenteeController.enterName())
 
-          case IncompleteRepresenteeAnswers(_, _, None, _, _, _) if representativeType.isLeft =>
+          case IncompleteRepresenteeAnswers(_, _, None, _, _, _) if representativeType =!= Capacitor =>
             Redirect(routes.RepresenteeController.enterDateOfDeath())
 
-          case IncompleteRepresenteeAnswers(_, None, _, _, _, _)                              =>
+          case IncompleteRepresenteeAnswers(_, None, _, _, _, _)                                     =>
             Redirect(routes.RepresenteeController.enterId())
 
           case IncompleteRepresenteeAnswers(
@@ -752,19 +750,17 @@ class RepresenteeController @Inject() (
                   cyaPage(
                     completeAnswers,
                     representativeType,
-                    journey.isRight,
                     triageRoutes.CommonTriageQuestionsController
                       .whoIsIndividualRepresenting()
                   )
                 )
             )
 
-          case completeAnswers: CompleteRepresenteeAnswers                                    =>
+          case completeAnswers: CompleteRepresenteeAnswers                                           =>
             Ok(
               cyaPage(
                 completeAnswers,
                 representativeType,
-                journey.isRight,
                 triageRoutes.CommonTriageQuestionsController
                   .whoIsIndividualRepresenting()
               )

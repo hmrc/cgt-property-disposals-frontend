@@ -27,15 +27,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
     accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
     returnHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_banner,
     returnCharges: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_charges,
@@ -61,7 +57,7 @@
     returnSummary: ReturnSummary,
     rebasingEligibilityUtil: RebasingEligibilityUtil,
     subscribedDetails: SubscribedDetails,
-    representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]],
+    representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 

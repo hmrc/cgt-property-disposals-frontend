@@ -67,7 +67,6 @@
         @yesNo(
             fieldId = key,
             label = pageHeading(title),
-            labelAsHeading = true,
             errorKey = form.error(key).map(e => s"$journeyContext.${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,

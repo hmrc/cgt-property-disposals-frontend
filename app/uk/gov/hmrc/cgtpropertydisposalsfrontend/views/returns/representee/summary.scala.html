@@ -20,27 +20,36 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 
 @this(
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display
 )
 
 @(
         answers: CompleteRepresenteeAnswers,
-        representativeType: Either[PersonalRepresentative.type, Capacitor.type]
+        representativeType: RepresentativeType
 )(implicit messages: Messages)
+
+@whoForValueMessage = @{
+    val representativeTypeInterpolator = representativeType match {
+    case Capacitor => "capacitor"
+    case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin  => "personalRep"
+    }
+    messages(s"representee.cyaValue.whoFor.$representativeTypeInterpolator")
+}
 
 @cyaSection() {
     @cyaRow(
         messages("representee.cyaLabel.whoFor"),
-        Html(messages(s"representee.cyaValue.whoFor.${representativeType.fold(_ => "personalRep", _ => "capacitor")}")),
+        Html(whoForValueMessage),
         Some(cyaChange(messages("representee.cyaChange.whoFor"), triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
         "whoFor"
     )

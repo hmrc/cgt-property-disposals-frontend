@@ -26,15 +26,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
- submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
- accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
- caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+   textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+   submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+   accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(form: Form[SubmitEmailDetails], emailJourneyType: EmailJourneyType, backLink: Option[Call], submit: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)

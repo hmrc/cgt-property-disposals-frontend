@@ -42,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, IndividualUserType, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
@@ -100,12 +100,12 @@ class DisposalDetailsControllerSpec
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Capacitor, _)              => ".capacitor"
-      case (PersonalRepresentative, _) => ".personalRep"
-      case (_, UserType.Individual)    => ""
-      case (_, UserType.Organisation)  => ".trust"
-      case (_, UserType.Agent)         => ".agent"
-      case other                       => sys.error(s"User type '$other' not handled")
+      case (Capacitor, _)                                                      => ".capacitor"
+      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
+      case (_, UserType.Individual)                                            => ""
+      case (_, UserType.Organisation)                                          => ".trust"
+      case (_, UserType.Agent)                                                 => ".agent"
+      case other                                                               => sys.error(s"User type '$other' not handled")
     }
 
   def fillingOutReturn(
@@ -1122,7 +1122,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1169,7 +1169,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1802,7 +1802,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -1849,7 +1849,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalPriceTitleScenarios(individualUserType, userType)
@@ -2583,7 +2583,7 @@ class DisposalDetailsControllerSpec
           ) {
             (
               userType: UserType,
-              disposalMethod: DisposalMethod,
+              _: DisposalMethod,
               individualUserType: IndividualUserType
             ) =>
               disposalFeesTitleScenarios(individualUserType, userType).foreach {
@@ -3424,7 +3424,6 @@ class DisposalDetailsControllerSpec
         def testIsCheckYourAnswers(
           result: Future[Result],
           completeDisposalDetailsAnswers: CompleteDisposalDetailsAnswers,
-          expectedTitleKey: String,
           expectedDisposalPriceTitleKey: String,
           expectedDisposalFeesTitleKey: String,
           userType: UserType,
@@ -3489,15 +3488,12 @@ class DisposalDetailsControllerSpec
               testIsCheckYourAnswers(
                 performAction(),
                 completeAnswers,
-                "returns.disposal-details.cya.title",
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
                 )._1,
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
@@ -3560,15 +3556,12 @@ class DisposalDetailsControllerSpec
               testIsCheckYourAnswers(
                 performAction(),
                 completeAnswers,
-                "returns.disposal-details.cya.title",
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
                 )._1,
                 expectedTitles(
-                  completeAnswers,
                   disposalMethod,
                   userType,
                   individualUserType
@@ -3707,12 +3700,12 @@ object DisposalDetailsControllerSpec extends Matchers {
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Capacitor, _)              => ".capacitor"
-      case (PersonalRepresentative, _) => ".personalRep"
-      case (_, UserType.Individual)    => ""
-      case (_, UserType.Organisation)  => ".trust"
-      case (_, UserType.Agent)         => ".agent"
-      case other                       => sys.error(s"User type '$other' not handled")
+      case (Capacitor, _)                                                      => ".capacitor"
+      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
+      case (_, UserType.Individual)                                            => ""
+      case (_, UserType.Organisation)                                          => ".trust"
+      case (_, UserType.Agent)                                                 => ".agent"
+      case other                                                               => sys.error(s"User type '$other' not handled")
     }
 
   def validateDisposalDetailsCheckYourAnswersPage(
@@ -3745,7 +3738,6 @@ object DisposalDetailsControllerSpec extends Matchers {
   }
 
   def expectedTitles(
-    completeAnswers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod,
     userType: UserType,
     individualUserType: IndividualUserType

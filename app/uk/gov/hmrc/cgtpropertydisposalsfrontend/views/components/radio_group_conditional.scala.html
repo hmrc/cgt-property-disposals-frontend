@@ -21,19 +21,17 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
 
 @this(
-        errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
+    errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
 
 @(
-        fieldId: String,
-        label: Html,
-        options: List[RadioOption],
-        helpText: Option[Html] = None,
-        labelAsHeading: Boolean = false,
-        error: Option[FormError] = None,
-        hasErrors: Boolean = false,
-        selected: Option[Int] = None,
-        customErrorKey: Option[String] = None
+    fieldId: String,
+    label: Html,
+    options: List[RadioOption],
+    helpText: Option[Html] = None,
+    error: Option[FormError] = None,
+    selected: Option[Int] = None,
+    customErrorKey: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(error.nonEmpty) "form-group form-group-error" else "form-group" }

@@ -28,17 +28,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
- returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
- radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
- unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
- yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
- caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+   pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+   returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+   yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+   caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(form: Form[Boolean], backLink: Call, rebaseCutOffDate: LocalDate, assetType: AssetType)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -66,7 +64,6 @@
   @yesNo(
    fieldId = key,
    label = pageHeading(title),
-   labelAsHeading = true,
    errorKey = form.error(key).map(e => e.message),
    hasErrors = hasErrors,
    selected = form.value,

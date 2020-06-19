@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{ PersonalRepresentative, Capacitor }
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -36,7 +36,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliabilit
         answers: CompleteCalculatedYTDAnswers,
         disposalDate: DisposalDate,
         isATrust: Boolean,
-        representativeType: Option[Either[PersonalRepresentative.type,Capacitor.type]],
+        representativeType: Option[RepresentativeType],
         wasUkResident: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 

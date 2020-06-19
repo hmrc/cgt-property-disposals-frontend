@@ -165,6 +165,7 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     float: left;
     padding-left: 12px;
     margin-bottom: 0;
+    clear: left;
 }
 
 .autocomplete__wrapper {

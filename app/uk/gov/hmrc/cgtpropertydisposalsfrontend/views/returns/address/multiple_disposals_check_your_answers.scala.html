@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Capacitor}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -35,7 +35,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
     answers: CompleteExamplePropertyDetailsAnswers,
     shouldAskIfPostcodeExists: Boolean,
     isATrust: Boolean,
-    representativeType: Option[Either[PersonalRepresentative.type, Capacitor.type]]
+    representativeType: Option[RepresentativeType]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 

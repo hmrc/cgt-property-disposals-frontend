@@ -21,22 +21,22 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
-        uiSidebar: uk.gov.hmrc.play.views.html.layouts.Sidebar,
-        uiArticle: uk.gov.hmrc.play.views.html.layouts.Article,
-        govUkWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.govuk_wrapper
+    uiArticle: uk.gov.hmrc.play.views.html.layouts.Article,
+    govUkWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.govuk_wrapper
 )
 
-@(title: String,
-        hasErrors: Boolean = false,
-        userType: Option[UserType],
-        sidebarLinks: Option[Html] = None,
-        contentHeader: Option[Html] = None,
-        bodyClasses: Option[String] = None,
-        mainClass: Option[String] = None,
-        scriptElem: Option[Html] = None,
-        withSignOutLink: Boolean = true,
-        sidebar: Option[Html] = None,
-        accountMenu: Option[Html] = None)(mainContent: Html)(implicit messages: Messages, appConfig: ViewConfig)
+@(
+    title: String,
+    hasErrors: Boolean = false,
+    userType: Option[UserType],
+    contentHeader: Option[Html] = None,
+    bodyClasses: Option[String] = None,
+    mainClass: Option[String] = None,
+    scriptElem: Option[Html] = None,
+    withSignOutLink: Boolean = true,
+    sidebar: Option[Html] = None,
+    accountMenu: Option[Html] = None
+)(mainContent: Html)(implicit messages: Messages, appConfig: ViewConfig)
 
 @serviceInfoContent = @{accountMenu.fold(Html(""))(s => s)}
 

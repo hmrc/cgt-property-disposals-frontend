@@ -58,7 +58,6 @@ class RegistrationController @Inject() (
   metrics: Metrics,
   selectEntityTypePage: views.html.onboarding.registration.select_entity_type,
   wrongGGAccountForTrustPage: views.html.onboarding.wrong_gg_account_for_trust,
-  enterNamePage: views.html.onboarding.name.enter_name,
   checkYourDetailsPage: views.html.onboarding.registration.check_your_details,
   cc: MessagesControllerComponents
 )(implicit

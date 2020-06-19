@@ -59,7 +59,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.IncompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
@@ -165,12 +165,12 @@ class CheckAllAnswersAndSubmitControllerSpec
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Some(Capacitor), _)              => ".capacitor"
-      case (Some(PersonalRepresentative), _) => ".personalRep"
-      case (_, UserType.Individual)          => ""
-      case (_, UserType.Organisation)        => ".trust"
-      case (_, UserType.Agent)               => ".agent"
-      case other                             => sys.error(s"User type '$other' not handled")
+      case (Some(Capacitor), _)                                                      => ".capacitor"
+      case (Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin), _) => ".personalRep"
+      case (_, UserType.Individual)                                                  => ""
+      case (_, UserType.Organisation)                                                => ".trust"
+      case (_, UserType.Agent)                                                       => ".agent"
+      case other                                                                     => sys.error(s"User type '$other' not handled")
     }
 
   "CheckAllAnswersAndSubmitController" when {
