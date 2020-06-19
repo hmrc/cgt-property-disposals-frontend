@@ -603,7 +603,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.enterPostcode(),
             Individual
           )
         }
@@ -615,7 +615,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.enterPostcode(),
             Organisation
           )
         }
@@ -627,7 +627,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.enterPostcode(),
             Agent
           )
         }
@@ -643,7 +643,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.enterPostcode(),
             Individual
           )
         }
@@ -659,7 +659,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.enterPostcode(),
             Organisation
           )
         }
@@ -675,7 +675,7 @@ class MixedUsePropertyDetailsControllerSpec
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(individualUserType = None)
             ),
-            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+            routes.MixedUsePropertyDetailsController.enterPostcode(),
             Agent
           )
         }

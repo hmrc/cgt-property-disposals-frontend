@@ -173,7 +173,7 @@ class MixedUsePropertyDetailsController @Inject() (
       withValidJourney(request) { (_, r) =>
         val answers       = r.answers
         val backLink      = answers.fold(
-          _ => routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
+          _ => routes.MixedUsePropertyDetailsController.enterPostcode(),
           _ => routes.MixedUsePropertyDetailsController.checkYourAnswers()
         )
         val disposalPrice = answers.fold(_.disposalPrice, c => Some(c.disposalPrice))
