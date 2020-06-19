@@ -23,11 +23,11 @@
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
 submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary
+summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(answers: CompleteMixedUsePropertyDetailsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -36,7 +36,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.sin
 
 @mainTemplate(title = title, userType = request.userType) {
 
-@pageHeading(title, Some(messages("singleMixedUse.caption")))
+@caption(messages("singleMixedUse.caption"))
 
 @summary(answers)
 

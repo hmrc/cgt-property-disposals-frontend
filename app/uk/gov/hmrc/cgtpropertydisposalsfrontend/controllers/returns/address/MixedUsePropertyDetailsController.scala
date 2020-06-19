@@ -352,11 +352,7 @@ class MixedUsePropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
         case (_, r) =>
-          r.draftReturn.mixedUsePropertyDetailsAnswers.fold[Future[Result]](
-            Redirect(
-              routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
-            )
-          ) {
+          r.answers match {
             case IncompleteMixedUsePropertyDetailsAnswers(None, _, _)                  =>
               Redirect(routes.MixedUsePropertyDetailsController.singleMixedUseGuidance())
             case IncompleteMixedUsePropertyDetailsAnswers(_, None, _)                  =>
