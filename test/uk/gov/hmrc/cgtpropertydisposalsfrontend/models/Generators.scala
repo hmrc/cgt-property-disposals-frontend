@@ -43,6 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.{CompleteMixedUsePropertyDetailsAnswers, IncompleteMixedUsePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
@@ -84,7 +85,8 @@ object Generators
     with YearToDateLiabilityAnswersGen
     with ExamplePropertyDetailsAnswersGen
     with ExampleCompanyDetailsAnswersGen
-    with RepresenteeAnswersGen {
+    with RepresenteeAnswersGen
+    with SingleMixedUseDetailsAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -579,6 +581,15 @@ trait ExampleCompanyDetailsAnswersGen { this: GenUtils =>
   implicit val completeExampleCompanyDetailsAnswersGen: Gen[CompleteExampleCompanyDetailsAnswers] =
     gen[CompleteExampleCompanyDetailsAnswers]
 
+}
+
+trait SingleMixedUseDetailsAnswersGen { this: GenUtils =>
+
+  implicit val incompleteMixedUsePropertyDetailsAnswers: Gen[IncompleteMixedUsePropertyDetailsAnswers] =
+    gen[IncompleteMixedUsePropertyDetailsAnswers]
+
+  implicit val completeMixedUsePropertyDetailsAnswers: Gen[CompleteMixedUsePropertyDetailsAnswers] =
+    gen[CompleteMixedUsePropertyDetailsAnswers]
 }
 
 trait RepresenteeAnswersGen extends LowerPriorityRepresenteeAnswersGen {

@@ -61,7 +61,7 @@
             _.exampleCompanyDetailsAnswers.flatMap{
             _.fold(_.address, c => Some(c.address)).map(getAddressLines)
             },
-            _.examplePropertyDetailsAnswers.flatMap{
+            _.mixedUsePropertyDetailsAnswers.flatMap{
                 _.fold(_.address, c => Some(c.address)).map(getAddressLines)
               }
         )

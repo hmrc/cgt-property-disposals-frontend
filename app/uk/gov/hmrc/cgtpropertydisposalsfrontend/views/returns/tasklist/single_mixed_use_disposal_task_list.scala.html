@@ -46,7 +46,7 @@
 @triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
 
 @propertyDetailsState = @{
-    draftReturn.examplePropertyDetailsAnswers.fold[TaskListStatus](ToDo)(
+    draftReturn.mixedUsePropertyDetailsAnswers.fold[TaskListStatus](ToDo)(
         _.fold(_ => InProgress, _ => Complete)
     )
 }
@@ -128,7 +128,7 @@
                 <li id="propertyDetails" class="app-task-list__item">
                 @taskLink(
                     messages("task-list.enter-property-details.link"),
-                    "#",
+                    returns.address.routes.MixedUsePropertyDetailsController.checkYourAnswers().url,
                     propertyDetailsState
                 )
                 </li>
