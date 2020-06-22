@@ -140,8 +140,9 @@ class MixedUsePropertyDetailsController @Inject() (
   protected lazy val enterPostcodeCall: Call        = addressRoutes.MixedUsePropertyDetailsController.enterPostcode()
   protected lazy val enterPostcodeSubmitCall: Call  =
     addressRoutes.MixedUsePropertyDetailsController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call        = addressRoutes.MixedUsePropertyDetailsController.enterUkAddress()
-  protected lazy val selectAddressSubmitCall: Call  = addressRoutes.MixedUsePropertyDetailsController.selectAddress()
+  protected lazy val selectAddressCall: Call        = addressRoutes.MixedUsePropertyDetailsController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call  =
+    addressRoutes.MixedUsePropertyDetailsController.selectAddressSubmit()
   protected lazy val continueCall: Call             = addressRoutes.MixedUsePropertyDetailsController.checkYourAnswers()
 
   def singleMixedUseGuidance(): Action[AnyContent] =
