@@ -363,14 +363,18 @@ countryOfResidence.cyaChange=country of residence
 address-select.title=Select your contact address
 address-select.agent.title=Select your contact address
 address-select.trust.title=Select your contact address
+
 address-select.error.required=Select the contact address or enter it manually if it is not shown
 address-select.agent.error.required=Select the contact address or enter it manually if it is not shown
 address-select.trust.error.required=Select the contact address or enter it manually if it is not shown
+
 address-select.returns.error.required=Select the address you disposed of or enter it manually if it is not shown
 address-select.returns.agent.error.required=Select the address your client disposed of or enter it manually if it is not shown
 address-select.returns.trust.error.required=Select the address the trust disposed of or enter it manually if it is not shown
 address-select.returns.personalRep.error.required=Select the address disposed of or enter it manually if it is not shown
 address-select.returns.capacitor.error.required=Select the address disposed of or enter it manually if it is not shown
+address-select.returns.personalRepInPeriodOfAdmin.error.required=Select the address your client disposed of or enter it manually if it is not shown
+
 address-select.error.number=Select the contact address or enter it manually if it is not shown
 address-select.agent.error.number=Select the contact address or enter it manually if it is not shown
 address-select.trust.error.number=Select the contact address or enter it manually if it is not shown
@@ -1061,17 +1065,21 @@ enterPostcode.returns.agent.singleDisposal.title=Find the address of the UK prop
 enterPostcode.returns.trust.singleDisposal.title=Find the address of the UK property the trust disposed of
 enterPostcode.returns.capacitor.singleDisposal.title=Find the address of the UK property that was disposed of
 enterPostcode.returns.personalRep.singleDisposal.title=Find the address of the UK property that was disposed of
+enterPostcode.returns.personalRepInPeriodOfAdmin.singleDisposal.title=Find the address of the UK property your client disposed of
+
 address-select.returns.singleDisposal.title=Select the address of the UK property you disposed of
 address-select.returns.agent.singleDisposal.title=Select the address of the UK property your client disposed of
 address-select.returns.trust.singleDisposal.title=Select the address of the UK property the trust disposed of
 address-select.returns.personalRep.singleDisposal.title=Select the address of the UK property that was disposed of
 address-select.returns.capacitor.singleDisposal.title=Select the address of the UK property that was disposed of
+address-select.returns.personalRepInPeriodOfAdmin.singleDisposal.title=Select the address of the UK property your client disposed of
+
 address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
 address.uk.returns.agent.singleDisposal.title=Enter the address of the UK property your client disposed of
 address.uk.returns.trust.singleDisposal.title=Enter the address of the UK property the trust disposed of
 address.uk.returns.personalRep.singleDisposal.title=Enter the address of the UK property that was disposed of
 address.uk.returns.capacitor.singleDisposal.title=Enter the address of the UK property that was disposed of
-
+address.uk.returns.personalRepInPeriodOfAdmin.singleDisposal.title=Enter the address of the UK property your client disposed of
 
 enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK property disposals
 address-select.returns.multipleDisposals.title=Select the address of the property
