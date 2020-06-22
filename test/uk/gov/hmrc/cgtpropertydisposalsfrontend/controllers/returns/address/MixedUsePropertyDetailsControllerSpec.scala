@@ -195,7 +195,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(individualState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.singleMixedDisposal.title")
         }
 
         "handling capacitors" in {
@@ -204,7 +204,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(capacitorState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.singleMixedDisposal.title")
         }
 
         "handling personal representatives" in {
@@ -213,7 +213,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(personalRepState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.singleMixedDisposal.title")
         }
 
         "handling agents" in {
@@ -222,7 +222,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(agentState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.singleMixedDisposal.title")
         }
 
         "handling trusts" in {
@@ -231,7 +231,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(trustState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.singleMixedDisposal.title")
 
         }
 
@@ -273,7 +273,7 @@ class MixedUsePropertyDetailsControllerSpec
 
           test("postcode" -> "W1A2HV")(
             "address-line1.error.required",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -288,7 +288,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-line1.error.tooLong",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -303,7 +303,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-line1.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -318,7 +318,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-line2.error.tooLong",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -334,7 +334,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-line2.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -349,7 +349,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-town.error.tooLong",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -365,7 +365,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-town.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -380,7 +380,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"       -> "W1A2HV"
           )(
             "address-county.error.tooLong",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -396,7 +396,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"       -> "W1A2HV"
           )(
             "address-county.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -408,7 +408,7 @@ class MixedUsePropertyDetailsControllerSpec
 
           test("address-line1" -> "1 the Street")(
             "postcode.error.required",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -423,7 +423,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A,2HV"
           )(
             "postcode.error.invalidCharacters",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
@@ -438,7 +438,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "ABC123"
           )(
             "postcode.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.singleMixedDisposal.title"
           )
         }
 
