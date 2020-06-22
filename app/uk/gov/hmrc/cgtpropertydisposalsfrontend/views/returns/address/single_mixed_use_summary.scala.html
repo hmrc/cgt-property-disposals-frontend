@@ -33,24 +33,24 @@
 
 @cyaSection() {
 @cyaRow(
-        messages("returns.company-address.cyaLabel.company-address"),
+        messages("returns.property-address.cyaLabel.property-address"),
         addressDisplay(answers.address, DisplayFormat.Block),
-        Some(cyaChange(messages("returns.company-address.cyaChange.company-address"), returns.address.routes.MixedUsePropertyDetailsController.enterPostcode().url)),
+        Some(cyaChange(messages("returns.property-address.cyaChange.property-address"), returns.address.routes.MixedUsePropertyDetailsController.enterPostcode().url)),
         "singleMixedUseAddress"
     )
 
     @cyaRow(
-        messages("returns.company-address.cyaLabel.disposal-price"),
+        messages("returns.property-address.cyaLabel.disposal-price"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
-        Some(cyaChange(messages("returns.company-address.cyaChange.disposal-price"),
+        Some(cyaChange(messages("returns.property-address.cyaLabel.disposal-price"),
             returns.address.routes.MixedUsePropertyDetailsController.enterDisposalValue().url)),
         "singleMixedUseDisposalPrice"
     )
 
     @cyaRow(
-        messages("returns.company-address.cyaLabel.acquisition-price"),
+        messages("returns.property-address.cyaLabel.acquisition-price"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
-        Some(cyaChange(messages("returns.company-address.cyaChange.acquisition-price"),
+        Some(cyaChange(messages("returns.property-address.cyaLabel.acquisition-price"),
             returns.address.routes.MixedUsePropertyDetailsController.enterAcquisitionValue().url)),
         "singleMixedUseAcquisitionPrice"
     )
