@@ -49,6 +49,7 @@
     reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
     lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
     singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
+    singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
     printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
@@ -99,6 +100,7 @@
                 case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
                 case c: CompleteSingleIndirectDisposalReturn => addressDisplay(c.companyAddress, Line)
                 case c: CompleteMultipleIndirectDisposalReturn => addressDisplay(c.exampleCompanyDetailsAnswers.address, Line)
+                case c: CompleteSingleMixedUseDisposalReturn => addressDisplay(c.propertyDetailsAnswers.address, Line)
             },
             None,
             "property-address-table"
@@ -232,6 +234,25 @@
         @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType)
 
         @if(multipleIndirect.hasAttachments) {
+            <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
+            <p>@messages(s"$key.hasAttachments.p1")</p>
+        }
+    }
+
+    case singleMixedUse: CompleteSingleMixedUseDisposalReturn=> {
+        <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
+        @singleDisposalTriageSummary(singleMixedUse.triageAnswers, subscribedDetails.isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
+        @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers)
+
+        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType)
+
+        @if(singleMixedUse.hasAttachments) {
             <h2 class="heading-medium">@messages(s"$key.hasAttachments")</h2>
             <p>@messages(s"$key.hasAttachments.p1")</p>
         }
