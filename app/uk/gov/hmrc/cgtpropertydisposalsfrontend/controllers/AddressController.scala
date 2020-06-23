@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{EnteringCompanyDetails, EnteringSingleMixedUsePropertyDetails, FillingOutReturnAddressJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.{ManagingSubscription, Onboarding}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -170,7 +170,7 @@ trait AddressController[A <: AddressJourneyType] {
               enterPostcodeCall,
               journey,
               isATrust(journey),
-              extractRepresentitiveType(journey)
+              extractRepresentativeType(journey)
             )
           )
       }
@@ -192,7 +192,7 @@ trait AddressController[A <: AddressJourneyType] {
                     enterPostcodeCall,
                     journey,
                     isATrust(journey),
-                    extractRepresentitiveType(journey)
+                    extractRepresentativeType(journey)
                   )
                 ),
               storeAddress(continueCall, journey, true)
@@ -254,7 +254,7 @@ trait AddressController[A <: AddressJourneyType] {
               enterUkAddressCall,
               journey,
               isATrust(journey),
-              extractRepresentitiveType(journey)
+              extractRepresentativeType(journey)
             )
           )
       }
@@ -276,7 +276,7 @@ trait AddressController[A <: AddressJourneyType] {
                     enterUkAddressCall,
                     journey,
                     isATrust(journey),
-                    extractRepresentitiveType(journey)
+                    extractRepresentativeType(journey)
                   )
                 ),
               {
@@ -293,7 +293,7 @@ trait AddressController[A <: AddressJourneyType] {
                         enterUkAddressCall,
                         journey,
                         isATrust(journey),
-                        extractRepresentitiveType(journey)
+                        extractRepresentativeType(journey)
                       )
                     )
                   }
@@ -352,7 +352,7 @@ trait AddressController[A <: AddressJourneyType] {
                   enterUkAddressCall,
                   journey,
                   isATrust(journey),
-                  extractRepresentitiveType(journey)
+                  extractRepresentativeType(journey)
                 )
               )
           }
@@ -382,7 +382,7 @@ trait AddressController[A <: AddressJourneyType] {
                         enterUkAddressCall,
                         journey,
                         isATrust(journey),
-                        extractRepresentitiveType(journey)
+                        extractRepresentativeType(journey)
                       )
                     ),
                   storeAddress(continueCall, journey, false)
@@ -420,14 +420,20 @@ trait AddressController[A <: AddressJourneyType] {
 
   }
 
-  private def extractRepresentitiveType(
+  private def extractRepresentativeType(
     journey: AddressJourneyType
   ): Option[RepresentativeType] =
     journey match {
-      case j: FillingOutReturnAddressJourney =>
+      case j: FillingOutReturnAddressJourney        =>
         j.draftReturn.fold(_.triageAnswers.representativeType(), _.triageAnswers.representativeType())
 
-      case _                                 => None
+      case c: EnteringCompanyDetails                =>
+        c.representativeType
+
+      case m: EnteringSingleMixedUsePropertyDetails =>
+        m.representativeType
+
+      case _                                        => None
     }
 
   private def registeredWithId(journey: AddressJourneyType): Boolean =

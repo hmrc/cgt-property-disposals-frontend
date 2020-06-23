@@ -127,12 +127,18 @@ class MixedUsePropertyDetailsController @Inject() (
   def isATrust(journey: EnteringSingleMixedUsePropertyDetails): Boolean =
     journey.journey.subscribedDetails.isATrust
 
-  protected lazy val isUkCall: Call                                              = enterPostcodeCall
-  protected lazy val isUkSubmitCall: Call                                        = enterPostcodeCall
-  protected lazy val enterNonUkAddressCall: Call                                 = enterPostcodeCall
-  protected lazy val enterNonUkAddressSubmitCall: Call                           = enterPostcodeCall
-  protected lazy val backLinkCall: EnteringSingleMixedUsePropertyDetails => Call = _ => enterPostcodeCall
-  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call]               = None
+  protected lazy val isUkCall: Call                                                     = enterPostcodeCall
+  protected lazy val isUkSubmitCall: Call                                               = enterPostcodeCall
+  protected lazy val enterNonUkAddressCall: Call                                        = enterPostcodeCall
+  protected lazy val enterNonUkAddressSubmitCall: Call                                  = enterPostcodeCall
+  protected lazy val backLinkCall: EnteringSingleMixedUsePropertyDetails => Call        = _ => enterPostcodeCall
+  override val enterPostcodePageBackLink: EnteringSingleMixedUsePropertyDetails => Call =
+    _.answers.fold(
+      _ => controllers.returns.routes.TaskListController.taskList(),
+      _ => routes.MixedUsePropertyDetailsController.checkYourAnswers()
+    )
+
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call] = None
 
   protected lazy val enterUkAddressCall: Call       = addressRoutes.MixedUsePropertyDetailsController.enterUkAddress()
   protected lazy val enterUkAddressSubmitCall: Call =
