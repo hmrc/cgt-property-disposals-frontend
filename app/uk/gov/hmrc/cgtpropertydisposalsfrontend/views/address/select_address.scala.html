@@ -76,6 +76,8 @@
   )
  case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
    messages("address-select.representee.title")
+ case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
+  messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
  case _ => messages("address-select.title")
 }}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

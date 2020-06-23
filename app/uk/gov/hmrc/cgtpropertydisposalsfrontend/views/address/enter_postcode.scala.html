@@ -37,7 +37,8 @@ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.err
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
 accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(form: Form[AddressLookupRequest],
@@ -72,6 +73,8 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   )
  case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
    messages("enterPostcode.representee.title")
+ case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
+     messages(s"$returnsKey$userKey.singleDisposal.title")
  case _ => messages("enterPostcode.title")
 }}
 
@@ -86,7 +89,8 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   @errorSummary(form)
  }
 
- @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())))
+ @caption(messages(addressJourneyType.captionMessageKey()))
+ @pageHeading(title, None))
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
    @textInput(
