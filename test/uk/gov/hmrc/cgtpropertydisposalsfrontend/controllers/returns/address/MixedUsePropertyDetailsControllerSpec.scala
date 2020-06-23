@@ -199,7 +199,7 @@ class MixedUsePropertyDetailsControllerSpec
           test(
             performAction(),
             "enterPostcode.returns.singleDisposal.title",
-            controllers.returns.routes.TaskListController.taskList()
+            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
           )
         }
 
@@ -226,7 +226,7 @@ class MixedUsePropertyDetailsControllerSpec
           test(
             performAction(),
             "enterPostcode.returns.personalRep.singleDisposal.title",
-            controllers.returns.routes.TaskListController.taskList()
+            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
           )
         }
 
@@ -239,7 +239,7 @@ class MixedUsePropertyDetailsControllerSpec
           test(
             performAction(),
             "enterPostcode.returns.agent.singleDisposal.title",
-            controllers.returns.routes.TaskListController.taskList()
+            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
           )
 
         }
@@ -253,7 +253,7 @@ class MixedUsePropertyDetailsControllerSpec
           test(
             performAction(),
             "enterPostcode.returns.trust.singleDisposal.title",
-            controllers.returns.routes.TaskListController.taskList()
+            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
           )
         }
 

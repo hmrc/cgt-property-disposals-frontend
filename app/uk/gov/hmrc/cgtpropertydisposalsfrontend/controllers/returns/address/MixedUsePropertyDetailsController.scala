@@ -134,7 +134,7 @@ class MixedUsePropertyDetailsController @Inject() (
   protected lazy val backLinkCall: EnteringSingleMixedUsePropertyDetails => Call        = _ => enterPostcodeCall
   override val enterPostcodePageBackLink: EnteringSingleMixedUsePropertyDetails => Call =
     _.answers.fold(
-      _ => controllers.returns.routes.TaskListController.taskList(),
+      _ => routes.MixedUsePropertyDetailsController.singleMixedUseGuidance(),
       _ => routes.MixedUsePropertyDetailsController.checkYourAnswers()
     )
 
