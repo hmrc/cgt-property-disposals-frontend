@@ -57,6 +57,7 @@
         _.representeeAnswers,
         _.representeeAnswers,
         _.representeeAnswers,
+        _.representeeAnswers,
         _.representeeAnswers
     )
 }
@@ -162,6 +163,7 @@
                 case c: CompleteSingleDisposalReturn => addressDisplay(c.propertyAddress, Line)
                 case c: CompleteSingleIndirectDisposalReturn => addressDisplay(c.companyAddress, Line)
                 case c: CompleteMultipleIndirectDisposalReturn => addressDisplay(c.exampleCompanyDetailsAnswers.address, Line)
+                case c: CompleteSingleMixedUseDisposalReturn => addressDisplay(c.propertyDetailsAnswers.address, Line)
             },
             None,
             "property-address-table"

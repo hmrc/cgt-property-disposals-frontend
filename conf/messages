@@ -637,7 +637,7 @@ agent.confirm-client.cgt-reference=Capital Gains Tax on UK property account numb
 agent.confirm-client.change-client=Change client
 
 
-triage.caption=Before you start
+triage.caption=Check if you can use this service
 
 who-are-you-reporting-for.title=Who are you completing this return for?
 
@@ -1021,6 +1021,7 @@ task-list.provide-details.heading=Provide details
 task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss
 task-list.enter-property-address.link=Enter property address
 task-list.enter-property-details.link=Enter property details
+task-list.enter-property-details-single-mixed-use.link=Enter mixed-use property details
 task-list.enter-company-details.link=Enter company details
 task-list.example-company-details.link=Example company details
 task-list.disposals-details.link=Enter sale or disposal details
@@ -3449,13 +3450,13 @@ singleMixedUse.cyaLabel.acquisition-price=What was the acquisition amount?
 
 singleMixedUse.caption=Property details
 
-singledMixedUse.guidance.title=You’ll need to enter details about the property disposal
+singleMixedUse.guidance.title=You’ll need to enter details about the property disposal
 
 
-singledMixedUse.guidance.list.title=You’ll need to enter the:
-singledMixedUse.guidance.list.l1=property’s UK address
-singledMixedUse.guidance.list.l2=disposal value of the property
-singledMixedUse.guidance.list.l3=acquisition value of the property
+singleMixedUse.guidance.list.title=You’ll need to enter the:
+singleMixedUse.guidance.list.l1=property’s UK address
+singleMixedUse.guidance.list.l2=disposal value of the property
+singleMixedUse.guidance.list.l3=acquisition value of the property
 singleMixedUseDisposalsDisposalPrice.title=What was the disposal value of the property?
 
 singleMixedUseDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.

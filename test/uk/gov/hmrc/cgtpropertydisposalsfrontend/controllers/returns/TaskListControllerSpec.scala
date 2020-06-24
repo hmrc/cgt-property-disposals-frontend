@@ -2254,7 +2254,7 @@ class TaskListControllerSpec
             incompletePropertyDetails
           )(
             "propertyDetails",
-            messageFromMessageKey("task-list.enter-property-details.link"),
+            messageFromMessageKey("task-list.enter-property-details-single-mixed-use.link"),
             address.routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             TaskListStatus.InProgress,
             _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
@@ -2275,7 +2275,7 @@ class TaskListControllerSpec
             completePropertyDetails
           )(
             "propertyDetails",
-            messageFromMessageKey("task-list.enter-property-details.link"),
+            messageFromMessageKey("task-list.enter-property-details-single-mixed-use.link"),
             address.routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             TaskListStatus.Complete
           )

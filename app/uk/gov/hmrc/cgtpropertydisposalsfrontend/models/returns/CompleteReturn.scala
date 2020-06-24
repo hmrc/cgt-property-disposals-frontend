@@ -30,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDet
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.CompleteMixedUsePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
@@ -176,7 +177,7 @@ object CompleteReturn {
           None
       }
 
-    implicit class CompleteReturnOps(
+    implicit class CompleteSingleDisposalReturnOps(
       private val c: CompleteSingleDisposalReturn
     ) extends AnyVal {
 
@@ -184,6 +185,7 @@ object CompleteReturn {
         c.triageAnswers.assetType === AssetType.NonResidential
 
     }
+
   }
 
   final case class CompleteSingleIndirectDisposalReturn(
@@ -234,14 +236,6 @@ object CompleteReturn {
           None
       }
 
-    implicit class CompleteReturnOps(
-      private val c: CompleteSingleDisposalReturn
-    ) extends AnyVal {
-
-      def hasNonResidentialAssetType(): Boolean =
-        c.triageAnswers.assetType === AssetType.NonResidential
-
-    }
   }
 
   final case class CompleteMultipleIndirectDisposalReturn(
@@ -288,18 +282,64 @@ object CompleteReturn {
 
   }
 
+  final case class CompleteSingleMixedUseDisposalReturn(
+    triageAnswers: CompleteSingleDisposalTriageAnswers,
+    propertyDetailsAnswers: CompleteMixedUsePropertyDetailsAnswers,
+    exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
+    yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
+    supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
+    representeeAnswers: Option[CompleteRepresenteeAnswers],
+    hasAttachments: Boolean
+  ) extends CompleteReturn
+
+  object CompleteSingleMixedUseDisposalReturn {
+
+    def fromDraftReturn(
+      draftReturn: DraftSingleMixedUseDisposalReturn
+    ): Option[CompleteSingleMixedUseDisposalReturn] =
+      draftReturn match {
+        case DraftSingleMixedUseDisposalReturn(
+              _,
+              t: CompleteSingleDisposalTriageAnswers,
+              Some(c: CompleteMixedUsePropertyDetailsAnswers),
+              Some(e: CompleteExemptionAndLossesAnswers),
+              Some(y: CompleteNonCalculatedYTDAnswers),
+              Some(u: CompleteSupportingEvidenceAnswers),
+              representeeAnswers,
+              _
+            ) =>
+          validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
+            CompleteSingleMixedUseDisposalReturn(
+              t,
+              c,
+              e,
+              y,
+              u,
+              maybeCompleteRepresenteeAnswers,
+              hasAttachments = true
+            )
+          )
+
+        case _ =>
+          None
+      }
+
+  }
+
   implicit class CompleteReturnOps(private val c: CompleteReturn) extends AnyVal {
     def fold[A](
       whenMultiple: CompleteMultipleDisposalsReturn => A,
       whenSingle: CompleteSingleDisposalReturn => A,
       whenSingleIndirect: CompleteSingleIndirectDisposalReturn => A,
-      whenMultipleIndirect: CompleteMultipleIndirectDisposalReturn => A
+      whenMultipleIndirect: CompleteMultipleIndirectDisposalReturn => A,
+      whenSingleMixedUse: CompleteSingleMixedUseDisposalReturn => A
     ): A =
       c match {
         case m: CompleteMultipleDisposalsReturn        => whenMultiple(m)
         case s: CompleteSingleDisposalReturn           => whenSingle(s)
         case s: CompleteSingleIndirectDisposalReturn   => whenSingleIndirect(s)
         case m: CompleteMultipleIndirectDisposalReturn => whenMultipleIndirect(m)
+        case s: CompleteSingleMixedUseDisposalReturn   => whenSingleMixedUse(s)
       }
 
     def isIndirectDisposal(): Boolean =
@@ -307,11 +347,13 @@ object CompleteReturn {
         m => m.triageAnswers.isIndirectDisposal(),
         _ => false,
         _ => true,
-        _ => true
+        _ => true,
+        _ => false
       )
 
     def representativeType(): Option[RepresentativeType] =
       c.fold(
+        _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),
@@ -340,21 +382,22 @@ object CompleteReturn {
 
   @silent
   implicit val format: OFormat[CompleteReturn] = {
-    implicit val singleDisposalTriageFormat: OFormat[CompleteSingleDisposalTriageAnswers]          = Json.format
-    implicit val multipleDisposalsTriageFormat: OFormat[CompleteMultipleDisposalsTriageAnswers]    = Json.format
-    implicit val ukAddressFormat: OFormat[UkAddress]                                               = Json.format
-    implicit val examplePropertyDetailsFormat: OFormat[CompleteExamplePropertyDetailsAnswers]      = Json.format
-    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]                    = Json.format
-    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]              = Json.format
-    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                        =
+    implicit val singleDisposalTriageFormat: OFormat[CompleteSingleDisposalTriageAnswers]              = Json.format
+    implicit val multipleDisposalsTriageFormat: OFormat[CompleteMultipleDisposalsTriageAnswers]        = Json.format
+    implicit val ukAddressFormat: OFormat[UkAddress]                                                   = Json.format
+    implicit val examplePropertyDetailsFormat: OFormat[CompleteExamplePropertyDetailsAnswers]          = Json.format
+    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]                        = Json.format
+    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]                  = Json.format
+    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                            =
       Json.format
-    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]              = Json.format
-    implicit val nonCalculatedYearToDateLiabilityFormat: OFormat[CompleteNonCalculatedYTDAnswers]  = Json.format
-    implicit val calculatedYearToDateLiabilityFormat: OFormat[CompleteCalculatedYTDAnswers]        = Json.format
-    implicit val supportingDocumentsFormat: OFormat[CompleteSupportingEvidenceAnswers]             = Json.format
-    implicit val representeeAnswersFormat: OFormat[CompleteRepresenteeAnswers]                     =
+    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]                  = Json.format
+    implicit val nonCalculatedYearToDateLiabilityFormat: OFormat[CompleteNonCalculatedYTDAnswers]      = Json.format
+    implicit val calculatedYearToDateLiabilityFormat: OFormat[CompleteCalculatedYTDAnswers]            = Json.format
+    implicit val supportingDocumentsFormat: OFormat[CompleteSupportingEvidenceAnswers]                 = Json.format
+    implicit val representeeAnswersFormat: OFormat[CompleteRepresenteeAnswers]                         =
       Json.format
-    implicit val exampleCompanyDetailsAnswersFormat: OFormat[CompleteExampleCompanyDetailsAnswers] = Json.format
+    implicit val exampleCompanyDetailsAnswersFormat: OFormat[CompleteExampleCompanyDetailsAnswers]     = Json.format
+    implicit val mixedUsePropertyDetailsAnswersFormat: OFormat[CompleteMixedUsePropertyDetailsAnswers] = Json.format
     derived.oformat()
   }
 

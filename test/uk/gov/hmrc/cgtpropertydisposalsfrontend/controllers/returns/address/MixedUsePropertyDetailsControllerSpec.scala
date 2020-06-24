@@ -39,8 +39,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.{CompleteMixedUsePropertyDetailsAnswers, IncompleteMixedUsePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
@@ -84,7 +85,15 @@ class MixedUsePropertyDetailsControllerSpec
   ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
     val draftReturn      = sample[DraftSingleMixedUseDisposalReturn].copy(
       triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType),
-      mixedUsePropertyDetailsAnswers = mixedUsePropertyDetailsAnswers
+      mixedUsePropertyDetailsAnswers = mixedUsePropertyDetailsAnswers,
+      representeeAnswers = individualUserType match {
+        case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) =>
+          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
+        case Some(Capacitor)                                                      =>
+          Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+        case _                                                                    =>
+          None
+      }
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
@@ -110,18 +119,20 @@ class MixedUsePropertyDetailsControllerSpec
       Some(IncompleteMixedUsePropertyDetailsAnswers(address, None, None))
     )
 
-  def capacitorState(): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) =
+  def capacitorState(
+    answers: Option[MixedUsePropertyDetailsAnswers] = None
+  ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) =
     sessionWithDraftMixedUseDisposal(
       Right(sample[IndividualName]),
       UserType.Individual,
       Some(Capacitor),
-      None
+      answers
     )
 
   def personalRepState(): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) =
     sessionWithDraftMixedUseDisposal(
       Right(sample[IndividualName]),
-      UserType.Agent,
+      UserType.Individual,
       Some(PersonalRepresentative),
       None
     )
@@ -148,6 +159,107 @@ class MixedUsePropertyDetailsControllerSpec
     else ""
 
   "MixedUsePropertyDetailsController" when {
+
+    "handling requests to display the enter postcode page" must {
+
+      def performAction(): Future[Result] =
+        controller.enterPostcode()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(result: Future[Result], expectedTitleKey: String, expectedBackLink: Call): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc
+                .select("#content > article > span")
+                .text() shouldBe messageFromMessageKey(
+                "singleMixedUse.caption"
+              )
+
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MixedUsePropertyDetailsController
+                .enterPostcodeSubmit()
+                .url
+            }
+          )
+
+        "handling individuals" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(individualState()._1)
+          }
+
+          test(
+            performAction(),
+            "enterPostcode.returns.singleDisposal.title",
+            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
+          )
+        }
+
+        "handling capacitors" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(capacitorState(Some(sample[CompleteMixedUsePropertyDetailsAnswers]))._1)
+          }
+
+          test(
+            performAction(),
+            "enterPostcode.returns.capacitor.singleDisposal.title",
+            routes.MixedUsePropertyDetailsController.checkYourAnswers()
+          )
+
+        }
+
+        "handling personal representatives" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(personalRepState()._1)
+          }
+
+          test(
+            performAction(),
+            "enterPostcode.returns.personalRep.singleDisposal.title",
+            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
+          )
+        }
+
+        "handling agents" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(agentState()._1)
+          }
+
+          test(
+            performAction(),
+            "enterPostcode.returns.agent.singleDisposal.title",
+            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
+          )
+
+        }
+
+        "handling trusts" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(trustState()._1)
+          }
+
+          test(
+            performAction(),
+            "enterPostcode.returns.trust.singleDisposal.title",
+            routes.MixedUsePropertyDetailsController.singleMixedUseGuidance()
+          )
+        }
+
+      }
+
+    }
 
     "handling requests to display the enter address page" must {
 
@@ -195,7 +307,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(individualState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.singleDisposal.title")
         }
 
         "handling capacitors" in {
@@ -204,7 +316,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(capacitorState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.capacitor.singleDisposal.title")
         }
 
         "handling personal representatives" in {
@@ -213,7 +325,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(personalRepState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.personalRep.singleDisposal.title")
         }
 
         "handling agents" in {
@@ -222,7 +334,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(agentState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.agent.singleDisposal.title")
         }
 
         "handling trusts" in {
@@ -231,7 +343,7 @@ class MixedUsePropertyDetailsControllerSpec
             mockGetSession(trustState()._1)
           }
 
-          test(performAction(), "address.uk.title")
+          test(performAction(), "address.uk.returns.trust.singleDisposal.title")
 
         }
 
@@ -273,7 +385,7 @@ class MixedUsePropertyDetailsControllerSpec
 
           test("postcode" -> "W1A2HV")(
             "address-line1.error.required",
-            "address.uk.title"
+            "address.uk.returns.singleDisposal.title"
           )
         }
 
@@ -288,7 +400,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-line1.error.tooLong",
-            "address.uk.title"
+            "address.uk.returns.agent.singleDisposal.title"
           )
         }
 
@@ -303,7 +415,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-line1.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.trust.singleDisposal.title"
           )
         }
 
@@ -318,7 +430,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-line2.error.tooLong",
-            "address.uk.title"
+            "address.uk.returns.personalRep.singleDisposal.title"
           )
         }
 
@@ -334,7 +446,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-line2.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.capacitor.singleDisposal.title"
           )
         }
 
@@ -349,7 +461,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-town.error.tooLong",
-            "address.uk.title"
+            "address.uk.returns.personalRep.singleDisposal.title"
           )
         }
 
@@ -365,7 +477,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A2HV"
           )(
             "address-town.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.capacitor.singleDisposal.title"
           )
         }
 
@@ -380,7 +492,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"       -> "W1A2HV"
           )(
             "address-county.error.tooLong",
-            "address.uk.title"
+            "address.uk.returns.personalRep.singleDisposal.title"
           )
         }
 
@@ -396,7 +508,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"       -> "W1A2HV"
           )(
             "address-county.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.capacitor.singleDisposal.title"
           )
         }
 
@@ -408,7 +520,7 @@ class MixedUsePropertyDetailsControllerSpec
 
           test("address-line1" -> "1 the Street")(
             "postcode.error.required",
-            "address.uk.title"
+            "address.uk.returns.singleDisposal.title"
           )
         }
 
@@ -423,7 +535,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "W1A,2HV"
           )(
             "postcode.error.invalidCharacters",
-            "address.uk.title"
+            "address.uk.returns.singleDisposal.title"
           )
         }
 
@@ -438,7 +550,7 @@ class MixedUsePropertyDetailsControllerSpec
             "postcode"      -> "ABC123"
           )(
             "postcode.error.pattern",
-            "address.uk.title"
+            "address.uk.returns.singleDisposal.title"
           )
         }
 
