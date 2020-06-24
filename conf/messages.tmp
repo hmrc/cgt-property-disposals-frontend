@@ -1,172 +1,3 @@
-landingPage.title=Report and pay Capital Gains Tax on UK property
-landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
-landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
-
-landingPage.warning=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
-landingPage.covid.p1=Due to coronavirus (COVID-19), you will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
-landingPage.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
-landingPage.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
-
-landingPage.contents.h2=Contents
-landingPage.intro.h2=Overview
-landingPage.contents.list.bullet1=<a href="{0}">Overview</a>
-landingPage.contents.list.bullet2=<a href="{0}">How to report and pay the tax</a>
-landingPage.contents.list.bullet3=<a href="{0}">Before you start</a>
-landingPage.contents.list.bullet4=<a href="{0}">If you’re an agent</a>
-landingPage.contents.list.bullet5=<a href="{0}">If you’re representing a trust</a>
-landingPage.contents.list.bullet6=<a href="{0}">If you’re a capacitor or personal representative</a>
-
-landingPage.howTo.h2=How to report and pay the tax
-landingPage.howTo.p1=You’ll need to create a Capital Gains Tax on UK property account before you can report and pay the tax using this service.
-landingPage.howTo.p2=If you’re a resident or representing a trust, you can use this service to:
-landingPage.howTo.list1.bullet1=report the disposal of UK residential property or land made from 6 April 2020
-landingPage.howTo.list1.bullet2=pay any tax you might owe for that disposal
-landingPage.howTo.list1.bullet3=view your previous and current returns
-
-landingPage.howTo.p3=If you’re a non-resident you must use this service to report sales or disposals from 6 April 2020 of:
-landingPage.howTo.list2.bullet1=residential UK property or land
-landingPage.howTo.list2.bullet2=non-residential UK property or land
-landingPage.howTo.p4=If you’re a non-resident, you must report all sales or disposals of UK property, even if you have no tax to pay or have made a loss.
-landingPage.startButton=Start
-landingPage.beforeYouStart.h2=Before you start
-landingPage.beforeYouStart.p1=To use this service, you’ll need a Government Gateway user ID and password. If you do not have a user ID, you can create one.
-landingPage.beforeYouStart.p2=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
-landingPage.beforeYouStart.p3=Get the following information ready:
-landingPage.beforeYouStart.list1.bullet1=property address and postcode
-landingPage.beforeYouStart.list1.bullet2=date you got the property
-landingPage.beforeYouStart.list1.bullet3=date you exchanged contracts when you were selling or disposing of the property
-landingPage.beforeYouStart.list1.bullet4=date you stopped being the property’s owner (completion date)
-landingPage.beforeYouStart.list1.bullet5=value of the property when you got it
-landingPage.beforeYouStart.list1.bullet6=value of the property when you sold or disposed of it
-landingPage.beforeYouStart.list1.bullet7=costs of buying, selling or making improvements to the property
-landingPage.beforeYouStart.list1.bullet8=details of any tax reliefs, allowances or exemptions you’re entitled to claim
-landingPage.beforeYouStart.list1.bullet9=property type, if you’re a non-resident
-
-landingPage.ifAgent.h2=If you’re an agent
-landingPage.ifAgent.p1=Find out how to <a href="{0}">report your client’s Capital Gains Tax on UK property disposals</a>.
-landingPage.ifTrust.h2=If you’re representing a trust
-landingPage.ifTrust.p1=The trust must be  <a href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
-landingPage.reportingDisposals.h2=If you’re reporting indirect disposals or disposals of mixed use property
-landingPage.reportingDisposals.p1=Use the <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
-landingPage.capacitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
-landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
-landingPage.capacitorOrPersonalRepresentative.p2=If the disposal was made by the deceased’s estate during the period of administration, you’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
-landingPage.capacitorOrPersonalRepresentative.p3=To use this service for another person, where the the disposal was not made within a period of administration, you’ll need to:
-landingPage.capacitorOrPersonalRepresentative.p4=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
-landingPage.capacitorOrPersonalRepresentative.p5=The details you provide must match the details we hold about the person.
-landingPage.capacitorOrPersonalRepresentative.p6=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
-landingPage.capacitorOrPersonalRepresentative.p7=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
-landingPage.capacitorOrPersonalRepresentative.p8=You’ll need to call HMRC to amend a return that has been sent.
-landingPage.capacitorOrPersonalRepresentative.example.title=<strong class="bold">Example</strong>
-landingPage.capacitorOrPersonalRepresentative.p9=Mr Andrews died on 20 April 2020. Mr Smith is the personal representative for Mr Andrews’ estate. Before he died Mr Andrews had agreed to sell his UK residential investment property.
-landingPage.capacitorOrPersonalRepresentative.p10=Mr Andrews exchanged contracts on 15 April 2020 before he died. After he died Mr Smith completed the property sale. Capital Gains Tax was due.
-landingPage.capacitorOrPersonalRepresentative.p11=To report and pay the tax, Mr Smith signed into his own Capital Gains Tax on UK property account. Mr Smith started a new return and selected he was completing the return for someone who had died. Mr Smith entered the details, checked and sent the return, and paid the Capital Gains Tax due.
-landingPage.capacitorOrPersonalRepresentative.list1.bullet1=sign in to your own Capital Gains Tax on UK property account or create one if you do not have one
-landingPage.capacitorOrPersonalRepresentative.list1.bullet2=start a new return from your account
-landingPage.capacitorOrPersonalRepresentative.list1.bullet3=select that you’re completing the return for someone else or someone who has died
-landingPage.capacitorOrPersonalRepresentative.list1.bullet4=enter the person’s full name
-landingPage.capacitorOrPersonalRepresentative.list1.bullet5=provide evidence that you have the authority to act on their behalf, for example a <a href="{0}">lasting power of attorney (LPA)</a> document
-landingPage.capacitorOrPersonalRepresentative.list2.bullet1=National Insurance number
-landingPage.capacitorOrPersonalRepresentative.list2.bullet2=Self Assessment Unique Taxpayer Reference
-landingPage.capacitorOrPersonalRepresentative.list2.bullet3=Capital Gains Tax on UK property account number
-
-landingPage.sidebar.title=Related content
-landingPage.sidebar.1=Calculate Capital Gains Tax
-landingPage.sidebar.2=Capital Gains Tax
-landingPage.sidebar.3=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
-landingPage.sidebar.4=Pay your tax
-
-agentsLandingPage.title=Manage your client’s Capital Gains Tax on UK property account
-agentsLandingPage.intro.p1=Find out how to ask your client to authorise you to manage their Capital Gains Tax on UK property account.
-agentsLandingPage.contents.h4=Contents
-agentsLandingPage.contents.list1.ordered1=<a href="{0}">Who needs to report Capital Gains Tax on UK property</a>
-agentsLandingPage.contents.list1.ordered2=<a href="{0}">How to ask for authorisation</a>
-agentsLandingPage.contents.list1.ordered3=<a href="{0}">How to manage your client’s account</a>
-agentsLandingPage.contents.list1.ordered4=<a href="{0}">Send a Capital Gains Tax on UK property return</a>
-agentsLandingPage.contents.list1.ordered5=<a href="{0}">What you’ll need to complete the return</a>
-agentsLandingPage.contents.list1.ordered6=<a href="{0}">Ways your client can pay</a>
-agentsLandingPage.report.h3=Who needs to report Capital Gains Tax on UK property
-agentsLandingPage.report.uk-residents.h4=UK residents
-agentsLandingPage.report.uk-residents.p1=For UK residential property disposals made from 6 April 2020, UK residents have 30 days after the property’s completion date to report and pay Capital Gains Tax on the disposals.
-agentsLandingPage.report.uk-residents.covid.p1=Due to coronavirus (COVID-19), UK residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
-agentsLandingPage.report.uk-residents.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
-agentsLandingPage.report.uk-residents.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
-agentsLandingPage.report.uk-residents.p2=<a href="{0}">Check if your client needs to report and pay Capital Gains Tax on UK property</a>
-agentsLandingPage.report.uk-residents.p3=For UK residential property disposals made from 6 April 2020, UK residents must report their Capital Gains Tax online. You can do this for your clients through their Capital Gains Tax on UK property account.
-agentsLandingPage.report.uk-residents.p4=If your client is a resident who is an individual or a trust, you can use this service to:
-agentsLandingPage.report.uk-residents.list1.bullet1=report your client’s UK residential property disposals made from 6 April 2020
-agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay any tax they might owe for that disposal
-agentsLandingPage.report.uk-residents.list1.bullet3=view your client’s previous and current returns
-agentsLandingPage.report.what-residents-cannot-do.h4=What UK residents cannot do
-agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use your client’s online account to report a disposal made by a deceased’s estate during the period of administration. You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
-agentsLandingPage.report.non-residents.h4=Non-residents
-agentsLandingPage.report.non-residents.p1=Non-residents must report all sales or disposals of UK property within 30 days of the completion date, even if they have no tax to pay or have made a loss.
-agentsLandingPage.report.non-uk-residents.covid.p1=Due to coronavirus (COVID-19), non-residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
-agentsLandingPage.report.non-uk-residents.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
-agentsLandingPage.report.non-uk-residents.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
-agentsLandingPage.report.non-residents.p2=If your client is a non-resident use this service to report their UK property disposals of:
-agentsLandingPage.report.non-residents.list1.bullet1=residential UK property or land made from 6 April 2020
-agentsLandingPage.report.non-residents.list1.bullet2=non-residential UK property or land made from 6 April 2020
-agentsLandingPage.report.what-non-residents-cannot-do.h4=What non-residents cannot do
-agentsLandingPage.report.what-non-residents-cannot-do.p1=You cannot use your client’s online account to report:
-agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet1=disposals of mixed-use property (part of the property was residential and part was non-residential during the period of ownership) - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
-agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet2=indirect disposals of UK property - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
-agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3=a disposal made by a deceased’s estate during the period of administration - <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you
-agentsLandingPage.how-to-ask-for-authorisation.h3=How to ask for authorisation
-agentsLandingPage.how-to-ask-for-authorisation.p1=Ask your client to:
-agentsLandingPage.how-to-ask-for-authorisation.list1.bullet1=create a Government Gateway user ID if they do not have one
-agentsLandingPage.how-to-ask-for-authorisation.list1.bullet2=use their Government Gateway user ID and password to sign in and <a href = "{0}">create a Capital Gains Tax on UK property account</a>
-agentsLandingPage.how-to-ask-for-authorisation.list1.bullet3=give you their account number
-agentsLandingPage.how-to-ask-for-authorisation.list1.bullet4=give you their UK postcode or country of residence - these details must match their Capital Gains Tax on UK property account details
-agentsLandingPage.how-to-ask-for-authorisation.p2=You’ll need an <a href="{0}">agent services account</a> – this is different from your HMRC online services for agents account.
-agentsLandingPage.how-to-ask-for-authorisation.p3=Sign in to your agent services account then select ‘ask a client to authorise you’.
-agentsLandingPage.how-to-ask-for-authorisation.p4=Enter your client’s details. You’ll then get a link to share with your client. Send your client an email asking them to go to the link to authorise you. The link will expire 14 days after it was created.
-agentsLandingPage.how-to-ask-for-authorisation.p5=Tell your client they’ll need the Government Gateway user ID and password they use for their personal tax affairs (if they’re an individual) or the trust name (if they’re a trust). If they do not have a user ID, they can create one when they go to your link.
-agentsLandingPage.how-to-ask-for-authorisation.p6=When your client selects the link in the email you sent them, you’ll then be able to manage their Capital Gains Tax on UK property account and returns.
-agentsLandingPage.how-to-ask-for-authorisation.p7=You’ll get an email after your client accepts or rejects your request, or if the link has expired after 14 days.
-agentsLandingPage.how-to-ask-for-authorisation.p8=Track your authorisation requests from your agent services account.
-agentsLandingPage.how-to-ask-for-authorisation.p9=You’ll need to ask for authorisation, even if your client has already authorised you to manage their Self Assessment or other tax matters.
-agentsLandingPage.how-to-ask-for-authorisation.p10=Online services may be slow during busy times.
-agentsLandingPage.sign-in-button=Sign in
-agentsLandingPage.sidebar.title=Related content
-agentsLandingPage.sidebar.1=Create an agent services account
-
-agentsLandingPage.how-to-manage-your-clients-account.h3=How to manage your client’s account
-agentsLandingPage.how-to-manage-your-clients-account.p1=After you’ve been authorised, you’ll need to:
-agentsLandingPage.how-to-manage-your-clients-account.list1.bullet1=sign in to your agent services account
-agentsLandingPage.how-to-manage-your-clients-account.list1.bullet2=select ‘report and pay a client’s Capital Gains Tax on UK property’
-agentsLandingPage.how-to-manage-your-clients-account.list1.bullet3=enter your client’s Capital Gains Tax on UK property account number
-agentsLandingPage.how-to-manage-your-clients-account.list1.bullet4=enter your client’s UK postcode or country of residence - these details must match their Capital Gains Tax on UK property account details
-agentsLandingPage.how-to-manage-your-clients-account.p2=Go to ‘manage account’ at the top of your client’s Capital Gains Tax on UK property account to update the contact details for the account.
-
-agentsLandingPage.send-a-cgt-on-uk-property-return.h3=Send a Capital Gains Tax on UK property return
-agentsLandingPage.send-a-cgt-on-uk-property-return.p1=Start a new return from your client’s Capital Gains Tax on UK property ‘account home’.
-agentsLandingPage.send-a-cgt-on-uk-property-return.p2=The return will be saved in your client’s account home for 30 days from the last day it was saved.
-agentsLandingPage.send-a-cgt-on-uk-property-return.p3=If your client disposed of more than one property from 6 April 2020 with the same completion date, you can use this service to report the Capital Gains Tax for all those properties. The properties must also have exchange dates in the same tax year.
-
-agentsLandingPage.what-you-will-need-to-complete-the-return.h3=What you’ll need to complete the return
-agentsLandingPage.what-you-will-need-to-complete-the-return.p1=You need these details about your client’s disposal:
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet1=address and postcode
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet2=date they got the property
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet3=date they exchanged contracts when selling or disposing of the property
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet4=date they stopped being the property’s owner (completion date)
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet5=value of property when they got it
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet6=value of property when they disposed of it
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet7=costs of buying, selling or making improvements to the property
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet8=details of any tax reliefs, allowances or exemptions they’re entitled to claim
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet9=property type, if they’re a non-resident
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet10=property value on 31 March 1982 (known as ‘rebasing’) if they were a UK resident at the time of the disposal and owned the property on or before 31 March 1982
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet11=<a href="{0}">property value on 5 April 2019 (known as ‘rebasing’)</a> if they were a non-resident at the time of the disposal and owned the property on or before 5 April 2019
-agentsLandingPage.what-you-will-need-to-complete-the-return.p2=You may be asked to upload a document showing how the Capital Gains Tax due was worked out.
-
-agentsLandingPage.ways-your-client-can-pay.h3=Ways your client can pay
-agentsLandingPage.ways-your-client-can-pay.p1=Your client can pay by bank transfer, debit card or corporate credit card from their account. They will need to provide their payment reference number. They can find it in their Capital Gains Tax on UK property account.
-
-
-#===================================================
-# SERVICE WIDE AND GENERIC
-#===================================================
-
 service.title=Report and pay Capital Gains Tax on UK property
 service.signOut=Sign out
 hmrc_branding=HM Revenue & Customs
@@ -206,33 +37,6 @@ generic.for=for
 yesNo.true=Yes
 yesNo.false=No
 
-#Months
-date.1=January
-date.2=February
-date.3=March
-date.4=April
-date.5=May
-date.6=June
-date.7=July
-date.8=August
-date.9=September
-date.10=October
-date.11=November
-date.12=December
-
-date.short.1=Jan
-date.short.2=Feb
-date.short.3=Mar
-date.short.4=Apr
-date.short.5=May
-date.short.6=Jun
-date.short.7=Jul
-date.short.8=Aug
-date.short.9=Sept
-date.short.10=Oct
-date.short.11=Nov
-date.short.12=Dec
-
 cya.change=Change
 cya.delete=Delete
 cya.remove=Remove
@@ -243,23 +47,14 @@ unit-input.assistive.percent=do not enter the percent sign
 
 error.summary.heading=There’s a problem
 
-signed-out.title=You’ve signed out
-signed-out.p1=You’ve signed out of your Capital Gains Tax on UK property account.
-signed-out.p2=You can <a href="{0}">sign in</a> to your account.
-signed-out.button=Go to GOV.UK
-
-timed-out.title=For your security, we signed you out
-timed-out.p1=This was because you were inactive for too long.
-timed-out.p2=To access your Capital Gains on UK property account, you’ll need to sign in.
-timed-out.button=Sign in
-
 recruitment-banner.message=Help improve GOV.UK
 recruitment-banner.dismiss=No thanks
 recruitment-banner.link=Get involved in making Government services better (opens in a new tab)
 
-#===================================================
-# ONBOARDING
-#===================================================
+nino.title=Enter your National Insurance number
+nino.helpText=It’s on your National Insurance card, benefit letter, payslip or P60.<br>For example, ‘QQ 12 34 56 C’.
+nino.invalid=Your National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
+nino.generic.error=National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
 
 haveANino.title=Do you have a National Insurance number?
 haveANino.helpText=You’ll find it on your National Insurance card, payslip or P60. For example, ‘QQ 12 34 56 C’.
@@ -316,13 +111,13 @@ email.error.required=Enter a contact email address
 
 confirmEmail.title=You have 30 minutes to confirm your email address
 confirmEmail.sentEmail=We’ve sent an email to you at {0}.
-confirmEmail.changeAgain=You can <a href="{0}">use a different email address</a>.
+confirmEmail.changeAgain=You can <a href~"{0}">use a different email address</a>.
 confirmEmail.whatYouCanDo=What you need to do
 confirmEmail.gotoEmail=Go to that email account and select the link in the email we sent you.
 confirmEmail.ifNoEmail=If the email did not arrive
 confirmEmail.noEmailAction=You can tell us to resend the email to that email account.
 confirmEmail.verified.title=Email address confirmed
-confirmEmail.verified.intro=The email address <strong class="bold">{0}</strong> has been confirmed.
+confirmEmail.verified.intro=The email address <strong class~"bold">{0}</strong> has been confirmed.
 confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax on UK property sales or disposals.
 confirmEmail.verified.p2=Your email has not been updated in other government services.
 confirmEmail.resent=Confirmation email sent:
@@ -379,9 +174,9 @@ nonUkAddress-line1.error.tooLong=Address line 1 must be 35 characters or fewer
 nonUkAddress-line2.error.tooLong=Address line 2 must be 35 characters or fewer
 nonUkAddress-line3.error.tooLong=Address line 3 must be 35 characters or fewer
 nonUkAddress-line4.error.tooLong=Address line 4 must be 35 characters or fewer
-nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
-nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
-nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 countryCode.error.required=Select a country from the options presented as you type
 countryCode.error.notFound=Select a country from the options presented as you type
@@ -391,17 +186,14 @@ countryOfResidence.cyaChange=country of residence
 address-select.title=Select your contact address
 address-select.agent.title=Select your contact address
 address-select.trust.title=Select your contact address
-
 address-select.error.required=Select the contact address or enter it manually if it is not shown
 address-select.agent.error.required=Select the contact address or enter it manually if it is not shown
 address-select.trust.error.required=Select the contact address or enter it manually if it is not shown
-
 address-select.returns.error.required=Select the address you disposed of or enter it manually if it is not shown
 address-select.returns.agent.error.required=Select the address your client disposed of or enter it manually if it is not shown
 address-select.returns.trust.error.required=Select the address the trust disposed of or enter it manually if it is not shown
 address-select.returns.personalRep.error.required=Select the address disposed of or enter it manually if it is not shown
 address-select.returns.capacitor.error.required=Select the address disposed of or enter it manually if it is not shown
-
 address-select.error.number=Select the contact address or enter it manually if it is not shown
 address-select.agent.error.number=Select the contact address or enter it manually if it is not shown
 address-select.trust.error.number=Select the contact address or enter it manually if it is not shown
@@ -422,21 +214,21 @@ address-select.returns.personalRep.invalid=Select the contact address or enter i
 subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
 subscribed.organisation.p1=You’ve created a Capital Gains Tax on UK property account for your trust or estate.
-subscribed.organisation.p2=The trust or estate’s account number is <strong class="bold">{0}</strong>.
-subscribed.individual.p2=Your Capital Gains Tax on UK property account number is <strong class="bold">{0}</strong>.
+subscribed.organisation.p2=The trust or estate’s account number is <strong class~"bold">{0}</strong>.
+subscribed.individual.p2=Your Capital Gains Tax on UK property account number is <strong class~"bold">{0}</strong>.
 subscribed.organisation.p3=You will need to provide this number to HMRC if you need to discuss the trust or estate’s account.
 subscribed.individual.p3=You will need to provide this number to HMRC if you need to discuss your account.
-subscribed.p4=We have sent a confirmation email to <strong class="bold">{0}</strong>.
+subscribed.p4=We have sent a confirmation email to <strong class~"bold">{0}</strong>.
 subscribed.buttonText=Go to account
 
 registerTrust.title=You’ll need to register the trust
 registerTrust.p=To use this service, you’ll need to:
-registerTrust.bullet1=<a href="{0}" target="_blank">Register the trust (opens in new window)</a>.
+registerTrust.bullet1=<a href~"{0}" target~"_blank">Register the trust (opens in new window)</a>.
 registerTrust.bullet2=Sign in to this service using the Government Gateway user ID and password you used to register the trust.
 
 reportCorpTax.title=You’ve tried to sign in as an organisation
 reportCorpTax.p1=Trusts are the only organisations that can use this service to report Capital Gains Tax on UK property.
-reportCorpTax.p2=You have told us you are not a trust so you’ll need to <a href="{0}">file a Company Tax Return</a> to report any taxable gains on UK property.
+reportCorpTax.p2=You have told us you are not a trust so you’ll need to <a href~"{0}">file a Company Tax Return</a> to report any taxable gains on UK property.
 
 entityType.title=Do you want to report a capital gain for a trust or estate?
 entityType.individual=No
@@ -449,9 +241,9 @@ wrongAccountForTrusts.p1=You’re trying to use this service to report Capital G
 wrongAccountForTrusts.whatWentWrong=What went wrong
 wrongAccountForTrusts.whatWentWrong.p1=You’ve signed into Government Gateway as an ‘individual’ person not an ‘organisation’.
 wrongAccountForTrusts.whatNext=What you’ll need to do next
-wrongAccountForTrusts.whatNext.p1=You’ll need to sign in using the <a href="{0}">Government Gateway</a> user ID and password created for the trust. These are the same details you used to register the trust.
+wrongAccountForTrusts.whatNext.p1=You’ll need to sign in using the <a href~"{0}">Government Gateway</a> user ID and password created for the trust. These are the same details you used to register the trust.
 wrongAccountForTrusts.createGGAccount=Create a trust’s Government Gateway account
-wrongAccountForTrusts.createGGAccount.p1=You can a <a href="{0}">create a Government Gateway account</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a href="{1}">registered</a> before you can use this service.
+wrongAccountForTrusts.createGGAccount.p1=You can a <a href~"{0}">create a Government Gateway account</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a href~"{1}">registered</a> before you can use this service.
 
 enterName.title=Enter your full name
 enterName.firstName.label=First name
@@ -547,9 +339,9 @@ enterTrn.tooManyAttempts.title=You’ll need to wait and try again
 enterTrn.tooManyAttempts.p1=You’ve tried to enter your Trust Registration Number and trust name too many times.
 enterTrn.tooManyAttempts.p2=You’ll need to wait 2 hours and try again.
 enterTrn.whatATrnIs=What a Trust Registration Number is
-enterTrn.whatATrnIs.p1=HMRC sends this number to the person who <a href="{0}" target="_blank">registers the trust (opens in a new window)</a>.
+enterTrn.whatATrnIs.p1=HMRC sends this number to the person who <a href~"{0}" target~"_blank">registers the trust (opens in a new window)</a>.
 enterTrn.ifYouCannotFind=If you cannot find it
-enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trust Registration Number number, you can <a href="{0}" target="_blank">contact HMRC (opens in a new window)</a>.
+enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trust Registration Number number, you can <a href~"{0}" target~"_blank">contact HMRC (opens in a new window)</a>.
 
 enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
@@ -567,18 +359,28 @@ changeGGAccount.button=Try again
 weOnlySupportGG.title=Report and pay Capital Gains Tax on UK property
 weOnlySupportGG.p1=The Government Gateway user ID you signed in with cannot be used to access this service.
 weOnlySupportGG.createAccount=Create an account
-weOnlySupportGG.createAccount.p1=You’ll need to <a href="{0}">create a new Government Gateway user ID</a>. You can then use it to create a Capital Gains Tax on UK property account.
+weOnlySupportGG.createAccount.p1=You’ll need to <a href~"{0}">create a new Government Gateway user ID</a>. You can then use it to create a Capital Gains Tax on UK property account.
 weOnlySupportGG.signIn=Sign in if you already have an account
-weOnlySupportGG.signIn.p1=<a href="{0}">Sign in</a> with the same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
+weOnlySupportGG.signIn.p1=<a href~"{0}">Sign in</a> with the same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
+
+signed-out.title=You’ve signed out
+signed-out.p1=You’ve signed out of your Capital Gains Tax on UK property account.
+signed-out.p2=You can <a href~"{0}">sign in</a> to your account.
+signed-out.button=Go to GOV.UK
+
+timed-out.title=For your security, we signed you out
+timed-out.p1=This was because you were inactive for too long.
+timed-out.p2=To access your Capital Gains on UK property account, you’ll need to sign in.
+timed-out.button=Sign in
 
 email-whitelisting.problem.title=Sorry, there is a problem
-email-whitelisting.problem.p1=You cannot access the Report and pay Capital Gains Tax trial service at the moment. 
+email-whitelisting.problem.p1=You cannot access the Report and pay Capital Gains Tax trial service at the moment.
 email-whitelisting.problem.p2=This might be because:
 email-whitelisting.problem.bullet1=there is a technical problem
 email-whitelisting.problem.bullet2=you tried to use the link we emailed to you more than 5 times
 email-whitelisting.problem.bullet3=you typed the URL directly into the browser instead of using the link we emailed to you
 email-whitelisting.problem.bullet4=the trial has ended
-email-whitelisting.problem.p3=You’ll need to email HMRC at <strong class="bold">ddcw-info-cgtpd-g@digital.hmrc.gov.uk</strong> to request access to the service.
+email-whitelisting.problem.p3=You’ll need to email HMRC at <strong class~"bold">ddcw-info-cgtpd-g@digital.hmrc.gov.uk</strong> to request access to the service.
 email-whitelisting.problem.p4=You should include your name.
 
 agent.enter-client-cgt-ref.title=What is your client’s Capital Gains Tax on UK property account number?
@@ -605,16 +407,13 @@ countryCode.error.noMatch=The country must match the country used in your client
 agent.too-many-attempts.title=You’ll need to wait and try again
 agent.too-many-attempts.p1=You’ve entered incorrect details for your client too many times.
 agent.too-many-attempts.p2=You’ll need to wait 2 hours and try again.
-agent.too-many-attempts.p3=You can <a href="{0}">change to a different client’s Capital Gains Tax on UK property account</a>.
+agent.too-many-attempts.p3=You can <a href~"{0}">change to a different client’s Capital Gains Tax on UK property account</a>.
 
 agent.confirm-client.title=Check and confirm your client’s details
 agent.confirm-client.name=Name
 agent.confirm-client.cgt-reference=Capital Gains Tax on UK property account number
 agent.confirm-client.change-client=Change client
 
-#===================================================
-# ACCOUNT PAGES
-#===================================================
 
 account.caption=Capital Gains Tax on UK property account
 
@@ -631,7 +430,7 @@ account.home.left.placeholder=Your total Capital Gains Tax liability for UK prop
 account.home.right.title=Total amount left to pay
 account.home.right.placeholder=The total amount due for all your Capital Gains Tax on UK property disposals made from 6 April 2020.
 account.home.private-beta.guide=How to report capital gains on disposals made from 6 April 2020
-account.home.private-beta.guide.content=You will be able to use this service from 6 April 2020, to report and pay Capital Gains Tax on UK property disposals made on or after 6 April 2020. Find out how to <a href="{0}">report a capital gain on UK property disposals made before 6 April 2020</a>.
+account.home.private-beta.guide.content=You will be able to use this service from 6 April 2020, to report and pay Capital Gains Tax on UK property disposals made on or after 6 April 2020. Find out how to <a href~"{0}">report a capital gain on UK property disposals made before 6 April 2020</a>.
 account.home.button.start-a-new-return=Start new return
 
 account.totalLeftToPay=Total left to pay
@@ -645,42 +444,24 @@ account.manageYourDetails.accountName=Account name
 account.manageYourDetails.betaNotice=This service is in private beta until 6 April 2020. On that date you will be able to come back and send a CGT on UK property disposals return for disposals made on or after 6 April 2020.
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
-account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
-account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
+account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href~"{0}" target~"_blank">tell HMRC (opens in a new window)</a>.
+account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href~"{0}" target~"_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
 account.manageYourDetails.ContactName.changed=Contact name changed
 account.manageYourDetails.Email.changed=Contact email address changed
 account.manageYourDetails.Address.changed=Contact address changed
 account.manageYourDetails.changed.p=We’ll use this to contact you about your Capital Gains Tax on UK property sales or disposals.
 
-#===================================================
-# COMMON TRIAGE PAGES
-#===================================================
 
-triage.caption=Check if you can use this service
+triage.caption=Before you start
 
 who-are-you-reporting-for.title=Who are you completing this return for?
 
-individualUserType.periodOfAdminDisabled.Self=Yourself
-individualUserType.periodOfAdminDisabled.Capacitor=Someone else
-individualUserType.periodOfAdminDisabled.PersonalRepresentative=Someone who has died
-individualUserType.periodOfAdminDisabled.agent.Self=Your client
-individualUserType.periodOfAdminDisabled.agent.PersonalRepresentative=Someone who has died
-
 individualUserType.Self=Yourself
-individualUserType.Capacitor=Someone you’re helping
-individualUserType.Capacitor.helpText=You’re a capacitor
-individualUserType.PersonalRepresentative=A person who made the disposal <strong class="bold">before they died</strong>
-individualUserType.PersonalRepresentative.helpText=You’re a personal representative
-individualUserType.PersonalRepresentativeInPeriodOfAdmin=The estate of a person and the property was sold <strong class="bold">after they died</strong>
-individualUserType.PersonalRepresentativeInPeriodOfAdmin.helpText=You’re a personal representative
+individualUserType.Capacitor=Someone else
+individualUserType.PersonalRepresentative=Someone who has died
 individualUserType.agent.Self=Your client
-individualUserType.agent.Self.helpText=Who is not a personal representative
-individualUserType.agent.PersonalRepresentative=A person who made the disposal <strong class="bold">before they died</strong>
-individualUserType.agent.PersonalRepresentative.helpText=Your client is a personal representative
-individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin=The estate of a person and the property was sold <strong class="bold">after they died</strong>
-individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin.helpText=Your client is a personal representative
-
+individualUserType.agent.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
@@ -702,8 +483,8 @@ capacitorsPersonalRepresentativesNotHandled.openingTimes=Opening times:
 capacitorsPersonalRepresentativesNotHandled.openingTimes.monToFri=Monday to Friday: 8am to 4pm
 capacitorsPersonalRepresentativesNotHandled.openingTimes.saturday=8am to 4pm, Saturday
 capacitorsPersonalRepresentativesNotHandled.openingTimes.sunBankHols=Closed Sundays and bank holidays
-capacitorsPersonalRepresentativesNotHandled.getHelp=Get help <a href="{0}">dealing with HMRC if you have additional needs</a>.
-capacitorsPersonalRepresentativesNotHandled.callChargesLink=<a href="{0}">Find out about call charges</a>
+capacitorsPersonalRepresentativesNotHandled.getHelp=Get help <a href~"{0}">dealing with HMRC if you have additional needs</a>.
+capacitorsPersonalRepresentativesNotHandled.callChargesLink=<a href~"{0}">Find out about call charges</a>
 
 numberOfProperties.main.title=Tell us how many disposals you are including in this return
 numberOfProperties.helpText.p1.heading=UK property disposals
@@ -712,39 +493,41 @@ numberOfProperties.helpText.p2.heading=Mixed use property disposals
 numberOfProperties.helpText.p2.text=A mixed use property is part residential and part commercial. For this return, even if a property had both a commercial part and a residential part, it would still be considered ’one’ property.
 
 numberOfProperties.helpText.p3.heading=Indirect disposals
-numberOfProperties.helpText.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as:
+numberOfProperties.helpText.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as the:
 numberOfProperties.helpText.p3.li1=you were a non-resident on the disposal date
-numberOfProperties.helpText.p3.li2=the shares all had the same sale or disposal date
+numberOfProperties.helpText.p3.li2=shares all had the same sale or disposal date
 
 numberOfProperties.helpText.agent.p3.heading=Indirect disposals
-numberOfProperties.helpText.agent.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as:
+numberOfProperties.helpText.agent.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as the:
 numberOfProperties.helpText.agent.p3.li1=your client was a non-resident on the disposal date
-numberOfProperties.helpText.agent.p3.li2=the shares all had the same sale or disposal date
+numberOfProperties.helpText.agent.p3.li2=shares all had the same sale or disposal date
 
 numberOfProperties.helpText.trust.p3.heading=Indirect disposals
-numberOfProperties.helpText.trust.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as:
+numberOfProperties.helpText.trust.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as the:
 numberOfProperties.helpText.trust.p3.li1=the trust was a non-resident on the disposal date
-numberOfProperties.helpText.trust.p3.li2=the shares all had the same sale or disposal date
+numberOfProperties.helpText.trust.p3.li2=shares all had the same sale or disposal date
 
 numberOfProperties.helpText.capacitor.p3.heading=Indirect disposals
-numberOfProperties.helpText.capacitor.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as:
+numberOfProperties.helpText.capacitor.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as the:
 numberOfProperties.helpText.capacitor.p3.li1=the person was a non-resident on the disposal date
-numberOfProperties.helpText.capacitor.p3.li2=the shares all had the same sale or disposal date
+numberOfProperties.helpText.capacitor.p3.li2=shares all had the same sale or disposal date
 
 numberOfProperties.helpText.personalRep.p3.heading=Indirect disposals
-numberOfProperties.helpText.personalRep.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as:
+numberOfProperties.helpText.personalRep.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as the:
 numberOfProperties.helpText.personalRep.p3.li1=the person was a non-resident on the disposal date
-numberOfProperties.helpText.personalRep.p3.li2=the shares all had the same sale or disposal date
+numberOfProperties.helpText.personalRep.p3.li2=shares all had the same sale or disposal date
+
 
 numberOfProperties.title=How many disposals are you including in this return?
 
 numberOfProperties.details.summary=What happens on the completion date?
 
-numberOfProperties.details.p1=The completion date is usually the day the you disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.agent.details.p1=The completion date is usually the day the your client disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.trust.details.p1=The completion date is usually the day the trust disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.capacitor.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
-numberOfProperties.personalRep.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
+numberOfProperties.details.p1=The completion date is usually the day the you disposed of the property got the money from the sale or disposal. It’s usually when the new owner gets the keys.
+numberOfProperties.agent.details.p1=The completion date is usually the day the your client disposed of the property got the money from the sale or disposal. It’s usually when the new owner gets the keys.
+numberOfProperties.trust.details.p1=The completion date is usually the day the trust disposed of the property got the money from the sale or disposal. It’s usually when the new owner gets the keys.
+numberOfProperties.capacitor.details.p1=The completion date is usually the day the person disposed of the property got the money from the sale or disposal. It’s usually when the new owner gets the keys.
+numberOfProperties.personalRep.details.p1=The completion date is usually the day the person disposed of the property got the money from the sale or disposal. It’s usually when the new owner gets the keys.
+
 
 numberOfProperties.One=One
 numberOfProperties.MoreThanOne=2 or more
@@ -754,9 +537,6 @@ numberOfProperties.error.required=Select how many UK properties you are includin
 
 numberOfProperties.cyaChange=how many properties you want to include in this return
 
-#===================================================
-# SINGLE DISPOSAL TRIAGE PAGES
-#===================================================
 
 disposalMethod.title=How did you sell or dispose of the UK property?
 disposalMethod.agent.title=How did your client sell or dispose of the UK property?
@@ -790,11 +570,11 @@ wereYouAUKResident.personalRep.title=Was the person a UK resident on the contrac
 
 wereYouAUKResident.helpText=Contract exchange usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
-wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
-wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.link=<a href~"{0}" target~"_blank">Work out your residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.agent.link=<a href~"{0}" target~"_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.trust.link=<a href~"{0}" target~"_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.capacitor.link=<a href~"{0}" target~"_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.personalRep.link=<a href~"{0}" target~"_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
 
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
@@ -821,11 +601,11 @@ triage.enterCountry.trust.helpText=It’s usually the day the trust and the new 
 triage.enterCountry.capacitor.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 
-triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>.
-triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
-triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
-triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.link=<a href~"{0}" target~"_blank">Work out your residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.agent.link=<a href~"{0}" target~"_blank">Work out your client’s residence status (opens in a new window)</a>.
+triage.enterCountry.trust.link=<a href~"{0}" target~"_blank">Work out the trust’s residence status (opens in a new window)</a>.
+triage.enterCountry.capacitor.link=<a href~"{0}" target~"_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.personalRep.link=<a href~"{0}" target~"_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
@@ -884,7 +664,6 @@ sharesDisposalDate-month.error.monthAndYearRequired=Date of disposal must includ
 sharesDisposalDate-day.error.dayAndYearRequired=Date of disposal must include a day and a year
 sharesDisposalDate-day.error.dayAndMonthRequired=Date of disposal must include a day and a month
 sharesDisposalDate.error.tooFarInFuture=The date you disposed of the shares cannot be in the future
-sharesDisposalDate.error.before1900=The date you disposed of the shares must be on or after 01 01 1900, contact HMRC if the date is before this
 sharesDisposalDate.cyaChange=when the shares were sold
 
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
@@ -901,7 +680,7 @@ didYouDisposeOfResidentialProperty.details.p1=Residential property includes:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
-didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
+didYouDisposeOfResidentialProperty.details.link=<a href~"{0}" tabindex~"-1" target~"_blank">Read a definition of residential property (opens in a new window)</a>.
 
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a UK residential property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a UK residential property
@@ -918,7 +697,7 @@ didYouDisposeOfResidentialProperty.cyaChange=whether UK residential property was
 
 ukResidentCanOnlyReportResidential.title=You cannot use this service
 ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
-ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
+ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href~"{0}">non-residential UK property sales or disposals</a>.
 
 disposalDate.title=What date did you exchange contracts when disposing of the property?
 disposalDate.agent.title=When the property was disposed of, what date were contracts exchanged?
@@ -934,11 +713,10 @@ disposalDate.trust.helpText=It’s usually when a buyer and seller swap contract
 disposalDate.capacitor.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 disposalDate.personalRep.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 
-disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
+disposalDate.link=<a href~"{0}" target~"_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
-disposalDate.error.before1900=The contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
 
 disposalDate-day.error.required=Contract exchange date must include a day
 disposalDate-month.error.required=Contract exchange date must include a month
@@ -964,12 +742,11 @@ completionDate.trust.helpText=It’s usually when the money from the property sa
 completionDate.capacitor.helpText=It’s usually when the money from the property sale was transferred and the new owner got the keys. For example, 25 4 2020.
 completionDate.personalRep.helpText=It’s usually when the money from the property sale was transferred and the new owner got the keys. For example, 25 4 2020.
 
-completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>
+completionDate.link=<a href~"{0}" target~"_blank">Find out what happens on the completion date (opens in a new window)</a>
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
 completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date
 completionDate.error.tooFarInFuture=Completion date must be today or in the past
-completionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
 
 completionDate-day.error.required=Completion date must include a day
 completionDate-month.error.required=Completion date must include a month
@@ -987,11 +764,11 @@ disposalDateTooEarly.non-uk.title=You cannot use this service
 disposalDateTooEarly.non-uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
 disposalDateTooEarly.non-uk.p2=If an indirect disposal was made, it’s because the shares were sold before 6 April 2020.
 disposalDateTooEarly.non-uk.h2=What you’ll need to do next
-disposalDateTooEarly.non-uk.p3=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateTooEarly.non-uk.p3=You’ll need to complete a <a href~"{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 
 disposalDateTooEarly.uk.title=You cannot use this service
 disposalDateTooEarly.uk.p1=This is because when the property was sold or disposed of contracts were exchanged before 6 April 2020.
-disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
+disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href~"{0}">UK property sales or disposals before 6 April 2020</a>.
 
 triage.check-your-answers.title=Check your answers
 triage.cyaChange.countryOfResidence=your country of residence on the day you ‘exchanged’ contracts
@@ -1000,9 +777,41 @@ triage.cyaChange.propertyType=whether you sold or disposed of a residential prop
 triage.cyaChange.disposalDate=the date you exchanged contracts when selling the property
 triage.cyaChange.completionDate=the completion date when you sold the property
 
-#===================================================
-#  TASK LIST AND SAVE DRAFT PAGES
-#===================================================
+draftReturnSaved.title=Your Capital Gains Tax on UK property return will be saved for 30 days
+draftReturnSaved.warning=After {0} all the details in your Capital Gains Tax on UK property return will be deleted.
+draftReturnSaved.trust.warning=After {0} all the details in the trust’s Capital Gains Tax on UK property return will be deleted.
+draftReturnSaved.agent.warning=After {0} all the details in the client’s Capital Gains Tax on UK property return will be deleted.
+draftReturnSaved.p1=After that date, you’ll need to start again.
+draftReturnSaved.p2=We will keep a return that is ‘In progress’ for 30 days from the day it was last saved. We will only save uploads for 5 days from the last day they were saved.
+
+
+#Months
+date.1=January
+date.2=February
+date.3=March
+date.4=April
+date.5=May
+date.6=June
+date.7=July
+date.8=August
+date.9=September
+date.10=October
+date.11=November
+date.12=December
+
+date.short.1=Jan
+date.short.2=Feb
+date.short.3=Mar
+date.short.4=Apr
+date.short.5=May
+date.short.6=Jun
+date.short.7=Jul
+date.short.8=Aug
+date.short.9=Sept
+date.short.10=Oct
+date.short.11=Nov
+date.short.12=Dec
+
 
 returns.return-to-summary-link=Return to summary
 task-list.InProgress=In progress
@@ -1016,7 +825,6 @@ task-list.provide-details.heading=Provide details
 task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss
 task-list.enter-property-address.link=Enter property address
 task-list.enter-property-details.link=Enter property details
-task-list.enter-property-details-single-mixed-use.link=Enter mixed-use property details
 task-list.enter-company-details.link=Enter company details
 task-list.example-company-details.link=Example company details
 task-list.disposals-details.link=Enter sale or disposal details
@@ -1033,17 +841,6 @@ task-list.upload-supporting-docs.link=Upload Your Supporting Documents
 
 task-list.enter-example-property-address.link=Enter details of one property
 task-list.indirect.enter-example-company-address.link=Enter details of one company
-
-draftReturnSaved.title=Your Capital Gains Tax on UK property return will be saved for 30 days
-draftReturnSaved.warning=After {0} all the details in your Capital Gains Tax on UK property return will be deleted.
-draftReturnSaved.trust.warning=After {0} all the details in the trust’s Capital Gains Tax on UK property return will be deleted.
-draftReturnSaved.agent.warning=After {0} all the details in the client’s Capital Gains Tax on UK property return will be deleted.
-draftReturnSaved.p1=After that date, you’ll need to start again.
-draftReturnSaved.p2=We will keep a return that is ‘In progress’ for 30 days from the day it was last saved. We will only save uploads for 5 days from the last day they were saved.
-
-#===================================================
-#  PROPERTY DETAILS PAGES
-#===================================================
 
 returns.property-address.singleDisposal.caption=Property address
 returns.property-details.multipleDisposals.caption=Details of one property disposal
@@ -1072,18 +869,17 @@ enterPostcode.returns.agent.singleDisposal.title=Find the address of the UK prop
 enterPostcode.returns.trust.singleDisposal.title=Find the address of the UK property the trust disposed of
 enterPostcode.returns.capacitor.singleDisposal.title=Find the address of the UK property that was disposed of
 enterPostcode.returns.personalRep.singleDisposal.title=Find the address of the UK property that was disposed of
-
 address-select.returns.singleDisposal.title=Select the address of the UK property you disposed of
 address-select.returns.agent.singleDisposal.title=Select the address of the UK property your client disposed of
 address-select.returns.trust.singleDisposal.title=Select the address of the UK property the trust disposed of
 address-select.returns.personalRep.singleDisposal.title=Select the address of the UK property that was disposed of
 address-select.returns.capacitor.singleDisposal.title=Select the address of the UK property that was disposed of
-
 address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
 address.uk.returns.agent.singleDisposal.title=Enter the address of the UK property your client disposed of
 address.uk.returns.trust.singleDisposal.title=Enter the address of the UK property the trust disposed of
 address.uk.returns.personalRep.singleDisposal.title=Enter the address of the UK property that was disposed of
 address.uk.returns.capacitor.singleDisposal.title=Enter the address of the UK property that was disposed of
+
 
 enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK property disposals
 address-select.returns.multipleDisposals.title=Select the address of the property
@@ -1097,30 +893,23 @@ returns.property-address.cyaLabel.disposal-price=What was the disposal amount?
 returns.property-address.cyaLabel.acquisition-price=What was the acquisition amount?
 returns.property-address.cyaChange.property-address=the address of the property
 
-#===================================================
-#  SALE OR DISPOSAL DETAILS PAGES
-#===================================================
-
 returns.disposal-details.caption=Sale or disposal details
 
 shareOfProperty.title=How much of the property did you own?
 shareOfProperty.agent.title=How much of the property did your client own?
 shareOfProperty.trust.title=How much of the property did the trust own?
 shareOfProperty.personalRep.title=How much of the property did the person own?
-shareOfProperty.personalRepInPeriodOfAdmin.title=How much of the property did the person own?
 shareOfProperty.capacitor.title=How much of the property did the person own?
 
 shareOfProperty.error.required=Select how much of the property you owned
 shareOfProperty.agent.error.required=Select how much of the property your client owned
 shareOfProperty.trust.error.required=Select how much of the property the trust owned
 shareOfProperty.personalRep.error.required=Select how much of the property the person owned
-shareOfProperty.personalRepInPeriodOfAdmin.error.required=Select how much of the property the person owned
 shareOfProperty.capacitor.error.required=Select how much of the property the person owned
 shareOfProperty.error.invalid=Select how much of the property you owned
 shareOfProperty.agent.error.invalid=Select how much of the property your client owned
 shareOfProperty.trust.error.invalid=Select how much of the property the trust owned
 shareOfProperty.personalRep.error.invalid=Select how much of the property the person owned
-shareOfProperty.personalRepInPeriodOfAdmin.error.invalid=Select how much of the property the person owned
 shareOfProperty.capacitor.error.invalid=Select how much of the property the person owned
 
 shareOfProperty.cyaChange=how much of the property was owned
@@ -1132,7 +921,6 @@ percentageShare.label=Percentage you owned
 percentageShare.agent.label=Percentage your client owned
 percentageShare.trust.label=Percentage your trust owned
 percentageShare.personalRep.label=Percentage the person owned
-percentageShare.personalRepInPeriodOfAdmin.label=Percentage the person owned
 percentageShare.capacitor.label=Percentage the person owned
 
 
@@ -1140,35 +928,30 @@ percentageShare.error.required=Enter how much of the property you owned as a per
 percentageShare.agent.error.required=Enter how much of the property your client owned as a percentage
 percentageShare.trust.error.required=Enter how much of the property the trust owned as a percentage
 percentageShare.personalRep.error.required=Enter how much of the property the person owned as a percentage
-percentageShare.personalRepInPeriodOfAdmin.error.required=Enter how much of the property the person owned as a percentage
 percentageShare.capacitor.error.required=Enter how much of the property the person owned as a percentage
 
 percentageShare.error.invalid=The percentage of the property you owned must be a number
 percentageShare.agent.error.invalid=The percentage of the property your client owned must be a number
 percentageShare.trust.error.invalid=The percentage of the property the trust owned must be a number
 percentageShare.personalRep.error.invalid=The percentage of the property the person owned must be a number
-percentageShare.personalRepInPeriodOfAdmin.error.invalid=The percentage of the property the person owned must be a number
 percentageShare.capacitor.error.invalid=The percentage of the property the person owned must be a number
 
 percentageShare.error.tooLarge=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.agent.error.tooLarge=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.trust.error.tooLarge=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.personalRep.error.tooLarge=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
-percentageShare.personalRepInPeriodOfAdmin.error.tooLarge=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.capacitor.error.tooLarge=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
 
 percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.agent.error.tooSmall=The percentage of the property your client owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.trust.error.tooSmall=The percentage of the property the trust owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.personalRep.error.tooSmall=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
-percentageShare.personalRepInPeriodOfAdmin.error.tooSmall=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.capacitor.error.tooSmall=The percentage of the property the person owned must be a number between 0 and 100, for example 25 or 33.33
 
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
 percentageShare.agent.error.tooManyDecimals=The percentage of the property your client owned must have 2 decimal places or less, for example 33.33
 percentageShare.trust.error.tooManyDecimals=The percentage of the property the trust owned must have 2 decimal places or less, for example 33.33
 percentageShare.personalRep.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
-percentageShare.personalRepInPeriodOfAdmin.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
 percentageShare.capacitor.error.tooManyDecimals=The percentage of the property the person owned must have 2 decimal places or less, for example 33.33
 
 
@@ -1180,8 +963,6 @@ disposalPrice.trust.Gifted.title=What was the market value of the property when 
 disposalPrice.trust.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 disposalPrice.personalRep.Gifted.title=What was the market value of the property when it was disposed of?
 disposalPrice.personalRep.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.title=What were the proceeds of the disposal?
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.title=What were the proceeds of the disposal?
 disposalPrice.capacitor.Gifted.title=What was the market value of the property when it was disposed of?
 disposalPrice.capacitor.indirect.Gifted.title=What was the market value of the shares when they were sold or disposed of?
 
@@ -1193,8 +974,6 @@ disposalPrice.trust.Gifted.helpText=If the property was shared, only enter the a
 disposalPrice.trust.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 disposalPrice.personalRep.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
 disposalPrice.personalRep.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.helpText=This is the amount the estate got when the shares were sold. You should subtract any selling or disposal costs.
 disposalPrice.capacitor.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
 disposalPrice.capacitor.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 
@@ -1206,8 +985,6 @@ disposalPrice.trust.Gifted.error.required=Enter the market value when the trust 
 disposalPrice.trust.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 disposalPrice.personalRep.Gifted.error.required=Enter the market value of the property when it was disposed of
 disposalPrice.personalRep.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.required=Enter the proceeds of the disposal
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.required=Enter the proceeds of the disposal
 disposalPrice.capacitor.Gifted.error.required=Enter the market value of the property when it was disposed of
 disposalPrice.capacitor.indirect.Gifted.error.required=Enter the market value of the shares when they were sold or disposed of
 
@@ -1219,8 +996,6 @@ disposalPrice.trust.Gifted.error.invalid=The market value must be an amount of m
 disposalPrice.trust.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.personalRep.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.personalRep.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.invalid=The proceeds of the disposal must be an amount of money, like 160,000 or 23,040.50
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.invalid=The proceeds of the disposal must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.Gifted.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.indirect.Gifted.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
 
@@ -1234,9 +1009,6 @@ disposalPrice.capacitor.Gifted.error.tooSmall=The market value must be an amount
 disposalPrice.capacitor.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.personalRep.Gifted.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.personalRep.indirect.Gifted.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-
 
 disposalPrice.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
@@ -1248,8 +1020,6 @@ disposalPrice.capacitor.Gifted.error.tooLarge=The market value must be an amount
 disposalPrice.capacitor.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
 disposalPrice.personalRep.Gifted.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000
 disposalPrice.personalRep.indirect.Gifted.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
 
 disposalPrice.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -1261,8 +1031,7 @@ disposalPrice.capacitor.Gifted.error.tooManyDecimals=The market value must be an
 disposalPrice.capacitor.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.personalRep.Gifted.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.personalRep.indirect.Gifted.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-disposalPrice.personalRepInPeriodOfAdmin.Gifted.error.tooManyDecimals=The proceeds of the disposal must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.error.tooManyDecimals=The proceeds of the disposal must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
 
 disposalPrice.SoldOther.title=How much did you get when you sold or disposed of the property?
 disposalPrice.indirect.SoldOther.title=How much did you get when you sold or disposed of the shares?
@@ -1272,8 +1041,6 @@ disposalPrice.trust.SoldOther.title=How much did the trust get when they sold or
 disposalPrice.trust.indirect.SoldOther.title=What was the disposal amount?
 disposalPrice.personalRep.SoldOther.title=What was the disposal amount?
 disposalPrice.personalRep.indirect.SoldOther.title=What was the disposal amount?
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.title=What were the proceeds of the disposal?
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.title=What were the proceeds of the disposal?
 disposalPrice.capacitor.SoldOther.title=What was the disposal amount?
 disposalPrice.capacitor.indirect.SoldOther.title=How much did the person get when they sold or disposed of the shares?
 
@@ -1285,8 +1052,6 @@ disposalPrice.trust.SoldOther.helpText=If the property was shared, only enter th
 disposalPrice.trust.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
 disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.personalRep.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.helpText=This is the amount the estate got when the shares were sold. You should subtract any selling or disposal costs.
 disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.capacitor.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
 
@@ -1298,8 +1063,6 @@ disposalPrice.trust.SoldOther.error.required=Enter how much the trust sold or di
 disposalPrice.trust.indirect.SoldOther.error.required=Enter the disposal amount
 disposalPrice.personalRep.SoldOther.error.required=Enter the disposal amount
 disposalPrice.personalRep.indirect.SoldOther.error.required=Enter the disposal amount
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.required=Enter the proceeds of the disposal
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.required=Enter the proceeds of the disposal
 disposalPrice.capacitor.SoldOther.error.required=Enter the disposal amount
 disposalPrice.capacitor.indirect.SoldOther.error.required=Enter how much the person got when they sold or disposed of the shares
 
@@ -1311,8 +1074,6 @@ disposalPrice.trust.SoldOther.error.invalid=How much the trust sold the property
 disposalPrice.trust.indirect.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.personalRep.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.personalRep.indirect.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.invalid=The proceeds of the disposal must be an amount of money, like 160,000 or 23,040.50
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.invalid=The proceeds of the disposal must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.SoldOther.error.invalid=The disposal amount must be an amount of money, like 160,000 or 23,040.50
 disposalPrice.capacitor.indirect.SoldOther.error.invalid=How much the person got when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
 
@@ -1326,8 +1087,6 @@ disposalPrice.personalRep.SoldOther.error.tooSmall=The disposal amount must be a
 disposalPrice.personalRep.indirect.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
 disposalPrice.capacitor.SoldOther.error.tooSmall=The disposal amount must be an amount of money between 1 and 50,000,000,000
 disposalPrice.capacitor.indirect.SoldOther.error.tooSmall=How much the person got when they sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
 
 disposalPrice.SoldOther.error.tooLarge=How much you sold the property for must be an amount of money between 1 and 50,000,000,000
 disposalPrice.indirect.SoldOther.error.tooLarge=How much you got when you sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
@@ -1339,9 +1098,6 @@ disposalPrice.personalRep.SoldOther.error.tooLarge=The disposal amount must be a
 disposalPrice.personalRep.indirect.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
 disposalPrice.capacitor.SoldOther.error.tooLarge=The disposal amount must be an amount of money between 1 and 50,000,000,000
 disposalPrice.capacitor.indirect.SoldOther.error.tooLarge=How much the person got when they sold or disposed of the shares must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
-
 
 disposalPrice.SoldOther.error.tooManyDecimals=How much you sold the property for must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.indirect.SoldOther.error.tooManyDecimals=How much you got when you sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -1353,10 +1109,10 @@ disposalPrice.personalRep.SoldOther.error.tooManyDecimals=The disposal amount mu
 disposalPrice.personalRep.indirect.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.capacitor.SoldOther.error.tooManyDecimals=The disposal amount must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalPrice.capacitor.indirect.SoldOther.error.tooManyDecimals=How much the person got when they sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-disposalPrice.personalRepInPeriodOfAdmin.SoldOther.error.tooManyDecimals=The proceeds of the disposal must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.error.tooManyDecimals=The proceeds of the disposal must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
 
 disposalPrice.cyaChange=the disposal amount
+
 
 disposalFees.title=What were your additional costs when you sold or disposed of the property?
 disposalFees.indirect.title=How much were your additional costs when you sold or disposed of the shares?
@@ -1366,8 +1122,6 @@ disposalFees.trust.title=What were the trust’s additional disposal costs?
 disposalFees.trust.indirect.title=How much were the additional costs when the shares were sold or disposed of?
 disposalFees.personalRep.title=What were the person’s additional disposal costs?
 disposalFees.personalRep.indirect.title=How much were the additional costs when the shares were sold or disposed of?
-disposalFees.personalRepInPeriodOfAdmin.title=What were the additional disposal costs?
-disposalFees.personalRepInPeriodOfAdmin.indirect.title=How much were the additional disposal costs?
 disposalFees.capacitor.title=What were the person’s additional disposal costs?
 disposalFees.capacitor.indirect.title=How much were the person’s additional costs when they sold or disposed of the shares?
 
@@ -1379,8 +1133,6 @@ disposalFees.trust.helpText=For example, the amount the trust paid to an estate 
 disposalFees.trust.indirect.helpText=Additional costs might include stock broker’s fees.
 disposalFees.personalRep.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
 disposalFees.personalRep.indirect.helpText=Additional costs might include stock broker’s fees.
-disposalFees.personalRepInPeriodOfAdmin.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
-disposalFees.personalRepInPeriodOfAdmin.indirect.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
 disposalFees.capacitor.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
 disposalFees.capacitor.indirect.helpText=Additional costs might include stock broker’s fees.
 
@@ -1392,8 +1144,6 @@ disposalFees.trust.error.required=Enter the trust’s additional disposal costs
 disposalFees.trust.indirect.error.required=Enter how much the additional costs were when the shares were sold or disposed of
 disposalFees.personalRep.error.required=Enter the person’s additional disposal costs
 disposalFees.personalRep.indirect.error.required=Enter how much the additional costs were when the shares were sold or disposed of
-disposalFees.personalRepInPeriodOfAdmin.error.required=Enter the additional disposal costs
-disposalFees.personalRepInPeriodOfAdmin.indirect.error.required=Enter the additional disposal costs
 disposalFees.capacitor.error.required=Enter the person’s additional disposal costs
 disposalFees.capacitor.indirect.error.required=Enter how much the person’s additional costs were when they sold or disposed of the shares
 
@@ -1407,8 +1157,6 @@ disposalFees.capacitor.error.invalid=Additional costs must be an amount of money
 disposalFees.capacitor.indirect.error.invalid=The person’s additional costs when they sold or disposed of the shares must be an amount of money, like 160,000 or 23,040.50
 disposalFees.personalRep.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
 disposalFees.personalRep.indirect.error.invalid=The additional costs when the shares were sold or disposed of must be an amount of money, like 160,000 or 23,040.50
-disposalFees.personalRepInPeriodOfAdmin.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
-disposalFees.personalRepInPeriodOfAdmin.indirect.error.invalid=Additional costs must be an amount of money, like 160,000 or 23,040.50
 
 disposalFees.error.tooSmall=How much you paid for the additional disposal costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.indirect.error.tooSmall=The additional costs when you sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
@@ -1418,8 +1166,6 @@ disposalFees.trust.error.tooSmall=How much the trust paid for the additional dis
 disposalFees.trust.indirect.error.tooSmall=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.personalRep.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.personalRep.indirect.error.tooSmall=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
-disposalFees.personalRepInPeriodOfAdmin.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
-disposalFees.personalRepInPeriodOfAdmin.indirect.error.tooSmall=Additional costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.capacitor.error.tooSmall=Additional costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.capacitor.indirect.error.tooSmall=The person’s additional costs when they sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
 
@@ -1431,8 +1177,6 @@ disposalFees.trust.error.tooLarge=How much the trust paid for the additional dis
 disposalFees.trust.indirect.error.tooLarge=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
 disposalFees.personalRep.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.personalRep.indirect.error.tooLarge=The additional costs when the shares were sold or disposed of must be an amount of money between 0 and 50,000,000,000
-disposalFees.personalRepInPeriodOfAdmin.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
-disposalFees.personalRepInPeriodOfAdmin.indirect.error.tooLarge=Additional costs must be an amount of money between 0 and 50,000,000,000
 disposalFees.capacitor.error.tooLarge=Additional costs must be an amount of money between 1 and 50,000,000,000
 disposalFees.capacitor.indirect.error.tooLarge=The person’s additional costs when they sold or disposed of the shares must be an amount of money between 0 and 50,000,000,000
 
@@ -1444,8 +1188,6 @@ disposalFees.trust.error.tooManyDecimals=How much the trust paid for the additio
 disposalFees.trust.indirect.error.tooManyDecimals=The additional costs when the shares were sold or disposed of must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.personalRep.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.personalRep.indirect.error.tooManyDecimals=The additional costs when the shares were sold or disposed of must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-disposalFees.personalRepInPeriodOfAdmin.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-disposalFees.personalRepInPeriodOfAdmin.indirect.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.capacitor.error.tooManyDecimals=Additional costs must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 disposalFees.capacitor.indirect.error.tooManyDecimals=The person’s additional costs when they sold or disposed of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
@@ -1453,10 +1195,6 @@ disposalFees.capacitor.indirect.error.tooManyDecimals=The person’s additional 
 disposalFees.cyaChange=the amount of additional costs
 
 returns.disposal-details.cya.title=Check your answers
-
-#===================================================
-#  PURCHASE OR ACQUISITION DETAILS PAGES
-#===================================================
 
 acquisitionDetails.caption=Purchase or acquisition details
 
@@ -1607,23 +1345,11 @@ acquisitionDate.trust.error.tooFarInFuture=The date the trust acquired the prope
 acquisitionDate.capacitor.error.tooFarInFuture=The date the person acquired the property must be before you disposed of the property
 acquisitionDate.personalRep.error.tooFarInFuture=The date the person acquired the property must be before they disposed of the property
 
-acquisitionDate.error.before1900=The date you got the property must be on or after 01 01 1900, contact HMRC if the date is before this
-acquisitionDate.agent.error.before1900=The date your client got the property must be on or after 01 01 1900, contact HMRC if the date is before this
-acquisitionDate.trust.error.before1900=The date the trust acquired the property must be on or after 01 01 1900, contact HMRC if the date is before this
-acquisitionDate.capacitor.error.before1900=The date the person acquired the property must be on or after 01 01 1900, contact HMRC if the date is before this
-acquisitionDate.personalRep.error.before1900=The date the person acquired the property must be on or after 01 01 1900, contact HMRC if the date is before this
-
 acquisitionDate.indirect.error.tooFarInFuture=The date you got the shares must be before the day you sold or disposed of them
 acquisitionDate.agent.indirect.error.tooFarInFuture=The date your client acquired the shares must be before the day they sold or disposed of them
 acquisitionDate.trust.indirect.error.tooFarInFuture=The date the trust acquired the shares must be before the day it sold or disposed of them
 acquisitionDate.capacitor.indirect.error.tooFarInFuture=The date the person got the shares must be before the day they sold or disposed of them
 acquisitionDate.personalRep.indirect.error.tooFarInFuture=The date the person got the shares must be before the day they sold or disposed of them
-
-acquisitionDate.indirect.error.before1900=The date you got the shares must be on or after 01 01 1900, contact HMRC if the date is before this
-acquisitionDate.agent.indirect.error.before1900=The date your client got the shares must be on or after 01 01 1900, contact HMRC if the date is before this
-acquisitionDate.trust.indirect.error.before1900=The date the trust acquired the shares must be on or after 01 01 1900, contact HMRC if the date is before this
-acquisitionDate.capacitor.indirect.error.before1900=The date the person acquired the shares must be on or after 01 01 1900, contact HMRC if the date is before this
-acquisitionDate.personalRep.indirect.error.before1900=The date the person acquired the shares must be on or after 01 01 1900, contact HMRC if the date is before this
 
 acquisitionDate-day.error.required=The date you got the property must include a day
 acquisitionDate-day.agent.error.required=The date your client acquired the property must include a day
@@ -1912,7 +1638,7 @@ improvementCosts.trust.title=Were there any improvement costs?
 improvementCosts.capacitor.title=Does the person want to claim any improvement costs?
 improvementCosts.personalRep.title=Were there any improvement costs?
 
-improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance. 
+improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.agent.helpText=Your client can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.trust.helpText=The trust can only claim for its share of any costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.capacitor.helpText=The person can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
@@ -2006,7 +1732,7 @@ acquisitionFees.trust.indirect.rebased.helpText=For example, the cost of paying 
 acquisitionFees.capacitor.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
 acquisitionFees.personalRep.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
 
-acquisitionFees.allowableCostsLinkText=	<a href="{0}" target="_blank">Find out about additional allowable costs (opens in a new window)</a>
+acquisitionFees.allowableCostsLinkText=	<a href~"{0}" target~"_blank">Find out about additional allowable costs (opens in a new window)</a>
 acquisitionFees.details.header=What is rebasing?
 acquisitionFees.details.p1=You owned the property on or before {0}.
 acquisitionFees.agent.details.p1=Your client owned the property on or before {0}.
@@ -2018,7 +1744,7 @@ acquisitionFees.indirect.details.p2=This means when you work out your Capital Ga
 acquisitionFees.indirect.agent.p2=To work out your client’s Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.indirect.trust.details.p2=To work out the trust’s Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.details.p3=This process is called rebasing.
-acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
+acquisitionFees.non-resident.details.p3=This process is called <a href~"{0}" target~"_blank">rebasing (opens in a new window)</a>.
 
 acquisitionFees.cyaChange=if there were any additional acquisition costs
 acquisitionFees.rebased.cyaChange=if there were any additional rebasing costs
@@ -2088,7 +1814,7 @@ rebaseAcquisitionPrice.personalRep.dropdown.p2=To work out the person’s gain o
 rebaseAcquisitionPrice.indirect.dropdown.p2=Learn about rebasing (opens in a new window or tab).
 
 rebaseAcquisitionPrice.dropdown.p3=This process is called rebasing.
-rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.
+rebaseAcquisitionPrice.dropdown.p4=<a href~"{0}" target~"_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.
 
 rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check a property’s market value. This means you should enter an estimate now and if you need to amend the amount do it later using this service. Or if you already complete a Self Assessment tax return you can provide the correct market value in your next Self Assessment.
 rebaseAcquisitionPrice.agent.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so your client can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
@@ -2109,10 +1835,6 @@ shouldUseRebase.indirect.error.required=Select yes if you are using the value of
 shouldUseRebase.cyaChange=whether you are using the rebased value in your calculation
 
 acquisitionDetails.cya.title=Check your answers
-
-#===================================================
-#  RELIEFS PAGES
-#===================================================
 
 reliefDetails.caption=Reliefs
 
@@ -2299,10 +2021,6 @@ otherReliefsAmount.cyaChange=the amount of other reliefs being claimed
 
 reliefDetails.cya.title=Check your answers
 
-#===================================================
-#  LOSSES AND EXEMPTIONS PAGES
-#===================================================
-
 exemptionAndLosses.caption=Losses and exemptions
 
 inYearLosses.title=Do you want to include any other Capital Gains Tax losses made in tax year {0} to {1}?
@@ -2329,11 +2047,11 @@ inYearLosses.trust.error.invalid=Select yes if you want to include any other Cap
 inYearLosses.capacitor.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.personalRep.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
 
-inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.trust.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.capacitor.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
-inYearLosses.personalRep.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.link=<a href~"{0}" target~"_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.agent.link=<a href~"{0}" target~"_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.trust.link=<a href~"{0}" target~"_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.capacitor.link=<a href~"{0}" target~"_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.personalRep.link=<a href~"{0}" target~"_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 
 inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
@@ -2403,11 +2121,11 @@ previousYearsLosses.trust.error.required=Select yes if you want to include any C
 previousYearsLosses.capacitor.error.required=Select yes if the person wants to include any Capital Gains Tax losses the person made in previous tax years
 previousYearsLosses.personalRep.error.required=Select yes if you want to include any Capital Gains Tax losses the person made in this tax year
 
-previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.trust.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.capacitor.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
-previousYearsLosses.personalRep.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.link=<a href~"{0}" target~"_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.agent.link=<a href~"{0}" target~"_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.trust.link=<a href~"{0}" target~"_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.capacitor.link=<a href~"{0}" target~"_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.personalRep.link=<a href~"{0}" target~"_blank">Find out how to report losses (opens in a new window)</a>.
 
 previousYearsLossesValue.label=Amount of losses from previous tax years
 previousYearsLossesValue.agent.label=Amount of losses from previous tax years
@@ -2461,11 +2179,11 @@ annualExemptAmount.capacitor.helpText=In the tax year {0} to {1}, the person onl
 annualExemptAmount.personalRep.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
 
 annualExemptAmount.details.1.header=What is the Annual Exempt Amount?
-annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
-annualExemptAmount.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
+annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href~"{0}" target~"_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
+annualExemptAmount.details.2.body=<a href~"{0}" target~"_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
 annualExemptAmount.details.2.header=Who are vulnerable beneficiaries?
 
-annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
+annualExemptAmount.link=<a href~"{0}" target~"_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
 
 annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.agent.error.tooLarge=Annual Exempt Amount must be {0} or less
@@ -2498,14 +2216,6 @@ annualExemptAmount.capacitor.error.tooManyDecimals=Annual Exempt Amount must hav
 annualExemptAmount.personalRep.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 
 annualExemptAmount.cyaChange=how much Annual Exempt Amount is being used
-
-exemptionsAndLosses.cya.title=Check your answers
-
-#===================================================
-#  YEAR TO DATE LIABILITY PAGES
-#===================================================
-
-ytdLiability.caption=Tax owed
 
 taxableGainOrLoss.title=Did you make an overall gain or loss on the property sale or disposal?
 taxableGainOrLoss.multiple.title=Did you make an overall gain or loss on the property sales or disposals in this return?
@@ -2672,6 +2382,10 @@ netLoss.personalRep.multiple.error.tooManyDecimals=Overall loss must be an amoun
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
+exemptionsAndLosses.cya.title=Check your answers
+
+ytdLiability.caption=Tax owed
+
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
 estimatedIncome.agent.title=What does your client believe their gross income will be in this tax year?
 estimatedIncome.capacitor.title=What does the person believe their gross income will be in this tax year?
@@ -2745,7 +2459,7 @@ personalAllowance.non-resident.helpText=We’ll use this amount to work out the 
 personalAllowance.agent.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax your client should pay.<br/><br/>You’ll need to check the double tax agreement for the country your client is resident in and the UK. This will tell you if they are entitled to a Personal Allowance.
 personalAllowance.capacitor.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax the person should pay.<br/><br/>The person will need to check the double tax agreement for the country the person is resident in and the UK. This will tell the person if they are entitled to a Personal Allowance.
 personalAllowance.personalRep.non-resident.helpText=We’ll use this amount to work out the rate of Capital Gains Tax that should be paid.<br/><br/>You will need to check the double tax agreement for the country the person was resident in and the UK. This will tell you if the person was entitled to a Personal Allowance.
-personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
+personalAllowance.link=<a href~"{0}" target~"_blank">Find out about Personal Allowances (opens in a new window)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.agent.error.required=Enter your client’s Personal Allowance for the tax year
 personalAllowance.capacitor.error.required=Enter the person’s Personal Allowance for the tax year
@@ -2795,15 +2509,15 @@ taxDue.taxableGain=Taxable gain
 taxDue.assistive.taxableGain=for taxable gain
 taxDue.amountOfTaxDue=Capital Gains Tax due for this return
 taxDue.assistive.amountOfTaxDue=for Capital Gains Tax due for this return
-taxDue.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
-taxDue.agent.helpText.p1=If your client agrees with these workings enter <strong class="bold">{0}</strong>.
-taxDue.trust.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
-taxDue.capacitor.helpText.p1=If the person agrees with these workings enter <strong class="bold">{0}</strong>.
-taxDue.personalRep.helpText.p1=If you agree with these workings enter <strong class="bold">{0}</strong>.
+taxDue.helpText.p1=If you agree with these workings enter <strong class~"bold">{0}</strong>.
+taxDue.agent.helpText.p1=If your client agrees with these workings enter <strong class~"bold">{0}</strong>.
+taxDue.trust.helpText.p1=If you agree with these workings enter <strong class~"bold">{0}</strong>.
+taxDue.capacitor.helpText.p1=If the person agrees with these workings enter <strong class~"bold">{0}</strong>.
+taxDue.personalRep.helpText.p1=If you agree with these workings enter <strong class~"bold">{0}</strong>.
 taxDue.helpText.p2=If you want to enter a different amount you will be asked to upload a file later showing your workings.
 taxDue.helpText.p3=If the trust is for vulnerable beneficiaries, you’ll need to work out and enter the amount of tax due.
 taxDue.trustDetails.label=Help for trusts for vulnerable beneficiaries
-taxDue.trustDetails.content=Trusts for vulnerable beneficiaries get special tax treatment. The workings out on this page do not apply to this type of trust. Find out how to <a href="{0}" target="_blank">work out the amount of Capital Gains Tax due (opens in a new window)</a> for this type of trust.
+taxDue.trustDetails.content=Trusts for vulnerable beneficiaries get special tax treatment. The workings out on this page do not apply to this type of trust. Find out how to <a href~"{0}" target~"_blank">work out the amount of Capital Gains Tax due (opens in a new window)</a> for this type of trust.
 taxDue.error.required=Enter the amount of Capital Gains Tax due for this return
 taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for example 493 or 2,040.59
 taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000
@@ -2882,10 +2596,6 @@ ytdLiability.cyaChange.nonCalculatedTaxDue=your tax due
 
 ytdLiability.cya.title=Check your answers
 
-#===================================================
-#  CHECK ALL ANSWERS AND CONFIRMATION PAGES
-#===================================================
-
 checkAllAnswers.title=Check your answers before sending the return
 checkAllAnswers.declaration=Declaration
 checkAllAnswers.declaration.p1=By continuing you are confirming that, to the best of your knowledge, the details you are providing are correct.
@@ -2897,16 +2607,16 @@ confirmationOfSubmission.paymentReference=Payment reference number
 confirmationOfSubmission.propertyAddress=Property address
 confirmationOfSubmission.companyAddress=Company address
 
-confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>.
+confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class~"bold">{0}</strong>.
 confirmationOfSubmission.sentToHmrc=Return sent to HMRC
 confirmationOfSubmission.taxDue=Tax due by
 
-confirmationOfSubmission.printPage=<a href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.agent.printPage=<a href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.trust.printPage=<a href="{0}">Print or save this page as a PDF</a>
-confirmationOfSubmission.capacitor.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
-confirmationOfSubmission.capacitor.noId.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRep.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.printPage=<a href~"{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.agent.printPage=<a href~"{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.trust.printPage=<a href~"{0}">Print or save this page as a PDF</a>
+confirmationOfSubmission.capacitor.printPage=You should <a href~"{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
+confirmationOfSubmission.capacitor.noId.printPage=You should <a href~"{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRep.printPage=You should <a href~"{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
 
 confirmationOfSubmission.whatNext=What you need to do next
 confirmationOfSubmission.agent.whatNext=What happens next
@@ -2919,20 +2629,20 @@ confirmationOfSubmission.trust.warning=You must pay your Capital Gains Tax on UK
 confirmationOfSubmission.capacitor.warning=The person must pay their Capital Gains Tax on UK property by {0}. The person may be charged interest on late payments.
 
 confirmationOfSubmission.howToPay.heading=How to pay
-confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a href="{0}"><strong class="bold">pay their tax bill</strong></a>.
+confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a href~"{0}"><strong class~"bold">pay their tax bill</strong></a>.
 
-confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number <strong class="bold">{0}</strong>.
-confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
-confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class~"bold">{0}</strong>.
+confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payment reference number <strong class~"bold">{0}</strong>.
+confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class~"bold">{0}</strong>.
+confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class~"bold">{0}</strong>.
+confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class~"bold">{0}</strong>.
 
 confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
-confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account. 
+confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account.
 
-confirmationOfSubmission.agent.inset.heading=<strong class="bold">Self Assessment</strong>
-confirmationOfSubmission.trust.inset.heading=<strong class="bold">If the trust needs to send a Self Assessment tax return</strong>
+confirmationOfSubmission.agent.inset.heading=<strong class~"bold">Self Assessment</strong>
+confirmationOfSubmission.trust.inset.heading=<strong class~"bold">If the trust needs to send a Self Assessment tax return</strong>
 confirmationOfSubmission.agent.inset.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.trust.inset.p1=If the trust needs to send a Self Assessment tax return
 
@@ -2942,14 +2652,14 @@ confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
 
-confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
+confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href~"{0}" target~"_blank">Self Assessment tax return (opens in a new window)</a>.
 confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from this return in the trust’s next Self Assessment tax return.
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details from this return in the person’s Self Assessment tax return.
 
-confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
-confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="{0}">Capital Gains Tax on UK property account home</a>.
+confirmationOfSubmission.returnToAccountHome=Go to your <a href~"{0}">Capital Gains Tax on UK property account home</a>.
+confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href~"{0}">Capital Gains Tax on UK property account home</a>.
 
 confirmationOfSubmission.organisationNameLine=Trust: {0}
 confirmationOfSubmission.agentNameLine=Client: {0}
@@ -2976,7 +2686,7 @@ viewReturn.chargeType.SixMonthLatePaymentPenalty=Penalty - payment 6 months late
 viewReturn.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months late
 viewReturn.chargeType.PenaltyInterest=Interest on penalties paid late
 viewReturn.charge.status.paid=Paid
-viewReturn.charge.status.payNow=<a href="{0}">Pay now</a>
+viewReturn.charge.status.payNow=<a href~"{0}">Pay now</a>
 viewReturn.charge.paymentMethod.BACS=Bacs payment received
 viewReturn.charge.paymentMethod.CHAPS=CHAPS payment received
 viewReturn.charge.paymentMethod.Cheque=cheque received
@@ -3027,7 +2737,7 @@ multiple-disposals.guidance.p3=You must send separate returns if the contract ex
 multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
 multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property.
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
-multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multiple-disposals.guidance.details.link=<a href~"{0}" target~"_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
 
 returns.list.title=Sent returns
 returns.list.ref=Return ref:
@@ -3056,7 +2766,7 @@ multipleDisposalsNumberOfProperties.p2=If you are reporting the sale of shares e
 multipleDisposalsNumberOfProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
 multipleDisposalsNumberOfProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
 multipleDisposalsNumberOfProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
-multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multipleDisposalsNumberOfProperties.details.link=<a href~"{0}" target~"_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
 
 multipleDisposalsNumberOfProperties.error.invalid=Amount of disposals must be a number
 multipleDisposalsNumberOfProperties.error.required=Enter the number of disposals you are including in this return
@@ -3072,11 +2782,11 @@ multipleDisposalsWereYouAUKResident.capacitor.title=Was the person a UK resident
 multipleDisposalsWereYouAUKResident.personalRep.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
-multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
-multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.link=<a href~"{0}" target~"_blank">Work out your residence status for a tax year (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.agent.link=<a href~"{0}" target~"_blank">Work out your client’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a href~"{0}" target~"_blank">Work out the trust’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.capacitor.link=<a href~"{0}" target~"_blank">Work out the person’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.personalRep.link=<a href~"{0}" target~"_blank">Work out the person’s residence status (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.agent.error.required=Select yes if your client was a UK resident on all of the contract exchange dates
@@ -3118,7 +2828,7 @@ assetTypeNotYetImplemented.p1=You cannot use this service to report Capital Gain
 assetTypeNotYetImplemented.li1=disposals of mixed-use UK property
 assetTypeNotYetImplemented.li2=indirect disposals of UK land
 assetTypeNotYetImplemented.h2=What you’ll need to do next
-assetTypeNotYetImplemented.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Captial Gains Tax on UK property or land form</a>.
+assetTypeNotYetImplemented.p2=You’ll need to complete a <a href~"{0}">non-resident: report and pay Captial Gains Tax on UK property or land form</a>.
 
 initialGainOrLoss.title=Did you make an initial gain or loss?
 initialGainOrLoss.agent.title=Did your client make an initial gain or loss?
@@ -3138,7 +2848,7 @@ initialGainOrLoss.gain.label=Gain
 initialGainOrLoss.loss.label=Loss
 initialGainOrLoss.details.summary=How to work out your initial gain or loss
 initialGainOrLoss.helpText=If you made an initial gain or loss, you’ll need to enter the amount.
-initialGainOrLoss.agent.helpText=If your client made an initial gain or loss, you’ll need to enter the amount.	
+initialGainOrLoss.agent.helpText=If your client made an initial gain or loss, you’ll need to enter the amount.
 initialGainOrLoss.trust.helpText=If the trust made an initial gain or loss, you’ll need to enter the amount.
 initialGainOrLoss.capacitor.helpText=If the person made an initial gain or loss, you’ll need to enter the amount.
 initialGainOrLoss.personalRep.helpText=If the person made an initial gain or loss, you’ll need to enter the amount
@@ -3194,7 +2904,7 @@ multipleDisposalsTaxYear.title=When were contracts exchanged on all the properti
 multipleDisposalsTaxYear.link=What happens on the exchange date?
 multipleDisposalsTaxYear.before=Before 6 April 2020
 multipleDisposalsTaxYear.after=After 6 April 2020
-multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multipleDisposalsTaxYear.details.p1=Contract <a href~"{0}" target~"_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
 
 multipleDisposalsTaxYear.cyaChange=when contracts were exchanged on all the properties
@@ -3236,12 +2946,10 @@ multipleDisposalsAssetTypeForNonUkResidents.cyaChange=the types of property or a
 multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
 multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
 multipleDisposalsCompletionDate.details.summary=What happens on the ‘completion’ date?
-multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘completion’ date (opens in a new window)</a> is usually the day the new owner gets the keys to the property.
+multipleDisposalsCompletionDate.details.p1=The <a href~"{0}" target=_blank>‘completion’ date (opens in a new window)</a> is usually the day the new owner gets the keys to the property.
 multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
-multipleDisposalsCompletionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
-
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
 multipleDisposalsCompletionDate-year.error.required=Completion date must include a year
@@ -3282,13 +2990,11 @@ multipleDisposalsDisposalDate.trust.helpText=It’s usually when a buyer and sel
 multipleDisposalsDisposalDate.capacitor.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 multipleDisposalsDisposalDate.personalRep.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 
-multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
+multipleDisposalsDisposalDate.link=<a href~"{0}" target~"_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 
 multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
 multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
-multipleDisposalsDisposalDate.error.before1900=Contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
-
 multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
@@ -3449,7 +3155,7 @@ supporting-evidence.scan-failed.button.tryAgain=Try again
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement
 accessibilityStatement.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
-accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href="{0}">accessibility statement</a> for the main GOV.UK website.
+accessibilityStatement.p2=This service is part of the wider GOV.UK website. There is a separate <a href~"{0}">accessibility statement</a> for the main GOV.UK website.
 accessibilityStatement.p3=This page only contains information about the Report and pay Capital Gains Tax on UK property service, available at {0}.
 accessibilityStatement.usingThisService.title=Using this service
 accessibilityStatement.usingThisService.p1=You can use this service to report the disposal of UK residential property or land (made from 6 April 2020). You can also view your previous and current returns.
@@ -3461,20 +3167,20 @@ accessibilityStatement.usingThisService.li3=get from the start of the service to
 accessibilityStatement.usingThisService.li4=get from the start of the service to the end using speech recognition software
 accessibilityStatement.usingThisService.li5=listen to the service using a screen reader (including the most recent versions of JAWS, NVDA and VoiceOver)
 accessibilityStatement.usingThisService.p4=We have also made the text in the service as simple as possible to understand.
-accessibilityStatement.usingThisService.p5=<a href="{0}">AbilityNet</a> has advice on making your device easier to use if you have a disability.
+accessibilityStatement.usingThisService.p5=<a href~"{0}">AbilityNet</a> has advice on making your device easier to use if you have a disability.
 accessibilityStatement.howAccessible.title=How accessible this service is
 accessibilityStatement.howAccessible.p1=HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
-accessibilityStatement.howAccessible.p2=This service is partially compliant with the <a href="{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. We cannot be certain that it is fully compliant. It will be fully tested by June 2020.
+accessibilityStatement.howAccessible.p2=This service is partially compliant with the <a href~"{0}">Web Content Accessibility Guidelines version 2.1 AA standard</a>. We cannot be certain that it is fully compliant. It will be fully tested by June 2020.
 accessibilityStatement.reportingProblems.title=Reporting accessibility problems with this service
-accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="{0}" target="_blank">accessibility problem (opens in a new window or tab)</a>.
+accessibilityStatement.reportingProblems.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href~"{0}" target~"_blank">accessibility problem (opens in a new window or tab)</a>.
 accessibilityStatement.notHappy.title=What to do if you are not happy with how we respond to your complaint
-accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href="{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the  <a href="{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
+accessibilityStatement.notHappy.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href~"{0}">contact the Equality Advisory and Support Service (EASS)</a>, or the  <a href~"{1}">Equality Commission for Northern Ireland (ECNI)</a> if you live in Northern Ireland.
 accessibilityStatement.contactingUs.title=Contacting us by phone or getting a visit from us in person
 accessibilityStatement.contactingUs.p1=We provide a text relay service if you are deaf, hearing impaired or have a speech impediment.
 accessibilityStatement.contactingUs.p2=We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service.
-accessibilityStatement.contactingUs.p3=Find out how to <a href="{0}">contact us</a>.
+accessibilityStatement.contactingUs.p3=Find out how to <a href~"{0}">contact us</a>.
 accessibilityStatement.howWeTested.title=How we tested this service
-accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019  and checked for compliance with WCAG 2.1 AA. It  was built using parts that were tested by the <a href="{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
+accessibilityStatement.howWeTested.p1=The service was tested on 6 December 2019  and checked for compliance with WCAG 2.1 AA. It  was built using parts that were tested by the <a href~"{0}">Digital Accessibility Centre</a>. Since then, it has been extended and the full service will be tested by HMRC within the next three months. Tests will include disabled users.
 accessibilityStatement.howWeTested.p2=This page was prepared on 6 April 2020. It was last updated on 6 April 2020.
 
 
@@ -3514,69 +3220,11 @@ mandatoryEvidence.scan-failed.p3=You’ll need to try again.
 mandatoryEvidence.scan-failed.button.tryAgain=Try again
 
 agentNoEnrolment.title=Use your agents services account to access this service
-agentNoEnrolment.p1=You’ll need to sign in using your agent services account user ID and password. If you do not have one, you’ll need to <a href="{0}">create an agent services account</a>.
+agentNoEnrolment.p1=You’ll need to sign in using your agent services account user ID and password. If you do not have one, you’ll need to <a href~"{0}">create an agent services account</a>.
 agentNoEnrolment.p2=Do not use sign in details for an HMRC online services for agents account.
 agentNoEnrolment.button.tryAgain=Try again
 
 representee.caption=Person represented
-
-singleMixedUse.cya.title=Check you answers
-singleMixedUse.cyaLabel.address=Property address
-singleMixedUse.cyaLabel.disposal-price=What was the disposal amount?
-singleMixedUse.cyaLabel.acquisition-price=What was the acquisition amount?
-
-singleMixedUse.caption=Property details
-
-singleMixedUse.guidance.title=You’ll need to enter details about the property disposal
-
-
-singleMixedUse.guidance.list.title=You’ll need to enter the:
-singleMixedUse.guidance.list.l1=property’s UK address
-singleMixedUse.guidance.list.l2=disposal value of the property
-singleMixedUse.guidance.list.l3=acquisition value of the property
-singleMixedUseDisposalsDisposalPrice.title=What was the disposal value of the property?
-
-singleMixedUseDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
-singleMixedUseDisposalsDisposalPrice.personalRep.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
-singleMixedUseDisposalsDisposalPrice.capacitor.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
-singleMixedUseDisposalsDisposalPrice.agent.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
-singleMixedUseDisposalsDisposalPrice.trust.helpText=This is the amount the the trust got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
-
-singleMixedUseDisposalsDisposalPrice.link=What are disposal costs?
-singleMixedUseDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
-singleMixedUseDisposalsDisposalPrice.error.required=Enter the disposal value of the property
-singleMixedUseDisposalsDisposalPrice.error.invalid=The disposal value of the property must be an amount of money, like 160,000 or 23,040.50
-singleMixedUseDisposalsDisposalPrice.error.tooLarge=The disposal value of the property must be an amount of money between 1 and 50,000,000,000
-singleMixedUseDisposalsDisposalPrice.error.tooSmall=The disposal value of the property must be an amount of money between 1 and 50,000,000,000
-singleMixedUseDisposalsDisposalPrice.error.tooManyDecimals=The disposal value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
-
-singleMixedUseDisposalsAcquisitionPrice.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.helpText=This is the amount you paid when they bought the property or its market value if you inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-singleMixedUseDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-singleMixedUseDisposalsAcquisitionPrice.capacitor.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-singleMixedUseDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-singleMixedUseDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when it bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-
-singleMixedUseDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
-singleMixedUseDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
-singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p1=The costs of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed
-singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p1=The person can include the cost of improvements that added value to the property. For example, if the person built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
-singleMixedUseDisposalsAcquisitionPrice.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if your client built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
-singleMixedUseDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
-
-singleMixedUseDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
-
-singleMixedUseDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
-singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p3=If the person shared any of the costs, you can only include the person’s share.
-singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
-singleMixedUseDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of the costs, they can only claim their share.
-singleMixedUseDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, they can only claim its share.
-
-singleMixedUseDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property
-singleMixedUseDisposalsAcquisitionPrice.error.invalid=The acquisition value of the property must be an amount of money, like 160,000 or 23,040.50
-singleMixedUseDisposalsAcquisitionPrice.error.tooLarge=The acquisition value of the property must be an amount of money between 1 and 50,000,000,000
-singleMixedUseDisposalsAcquisitionPrice.error.tooSmall=The acquisition value of the property must be an amount of money between 1 and 50,000,000,000
-singleMixedUseDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 representee.enterName.capacitor.title=What is the name of the person you are representing?
 representee.enterName.personalRep.title=What was the name of the person who died?
@@ -3623,7 +3271,6 @@ dateOfDeath-month.error.monthAndYearRequired=Date must include a month and a yea
 dateOfDeath-day.error.dayAndYearRequired=Date must include a day and a year
 dateOfDeath-day.error.dayAndMonthRequired=Date must include a day and a month
 dateOfDeath.error.tooFarInFuture=Date must be today or in the past
-dateOfDeath.error.before1900=Date must be on or after 01 01 1900, contact HMRC if the date is before this
 
 representeeReferenceIdType.title=Select if you have one of these reference numbers for the person
 representeeReferenceIdType.helpText=The reference number you enter must match the name you entered and the details we hold about the person.
@@ -3694,7 +3341,7 @@ representeeTooManyNameMatchFailures.p3=You’ll need to wait 2 hours and try aga
 
 periodOfAdminNotHandled.title=You cannot use this service
 periodOfAdminNotHandled.p1=This is because the disposal was made within a period of administration.
-periodOfAdminNotHandled.p2=Find out how to report and pay Capital Gains Tax on UK property <a href="{0}">during a period of administration</a>.
+periodOfAdminNotHandled.p2=Find out how to report and pay Capital Gains Tax on UK property <a href~"{0}">during a period of administration</a>.
 
 tmpCustomError.title=Sorry, we are experiencing technical difficulties - 500
 tmpCustomError.heading=Sorry, we’re experiencing technical difficulties
@@ -3749,9 +3396,9 @@ nonUkAddress-line1.companyDetails.error.tooLong=Company name must be 35 characte
 nonUkAddress-line2.companyDetails.error.tooLong=Street address must be 35 characters or fewer
 nonUkAddress-line3.companyDetails.error.tooLong=Address line 3 must be 35 characters or fewer
 nonUkAddress-line4.companyDetails.error.tooLong=Address line 4 must be 35 characters or fewer
-nonUkAddress-line1.companyDetails.error.pattern=Company name must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
-nonUkAddress-line2.companyDetails.error.pattern=Street address must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
-nonUkAddress-line3.companyDetails.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line1.companyDetails.error.pattern=Company name must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+nonUkAddress-line2.companyDetails.error.pattern=Street address must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+nonUkAddress-line3.companyDetails.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 nonUkAddress-line4.companyDetails.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 countryCode.companyDetails.error.required=Select a country from the options presented as you type
 countryCode.companyDetails.error.notFound=Select a country from the options presented as you type
@@ -3762,7 +3409,7 @@ companyDetails.cyaChange.company-address=the company name and address
 
 non-uk-resident.change-address-to-uk-address.title=You cannot use this service
 non-uk-resident.change-address-to-uk-address.p1=You cannot use this service to report Capitals Gains Tax on UK property sales or disposals. This is because your address is in the UK.
-non-uk-resident.change-address-to-uk-address.p2=You’ll need to <a href="{0}">contact HMRC</a> to find out how to report the tax.
+non-uk-resident.change-address-to-uk-address.p2=You’ll need to <a href~"{0}">contact HMRC</a> to find out how to report the tax.
 
 
 company-details.multiple-indirect-disposals.guidance.title=You’ll need to enter details for one of the disposals
