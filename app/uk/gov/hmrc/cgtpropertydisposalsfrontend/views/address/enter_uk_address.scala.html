@@ -47,7 +47,7 @@
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent" else ".personalRep"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
