@@ -31,7 +31,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec.{expectedTitles, validateDisposalDetailsCheckYourAnswersPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -58,6 +57,8 @@ class DisposalDetailsControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
+
+  import DisposalDetailsControllerSpec._
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -93,19 +94,6 @@ class DisposalDetailsControllerSpec
     userType match {
       case UserType.Agent => Some(sample[AgentReferenceNumber])
       case _              => None
-    }
-
-  def userMessageKey(
-    individualUserType: IndividualUserType,
-    userType: UserType
-  ): String =
-    (individualUserType, userType) match {
-      case (Capacitor, _)                                                      => ".capacitor"
-      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
-      case (_, UserType.Individual)                                            => ""
-      case (_, UserType.Organisation)                                          => ".trust"
-      case (_, UserType.Agent)                                                 => ".agent"
-      case other                                                               => sys.error(s"User type '$other' not handled")
     }
 
   def fillingOutReturn(
@@ -246,8 +234,8 @@ class DisposalDetailsControllerSpec
 
   val acceptedIndividualUserType: Gen[IndividualUserType] =
     individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative => true
-      case _                                         => false
+      case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
+      case _                                                                                 => false
     }
 
   "DisposalDetailsController" when {
@@ -3695,17 +3683,19 @@ class DisposalDetailsControllerSpec
 }
 
 object DisposalDetailsControllerSpec extends Matchers {
+
   def userMessageKey(
     individualUserType: IndividualUserType,
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Capacitor, _)                                                      => ".capacitor"
-      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
-      case (_, UserType.Individual)                                            => ""
-      case (_, UserType.Organisation)                                          => ".trust"
-      case (_, UserType.Agent)                                                 => ".agent"
-      case other                                                               => sys.error(s"User type '$other' not handled")
+      case (Capacitor, _)                             => ".capacitor"
+      case (PersonalRepresentative, _)                => ".personalRep"
+      case (PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRepInPeriodOfAdmin"
+      case (_, UserType.Individual)                   => ""
+      case (_, UserType.Organisation)                 => ".trust"
+      case (_, UserType.Agent)                        => ".agent"
+      case other                                      => sys.error(s"User type '$other' not handled")
     }
 
   def validateDisposalDetailsCheckYourAnswersPage(
