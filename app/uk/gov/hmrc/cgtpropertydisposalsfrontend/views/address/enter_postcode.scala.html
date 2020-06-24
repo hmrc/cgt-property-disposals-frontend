@@ -29,25 +29,26 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[AddressLookupRequest],
-        backLink: Call,
-        submit: Call,
-        enterUkAddress: Call,
-        addressJourneyType: AddressJourneyType,
-        isATrust: Boolean,
-        representativeType: Option[RepresentativeType]
+@(
+    form: Form[AddressLookupRequest],
+    backLink: Call,
+    submit: Call,
+    enterUkAddress: Call,
+    addressJourneyType: AddressJourneyType,
+    isATrust: Boolean,
+    representativeType: Option[RepresentativeType]
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
@@ -55,7 +56,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent" else ".personalRep"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -63,6 +64,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
           else ""
   }
 }
+
 @returnsKey = @{"enterPostcode.returns"}
 @postcodeFilterKey = @{"filter"}
 @title = @{ addressJourneyType match {

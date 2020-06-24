@@ -54,16 +54,17 @@
 @key = @{"address-select"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
- representativeType match {
-  case Some(PersonalRepresentative) => ".personalRep"
-  case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-  case Some(Capacitor) => ".capacitor"
-  case None =>
-   if (isAgent) ".agent"
-   else if (isATrust) ".trust"
-   else ""
- }
+  representativeType match {
+    case Some(PersonalRepresentative) => ".personalRep"
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent" else ".personalRep"
+    case Some(Capacitor) => ".capacitor"
+    case None =>
+       if (isAgent) ".agent"
+       else if (isATrust) ".trust"
+       else ""
+  }
 }
+
 @journeyErrorKey = @{ addressJourneyType match {
  case _:AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
  case _ => ""
