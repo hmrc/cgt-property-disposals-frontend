@@ -49,15 +49,11 @@
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"numberOfProperties"}
-@title = @{messages("numberOfProperties.main.title")}
+@title = @{messages(s"$key.main.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @subtitle = @{
-    s"""
-      <h2 class="heading-medium">
-        ${messages("numberOfProperties.title")}
-      </h2>
-    """
+    s"""<h2 class="heading-medium">${messages(s"$key.title")}</h2>"""
 }
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -65,7 +61,7 @@
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -99,26 +95,26 @@
     @pageHeading(title)
 
     <h2 class="heading-medium">
-        @messages("numberOfProperties.helpText.p1.heading")
+        @messages(s"$key.helpText.p1.heading")
     </h2>
     <p>
-        @messages("numberOfProperties.helpText.p1.text")
+        @messages(s"$key.helpText.p1.text")
     </p>
     <h2 class="heading-medium">
-        @messages("numberOfProperties.helpText.p2.heading")
+        @messages(s"$key.helpText.p2.heading")
     </h2>
     <p>
-        @messages("numberOfProperties.helpText.p2.text")
+        @messages(s"$key.helpText.p2.text")
     </p>
    <h2 class="heading-medium">
-        @messages(s"numberOfProperties.helpText${userKey}.p3.heading")
+        @messages(s"$key.helpText${userKey}.p3.heading")
     </h2>
     <p>
-        @messages(s"numberOfProperties.helpText${userKey}.p3.text")
+        @messages(s"$key.helpText${userKey}.p3.text")
     </p>
     <ul class="list-bullet">
-        <li>@messages(s"numberOfProperties.helpText${userKey}.p3.li1")</li>
-        <li>@messages(s"numberOfProperties.helpText${userKey}.p3.li2")</li>
+        <li>@messages(s"$key.helpText${userKey}.p3.li1")</li>
+        <li>@messages(s"$key.helpText${userKey}.p3.li2")</li>
     </ul>
 
     @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit(), 'novalidate -> "novalidate") {

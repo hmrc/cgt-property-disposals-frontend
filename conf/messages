@@ -685,6 +685,7 @@ capacitorsPersonalRepresentativesNotHandled.callChargesLink=<a href="{0}">Find o
 numberOfProperties.main.title=Tell us how many disposals you are including in this return
 numberOfProperties.helpText.p1.heading=UK property disposals
 numberOfProperties.helpText.p1.text=You can include more than one disposal in this return if all the properties had the same completion date.
+
 numberOfProperties.helpText.p2.heading=Mixed use property disposals
 numberOfProperties.helpText.p2.text=A mixed use property is part residential and part commercial. For this return, even if a property had both a commercial part and a residential part, it would still be considered ’one’ property.
 
@@ -713,6 +714,11 @@ numberOfProperties.helpText.personalRep.p3.text=This is where the disposal invol
 numberOfProperties.helpText.personalRep.p3.li1=the person was a non-resident on the disposal date
 numberOfProperties.helpText.personalRep.p3.li2=the shares all had the same sale or disposal date
 
+numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.heading=Indirect disposals
+numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.text=This is where the disposal involves rights to assets that derive at least 75% of their value from UK land. You can include more than one indirect disposal in this return as long as:
+numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li1=the person was a non-resident on the day they died
+numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li2=the shares all had the same sale or disposal date
+
 
 numberOfProperties.title=How many disposals are you including in this return?
 
@@ -723,6 +729,8 @@ numberOfProperties.agent.details.p1=The completion date is usually the day the y
 numberOfProperties.trust.details.p1=The completion date is usually the day the trust disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
 numberOfProperties.capacitor.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
 numberOfProperties.personalRep.details.p1=The completion date is usually the day the person disposed of the property and got the money from the sale or disposal. It’s usually when the new owner gets the keys.
+numberOfProperties.personalRepInPeriodOfAdmin.details.p1=The completion date is usually the day the personal representative got the money from the sale or disposal and the new owner got the keys.
+
 
 
 numberOfProperties.One=One
@@ -758,19 +766,36 @@ disposalMethod.personalRep.error.invalid=Select if the person sold it, gave it a
 
 disposalMethod.cyaChange=how the property was sold or disposed of
 
-wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
-wereYouAUKResident.agent.title=Was your client a UK resident on the day contracts were exchanged?
-wereYouAUKResident.trust.title=Was the trust resident in the UK on the day contracts were exchanged?
-wereYouAUKResident.capacitor.title=Was the person a UK resident on the day contracts were exchanged?
-wereYouAUKResident.personalRep.title=Was the person a UK resident on the contract exchange date?
+wereYouAUKResident.main.title=Tell us about your residence status on the disposal date
+wereYouAUKResident.capacitor.main.title=Tell us about the person’s residence status on the disposal date
+wereYouAUKResident.trust.main.title=Tell us about the trust’s residence status on the disposal date
+wereYouAUKResident.personalRep.main.title=Tell us about the person’s residence status on the disposal date
+wereYouAUKResident.agent.main.title=Tell us about your client’s residence status on the disposal date
+wereYouAUKResident.personalRepInPeriodOfAdmin.main.title=Was the person a UK resident for the tax year in which they died?
 
-wereYouAUKResident.helpText=Contract exchange usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
+wereYouAUKResident.title=Were you a UK resident on the disposal date?
+wereYouAUKResident.capacitor.title=Was the person a UK resident on the disposal date?
+wereYouAUKResident.trust.title=Was the trust resident in the UK on the disposal date?
+wereYouAUKResident.personalRep.title=Was the person a UK resident on the disposal date?
+wereYouAUKResident.agent.title=Was your client a UK resident on the disposal date?
+wereYouAUKResident.personalRepInPeriodOfAdmin.title=Was the person a UK resident for the tax year in which they died?
+
+wereYouAUKResident.helpText.p1=The date of disposal for UK property is the contract exchange date. Contract exchange usually happens when a buyer and seller swap contracts and when the buyer pays a deposit.
+
+wereYouAUKResident.helpText.p2=If you were a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.capacitor.helpText.p2=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.trust.helpText.p2=If the trust was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.personalRep.helpText.p2=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+wereYouAUKResident.agent.helpText.p2=If your client was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
+
 
 wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
+
 
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
@@ -782,6 +807,8 @@ wereYouAUKResident.capacitor.error.required=Select yes if the person was a UK re
 wereYouAUKResident.capacitor.error.boolean=Select yes if the person was a UK resident on the day contracts were exchanged
 wereYouAUKResident.personalRep.error.required=Select yes if the person was a UK resident on the contract exchange date
 wereYouAUKResident.personalRep.error.boolean=Select yes if the person was a UK resident on the contract exchange date
+wereYouAUKResident.personalRepInPeriodOfAdmin.error.required=Select yes if the person was a UK resident for the tax year in which they died
+wereYouAUKResident.personalRepInPeriodOfAdmin.error.boolean=Select yes if the person was a UK resident for the tax year in which they died
 
 wereYouAUKResident.cyaChange=UK residence status
 
@@ -2984,6 +3011,7 @@ multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on
 multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange‘ dates?
 multipleDisposalsWereYouAUKResident.capacitor.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.personalRep.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
+
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
 multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
