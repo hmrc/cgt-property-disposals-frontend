@@ -1,3 +1,7 @@
+#===================================================
+# TRANSLATION NOT REQUIRED = START
+#===================================================
+
 landingPage.title=Report and pay Capital Gains Tax on UK property
 landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
 landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
@@ -162,6 +166,25 @@ agentsLandingPage.what-you-will-need-to-complete-the-return.p2=You may be asked 
 agentsLandingPage.ways-your-client-can-pay.h3=Ways your client can pay
 agentsLandingPage.ways-your-client-can-pay.p1=Your client can pay by bank transfer, debit card or corporate credit card from their account. They will need to provide their payment reference number. They can find it in their Capital Gains Tax on UK property account.
 
+subsequentReturnExit.title=You’ll need to contact HMRC
+subsequentReturnExit.p1=At the moment, only the first return for UK property sale or disposal in the tax year can be submitted online.
+subsequentReturnExit.p2=You’ll need to contact HMRC and ask for a paper return to be posted to you.
+subsequentReturnExit.p3=Have your National Insurance number or your Self Assessment Unique Taxpayer Reference to hand if you have one.
+
+subsequentReturnExit.openingTimes.title=Opening times:
+subsequentReturnExit.openingTimes.monToFri=8am to 4pm, Monday to Friday
+subsequentReturnExit.closingTimes=Closed weekends and bank holidays
+subsequentReturnExit.phoneAgent.title=Agent Dedicated Line:
+subsequentReturnExit.telephone.title=Telephone:
+subsequentReturnExit.inside-uk-telephone.title=Inside UK:
+subsequentReturnExit.outside-uk-telephone.title=Outside UK:
+subsequentReturnExit.getHelp=Get help
+subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
+subsequentReturnExit.helpWithCallCharges=Find out about call charges
+
+#===================================================
+# TRANSLATION NOT REQUIRED = END
+#===================================================
 
 #===================================================
 # SERVICE WIDE AND GENERIC - START
@@ -256,23 +279,6 @@ timed-out.button=Sign in
 recruitment-banner.message=Help improve GOV.UK
 recruitment-banner.dismiss=No thanks
 recruitment-banner.link=Get involved in making Government services better (opens in a new tab)
-
-subsequentReturnExit.title=You’ll need to contact HMRC
-subsequentReturnExit.p1=At the moment, only the first return for UK property sale or disposal in the tax year can be submitted online.
-subsequentReturnExit.p2=You’ll need to contact HMRC and ask for a paper return to be posted to you.
-subsequentReturnExit.p3=Have your National Insurance number or your Self Assessment Unique Taxpayer Reference to hand if you have one.
-
-subsequentReturnExit.openingTimes.title=Opening times:
-subsequentReturnExit.openingTimes.monToFri=8am to 4pm, Monday to Friday
-subsequentReturnExit.closingTimes=Closed weekends and bank holidays
-subsequentReturnExit.phoneAgent.title=Agent Dedicated Line:
-subsequentReturnExit.telephone.title=Telephone:
-subsequentReturnExit.inside-uk-telephone.title=Inside UK:
-subsequentReturnExit.outside-uk-telephone.title=Outside UK:
-subsequentReturnExit.getHelp=Get help
-subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
-subsequentReturnExit.helpWithCallCharges=Find out about call charges
-
 
 accessibilityStatement.caption=Report and pay Capital Gains Tax on UK property
 accessibilityStatement.title=Accessibility statement
