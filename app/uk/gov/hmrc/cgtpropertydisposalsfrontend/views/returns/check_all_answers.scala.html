@@ -49,6 +49,7 @@
     supportingEvidenceSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary,
     representeeSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
     singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
+    singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
     printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
@@ -85,7 +86,7 @@
 
   @completeReturn match {
     case s: CompleteSingleDisposalReturn => {
-        @representeeSection(s.representeeAnswers)
+     @representeeSection(s.representeeAnswers)
 
      <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
      @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType)
@@ -200,6 +201,24 @@
         @supportingEvidenceSummary(multipleIndirect.supportingDocumentAnswers)
     }
 
+    case singleMixedUse: CompleteSingleMixedUseDisposalReturn=> {
+        @representeeSection(singleMixedUse.representeeAnswers)
+
+        <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
+        @singleDisposalTriageSummary(singleMixedUse.triageAnswers, isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
+        @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers)
+
+        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+        @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+        @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = true, isMultiple = false, isATrust, representativeType)
+
+        <h2 class="heading-medium">@messages("task-list.upload-supporting-docs.link")</h2>
+        @supportingEvidenceSummary(singleMixedUse.supportingDocumentAnswers)
+    }
 
   }
 

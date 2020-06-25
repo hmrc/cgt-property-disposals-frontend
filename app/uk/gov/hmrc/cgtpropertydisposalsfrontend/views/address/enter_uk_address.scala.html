@@ -47,7 +47,7 @@
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent" else ".personalRep"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -86,6 +86,9 @@
                 else if(isAgent)                                messages("address.uk.companyDetails.agent.title")
                 else                                            messages("address.uk.companyDetails.title")
         }
+
+  case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
+      messages(s"address.uk.returns$userKey.singleDisposal.title")
 
   case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
     messages("address.uk.representee.title")
