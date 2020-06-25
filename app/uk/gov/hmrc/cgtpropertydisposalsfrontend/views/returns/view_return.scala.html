@@ -28,6 +28,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{NonUkResidentReturn, UkResidentReturn}
+@import cats.syntax.eq._
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -50,7 +53,8 @@
     lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
     singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
     singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
-    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
+    printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js,
+    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(
@@ -66,9 +70,18 @@
 @amountOwed = @{returnSummary.mainReturnChargeAmount}
 
 @key= @{ "viewReturn" }
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@isATrust = @{ subscribedDetails.isATrust }
+
+@userKey = @{
+    if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else ""
+}
+
 
 @propertyAddressLabel = @{
-    if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
+if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     else messages(s"$key.propertyAddress")
 }
 
@@ -77,6 +90,18 @@
   @returnHeading(title, returnSummary, subscribedDetails, request.userType)
   
   @printLink(messages(s"$key.printLink"))
+
+  @returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { charge =>
+        @{if (isATrust)
+          warning(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(returnSummary.completionDate.plusDays(30))))
+         else
+          warning(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+        }
+  }
+
+  @returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { _ =>
+        Html(messages(s"$key$userKey.warning.subtext"))
+  }
 
     @cyaSection() {
         @cyaRow(
