@@ -623,15 +623,13 @@ weOnlySupportGG.createAccount.p1=You’ll need to <a href="{0}">create a new Gov
 weOnlySupportGG.signIn=Sign in if you already have an account
 weOnlySupportGG.signIn.p1=<a href="{0}">Sign in</a> with the same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
 
-email-whitelisting.problem.title=Sorry, there is a problem
-email-whitelisting.problem.p1=You cannot access the Report and pay Capital Gains Tax trial service at the moment. 
-email-whitelisting.problem.p2=This might be because:
-email-whitelisting.problem.bullet1=there is a technical problem
-email-whitelisting.problem.bullet2=you tried to use the link we emailed to you more than 5 times
-email-whitelisting.problem.bullet3=you typed the URL directly into the browser instead of using the link we emailed to you
-email-whitelisting.problem.bullet4=the trial has ended
-email-whitelisting.problem.p3=You’ll need to email HMRC at <strong class="bold">ddcw-info-cgtpd-g@digital.hmrc.gov.uk</strong> to request access to the service.
-email-whitelisting.problem.p4=You should include your name.
+#===================================================
+# ONBOARDING - END
+#===================================================
+
+#===================================================
+# AGENTS - START
+#===================================================
 
 agent.enter-client-cgt-ref.title=What is your client’s Capital Gains Tax on UK property account number?
 agent.enter-client-cgt-ref.helpText=When your client created their account they got an email with this number. It is 15 characters. For example, XYCGTP123456789.
@@ -670,7 +668,7 @@ agentNoEnrolment.p2=Do not use sign in details for an HMRC online services for a
 agentNoEnrolment.button.tryAgain=Try again
 
 #===================================================
-# ONBOARDING - END
+# AGENTS - END
 #===================================================
 
 #===================================================
