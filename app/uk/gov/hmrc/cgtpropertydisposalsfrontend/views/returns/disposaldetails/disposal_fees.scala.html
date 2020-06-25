@@ -46,12 +46,13 @@
     isIndirectDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-
+@key = @{ "disposalFees" }
+@indirectKey = @{ if(isIndirectDisposal) ".indirect" else ""}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -59,10 +60,14 @@
           else ""
   }
 }
+@helpTextMessage = @{
+    val helpTextUserKey = representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
+        case _ => userKey
+    }
+    messages(s"$key$helpTextUserKey$indirectKey.helpText")
+}
 
-@indirectKey = @{ if(isIndirectDisposal) ".indirect" else ""}
-
-@key = @{ "disposalFees" }
 @title = @{messages(s"$key$userKey$indirectKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -84,7 +89,7 @@
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key$userKey$indirectKey.helpText"))),
+            helpText = Some(Html(helpTextMessage)),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
