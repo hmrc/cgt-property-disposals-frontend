@@ -1331,19 +1331,19 @@ property-details.multiple-disposals.guidance.capacitor.p3=Contract exchange usua
 property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
 
 enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
-enterPostcode.returns.agent.singleDisposal.title=Find the address of the UK property your client disposed of
+enterPostcode.returns.agent.singleDisposal.title=Find the address of the UK property the person disposed of
 enterPostcode.returns.trust.singleDisposal.title=Find the address of the UK property the trust disposed of
 enterPostcode.returns.capacitor.singleDisposal.title=Find the address of the UK property that was disposed of
 enterPostcode.returns.personalRep.singleDisposal.title=Find the address of the UK property that was disposed of
 
 address-select.returns.singleDisposal.title=Select the address of the UK property you disposed of
-address-select.returns.agent.singleDisposal.title=Select the address of the UK property your client disposed of
+address-select.returns.agent.singleDisposal.title=Select the address of the UK property the person disposed of
 address-select.returns.trust.singleDisposal.title=Select the address of the UK property the trust disposed of
 address-select.returns.personalRep.singleDisposal.title=Select the address of the UK property that was disposed of
 address-select.returns.capacitor.singleDisposal.title=Select the address of the UK property that was disposed of
 
 address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
-address.uk.returns.agent.singleDisposal.title=Enter the address of the UK property your client disposed of
+address.uk.returns.agent.singleDisposal.title=Enter the address of the UK property the person disposed of
 address.uk.returns.trust.singleDisposal.title=Enter the address of the UK property the trust disposed of
 address.uk.returns.personalRep.singleDisposal.title=Enter the address of the UK property that was disposed of
 address.uk.returns.capacitor.singleDisposal.title=Enter the address of the UK property that was disposed of
