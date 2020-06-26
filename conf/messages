@@ -759,17 +759,17 @@ individualUserType.periodOfAdminDisabled.agent.PersonalRepresentative=Someone wh
 
 individualUserType.Self=Yourself
 individualUserType.Capacitor=Someone you’re helping
-individualUserType.Capacitor.helpText=You’re a capacitor
+individualUserType.Capacitor.helpText=You’re a capacitor.
 individualUserType.PersonalRepresentative=A person who made the disposal <strong class="bold">before they died</strong>
-individualUserType.PersonalRepresentative.helpText=You’re a personal representative
+individualUserType.PersonalRepresentative.helpText=You’re a personal representative.
 individualUserType.PersonalRepresentativeInPeriodOfAdmin=The estate of a person and the property was sold <strong class="bold">after they died</strong>
-individualUserType.PersonalRepresentativeInPeriodOfAdmin.helpText=You’re a personal representative
+individualUserType.PersonalRepresentativeInPeriodOfAdmin.helpText=You’re a personal representative.
 individualUserType.agent.Self=Your client
-individualUserType.agent.Self.helpText=Who is not a personal representative
+individualUserType.agent.Self.helpText=Who is not a personal representative.
 individualUserType.agent.PersonalRepresentative=A person who made the disposal <strong class="bold">before they died</strong>
-individualUserType.agent.PersonalRepresentative.helpText=Your client is a personal representative
+individualUserType.agent.PersonalRepresentative.helpText=Your client is a personal representative.
 individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin=The estate of a person and the property was sold <strong class="bold">after they died</strong>
-individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin.helpText=Your client is a personal representative
+individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin.helpText=Your client is a personal representative.
 
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
@@ -906,14 +906,12 @@ wereYouAUKResident.trust.helpText.p2=If the trust was a non-resident and made an
 wereYouAUKResident.personalRep.helpText.p2=If the person was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
 wereYouAUKResident.agent.helpText.p2=If your client was a non-resident and made an indirect disposal of shares, the disposal date is the day the shares were sold or given away.
 
-
 wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>
-
 
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
@@ -935,6 +933,7 @@ triage.enterCountry.agent.title=What country was your client a resident of when 
 triage.enterCountry.trust.title=What country was the trust a resident of when they exchanged contracts?
 triage.enterCountry.capacitor.title=What country was the person a resident of when they exchanged contracts?
 triage.enterCountry.personalRep.title=What country was the person a resident of on the day they exchanged contracts?
+triage.enterCountry.personalRepInPeriodOfAdmin.title=What country was the person a resident of in tax year {0} to {1}?
 
 triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
 triage.enterCountry.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
@@ -947,6 +946,8 @@ triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your clien
 triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
 triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
