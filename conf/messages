@@ -1789,6 +1789,9 @@ disposalFees.personalRep.helpText=For example, the amount the person paid to an 
 disposalFees.personalRep.indirect.helpText=Additional costs might include stock broker’s fees.
 disposalFees.personalRepInPeriodOfAdmin.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
 disposalFees.personalRepInPeriodOfAdmin.indirect.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
+disposalFees.personalRepInPeriodOfAdmin.agent.helpText=For example, the amount the estate paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
+disposalFees.personalRepInPeriodOfAdmin.agent.indirect.helpText=For example, the amount the estate paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
+
 disposalFees.capacitor.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
 disposalFees.capacitor.indirect.helpText=Additional costs might include stock broker’s fees.
 
