@@ -35,7 +35,8 @@
     uiFooterLinks: uk.gov.hmrc.play.views.html.layouts.FooterLinks,
     helperReportAProblemLink: uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink,
     betaBanner: uk.gov.hmrc.play.views.html.layouts.BetaBanner,
-    userRecruitmentBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.user_recruitment_banner
+    userRecruitmentBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.user_recruitment_banner,
+    languageSwitcher: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.language_switcher
 )
 
 
@@ -140,6 +141,9 @@
 
 @mainContentHeader = {
     @contentHeader.fold(Html(""))(header => uiMainContentHeader(contentHeader = header))
+    <div class="centered-content">
+        @languageSwitcher(appConfig.enableLanguageSwitching)
+    </div>
 }
 
 @getHelpForm = @{helperReportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}

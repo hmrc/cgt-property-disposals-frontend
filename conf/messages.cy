@@ -437,9 +437,9 @@ nonUkAddress-line1.error.tooLong=Address line 1 must be 35 characters or fewer
 nonUkAddress-line2.error.tooLong=Address line 2 must be 35 characters or fewer
 nonUkAddress-line3.error.tooLong=Address line 3 must be 35 characters or fewer
 nonUkAddress-line4.error.tooLong=Address line 4 must be 35 characters or fewer
-nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
-nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
-nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 countryCode.error.required=Select a country from the options presented as you type
 countryCode.error.notFound=Select a country from the options presented as you type
@@ -688,7 +688,7 @@ account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
 account.menu.changeClient=Change client
 account.agent.prefix=Client:
-account.home.title=Capital Gains Tax on UK property account home
+account.home.title=Capital Gains Tax on UK property account home welsh
 
 account.home.subtitle=Account number: {0}
 account.home.left.title=Capital Gains Tax liability
@@ -704,9 +704,9 @@ account.make.payment.link=Make a payment
 account.totalLeftToPay.penalties=Includes taxes, penalties and interest owed
 account.totalLeftToPay.payments=It takes 3 to 5 days for payments or charges to show in your account
 
-account.manageYourDetails.title=Manage account
-account.manageYourDetails.subtitle=Account number
-account.manageYourDetails.accountName=Account name
+account.manageYourDetails.title=Manage account in Welsh
+account.manageYourDetails.subtitle=Account number  in Welsh
+account.manageYourDetails.accountName=Account name  in Welsh
 account.manageYourDetails.betaNotice=This service is in private beta until 6 April 2020. On that date you will be able to come back and send a CGT on UK property disposals return for disposals made on or after 6 April 2020.
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
@@ -1419,9 +1419,9 @@ nonUkAddress-line1.companyDetails.error.tooLong=Company name must be 35 characte
 nonUkAddress-line2.companyDetails.error.tooLong=Street address must be 35 characters or fewer
 nonUkAddress-line3.companyDetails.error.tooLong=Address line 3 must be 35 characters or fewer
 nonUkAddress-line4.companyDetails.error.tooLong=Address line 4 must be 35 characters or fewer
-nonUkAddress-line1.companyDetails.error.pattern=Company name must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
-nonUkAddress-line2.companyDetails.error.pattern=Street address must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
-nonUkAddress-line3.companyDetails.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line1.companyDetails.error.pattern=Company name must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+nonUkAddress-line2.companyDetails.error.pattern=Street address must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+nonUkAddress-line3.companyDetails.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 nonUkAddress-line4.companyDetails.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 countryCode.companyDetails.error.required=Select a country from the options presented as you type
 countryCode.companyDetails.error.notFound=Select a country from the options presented as you type
@@ -2301,7 +2301,7 @@ improvementCosts.trust.title=Were there any improvement costs?
 improvementCosts.capacitor.title=Does the person want to claim any improvement costs?
 improvementCosts.personalRep.title=Were there any improvement costs?
 
-improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance. 
+improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.agent.helpText=Your client can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.trust.helpText=The trust can only claim for its share of any costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.capacitor.helpText=The person can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
@@ -2525,7 +2525,7 @@ initialGainOrLoss.gain.label=Gain
 initialGainOrLoss.loss.label=Loss
 initialGainOrLoss.details.summary=How to work out your initial gain or loss
 initialGainOrLoss.helpText=If you made an initial gain or loss, you’ll need to enter the amount.
-initialGainOrLoss.agent.helpText=If your client made an initial gain or loss, you’ll need to enter the amount.	
+initialGainOrLoss.agent.helpText=If your client made an initial gain or loss, you’ll need to enter the amount.
 initialGainOrLoss.trust.helpText=If the trust made an initial gain or loss, you’ll need to enter the amount.
 initialGainOrLoss.capacitor.helpText=If the person made an initial gain or loss, you’ll need to enter the amount.
 initialGainOrLoss.personalRep.helpText=If the person made an initial gain or loss, you’ll need to enter the amount
@@ -3525,7 +3525,7 @@ confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank t
 
 confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
-confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account. 
+confirmationOfSubmission.trust.paymentNotice=It takes 3 to 5 days for payments or charges to show in the trust’s account.
 
 confirmationOfSubmission.agent.inset.heading=<strong class="bold">Self Assessment</strong>
 confirmationOfSubmission.trust.inset.heading=<strong class="bold">If the trust needs to send a Self Assessment tax return</strong>
@@ -3926,11 +3926,10 @@ tmpCustomError.p2=We apologise for the inconvenience and thank you for your pati
 # PERSON REPRESENTED PAGES - END
 #===================================================
 
-
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English
 language-switcher.english.hover=Use this account in English
 language-switcher.welsh=Cymraeg
-language-switcher.welsh.hidden=Newid yr iaith i’r Gymraeg
-language-switcher.welsh.hover=Defnyddio’r cyfrif hwn yn Cymraeg
+language-switcher.welsh.hidden=Newid yr iaith i''r Gymraeg
+language-switcher.welsh.hover=Defnyddio''r cyfrif hwn yn Cymraeg
 language-switcher.nav=Language switcher
