@@ -70,7 +70,13 @@
           else ""
   }
 }
-
+@helpTextUserKey = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent =>  ".personalRepInPeriodOfAdmin.agent"
+        case _ => userKey
+    }
+}
 @assetTypeKey = @{assetType match {
     case AssetType.IndirectDisposal => ".indirect"
     case _ => ""
@@ -128,7 +134,7 @@
             selected = selectedIndex,
             error = form.error(key),
             options = options,
-            helpText = Some(Html(messages(s"$key$userKey$assetTypeKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate)))),
+            helpText = Some(Html(messages(s"$key$helpTextUserKey$assetTypeKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate)))),
             customErrorKey = Some(s"$key$assetTypeKey")
         )
         @if(isATrust) {

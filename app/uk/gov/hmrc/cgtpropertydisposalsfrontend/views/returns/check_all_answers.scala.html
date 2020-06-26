@@ -164,7 +164,7 @@
         @acquisitionDetailsSummary(s.acquisitionDetails,
             rebasingEligibilityUtil.getRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
             isUk = false,
-            rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate.value),
+            rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate, representativeType),
             isATrust,
             representativeType,
             s.triageAnswers.assetType

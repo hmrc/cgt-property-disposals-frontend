@@ -1898,14 +1898,7 @@ class SingleDisposalsTriageControllerSpec
       ) =
         d.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
-            _.unset(_.acquisitionDate)
-              .unset(_.acquisitionPrice)
-              .unset(_.rebasedAcquisitionPrice)
-              .unset(_.shouldUseRebase)
-              .unset(_.improvementCosts)
-              .unset(_.acquisitionFees)
-          ),
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(newAnswers)),
           initialGainOrLoss = None,
           reliefDetailsAnswers = d.reliefDetailsAnswers.map(
             _.unset(_.privateResidentsRelief)
@@ -2456,11 +2449,14 @@ class SingleDisposalsTriageControllerSpec
       ) =
         d.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
-            _.unset(_.acquisitionDate)
-              .unset(_.acquisitionPrice)
-              .unset(_.rebasedAcquisitionPrice)
-              .unset(_.shouldUseRebase)
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(a =>
+            if (d.triageAnswers.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
+              a.unset(_.acquisitionPrice)
+            else
+              a.unset(_.acquisitionDate)
+                .unset(_.acquisitionPrice)
+                .unset(_.rebasedAcquisitionPrice)
+                .unset(_.shouldUseRebase)
           ),
           initialGainOrLoss = None,
           reliefDetailsAnswers = d.reliefDetailsAnswers.map(
@@ -4034,14 +4030,7 @@ class SingleDisposalsTriageControllerSpec
       ) =
         d.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
-            _.unset(_.acquisitionDate)
-              .unset(_.acquisitionPrice)
-              .unset(_.rebasedAcquisitionPrice)
-              .unset(_.shouldUseRebase)
-              .unset(_.improvementCosts)
-              .unset(_.acquisitionFees)
-          ),
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(d.triageAnswers)),
           initialGainOrLoss = None,
           reliefDetailsAnswers = d.reliefDetailsAnswers.map(
             _.unset(_.privateResidentsRelief)

@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -49,6 +49,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -82,12 +83,13 @@ class AcquisitionDetailsControllerSpec
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Capacitor, _)                                                      => ".capacitor"
-      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
-      case (_, UserType.Individual)                                            => ""
-      case (_, UserType.Organisation)                                          => ".trust"
-      case (_, UserType.Agent)                                                 => ".agent"
-      case other                                                               => sys.error(s"User type '$other' not handled")
+      case (Capacitor, _)                             => ".capacitor"
+      case (PersonalRepresentative, _)                => ".personalRep"
+      case (PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRepInPeriodOfAdmin"
+      case (_, UserType.Individual)                   => ""
+      case (_, UserType.Organisation)                 => ".trust"
+      case (_, UserType.Agent)                        => ".agent"
+      case other                                      => sys.error(s"User type '$other' not handled")
     }
 
   def assetTypeMessageKey(assetType: AssetType): String =
@@ -109,14 +111,98 @@ class AcquisitionDetailsControllerSpec
       case _                     => Right(sample[IndividualName])
     }
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]) =
+  def redirectToStartBehaviour(performAction: () => Future[Result]) = {
+    def hasValidPeriodOfAdminState(
+      triageAnswers: SingleDisposalTriageAnswers,
+      representeeAnswers: Option[RepresenteeAnswers]
+    ) =
+      triageAnswers.fold(_.individualUserType, _.individualUserType).forall {
+        case PersonalRepresentativeInPeriodOfAdmin =>
+          representeeAnswers.map(_.fold(_ => false, _.dateOfDeath.isDefined)).getOrElse(false)
+
+        case _                                     =>
+          true
+      }
+
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case _: FillingOutReturn => true
-        case _                   => false
+        case FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn)
+            if hasValidPeriodOfAdminState(d.triageAnswers, d.representeeAnswers) =>
+          true
+        case FillingOutReturn(_, _, _, d: DraftSingleIndirectDisposalReturn)
+            if hasValidPeriodOfAdminState(d.triageAnswers, d.representeeAnswers) =>
+          true
+        case _ => false
       }
     )
+
+    "redirect to the start endpoint" when {
+
+      "there are no answers for the section and the user type is period of admin and" when {
+
+        "there are no representee answers" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                None,
+                Some(AssetType.Residential),
+                wasUkResident = Some(true),
+                UserType.Individual,
+                IndividualUserType.PersonalRepresentativeInPeriodOfAdmin,
+                Some(sample[DisposalDate]),
+                None
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.routes.StartController.start())
+        }
+
+        "the representee answers are incomplete" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                None,
+                Some(AssetType.Residential),
+                wasUkResident = Some(true),
+                UserType.Individual,
+                IndividualUserType.PersonalRepresentativeInPeriodOfAdmin,
+                Some(sample[DisposalDate]),
+                Some(sample[IncompleteRepresenteeAnswers])
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.routes.StartController.start())
+        }
+
+        "the representee answers are complete but there is no date of death" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                None,
+                Some(AssetType.Residential),
+                wasUkResident = Some(true),
+                UserType.Individual,
+                IndividualUserType.PersonalRepresentativeInPeriodOfAdmin,
+                Some(sample[DisposalDate]),
+                Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.routes.StartController.start())
+        }
+
+      }
+
+    }
+
+  }
 
   def sessionWithState(
     answers: AcquisitionDetailsAnswers,
@@ -124,7 +210,10 @@ class AcquisitionDetailsControllerSpec
     wasUkResident: Boolean,
     userType: UserType,
     individualUserType: IndividualUserType,
-    disposalDate: DisposalDate = sample[DisposalDate]
+    disposalDate: DisposalDate = sample[DisposalDate],
+    representeeAnswers: Option[RepresenteeAnswers] = Some(
+      sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+    )
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithState(
       Some(answers),
@@ -132,7 +221,8 @@ class AcquisitionDetailsControllerSpec
       Some(wasUkResident),
       userType,
       individualUserType,
-      Some(disposalDate)
+      Some(disposalDate),
+      representeeAnswers
     )
 
   def sessionWithState(
@@ -141,7 +231,8 @@ class AcquisitionDetailsControllerSpec
     wasUkResident: Option[Boolean],
     userType: UserType,
     individualUserType: IndividualUserType,
-    disposalDate: Option[DisposalDate]
+    disposalDate: Option[DisposalDate],
+    representeeAnswers: Option[RepresenteeAnswers]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
@@ -151,7 +242,8 @@ class AcquisitionDetailsControllerSpec
         disposalDate = disposalDate,
         individualUserType = Some(individualUserType)
       ),
-      acquisitionDetailsAnswers = answers
+      acquisitionDetailsAnswers = answers,
+      representeeAnswers = representeeAnswers
     )
 
     val journey = sample[FillingOutReturn].copy(
@@ -206,9 +298,9 @@ class AcquisitionDetailsControllerSpec
       def performAction(): Future[Result] =
         controller.acquisitionMethod()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
-
       val key = "acquisitionMethod"
+
+      behave like redirectToStartBehaviour(performAction)
 
       "display the page" when {
 
@@ -227,7 +319,10 @@ class AcquisitionDetailsControllerSpec
                           None,
                           userType,
                           individualUserType,
-                          Some(sample[DisposalDate])
+                          Some(sample[DisposalDate]),
+                          Some(
+                            sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+                          )
                         )._1
                       )
                     }
@@ -441,7 +536,10 @@ class AcquisitionDetailsControllerSpec
             None,
             userType,
             individualUserType,
-            None
+            None,
+            Some(
+              sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+            )
           )
           val updatedDraftReturn              = commonUpdateDraftReturn(
             draftReturn,
@@ -525,7 +623,8 @@ class AcquisitionDetailsControllerSpec
               None,
               userType,
               individualUserType,
-              None
+              None,
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
             )
             val updatedDraftReturn              = commonUpdateDraftReturn(
               draftReturn,
@@ -759,7 +858,10 @@ class AcquisitionDetailsControllerSpec
                     Some(sample[Boolean]),
                     userType,
                     individualUserType,
-                    None
+                    None,
+                    Some(
+                      sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+                    )
                   )._1
                 )
               }
@@ -919,7 +1021,10 @@ class AcquisitionDetailsControllerSpec
                     Some(sample[Boolean]),
                     userType,
                     individualUserType,
-                    None
+                    None,
+                    Some(
+                      sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+                    )
                   )._1
                 )
               }
@@ -1209,6 +1314,394 @@ class AcquisitionDetailsControllerSpec
                 userType,
                 individualUserType
               )
+          }
+        }
+
+      }
+
+    }
+
+    "handling requests to display the period of admin market value page" must {
+
+      def performAction(): Future[Result] =
+        controller.periodOfAdminMarketValue()(FakeRequest())
+
+      val dateOfDeath = DateOfDeath(LocalDate.ofEpochDay(0L))
+
+      val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "redirect to the check your answers page" when {
+
+        "the user is not period of admin" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = Some(
+                    AcquisitionDate(
+                      nonUkResidentsResidentialProperty.minusDays(2)
+                    )
+                  ),
+                  acquisitionPrice = None
+                ),
+                AssetType.Residential,
+                false,
+                UserType.Individual,
+                PersonalRepresentative
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.AcquisitionDetailsController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "display the page" when {
+
+        def checkPage(
+          assetType: AssetType,
+          isAgent: Boolean
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
+                  acquisitionMethod = Some(AcquisitionMethod.Other("period of admin"))
+                ),
+                assetType,
+                true,
+                if (isAgent) UserType.Agent else UserType.Individual,
+                PersonalRepresentativeInPeriodOfAdmin,
+                representeeAnswers = Some(representeeAnswers)
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              s"periodOfAdminMarketValue${assetTypeMessageKey(assetType)}.title",
+              TimeUtils.govDisplayFormat(dateOfDeath.value)
+            ),
+            { doc =>
+              doc
+                .select("#back")
+                .attr("href")   shouldBe controllers.returns.routes.TaskListController
+                .taskList()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .periodOfAdminMarketValueSubmit()
+                .url
+
+              val expectedHelpTextKey =
+                if (isAgent) s"periodOfAdminMarketValue.agent${assetTypeMessageKey(assetType)}.helpText"
+                else s"periodOfAdminMarketValue${assetTypeMessageKey(assetType)}.helpText"
+
+              doc
+                .select("#periodOfAdminMarketValue-form-hint")
+                .text() shouldBe messageFromMessageKey(expectedHelpTextKey)
+
+            }
+          )
+        }
+
+        "the user is a period of admin user and" when {
+
+          "it is not an indirect disposal and it is not an agent" in {
+            checkPage(AssetType.Residential, isAgent = false)
+          }
+
+          "it is not an indirect disposal and it is an agent" in {
+            checkPage(AssetType.Residential, isAgent = true)
+
+          }
+
+          "it is an indirect disposal and it is not an agent" in {
+            checkPage(AssetType.IndirectDisposal, isAgent = false)
+          }
+
+          "it is an indirect disposal and it is an agent" in {
+            checkPage(AssetType.IndirectDisposal, isAgent = true)
+
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling submitted period of admin market value answers" must {
+
+      val key = "periodOfAdminMarketValue"
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.periodOfAdminMarketValueSubmit()(
+          FakeRequest().withFormUrlEncodedBody(data: _*)
+        )
+
+      val dateOfDeath = DateOfDeath(LocalDate.ofEpochDay(0L))
+
+      val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      "redirect to the check your answers page" when {
+
+        "the user is not period of admin" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = Some(
+                    AcquisitionDate(
+                      nonUkResidentsResidentialProperty.minusDays(2)
+                    )
+                  ),
+                  acquisitionPrice = None
+                ),
+                AssetType.Residential,
+                false,
+                UserType.Individual,
+                PersonalRepresentative
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.AcquisitionDetailsController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        def test(data: (String, String)*)(
+          expectedErrorMessageKey: String
+        ) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers]
+                  .copy(acquisitionDate = AcquisitionDate(dateOfDeath.value)),
+                AssetType.Residential,
+                true,
+                UserType.Individual,
+                PersonalRepresentativeInPeriodOfAdmin,
+                representeeAnswers = Some(representeeAnswers)
+              )._1
+            )
+          }
+
+          val formattedDateOfDeath = TimeUtils.govDisplayFormat(dateOfDeath.value)
+          checkPageIsDisplayed(
+            performAction(data: _*),
+            messageFromMessageKey(
+              s"$key.title",
+              formattedDateOfDeath
+            ),
+            doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey,
+                formattedDateOfDeath
+              ),
+            BAD_REQUEST
+          )
+        }
+
+        "the amount of money is zero" in {
+          test(key -> "0")(s"$key.error.tooSmall")
+        }
+
+        "nothing is submitted" in {
+          test()(s"$key.error.required")
+        }
+
+        "the number submitted is larger than the maxium value" in {
+          test(key -> (MoneyUtils.maxAmountOfPounds + 1).toString)(s"$key.error.tooLarge")
+        }
+
+        "invalid characters are submitted" in {
+          test(key -> "abc")(s"$key.error.invalid")
+        }
+      }
+
+      "show an error page" when {
+        val price = 1.23d
+
+        val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
+          acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(2))),
+          acquisitionPrice = Some(sample[AmountInPence])
+        )
+
+        val (session, journey, draftReturn) = sessionWithState(
+          answers,
+          AssetType.Residential,
+          true,
+          UserType.Agent,
+          PersonalRepresentativeInPeriodOfAdmin,
+          representeeAnswers = Some(representeeAnswers)
+        )
+        val updatedDraftReturn              = commonUpdateDraftReturn(
+          draftReturn,
+          answers.copy(
+            acquisitionPrice = Some(AmountInPence(123L))
+          )
+        )
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction(key -> price.toString)
+          )
+        }
+
+        "there is an error updating the session" in {
+          val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(updatedSession)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction(key -> price.toString)
+          )
+        }
+
+      }
+
+      "redirect to the check you answers page" when {
+
+        val scenarios = List(
+          List(key -> "£1,234") -> AmountInPence(123400L),
+          List(key -> "1") -> AmountInPence(100L)
+        )
+
+        "the price submitted is valid and the journey was incomplete" in {
+          scenarios.foreach {
+            case (formData, expectedAmountInPence) =>
+              withClue(
+                s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+              ) {
+                val answers                         =
+                  IncompleteAcquisitionDetailsAnswers.empty.copy(
+                    acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
+                    acquisitionPrice = Some(sample[AmountInPence])
+                  )
+                val (session, journey, draftReturn) = sessionWithState(
+                  answers,
+                  AssetType.Residential,
+                  true,
+                  UserType.Individual,
+                  PersonalRepresentativeInPeriodOfAdmin,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+                val updatedDraftReturn              = commonUpdateDraftReturn(
+                  draftReturn,
+                  answers.copy(
+                    acquisitionPrice = Some(expectedAmountInPence)
+                  )
+                )
+
+                val updatedSession =
+                  session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(session)
+                  mockStoreDraftReturn(
+                    updatedDraftReturn,
+                    journey.subscribedDetails.cgtReference,
+                    journey.agentReferenceNumber
+                  )(Right(()))
+                  mockStoreSession(updatedSession)(Right(()))
+                }
+
+                checkIsRedirect(
+                  performAction(formData: _*),
+                  routes.AcquisitionDetailsController.checkYourAnswers()
+                )
+              }
+          }
+        }
+
+        "the price submitted is valid and the journey was complete" in {
+          scenarios.foreach {
+            case (formData, expectedAmountInPence) =>
+              withClue(
+                s"For form data $formData and expected amount in pence $expectedAmountInPence: "
+              ) {
+                val answers                         =
+                  sample[CompleteAcquisitionDetailsAnswers].copy(
+                    acquisitionDate = AcquisitionDate(dateOfDeath.value),
+                    rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
+                  )
+                val (session, journey, draftReturn) = sessionWithState(
+                  answers,
+                  AssetType.Residential,
+                  true,
+                  UserType.Agent,
+                  PersonalRepresentativeInPeriodOfAdmin,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+                val updatedDraftReturn              = commonUpdateDraftReturn(
+                  draftReturn,
+                  answers.copy(
+                    acquisitionPrice = expectedAmountInPence
+                  )
+                )
+                val updatedSession                  = session.copy(
+                  journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
+                )
+
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(session)
+                  mockStoreDraftReturn(
+                    updatedDraftReturn,
+                    journey.subscribedDetails.cgtReference,
+                    journey.agentReferenceNumber
+                  )(Right(()))
+                  mockStoreSession(updatedSession)(Right(()))
+                }
+
+                checkIsRedirect(
+                  performAction(formData: _*),
+                  routes.AcquisitionDetailsController.checkYourAnswers()
+                )
+              }
           }
         }
 
@@ -3806,6 +4299,28 @@ class AcquisitionDetailsControllerSpec
 
       }
 
+      "redirect to the period of admin market value page" when {
+
+        "there is no acquisition price and the user is a period of admin" in {
+          testRedirectOnMissingData(
+            sessionWithState(
+              allQuestionsAnswered
+                .copy(
+                  acquisitionPrice = None,
+                  acquisitionDate = Some(AcquisitionDate(LocalDate.now())),
+                  acquisitionMethod = Some(AcquisitionMethod.Other("period of admin"))
+                ),
+              sample[AssetType],
+              sample[Boolean],
+              UserType.Individual,
+              PersonalRepresentativeInPeriodOfAdmin
+            )._1,
+            routes.AcquisitionDetailsController.periodOfAdminMarketValue()
+          )
+        }
+
+      }
+
       "redirect to the acquisition price page" when {
 
         "the question has not been answered, and eligible for acquisition price" in {
@@ -4369,7 +4884,10 @@ class AcquisitionDetailsControllerSpec
                     Some(sample[Boolean]),
                     userType,
                     individualUserType,
-                    Some(sample[DisposalDate])
+                    Some(sample[DisposalDate]),
+                    Some(
+                      sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+                    )
                   )._1
                 )
               }
@@ -4393,7 +4911,10 @@ class AcquisitionDetailsControllerSpec
                     None,
                     userType,
                     individualUserType,
-                    Some(sample[DisposalDate])
+                    Some(sample[DisposalDate]),
+                    Some(
+                      sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+                    )
                   )._1
                 )
               }
@@ -4440,7 +4961,10 @@ class AcquisitionDetailsControllerSpec
                     Some(sample[Boolean]),
                     userType,
                     individualUserType,
-                    Some(sample[DisposalDate])
+                    Some(sample[DisposalDate]),
+                    Some(
+                      sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+                    )
                   )._1
                 )
               }
@@ -4485,7 +5009,10 @@ class AcquisitionDetailsControllerSpec
                     Some(sample[Boolean]),
                     userType,
                     individualUserType,
-                    Some(sample[DisposalDate])
+                    Some(sample[DisposalDate]),
+                    Some(
+                      sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath]))
+                    )
                   )._1
                 )
               }
