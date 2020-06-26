@@ -65,7 +65,7 @@
   }
 }
 
-@userMsgKey = @{
+@titleUserMessageKey = @{
     representativeType match {
         case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
         case _ => userKey
@@ -81,14 +81,14 @@
     case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
         f.draftReturn.fold(
             _ => messages(s"$key.returns.multipleDisposals.title"),
-            _ => messages(s"$key.returns$userMsgKey.singleDisposal.title")
+            _ => messages(s"$key.returns$titleUserMessageKey.singleDisposal.title")
         )
 
     case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
         messages("address-select.representee.title")
 
     case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
-        messages(s"$key.returns$userMsgKey.singleDisposal.title")
+        messages(s"$key.returns$titleUserMessageKey.singleDisposal.title")
 
     case _ => messages("address-select.title")
 }}
