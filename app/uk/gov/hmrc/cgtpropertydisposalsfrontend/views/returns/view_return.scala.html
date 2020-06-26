@@ -100,7 +100,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
   }
 
   @returnSummary.charges.filter(c => c.chargeType === UkResidentReturn || c.chargeType === NonUkResidentReturn).map { _ =>
-        Html(messages(s"$key$userKey.warning.subtext"))
+        @Html(messages(s"$key$userKey.warning.subtext"))
   }
 
     @cyaSection() {
