@@ -44,6 +44,7 @@
 
 @key = @{"address"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
@@ -55,6 +56,14 @@
           else ""
   }
 }
+
+@titleUserMessageKey = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
+        case _ => userKey
+    }
+}
+
 @journeyErrorKey = @{
   addressJourneyType match {
     case _: AddressJourneyType.Returns.EnteringCompanyDetails => ".companyDetails."
@@ -71,28 +80,28 @@
 @title = @{ addressJourneyType match {
   case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
     f.draftReturn.fold(
-      _ => messages("address.uk.returns.multipleDisposals.title"),
-      _ => messages(s"address.uk.returns$userKey.singleDisposal.title")
+      _ => messages(s"$key.uk.returns.multipleDisposals.title"),
+      _ => messages(s"$key.uk.returns$titleUserMessageKey.singleDisposal.title")
     )
   case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-    if(c.draftReturn.isLeft)                        messages("address.uk.companyDetails.multipleIndirect.title")
+    if(c.draftReturn.isLeft)                        messages(s"$key.uk.companyDetails.multipleIndirect.title")
     else
         c.representativeType match {
-            case Some(PersonalRepresentative) => messages("address.uk.companyDetails.personalRep.title")
-            case Some(PersonalRepresentativeInPeriodOfAdmin) => messages("address.uk.companyDetails.personalRep.title")
-            case Some(Capacitor) => messages("address.uk.companyDetails.capacitor.title")
+            case Some(PersonalRepresentative) => messages(s"$key.uk.companyDetails.personalRep.title")
+            case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key.uk.companyDetails.personalRep.title")
+            case Some(Capacitor) => messages(s"$key.uk.companyDetails.capacitor.title")
             case None =>
-                if(c.isATrust)                                  messages("address.uk.companyDetails.trust.title")
-                else if(isAgent)                                messages("address.uk.companyDetails.agent.title")
-                else                                            messages("address.uk.companyDetails.title")
+                if(c.isATrust)                                  messages(s"$key.uk.companyDetails.trust.title")
+                else if(isAgent)                                messages(s"$key.uk.companyDetails.agent.title")
+                else                                            messages(s"$key.uk.companyDetails.title")
         }
 
   case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
-      messages(s"address.uk.returns$userKey.singleDisposal.title")
+      messages(s"$key.uk.returns$titleUserMessageKey.singleDisposal.title")
 
   case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
-    messages("address.uk.representee.title")
-  case _ => messages("address.uk.title")
+    messages(s"$key.uk.representee.title")
+  case _ => messages(s"$key.uk.title")
 }}
 
 @helpText = @{
@@ -127,7 +136,7 @@
       </legend>
       @textInput(
         fieldId = line1Key,
-        label = Html(messages(s"address.uk.${journeyErrorKey.stripPrefix(".")}line1.label")),
+        label = Html(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line1.label")),
         errorKey = form.error(line1Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line1Key, ""),
         hasErrors = form.error(line1Key).nonEmpty,
@@ -136,7 +145,7 @@
       )
       @textInput(
         fieldId = line2Key,
-        label = Html(messages(s"address.uk.${journeyErrorKey.stripPrefix(".")}line2.label")),
+        label = Html(messages(s"$key.uk.${journeyErrorKey.stripPrefix(".")}line2.label")),
         errorKey = form.error(line2Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line2Key, ""),
         hasErrors = form.error(line2Key).nonEmpty,
@@ -145,7 +154,7 @@
       )
       @textInput(
         fieldId = line3Key,
-        label = Html(messages("address.uk.line3.label")),
+        label = Html(messages(s"$key.uk.line3.label")),
         errorKey = form.error(line3Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line3Key, ""),
         hasErrors = form.error(line3Key).nonEmpty,
@@ -153,7 +162,7 @@
       )
       @textInput(
         fieldId = line4Key,
-        label = Html(messages("address.uk.line4.label")),
+        label = Html(messages(s"$key.uk.line4.label")),
         errorKey = form.error(line4Key).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(line4Key, ""),
         hasErrors = form.error(line4Key).nonEmpty,
@@ -161,7 +170,7 @@
       )
       @textInput(
         fieldId = postcodeKey,
-        label = Html(messages("address.postcode.label")),
+        label = Html(messages(s"$key.postcode.label")),
         errorKey = form.error(postcodeKey).map(e => s"${journeyErrorKey.stripPrefix(".")}${e.message}"),
         value = form.data.getOrElse(postcodeKey, ""),
         hasErrors = form.error(postcodeKey).nonEmpty,
@@ -171,7 +180,7 @@
     </fieldset>
 
     @if(showFindAddressLink) {
-      <p><a href="@{enterPostcode.url}">@messages("address.lookup.linkText")</a></p>
+      <p><a href="@{enterPostcode.url}">@messages(s"$key.lookup.linkText")</a></p>
     }
 
     @submitButton(messages(if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))

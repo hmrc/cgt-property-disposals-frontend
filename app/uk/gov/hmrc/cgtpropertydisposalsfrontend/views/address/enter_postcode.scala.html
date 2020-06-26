@@ -65,18 +65,26 @@
   }
 }
 
+@titleUserMessageKey = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
+        case _ => userKey
+    }
+}
+
 @returnsKey = @{"enterPostcode.returns"}
 @postcodeFilterKey = @{"filter"}
+
 @title = @{ addressJourneyType match {
  case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
   f.draftReturn.fold(
     _ => messages(s"$returnsKey.multipleDisposals.title"),
-    _ => messages(s"$returnsKey$userKey.singleDisposal.title")
+    _ => messages(s"$returnsKey$titleUserMessageKey.singleDisposal.title")
   )
  case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
    messages("enterPostcode.representee.title")
  case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
-     messages(s"$returnsKey$userKey.singleDisposal.title")
+     messages(s"$returnsKey$titleUserMessageKey.singleDisposal.title")
  case _ => messages("enterPostcode.title")
 }}
 
