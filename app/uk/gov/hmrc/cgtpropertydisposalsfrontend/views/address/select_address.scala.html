@@ -65,22 +65,34 @@
   }
 }
 
+@userMsgKey = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
+        case _ => userKey
+    }
+}
+
 @journeyErrorKey = @{ addressJourneyType match {
- case _:AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
- case _ => ""
+    case _:AddressJourneyType.Returns.FillingOutReturnAddressJourney => ".returns."
+    case _ => ""
 }}
+
 @title = @{ addressJourneyType match {
- case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
-  f.draftReturn.fold(
-   _ => messages(s"$key.returns.multipleDisposals.title"),
-   _ => messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
-  )
- case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
-   messages("address-select.representee.title")
- case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
-  messages(s"$key.returns${userKey.stripSuffix(".")}.singleDisposal.title")
- case _ => messages("address-select.title")
+    case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+        f.draftReturn.fold(
+            _ => messages(s"$key.returns.multipleDisposals.title"),
+            _ => messages(s"$key.returns$userMsgKey.singleDisposal.title")
+        )
+
+    case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney =>
+        messages("address-select.representee.title")
+
+    case _: AddressJourneyType.Returns.EnteringSingleMixedUsePropertyDetails =>
+        messages(s"$key.returns$userMsgKey.singleDisposal.title")
+
+    case _ => messages("address-select.title")
 }}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
@@ -90,17 +102,17 @@
  @backLinkComponent(backLink)
 
  @if(hasErrors) {
-  @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
+    @errorSummary(form, Some(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}"))
  }
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
   @radioGroup(
-   fieldId = key,
-   options = addresses.map(a => addressDisplay(a, Line)),
-   selected = form.value.map(addresses.indexOf(_)),
-   label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
-   errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${userKey.stripPrefix(".")}${e.message}"),
-   hasErrors = hasErrors
+    fieldId = key,
+    options = addresses.map(a => addressDisplay(a, Line)),
+    selected = form.value.map(addresses.indexOf(_)),
+    label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
+    errorKey = form.error(key).map(e => s"${journeyErrorKey.stripPrefix(".")}${userKey.stripPrefix(".")}${e.message}"),
+    hasErrors = hasErrors
   )
 
   <p>
