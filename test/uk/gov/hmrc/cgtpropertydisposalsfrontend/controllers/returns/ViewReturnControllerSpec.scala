@@ -121,6 +121,11 @@ class ViewReturnControllerSpec
       case _              => None
     }
 
+  def deriveUserKey(isAgent: Boolean, isATrust: Boolean) =
+    if (isAgent) ".agent"
+    else if (isATrust) ".trust"
+    else ""
+
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
     case UserType.Agent | UserType.Organisation | UserType.Individual => true
     case _                                                            => false
@@ -292,9 +297,16 @@ class ViewReturnControllerSpec
             .select(
               "#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1"
             )
-            .text()                                   shouldBe messageFromMessageKey(
+            .text() shouldBe messageFromMessageKey(
             "viewReturn.title"
           )
+
+          val isAgent  = userType === UserType.Agent
+          val isATrust = subscribedDetails.isATrust
+
+          val time    = extractDueDate(isATrust, viewingReturn)
+          val userKey = deriveUserKey(isAgent, isATrust)
+          document.select("#warning").text()          shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
           if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
             document
               .select("#heading-reference")
@@ -362,6 +374,12 @@ class ViewReturnControllerSpec
           val result   = performAction()
           val document = Jsoup.parse(contentAsString(result))
 
+          val isAgent  = userType === UserType.Agent
+          val isATrust = subscribedDetails.isATrust
+          val userKey  = deriveUserKey(isAgent, isATrust)
+          val time     = extractDueDate(isATrust, viewingReturn)
+
+          document.select("#warning").text()                shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
           document
             .select("#date-sent-table-question")
             .text()                                         shouldBe "Return sent to HMRC"
@@ -642,4 +660,16 @@ class ViewReturnControllerSpec
     completeMultipleIndirectDisposalsReturn.exampleCompanyDetailsAnswers.address.getAddressLines
       .mkString(", ")
 
+  private def extractDueDate(
+    isATrust: Boolean,
+    viewingReturn: ViewingReturn
+  ) =
+    if (isATrust)
+      TimeUtils.govDisplayFormat(viewingReturn.returnSummary.completionDate.plusDays(30))
+    else
+      viewingReturn.returnSummary.charges
+        .filter(c => c.chargeType === ChargeType.UkResidentReturn || c.chargeType === ChargeType.NonUkResidentReturn)
+        .map(e => TimeUtils.govDisplayFormat(e.dueDate))
+        .headOption
+        .fold(sys.error("Error"))(_.toString)
 }

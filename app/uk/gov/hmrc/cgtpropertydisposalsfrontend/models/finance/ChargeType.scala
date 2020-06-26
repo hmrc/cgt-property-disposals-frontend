@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
+import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 
@@ -33,6 +34,8 @@ object ChargeType {
   final case object SixMonthLatePaymentPenalty extends ChargeType
   final case object TwelveMonthLatePaymentPenalty extends ChargeType
   final case object PenaltyInterest extends ChargeType
+
+  implicit val eq: Eq[ChargeType] = Eq.fromUniversalEquals
 
   implicit val format: OFormat[ChargeType] = derived.oformat()
 
