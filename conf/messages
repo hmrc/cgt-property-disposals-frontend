@@ -3631,8 +3631,8 @@ viewReturn.agent.warning=Your client must pay their Capital Gains Tax on UK prop
 viewReturn.trust.warning=The trust must pay their Capital Gains Tax on UK property by {0}. The trust may be charged interest on late payments.
 
 viewReturn.warning.subtext=It takes 3 to 5 days for payments or charges to show in your account.
-viewReturn.agent.warning.subtext=It takes 3 to 5 days for payments or charges to show in your client's account
-viewReturn.trust.warning.subtext=It takes 3 to 5 days for payments or charges to show in the trust's account.
+viewReturn.agent.warning.subtext=It takes 3 to 5 days for payments or charges to show in your client‘s account.
+viewReturn.trust.warning.subtext=It takes 3 to 5 days for payments or charges to show in the trust‘s account.
 
 #===================================================
 #  VIEW RETURN PAGES - END
