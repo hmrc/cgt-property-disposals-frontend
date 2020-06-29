@@ -37,6 +37,11 @@ ul+form legend>h2.heading-medium {
     margin-bottom: 0;
 }
 
+.pull-right {
+    float: right;
+    margin: 0;
+}
+
 .account-due h2 {
     font-size: 32px;
     margin-top: 0;

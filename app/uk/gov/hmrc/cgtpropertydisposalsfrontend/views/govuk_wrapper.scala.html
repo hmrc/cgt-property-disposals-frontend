@@ -141,9 +141,7 @@
 
 @mainContentHeader = {
     @contentHeader.fold(Html(""))(header => uiMainContentHeader(contentHeader = header))
-    <div class="centered-content">
-        @languageSwitcher(appConfig.enableLanguageSwitching)
-    </div>
+    @languageSwitcher(appConfig.enableLanguageSwitching)
 }
 
 @getHelpForm = @{helperReportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
