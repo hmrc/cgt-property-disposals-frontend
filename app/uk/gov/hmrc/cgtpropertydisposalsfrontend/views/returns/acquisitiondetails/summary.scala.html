@@ -59,7 +59,7 @@
           else ""
   }
 }
-
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 @assetTypeKey = @{assetType match {
     case AssetType.IndirectDisposal => ".indirect"
     case _ => ""
@@ -95,15 +95,16 @@
 }
 
 @cyaSection() {
-  @cyaRow(
-    messages(s"acquisitionMethod$userKey$assetTypeKey.title"),
-    Html(acquisitionMethodAndPriceTitle._1),
-    Some(cyaChange(
+  @if(!isPeriodOfAdmin) {
+      @cyaRow(
+      messages(s"acquisitionMethod$userKey$assetTypeKey.title"),
+      Html(acquisitionMethodAndPriceTitle._1),
+      Some(cyaChange(
       messages("acquisitionMethod.cyaChange"),
       routes.AcquisitionDetailsController.acquisitionMethod().url
-    )),
-    "acquisitionMethod"
-  )
+      )),
+      "acquisitionMethod"
+      )
   @cyaRow(
     messages(s"acquisitionDate$userKey$assetTypeKey.title"),
     Html(TimeUtils.govDisplayFormat(answers.acquisitionDate.value)),
@@ -113,18 +114,32 @@
     )),
     "acquisitionDate"
   )
+  }
 
-@if((isUk && !canRebase) || !isUk) {
-  @cyaRow(
-      acquisitionMethodAndPriceTitle._2,
-      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
-      Some(cyaChange(
-        acquisitionMethodAndPriceTitle._3,
-        routes.AcquisitionDetailsController.acquisitionPrice().url
-      )),
-      "acquisitionPrice"
-  )
-}
+
+  @{
+      if(isPeriodOfAdmin) {
+          cyaRow(
+              messages(s"periodOfAdminMarketValue$assetTypeKey.title", acquisitionDate),
+              Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
+              Some(cyaChange(
+                  messages("periodOfAdminMarketValue", acquisitionDate),
+                  routes.AcquisitionDetailsController.periodOfAdminMarketValue().url
+              )),
+              "periodOfAdminMarketValue"
+          )
+      } else if((isUk && !canRebase) || !isUk) {
+          cyaRow(
+              acquisitionMethodAndPriceTitle._2,
+              Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
+              Some(cyaChange(
+                  acquisitionMethodAndPriceTitle._3,
+                  routes.AcquisitionDetailsController.acquisitionPrice().url
+              )),
+              "acquisitionPrice"
+          )
+      }
+  }
 
 @if(canRebase) {
   @answers.rebasedAcquisitionPrice.map{ rebasedValue =>

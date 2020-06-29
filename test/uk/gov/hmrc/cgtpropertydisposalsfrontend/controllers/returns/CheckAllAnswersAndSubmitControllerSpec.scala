@@ -572,7 +572,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   rebasingEligibilityUtil.isEligibleForRebase(
                     wasAUkResident = false,
                     IndirectDisposal,
-                    completeReturn.acquisitionDetails.acquisitionDate.value
+                    completeReturn.acquisitionDetails.acquisitionDate,
+                    completeReturn.representativeType()
                   ),
                   isATrust,
                   IndirectDisposal

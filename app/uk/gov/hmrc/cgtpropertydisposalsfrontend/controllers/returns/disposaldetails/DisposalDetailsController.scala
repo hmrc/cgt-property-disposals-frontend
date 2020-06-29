@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -288,43 +288,16 @@ class DisposalDetailsController @Inject() (
                   i =>
                     i.copy(
                       disposalDetailsAnswers = Some(newAnswers),
-                      acquisitionDetailsAnswers = i.acquisitionDetailsAnswers.map {
-                        e =>
-                          val answers   = e
-                            .unset(_.acquisitionDate)
-                            .unset(_.acquisitionPrice)
-                            .unset(_.rebasedAcquisitionPrice)
-                            .unset(_.shouldUseRebase)
-                            .unset(_.acquisitionFees)
-                          val assetType = state.fold(
-                            e => e.triageAnswers.fold(_.assetType, e => Some(e.assetType)),
-                            _.triageAnswers.fold(_.assetType, e => Some(e.assetType))
-                          )
-                          if (assetType.contains(AssetType.IndirectDisposal)) answers
-                          else answers.unset(_.improvementCosts)
-                      },
+                      acquisitionDetailsAnswers =
+                        i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
                       yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
                         .flatMap(_.unsetAllButIncomeDetails())
                     ),
                   s =>
                     s.copy(
                       disposalDetailsAnswers = Some(newAnswers),
-                      acquisitionDetailsAnswers = s.acquisitionDetailsAnswers.map {
-                        e =>
-                          val answers = e
-                            .unset(_.acquisitionDate)
-                            .unset(_.acquisitionPrice)
-                            .unset(_.rebasedAcquisitionPrice)
-                            .unset(_.shouldUseRebase)
-                            .unset(_.acquisitionFees)
-
-                          val assetType = state.fold(
-                            e => e.triageAnswers.fold(_.assetType, e => Some(e.assetType)),
-                            _.triageAnswers.fold(_.assetType, e => Some(e.assetType))
-                          )
-                          if (assetType.contains(AssetType.IndirectDisposal)) answers
-                          else answers.unset(_.improvementCosts)
-                      },
+                      acquisitionDetailsAnswers =
+                        s.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(s.triageAnswers)),
                       initialGainOrLoss = None,
                       reliefDetailsAnswers = s.reliefDetailsAnswers
                         .map(_.unsetPrrAndLettingRelief()),

@@ -2310,11 +2310,13 @@ improvementCosts.trust.title=Were there any improvement costs?
 improvementCosts.capacitor.title=Does the person want to claim any improvement costs?
 improvementCosts.personalRep.title=Were there any improvement costs?
 
-improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance. 
+improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.agent.helpText=Your client can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.trust.helpText=The trust can only claim for its share of any costs that added value to the property. It cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.capacitor.helpText=The person can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.personalRep.helpText=You can only include costs that added value to the property. If the person shared these costs, you can only include their share. You cannot include mortgage interest, decorating or maintenance.
+improvementCosts.personalRepInPeriodOfAdmin.helpText=You can only claim for the estate’s share of any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.personalRepInPeriodOfAdmin.agent.helpText=Your client can only claim for the estate’s share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
 
 improvementCosts.rebased.helpText=You can only claim costs that added value to the property after {0} (date you rebased). If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.agent.rebased.helpText=Your client can only claim for their share of any costs that added value to the property after {0} (date they rebased). They cannot claim for mortgage interest, decorating or maintenance.
@@ -2356,28 +2358,27 @@ acquisitionFees.title=Do you want to claim any additional costs you paid when yo
 acquisitionFees.agent.title=Were there any additional acquisition costs?
 acquisitionFees.trust.title=Were there any additional acquisition costs?
 acquisitionFees.capacitor.title=Does the person want to claim for any additional acquisition costs?
-acquisitionFees.personalRep.title=Are you including any additional acquisition costs?
-acquisitionFees.capacitor.details.p1=The person owned the property on or before {0}.
-acquisitionFees.personalRep.details.p1=The person owned the property on or before {0}.
+acquisitionFees.personalRep.title=Were there any additional acquisition costs?
 
 acquisitionFees.indirect.title=Do you want to claim any additional costs you paid when you got the shares?
 acquisitionFees.agent.indirect.title=Were there any additional acquisition costs?
 acquisitionFees.trust.indirect.title=Were there any additional acquisition costs?
-acquisitionFees.capacitor.indirect.title=Select yes if the person wants to claim any additional costs they paid when they got the shares
+acquisitionFees.capacitor.indirect.title=Does the person want to claim any additional costs they paid when they got the shares?
 acquisitionFees.personalRep.indirect.title=Were there any additional acquisition costs?
-
 
 acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
 acquisitionFees.agent.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
 acquisitionFees.trust.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share.
 acquisitionFees.capacitor.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, they can only claim their share.
 acquisitionFees.personalRep.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share.
+acquisitionFees.personalRepInPeriodOfAdmin.helpText=For example, legal costs in securing the rights to the property.
 
 acquisitionFees.indirect.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
 acquisitionFees.agent.indirect.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
 acquisitionFees.trust.indirect.helpText=For example, fees for surveyors or solicitors. If the trust shared these costs, it can only claim its share.
 acquisitionFees.capacitor.indirect.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, they can only claim their share.
 acquisitionFees.personalRep.indirect.helpText=For example, fees for surveyors or solicitors. If the person shared these costs, you can only include their share.
+acquisitionFees.personalRepInPeriodOfAdmin.indirect.helpText=Additional costs might include stock broker’s fees.
 
 acquisitionFees.rebased.title=Do you want to claim any additional costs you paid when you rebased the property?
 acquisitionFees.agent.rebased.title=Were there any additional rebasing costs?
@@ -2406,15 +2407,21 @@ acquisitionFees.personalRep.indirect.rebased.helpText=For example, the cost of p
 
 acquisitionFees.allowableCostsLinkText=	<a href="{0}" target="_blank">Find out about additional allowable costs (opens in a new window)</a>
 acquisitionFees.details.header=What is rebasing?
+
 acquisitionFees.details.p1=You owned the property on or before {0}.
 acquisitionFees.agent.details.p1=Your client owned the property on or before {0}.
 acquisitionFees.trust.details.p1=The trust owned the property on or before {0}.
+acquisitionFees.capacitor.details.p1=The person owned the property on or before {0}.
+acquisitionFees.personalRep.details.p1=The person owned the property on or before {0}.
+
 acquisitionFees.details.p2=This means when you work out your Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.agent.details.p2=To work out your client’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.trust.details.p2=To work out the trust’s gain or loss, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+
 acquisitionFees.indirect.details.p2=This means when you work out your Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.indirect.agent.p2=To work out your client’s Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
 acquisitionFees.indirect.trust.details.p2=To work out the trust’s Capital Gains Tax, you must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount.
+
 acquisitionFees.details.p3=This process is called rebasing.
 acquisitionFees.non-resident.details.p3=This process is called <a href="{0}" target="_blank">rebasing (opens in a new window)</a>.
 
@@ -2493,6 +2500,28 @@ rebaseAcquisitionPrice.agent.dropdown.p5=It can take 3 months or more for HMRC t
 rebaseAcquisitionPrice.trust.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so the trust can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 rebaseAcquisitionPrice.capacitor.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so the person can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
 rebaseAcquisitionPrice.personalRep.dropdown.p5=It can take 3 months or more for HMRC to check a property’s market value. This means an estimate can be entered so you can report the tax. The estimate can be confirmed later through this service, or through a Self Assessment tax return.
+
+periodOfAdminMarketValue.title=What was the market value of the property on {0}?
+periodOfAdminMarketValue.indirect.title=What was the market value of the shares on {0}?
+
+periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
+periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
+periodOfAdminMarketValue.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
+periodOfAdminMarketValue.agent.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
+
+periodOfAdminMarketValue.label=Property’s market value on {0}
+periodOfAdminMarketValue.error.required=Enter the property’s market value on {0}
+periodOfAdminMarketValue.error.invalid=The property’s market value must be an amount of money, like 160,000 or 23,040.50
+periodOfAdminMarketValue.error.tooSmall=The property’s market value must be an amount of money between 1 and 50,000,000,000
+periodOfAdminMarketValue.error.tooLarge=The property’s market value must be an amount of money between 1 and 50,000,000,000
+periodOfAdminMarketValue.error.tooManyDecimals=The property’s market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+periodOfAdminMarketValue.indirect.error.required=Enter the market value of the shares on {0}
+periodOfAdminMarketValue.indirect.error.invalid=The market value of the shares must be an amount of money, like 160,000 or 23,040.50
+periodOfAdminMarketValue.indirect.error.tooSmall=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+periodOfAdminMarketValue.indirect.error.tooLarge=The market value of the shares must be an amount of money between 1 and 50,000,000,000
+periodOfAdminMarketValue.indirect.error.tooManyDecimals=The market value of the shares must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.5
+periodOfAdminMarketValue.cyaChange=the market value of the property on {0}
 
 rebaseAcquisitionPrice.cyaChange=the market value of the property on {0}
 

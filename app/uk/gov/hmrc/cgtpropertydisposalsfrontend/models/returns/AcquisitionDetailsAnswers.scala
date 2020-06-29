@@ -21,6 +21,8 @@ import monocle.Lens
 import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 
 sealed trait AcquisitionDetailsAnswers extends Product with Serializable
 
@@ -98,6 +100,31 @@ object AcquisitionDetailsAnswers {
       fieldLens(IncompleteAcquisitionDetailsAnswers).set(None)(
         fold(identity, IncompleteAcquisitionDetailsAnswers.fromCompleteAnswers)
       )
+
+    def unsetAllButAcquisitionMethod(
+      triageAnswers: SingleDisposalTriageAnswers
+    ): IncompleteAcquisitionDetailsAnswers = {
+      val isPeriodOfAdmin    = triageAnswers
+        .fold(_.individualUserType, _.individualUserType)
+        .contains(PersonalRepresentativeInPeriodOfAdmin)
+      val isIndirectDisposal = triageAnswers
+        .fold(_.assetType, e => Some(e.assetType))
+        .contains(IndirectDisposal)
+      val newAnswers         = a
+        .unset(_.acquisitionPrice)
+        .unset(_.rebasedAcquisitionPrice)
+        .unset(_.shouldUseRebase)
+        .unset(_.acquisitionFees)
+
+      if (isPeriodOfAdmin && isIndirectDisposal)
+        newAnswers
+      else if (isPeriodOfAdmin && !isIndirectDisposal)
+        newAnswers.unset(_.improvementCosts)
+      else if (!isPeriodOfAdmin && isIndirectDisposal)
+        newAnswers.unset(_.acquisitionDate)
+      else
+        newAnswers.unset(_.acquisitionDate).unset(_.improvementCosts)
+    }
 
   }
 
