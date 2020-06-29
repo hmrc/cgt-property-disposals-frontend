@@ -24,7 +24,7 @@
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
 )
 
-@()(implicit messages: Messages, appConfig: ViewConfig)
+@(indirectDisposalsEnabled: Boolean, mixedUseEnabled: Boolean)(implicit messages: Messages, appConfig: ViewConfig)
 
 @title = @{
     messages("agentsLandingPage.title")
@@ -53,7 +53,7 @@
 
     <p>@Html(messages("agentsLandingPage.intro.p1"))</p>
 
-    <h3 class="heading-medium">@messages("agentsLandingPage.contents.h4")</h3>
+    <h2 class="heading-medium">@messages("agentsLandingPage.contents.h4")</h2>
 
     <ol>
         <li class="list-item--dashed">@Html(messages("agentsLandingPage.contents.list1.ordered1", "#who-needs-to-report-capital-gains-tax-on-uk-property"))</li>
@@ -64,9 +64,9 @@
         <li class="list-item--dashed">@Html(messages("agentsLandingPage.contents.list1.ordered6", "#ways-your-client-can-pay"))</li>
     </ol>
 
-    <h3 id="who-needs-to-report-capital-gains-tax-on-uk-property" class="heading-medium">@messages("agentsLandingPage.report.h3")</h3>
+    <h2 id="who-needs-to-report-capital-gains-tax-on-uk-property" class="heading-medium">@messages("agentsLandingPage.report.h3")</h2>
 
-    <h4 class="sub-heading">@messages("agentsLandingPage.report.uk-residents.h4")</h4>
+    <h3 class="heading-secondary">@messages("agentsLandingPage.report.uk-residents.h4")</h3>
     <p>@messages("agentsLandingPage.report.uk-residents.p1")</p>
 
     <p>@messages("agentsLandingPage.report.uk-residents.covid.p1")</p>
@@ -76,6 +76,11 @@
     <p id="cgtUrl">@Html(messages("agentsLandingPage.report.uk-residents.p2", appConfig.cgtUrl))</p>
 
     <p>@messages("agentsLandingPage.report.uk-residents.p3")</p>
+
+    <div class="panel panel-border-wide">
+        <p>@Html(messages("agentsLandingPage.report.firstReturnOnly", appConfig.contactHmrc))</p>
+    </div>
+
     <p>@messages("agentsLandingPage.report.uk-residents.p4")</p>
 
     <ul class="list-bullet">
@@ -84,11 +89,11 @@
         <li>@messages("agentsLandingPage.report.uk-residents.list1.bullet3")</li>
     </ul>
 
-    <h4 class="sub-heading">@messages("agentsLandingPage.report.what-residents-cannot-do.h4")</h4>
+    <h3 class="heading-secondary">@messages("agentsLandingPage.report.what-residents-cannot-do.h4")</h3>
 
     <p id="contact-hmrc-1">@Html(messages("agentsLandingPage.report.what-residents-cannot-do.p1", appConfig.contactHmrc))</p>
 
-    <h4 class="sub-heading">@messages("agentsLandingPage.report.non-residents.h4")</h4>
+    <h3 class="heading-secondary">@messages("agentsLandingPage.report.non-residents.h4")</h3>
     <p>@messages("agentsLandingPage.report.non-residents.p1")</p>
 
     <p>@messages("agentsLandingPage.report.non-uk-residents.covid.p1")</p>
@@ -101,17 +106,27 @@
     <ul class="list-bullet">
         <li>@messages("agentsLandingPage.report.non-residents.list1.bullet1")</li>
         <li>@messages("agentsLandingPage.report.non-residents.list1.bullet2")</li>
+        @if(mixedUseEnabled) {
+            <li>@messages("agentsLandingPage.report.non-residents.list1.bullet3")</li>
+        }
+        @if(indirectDisposalsEnabled) {
+            <li>@messages("agentsLandingPage.report.non-residents.list1.bullet4")</li>
+        }
     </ul>
 
-    <h4 class="sub-heading">@messages("agentsLandingPage.report.what-non-residents-cannot-do.h4")</h4>
-    <p>@messages("agentsLandingPage.report.what-non-residents-cannot-do.p1")</p>
-    <ul class="list-bullet">
-        <li id="nrcgtReturn-1">@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet1", appConfig.nrcgtReturn))</li>
-        <li id="nrcgtReturn-2">@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet2", appConfig.nrcgtReturn))</li>
-        <li id="contact-hmrc-2">@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3", appConfig.contactHmrc))</li>
-    </ul>
+    <h3 class="heading-secondary">@messages("agentsLandingPage.report.what-non-residents-cannot-do.h4")</h3>
+    @if(!indirectDisposalsEnabled | !mixedUseEnabled) {
+        <p>@messages("agentsLandingPage.report.what-non-residents-cannot-do.p1")</p>
+        <ul class="list-bullet">
+            <li id="nrcgtReturn-1">@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet1", appConfig.nrcgtReturn))</li>
+            <li id="nrcgtReturn-2">@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet2", appConfig.nrcgtReturn))</li>
+            <li id="contact-hmrc-2">@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3", appConfig.contactHmrc))</li>
+        </ul>
+    } else {
+        <p id="contact-hmrc-2">@Html(messages("agentsLandingPage.report.what-non-residents-cannot-do.period-of-admin", appConfig.contactHmrc))</p>
+    }
 
-    <h3 id="how-to-ask-for-authorisation" class="heading-medium">@messages("agentsLandingPage.how-to-ask-for-authorisation.h3")</h3>
+    <h2 id="how-to-ask-for-authorisation" class="heading-medium">@messages("agentsLandingPage.how-to-ask-for-authorisation.h3")</h2>
     <p>@messages("agentsLandingPage.how-to-ask-for-authorisation.p1")</p>
     <ul class="list-bullet">
         <li>@messages("agentsLandingPage.how-to-ask-for-authorisation.list1.bullet1")</li>
@@ -135,7 +150,7 @@
         }" role="button" draggable="false" class="button button-start">@messages("agentsLandingPage.sign-in-button")</a>
     </p>
 
-    <h3 id="how-to-manage-your-clients-account" class="heading-medium">@messages("agentsLandingPage.how-to-manage-your-clients-account.h3")</h3>
+    <h2 id="how-to-manage-your-clients-account" class="heading-medium">@messages("agentsLandingPage.how-to-manage-your-clients-account.h3")</h2>
     <p>@messages("agentsLandingPage.how-to-manage-your-clients-account.p1")</p>
     <ul class="list-bullet">
         <li>@messages("agentsLandingPage.how-to-manage-your-clients-account.list1.bullet1")</li>
@@ -145,12 +160,12 @@
     </ul>
 
     <p>@messages("agentsLandingPage.how-to-manage-your-clients-account.p2")</p>
-    <h3 id="send-a-capital-gains-tax-on-uk-property-return" class="heading-medium">@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.h3")</h3>
+    <h2 id="send-a-capital-gains-tax-on-uk-property-return" class="heading-medium">@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.h3")</h2>
     <p>@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.p1")</p>
     <p>@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.p2")</p>
     <p>@messages("agentsLandingPage.send-a-cgt-on-uk-property-return.p3")</p>
 
-    <h3 id="what-youll-need-to-complete-the-return" class="heading-medium">@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.h3")</h3>
+    <h2 id="what-youll-need-to-complete-the-return" class="heading-medium">@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.h3")</h2>
     <p>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.p1")</p>
     <ul class="list-bullet">
         <li>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet1")</li>
@@ -167,6 +182,6 @@
     </ul>
     <p>@messages("agentsLandingPage.what-you-will-need-to-complete-the-return.p2")</p>
 
-    <h3 id="ways-your-client-can-pay" class="heading-medium">@messages("agentsLandingPage.ways-your-client-can-pay.h3")</h3>
+    <h2 id="ways-your-client-can-pay" class="heading-medium">@messages("agentsLandingPage.ways-your-client-can-pay.h3")</h2>
     <p>@messages("agentsLandingPage.ways-your-client-can-pay.p1")</p>
 }

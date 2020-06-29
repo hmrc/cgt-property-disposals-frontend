@@ -27,9 +27,13 @@ landingPage.howTo.list1.bullet1=report the disposal of UK residential property o
 landingPage.howTo.list1.bullet2=pay any tax you might owe for that disposal
 landingPage.howTo.list1.bullet3=view your previous and current returns
 
+landingPage.howTo.firstReturnsOnly=At the moment, only the first return for UK property sales or disposals in the tax year can be submitted online. If you need to amend an existing return or complete any further returns for the tax year you will need to <a href="{0}">contact HMRC</a>.
+
 landingPage.howTo.p3=If you’re a non-resident you must use this service to report sales or disposals from 6 April 2020 of:
 landingPage.howTo.list2.bullet1=residential UK property or land
 landingPage.howTo.list2.bullet2=non-residential UK property or land
+landingPage.howTo.list2.bullet3=mixed use UK property or land
+landingPage.howTo.list2.bullet4=rights to assets that derive at least 75% of their value from UK land (indirect disposals)
 landingPage.howTo.p4=If you’re a non-resident, you must report all sales or disposals of UK property, even if you have no tax to pay or have made a loss.
 landingPage.startButton=Start
 landingPage.beforeYouStart.h2=Before you start
@@ -97,6 +101,7 @@ agentsLandingPage.report.uk-residents.covid.p2=Transactions completed from 1 Jul
 agentsLandingPage.report.uk-residents.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
 agentsLandingPage.report.uk-residents.p2=<a href="{0}">Check if your client needs to report and pay Capital Gains Tax on UK property</a>
 agentsLandingPage.report.uk-residents.p3=For UK residential property disposals made from 6 April 2020, UK residents must report their Capital Gains Tax online. You can do this for your clients through their Capital Gains Tax on UK property account.
+agentsLandingPage.report.firstReturnOnly=At the moment, only the first return for UK property sales or disposals in the tax year can be submitted online. If your client needs to amend an existing return or complete any further returns for the tax year they will need to <a href="{0}">contact HMRC</a>.
 agentsLandingPage.report.uk-residents.p4=If your client is a resident who is an individual or a trust, you can use this service to:
 agentsLandingPage.report.uk-residents.list1.bullet1=report your client’s UK residential property disposals made from 6 April 2020
 agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay any tax they might owe for that disposal
@@ -108,14 +113,18 @@ agentsLandingPage.report.non-residents.p1=Non-residents must report all sales or
 agentsLandingPage.report.non-uk-residents.covid.p1=Due to coronavirus (COVID-19), non-residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
 agentsLandingPage.report.non-uk-residents.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
 agentsLandingPage.report.non-uk-residents.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
-agentsLandingPage.report.non-residents.p2=If your client is a non-resident use this service to report their UK property disposals of:
-agentsLandingPage.report.non-residents.list1.bullet1=residential UK property or land made from 6 April 2020
-agentsLandingPage.report.non-residents.list1.bullet2=non-residential UK property or land made from 6 April 2020
+agentsLandingPage.report.non-residents.p2=If your client is a non-resident use this service to report their UK property disposals made from 6 April 2020 of:
+agentsLandingPage.report.non-residents.list1.bullet1=residential UK property or land
+agentsLandingPage.report.non-residents.list1.bullet2=non-residential UK property or land
+agentsLandingPage.report.non-residents.list1.bullet3=mixed use UK property or land
+agentsLandingPage.report.non-residents.list1.bullet4=rights to assets that derive at least 75% of their value from UK land (indirect disposals)
+
 agentsLandingPage.report.what-non-residents-cannot-do.h4=What non-residents cannot do
 agentsLandingPage.report.what-non-residents-cannot-do.p1=You cannot use your client’s online account to report:
 agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet1=disposals of mixed-use property (part of the property was residential and part was non-residential during the period of ownership) - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
 agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet2=indirect disposals of UK property - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
 agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3=a disposal made by a deceased’s estate during the period of administration - <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you
+agentsLandingPage.report.what-non-residents-cannot-do.period-of-admin=You cannot use your client’s online account to report a disposal made by a deceased’s estate during the period of administration. You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
 agentsLandingPage.how-to-ask-for-authorisation.h3=How to ask for authorisation
 agentsLandingPage.how-to-ask-for-authorisation.p1=Ask your client to:
 agentsLandingPage.how-to-ask-for-authorisation.list1.bullet1=create a Government Gateway user ID if they do not have one

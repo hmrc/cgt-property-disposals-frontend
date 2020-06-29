@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
+import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -25,18 +26,25 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 @Singleton
 class LandingPageController @Inject() (
   cc: MessagesControllerComponents,
+  val config: Configuration,
   landing_page: views.html.landing_page,
   agents_landing_page: views.html.agents_landing_page
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
+  private val indirectDisposalsEnabled: Boolean =
+    config.underlying.getBoolean("indirect-disposals.enabled")
+
+  private val mixedUseEnabled: Boolean =
+    config.underlying.getBoolean("mixed-use.enabled")
+
   def landingPage(): Action[AnyContent] =
-    Action(implicit request => Ok(landing_page()))
+    Action(implicit request => Ok(landing_page(indirectDisposalsEnabled, mixedUseEnabled)))
 
   def agentsLandingPage(): Action[AnyContent] =
     Action(implicit request =>
       Ok(
-        agents_landing_page()
+        agents_landing_page(indirectDisposalsEnabled, mixedUseEnabled)
       )
     )
 
