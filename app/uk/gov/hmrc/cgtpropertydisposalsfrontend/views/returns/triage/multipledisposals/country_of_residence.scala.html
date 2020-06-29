@@ -24,9 +24,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{RepresentativeType, RepresenteeAnswers}
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -44,16 +44,18 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         backLink: Call,
         hasCreatedDraftReturn: Boolean,
         isATrust: Boolean,
-        representativeType: Option[RepresentativeType]
+        representativeType: Option[RepresentativeType],
+        representeeAnswers: Option[RepresenteeAnswers]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"countryCode"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -61,7 +63,21 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
           else ""
   }
 }
-@title = @{messages(s"multipleDisposalsCountryOfResidence$userKey.title")}
+@title = @{
+  if(isPeriodOfAdmin){
+      representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)).fold(
+        sys.error("Could not find date of death for personal rep in period of admin")
+      ) { dateOfDeath =>
+      val taxYearStartYear = TimeUtils.taxYearStart(dateOfDeath.value).getYear
+          messages(
+              s"multipleDisposalsCountryOfResidence.personalRepInPeriodOfAdmin.title",
+              taxYearStartYear.toString,
+              (taxYearStartYear + 1).toString
+          )
+      }
+  } else
+      messages(s"multipleDisposalsCountryOfResidence$userKey.title")
+}
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
 
@@ -82,7 +98,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
             hasErrors = form.error(key).nonEmpty,
             errorKey = form.error(key).map(e => e.message),
             autoComplete = AutoCompleteType.Country,
-            helpText = Some(Html(messages(s"multipleDisposalsCountryOfResidence$userKey.helpText"))),
+            helpText = Some(Html(messages(s"multipleDisposalsCountryOfResidence$userKey.helpText"))).filterNot(_ => isPeriodOfAdmin),
             labelAsHeading = true
         )
 

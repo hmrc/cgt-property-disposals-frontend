@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import cats.syntax.order._
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.order
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 final case class TaxYear(

@@ -929,6 +929,7 @@ triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your clien
 triage.enterCountry.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>.
 triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
 triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the person’s residence status for a tax year (opens in a new window)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell or dispose of?
 assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
@@ -1147,6 +1148,7 @@ multipleDisposalsWereYouAUKResident.agent.title=Was your client a UK resident on
 multipleDisposalsWereYouAUKResident.trust.title=Was the trust resident in the UK on all of the contract ‘exchange‘ dates?
 multipleDisposalsWereYouAUKResident.capacitor.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.personalRep.title=Was the person a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.title=Was the person a UK resident for the tax year in which they died?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
 
 multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
@@ -1154,6 +1156,8 @@ multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Wor
 multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Work out the trust’s residence status (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
 multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Work out the person’s residence status (opens in a new window)</a>
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Work out the persons’s residence status for a tax year (opens in a new window)</a>
+
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.error.boolean=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.agent.error.required=Select yes if your client was a UK resident on all of the contract exchange dates
@@ -1164,6 +1168,8 @@ multipleDisposalsWereYouAUKResident.capacitor.error.required=Select yes if the p
 multipleDisposalsWereYouAUKResident.capacitor.error.boolean=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.personalRep.error.required=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
 multipleDisposalsWereYouAUKResident.personalRep.error.boolean=Select yes if the person was a UK resident on all of the contract ‘exchange’ dates
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.error.required=Select yes if the person was a UK resident for the tax year in which they died
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.error.boolean=Select yes if the person was a UK resident for the tax year in which they died
 
 multipleDisposalsWereYouAUKResident.cyaChange=UK residence status on all of the contract exchange dates
 
@@ -1184,6 +1190,8 @@ multipleDisposalsCountryOfResidence.agent.title=What country was your client a r
 multipleDisposalsCountryOfResidence.trust.title=What country was the trust a resident of when they exchanged contracts?
 multipleDisposalsCountryOfResidence.capacitor.title=What country was the person a resident of when they made the disposals?
 multipleDisposalsCountryOfResidence.personalRep.title=What country was the person a resident of when they made the disposals?
+multipleDisposalsCountryOfResidence.personalRepInPeriodOfAdmin.title=What country was the person a resident of in the tax year {0} to {1}?
+
 multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
 multipleDisposalsCountryOfResidence.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
 multipleDisposalsCountryOfResidence.trust.helpText=It’s usually the day the trust and the new owner swapped contracts and they paid a deposit.
@@ -1211,32 +1219,43 @@ multipleDisposalsAssetTypeForNonUkResidents.agent.title=What types of property o
 multipleDisposalsAssetTypeForNonUkResidents.trust.title=What types of property or assets did the trust dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.capacitor.title=What types of property or assets did the person dispose of?
 multipleDisposalsAssetTypeForNonUkResidents.personalRep.title=What types of property or assets did the person dispose of?
+multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.title=What types of property or assets did you dispose of?
+
+
 multipleDisposalsAssetTypeForNonUkResidents.helpText=Select all that apply.
 multipleDisposalsAssetTypeForNonUkResidents.Residential=Residential
 multipleDisposalsAssetTypeForNonUkResidents.Residential.helpText=Includes houses, flats, or other dwellings, including their gardens or grounds.
 multipleDisposalsAssetTypeForNonUkResidents.NonResidential=Non-residential
+multipleDisposalsAssetTypeForNonUkResidents.NonResidential.helpText=Includes agricultural land, forests and commercial property, like shops or offices.
+
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse=Mixed use
 multipleDisposalsAssetTypeForNonUkResidents.MixedUse.helpText=Part of the property was residential while you owned it.
-multipleDisposalsAssetTypeForNonUkResidents.MixedUse.agent.helpText=Part of the property was residential and part was non-residential while your client owned it
-multipleDisposalsAssetTypeForNonUkResidents.MixedUse.trust.helpText=Part of the property was residential and part was non-residential while the trust owned it
-multipleDisposalsAssetTypeForNonUkResidents.MixedUse.capacitor.helpText=Part of the property was residential and part was non-residential while the person owned it
-multipleDisposalsAssetTypeForNonUkResidents.MixedUse.personalRep.helpText=Part of the property was residential and part was non-residential while the person owned it
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.agent.helpText=Part of the property was residential and part was non-residential while your client owned it.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.trust.helpText=Part of the property was residential and part was non-residential while the trust owned it.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.capacitor.helpText=Part of the property was residential and part was non-residential while the person owned it.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.personalRep.helpText=Part of the property was residential and part was non-residential while the person owned it.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.personalRepInPeriodOfAdmin.helpText=Part of the property was residential and part was non-residential.
+
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
-multipleDisposalsAssetTypeForNonUkResidents.agent.IndirectDisposal=Company shares - your client made an indirect disposal
-multipleDisposalsAssetTypeForNonUkResidents.trust.IndirectDisposal=Company shares - the trust made an indirect disposal
-multipleDisposalsAssetTypeForNonUkResidents.capacitor.IndirectDisposal=Company shares - the person made an indirect disposal
-multipleDisposalsAssetTypeForNonUkResidents.personalRep.IndirectDisposal=Company shares - the person made an indirect disposal
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
+multipleDisposalsAssetTypeForNonUkResidents.agent.IndirectDisposal=Company shares - your client made an indirect disposal.
+multipleDisposalsAssetTypeForNonUkResidents.trust.IndirectDisposal=Company shares - the trust made an indirect disposal.
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.IndirectDisposal=Company shares - the person made an indirect disposal.
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.IndirectDisposal=Company shares - the person made an indirect disposal.
+multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.IndirectDisposal=Company shares through an indirect disposal.
+
 multipleDisposalsAssetTypeForNonUkResidents.error.required=Select the types of property or assets you disposed of
 multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Select the types of property or assets you disposed of
 multipleDisposalsAssetTypeForNonUkResidents.agent.error.required=Select the types of property or assets your client disposed of
 multipleDisposalsAssetTypeForNonUkResidents.trust.error.required=Select the types of property or assets the trust disposed of
 multipleDisposalsAssetTypeForNonUkResidents.capacitor.error.required=Select the types of property or assets the person disposed of
 multipleDisposalsAssetTypeForNonUkResidents.personalRep.error.required=Select the types of property or assets the person disposed of
+multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.error.required=Select the types of property or assets the person disposed of
 multipleDisposalsAssetTypeForNonUkResidents.agent.error.invalid=Select the types of property or assets your client disposed of
 multipleDisposalsAssetTypeForNonUkResidents.trust.error.invalid=Select the types of property or assets the trust disposed of
 multipleDisposalsAssetTypeForNonUkResidents.capacitor.error.invalid=Select the types of property or assets the person disposed of
 multipleDisposalsAssetTypeForNonUkResidents.personalRep.error.invalid=Select the types of property or assets the person disposed of
+multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.error.invalid=Select the types of property or assets you disposed of
 
 multipleDisposalsAssetTypeForNonUkResidents.cyaChange=the types of property or assets included in this return
 

@@ -189,7 +189,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
     case m: CompleteMultipleDisposalsReturn => {
           <h2>@messages("task-list.triage.link")</h2>
-          @multipleDisposalsTriageSummary(m.triageAnswers, subscribedDetails.isATrust)
+          @multipleDisposalsTriageSummary(m.triageAnswers, subscribedDetails.isATrust, m.representeeAnswers)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
           @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust, representativeType)
@@ -247,7 +247,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
     case multipleIndirect: CompleteMultipleIndirectDisposalReturn => {
         <h2>@messages("task-list.triage.link")</h2>
-        @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, subscribedDetails.isATrust)
+        @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, subscribedDetails.isATrust, multipleIndirect.representeeAnswers)
 
         <h2 class="heading-medium">@messages("task-list.example-company-details.link")</h2>
         @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)

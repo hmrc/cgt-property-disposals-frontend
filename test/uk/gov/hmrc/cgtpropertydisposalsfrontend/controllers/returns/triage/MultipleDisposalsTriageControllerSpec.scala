@@ -71,22 +71,28 @@ class MultipleDisposalsTriageControllerSpec
 
   val mockUUIDGenerator = mock[UUIDGenerator]
 
-  val trustDisplay       =
+  val trustDisplay         =
     UserTypeDisplay(UserType.Organisation, None, Left(sample[TrustName]))
-  val agentDisplay       =
+  val agentDisplay         =
     UserTypeDisplay(UserType.Agent, None, Right(sample[IndividualName]))
-  val individualDisplay  =
+  val individualDisplay    =
     UserTypeDisplay(UserType.Individual, None, Right(sample[IndividualName]))
-  val personalRepDisplay =
+  val personalRepDisplay   =
     UserTypeDisplay(
       UserType.Individual,
       Some(PersonalRepresentative),
       Right(sample[IndividualName])
     )
-  val capacitorDisplay   =
+  val capacitorDisplay     =
     UserTypeDisplay(
       UserType.Individual,
       Some(Capacitor),
+      Right(sample[IndividualName])
+    )
+  val periodOfAdminDisplay =
+    UserTypeDisplay(
+      UserType.Individual,
+      Some(PersonalRepresentativeInPeriodOfAdmin),
       Right(sample[IndividualName])
     )
 
@@ -250,7 +256,7 @@ class MultipleDisposalsTriageControllerSpec
           testPageIsDisplayed(
             performAction,
             session,
-            s"multiple-disposals.guidance${displayType.getSubKey}.title",
+            s"multiple-disposals.guidance${displayType.getSubKey()}.title",
             routes.MultipleDisposalsTriageController.guidanceSubmit(),
             expectedBackLink,
             "button.continue",
@@ -277,10 +283,11 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               personalRepDisplay,
-              capacitorDisplay
+              capacitorDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user name ${displayType.name.fold(_ => "Trust name", _ => "Individual name")} ${displayType.getSubKey} "
+                s"For user name ${displayType.name.fold(_ => "Trust name", _ => "Individual name")} ${displayType.getSubKey()} "
               ) {
 
                 val answers = sample[CompleteMultipleDisposalsTriageAnswers]
@@ -323,10 +330,11 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               personalRepDisplay,
-              capacitorDisplay
+              capacitorDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user type ${displayType.getSubKey} "
+                s"For user type ${displayType.getSubKey()} "
               ) {
                 test(
                   sessionDataWithFillingOutReturn(
@@ -798,7 +806,7 @@ class MultipleDisposalsTriageControllerSpec
           testPageIsDisplayed(
             performAction,
             session,
-            s"multipleDisposalsWereYouAUKResident${displayType.getSubKey}.title",
+            s"multipleDisposalsWereYouAUKResident${displayType.getSubKey(separatePeriodOfAdminKey = true)}.title",
             routes.MultipleDisposalsTriageController.wereYouAUKResidentSubmit(),
             expectedBackLink,
             expectedButtonMessageKey,
@@ -807,7 +815,7 @@ class MultipleDisposalsTriageControllerSpec
               SelectorAndValue(
                 "#wrapper > div:eq(1) > article > form > p",
                 messageFromMessageKey(
-                  s"multipleDisposalsWereYouAUKResident${displayType.getSubKey}.link",
+                  s"multipleDisposalsWereYouAUKResident${displayType.getSubKey(separatePeriodOfAdminKey = true)}.link",
                   viewConfig.workOurYouResidenceStatusUrl
                 )
               )
@@ -822,10 +830,11 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               personalRepDisplay,
-              capacitorDisplay
+              capacitorDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user type ${displayType.getSubKey}"
+                s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
                 test(
                   sessionDataWithStartingNewDraftReturn(
@@ -850,10 +859,11 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               personalRepDisplay,
-              capacitorDisplay
+              capacitorDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user type ${displayType.getSubKey}"
+                s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
                 test(
                   sessionDataWithStartingNewDraftReturn(
@@ -895,10 +905,11 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               personalRepDisplay,
-              capacitorDisplay
+              capacitorDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user type ${displayType.getSubKey}"
+                s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
                 test(
                   sessionDataWithFillingOutReturn(
@@ -1101,10 +1112,11 @@ class MultipleDisposalsTriageControllerSpec
             agentDisplay,
             individualDisplay,
             capacitorDisplay,
-            personalRepDisplay
+            personalRepDisplay,
+            periodOfAdminDisplay
           ).foreach { displayType: UserTypeDisplay =>
             withClue(
-              s"For user type ${displayType.getSubKey}"
+              s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
             ) {
               val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                 individualUserType = Some(setIndividualUserType(displayType)),
@@ -1124,12 +1136,12 @@ class MultipleDisposalsTriageControllerSpec
 
               checkPageIsDisplayed(
                 performAction(),
-                messageFromMessageKey(s"$key${displayType.getSubKey}.title"),
+                messageFromMessageKey(s"$key${displayType.getSubKey(separatePeriodOfAdminKey = true)}.title"),
                 doc =>
                   doc
                     .select("#error-summary-display > ul > li > a")
                     .text() shouldBe messageFromMessageKey(
-                    s"$key${displayType.getSubKey}.error.required"
+                    s"$key${displayType.getSubKey(separatePeriodOfAdminKey = true)}.error.required"
                   ),
                 BAD_REQUEST
               )
@@ -2015,12 +2027,30 @@ class MultipleDisposalsTriageControllerSpec
           expectedBackLink: Call,
           expectedButtonMessageKey: String,
           expectReturnToSummaryLink: Boolean,
-          displayType: UserTypeDisplay
-        ): Unit               =
+          displayType: UserTypeDisplay,
+          representeeAnswers: Option[RepresenteeAnswers]
+        ): Unit = {
+          val userKey         = displayType.getSubKey(separatePeriodOfAdminKey = true)
+          val isPeriodOfAdmin = displayType.representativeType.contains(PersonalRepresentativeInPeriodOfAdmin)
+          val titleArgs       =
+            if (isPeriodOfAdmin)
+              representeeAnswers
+                .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+                .map { dateOfDeath =>
+                  val taxYear = TimeUtils.taxYearStart(dateOfDeath.value)
+                  List(
+                    taxYear.getYear.toString,
+                    (taxYear.getYear + 1).toString
+                  )
+                }
+                .getOrElse(sys.error("Could not find date of death for period of admin"))
+            else
+              List.empty
+
           testPageIsDisplayed(
             performAction,
             session,
-            s"multipleDisposalsCountryOfResidence${displayType.getSubKey}.title",
+            s"multipleDisposalsCountryOfResidence$userKey.title",
             routes.MultipleDisposalsTriageController.countryOfResidenceSubmit(),
             expectedBackLink,
             expectedButtonMessageKey,
@@ -2028,19 +2058,23 @@ class MultipleDisposalsTriageControllerSpec
             List(
               SelectorAndValue(
                 "#countryCode-form-hint",
-                messageFromMessageKey(
-                  s"multipleDisposalsCountryOfResidence${displayType.getSubKey}.helpText"
-                )
+                if (isPeriodOfAdmin) ""
+                else
+                  messageFromMessageKey(
+                    s"multipleDisposalsCountryOfResidence$userKey.helpText"
+                  )
               ),
               SelectorAndValue(
                 "#wrapper > div:eq(1) > article > form > p",
                 messageFromMessageKey(
-                  s"triage.enterCountry${displayType.getSubKey}.link",
+                  s"triage.enterCountry$userKey.link",
                   viewConfig.workOurYouResidenceStatusUrl
                 )
               )
-            )
+            ),
+            titleMessageArgs = titleArgs
           )
+        }
         val incompleteAnswers =
           IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
@@ -2055,12 +2089,13 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               capacitorDisplay,
-              personalRepDisplay
+              personalRepDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user type ${displayType.getSubKey}"
+                s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
-                test(
+                val (session, startingNewDraftReturn) =
                   sessionDataWithStartingNewDraftReturn(
                     incompleteAnswers.copy(
                       individualUserType = Some(setIndividualUserType(displayType)),
@@ -2070,12 +2105,16 @@ class MultipleDisposalsTriageControllerSpec
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
-                  )._1,
+                  )
+
+                test(
+                  session,
                   triage.routes.MultipleDisposalsTriageController
                     .wereYouAUKResident(),
                   "button.continue",
                   expectReturnToSummaryLink = false,
-                  displayType
+                  displayType,
+                  startingNewDraftReturn.representeeAnswers
                 )
               }
             }
@@ -2087,24 +2126,28 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               personalRepDisplay,
-              capacitorDisplay
+              capacitorDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user type ${displayType.getSubKey}"
+                s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
-                test(
+                val (session, startingNewDraftReturn) =
                   sessionDataWithStartingNewDraftReturn(
                     sample[CompleteMultipleDisposalsTriageAnswers]
                       .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
                     displayType.userType,
                     displayType.representativeType
-                  )._1,
+                  )
+                test(
+                  session,
                   triage.routes.MultipleDisposalsTriageController
                     .checkYourAnswers(),
                   "button.continue",
                   expectReturnToSummaryLink = false,
-                  displayType
+                  displayType,
+                  startingNewDraftReturn.representeeAnswers
                 )
               }
             }
@@ -2121,7 +2164,8 @@ class MultipleDisposalsTriageControllerSpec
                 .wereYouAUKResident(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true,
-              individualDisplay
+              individualDisplay,
+              None
             )
           }
 
@@ -2135,7 +2179,8 @@ class MultipleDisposalsTriageControllerSpec
                 .checkYourAnswers(),
               "button.saveAndContinue",
               expectReturnToSummaryLink = true,
-              individualDisplay
+              individualDisplay,
+              None
             )
           }
         }
@@ -2474,7 +2519,7 @@ class MultipleDisposalsTriageControllerSpec
           testPageIsDisplayed(
             performAction,
             session,
-            s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey}.title",
+            s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey(separatePeriodOfAdminKey = true)}.title",
             routes.MultipleDisposalsTriageController
               .assetTypeForNonUkResidentsSubmit(),
             expectedBackLink,
@@ -2484,7 +2529,7 @@ class MultipleDisposalsTriageControllerSpec
               SelectorAndValue(
                 "#content > article > form > div > #multipleDisposalsAssetTypeForNonUkResidents > div:eq(4) > span",
                 messageFromMessageKey(
-                  s"multipleDisposalsAssetTypeForNonUkResidents.MixedUse${displayType.getSubKey}.helpText"
+                  s"multipleDisposalsAssetTypeForNonUkResidents.MixedUse${displayType.getSubKey(separatePeriodOfAdminKey = true)}.helpText"
                 )
               )
             ),
@@ -2494,7 +2539,7 @@ class MultipleDisposalsTriageControllerSpec
                 "for",
                 "multipleDisposalsAssetTypeForNonUkResidents-3",
                 s"Residential Non-residential Mixed use ${messageFromMessageKey(
-                  s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey}.IndirectDisposal"
+                  s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey(separatePeriodOfAdminKey = true)}.IndirectDisposal"
                 )}"
               )
             )
@@ -2508,10 +2553,11 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               capacitorDisplay,
-              personalRepDisplay
+              personalRepDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user type ${displayType.getSubKey}"
+                s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
                 test(
                   sessionDataWithStartingNewDraftReturn(
@@ -2537,10 +2583,11 @@ class MultipleDisposalsTriageControllerSpec
               agentDisplay,
               individualDisplay,
               personalRepDisplay,
-              capacitorDisplay
+              capacitorDisplay,
+              periodOfAdminDisplay
             ).foreach { displayType: UserTypeDisplay =>
               withClue(
-                s"For user type ${displayType.getSubKey}"
+                s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
               ) {
                 test(
                   sessionDataWithStartingNewDraftReturn(
@@ -2846,10 +2893,11 @@ class MultipleDisposalsTriageControllerSpec
             agentDisplay,
             individualDisplay,
             capacitorDisplay,
-            personalRepDisplay
+            personalRepDisplay,
+            periodOfAdminDisplay
           ).foreach { displayType: UserTypeDisplay =>
             withClue(
-              s"For user type ${displayType.getSubKey}"
+              s"For user type ${displayType.getSubKey(separatePeriodOfAdminKey = true)}"
             ) {
               val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                 individualUserType = Some(setIndividualUserType(displayType)),
@@ -2873,13 +2921,13 @@ class MultipleDisposalsTriageControllerSpec
               checkPageIsDisplayed(
                 performAction(),
                 messageFromMessageKey(
-                  s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey}.title"
+                  s"multipleDisposalsAssetTypeForNonUkResidents${displayType.getSubKey(separatePeriodOfAdminKey = true)}.title"
                 ),
                 { doc =>
                   doc
                     .select("#error-summary-display > ul > li > a")
                     .text() shouldBe messageFromMessageKey(
-                    s"$key${displayType.getSubKey}.error.required"
+                    s"$key${displayType.getSubKey(separatePeriodOfAdminKey = true)}.error.required"
                   )
                   doc.title() should startWith("Error:")
                 },
@@ -4238,7 +4286,8 @@ class MultipleDisposalsTriageControllerSpec
     expectedButtonMessageKey: String,
     expectReturnToSummaryLink: Boolean,
     expectedAdditionalIdKeyValues: List[SelectorAndValue] = Nil,
-    expectedAdditionalNameAttributeKeyValues: List[TagAttributePairAndValue] = Nil
+    expectedAdditionalNameAttributeKeyValues: List[TagAttributePairAndValue] = Nil,
+    titleMessageArgs: List[String] = Nil
   ): Unit = {
     inSequence {
       mockAuthWithNoRetrievals()
@@ -4247,7 +4296,7 @@ class MultipleDisposalsTriageControllerSpec
 
     checkPageIsDisplayed(
       performAction(),
-      messageFromMessageKey(expectedPageTitleMessageKey),
+      messageFromMessageKey(expectedPageTitleMessageKey, titleMessageArgs: _*),
       { doc =>
         doc.select("#back").attr("href")          shouldBe expectedBackLink.url
         doc
@@ -4287,10 +4336,11 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     representativeType: Option[RepresentativeType],
     name: Either[TrustName, IndividualName]
   ) {
-    def getSubKey: String =
+    def getSubKey(separatePeriodOfAdminKey: Boolean = false): String =
       representativeType match {
         case Some(PersonalRepresentative)                => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+          if (separatePeriodOfAdminKey) ".personalRepInPeriodOfAdmin" else ".personalRep"
         case Some(Capacitor)                             => ".capacitor"
         case None                                        =>
           if (userType === UserType.Agent) ".agent"
