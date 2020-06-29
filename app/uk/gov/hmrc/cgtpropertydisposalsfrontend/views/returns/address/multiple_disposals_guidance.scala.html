@@ -45,7 +45,8 @@
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent =>  ".personalRepInPeriodOfAdmin.agent"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -76,7 +77,13 @@
         <li>@messages(s"$key.li1")</li>
         <li>@messages(s"$key.li2")</li>
         <li>@messages(s"$key.li3")</li>
-        <li>@messages(s"$key.li4")</li>
+        <li>@{
+            if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
+                messages(s"$key$userKey.li4")
+            else
+                messages(s"$key.li4")
+            }</li>
+
     </ul>
 
     <p>
