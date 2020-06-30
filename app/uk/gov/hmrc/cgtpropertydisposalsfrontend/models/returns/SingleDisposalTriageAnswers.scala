@@ -18,7 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import java.time.LocalDate
 
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 import cats.Eq
+import cats.syntax.order._
 import julienrf.json.derived
 import monocle.Lens
 import monocle.macros.Lenses
@@ -120,6 +122,15 @@ object SingleDisposalTriageAnswers {
       ) match {
         case Some(r: RepresentativeType) => Some(r)
         case _                           => None
+      }
+
+    def isPersonalRepresentativeInPeriodOfAdmin(): Boolean =
+      s.fold[Option[IndividualUserType]](
+        _.individualUserType,
+        _.individualUserType
+      ) match {
+        case Some(r: RepresentativeType) if r === PersonalRepresentativeInPeriodOfAdmin => true
+        case _                                                                          => false
       }
 
     def isIndirectDisposal(): Boolean =

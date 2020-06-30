@@ -24,9 +24,10 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TimeUtils, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -44,7 +45,8 @@
     backLink: Call,
     displayReturnToSummaryLink: Boolean,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    representeeAnswers: Option[RepresenteeAnswers]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"countryCode"}
@@ -63,7 +65,29 @@
     }
 }
 
-@title = @{messages(s"$messageKey$userKey.title")}
+@helpText = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => None
+        case _ => Some(Html(messages(s"$messageKey$userKey.helpText")))
+    }
+}
+
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
+
+@title = @{
+    if(isPeriodOfAdmin){
+        representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)).fold(
+            sys.error("Could not find date of death for personal rep in period of admin")
+        ) { dateOfDeath =>
+            val taxYearStartYear = TimeUtils.taxYearStart(dateOfDeath.value).getYear
+            messages(
+                s"$messageKey$userKey.title",
+                taxYearStartYear.toString,
+                (taxYearStartYear + 1).toString
+            )
+        }
+    } else messages(s"$messageKey$userKey.title")
+}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -86,7 +110,7 @@
             hasErrors = form.error(key).nonEmpty,
             errorKey = form.error(key).map(e => e.message),
             autoComplete = AutoCompleteType.Country,
-            helpText = Some(Html(messages(s"$messageKey$userKey.helpText"))),
+            helpText = helpText,
             labelAsHeading = true
         )
 

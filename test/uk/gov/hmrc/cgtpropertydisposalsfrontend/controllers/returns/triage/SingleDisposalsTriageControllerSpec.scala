@@ -618,7 +618,7 @@ class SingleDisposalsTriageControllerSpec
         requiredPreviousAnswers,
         requiredPreviousAnswers.copy(wasAUKResident = Some(false))
       )(
-        "wereYouAUKResident.title",
+        "wereYouAUKResident.main.title",
         checkContent(
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -637,7 +637,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.Capacitor)
           )
       )(
-        "wereYouAUKResident.capacitor.title",
+        "wereYouAUKResident.capacitor.main.title",
         checkContent(
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -655,7 +655,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.PersonalRepresentative)
           )
       )(
-        "wereYouAUKResident.personalRep.title",
+        "wereYouAUKResident.personalRep.main.title",
         checkContent(
           _,
           routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -672,7 +672,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.Self)
           )
       )(
-        "wereYouAUKResident.title",
+        "wereYouAUKResident.main.title",
         { doc =>
           checkContent(
             doc,
@@ -693,7 +693,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.Capacitor)
           )
       )(
-        "wereYouAUKResident.capacitor.title",
+        "wereYouAUKResident.capacitor.main.title",
         { doc =>
           checkContent(
             doc,
@@ -714,7 +714,7 @@ class SingleDisposalsTriageControllerSpec
             individualUserType = Some(IndividualUserType.PersonalRepresentative)
           )
       )(
-        "wereYouAUKResident.personalRep.title",
+        "wereYouAUKResident.personalRep.main.title",
         { doc =>
           checkContent(
             doc,
@@ -734,7 +734,7 @@ class SingleDisposalsTriageControllerSpec
           countryOfResidence = Some(Country.uk)
         )
       )(
-        "wereYouAUKResident.agent.title",
+        "wereYouAUKResident.agent.main.title",
         doc =>
           checkContent(
             doc,
@@ -751,7 +751,7 @@ class SingleDisposalsTriageControllerSpec
           individualUserType = Some(IndividualUserType.PersonalRepresentative)
         )
       )(
-        "wereYouAUKResident.personalRep.title",
+        "wereYouAUKResident.personalRep.main.title",
         doc =>
           checkContent(
             doc,
@@ -767,7 +767,7 @@ class SingleDisposalsTriageControllerSpec
           countryOfResidence = Some(Country.uk)
         )
       )(
-        "wereYouAUKResident.trust.title",
+        "wereYouAUKResident.trust.main.title",
         doc =>
           checkContent(
             doc,
@@ -1067,6 +1067,7 @@ class SingleDisposalsTriageControllerSpec
               )
             )
           }
+
         }
 
       }
@@ -1424,7 +1425,9 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the user has complete the section and has changed their answer and they choose asset type non-residential" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              disposalMethod = DisposalMethod.Sold
+            )
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               completeAnswers.copy(assetType = Residential),
@@ -1492,6 +1495,7 @@ class SingleDisposalsTriageControllerSpec
               )
             }
           }
+
         }
 
       }
@@ -4150,6 +4154,7 @@ class SingleDisposalsTriageControllerSpec
         formData(today),
         requiredPreviousAnswers
           .copy(
+            disposalMethod = Some(DisposalMethod.Sold),
             disposalDate = Some(DisposalDate(today, taxYear)),
             completionDate = Some(CompletionDate(today))
           ),
@@ -4220,7 +4225,7 @@ class SingleDisposalsTriageControllerSpec
 
         }
 
-        "the user is filling our a draft return and" when {
+        "the user is filling out a draft return and" when {
 
           "the section is incomplete" in {
             testSuccessfulUpdateFillingOutReturn(
@@ -4279,6 +4284,7 @@ class SingleDisposalsTriageControllerSpec
               )
             }
           }
+
         }
 
       }
