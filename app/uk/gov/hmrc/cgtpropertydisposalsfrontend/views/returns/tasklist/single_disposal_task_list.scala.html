@@ -26,6 +26,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
@@ -61,20 +63,26 @@
 
 @canSeeInitialGainOrLoss = @{
 
-    def shouldSeeSection(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
-        (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
-            case (_, _, _) if countryOfResidence.isUk() => false
-            case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
+    def shouldSeeSection(
+            countryOfResidence: Country,
+            assetType: AssetType,
+            acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers],
+            individualUserType: Option[IndividualUserType]
+    ) = {
+        (individualUserType, countryOfResidence, assetType, acquisitionDetailsAnswers) match {
+            case (Some(PersonalRepresentativeInPeriodOfAdmin), _, _, _) => false
+            case (_, _, _, _) if countryOfResidence.isUk() => false
+            case (_, _, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
                 if acquisitionDate.isBefore(RebasingCutoffDates.nonUkResidentsResidentialProperty) => true
-            case (_, _, _) => false
+            case (_, _, _, _) => false
         }
     }
 
     (draftReturn.triageAnswers) match {
-        case IncompleteSingleDisposalTriageAnswers(_, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) =>
-            shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
-        case CompleteSingleDisposalTriageAnswers(_, _, countryOfResidence, assetType, _, _) =>
-            shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
+        case IncompleteSingleDisposalTriageAnswers(individualUserType, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) =>
+            shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
+        case CompleteSingleDisposalTriageAnswers(individualUserType, _, countryOfResidence, assetType, _, _) =>
+            shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
         case _ =>
             false
     }

@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.{CompleteExampleCompanyDetailsAnswers, IncompleteExampleCompanyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.{CompleteMixedUsePropertyDetailsAnswers, IncompleteMixedUsePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
@@ -815,6 +815,27 @@ class TaskListControllerSpec
             ),
             TaskListStatus.ToDo
           )
+        }
+        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought BEFORE 01/04/2015 and " +
+          "the user is on a period of admin journey" in {
+          val dateOfDeath = LocalDate.of(2014, 10, 1)
+          testSectionNonExistent(
+            sample[DraftSingleDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(
+                  assetType = AssetType.Residential,
+                  countryOfResidence = Country("TR", Some("Turkey")),
+                  individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+                ),
+              representeeAnswers =
+                Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(dateOfDeath))
+              ),
+              initialGainOrLoss = None
+            )
+          )("initialGainOrLoss")
         }
 
         "the session data indicates that the country of residence is NOT United Kingdom and NON-RESIDENTIAL property was bought" in {
