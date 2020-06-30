@@ -262,6 +262,42 @@ class AcquisitionDetailsControllerSpec
     (sessionData, journey, draftReturn)
   }
 
+  def sessionWithSingleIndirectDisposalState(
+    answers: Option[AcquisitionDetailsAnswers],
+    wasUkResident: Option[Boolean],
+    userType: UserType,
+    individualUserType: IndividualUserType,
+    disposalDate: Option[DisposalDate],
+    representeeAnswers: Option[RepresenteeAnswers]
+  ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
+
+    val draftReturn = sample[DraftSingleIndirectDisposalReturn].copy(
+      triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
+        assetType = Some(IndirectDisposal),
+        wasAUKResident = wasUkResident,
+        disposalDate = disposalDate,
+        individualUserType = Some(individualUserType)
+      ),
+      acquisitionDetailsAnswers = answers,
+      representeeAnswers = representeeAnswers
+    )
+
+    val journey = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      subscribedDetails = sample[SubscribedDetails].copy(
+        name = setNameForUserType(userType)
+      )
+    )
+
+    val sessionData = SessionData.empty.copy(
+      userType = Some(userType),
+      journeyStatus = Some(journey)
+    )
+
+    (sessionData, journey, draftReturn)
+  }
+
   def commonUpdateDraftReturn(
     d: DraftSingleDisposalReturn,
     newAnswers: AcquisitionDetailsAnswers
@@ -272,6 +308,15 @@ class AcquisitionDetailsControllerSpec
       reliefDetailsAnswers = d.reliefDetailsAnswers.map(
         _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
       ),
+      yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
+    )
+
+  def commonUpdateDraftReturn(
+    d: DraftSingleIndirectDisposalReturn,
+    newAnswers: AcquisitionDetailsAnswers
+  ) =
+    d.copy(
+      acquisitionDetailsAnswers = Some(newAnswers),
       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
     )
 
@@ -690,6 +735,39 @@ class AcquisitionDetailsControllerSpec
                   AcquisitionMethod.Other("things")
                 )(userType, individualUserType, Residential)
             }
+          }
+
+          "the user hasn't started this section before and they are on an indirect disposal journey and is not period of admin" in {
+            val (session, journey, draftReturn) = sessionWithSingleIndirectDisposalState(
+              None,
+              None,
+              UserType.Individual,
+              IndividualUserType.Self,
+              None,
+              None
+            )
+            val updatedDraftReturn              = commonUpdateDraftReturn(
+              draftReturn,
+              IncompleteAcquisitionDetailsAnswers.empty
+                .copy(acquisitionMethod = Some(AcquisitionMethod.Gifted), improvementCosts = Some(AmountInPence.zero))
+            )
+            val updatedSession                  = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(updatedSession)(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction("acquisitionMethod" -> "2"),
+              routes.AcquisitionDetailsController.checkYourAnswers()
+            )
           }
 
         }
@@ -1615,22 +1693,20 @@ class AcquisitionDetailsControllerSpec
               withClue(
                 s"For form data $formData and expected amount in pence $expectedAmountInPence: "
               ) {
-                val answers                         =
-                  IncompleteAcquisitionDetailsAnswers.empty.copy(
-                    acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
-                    acquisitionPrice = Some(sample[AmountInPence])
-                  )
                 val (session, journey, draftReturn) = sessionWithState(
-                  answers,
-                  AssetType.Residential,
-                  true,
+                  None,
+                  Some(AssetType.Residential),
+                  Some(false),
                   UserType.Individual,
                   PersonalRepresentativeInPeriodOfAdmin,
-                  representeeAnswers = Some(representeeAnswers)
+                  Some(sample[DisposalDate]),
+                  Some(representeeAnswers)
                 )
                 val updatedDraftReturn              = commonUpdateDraftReturn(
                   draftReturn,
-                  answers.copy(
+                  IncompleteAcquisitionDetailsAnswers.empty.copy(
+                    acquisitionMethod = Some(AcquisitionMethod.Other("period of admin")),
+                    acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
                     acquisitionPrice = Some(expectedAmountInPence)
                   )
                 )
