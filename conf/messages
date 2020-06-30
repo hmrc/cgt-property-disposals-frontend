@@ -2523,13 +2523,13 @@ rebaseAcquisitionPrice.personalRep.dropdown.p5=It can take 3 months or more for 
 periodOfAdminMarketValue.title=What was the market value of the property on {0}?
 periodOfAdminMarketValue.indirect.title=What was the market value of the shares on {0}?
 
-periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
-periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your client’s share.
+periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
+periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
 periodOfAdminMarketValue.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
 periodOfAdminMarketValue.agent.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
 
 periodOfAdminMarketValue.label=Property’s market value on {0}
-periodOfAdminMarketValue.error.required=Enter the property’s market value on {0}
+periodOfAdminMarketValue.error.required=Enter the market value of the property on {0}
 periodOfAdminMarketValue.error.invalid=The property’s market value must be an amount of money, like 160,000 or 23,040.50
 periodOfAdminMarketValue.error.tooSmall=The property’s market value must be an amount of money between 1 and 50,000,000,000
 periodOfAdminMarketValue.error.tooLarge=The property’s market value must be an amount of money between 1 and 50,000,000,000
