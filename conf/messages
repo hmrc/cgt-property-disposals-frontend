@@ -3798,11 +3798,21 @@ multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=
 multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
 multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.agent.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.trust.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.personalRep.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.capacitor.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=What was the market value of the property on {0}?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What was the market value of the property on {0}?
+
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
 multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.capacitor.helpText= This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
+
 
 multipleDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
 multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
@@ -3810,6 +3820,8 @@ multipleDisposalsAcquisitionPrice.agent.details.p1=Your client can include the c
 multipleDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. The trust cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.capacitor.details.p1=The person can include the cost of improvements that added value to the property. For example, if the person built an extension or replaced a basic kitchen with a luxury one. They cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.personalRep.details.p1=The cost of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if your client built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
 
 multipleDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
 multipleDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
@@ -3817,6 +3829,8 @@ multipleDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of 
 multipleDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, it can only claim its share.
 multipleDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
 multipleDisposalsAcquisitionPrice.personalRep.details.p3=If the person shared any of the costs, you can only include the person’s share.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If your client shared any of the costs, they can only claim their share.
 
 multipleDisposalsAcquisitionPrice.error.invalid=The acquisition value must be an amount of money
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86

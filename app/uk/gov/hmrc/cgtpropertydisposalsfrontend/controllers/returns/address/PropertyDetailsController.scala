@@ -690,7 +690,8 @@ class PropertyDetailsController @Inject() (
                 form,
                 backLink,
                 r.journey.subscribedDetails.isATrust,
-                extractIndividualUserType(r)
+                extractIndividualUserType(r),
+                extractDateOfDeath(r)
               )
             )
         }
@@ -717,7 +718,8 @@ class PropertyDetailsController @Inject() (
                       formWithErrors,
                       backLink,
                       r.journey.subscribedDetails.isATrust,
-                      extractIndividualUserType(r)
+                      extractIndividualUserType(r),
+                      extractDateOfDeath(r)
                     )
                   ),
                 acquisitionPrice =>
@@ -918,6 +920,20 @@ class PropertyDetailsController @Inject() (
       case Some(r: RepresentativeType) => Some(r)
       case _                           => None
     }
+
+  private def extractDateOfDeath(
+    f: FillingOutReturnAddressJourney
+  ): Option[DateOfDeath] =
+    f.draftReturn.fold(
+      _.representeeAnswers match {
+        case Some(value) => value.fold(_.dateOfDeath, _.dateOfDeath)
+        case _           => None
+      },
+      _.representeeAnswers match {
+        case Some(value) => value.fold(_.dateOfDeath, _.dateOfDeath)
+        case _           => None
+      }
+    )
 
   private def disposalPriceBackLink(
     answers: ExamplePropertyDetailsAnswers
