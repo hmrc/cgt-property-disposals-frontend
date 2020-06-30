@@ -95,28 +95,34 @@ class AcquisitionDetailsController @Inject() (
   ): Future[Result] = {
     def defaultAnswers(
       triageAnswers: SingleDisposalTriageAnswers,
-      representeeAnswers: Option[RepresenteeAnswers]
-    ): Option[IncompleteAcquisitionDetailsAnswers] =
-      triageAnswers.fold(_.individualUserType, _.individualUserType) match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) =>
-          representeeAnswers.collect {
-            case CompleteRepresenteeAnswers(_, _, Some(dateOfDeath), _) =>
-              IncompleteAcquisitionDetailsAnswers.empty.copy(
-                acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
-                acquisitionMethod = Some(AcquisitionMethod.Other("period of admin"))
-              )
-          }
+      representeeAnswers: Option[RepresenteeAnswers],
+      isIndirectDisposal: Boolean
+    ): Option[IncompleteAcquisitionDetailsAnswers] = {
+      val answers =
+        triageAnswers.fold(_.individualUserType, _.individualUserType) match {
+          case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+            representeeAnswers.collect {
+              case CompleteRepresenteeAnswers(_, _, Some(dateOfDeath), _) =>
+                IncompleteAcquisitionDetailsAnswers.empty.copy(
+                  acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
+                  acquisitionMethod = Some(AcquisitionMethod.Other("period of admin"))
+                )
+            }
 
-        case _                                           =>
-          Some(IncompleteAcquisitionDetailsAnswers.empty)
-      }
+          case _                                           =>
+            Some(IncompleteAcquisitionDetailsAnswers.empty)
+        }
+
+      if (isIndirectDisposal) answers.map(_.copy(improvementCosts = Some(AmountInPence.zero)))
+      else answers
+    }
 
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some(
             (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
           ) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
-          defaultAnswers(d.triageAnswers, d.representeeAnswers).fold[Future[Result]](
+          defaultAnswers(d.triageAnswers, d.representeeAnswers, isIndirectDisposal = false).fold[Future[Result]](
             Redirect(controllers.routes.StartController.start())
           )(answers => f(s, r, Right(d), answers))
         )(f(s, r, Right(d), _))
@@ -133,7 +139,7 @@ class AcquisitionDetailsController @Inject() (
             )
           ) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
-          defaultAnswers(d.triageAnswers, d.representeeAnswers).fold[Future[Result]](
+          defaultAnswers(d.triageAnswers, d.representeeAnswers, isIndirectDisposal = true).fold[Future[Result]](
             Redirect(controllers.routes.StartController.start())
           )(answers => f(s, r, Left(d), answers))
         )(f(s, r, Left(d), _))
