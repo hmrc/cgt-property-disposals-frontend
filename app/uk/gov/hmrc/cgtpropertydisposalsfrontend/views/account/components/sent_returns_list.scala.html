@@ -45,7 +45,7 @@ sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.c
       r -> r.charges
            .filter(_.totalOutstanding() > AmountInPence.zero)
            .map(_.dueDate)
-           .sortWith(TimeUtils.order.compare(_, _) < 0)
+           .sortWith(TimeUtils.localDateOrder.compare(_, _) < 0)
            .headOption
   )
  }

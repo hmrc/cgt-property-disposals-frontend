@@ -48,10 +48,11 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 
 @key = @{"multipleDisposalsWereYouAUKResident"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -62,7 +63,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 @userErrorKey = @{
     representativeType match {
         case Some(PersonalRepresentative) => "personalRep."
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => "personalRep."
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => "personalRepInPeriodOfAdmin."
         case Some(Capacitor) => "capacitor."
         case None =>
             if (isAgent) "agent."
@@ -90,7 +91,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
             errorKey = form.error(key).map(e => s"$userErrorKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages(s"$key.helpText")))
+            helpText = Some(Html(messages(s"$key.helpText"))).filterNot(_ => isPeriodOfAdmin)
         )
         <p>@Html(messages(s"$key$userKey.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
