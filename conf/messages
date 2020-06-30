@@ -3416,7 +3416,7 @@ hasSupportingDocsToUpload.error.required=Select yes if you want to upload any su
 hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
 
 mandatoryEvidence.title=Upload a document showing how the Capital Gains Tax due was worked out
-mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG, Any files you upload to a draft return will be saved for 5 days.
+mandatoryEvidence.helpText=Files can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG, Any files you upload to a draft return will be saved for 5 days.
 
 mandatoryEvidence.cyaChange=the document showing how the Capital Gains Tax due was worked out
 
@@ -3452,7 +3452,7 @@ mandatoryEvidence.scan-failed.p1=The problem could be that:
 mandatoryEvidence.scan-failed.bullet1=the document had a virus or was corrupt
 mandatoryEvidence.scan-failed.bullet2=you did not select a document to upload
 mandatoryEvidence.scan-failed.bullet3=you uploaded the wrong type of document
-mandatoryEvidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG
+mandatoryEvidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG
 mandatoryEvidence.scan-failed.p3=You’ll need to try again.
 mandatoryEvidence.scan-failed.button.tryAgain=Try again
 
@@ -3488,7 +3488,7 @@ supporting-evidence.check-your-answers.add-another-file=Add another file
 supporting-evidence.upload.title=Upload a document with your supporting evidence
 supporting-evidence.upload.caption=Supporting evidence
 supporting-evidence.upload.error.required=Upload a file containing your supporting evidence
-supporting-evidence.upload.help-text=The file can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
+supporting-evidence.upload.help-text=The file can be up to 3MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, and JPG.
 file.error.required=Select a file containing your supporting evidence
 
 supporting-evidence.expired.title=For your security, we deleted these documents
@@ -3517,7 +3517,7 @@ supporting-evidence.scan-failed.p1=The problem could be that:
 supporting-evidence.scan-failed.bullet1=the document had a virus or was corrupt
 supporting-evidence.scan-failed.bullet2=you did not select a document to upload
 supporting-evidence.scan-failed.bullet3=you uploaded the wrong type of document
-supporting-evidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG and JPG
+supporting-evidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, and JPG
 supporting-evidence.scan-failed.p3=You’ll need to try again.
 supporting-evidence.scan-failed.button.tryAgain=Try again
 
