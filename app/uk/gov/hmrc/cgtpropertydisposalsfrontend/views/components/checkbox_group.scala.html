@@ -30,7 +30,8 @@
     options: List[RadioOption],
     helpText: Option[Html] = None,
     error: Option[FormError] = None,
-    selected: List[Int]
+    selected: List[Int],
+    customErrorKey: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(error.nonEmpty) "form-group form-group-error" else "form-group" }
@@ -55,7 +56,7 @@ List(hintIdWithHintText.map(_._1), errorIdWithError.map(_._1)).collect{ case Som
         }
 
         @errorIdWithError.map { case (id, e) =>
-          @errorInline(id, messages(s"$fieldId.${e.message}", e.args))
+          @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${e.message}", e.args))
         }
 
         @options.zipWithIndex.map{ case (option, index) =>
