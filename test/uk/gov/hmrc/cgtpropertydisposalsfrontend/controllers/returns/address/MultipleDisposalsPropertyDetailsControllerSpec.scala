@@ -104,12 +104,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     individualUserType: Option[IndividualUserType]
   ) =
     (userType, individualUserType) match {
-      case (_, Some(Capacitor))                                                      => ".capacitor"
-      case (_, Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin)) => ".personalRep"
-      case (Individual, _)                                                           => ""
-      case (Organisation, _)                                                         => ".trust"
-      case (Agent, _)                                                                => ".agent"
-      case other                                                                     => sys.error(s"User type '$other' not handled")
+      case (_, Some(Capacitor))                             => ".capacitor"
+      case (_, Some(PersonalRepresentative))                => ".personalRep"
+      case (_, Some(PersonalRepresentativeInPeriodOfAdmin)) => ".personalRepInPeriodOfAdmin"
+      case (Individual, _)                                  => ""
+      case (Organisation, _)                                => ".trust"
+      case (Agent, _)                                       => ".agent"
+      case other                                            => sys.error(s"User type '$other' not handled")
     }
 
   override def updateAddress(
@@ -1995,7 +1996,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
-                      )
+                      ),
+                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                        .copy(individualUserType = None)
                     ),
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = Right(sample[IndividualName])

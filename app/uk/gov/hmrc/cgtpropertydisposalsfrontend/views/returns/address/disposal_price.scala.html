@@ -52,7 +52,7 @@
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -61,7 +61,7 @@
   }
 }
 
-@title = @{messages(s"$key.title")}
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
@@ -69,7 +69,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$key$userKey"))
     }
 
     @caption(messages("returns.property-details.multipleDisposals.caption"))
@@ -87,10 +87,11 @@
         inputClass = Some("small"),
         aspect = "left",
         unit = "£",
-        assistiveText = messages("unit-input.assistive.pounds")
-      )
+        assistiveText = messages("unit-input.assistive.pounds"),
+        customErrorKey = Some(s"$key$userKey")
+    )
 
-      @details(
+@details(
         messages(s"$key.link"),
         Html(
         s"""
