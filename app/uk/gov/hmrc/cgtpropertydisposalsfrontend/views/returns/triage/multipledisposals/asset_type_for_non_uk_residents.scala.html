@@ -116,7 +116,8 @@
             selected = form.value.map(_.map(toIndex)).getOrElse(List.empty),
             helpText = Some(Html(messages(s"$key.helpText"))),
             label = pageHeading(title),
-            error = form.error(key)
+            error = form.error(key),
+            customErrorKey = Some(s"$key$userKey")
         )
 
         @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))

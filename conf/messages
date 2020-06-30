@@ -1190,7 +1190,7 @@ multipleDisposalsCountryOfResidence.agent.title=What country was your client a r
 multipleDisposalsCountryOfResidence.trust.title=What country was the trust a resident of when they exchanged contracts?
 multipleDisposalsCountryOfResidence.capacitor.title=What country was the person a resident of when they made the disposals?
 multipleDisposalsCountryOfResidence.personalRep.title=What country was the person a resident of when they made the disposals?
-multipleDisposalsCountryOfResidence.personalRepInPeriodOfAdmin.title=What country was the person a resident of in the tax year {0} to {1}?
+multipleDisposalsCountryOfResidence.personalRepInPeriodOfAdmin.title=What country was the person a resident of in tax year {0} to {1}?
 
 multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
 multipleDisposalsCountryOfResidence.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
