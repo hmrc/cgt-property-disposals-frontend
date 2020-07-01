@@ -77,7 +77,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     )
 
     @cyaRow(
-        messages("multipleDisposalsDisposalDate.title"),
+        messages(s"multipleDisposalsDisposalDate$userKey"),
         Html(TimeUtils.govDisplayFormat(answers.disposalDate.value)),
         Some(cyaChange(messages("multipleDisposalsDisposalDate.cyaChange"), returns.address.routes.PropertyDetailsController.disposalDate().url)),
         "multipleDisposalsDisposalDate"
