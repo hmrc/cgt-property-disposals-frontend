@@ -3596,6 +3596,9 @@ class AcquisitionDetailsControllerSpec
                     .attr("action") shouldBe routes.AcquisitionDetailsController
                     .acquisitionFeesSubmit()
                     .url
+                  doc
+                    .select("#acquisitionFees-form-hint")
+                    .text()         shouldBe messageFromMessageKey(s"$key$userKey.helpText")
                 }
               )
           }
@@ -3800,6 +3803,55 @@ class AcquisitionDetailsControllerSpec
                 }
               )
           }
+        }
+
+        "the user is a personal rep in a period of admin" in {
+          List(UserType.Individual, UserType.Agent).foreach { userType =>
+            withClue(s"For user type $userType: ") {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithState(
+                    sample[IncompleteAcquisitionDetailsAnswers].copy(
+                      acquisitionDate = Some(
+                        AcquisitionDate(
+                          nonUkResidentsNonResidentialProperty.plusDays(2L)
+                        )
+                      ),
+                      shouldUseRebase = Some(false),
+                      improvementCosts = Some(sample[AmountInPence])
+                    ),
+                    AssetType.NonResidential,
+                    false,
+                    userType,
+                    PersonalRepresentativeInPeriodOfAdmin
+                  )._1
+                )
+              }
+
+              checkPageIsDisplayed(
+                performAction(),
+                messageFromMessageKey(s"$key.personalRep.title"),
+                { doc =>
+                  doc
+                    .select("#back")
+                    .attr("href")   shouldBe routes.AcquisitionDetailsController
+                    .improvementCosts()
+                    .url
+                  doc
+                    .select("#content > article > form")
+                    .attr("action") shouldBe routes.AcquisitionDetailsController
+                    .acquisitionFeesSubmit()
+                    .url
+                  doc
+                    .select("#acquisitionFees-form-hint")
+                    .text()         shouldBe messageFromMessageKey("acquisitionFees.personalRepInPeriodOfAdmin.helpText")
+                }
+              )
+            }
+
+          }
+
         }
 
       }

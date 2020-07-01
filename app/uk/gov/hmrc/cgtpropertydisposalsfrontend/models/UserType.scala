@@ -20,7 +20,7 @@ import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 
-sealed trait UserType
+sealed trait UserType extends Product with Serializable
 
 object UserType {
 

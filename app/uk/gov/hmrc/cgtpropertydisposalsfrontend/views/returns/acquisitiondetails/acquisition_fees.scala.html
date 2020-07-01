@@ -72,8 +72,7 @@
 }
 @helpTextUserKey = @{
     representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent =>  ".personalRepInPeriodOfAdmin.agent"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
         case _ => userKey
     }
 }
