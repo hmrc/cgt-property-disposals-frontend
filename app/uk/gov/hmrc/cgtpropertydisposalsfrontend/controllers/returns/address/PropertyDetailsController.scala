@@ -801,7 +801,7 @@ class PropertyDetailsController @Inject() (
                       _,
                       _
                     )
-                    if representeeAnswers
+                    if !viewConfig.periodOfAdminEnabled && representeeAnswers
                       .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
                       .exists(_.value <= disposalDate.value) =>
                   Redirect(
