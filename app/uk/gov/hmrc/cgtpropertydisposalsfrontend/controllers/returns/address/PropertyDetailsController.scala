@@ -855,7 +855,8 @@ class PropertyDetailsController @Inject() (
                           completeAnswers,
                           shouldAskIfPostcodeExists(assetTypes),
                           r.journey.subscribedDetails.isATrust,
-                          extractIndividualUserType(r)
+                          extractIndividualUserType(r),
+                          extractDateOfDeath(r)
                         )
                       )
                   )
@@ -866,7 +867,8 @@ class PropertyDetailsController @Inject() (
                       c,
                       shouldAskIfPostcodeExists(assetTypes),
                       r.journey.subscribedDetails.isATrust,
-                      extractIndividualUserType(r)
+                      extractIndividualUserType(r),
+                      extractDateOfDeath(r)
                     )
                   )
 
@@ -924,16 +926,12 @@ class PropertyDetailsController @Inject() (
   private def extractDateOfDeath(
     f: FillingOutReturnAddressJourney
   ): Option[DateOfDeath] =
-    f.draftReturn.fold(
-      _.representeeAnswers match {
-        case Some(value) => value.fold(_.dateOfDeath, _.dateOfDeath)
-        case _           => None
-      },
-      _.representeeAnswers match {
-        case Some(value) => value.fold(_.dateOfDeath, _.dateOfDeath)
-        case _           => None
-      }
-    )
+    f.draftReturn
+      .fold(
+        _.representeeAnswers.map(e => e.fold(_.dateOfDeath, _.dateOfDeath)),
+        _.representeeAnswers.map(e => e.fold(_.dateOfDeath, _.dateOfDeath))
+      )
+      .flatten
 
   private def disposalPriceBackLink(
     answers: ExamplePropertyDetailsAnswers

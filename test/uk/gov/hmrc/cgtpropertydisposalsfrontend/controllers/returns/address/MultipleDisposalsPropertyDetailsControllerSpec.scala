@@ -2689,7 +2689,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       val currentDraftReturn =
         sample[DraftMultipleDisposalsReturn].copy(
           triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-            .copy(assetTypes = List(AssetType.Residential)),
+            .copy(
+              assetTypes = List(AssetType.Residential),
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            ),
           examplePropertyDetailsAnswers = Some(allQuestionsAnswered),
           representeeAnswers = None
         )

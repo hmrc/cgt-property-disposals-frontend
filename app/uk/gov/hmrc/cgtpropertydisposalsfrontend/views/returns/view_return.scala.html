@@ -192,7 +192,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
           @multipleDisposalsTriageSummary(m.triageAnswers, subscribedDetails.isATrust, m.representeeAnswers)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
-          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust, representativeType)
+          @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust, representativeType, m.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
           @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
