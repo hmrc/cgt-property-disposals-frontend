@@ -1338,7 +1338,7 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 None
               )
-              if representeeAnswers
+              if !viewConfig.periodOfAdminEnabled && representeeAnswers
                 .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
                 .exists(_.value <= disposalDate.value) =>
             Redirect(
