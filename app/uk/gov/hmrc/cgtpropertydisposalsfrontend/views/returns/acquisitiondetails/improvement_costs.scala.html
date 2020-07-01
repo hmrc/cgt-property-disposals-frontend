@@ -109,13 +109,17 @@
         case _ => 1
     })
 }
+@customErrorKey = @{
+  if(form.errors.headOption.map(_.key).contains(key)) Some(s"$key$userKey")
+  else None
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, customErrorKey = customErrorKey)
     }
 
     @caption(messages("acquisitionDetails.caption"))
@@ -127,7 +131,8 @@
             selected = selectedIndex,
             error = form.error(key),
             options = options,
-            helpText = Some(Html(messages(s"$key$helpTextUserKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate))))
+            helpText = Some(Html(messages(s"$key$helpTextUserKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate)))),
+            customErrorKey = customErrorKey
         )
         @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1")))
 

@@ -3279,7 +3279,7 @@ class AcquisitionDetailsControllerSpec
               val assetTypeKey = assetTypeMessageKey(assetType)
               val userKey      = userMessageKey(individualUserType, userType)
               test()(userType, individualUserType, assetType, userKey)(
-                s"$key$assetTypeKey.error.required"
+                s"$key$userKey$assetTypeKey.error.required"
               )
           }
         }
@@ -3289,7 +3289,7 @@ class AcquisitionDetailsControllerSpec
             (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
               val userKey = userMessageKey(individualUserType, userType)
               test(key -> "2")(userType, individualUserType, assetType, userKey)(
-                s"$key.error.invalid"
+                s"$key$userKey.error.invalid"
               )
           }
         }
