@@ -71,20 +71,8 @@
     }
 }
 
-@title = @{messages(s"$key$userMsgKey.main.title")}
-
-@subtitle = @{
-   if(isPeriodOfAdmin) ""
-   else s"""<h2 class="heading-medium">${messages(s"$key$userMsgKey.title")}</h2>"""
-}
-
-@helpTextMsgs = @{
-    if(isPeriodOfAdmin) ""
-    else s"""
-            |<p>${messages(s"$key.helpText.p1")}</p>
-            |<p>${messages(s"$key$userMsgKey.helpText.p2")}</p>
-         """.stripMargin
-}
+@legend = @{messages(s"$key$userMsgKey.title")}
+@title = @{if(isPeriodOfAdmin) legend else messages(s"$key$userMsgKey.main.title") }
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -97,13 +85,17 @@
     }
 
     @caption(messages("triage.caption"))
+
+  @if(!isPeriodOfAdmin) {
     @pageHeading(title)
-    @Html(helpTextMsgs)
+    <p>@messages(s"$key.helpText.p1")</p>
+    <p>@messages(s"$key$userMsgKey.helpText.p2")</p>
+  }
 
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = Html(subtitle),
+            label = if(isPeriodOfAdmin) pageHeading(title) else Html(s"""<h2 class="heading-medium">$legend</h2>"""),
             errorKey = form.error(key).map(e => s"$userErrorMsgKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,

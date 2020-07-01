@@ -10,6 +10,7 @@ legend>h1.heading-xlarge,
 legend>h2.heading-medium {
     margin-bottom: 15px;
 }
+legend>h2.heading-medium,
 .form-group-error legend>h1.heading-xlarge,
 .form-group-error h1>label.heading-xlarge,
 h1 > span.heading-medium,
