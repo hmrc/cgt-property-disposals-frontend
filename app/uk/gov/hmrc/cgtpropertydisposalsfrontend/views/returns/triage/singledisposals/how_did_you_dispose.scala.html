@@ -62,12 +62,12 @@
 
 @userErrorPrefix = @{
     representativeType match {
-        case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-        case Some(Capacitor) => ".capacitor"
+        case Some(PersonalRepresentative) => "personalRep."
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => "personalRep."
+        case Some(Capacitor) => "capacitor."
         case None =>
-            if (isAgent) ".agent"
-            else if (isATrust) ".trust"
+            if (isAgent) "agent."
+            else if (isATrust) "trust."
             else ""
     }
 }

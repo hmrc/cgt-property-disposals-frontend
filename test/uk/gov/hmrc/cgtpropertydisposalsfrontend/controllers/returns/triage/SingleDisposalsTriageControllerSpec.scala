@@ -102,15 +102,16 @@ class SingleDisposalsTriageControllerSpec
       representeeAnswers = Some(representeeAnswers)
     )
 
-    SessionData.empty
-      .copy(journeyStatus =
-        Some(
-          startingNewDraftReturn.copy(
-            subscribedDetails = startingNewDraftReturn.subscribedDetails.copy(name = name),
-            newReturnTriageAnswers = Right(singleDisposalTriageAnswers)
-          )
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(
+        startingNewDraftReturn.copy(
+          subscribedDetails = startingNewDraftReturn.subscribedDetails.copy(name = name),
+          newReturnTriageAnswers = Right(singleDisposalTriageAnswers)
         )
-      ) -> startingNewDraftReturn
+      )
+    )
+
+    sessionData -> startingNewDraftReturn
   }
 
   def sessionDataWithFillingOurReturn(
@@ -122,8 +123,11 @@ class SingleDisposalsTriageControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = name)
     )
 
-    SessionData.empty
-      .copy(journeyStatus = Some(fillingOutReturn)) -> fillingOutReturn
+    val sessionData = SessionData.empty.copy(
+      journeyStatus = Some(fillingOutReturn)
+    )
+
+    sessionData -> fillingOutReturn
   }
 
   def sessionDataWithFillingOutReturn(
@@ -367,11 +371,10 @@ class SingleDisposalsTriageControllerSpec
           supportingEvidenceAnswers = None
         )
 
-      val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(
-          hasConfirmedSingleDisposal = true,
-          individualUserType = Some(Self)
-        )
+      val requiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
+        hasConfirmedSingleDisposal = true,
+        individualUserType = Some(Self)
+      )
 
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
@@ -460,8 +463,9 @@ class SingleDisposalsTriageControllerSpec
         performAction,
         requiredPreviousAnswers,
         List("disposalMethod" -> "0"),
-        requiredPreviousAnswers
-          .copy(disposalMethod = Some(DisposalMethod.Sold)),
+        requiredPreviousAnswers.copy(
+          disposalMethod = Some(DisposalMethod.Sold)
+        ),
         updateDraftReturn
       )
 
@@ -916,7 +920,8 @@ class SingleDisposalsTriageControllerSpec
             val answers = requiredPreviousAnswers.copy(
               wasAUKResident = Some(false),
               countryOfResidence = Some(Country("AB", None)),
-              assetType = Some(AssetType.Residential)
+              assetType = Some(AssetType.Residential),
+              disposalMethod = Some(DisposalMethod.Sold)
             )
 
             testSuccessfulUpdateStartingNewDraft(
@@ -937,12 +942,12 @@ class SingleDisposalsTriageControllerSpec
 
           "the user has answered some questions but not complete the section and has " +
             "changed their answer from was in the uk to not in the uk" in {
-            val answers = requiredPreviousAnswers
-              .copy(
-                wasAUKResident = Some(true),
-                countryOfResidence = None,
-                assetType = Some(AssetType.Residential)
-              )
+            val answers = requiredPreviousAnswers.copy(
+              wasAUKResident = Some(true),
+              countryOfResidence = None,
+              assetType = Some(AssetType.Residential),
+              disposalMethod = Some(DisposalMethod.Sold)
+            )
 
             testSuccessfulUpdateStartingNewDraft(
               performAction,
@@ -962,7 +967,9 @@ class SingleDisposalsTriageControllerSpec
 
           "the user has complete the section and has changed their answer from " +
             "not in the uk to was in the uk" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              disposalMethod = DisposalMethod.Sold
+            )
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               completeAnswers.copy(countryOfResidence = Country("AB", None)),
@@ -970,7 +977,7 @@ class SingleDisposalsTriageControllerSpec
               IncompleteSingleDisposalTriageAnswers(
                 completeAnswers.individualUserType,
                 true,
-                Some(completeAnswers.disposalMethod),
+                Some(DisposalMethod.Sold),
                 Some(true),
                 None,
                 None,
@@ -987,7 +994,9 @@ class SingleDisposalsTriageControllerSpec
 
           "the user has completed the section and has changed their answer from " +
             "was in the uk to not in the uk" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              disposalMethod = DisposalMethod.Sold
+            )
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               completeAnswers.copy(countryOfResidence = Country.uk),
@@ -995,7 +1004,7 @@ class SingleDisposalsTriageControllerSpec
               IncompleteSingleDisposalTriageAnswers(
                 completeAnswers.individualUserType,
                 true,
-                Some(completeAnswers.disposalMethod),
+                Some(DisposalMethod.Sold),
                 Some(false),
                 None,
                 None,
@@ -1020,7 +1029,7 @@ class SingleDisposalsTriageControllerSpec
                 IncompleteSingleDisposalTriageAnswers(
                   completeAnswers.individualUserType,
                   true,
-                  Some(completeAnswers.disposalMethod),
+                  Some(DisposalMethod.Sold),
                   Some(true),
                   None,
                   None,
@@ -1030,7 +1039,10 @@ class SingleDisposalsTriageControllerSpec
                 )
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
-                completeAnswers.copy(countryOfResidence = Country("AB", None)),
+                completeAnswers.copy(
+                  countryOfResidence = Country("AB", None),
+                  disposalMethod = DisposalMethod.Sold
+                ),
                 List("wereYouAUKResident" -> "true"),
                 updateDraftReturn(_, newAnswers),
                 checkIsRedirect(
@@ -1042,12 +1054,12 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the section is incomplete" in {
-            val answers = requiredPreviousAnswers
-              .copy(
-                wasAUKResident = Some(true),
-                countryOfResidence = None,
-                assetType = Some(AssetType.Residential)
-              )
+            val answers = requiredPreviousAnswers.copy(
+              wasAUKResident = Some(true),
+              countryOfResidence = None,
+              assetType = Some(AssetType.Residential),
+              disposalMethod = Some(DisposalMethod.Sold)
+            )
 
             testSuccessfulUpdateFillingOutReturn(
               performAction,
@@ -1443,7 +1455,9 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the user has complete the section and has changed their answer and they choose asset type residential" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              disposalMethod = DisposalMethod.Sold
+            )
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               completeAnswers.copy(assetType = NonResidential),
@@ -1457,6 +1471,7 @@ class SingleDisposalsTriageControllerSpec
               )
             )
           }
+
         }
 
         "the user is filling out a draft return and" when {
@@ -1481,12 +1496,18 @@ class SingleDisposalsTriageControllerSpec
             forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
-                completeAnswers.copy(assetType = Residential),
+                completeAnswers.copy(
+                  assetType = Residential,
+                  disposalMethod = DisposalMethod.Sold
+                ),
                 List("didYouDisposeOfResidentialProperty" -> "false"),
                 _.copy(triageAnswers =
                   IncompleteSingleDisposalTriageAnswers
                     .fromCompleteAnswers(completeAnswers)
-                    .copy(assetType = Some(NonResidential))
+                    .copy(
+                      assetType = Some(NonResidential),
+                      disposalMethod = Some(DisposalMethod.Sold)
+                    )
                 ),
                 checkIsRedirect(
                   _,
@@ -2151,7 +2172,7 @@ class SingleDisposalsTriageControllerSpec
 
         }
 
-        "the user is filling our a draft return and" when {
+        "the user is filling out a draft return and" when {
 
           "the section is incomplete" in {
             testSuccessfulUpdateFillingOutReturn(
@@ -2174,8 +2195,10 @@ class SingleDisposalsTriageControllerSpec
 
           "the section is complete" in {
             forAll { c: CompleteSingleDisposalTriageAnswers =>
-              val completeJourney =
-                c.copy(disposalDate = DisposalDate(today, taxYear))
+              val completeJourney = c.copy(
+                disposalDate = DisposalDate(today, taxYear),
+                disposalMethod = DisposalMethod.Sold
+              )
               val date            = today.minusDays(1L)
               val newAnswers      =
                 IncompleteSingleDisposalTriageAnswers(
@@ -2204,6 +2227,7 @@ class SingleDisposalsTriageControllerSpec
               )
             }
           }
+
         }
 
       }
@@ -2698,13 +2722,13 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the section is complete" in {
-            val completionDate  = CompletionDate(disposalDate.value.plusDays(1L))
-            val completeAnswers =
-              sample[CompleteSingleDisposalTriageAnswers]
-                .copy(
-                  completionDate = CompletionDate(disposalDate.value),
-                  disposalDate = disposalDate
-                )
+            val completionDate = CompletionDate(disposalDate.value.plusDays(1L))
+
+            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              completionDate = CompletionDate(disposalDate.value),
+              disposalDate = disposalDate,
+              disposalMethod = DisposalMethod.Sold
+            )
 
             testSuccessfulUpdateStartingNewDraft(
               performAction,
@@ -2717,9 +2741,10 @@ class SingleDisposalsTriageControllerSpec
               )
             )
           }
+
         }
 
-        "the user is filling our a draft return and" when {
+        "the user is filling out a draft return and" when {
 
           "the section is incomplete" in {
             val completionDate = CompletionDate(disposalDate.value)
@@ -2743,11 +2768,11 @@ class SingleDisposalsTriageControllerSpec
             forAll { c: CompleteSingleDisposalTriageAnswers =>
               val completionDate  =
                 CompletionDate(disposalDate.value.plusDays(1L))
-              val completeAnswers =
-                c.copy(
-                  completionDate = CompletionDate(disposalDate.value),
-                  disposalDate = disposalDate
-                )
+              val completeAnswers = c.copy(
+                completionDate = CompletionDate(disposalDate.value),
+                disposalDate = disposalDate,
+                disposalMethod = DisposalMethod.Sold
+              )
 
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
@@ -2764,6 +2789,7 @@ class SingleDisposalsTriageControllerSpec
               )
             }
           }
+
         }
 
       }
@@ -3153,9 +3179,10 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the user has complete the section and has changed their answer and they choose asset type residential" in {
-            val completeAnswers =
-              sample[CompleteSingleDisposalTriageAnswers]
-                .copy(countryOfResidence = Country("CC", None))
+            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              countryOfResidence = Country("CC", None),
+              disposalMethod = DisposalMethod.Sold
+            )
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               completeAnswers,
@@ -3167,6 +3194,7 @@ class SingleDisposalsTriageControllerSpec
               )
             )
           }
+
         }
 
         "the user is filling out a draft return and" when {
@@ -3189,8 +3217,10 @@ class SingleDisposalsTriageControllerSpec
 
           "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
             forAll { c: CompleteSingleDisposalTriageAnswers =>
-              val completeAnswers =
-                c.copy(countryOfResidence = Country("CC", None))
+              val completeAnswers = c.copy(
+                countryOfResidence = Country("CC", None),
+                disposalMethod = DisposalMethod.Sold
+              )
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
                 completeAnswers,
@@ -3206,7 +3236,9 @@ class SingleDisposalsTriageControllerSpec
               )
             }
           }
+
         }
+
       }
 
       "not do any updates" when {
@@ -3598,7 +3630,9 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the user has complete the section" in {
-            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
+            val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              disposalMethod = DisposalMethod.Sold
+            )
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               completeAnswers.copy(assetType = AssetType.Residential),
@@ -3648,8 +3682,10 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from not indirect disposal and not mixed use to indirect disposal" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = NonResidential)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = NonResidential,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
@@ -3669,8 +3705,10 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from not indirect disposal and not mixed use to mixed use" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = NonResidential)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = NonResidential,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
@@ -3690,13 +3728,18 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from mixed use to indirect disposal" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = MixedUse)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = MixedUse,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
               .unset(_.tooEarlyDisposalDate)
-              .copy(assetType = Some(IndirectDisposal))
+              .copy(
+                assetType = Some(IndirectDisposal),
+                disposalMethod = Some(DisposalMethod.Sold)
+              )
 
             testSuccessfulUpdateStartingNewDraft(
               performAction,
@@ -3711,8 +3754,10 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from mixed use to not indirect disposal" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = MixedUse)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = MixedUse,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
@@ -3739,11 +3784,17 @@ class SingleDisposalsTriageControllerSpec
             forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
-                completeAnswers.copy(assetType = AssetType.Residential),
+                completeAnswers.copy(
+                  disposalMethod = DisposalMethod.Sold,
+                  assetType = AssetType.Residential
+                ),
                 List("assetTypeForNonUkResidents" -> "1"),
                 updateDraftReturn(
                   _,
-                  completeAnswers.copy(assetType = AssetType.NonResidential)
+                  completeAnswers.copy(
+                    disposalMethod = DisposalMethod.Sold,
+                    assetType = AssetType.NonResidential
+                  )
                 ),
                 checkIsRedirect(
                   _,
@@ -3771,8 +3822,11 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from indirect disposal to not indirect disposal and not mixed use" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = IndirectDisposal)
+            val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = IndirectDisposal,
+              disposalMethod = DisposalMethod.Sold
+            )
+
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
@@ -3800,8 +3854,10 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from indirect disposal to mixed use" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = IndirectDisposal)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = IndirectDisposal,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
@@ -3829,13 +3885,18 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from not indirect disposal and not mixed use to indirect disposal" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = NonResidential)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = NonResidential,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
               .unset(_.tooEarlyDisposalDate)
-              .copy(assetType = Some(IndirectDisposal))
+              .copy(
+                assetType = Some(IndirectDisposal),
+                disposalMethod = Some(DisposalMethod.Sold)
+              )
 
             testSuccessfulUpdateFillingOutReturn(
               performAction,
@@ -3857,8 +3918,10 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from not indirect disposal and not mixed use to mixed use" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = NonResidential)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = NonResidential,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
@@ -3885,8 +3948,10 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from mixed use to indirect disposal" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = MixedUse)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = MixedUse,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
@@ -3913,8 +3978,10 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the asset type has changed from mixed use to not indirect disposal" in {
-            val answers    = sample[CompleteSingleDisposalTriageAnswers]
-              .copy(assetType = MixedUse)
+            val answers    = sample[CompleteSingleDisposalTriageAnswers].copy(
+              assetType = MixedUse,
+              disposalMethod = DisposalMethod.Sold
+            )
             val newAnswers = answers
               .unset(_.disposalDate)
               .unset(_.completionDate)
@@ -3941,6 +4008,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
         }
+
       }
 
       "not do any updates" when {
@@ -4150,14 +4218,15 @@ class SingleDisposalsTriageControllerSpec
 
       behave like unsuccessfulUpdatesBehaviour(
         performAction,
-        requiredPreviousAnswers,
+        requiredPreviousAnswers.copy(
+          disposalMethod = Some(DisposalMethod.Sold)
+        ),
         formData(today),
-        requiredPreviousAnswers
-          .copy(
-            disposalMethod = Some(DisposalMethod.Sold),
-            disposalDate = Some(DisposalDate(today, taxYear)),
-            completionDate = Some(CompletionDate(today))
-          ),
+        requiredPreviousAnswers.copy(
+          disposalMethod = Some(DisposalMethod.Sold),
+          disposalDate = Some(DisposalDate(today, taxYear)),
+          completionDate = Some(CompletionDate(today))
+        ),
         updateDraftReturn,
         () => mockGetTaxYear(today)(Right(Some(taxYear)))
       )
@@ -4170,10 +4239,13 @@ class SingleDisposalsTriageControllerSpec
 
             testSuccessfulUpdateStartingNewDraft(
               performAction,
-              requiredPreviousAnswers,
+              requiredPreviousAnswers.copy(
+                disposalMethod = Some(DisposalMethod.Sold)
+              ),
               formData(today),
               requiredPreviousAnswers
                 .copy(
+                  disposalMethod = Some(DisposalMethod.Sold),
                   tooEarlyDisposalDate = Some(today),
                   disposalDate = None,
                   completionDate = Some(CompletionDate(today))
@@ -4189,14 +4261,14 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "a tax year can be found and the journey was complete" in {
-            val completeJourney =
-              sample[CompleteSingleDisposalTriageAnswers]
-                .copy(
-                  disposalDate = DisposalDate(today, taxYear),
-                  completionDate = CompletionDate(today),
-                  assetType = IndirectDisposal
-                )
-            val date            = today.minusDays(1L)
+            val completeJourney = sample[CompleteSingleDisposalTriageAnswers].copy(
+              disposalDate = DisposalDate(today, taxYear),
+              completionDate = CompletionDate(today),
+              assetType = IndirectDisposal,
+              disposalMethod = DisposalMethod.Sold
+            )
+
+            val date = today.minusDays(1L)
 
             testSuccessfulUpdateStartingNewDraft(
               performAction,
@@ -4230,15 +4302,17 @@ class SingleDisposalsTriageControllerSpec
           "the section is incomplete" in {
             testSuccessfulUpdateFillingOutReturn(
               performAction,
-              requiredPreviousAnswers,
+              requiredPreviousAnswers.copy(
+                disposalMethod = Some(DisposalMethod.Sold)
+              ),
               formData(today),
               updateDraftReturn(
                 _,
-                requiredPreviousAnswers
-                  .copy(
-                    disposalDate = Some(DisposalDate(today, taxYear)),
-                    completionDate = Some(CompletionDate(today))
-                  )
+                requiredPreviousAnswers.copy(
+                  disposalDate = Some(DisposalDate(today, taxYear)),
+                  completionDate = Some(CompletionDate(today)),
+                  disposalMethod = Some(DisposalMethod.Sold)
+                )
               ),
               checkIsRedirect(
                 _,
@@ -4254,7 +4328,8 @@ class SingleDisposalsTriageControllerSpec
               val completeJourney = c.copy(
                 disposalDate = DisposalDate(today, taxYear),
                 completionDate = CompletionDate(today),
-                assetType = IndirectDisposal
+                assetType = IndirectDisposal,
+                disposalMethod = DisposalMethod.Sold
               )
               val date            = today.minusDays(1L)
               val newAnswers      =
@@ -4717,8 +4792,10 @@ class SingleDisposalsTriageControllerSpec
       def performAction() =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
-        .copy(assetType = AssetType.Residential)
+      val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+        assetType = AssetType.Residential,
+        disposalMethod = DisposalMethod.Sold
+      )
 
       val startingNewDraftReturn = sample[StartingNewDraftReturn]
         .copy(newReturnTriageAnswers = Right(completeAnswers))
