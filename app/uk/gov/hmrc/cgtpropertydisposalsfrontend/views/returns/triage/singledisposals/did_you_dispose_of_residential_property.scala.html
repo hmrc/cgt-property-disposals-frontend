@@ -77,6 +77,13 @@
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
+@helpText = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+            messages(s"$key.personalRepInPeriodOfAdmin.helpText")
+        case _ => messages(s"$key.helpText")
+    }
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
@@ -93,16 +100,16 @@
             errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages(s"$key.helpText")))
+            helpText = Some(Html(helpText))
         )
 
-        @details(messages("didYouDisposeOfResidentialProperty.details.summary"),
+        @details(messages(s"$key.details.summary"),
           Html(s"""|
-                   |<p>${messages("didYouDisposeOfResidentialProperty.details.p1")}</p>
+                   |<p>${messages(s"$key.details.p1")}</p>
                    |<ul class="list-bullet">
-                   |  <li>${messages("didYouDisposeOfResidentialProperty.details.l1")}</li>
-                   |  <li>${messages("didYouDisposeOfResidentialProperty.details.l2")}</li>
-                   |  <li>${messages("didYouDisposeOfResidentialProperty.details.l3")}</li>
+                   |  <li>${messages(s"$key.details.l1")}</li>
+                   |  <li>${messages(s"$key.details.l2")}</li>
+                   |  <li>${messages(s"$key.details.l3")}</li>
                    |</ul>
                    |""".stripMargin
           )
