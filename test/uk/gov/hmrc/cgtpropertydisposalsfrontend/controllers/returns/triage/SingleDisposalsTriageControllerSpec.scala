@@ -4547,60 +4547,6 @@ class SingleDisposalsTriageControllerSpec
           )
         }
 
-        "redirect to the period of admin not handled exit page" when {
-
-          "the disposal date given is after or on a given date of death" when {
-
-            "a draft return has not been created" in {
-              val session = sessionDataWithStartingNewDraftReturn(
-                allQuestionsAnswered,
-                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath =
-                  Some(
-                    DateOfDeath(completeTriageQuestions.disposalDate.value)
-                  )
-                )
-              )._1
-
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(session)
-              }
-
-              checkIsRedirect(
-                performAction(),
-                routes.CommonTriageQuestionsController
-                  .periodOfAdministrationNotHandled()
-              )
-            }
-
-            "a draft return has been created" in {
-              val session = sessionDataWithFillingOutReturn(
-                allQuestionsAnswered,
-                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath =
-                  Some(
-                    DateOfDeath(
-                      completeTriageQuestions.disposalDate.value.minusDays(1L)
-                    )
-                  )
-                )
-              )._1
-
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(session)
-              }
-
-              checkIsRedirect(
-                performAction(),
-                routes.CommonTriageQuestionsController
-                  .periodOfAdministrationNotHandled()
-              )
-            }
-
-          }
-
-        }
-
       }
 
       "show an error page" when {
@@ -5588,6 +5534,75 @@ class DisabledIndirectDisposalSingleDisposalsTriageControllerSpec
           controller.checkYourAnswers()(FakeRequest()),
           routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
         )
+      }
+
+    }
+
+  }
+
+}
+
+class DisabledPeriodOfAdminSingleDisposalsTriageControllerSpec
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport {
+
+  override val overrideBindings =
+    List[GuiceableModule](
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SessionStore].toInstance(mockSessionStore)
+    )
+
+  override lazy val additionalConfig = Configuration(
+    "period-of-admin.enabled" -> false
+  )
+
+  lazy val controller = instanceOf[SingleDisposalsTriageController]
+
+  "SingleDisposalsTriageController" when {
+
+    "period of admin is disabled" when {
+
+      "handling requests to display the cya page" must {
+
+        "redirect to the exit page when the disposal date is after the date of death" in {
+          val dateOfDeath = sample[DateOfDeath]
+
+          val representeeAnswers =
+            sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
+          val triageAnswers      =
+            IncompleteSingleDisposalTriageAnswers(
+              hasConfirmedSingleDisposal = true,
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+              disposalMethod = Some(sample[DisposalMethod]),
+              wasAUKResident = Some(false),
+              countryOfResidence = Some(sample[Country]),
+              assetType = Some(AssetType.Residential),
+              completionDate = None,
+              disposalDate = Some(DisposalDate(dateOfDeath.value.plusDays(1L), sample[TaxYear])),
+              tooEarlyDisposalDate = None
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[StartingNewDraftReturn].copy(
+                    newReturnTriageAnswers = Right(triageAnswers),
+                    representeeAnswers = Some(representeeAnswers)
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            controller.checkYourAnswers()(FakeRequest()),
+            routes.CommonTriageQuestionsController.periodOfAdministrationNotHandled()
+          )
+        }
+
       }
 
     }
