@@ -29,9 +29,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow:     uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
@@ -45,12 +45,19 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 @userKey = @{
     representativeType match {
         case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
         case Some(Capacitor) => ".capacitor"
         case None =>
             if (isAgent) ".agent"
             else if (isATrust) ".trust"
             else ""
+    }
+}
+
+@isPeriodOfAdmin = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => true
+        case _ => false
     }
 }
 
@@ -81,12 +88,14 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
     Some(cyaChange(messages("numberOfProperties.cyaChange"), routes.CommonTriageQuestionsController.howManyProperties().url)),
       "numberOfProperties"
   )
-  @cyaRow(
-    messages(s"disposalMethod$userKey.title"),
-    Html(messages(s"disposalMethod.${answers.disposalMethod.toString}")),
-    Some(cyaChange(messages("disposalMethod.cyaChange"), routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty().url)),
-      "disposalMethod"
-  )
+  @if(!isPeriodOfAdmin){
+      @cyaRow(
+        messages(s"disposalMethod$userKey.title"),
+        Html(messages(s"disposalMethod.${answers.disposalMethod.toString}")),
+        Some(cyaChange(messages("disposalMethod.cyaChange"), routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty().url)),
+          "disposalMethod"
+      )
+  }
   @cyaRow(
     messages(s"wereYouAUKResident$userKey.title"),
     Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
