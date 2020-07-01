@@ -73,7 +73,7 @@
 
 @legend = @{messages(s"$key$userMsgKey.title")}
 @title = @{if(isPeriodOfAdmin) legend else messages(s"$key$userMsgKey.main.title") }
-
+@label = @{if(isPeriodOfAdmin) pageHeading(title) else Html(s"""<h2 class="heading-medium">$legend</h2>""")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
@@ -95,7 +95,7 @@
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = if(isPeriodOfAdmin) pageHeading(title) else Html(s"""<h2 class="heading-medium">$legend</h2>"""),
+            label = label,
             errorKey = form.error(key).map(e => s"$userErrorMsgKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
