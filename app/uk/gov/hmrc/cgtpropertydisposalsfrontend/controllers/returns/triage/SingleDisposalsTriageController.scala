@@ -1138,7 +1138,8 @@ class SingleDisposalsTriageController @Inject() (
                 c,
                 displayReturnToSummaryLink,
                 isATrust,
-                c.representativeType()
+                c.representativeType(),
+                representeeAnswers
               )
             )
 
@@ -1390,7 +1391,8 @@ class SingleDisposalsTriageController @Inject() (
             updateAnswersAndShowCheckYourAnswersPage(
               state,
               CompleteSingleDisposalTriageAnswers(t, m, Country.uk, r, d, c),
-              displayReturnToSummaryLink
+              displayReturnToSummaryLink,
+              representeeAnswers
             )
 
           case IncompleteSingleDisposalTriageAnswers(
@@ -1407,7 +1409,8 @@ class SingleDisposalsTriageController @Inject() (
             updateAnswersAndShowCheckYourAnswersPage(
               state,
               CompleteSingleDisposalTriageAnswers(t, m, country, r, d, c),
-              displayReturnToSummaryLink
+              displayReturnToSummaryLink,
+              representeeAnswers
             )
         }
       }
@@ -1416,7 +1419,8 @@ class SingleDisposalsTriageController @Inject() (
   private def updateAnswersAndShowCheckYourAnswersPage(
     state: JourneyState,
     newCompleteTriageAnswers: CompleteSingleDisposalTriageAnswers,
-    displayReturnToSummaryLink: Boolean
+    displayReturnToSummaryLink: Boolean,
+    representeeAnswers: Option[RepresenteeAnswers]
   )(implicit
     request: RequestWithSessionData[_],
     hc: HeaderCarrier
@@ -1457,7 +1461,8 @@ class SingleDisposalsTriageController @Inject() (
             newCompleteTriageAnswers,
             displayReturnToSummaryLink,
             isATrust,
-            newCompleteTriageAnswers.representativeType()
+            newCompleteTriageAnswers.representativeType(),
+            representeeAnswers
           )
         )
     }

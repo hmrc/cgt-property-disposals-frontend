@@ -89,7 +89,7 @@
      @representeeSection(s.representeeAnswers)
 
      <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
-     @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType)
+     @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType, s.representeeAnswers)
 
      <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
      @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
@@ -152,7 +152,7 @@
         @representeeSection(s.representeeAnswers)
 
         <h2 class="heading-medium">@messages("task-list.triage.link")</h2>
-        @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType)
+        @singleDisposalTriageSummary(s.triageAnswers, isATrust, representativeType, s.representeeAnswers)
 
         <h2 class="heading-medium">@messages("task-list.enter-company-details.link")</h2>
         @singleIndirectDisposalAddressSummary(s.companyAddress)
@@ -205,7 +205,7 @@
         @representeeSection(singleMixedUse.representeeAnswers)
 
         <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
-        @singleDisposalTriageSummary(singleMixedUse.triageAnswers, isATrust, representativeType)
+        @singleDisposalTriageSummary(singleMixedUse.triageAnswers, isATrust, representativeType, singleMixedUse.representeeAnswers)
 
         <h2 class="heading-medium">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
         @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers)

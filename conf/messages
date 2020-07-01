@@ -1065,6 +1065,7 @@ disposalDate.agent.title=When the property was disposed of, what date were contr
 disposalDate.trust.title=When the property was disposed of, what date were contracts exchanged?
 disposalDate.capacitor.title=When the property was disposed of, what date were contracts exchanged?
 disposalDate.personalRep.title=When the property was disposed of, what date were contracts exchanged?
+disposalDate.personalRepInPeriodOfAdmin.title=When the property was disposed of, what date were contracts exchanged?
 
 disposalDate.indirectDisposal.title=What date did you sell the shares?
 
@@ -1097,6 +1098,7 @@ completionDate.agent.title=When the property was disposed of what was the comple
 completionDate.trust.title=When the property was disposed of what was the completion date?
 completionDate.capacitor.title=When the property was disposed of what was the completion date?
 completionDate.personalRep.title=When the property was disposed of what was the completion date?
+completionDate.personalRepInPeriodOfAdmin.title=When the property was disposed of what was the completion date?
 
 completionDate.helpText=It’s usually when you got the money from the sale or property transfer and the new owner got the keys. For example, 25 4 2020.
 completionDate.agent.helpText=It’s usually when the money from the property sale was transferred and the new owner got the keys. For example, 25 4 2020.
