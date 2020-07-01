@@ -214,7 +214,7 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def wereYouUKResidentBackLinkUrl(triageAnswers: SingleDisposalTriageAnswers): Call =
-    if (triageAnswers.isPersonalRepresentativeInPeriodOfAdmin())
+    if (triageAnswers.isPeriodOfAdmin())
       routes.CommonTriageQuestionsController.howManyProperties()
     else
       routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -1698,7 +1698,7 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def populateDisposalMethodInPeriodOfAdmin(s: SingleDisposalTriageAnswers): SingleDisposalTriageAnswers =
-    if (s.isPersonalRepresentativeInPeriodOfAdmin())
+    if (s.isPeriodOfAdmin())
       s.fold(
         _.copy(disposalMethod = Some(DisposalMethod.Sold)),
         _.copy(disposalMethod = DisposalMethod.Sold)

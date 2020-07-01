@@ -64,7 +64,7 @@
 @userMsgKey = @{ userKey.stripSuffix(".") }
 @userErrorMsgKey = @{ userKey.stripPrefix(".") }
 
-@isPersonalRepresentativeInPeriodOfAdmin = @{
+@isPeriodOfAdmin = @{
     representativeType match {
         case Some(PersonalRepresentativeInPeriodOfAdmin) => true
         case _                                           => false
@@ -74,12 +74,12 @@
 @title = @{messages(s"$key$userMsgKey.main.title")}
 
 @subtitle = @{
-   if(isPersonalRepresentativeInPeriodOfAdmin) ""
+   if(isPeriodOfAdmin) ""
    else s"""<h2 class="heading-medium">${messages(s"$key$userMsgKey.title")}</h2>"""
 }
 
 @helpTextMsgs = @{
-    if(isPersonalRepresentativeInPeriodOfAdmin) ""
+    if(isPeriodOfAdmin) ""
     else s"""
             |<p>${messages(s"$key.helpText.p1")}</p>
             |<p>${messages(s"$key$userMsgKey.helpText.p2")}</p>

@@ -124,7 +124,7 @@ object SingleDisposalTriageAnswers {
         case _                           => None
       }
 
-    def isPersonalRepresentativeInPeriodOfAdmin(): Boolean =
+    def isPeriodOfAdmin(): Boolean =
       s.fold[Option[IndividualUserType]](
         _.individualUserType,
         _.individualUserType
