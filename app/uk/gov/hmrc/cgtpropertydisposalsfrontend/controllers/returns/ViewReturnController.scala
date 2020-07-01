@@ -17,8 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.instances.future._
-import cats.instances.string._
-import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -32,6 +30,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import cats.syntax.eq._
+import cats.instances.string._
 
 import scala.concurrent.{ExecutionContext, Future}
 

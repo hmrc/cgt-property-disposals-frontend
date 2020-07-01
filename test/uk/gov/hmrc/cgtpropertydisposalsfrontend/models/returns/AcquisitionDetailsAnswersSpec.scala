@@ -21,6 +21,9 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, Residential}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentativeInPeriodOfAdmin, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 
 class AcquisitionDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
@@ -96,6 +99,83 @@ class AcquisitionDetailsAnswersSpec extends WordSpec with Matchers with ScalaChe
             .copy(acquisitionFees = None)
           completeAnswers.unset(_.shouldUseRebase)   shouldBe incompleteAnswers
             .copy(shouldUseRebase = None)
+        }
+
+      }
+
+      "have a method which unsets all relevant fields but the acquisition method" when {
+
+        val completeAnswers =
+          sample[CompleteAcquisitionDetailsAnswers]
+            .copy(rebasedAcquisitionPrice = Some(sample[AmountInPence]))
+
+        "the user is in period of admin and the asset type is indirect disposal" in {
+          completeAnswers.unsetAllButAcquisitionMethod(
+            sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+              assetType = IndirectDisposal
+            )
+          ) shouldBe IncompleteAcquisitionDetailsAnswers(
+            Some(completeAnswers.acquisitionMethod),
+            Some(completeAnswers.acquisitionDate),
+            None,
+            None,
+            Some(completeAnswers.improvementCosts),
+            None,
+            None
+          )
+
+        }
+
+        "the user is in period of admin and the asset type is not indirect disposal" in {
+          completeAnswers.unsetAllButAcquisitionMethod(
+            sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+              assetType = Residential
+            )
+          ) shouldBe IncompleteAcquisitionDetailsAnswers(
+            Some(completeAnswers.acquisitionMethod),
+            Some(completeAnswers.acquisitionDate),
+            None,
+            None,
+            None,
+            None,
+            None
+          )
+        }
+
+        "the user is not in period of admin and the asset type is indirect disposal" in {
+          completeAnswers.unsetAllButAcquisitionMethod(
+            sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              assetType = IndirectDisposal
+            )
+          ) shouldBe IncompleteAcquisitionDetailsAnswers(
+            Some(completeAnswers.acquisitionMethod),
+            None,
+            None,
+            None,
+            Some(completeAnswers.improvementCosts),
+            None,
+            None
+          )
+        }
+
+        "the user is not in period of admin and the asset type is not indirect disposal" in {
+          completeAnswers.unsetAllButAcquisitionMethod(
+            sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              assetType = Residential
+            )
+          ) shouldBe IncompleteAcquisitionDetailsAnswers(
+            Some(completeAnswers.acquisitionMethod),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
+          )
         }
 
       }

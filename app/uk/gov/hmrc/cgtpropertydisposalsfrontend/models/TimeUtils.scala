@@ -134,7 +134,14 @@ object TimeUtils {
       s"date.short.${date.getMonthValue()}"
     )} ${date.getYear()}"""
 
-  implicit val order: Order[LocalDate] = Order.from(_ compareTo _)
+  implicit val localDateOrder: Order[LocalDate] = Order.from(_ compareTo _)
+
+  // what's the  start date of the tax year the given date falls into?
+  def taxYearStart(date: LocalDate): LocalDate = {
+    val currentCalendarTaxYearStart = LocalDate.of(date.getYear, 4, 6)
+    if (date < currentCalendarTaxYearStart) currentCalendarTaxYearStart.minusYears(1L)
+    else currentCalendarTaxYearStart
+  }
 
   // what's the  start date of the tax year the given date falls into?
   def taxYearStart(date: LocalDate): LocalDate = {

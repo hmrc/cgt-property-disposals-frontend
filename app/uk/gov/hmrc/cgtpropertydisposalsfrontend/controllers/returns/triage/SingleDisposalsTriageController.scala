@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Other, Sold}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
@@ -546,16 +546,8 @@ class SingleDisposalsTriageController @Inject() (
       case Right(currentDraftReturn: DraftSingleDisposalReturn)               =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map { e =>
-            val answer = e
-              .unset(_.acquisitionDate)
-              .unset(_.acquisitionPrice)
-              .unset(_.rebasedAcquisitionPrice)
-              .unset(_.shouldUseRebase)
-              .unset(_.improvementCosts)
-              .unset(_.acquisitionFees)
-            if (newAnswers.assetType.contains(AssetType.IndirectDisposal)) answer else answer.unset(_.improvementCosts)
-          },
+          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers
+            .map(_.unsetAllButAcquisitionMethod(currentDraftReturn.triageAnswers)),
           initialGainOrLoss = None,
           reliefDetailsAnswers = currentDraftReturn.reliefDetailsAnswers
             .map(_.unsetPrrAndLettingRelief()),
@@ -567,15 +559,8 @@ class SingleDisposalsTriageController @Inject() (
       case Left(Right(currentDraftReturn: DraftSingleIndirectDisposalReturn)) =>
         currentDraftReturn.copy(
           triageAnswers = newAnswers,
-          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers.map { e =>
-            val answer = e
-              .unset(_.acquisitionDate)
-              .unset(_.acquisitionPrice)
-              .unset(_.rebasedAcquisitionPrice)
-              .unset(_.shouldUseRebase)
-              .unset(_.acquisitionFees)
-            if (newAnswers.assetType.contains(AssetType.IndirectDisposal)) answer else answer.unset(_.improvementCosts)
-          },
+          acquisitionDetailsAnswers = currentDraftReturn.acquisitionDetailsAnswers
+            .map(_.unsetAllButAcquisitionMethod(currentDraftReturn.triageAnswers)),
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
           supportingEvidenceAnswers = None
@@ -695,12 +680,15 @@ class SingleDisposalsTriageController @Inject() (
                   r.copy(
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
-                      acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(
-                        _.unset(_.acquisitionDate)
-                          .unset(_.acquisitionPrice)
-                          .unset(_.rebasedAcquisitionPrice)
-                          .unset(_.shouldUseRebase)
-                      ),
+                      acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map { a =>
+                        if (d.triageAnswers.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
+                          a.unset(_.acquisitionPrice)
+                        else
+                          a.unset(_.acquisitionDate)
+                            .unset(_.acquisitionPrice)
+                            .unset(_.rebasedAcquisitionPrice)
+                            .unset(_.shouldUseRebase)
+                      },
                       initialGainOrLoss = None,
                       reliefDetailsAnswers = d.reliefDetailsAnswers
                         .map(_.unsetPrrAndLettingRelief()),

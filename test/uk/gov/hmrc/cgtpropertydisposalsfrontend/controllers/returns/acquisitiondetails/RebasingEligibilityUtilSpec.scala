@@ -34,7 +34,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
     val afterCutoff  = sample[CompleteAcquisitionDetailsAnswers]
       .copy(acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents.plusDays(1)))
     val triage       = sample[CompleteSingleDisposalTriageAnswers]
-      .copy(countryOfResidence = Country.uk)
+      .copy(countryOfResidence = Country.uk, individualUserType = None)
   }
 
   object nonUkNonResidential {
@@ -53,7 +53,8 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
     val triage       = sample[CompleteSingleDisposalTriageAnswers]
       .copy(
         countryOfResidence = Country("US", Some("United States")),
-        assetType = NonResidential
+        assetType = NonResidential,
+        individualUserType = None
       )
   }
 
@@ -73,7 +74,8 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
     val triage       = sample[CompleteSingleDisposalTriageAnswers]
       .copy(
         countryOfResidence = Country("US", Some("United States")),
-        assetType = Residential
+        assetType = Residential,
+        individualUserType = None
       )
   }
 

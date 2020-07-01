@@ -67,6 +67,13 @@
           else ""
   }
 }
+@helpTextUserKey = @{
+  representativeType match {
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent =>  ".personalRepInPeriodOfAdmin.agent"
+      case _ => userKey
+  }
+}
 
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -120,7 +127,7 @@
             selected = selectedIndex,
             error = form.error(key),
             options = options,
-            helpText = Some(Html(messages(s"$key$userKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate))))
+            helpText = Some(Html(messages(s"$key$helpTextUserKey$rebasingKey.helpText", TimeUtils.govDisplayFormat(rebaseCutOffDate))))
         )
         @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1")))
 

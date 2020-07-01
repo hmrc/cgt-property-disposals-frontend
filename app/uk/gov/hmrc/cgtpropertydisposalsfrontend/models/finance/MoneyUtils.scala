@@ -84,7 +84,8 @@ object MoneyUtils {
     isTooSmall: BigDecimal => Boolean,
     isTooLarge: BigDecimal => Boolean,
     tooSmallArgs: List[String] = Nil,
-    tooLargeArgs: List[String] = Nil
+    tooLargeArgs: List[String] = Nil,
+    requiredErrorArgs: List[String] = Nil
   ): Formatter[BigDecimal] =
     new Formatter[BigDecimal] {
       override def bind(
@@ -93,7 +94,7 @@ object MoneyUtils {
       ): Either[Seq[FormError], BigDecimal] = {
         val result =
           FormUtils
-            .readValue(key, data, identity)
+            .readValue(key, data, identity, requiredErrorArgs)
             .flatMap(
               validateAmountOfMoney(
                 key,

@@ -365,16 +365,7 @@ class DisposalDetailsControllerSpec
       ) =
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
-          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map { e =>
-            val answer    = e
-              .unset(_.acquisitionDate)
-              .unset(_.acquisitionPrice)
-              .unset(_.rebasedAcquisitionPrice)
-              .unset(_.shouldUseRebase)
-              .unset(_.acquisitionFees)
-            val assetType = d.triageAnswers.fold(_.assetType, e => Some(e.assetType))
-            if (assetType.contains(AssetType.IndirectDisposal)) answer else answer.unset(_.improvementCosts)
-          },
+          acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(d.triageAnswers)),
           initialGainOrLoss = None,
           reliefDetailsAnswers = d.reliefDetailsAnswers.map(
             _.unset(_.privateResidentsRelief)

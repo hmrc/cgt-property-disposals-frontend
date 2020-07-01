@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{rou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.order
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}

@@ -133,7 +133,7 @@
         @representeeSection(m.representeeAnswers)
 
        <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
-       @multipleDisposalsTriageSummary(m.triageAnswers, isATrust)
+       @multipleDisposalsTriageSummary(m.triageAnswers, isATrust, m.representeeAnswers)
 
        <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
        @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), isATrust, representativeType)
@@ -164,7 +164,7 @@
         @acquisitionDetailsSummary(s.acquisitionDetails,
             rebasingEligibilityUtil.getRebasingCutOffDate(IndirectDisposal, wasUkResident = false),
             isUk = false,
-            rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate.value),
+            rebasingEligibilityUtil.isEligibleForRebase(wasAUkResident = false, IndirectDisposal, s.acquisitionDetails.acquisitionDate, representativeType),
             isATrust,
             representativeType,
             s.triageAnswers.assetType
@@ -185,7 +185,7 @@
       @representeeSection(multipleIndirect.representeeAnswers)
 
         <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
-        @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, isATrust)
+        @multipleDisposalsTriageSummary(multipleIndirect.triageAnswers, isATrust, multipleIndirect.representeeAnswers)
 
         <h2 class="heading-medium">Example company details</h2>
         @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)

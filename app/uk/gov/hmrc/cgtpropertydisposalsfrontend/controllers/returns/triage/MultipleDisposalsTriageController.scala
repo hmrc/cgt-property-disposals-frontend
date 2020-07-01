@@ -452,7 +452,8 @@ class MultipleDisposalsTriageController @Inject() (
                 _.subscribedDetails.isATrust,
                 _._1.subscribedDetails.isATrust
               ),
-              answers.representativeType()
+              answers.representativeType(),
+              state.fold(_.representeeAnswers, _._2.fold(_.representeeAnswers, _.representeeAnswers))
             )
           )
         }
@@ -480,7 +481,8 @@ class MultipleDisposalsTriageController @Inject() (
                     _.subscribedDetails.isATrust,
                     _._1.subscribedDetails.isATrust
                   ),
-                  answers.representativeType()
+                  answers.representativeType(),
+                  state.fold(_.representeeAnswers, _._2.fold(_.representeeAnswers, _.representeeAnswers))
                 )
               )
             },
@@ -1258,7 +1260,8 @@ class MultipleDisposalsTriageController @Inject() (
                   state.fold(
                     _.subscribedDetails.isATrust,
                     _._1.subscribedDetails.isATrust
-                  )
+                  ),
+                  representeeAnswers
                 )
               )
             )
@@ -1285,7 +1288,8 @@ class MultipleDisposalsTriageController @Inject() (
                   state.fold(
                     _.subscribedDetails.isATrust,
                     _._1.subscribedDetails.isATrust
-                  )
+                  ),
+                  representeeAnswers
                 )
               )
             )
@@ -1298,7 +1302,8 @@ class MultipleDisposalsTriageController @Inject() (
                 state.fold(
                   _.subscribedDetails.isATrust,
                   _._1.subscribedDetails.isATrust
-                )
+                ),
+                representeeAnswers
               )
             )
         }

@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 
 @this(
@@ -36,11 +37,13 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 
 @(
     answers: CompleteMultipleDisposalsTriageAnswers,
-    isATrust: Boolean
+    isATrust: Boolean,
+        representeeAnswers: Option[RepresenteeAnswers]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @representativeType = @{answers.representativeType()}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 @userKey = @{
     representativeType match {
         case Some(PersonalRepresentative) => ".personalRep"
@@ -52,6 +55,26 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
             else ""
     }
 }
+@userKeyWithSeparatePeriodOfAdmin = @{
+  if(isPeriodOfAdmin) ".personalRepInPeriodOfAdmin" else userKey
+}
+
+@countryOfResidenceTitle = @{
+        if(isPeriodOfAdmin){
+            representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)).fold(
+                sys.error("Could not find date of death for personal rep in period of admin")
+            ) { dateOfDeath =>
+                val taxYearStartYear = TimeUtils.taxYearStart(dateOfDeath.value).getYear
+                messages(
+                    s"multipleDisposalsCountryOfResidence.personalRepInPeriodOfAdmin.title",
+                    taxYearStartYear.toString,
+                    (taxYearStartYear + 1).toString
+                )
+            }
+        } else
+            messages(s"multipleDisposalsCountryOfResidence$userKey.title")
+}
+
 @cyaSection() {
       @answers.individualUserType.filter(i => !viewConfig.periodOfAdminEnabled || i === Self).map { individualUserType =>
       @cyaRow(
@@ -76,20 +99,20 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
     )
 
   @cyaRow(
-    messages(s"multipleDisposalsWereYouAUKResident$userKey.title"),
+    messages(s"multipleDisposalsWereYouAUKResident$userKeyWithSeparatePeriodOfAdmin.title"),
     Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
     Some(cyaChange(messages("multipleDisposalsWereYouAUKResident.cyaChange"), routes.MultipleDisposalsTriageController.wereYouAUKResident().url)),
       "wereYouAUKResident"
   )
     @if(!answers.countryOfResidence.isUk()){
         @cyaRow(
-            messages(s"multipleDisposalsCountryOfResidence$userKey.title"),
+            countryOfResidenceTitle,
             Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
             Some(cyaChange(messages("countryOfResidence.cyaChange"), routes.MultipleDisposalsTriageController.countryOfResidence().url)),
             "countryOfResidence"
         )
         @cyaRow(
-            messages(s"multipleDisposalsAssetTypeForNonUkResidents$userKey.title"),
+            messages(s"multipleDisposalsAssetTypeForNonUkResidents$userKeyWithSeparatePeriodOfAdmin.title"),
             Html(
                 answers.assetTypes.map(assetType =>
                     messages(s"multipleDisposalsAssetTypeForNonUkResidents.${assetType.toString}")
