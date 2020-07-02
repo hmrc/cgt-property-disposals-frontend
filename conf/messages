@@ -1384,16 +1384,31 @@ property-details.multiple-disposals.guidance.agent.p1=You should enter the detai
 property-details.multiple-disposals.guidance.trust.p1=You should enter the details of the property that gave the trust the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
 property-details.multiple-disposals.guidance.capacitor.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
 property-details.multiple-disposals.guidance.personalRep.p1=You should enter the details of the property that gave the person the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p1=You should enter the details of the property that gave the estate the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p1=You should enter the details of the property that gave your client the largest gain or the smallest loss. If the property was a mixed use property, you should consider both the commercial and the residential parts of the property as one property.
+
 property-details.multiple-disposals.guidance.p2=For that one property, you’ll need to enter:
 property-details.multiple-disposals.guidance.li1=property’s UK address
 property-details.multiple-disposals.guidance.li2=contract exchange date
 property-details.multiple-disposals.guidance.li3=disposal amount, less disposal costs for the whole property
+
 property-details.multiple-disposals.guidance.li4=acquisition amount, plus improvement and acquisition costs for the whole property
+property-details.multiple-disposals.guidance.agent.li4=Contract exchange usually happens when your client and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.trust.li4=Contract exchange usually happens when the trust and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.personalRep.li4=Contract exchange usually happens when the person and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.capacitor.li4=Contract exchange usually happens when the person and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.li4=market value plus acquisition costs for the whole property
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.li4=market value plus acquisition costs for the whole property
+
 property-details.multiple-disposals.guidance.p3=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.agent.p3=Contract exchange usually happens when your client and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.trust.p3=Contract exchange usually happens when the trust and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.personalRep.p3=Contract exchange usually happens when the person and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.capacitor.p3=Contract exchange usually happens when the person and the buyer or new owner swap contracts and the buyer pays a deposit.
+
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p3=Contract exchange usually happens when a seller and a buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p3=Contract exchange usually happens when a seller and a buyer or new owner swap contracts and the buyer pays a deposit.
+
 property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
 
 enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
@@ -3729,28 +3744,82 @@ viewReturn.trust.warning.subtext=It takes 3 to 5 days for payments or charges to
 #===================================================
 
 multipleDisposalsDisposalPrice.title=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.personalRep.title=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.capacitor.title=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.agent.title=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.trust.title=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.title=What were the proceeds of the disposal?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.title=What were the proceeds of the disposal?
+
 multipleDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.trust.helpText=This is the amount the trust got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.capacitor.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.personalRep.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs. <br/> If the property was a mixed use property you should consider both the commercial and the residential parts of the property as one property.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs. <br/> If the property was a mixed use property you should consider both the commercial and the residential parts of the property as one property.
+
 multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
 
 multipleDisposalsDisposalPrice.error.required=Enter the disposal value of the property, for example, 20,520.86
+multipleDisposalsDisposalPrice.capacitor.error.required=Enter the disposal value of the property, for example, 20,520.86
+multipleDisposalsDisposalPrice.personalRep.error.required=Enter the disposal value of the property, for example, 20,520.86
+multipleDisposalsDisposalPrice.trust.error.required=Enter the disposal value of the property, for example, 20,520.86
+multipleDisposalsDisposalPrice.agent.error.required=Enter the disposal value of the property, for example, 20,520.86
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.required=Enter the proceeds of the disposal
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the proceeds of the disposal
+
 multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.capacitor.error.=The disposal value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.personalRep.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.trust.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.agent.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.invalid=The proceeds of the disposal must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.invalid=The proceeds of the disposal must be an amount of money, like 160,000 or 23,040.50
+
 multipleDisposalsDisposalPrice.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.capacitor.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRep.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.trust.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.agent.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+
 multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.capacitor.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRep.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.trust.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.agent.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+
 multipleDisposalsDisposalPrice.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.capacitor.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.personalRep.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.trust.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.agent.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=The proceeds of the disposal must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=The proceeds of the disposal must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
 multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.agent.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.trust.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.personalRep.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.capacitor.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=What was the market value of the property on {0}?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What was the market value of the property on {0}?
+
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
 multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.capacitor.helpText= This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
+
 
 multipleDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
 multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
@@ -3758,6 +3827,8 @@ multipleDisposalsAcquisitionPrice.agent.details.p1=Your client can include the c
 multipleDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. The trust cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.capacitor.details.p1=The person can include the cost of improvements that added value to the property. For example, if the person built an extension or replaced a basic kitchen with a luxury one. They cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.personalRep.details.p1=The cost of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if your client built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
 
 multipleDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
 multipleDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
@@ -3765,6 +3836,8 @@ multipleDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of 
 multipleDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, it can only claim its share.
 multipleDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
 multipleDisposalsAcquisitionPrice.personalRep.details.p3=If the person shared any of the costs, you can only include the person’s share.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If your client shared any of the costs, they can only claim their share.
 
 multipleDisposalsAcquisitionPrice.error.invalid=The acquisition value must be an amount of money
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86
@@ -3779,11 +3852,15 @@ multipleDisposalsDisposalDate.agent.title=When the property was disposed of, wha
 multipleDisposalsDisposalDate.trust.title=When the property was disposed of, what date were contracts exchanged?
 multipleDisposalsDisposalDate.capacitor.title=When the property was disposed of, what date were contracts exchanged?
 multipleDisposalsDisposalDate.personalRep.title=When the property was disposed of, what date were contracts exchanged?
+multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.title=When the property was disposed of, what date were contracts exchanged?
+multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.agent.title=When the property was disposed of, what date were contracts exchanged?
 multipleDisposalsDisposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
 multipleDisposalsDisposalDate.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 multipleDisposalsDisposalDate.trust.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 multipleDisposalsDisposalDate.capacitor.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 multipleDisposalsDisposalDate.personalRep.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
+multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
+multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 
 multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 
