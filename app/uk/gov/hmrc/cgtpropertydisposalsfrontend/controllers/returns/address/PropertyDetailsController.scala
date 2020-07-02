@@ -690,7 +690,8 @@ class PropertyDetailsController @Inject() (
                 form,
                 backLink,
                 r.journey.subscribedDetails.isATrust,
-                extractIndividualUserType(r)
+                extractIndividualUserType(r),
+                extractDateOfDeath(r)
               )
             )
         }
@@ -717,7 +718,8 @@ class PropertyDetailsController @Inject() (
                       formWithErrors,
                       backLink,
                       r.journey.subscribedDetails.isATrust,
-                      extractIndividualUserType(r)
+                      extractIndividualUserType(r),
+                      extractDateOfDeath(r)
                     )
                   ),
                 acquisitionPrice =>
@@ -853,7 +855,8 @@ class PropertyDetailsController @Inject() (
                           completeAnswers,
                           shouldAskIfPostcodeExists(assetTypes),
                           r.journey.subscribedDetails.isATrust,
-                          extractIndividualUserType(r)
+                          extractIndividualUserType(r),
+                          extractDateOfDeath(r)
                         )
                       )
                   )
@@ -864,7 +867,8 @@ class PropertyDetailsController @Inject() (
                       c,
                       shouldAskIfPostcodeExists(assetTypes),
                       r.journey.subscribedDetails.isATrust,
-                      extractIndividualUserType(r)
+                      extractIndividualUserType(r),
+                      extractDateOfDeath(r)
                     )
                   )
 
@@ -918,6 +922,16 @@ class PropertyDetailsController @Inject() (
       case Some(r: RepresentativeType) => Some(r)
       case _                           => None
     }
+
+  private def extractDateOfDeath(
+    f: FillingOutReturnAddressJourney
+  ): Option[DateOfDeath] =
+    f.draftReturn
+      .fold(
+        _.representeeAnswers.map(e => e.fold(_.dateOfDeath, _.dateOfDeath)),
+        _.representeeAnswers.map(e => e.fold(_.dateOfDeath, _.dateOfDeath))
+      )
+      .flatten
 
   private def disposalPriceBackLink(
     answers: ExamplePropertyDetailsAnswers

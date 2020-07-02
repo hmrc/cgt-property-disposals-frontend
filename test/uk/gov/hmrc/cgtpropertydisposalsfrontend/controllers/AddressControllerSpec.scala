@@ -96,12 +96,14 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin), _) => ".personalRep"
-      case (Some(Capacitor), _)                                                      => ".capacitor"
-      case (_, UserType.Individual)                                                  => ""
-      case (_, UserType.Organisation)                                                => ".trust"
-      case (_, UserType.Agent)                                                       => ".agent"
-      case other                                                                     => sys.error(s"User type '$other' not handled")
+      case (Some(PersonalRepresentative), _)                                  => ".personalRep"
+      case (Some(PersonalRepresentativeInPeriodOfAdmin), UserType.Agent)      => ".personalRepInPeriodOfAdmin.agent"
+      case (Some(PersonalRepresentativeInPeriodOfAdmin), UserType.Individual) => ".personalRepInPeriodOfAdmin"
+      case (Some(Capacitor), _)                                               => ".capacitor"
+      case (_, UserType.Individual)                                           => ""
+      case (_, UserType.Organisation)                                         => ".trust"
+      case (_, UserType.Agent)                                                => ".agent"
+      case other                                                              => sys.error(s"User type '$other' not handled")
     }
 
   def getUserClue(

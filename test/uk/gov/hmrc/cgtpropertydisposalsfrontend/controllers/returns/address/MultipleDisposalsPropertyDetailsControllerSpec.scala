@@ -21,6 +21,7 @@ import java.time.LocalDate
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -99,17 +100,20 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
+  implicit val messages: Messages = MessagesImpl(lang, messagesApi)
+
   def messageKey(
     userType: UserType,
     individualUserType: Option[IndividualUserType]
   ) =
     (userType, individualUserType) match {
-      case (_, Some(Capacitor))                                                      => ".capacitor"
-      case (_, Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin)) => ".personalRep"
-      case (Individual, _)                                                           => ""
-      case (Organisation, _)                                                         => ".trust"
-      case (Agent, _)                                                                => ".agent"
-      case other                                                                     => sys.error(s"User type '$other' not handled")
+      case (_, Some(Capacitor))                             => ".capacitor"
+      case (_, Some(PersonalRepresentative))                => ".personalRep"
+      case (_, Some(PersonalRepresentativeInPeriodOfAdmin)) => ".personalRepInPeriodOfAdmin"
+      case (Individual, _)                                  => ""
+      case (Organisation, _)                                => ".trust"
+      case (Agent, _)                                       => ".agent"
+      case other                                            => sys.error(s"User type '$other' not handled")
     }
 
   override def updateAddress(
@@ -1995,7 +1999,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
-                      )
+                      ),
+                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                        .copy(individualUserType = None)
                     ),
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = Right(sample[IndividualName])
@@ -2165,6 +2171,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           expectedBackLink: Call,
           userType: UserType
         ): Unit = {
+          val dateOfDeath = LocalDate.of(2020, 1, 1)
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2172,7 +2179,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 userType = Some(userType),
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = draftReturn,
+                    draftReturn = draftReturn.copy(
+                      representeeAnswers =
+                        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath))))
+                    ),
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name =
                         if (userType === Organisation) Left(sample[TrustName])
@@ -2189,10 +2199,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           val individualUserType = draftReturn.triageAnswers
             .fold(_.individualUserType, _.individualUserType)
+          val userKey            = userMessageKey(individualUserType, userType)
+          val arg                = TimeUtils.govShortDisplayFormat(dateOfDeath)
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"multipleDisposalsAcquisitionPrice.title"),
+            messageFromMessageKey(s"multipleDisposalsAcquisitionPrice$userKey.title", arg),
             { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
@@ -2328,6 +2340,37 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             ),
             routes.PropertyDetailsController.disposalPrice(),
             Individual
+          )
+        }
+        "estate has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Individual
+          )
+        }
+
+        "agent of estate has started but not completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = None
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))
+            ),
+            routes.PropertyDetailsController.disposalPrice(),
+            Agent
           )
         }
 
@@ -2486,6 +2529,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
                     draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
                       )
@@ -2645,7 +2689,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       val currentDraftReturn =
         sample[DraftMultipleDisposalsReturn].copy(
           triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-            .copy(assetTypes = List(AssetType.Residential)),
+            .copy(
+              assetTypes = List(AssetType.Residential),
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            ),
           examplePropertyDetailsAnswers = Some(allQuestionsAnswered),
           representeeAnswers = None
         )

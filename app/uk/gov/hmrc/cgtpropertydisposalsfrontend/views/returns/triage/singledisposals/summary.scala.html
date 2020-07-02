@@ -56,12 +56,7 @@
     }
 }
 
-@isPeriodOfAdmin = @{
-    representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => true
-        case _ => false
-    }
-}
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 
 @isIndirecDisposal = @{
     answers match {

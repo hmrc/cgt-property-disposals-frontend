@@ -64,12 +64,7 @@
 @userMsgKey = @{ userKey.stripSuffix(".") }
 @userErrorMsgKey = @{ userKey.stripPrefix(".") }
 
-@isPeriodOfAdmin = @{
-    representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => true
-        case _                                           => false
-    }
-}
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 
 @legend = @{messages(s"$key$userMsgKey.title")}
 @title = @{if(isPeriodOfAdmin) legend else messages(s"$key$userMsgKey.main.title") }
