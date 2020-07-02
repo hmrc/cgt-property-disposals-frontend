@@ -27,17 +27,19 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers
 
 @this(
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow:     uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
     answers: CompleteSingleDisposalTriageAnswers,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    representeeAnswers: Option[RepresenteeAnswers]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -45,7 +47,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 @userKey = @{
     representativeType match {
         case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
         case Some(Capacitor) => ".capacitor"
         case None =>
             if (isAgent) ".agent"
@@ -54,11 +56,33 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
     }
 }
 
+@isPeriodOfAdmin = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => true
+        case _ => false
+    }
+}
+
 @isIndirecDisposal = @{
     answers match {
         case CompleteSingleDisposalTriageAnswers(_, _, _, AssetType.IndirectDisposal, _, _) => true
         case _ => false
     }
+}
+
+@countryOfResidentTitle = @{
+    if(isPeriodOfAdmin){
+        representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)).fold(
+            sys.error("Could not find date of death for personal rep in period of admin")
+        ) { dateOfDeath =>
+          val taxYearStartYear = TimeUtils.taxYearStart(dateOfDeath.value).getYear
+          messages(
+             s"triage.enterCountry$userKey.title",
+             taxYearStartYear.toString,
+             (taxYearStartYear + 1).toString
+          )
+        }
+    } else messages(s"triage.enterCountry$userKey.title")
 }
 
 @cyaSection() {
@@ -74,28 +98,29 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
       )
   }
 
-
   @cyaRow(
     messages("numberOfProperties.title"),
     Html(messages(s"numberOfProperties.One")),
     Some(cyaChange(messages("numberOfProperties.cyaChange"), routes.CommonTriageQuestionsController.howManyProperties().url)),
       "numberOfProperties"
   )
+  @if(!isPeriodOfAdmin){
+      @cyaRow(
+        messages(s"disposalMethod$userKey.title"),
+        Html(messages(s"disposalMethod.${answers.disposalMethod.toString}")),
+        Some(cyaChange(messages("disposalMethod.cyaChange"), routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty().url)),
+          "disposalMethod"
+      )
+  }
   @cyaRow(
-    messages(s"disposalMethod$userKey.title"),
-    Html(messages(s"disposalMethod.${answers.disposalMethod.toString}")),
-    Some(cyaChange(messages("disposalMethod.cyaChange"), routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty().url)),
-      "disposalMethod"
-  )
-  @cyaRow(
-    messages(s"wereYouAUKResident$userKey.title"),
+   messages(s"wereYouAUKResident$userKey.title"),
     Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
     Some(cyaChange(messages("wereYouAUKResident.cyaChange"), routes.SingleDisposalsTriageController.wereYouAUKResident().url)),
       "wereYouAUKResident"
   )
     @if(!answers.countryOfResidence.isUk()){
         @cyaRow(
-            messages(s"triage.enterCountry$userKey.title"),
+            countryOfResidentTitle,
             Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
             Some(cyaChange(messages("countryOfResidence.cyaChange"), routes.SingleDisposalsTriageController.countryOfResidence().url)),
             "countryOfResidence"

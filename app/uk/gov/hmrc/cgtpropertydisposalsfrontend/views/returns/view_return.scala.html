@@ -145,7 +145,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     @completeReturn match {
     case s: CompleteSingleDisposalReturn => {
     <h2>@messages("task-list.triage.link")</h2>
-          @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType)
+          @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType, s.representeeAnswers)
 
           <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
           @addressSummary(s.propertyAddress, s.hasNonResidentialAssetType())
@@ -208,7 +208,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
     case s: CompleteSingleIndirectDisposalReturn => {
         <h2>@messages("task-list.triage.link")</h2>
-        @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType)
+        @singleDisposalTriageSummary(s.triageAnswers, subscribedDetails.isATrust, representativeType, s.representeeAnswers)
 
         <h2 class="heading-medium">@messages("task-list.enter-company-details.link")</h2>
         @singleIndirectDisposalAddressSummary(s.companyAddress)
@@ -266,7 +266,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
     case singleMixedUse: CompleteSingleMixedUseDisposalReturn=> {
         <h2 class="heading-medium" >@messages("task-list.triage.link")</h2>
-        @singleDisposalTriageSummary(singleMixedUse.triageAnswers, subscribedDetails.isATrust, representativeType)
+        @singleDisposalTriageSummary(singleMixedUse.triageAnswers, subscribedDetails.isATrust, representativeType, singleMixedUse.representeeAnswers)
 
         <h2 class="heading-medium">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
         @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers)

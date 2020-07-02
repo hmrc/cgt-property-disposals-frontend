@@ -27,14 +27,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(
@@ -50,53 +51,60 @@
 
 @userKey = @{
     representativeType match {
-        case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-        case Some(Capacitor) => ".capacitor"
+        case Some(PersonalRepresentative) => ".personalRep."
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin."
+        case Some(Capacitor) => ".capacitor."
         case None =>
-            if (isAgent) ".agent"
-            else if (isATrust) ".trust"
+            if (isAgent) ".agent."
+            else if (isATrust) ".trust."
             else ""
     }
 }
 
-@userTypeErrorPrefix = @{
+@userMsgKey = @{ userKey.stripSuffix(".") }
+@userErrorMsgKey = @{ userKey.stripPrefix(".") }
+
+@isPeriodOfAdmin = @{
     representativeType match {
-        case Some(PersonalRepresentative) => "personalRep."
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => "personalRep."
-        case Some(Capacitor) => "capacitor."
-        case None =>
-            if (isAgent) "agent."
-            else if (isATrust) "trust."
-            else ""
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => true
+        case _                                           => false
     }
 }
 
-@title = @{messages(s"$key$userKey.title")}
+@legend = @{messages(s"$key$userMsgKey.title")}
+@title = @{if(isPeriodOfAdmin) legend else messages(s"$key$userMsgKey.main.title") }
+@label = @{if(isPeriodOfAdmin) pageHeading(title) else Html(s"""<h2 class="heading-medium">$legend</h2>""")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form, Some(s"$key$userKey"))
+        @errorSummary(form, Some(s"$key$userMsgKey"))
     }
+
+    @caption(messages("triage.caption"))
+
+  @if(!isPeriodOfAdmin) {
+    @pageHeading(title)
+    <p>@messages(s"$key.helpText.p1")</p>
+    <p>@messages(s"$key$userMsgKey.helpText.p2")</p>
+  }
 
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = pageHeading(title, Some(messages("triage.caption"))),
-            errorKey = form.error(key).map(e => s"$userTypeErrorPrefix${e.message}"),
+            label = label,
+            errorKey = form.error(key).map(e => s"$userErrorMsgKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages("wereYouAUKResident.helpText")))
+            helpText = None
         )
 
-      <p>@Html(messages(s"$key$userKey.link", viewConfig.workOurYouResidenceStatusUrl))</p>
+        <p>@Html(messages(s"$key$userMsgKey.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
-      @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+        @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
