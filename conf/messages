@@ -3757,6 +3757,7 @@ multipleDisposalsDisposalPrice.trust.helpText=This is the amount the trust got w
 multipleDisposalsDisposalPrice.capacitor.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.personalRep.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs. <br/> If the property was a mixed use property you should consider both the commercial and the residential parts of the property as one property.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs. <br/> If the property was a mixed use property you should consider both the commercial and the residential parts of the property as one property.
 
 multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
@@ -3767,6 +3768,7 @@ multipleDisposalsDisposalPrice.personalRep.error.required=Enter the disposal val
 multipleDisposalsDisposalPrice.trust.error.required=Enter the disposal value of the property, for example, 20,520.86
 multipleDisposalsDisposalPrice.agent.error.required=Enter the disposal value of the property, for example, 20,520.86
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.required=Enter the proceeds of the disposal
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the proceeds of the disposal
 
 multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.capacitor.error.=The disposal value must be an amount of money, like 160,000 or 23,040.50
@@ -3774,6 +3776,7 @@ multipleDisposalsDisposalPrice.personalRep.error.invalid=The disposal value must
 multipleDisposalsDisposalPrice.trust.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.agent.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.invalid=The proceeds of the disposal must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.invalid=The proceeds of the disposal must be an amount of money, like 160,000 or 23,040.50
 
 multipleDisposalsDisposalPrice.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.capacitor.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
@@ -3781,6 +3784,7 @@ multipleDisposalsDisposalPrice.personalRep.error.tooLarge=The disposal value mus
 multipleDisposalsDisposalPrice.trust.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.agent.error.tooLarge=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
 
 multipleDisposalsDisposalPrice.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.capacitor.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
@@ -3788,6 +3792,7 @@ multipleDisposalsDisposalPrice.personalRep.error.tooSmall=The disposal value mus
 multipleDisposalsDisposalPrice.trust.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.agent.error.tooSmall=The disposal value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The proceeds of the disposal must be an amount of money between 1 and 50,000,000,000
 
 multipleDisposalsDisposalPrice.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.capacitor.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
@@ -3795,6 +3800,7 @@ multipleDisposalsDisposalPrice.personalRep.error.tooManyDecimals=The disposal va
 multipleDisposalsDisposalPrice.trust.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.agent.error.tooManyDecimals=The disposal value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=The proceeds of the disposal must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=The proceeds of the disposal must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 multipleDisposalsDisposalPrice.cyaChange=the disposal value of the property
 
