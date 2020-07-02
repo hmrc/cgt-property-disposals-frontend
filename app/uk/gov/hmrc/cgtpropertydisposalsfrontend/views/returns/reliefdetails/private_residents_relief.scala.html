@@ -55,7 +55,7 @@
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -64,7 +64,18 @@
   }
 }
 
-@title = @{messages(s"$key$userKey.title")}
+@isPeriodOfAdmin = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => true
+        case _                                           => false
+    }
+}
+
+@legend = @{messages(s"$key$userKey.title")}
+@title = @{if(isPeriodOfAdmin) messages(s"$key$userKey.main.title") else legend}
+@label = @{if(isPeriodOfAdmin) pageHeading(legend) else Html(s"""<h2 class="heading-medium">$legend</h2>""")}
+@helpText = @{ if(isPeriodOfAdmin) None else Some(Html(messages(s"$key$userKey.helpText")))}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @customErrorKey = @{if(form.error(valueKey).nonEmpty) s"$valueKey$userKey" else s"$key$userKey"}
 
@@ -102,30 +113,41 @@
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
-@backLinkComponent(backLink)
+    @backLinkComponent(backLink)
 
-@if(hasErrors) {
- @errorSummary(form, Some(customErrorKey))
-}
+    @if(hasErrors) {
+     @errorSummary(form, Some(customErrorKey))
+    }
 
-@caption(messages("reliefDetails.caption"))
+    @caption(messages("reliefDetails.caption"))
 
-@formWrapper(routes.ReliefDetailsController.privateResidentsReliefSubmit(), 'novalidate -> "novalidate") {
- @radioGroupConditional(
-  fieldId = key,
-  label = pageHeading(title),
-  selected = selectedIndex,
-  error = form.error(key),
-  options = options,
-  helpText = Some(Html(messages(s"$key$userKey.helpText"))),
-  customErrorKey = Some(customErrorKey)
- )
- <p>
-  <a href="@{appConfig.lettingReliefInfo}" target="_blank">
-   @messages(s"$key.furtherInfoLink")
-  </a>
- </p>
- @submitButton(messages("button.saveAndContinue"))
+    @if(isPeriodOfAdmin) {
+        @pageHeading(title)
+        <p>@messages(s"$key$userKey.helpText.p1")</p>
+        <ui class="list-bullet">
+            <li>@messages(s"$key$userKey.helpText.li1")</li>
+            <li>@messages(s"$key$userKey.helpText.li2")</li>
+        </ui>
+    }
+
+    @formWrapper(routes.ReliefDetailsController.privateResidentsReliefSubmit(), 'novalidate -> "novalidate") {
+     @radioGroupConditional(
+        fieldId = key,
+        label = label,
+        selected = selectedIndex,
+        error = form.error(key),
+        options = options,
+        helpText = helpText,
+        customErrorKey = Some(customErrorKey)
+     )
+
+     <p>
+      <a href="@{appConfig.lettingReliefInfo}" target="_blank">
+       @messages(s"$key.furtherInfoLink")
+      </a>
+     </p>
+
+     @submitButton(messages("button.saveAndContinue"))
 }
 
 @returnToSummaryLink(displayReturnToSummaryLink = true)

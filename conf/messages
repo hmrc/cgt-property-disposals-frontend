@@ -2701,6 +2701,9 @@ privateResidentsRelief.agent.title=Is your client entitled to claim Private Resi
 privateResidentsRelief.trust.title=Is the trust entitled to claim Private Residence Relief?
 privateResidentsRelief.capacitor.title=Is the person entitled to claim Private Residence Relief?
 privateResidentsRelief.personalRep.title=Was the person entitled to claim Private Residence Relief?
+privateResidentsRelief.personalRepInPeriodOfAdmin.title=Is Private Residence Relief being claimed?
+
+privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Tell us if Private Residence Relief is being claimed
 
 privateResidentsRelief.helpText=You might qualify for this relief if the property had been your main home at some point.
 privateResidentsRelief.agent.helpText=Your client might qualify for this relief if the property had been their main home at some point.
@@ -2708,11 +2711,16 @@ privateResidentsRelief.trust.helpText=The trust might qualify for this relief if
 privateResidentsRelief.capacitor.helpText=The person might qualify for this relief if the property had been their main home at some point.
 privateResidentsRelief.personalRep.helpText=The person might have qualified for this relief if the property had been their main home at some point.
 
+privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Private Residence Relief can be claimed only if:
+privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=the property had been the only home of a beneficiary, both before and after the deceased’s death
+privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=that beneficiary was also entitled to at least 75% of the proceeds of the disposal of the property (assuming that none of the proceeds are needed to meet any liabilities of the deceased person’s estate)
+
 privateResidentsReliefValue.label=Amount of Private Residence Relief you are entitled to
 privateResidentsReliefValue.agent.label=Amount of Private Residence Relief your client is entitled to
 privateResidentsReliefValue.trust.label=Amount of Private Residence Relief the trust is entitled to
 privateResidentsReliefValue.capacitor.label=Amount of Private Residence Relief the person is entitled to
 privateResidentsReliefValue.personalRep.label=Amount of Private Residence Relief the person was entitled to
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.label=Amount of Private Residence Relief being claimed
 
 privateResidentsRelief.furtherInfoLink=Find out about Private Residence Relief (opens in a new window)
 
@@ -2721,12 +2729,14 @@ privateResidentsRelief.agent.error.required=Select yes if your client is entitle
 privateResidentsRelief.trust.error.required=Select yes if the trust is entitled to claim Private Residence Relief
 privateResidentsRelief.capacitor.error.required=Select yes if the person is entitled to Private Residence Relief
 privateResidentsRelief.personalRep.error.required=Select yes if the person was entitled to Private Residence Relief
+privateResidentsRelief.personalRepInPeriodOfAdmin.error.required=Select yes if your client is claiming Private Residence Relief
 
 privateResidentsReliefValue.error.required=Enter the amount of Private Residence Relief, like 108 or 2,940.54
 privateResidentsReliefValue.agent.error.required=Enter the amount of Private Residence Relief your client is entitled to
 privateResidentsReliefValue.trust.error.required=Enter the amount of Private Residence Relief the trust is entitled to
 privateResidentsReliefValue.capacitor.error.required=Enter the amount of Private Residence Relief the person is entitled to
 privateResidentsReliefValue.personalRep.error.required=Enter the amount of Private Residence Relief the person was entitled to
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.required=Enter the amount of Private Residence Relief being claimed
 
 privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.agent.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
