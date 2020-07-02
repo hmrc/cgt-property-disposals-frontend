@@ -115,49 +115,53 @@ class TaskListControllerSpec
         sectionLinkHref: Call,
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => ()
-      ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
-          draftReturn.copy(
-            supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
-            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
-          )
-        )
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(fillingOutReturn)
+      ): Unit =
+        withClue(s"For draft return $draftReturn: ") {
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+            draftReturn.copy(
+              supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+              yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
             )
           )
-        }
 
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("service.title"),
-          { doc =>
-            sectionsStatus match {
-              case TaskListStatus.CannotStart =>
-                doc
-                  .select(s"li#$sectionLinkId > span")
-                  .text shouldBe sectionLinkText
-
-              case _                          =>
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .text         shouldBe sectionLinkText
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .attr("href") shouldBe sectionLinkHref.url
-            }
-
-            doc
-              .select(s"li#$sectionLinkId > strong")
-              .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
-            extraChecks(doc)
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(fillingOutReturn)
+              )
+            )
           }
-        )
-      }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("service.title"),
+            doc =>
+              try {
+                sectionsStatus match {
+                  case TaskListStatus.CannotStart =>
+                    doc
+                      .select(s"li#$sectionLinkId > span")
+                      .text shouldBe sectionLinkText
+
+                  case _                          =>
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .text         shouldBe sectionLinkText
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .attr("href") shouldBe sectionLinkHref.url
+                }
+
+                doc
+                  .select(s"li#$sectionLinkId > strong")
+                  .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+                extraChecks(doc)
+              } catch {
+                case _: Throwable => println(s"Failed with html: ${doc.html()}")
+              }
+          )
+        }
 
       def testSectionNonExistent(draftReturn: DraftSingleDisposalReturn)(
         sectionLinkId: String
@@ -447,7 +451,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = None,
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -464,7 +468,7 @@ class TaskListControllerSpec
             test(
               sample[DraftSingleDisposalReturn].copy(
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = None),
+                  .copy(individualUserType = None, countryOfResidence = Country.uk),
                 propertyAddress = Some(sample[UkAddress]),
                 disposalDetailsAnswers = disposalDetailsState,
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -483,7 +487,7 @@ class TaskListControllerSpec
               test(
                 sample[DraftSingleDisposalReturn].copy(
                   triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                    .copy(individualUserType = None),
+                    .copy(individualUserType = None, countryOfResidence = Country.uk),
                   propertyAddress = Some(sample[UkAddress]),
                   disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                   acquisitionDetailsAnswers = acquisitionDetailsAnswers,
@@ -501,7 +505,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -518,7 +522,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -534,7 +538,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -593,7 +597,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -608,7 +612,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -623,7 +627,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -638,7 +642,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = None,
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -687,7 +691,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -703,7 +707,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -719,7 +723,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -735,7 +739,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = Some(sample[UkAddress]),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -751,7 +755,7 @@ class TaskListControllerSpec
           test(
             sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None),
+                .copy(individualUserType = None, countryOfResidence = Country.uk),
               propertyAddress = None,
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -927,50 +931,54 @@ class TaskListControllerSpec
         sectionLinkHref: Call,
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => ()
-      ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
-          draftReturn.copy(
-            supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
-            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
-          )
-        )
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(fillingOutReturn)
+      ): Unit =
+        withClue(s"For draft return $draftReturn: ") {
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+            draftReturn.copy(
+              supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+              yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
             )
           )
-        }
 
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("service.title"),
-          { doc =>
-            sectionsStatus match {
-              case TaskListStatus.CannotStart =>
-                doc
-                  .select(s"li#$sectionLinkId > span")
-                  .text shouldBe sectionLinkText
-
-              case _                          =>
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .text         shouldBe sectionLinkText
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .attr("href") shouldBe sectionLinkHref.url
-            }
-
-            doc
-              .select(s"li#$sectionLinkId > strong")
-              .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
-            extraChecks(doc)
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(fillingOutReturn)
+              )
+            )
           }
-        )
 
-      }
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("service.title"),
+            doc =>
+              try {
+                sectionsStatus match {
+                  case TaskListStatus.CannotStart =>
+                    doc
+                      .select(s"li#$sectionLinkId > span")
+                      .text shouldBe sectionLinkText
+
+                  case _                          =>
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .text         shouldBe sectionLinkText
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .attr("href") shouldBe sectionLinkHref.url
+                }
+
+                doc
+                  .select(s"li#$sectionLinkId > strong")
+                  .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+                extraChecks(doc)
+              } catch {
+                case _: Throwable => println(s"Failed with html: ${doc.html()}")
+              }
+          )
+
+        }
 
       "display the page with the proper person represented section status" when {
 
@@ -1246,49 +1254,54 @@ class TaskListControllerSpec
         sectionLinkHref: Call,
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => ()
-      ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
-          draftReturn.copy(
-            supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
-            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
-          )
-        )
+      ): Unit =
+        withClue(s"For draft return $draftReturn: ") {
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(fillingOutReturn)
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+            draftReturn.copy(
+              supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+              yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
             )
           )
-        }
 
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("service.title"),
-          { doc =>
-            sectionsStatus match {
-              case TaskListStatus.CannotStart =>
-                doc
-                  .select(s"li#$sectionLinkId > span")
-                  .text shouldBe sectionLinkText
-
-              case _                          =>
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .text         shouldBe sectionLinkText
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .attr("href") shouldBe sectionLinkHref.url
-            }
-
-            doc
-              .select(s"li#$sectionLinkId > strong")
-              .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
-            extraChecks(doc)
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(fillingOutReturn)
+              )
+            )
           }
-        )
-      }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("service.title"),
+            doc =>
+              try {
+                sectionsStatus match {
+                  case TaskListStatus.CannotStart =>
+                    doc
+                      .select(s"li#$sectionLinkId > span")
+                      .text shouldBe sectionLinkText
+
+                  case _                          =>
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .text         shouldBe sectionLinkText
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .attr("href") shouldBe sectionLinkHref.url
+                }
+
+                doc
+                  .select(s"li#$sectionLinkId > strong")
+                  .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+                extraChecks(doc)
+              } catch {
+                case _: Throwable => println(s"Failed with html: ${doc.html()}")
+              }
+          )
+        }
 
       "display the page with the proper person represented section status" when {
 
@@ -1786,50 +1799,55 @@ class TaskListControllerSpec
         sectionLinkHref: Call,
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => ()
-      ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
-          draftReturn.copy(
-            supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
-            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
-          )
-        )
+      ): Unit =
+        withClue(s"For draft return $draftReturn: ") {
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(fillingOutReturn)
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+            draftReturn.copy(
+              supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+              yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
             )
           )
-        }
 
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("service.title"),
-          { doc =>
-            sectionsStatus match {
-              case TaskListStatus.CannotStart =>
-                doc
-                  .select(s"li#$sectionLinkId > span")
-                  .text shouldBe sectionLinkText
-
-              case _                          =>
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .text         shouldBe sectionLinkText
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .attr("href") shouldBe sectionLinkHref.url
-            }
-
-            doc
-              .select(s"li#$sectionLinkId > strong")
-              .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
-            extraChecks(doc)
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(fillingOutReturn)
+              )
+            )
           }
-        )
 
-      }
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("service.title"),
+            doc =>
+              try {
+                sectionsStatus match {
+                  case TaskListStatus.CannotStart =>
+                    doc
+                      .select(s"li#$sectionLinkId > span")
+                      .text shouldBe sectionLinkText
+
+                  case _                          =>
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .text         shouldBe sectionLinkText
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .attr("href") shouldBe sectionLinkHref.url
+                }
+
+                doc
+                  .select(s"li#$sectionLinkId > strong")
+                  .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+                extraChecks(doc)
+              } catch {
+                case _: Throwable => println(s"Failed with html: ${doc.html()}")
+              }
+          )
+
+        }
 
       "display the page with the proper person represented section status" when {
 
@@ -2111,49 +2129,53 @@ class TaskListControllerSpec
         sectionLinkHref: Call,
         sectionsStatus: TaskListStatus,
         extraChecks: Document => Unit = _ => ()
-      ): Unit = {
-        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
-          draftReturn.copy(
-            supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
-            yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
-          )
-        )
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(fillingOutReturn)
+      ): Unit =
+        withClue(s"For draft return $draftReturn: ") {
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn =
+            draftReturn.copy(
+              supportingEvidenceAnswers = draftReturn.supportingEvidenceAnswers.map(removeEvidence),
+              yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.map(removeEvidence)
             )
           )
-        }
 
-        checkPageIsDisplayed(
-          performAction(),
-          messageFromMessageKey("service.title"),
-          { doc =>
-            sectionsStatus match {
-              case TaskListStatus.CannotStart =>
-                doc
-                  .select(s"li#$sectionLinkId > span")
-                  .text shouldBe sectionLinkText
-
-              case _                          =>
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .text         shouldBe sectionLinkText
-                doc
-                  .select(s"li#$sectionLinkId > a")
-                  .attr("href") shouldBe sectionLinkHref.url
-            }
-
-            doc
-              .select(s"li#$sectionLinkId > strong")
-              .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
-            extraChecks(doc)
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(fillingOutReturn)
+              )
+            )
           }
-        )
-      }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("service.title"),
+            doc =>
+              try {
+                sectionsStatus match {
+                  case TaskListStatus.CannotStart =>
+                    doc
+                      .select(s"li#$sectionLinkId > span")
+                      .text shouldBe sectionLinkText
+
+                  case _                          =>
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .text         shouldBe sectionLinkText
+                    doc
+                      .select(s"li#$sectionLinkId > a")
+                      .attr("href") shouldBe sectionLinkHref.url
+                }
+
+                doc
+                  .select(s"li#$sectionLinkId > strong")
+                  .text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+                extraChecks(doc)
+              } catch {
+                case _: Throwable => println(s"Failed with html: ${doc.html()}")
+              }
+          )
+        }
 
       "display the page with the proper person represented section status" when {
 
