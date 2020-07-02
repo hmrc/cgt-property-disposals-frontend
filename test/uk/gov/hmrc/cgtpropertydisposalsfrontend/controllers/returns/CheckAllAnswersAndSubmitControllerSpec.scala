@@ -166,12 +166,14 @@ class CheckAllAnswersAndSubmitControllerSpec
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Some(Capacitor), _)                                                      => ".capacitor"
-      case (Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin), _) => ".personalRep"
-      case (_, UserType.Individual)                                                  => ""
-      case (_, UserType.Organisation)                                                => ".trust"
-      case (_, UserType.Agent)                                                       => ".agent"
-      case other                                                                     => sys.error(s"User type '$other' not handled")
+      case (Some(Capacitor), _)                                          => ".capacitor"
+      case (Some(PersonalRepresentative), _)                             => ".personalRep"
+      case (Some(PersonalRepresentativeInPeriodOfAdmin), UserType.Agent) => ".personalRepInPeriodOfAdmin.agent"
+      case (Some(PersonalRepresentativeInPeriodOfAdmin), _)              => ".personalRepInPeriodOfAdmin"
+      case (_, UserType.Individual)                                      => ""
+      case (_, UserType.Organisation)                                    => ".trust"
+      case (_, UserType.Agent)                                           => ".agent"
+      case other                                                         => sys.error(s"User type '$other' not handled")
     }
 
   "CheckAllAnswersAndSubmitController" when {
@@ -354,8 +356,9 @@ class CheckAllAnswersAndSubmitControllerSpec
         val completeReturn = sample[CompleteMultipleDisposalsReturn]
           .copy(
             triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-              .copy(individualUserType = Some(PersonalRepresentative)),
-            representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
+              .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+            representeeAnswers =
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(LocalDate.now)))),
             hasAttachments = true
           )
 
@@ -1431,6 +1434,36 @@ class CheckAllAnswersAndSubmitControllerSpec
             ),
             Right(IndividualName("John", "Doe")),
             Some(PersonalRepresentative)
+          ),
+          TestScenario(
+            "Estate in period of administration with tax due",
+            UserType.Individual,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
+            Right(IndividualName("John", "Doe")),
+            Some(PersonalRepresentativeInPeriodOfAdmin)
+          ),
+          TestScenario(
+            "Agent of estate in period of administration with tax due",
+            UserType.Agent,
+            AmountInPence(10000),
+            "",
+            taxDueRefLine,
+            List(
+              submissionLine,
+              returnReferenceWithBundleId,
+              addressLine,
+              taxDueDateLine
+            ),
+            Right(IndividualName("John", "Doe")),
+            Some(PersonalRepresentativeInPeriodOfAdmin)
           )
         )
 
@@ -1468,17 +1501,12 @@ class CheckAllAnswersAndSubmitControllerSpec
                 )
               )
               val representeeAnswers = individualUserType match {
-                case Some(PersonalRepresentative) =>
+                case Some(_: RepresentativeType) =>
                   Some(
                     sample[CompleteRepresenteeAnswers]
                       .copy(dateOfDeath = Some(sample[DateOfDeath]))
                   )
-                case Some(Capacitor)              =>
-                  Some(
-                    sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
-                  )
-
-                case _                            => None
+                case _                           => None
               }
               val triageAnswers      =
                 sample[CompleteSingleDisposalTriageAnswers]

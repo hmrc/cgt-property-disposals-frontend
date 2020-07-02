@@ -65,7 +65,8 @@
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => ".personalRepInPeriodOfAdmin"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if(isAgent) => ".personalRepInPeriodOfAdmin.agent"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -182,7 +183,7 @@
 
     @justSubmittedReturn.submissionResponse.charge.map { charge =>
       @representativeType match {
-          case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) => {
+          case Some(PersonalRepresentative) => {
             <h2 class="heading-medium">@messages(s"$key.howToPay.heading")</h2>
 
             <p id="howToPay">@Html(messages(s"$key.personalRep.howToPay.p1", charge.chargeReference))</p>
@@ -201,6 +202,14 @@
 
               @payNowButton
           }
+
+            case Some(PersonalRepresentativeInPeriodOfAdmin) => {
+                <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
+
+                <p id="howToPay">@messages(s"$key$userKey.howToPay.p1")</p>
+
+            }
+
 
           case None => {
               <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
@@ -235,6 +244,8 @@
     @{
       if(isAgent)
         buttonLink(messages("button.clients.accountHome"), accountRoutes.HomePageController.homepage().url)
+      else if(representativeType.contains(PersonalRepresentativeInPeriodOfAdmin))
+          buttonLink(messages("button.accountHome"), accountRoutes.HomePageController.homepage().url)
       else
         justSubmittedReturn.submissionResponse.charge.fold(
             buttonLink(messages("button.accountHome"), accountRoutes.HomePageController.homepage().url)
