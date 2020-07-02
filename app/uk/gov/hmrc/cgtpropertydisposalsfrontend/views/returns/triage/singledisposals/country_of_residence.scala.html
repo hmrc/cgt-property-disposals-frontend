@@ -65,14 +65,9 @@
     }
 }
 
-@helpText = @{
-    representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => None
-        case _ => Some(Html(messages(s"$messageKey$userKey.helpText")))
-    }
-}
-
 @isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
+
+@helpText = @{ if(isPeriodOfAdmin) None else Some(Html(messages(s"$messageKey$userKey.helpText"))) }
 
 @title = @{
     if(isPeriodOfAdmin){
