@@ -3105,11 +3105,16 @@ taxableGainOrLoss.capacitor.title=Did the person make an overall gain or loss on
 taxableGainOrLoss.capacitor.multiple.title=Did the person make an overall gain or loss on the property sales or disposals in this return?
 taxableGainOrLoss.personalRep.title=Was an overall gain or loss made on the property sale or disposal?
 taxableGainOrLoss.personalRep.multiple.title=Was an overall gain or loss made on the property sales or disposals in this return?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.title=Did the estate make an overall gain or loss on the property sale or disposal?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title=Did the estate make an overall gain or loss on the property sales or disposals in this return?
+
 taxableGainOrLoss.helpText=To work out if you made an overall gain or loss, you’ll need to take your initial gain or loss and subtract any reliefs, losses, or other allowances you are entitled to.
 taxableGainOrLoss.agent.helpText=To work out if your client made an overall gain or loss, you’ll need to take your client’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
 taxableGainOrLoss.trust.helpText=To work out if the trust made an overall gain or loss, you’ll need to take the trust’s initial gain or loss and subtract any reliefs, losses, or other allowances it is entitled to.
 taxableGainOrLoss.capacitor.helpText=To work out if the person made an overall gain or loss, you’ll need to take the person’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
 taxableGainOrLoss.personalRep.helpText=To work out if there was an overall gain or loss, you’ll need to take the initial gain or loss and subtract any reliefs, losses, or other allowances the person was entitled to.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.helpText=Take the gain or loss and subtract any reliefs, losses, or other allowances the estate is entitled to.
+
 taxableGainOrLoss.error.required=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.multiple.error.required=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.agent.error.required=Select yes if your client made an overall gain on the property sale or disposal
@@ -3120,6 +3125,10 @@ taxableGainOrLoss.capacitor.error.required=Select yes if the person made an over
 taxableGainOrLoss.capacitor.multiple.error.required=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRep.error.required=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRep.multiple.error.required=Select yes if the person made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.error.required=Select yes if the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.error.required=Select yes if the estate made an overall gain
+
+
 taxableGainOrLoss.error.invalid=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.error.multiple.invalid=Select yes if you made an overall gain on the property sales or disposals in this return
 taxableGainOrLoss.agent.error.invalid=Select yes if your client made an overall gain on the property sale or disposal
@@ -3130,6 +3139,8 @@ taxableGainOrLoss.capacitor.error.invalid=Select yes if the person made an overa
 taxableGainOrLoss.capacitor.multiple.error.invalid=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRep.error.invalid=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRep.multiple.error.invalid=Select yes if the person made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.error.invalid=Select yes if the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.error.invalid=Select yes if the estate made an overall gain
 
 taxableGainOrLoss.cyaChange=if an overall gain or loss was made on the property sale or disposal
 
@@ -3138,6 +3149,7 @@ taxableGainOrLoss.agent.gain.label=Yes, my client made an overall gain
 taxableGainOrLoss.trust.gain.label=Yes, the trust made an overall gain
 taxableGainOrLoss.capacitor.gain.label=Yes, the person made an overall gain
 taxableGainOrLoss.personalRep.gain.label=Yes, the person made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=Yes, the estate made an overall gain
 
 taxableGain.label=Amount of overall gain
 taxableGain.error.required=Enter the amount of overall gain
@@ -3150,6 +3162,8 @@ taxableGain.capacitor.error.required=Enter the amount of overall gain
 taxableGain.capacitor.multiple.error.required=Enter the amount of overall gain
 taxableGain.personalRep.error.required=Enter the amount of overall gain
 taxableGain.personalRep.multiple.error.required=Enter the amount of overall gain
+taxableGain.personalRepInPeriodOfAdmin.error.required=Enter the amount of overall gain
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.required=Enter the amount of overall gain
 
 taxableGain.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
@@ -3161,6 +3175,8 @@ taxableGain.capacitor.error.invalid=Overall gain must be an amount of money, lik
 taxableGain.capacitor.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.personalRep.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.personalRep.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 
 taxableGain.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
@@ -3172,6 +3188,8 @@ taxableGain.capacitor.error.tooSmall=Overall gain must be an amount of money bet
 taxableGain.capacitor.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 
 taxableGain.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
@@ -3183,6 +3201,8 @@ axableGain.capacitor.error.tooLarge=Overall gain must be an amount of money betw
 taxableGain.capacitor.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 
 taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
@@ -3194,12 +3214,15 @@ taxableGain.capacitor.error.tooManyDecimals=Overall gain must be an amount of mo
 taxableGain.capacitor.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.personalRep.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.personalRep.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
 taxableGainOrLoss.trust.loss.label=No, the trust made an overall loss
 taxableGainOrLoss.capacitor.loss.label=No, the person made an overall loss
 taxableGainOrLoss.personalRep.loss.label=No, the person made an overall loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.loss.label=No, the estate made an overall loss
 
 netLoss.label=Amount of overall loss
 
@@ -3213,6 +3236,8 @@ netLoss.capacitor.error.required=Enter the amount of overall loss
 netLoss.capacitor.multiple.error.required=Enter the amount of overall loss
 netLoss.personalRep.error.required=Enter the amount of overall loss
 netLoss.personalRep.multiple.error.required=Enter the amount of overall loss
+netLoss.personalRepInPeriodOfAdmin.error.required=Enter the amount of overall loss
+netLoss.personalRepInPeriodOfAdmin.multiple.error.required=Enter the amount of overall loss
 
 netLoss.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
@@ -3224,6 +3249,8 @@ netLoss.capacitor.error.invalid=Overall loss must be must be an amount of money,
 netLoss.capacitor.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.personalRep.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.personalRep.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 
 netLoss.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
@@ -3235,6 +3262,8 @@ netLoss.capacitor.error.tooSmall=Overall loss must be an amount of money between
 netLoss.capacitor.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRep.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRep.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 
 netLoss.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
@@ -3246,6 +3275,8 @@ netLoss.capacitor.error.tooLarge=Overall loss must be an amount of money between
 netLoss.capacitor.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRep.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRep.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 
 netLoss.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
@@ -3257,6 +3288,8 @@ netLoss.capacitor.error.tooManyDecimals=Overall loss must be an amount of money 
 netLoss.capacitor.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.personalRep.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.personalRep.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
@@ -3364,6 +3397,7 @@ hasEstimatedDetails.agent.yes.content=The amounts will need to be confirmed with
 hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.capacitor.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the person needs to complete a Self Assessment tax return this can be done in their next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.personalRep.yes.content=The amounts will need to be confirmed with HMRC when they become available. If you need to complete a Self Assessment tax return for the person this can be done in through their Self Assessment return. If not, it can be done through this service.
+hasEstimatedDetails.personalRepInPeriodOfAdmin.yes.content=The amounts will need to be confirmed with HMRC when they become available. If you need to complete a Self Assessment tax return for the estate this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
@@ -3440,6 +3474,8 @@ calculator.incomeAboveThreshold=The amount of taxable gain to be charged at basi
 calculator.trustRateInfo.p1=Most trusts disposing of this property type pay taxable gains at {0}.
 calculator.trustRateInfo.p2=Trusts for vulnerable beneficiaries get special tax treatment. If you’re a trustee of this type of trust you’ll need to work out the amount of tax due.
 calculator.agent.trustRateInfo.p2=Trusts for vulnerable beneficiaries get special tax treatment. If your client is this type of trust you’ll need to work out the amount of tax due.
+calculator.periodOfAdminRateInfo.p1=Most personal representatives or estates disposing of this property type pay taxable gains at {0}.
+
 calculator.ukThreshold=UK threshold for basic rate tax
 calculator.total.ukThresholdLessTaxableIncome=UK threshold for basic rate tax less taxable income
 calculator.basicRateRule=To work out the amount to be charged at the basic rate of Capital Gains Tax we took the lower of these amounts:

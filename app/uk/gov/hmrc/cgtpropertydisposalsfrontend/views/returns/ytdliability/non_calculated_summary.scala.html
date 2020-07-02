@@ -53,14 +53,20 @@
           else ""
   }
 }
+@userKeyWithSeparatePeriodOfAdmin = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+        case _ => userKey
+    }
+}
 
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
 
 @taxableGainOrLossLabelWithAmount = @{
     if(answers.taxableGainOrLoss > AmountInPence.zero)
-        s"taxableGainOrLoss$userKey.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds()))
+        s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds()))
     else if(answers.taxableGainOrLoss < AmountInPence.zero)
-        s"taxableGainOrLoss$userKey.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds() * -1))
+        s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds() * -1))
     else
         "taxableGainOrLoss.noLossOrGain.label" -> None
 }
@@ -68,7 +74,7 @@
 
 @cyaSection() {
     @cyaRow(
-    messages(s"taxableGainOrLoss$userKey$multipleKey.title"),
+    messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$multipleKey.title"),
     Html(messages(taxableGainOrLossLabelWithAmount._1)),
     Some(cyaChange(messages("taxableGainOrLoss.cyaChange"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
     "taxableGainOrLossAnswer"
