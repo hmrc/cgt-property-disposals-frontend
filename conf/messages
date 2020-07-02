@@ -3749,6 +3749,7 @@ multipleDisposalsDisposalPrice.capacitor.title=What was the disposal value of th
 multipleDisposalsDisposalPrice.agent.title=What was the disposal value of the property?
 multipleDisposalsDisposalPrice.trust.title=What was the disposal value of the property?
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.title=What were the proceeds of the disposal?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.title=What were the proceeds of the disposal?
 
 multipleDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
