@@ -65,7 +65,8 @@ class CommonTriageQuestionsController @Inject() (
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
   assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented,
-  periodOfAdminNotHandledPage: pages.period_of_admin_not_handled
+  periodOfAdminNotHandledPage: pages.period_of_admin_not_handled,
+  previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -393,6 +394,22 @@ class CommonTriageQuestionsController @Inject() (
           else routes.SingleDisposalsTriageController.whenWasDisposalDate()
 
         Ok(periodOfAdminNotHandledPage(backLink))
+      }
+    }
+
+  def previousReturnExistsWithSameCompletionDate(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        val backLink =
+          if (triageAnswersFomState(state).isLeft) routes.MultipleDisposalsTriageController.completionDate()
+          else routes.SingleDisposalsTriageController.whenWasCompletionDate()
+
+        Ok(
+          previousReturnExistsWithSameCompletionDatePage(
+            state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
+            backLink
+          )
+        )
       }
     }
 

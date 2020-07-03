@@ -94,12 +94,14 @@ class SingleDisposalsTriageControllerSpec
   def sessionDataWithStartingNewDraftReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
-    representeeAnswers: RepresenteeAnswers = sample[IncompleteRepresenteeAnswers]
+    representeeAnswers: RepresenteeAnswers = sample[IncompleteRepresenteeAnswers],
+    previousSentReturns: Option[List[ReturnSummary]] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       newReturnTriageAnswers = Right(singleDisposalTriageAnswers),
-      representeeAnswers = Some(representeeAnswers)
+      representeeAnswers = Some(representeeAnswers),
+      previousSentReturns = previousSentReturns
     )
 
     val sessionData = SessionData.empty.copy(
@@ -116,11 +118,13 @@ class SingleDisposalsTriageControllerSpec
 
   def sessionDataWithFillingOurReturn(
     draftReturn: DraftSingleDisposalReturn,
-    name: Either[TrustName, IndividualName]
+    name: Either[TrustName, IndividualName],
+    previousSentReturns: Option[List[ReturnSummary]]
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(name = name)
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      previousSentReturns = previousSentReturns
     )
 
     val sessionData = SessionData.empty.copy(
@@ -133,7 +137,8 @@ class SingleDisposalsTriageControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
-    representeeAnswers: RepresenteeAnswers = sample[IncompleteRepresenteeAnswers]
+    representeeAnswers: RepresenteeAnswers = sample[IncompleteRepresenteeAnswers],
+    previousSentReturns: Option[List[ReturnSummary]] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers,
@@ -142,7 +147,8 @@ class SingleDisposalsTriageControllerSpec
 
     val (session, journey) = sessionDataWithFillingOurReturn(
       draftReturn,
-      name
+      name,
+      previousSentReturns
     )
     (session, journey, draftReturn)
   }
@@ -2730,7 +2736,9 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               completeAnswers,
               formData(completionDate.value),
-              completeAnswers.copy(completionDate = completionDate),
+              IncompleteSingleDisposalTriageAnswers
+                .fromCompleteAnswers(completeAnswers)
+                .copy(completionDate = Some(completionDate)),
               checkIsRedirect(
                 _,
                 routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -2776,7 +2784,9 @@ class SingleDisposalsTriageControllerSpec
                 formData(completionDate.value),
                 updateDraftReturn(
                   _,
-                  completeAnswers.copy(completionDate = completionDate)
+                  IncompleteSingleDisposalTriageAnswers
+                    .fromCompleteAnswers(completeAnswers)
+                    .copy(completionDate = Some(completionDate))
                 ),
                 checkIsRedirect(
                   _,
@@ -4409,13 +4419,15 @@ class SingleDisposalsTriageControllerSpec
         case class Scenario(
           answers: SingleDisposalTriageAnswers,
           name: Either[TrustName, IndividualName],
-          expectedRedirect: Call
+          expectedRedirect: Call,
+          previousReturnSummaries: Option[List[ReturnSummary]]
         )
 
         def test(
           sessionDataWith: (
             SingleDisposalTriageAnswers,
-            Either[TrustName, IndividualName]
+            Either[TrustName, IndividualName],
+            Option[List[ReturnSummary]]
           ) => SessionData
         ): Unit =
           List(
@@ -4423,7 +4435,8 @@ class SingleDisposalsTriageControllerSpec
               allQuestionsAnswered.copy(individualUserType = None),
               Right(sample[IndividualName]),
               routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresenting()
+                .whoIsIndividualRepresenting(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(
@@ -4431,48 +4444,70 @@ class SingleDisposalsTriageControllerSpec
                 hasConfirmedSingleDisposal = false
               ),
               Left(sample[TrustName]),
-              routes.CommonTriageQuestionsController.howManyProperties()
+              routes.CommonTriageQuestionsController.howManyProperties(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(hasConfirmedSingleDisposal = false),
               Right(sample[IndividualName]),
-              routes.CommonTriageQuestionsController.howManyProperties()
+              routes.CommonTriageQuestionsController.howManyProperties(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(disposalMethod = None),
               Right(sample[IndividualName]),
               routes.SingleDisposalsTriageController
-                .howDidYouDisposeOfProperty()
+                .howDidYouDisposeOfProperty(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(wasAUKResident = None),
               Right(sample[IndividualName]),
-              routes.SingleDisposalsTriageController.wereYouAUKResident()
+              routes.SingleDisposalsTriageController.wereYouAUKResident(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(assetType = None),
               Right(sample[IndividualName]),
               routes.SingleDisposalsTriageController
-                .didYouDisposeOfAResidentialProperty()
+                .didYouDisposeOfAResidentialProperty(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(disposalDate = None),
               Right(sample[IndividualName]),
               routes.SingleDisposalsTriageController
-                .whenWasDisposalDate()
+                .whenWasDisposalDate(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(completionDate = None),
               Right(sample[IndividualName]),
               routes.SingleDisposalsTriageController
-                .whenWasCompletionDate()
+                .whenWasCompletionDate(),
+              None
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType = None),
+              Left(sample[TrustName]),
+              routes.CommonTriageQuestionsController
+                .previousReturnExistsWithSameCompletionDate(),
+              Some(List(sample[ReturnSummary].copy(completionDate = completeTriageQuestions.completionDate.value)))
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType = Some(Self)),
+              Right(sample[IndividualName]),
+              routes.CommonTriageQuestionsController
+                .previousReturnExistsWithSameCompletionDate(),
+              Some(List(sample[ReturnSummary].copy(completionDate = completeTriageQuestions.completionDate.value)))
             ),
             Scenario(
               allQuestionsAnswered
                 .copy(wasAUKResident = Some(false), countryOfResidence = None),
               Right(sample[IndividualName]),
               routes.SingleDisposalsTriageController
-                .countryOfResidence()
+                .countryOfResidence(),
+              None
             ),
             Scenario(
               allQuestionsAnswered
@@ -4482,7 +4517,8 @@ class SingleDisposalsTriageControllerSpec
                 ),
               Right(sample[IndividualName]),
               routes.CommonTriageQuestionsController
-                .ukResidentCanOnlyDisposeResidential()
+                .ukResidentCanOnlyDisposeResidential(),
+              None
             ),
             Scenario(
               allQuestionsAnswered
@@ -4494,33 +4530,48 @@ class SingleDisposalsTriageControllerSpec
                   disposalDate = None
                 ),
               Right(sample[IndividualName]),
-              routes.SingleDisposalsTriageController.disposalDateOfShares()
+              routes.SingleDisposalsTriageController.disposalDateOfShares(),
+              None
+            ),
+            Scenario(
+              allQuestionsAnswered
+                .copy(
+                  wasAUKResident = Some(false),
+                  countryOfResidence = Some(sample[Country]),
+                  assetType = Some(AssetType.IndirectDisposal)
+                ),
+              Right(sample[IndividualName]),
+              routes.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate(),
+              Some(List(sample[ReturnSummary].copy(completionDate = completeTriageQuestions.completionDate.value)))
             ),
             Scenario(
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.Capacitor)),
               Right(sample[IndividualName]),
-              representee.routes.RepresenteeController.enterName()
+              representee.routes.RepresenteeController.enterName(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
               Right(sample[IndividualName]),
-              representee.routes.RepresenteeController.enterName()
+              representee.routes.RepresenteeController.enterName(),
+              None
             ),
             Scenario(
               allQuestionsAnswered.copy(individualUserType =
                 Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
               ),
               Right(sample[IndividualName]),
-              representee.routes.RepresenteeController.enterName()
+              representee.routes.RepresenteeController.enterName(),
+              None
             )
           ).foreach {
-            case Scenario(state, name, expectedRedirect) =>
+            case Scenario(state, name, expectedRedirect, previousSentReturns) =>
               withClue(
                 s"For state $state and expected redirect url ${expectedRedirect.url}: "
               ) {
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(sessionDataWith(state, name))
+                  mockGetSession(sessionDataWith(state, name, previousSentReturns))
                 }
 
                 checkIsRedirect(performAction(), expectedRedirect)
@@ -4532,7 +4583,8 @@ class SingleDisposalsTriageControllerSpec
             sessionDataWithStartingNewDraftReturn(
               _,
               _,
-              representeeAnswers = sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None)
+              representeeAnswers = sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None),
+              _
             )._1
           )
         }
@@ -4542,7 +4594,8 @@ class SingleDisposalsTriageControllerSpec
             sessionDataWithFillingOutReturn(
               _,
               _,
-              representeeAnswers = sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None)
+              representeeAnswers = sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None),
+              _
             )._1
           )
         }
@@ -4718,6 +4771,45 @@ class SingleDisposalsTriageControllerSpec
           )
         }
 
+        "there is a previous return with the same completion date that has been submitted but" when {
+
+          def test(representativeType: RepresentativeType) = {
+            val triageAnswers = completeTriageQuestions.copy(individualUserType = Some(representativeType))
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  triageAnswers,
+                  representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None),
+                  previousSentReturns = Some(
+                    List(sample[ReturnSummary].copy(completionDate = triageAnswers.completionDate.value))
+                  )
+                )._1
+              )
+            }
+
+            testIsCheckYourAnswers(
+              performAction(),
+              triageAnswers,
+              "triage.check-your-answers.title",
+              Some(UserType.Individual)
+            )
+          }
+
+          "the user is a capacitor" in {
+            test(IndividualUserType.Capacitor)
+          }
+
+          "the user is a personal rep" in {
+            test(IndividualUserType.PersonalRepresentative)
+          }
+
+          "the user is a personal rep in period of admin" in {
+            test(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
+          }
+
+        }
+
       }
 
     }
@@ -4757,7 +4849,8 @@ class SingleDisposalsTriageControllerSpec
           None,
           startingNewDraftReturn.representeeAnswers,
           TimeUtils.today()
-        )
+        ),
+        startingNewDraftReturn.previousSentReturns
       )
 
       val sessionDataWithFillingOutDraftReturn =
@@ -4867,7 +4960,8 @@ class SingleDisposalsTriageControllerSpec
                 None,
                 startingNewDraftReturn.representeeAnswers,
                 TimeUtils.today()
-              )
+              ),
+              startingNewDraftReturn.previousSentReturns
             )
             val sessionDataWithFillingOutDraftReturn =
               SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
@@ -4909,7 +5003,8 @@ class SingleDisposalsTriageControllerSpec
                 None,
                 startingNewDraftReturn.representeeAnswers,
                 TimeUtils.today()
-              )
+              ),
+              startingNewDraftReturn.previousSentReturns
             )
             val sessionDataWithFillingOutDraftReturn =
               SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
@@ -5396,10 +5491,15 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
         else s"individualUserType.Self"
       )
 
-    doc.select("#numberOfProperties-answer").text()   shouldBe "One"
-    doc.select("#disposalMethod-answer").text()       shouldBe messages(
-      s"disposalMethod.${completeSingleDisposalTriageAnswers.disposalMethod}"
-    )
+    doc.select("#numberOfProperties-answer").text() shouldBe "One"
+
+    if (completeSingleDisposalTriageAnswers.individualUserType.contains(PersonalRepresentativeInPeriodOfAdmin))
+      doc.select("#disposalMethod-answer").text() shouldBe ""
+    else
+      doc.select("#disposalMethod-answer").text() shouldBe messages(
+        s"disposalMethod.${completeSingleDisposalTriageAnswers.disposalMethod}"
+      )
+
     if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
       doc.select("#wereYouAUKResident-answer").text() shouldBe "Yes"
     else

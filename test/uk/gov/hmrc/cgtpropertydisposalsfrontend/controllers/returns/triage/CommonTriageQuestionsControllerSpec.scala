@@ -1995,6 +1995,96 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
+    "handling requests to display the previous return has same completion date exit page" must {
+
+      def performAction(): Future[Result] =
+        controller.previousReturnExistsWithSameCompletionDate()(FakeRequest())
+
+      "display the page" when {
+
+        "the user is an individual" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Left(sample[IncompleteMultipleDisposalsTriageAnswers]),
+                Right(sample[IndividualName]),
+                UserType.Individual
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
+            { doc =>
+              doc.select("#back").attr("href")                         shouldBe routes.MultipleDisposalsTriageController.completionDate().url
+              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.p1",
+                viewConfig.contactHmrc
+              )
+            }
+          )
+        }
+
+        "the user is a trust" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(sample[SingleDisposalTriageAnswers]),
+                Left(sample[TrustName]),
+                UserType.Organisation
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
+            { doc =>
+              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+                .whenWasCompletionDate()
+                .url
+              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.trust.p1",
+                viewConfig.contactHmrc
+              )
+            }
+          )
+        }
+
+        "the user is an agent" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(sample[SingleDisposalTriageAnswers]),
+                Left(sample[TrustName]),
+                UserType.Agent
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("previousReturnExistsWithSameCompletionDate.title"),
+            { doc =>
+              doc.select("#back").attr("href")                         shouldBe routes.SingleDisposalsTriageController
+                .whenWasCompletionDate()
+                .url
+              doc.select("#content > article > p:nth-child(3)").html() shouldBe messageFromMessageKey(
+                "previousReturnExistsWithSameCompletionDate.agent.p1",
+                viewConfig.contactHmrc
+              )
+            }
+          )
+        }
+
+      }
+
+    }
+
   }
 
   def testSuccessfulUpdateStartingNewDraftReturn(

@@ -90,7 +90,8 @@ class CompanyDetailsController @Inject() (
                 _,
                 _,
                 _,
-                i: DraftSingleIndirectDisposalReturn
+                i: DraftSingleIndirectDisposalReturn,
+                _
               )
             )
           ) =>
@@ -110,7 +111,8 @@ class CompanyDetailsController @Inject() (
                 _,
                 _,
                 _,
-                i: DraftMultipleIndirectDisposalsReturn
+                i: DraftMultipleIndirectDisposalsReturn,
+                _
               )
             )
           ) =>

@@ -149,22 +149,22 @@ trait ChangeRepresenteeEmailControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case StartingNewDraftReturn(_, _, _, _, representeeAnswers)
+        case StartingNewDraftReturn(_, _, _, _, representeeAnswers, _)
             if isDefinedAndContainsContactDetails(representeeAnswers) =>
           true
-        case FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn)
+        case FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn, _)
             if isDefinedAndContainsContactDetails(s.representeeAnswers) =>
           true
-        case FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn)
+        case FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _)
             if isDefinedAndContainsContactDetails(m.representeeAnswers) =>
           true
-        case FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn)
+        case FillingOutReturn(_, _, _, i: DraftSingleIndirectDisposalReturn, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
-        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn)
+        case FillingOutReturn(_, _, _, i: DraftSingleMixedUseDisposalReturn, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
-        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn)
+        case FillingOutReturn(_, _, _, i: DraftMultipleIndirectDisposalsReturn, _)
             if isDefinedAndContainsContactDetails(i.representeeAnswers) =>
           true
         case _ => false

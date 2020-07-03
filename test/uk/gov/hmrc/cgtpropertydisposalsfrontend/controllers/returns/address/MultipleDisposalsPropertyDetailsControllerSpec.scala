@@ -85,7 +85,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       sample[SubscribedDetails],
       sample[GGCredId],
       None,
-      draftReturn
+      draftReturn,
+      None
     ),
     Left(draftReturn),
     Some(Self)

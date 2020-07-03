@@ -815,11 +815,9 @@ class MultipleDisposalsTriageController @Inject() (
                 )
               else {
                 val updatedAnswers =
-                  answers.fold[MultipleDisposalsTriageAnswers](
-                    _.copy(completionDate = Some(completionDate)),
-                    _.copy(completionDate = completionDate)
-                  )
-                val newState       = updateState(
+                  answers.unset(_.completionDate).copy(completionDate = Some(completionDate))
+
+                val newState = updateState(
                   state,
                   updatedAnswers,
                   d =>
@@ -1239,6 +1237,19 @@ class MultipleDisposalsTriageController @Inject() (
             Redirect(routes.MultipleDisposalsTriageController.completionDate())
 
           case IncompleteMultipleDisposalsTriageAnswers(
+                individualUserType,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                Some(completionDate)
+              ) if hasPreviousReturnWithSameCompletionDate(completionDate, individualUserType, state) =>
+            Redirect(routes.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate())
+
+          case IncompleteMultipleDisposalsTriageAnswers(
                 i,
                 Some(n),
                 Some(true),
@@ -1343,7 +1354,8 @@ class MultipleDisposalsTriageController @Inject() (
                   startingNewDraftReturn.subscribedDetails,
                   startingNewDraftReturn.ggCredId,
                   startingNewDraftReturn.agentReferenceNumber,
-                  newDraftReturn
+                  newDraftReturn,
+                  startingNewDraftReturn.previousSentReturns
                 )
 
                 updateStateAndThen(
@@ -1380,13 +1392,13 @@ class MultipleDisposalsTriageController @Inject() (
     f: (SessionData, JourneyState, MultipleDisposalsTriageAnswers) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t), _))) =>
+      case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t), _, _))) =>
         f(session, Left(s), t)
 
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn)
+              r @ FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn, _)
             )
           ) =>
         f(session, Right(r -> Right(m)), m.triageAnswers)
@@ -1394,12 +1406,12 @@ class MultipleDisposalsTriageController @Inject() (
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, mi: DraftMultipleIndirectDisposalsReturn)
+              r @ FillingOutReturn(_, _, _, mi: DraftMultipleIndirectDisposalsReturn, _)
             )
           ) =>
         f(session, Right(r -> Left(mi)), mi.triageAnswers)
 
-      case _                                                                =>
+      case _                                                                   =>
         Redirect(
           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
             .start()
@@ -1460,6 +1472,19 @@ class MultipleDisposalsTriageController @Inject() (
           )
       }
     )
+
+  private def hasPreviousReturnWithSameCompletionDate(
+    completionDate: CompletionDate,
+    individualUserType: Option[IndividualUserType],
+    state: JourneyState
+  ) =
+    individualUserType match {
+      case Some(_: RepresentativeType) => false
+      case _                           =>
+        val previousSentCompletionDates =
+          state.fold(_.previousSentReturns, _._1.previousSentReturns).getOrElse(List.empty).map(_.completionDate)
+        previousSentCompletionDates.contains(completionDate.value)
+    }
 
 }
 

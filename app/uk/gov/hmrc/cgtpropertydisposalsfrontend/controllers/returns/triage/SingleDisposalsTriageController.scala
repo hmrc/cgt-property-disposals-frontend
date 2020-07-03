@@ -668,10 +668,7 @@ class SingleDisposalsTriageController @Inject() (
           )
             state.map(_._2)
           else {
-            val newAnswers = answers.fold(
-              _.copy(completionDate = Some(date)),
-              _.copy(completionDate = date)
-            )
+            val newAnswers = answers.unset(_.completionDate).copy(completionDate = Some(date))
 
             state.bimap(
               _.copy(newReturnTriageAnswers = Right(newAnswers)),
@@ -1121,9 +1118,7 @@ class SingleDisposalsTriageController @Inject() (
             _.representeeAnswers,
             _._1.fold(_.fold(_.representeeAnswers, _.representeeAnswers), _.representeeAnswers)
           )
-        val representeeAnswersIncomplete = !representeeAnswers
-          .map(_.fold(_ => false, _ => true))
-          .getOrElse(false)
+        val representeeAnswersIncomplete = !representeeAnswers.exists(_.fold(_ => false, _ => true))
 
         triageAnswers match {
           case c: CompleteSingleDisposalTriageAnswers =>
@@ -1313,6 +1308,21 @@ class SingleDisposalsTriageController @Inject() (
             )
 
           case IncompleteSingleDisposalTriageAnswers(
+                individualUserType,
+                _,
+                _,
+                _,
+                _,
+                Some(AssetType.IndirectDisposal),
+                Some(shareDisposalDate),
+                None,
+                _
+              ) if hasPreviousReturnWithSameCompletionDate(shareDisposalDate.value, individualUserType, state) =>
+            Redirect(
+              routes.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate()
+            )
+
+          case IncompleteSingleDisposalTriageAnswers(
                 _,
                 _,
                 _,
@@ -1375,6 +1385,21 @@ class SingleDisposalsTriageController @Inject() (
               ) =>
             Redirect(
               routes.SingleDisposalsTriageController.whenWasCompletionDate()
+            )
+
+          case IncompleteSingleDisposalTriageAnswers(
+                individualUserType,
+                _,
+                _,
+                _,
+                _,
+                _,
+                _,
+                Some(completionDate),
+                _
+              ) if hasPreviousReturnWithSameCompletionDate(completionDate.value, individualUserType, state) =>
+            Redirect(
+              routes.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate()
             )
 
           case IncompleteSingleDisposalTriageAnswers(
@@ -1515,7 +1540,8 @@ class SingleDisposalsTriageController @Inject() (
                                startingNewDraftReturn.subscribedDetails,
                                startingNewDraftReturn.ggCredId,
                                startingNewDraftReturn.agentReferenceNumber,
-                               newDraftReturn
+                               newDraftReturn,
+                               startingNewDraftReturn.previousSentReturns
                              )
                 _         <- EitherT(
                                updateSession(sessionStore, request)(
@@ -1658,13 +1684,13 @@ class SingleDisposalsTriageController @Inject() (
     f: (SessionData, JourneyState, SingleDisposalTriageAnswers) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t), _))) =>
+      case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t), _, _))) =>
         f(session, Left(s), populateDisposalMethodInPeriodOfAdmin(t))
 
       case Some(
             (
               session,
-              r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn)
+              r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _)
             )
           ) =>
         f(session, Right(Right(d) -> r), populateDisposalMethodInPeriodOfAdmin(d.triageAnswers))
@@ -1676,7 +1702,8 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                d: DraftSingleIndirectDisposalReturn
+                d: DraftSingleIndirectDisposalReturn,
+                _
               )
             )
           ) =>
@@ -1689,13 +1716,14 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                d: DraftSingleMixedUseDisposalReturn
+                d: DraftSingleMixedUseDisposalReturn,
+                _
               )
             )
           ) =>
         f(session, Right(Left(Left(d)) -> r), populateDisposalMethodInPeriodOfAdmin(d.triageAnswers))
 
-      case _                                                                 =>
+      case _                                                                    =>
         Redirect(
           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
             .start()
@@ -1718,6 +1746,19 @@ class SingleDisposalsTriageController @Inject() (
       _ => ifIncomplete,
       _ => routes.SingleDisposalsTriageController.checkYourAnswers()
     )
+
+  private def hasPreviousReturnWithSameCompletionDate(
+    completionDate: LocalDate,
+    individualUserType: Option[IndividualUserType],
+    state: JourneyState
+  ) =
+    individualUserType match {
+      case Some(_: RepresentativeType) => false
+      case _                           =>
+        val previousSentCompletionDates =
+          state.fold(_.previousSentReturns, _._2.previousSentReturns).getOrElse(List.empty).map(_.completionDate)
+        previousSentCompletionDates.contains(completionDate)
+    }
 
 }
 

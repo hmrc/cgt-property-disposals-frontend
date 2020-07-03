@@ -93,14 +93,16 @@ object JourneyStatus {
       MultipleDisposalsTriageAnswers,
       SingleDisposalTriageAnswers
     ],
-    representeeAnswers: Option[RepresenteeAnswers]
+    representeeAnswers: Option[RepresenteeAnswers],
+    previousSentReturns: Option[List[ReturnSummary]]
   ) extends JourneyStatus
 
   final case class FillingOutReturn(
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    draftReturn: DraftReturn
+    draftReturn: DraftReturn,
+    previousSentReturns: Option[List[ReturnSummary]]
   ) extends JourneyStatus
 
   final case class JustSubmittedReturn(
