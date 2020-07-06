@@ -56,7 +56,8 @@
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => ".personalRepInPeriodOfAdmin"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if(isAgent) => ".personalRepInPeriodOfAdmin.agent"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -112,7 +113,7 @@
           @details(messages(s"$key.details.1.header"), Html(messages(s"$key.details.1.body", appConfig.trustsTaxFreeAllowance)))
           @details(messages(s"$key.details.2.header"),  Html(messages(s"$key.details.2.body", appConfig.trustsForVulnerable)))
         } else {
-          <p>@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>
+          @details(messages(s"$key.details.1.header"),  Html(messages(s"$key.details.1.body", appConfig.annualExemptAmountUrl)))
         }
 
         @submitButton(messages("button.saveAndContinue"))

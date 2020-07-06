@@ -125,9 +125,10 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     s"${getString("external-url.report-accessibility-problem")}?service=cgtpd"
   val contactHmrc: String                             = getString("external-url.contact-hmrc")
 
-  val personalRepresentative: String      = getString(
+  val personalRepresentativeUrl: String = getString(
     "external-url.personal-representative"
   )
+
   val calculateCgt: String                = getString("external-url.calculate-cgt")
   val payYourTax: String                  = getString("external-url.pay-your-tax")
   val payTheirTaxBill: String             = getString("external-url.pay-their-tax-bill")
