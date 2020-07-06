@@ -3616,7 +3616,7 @@ confirmationOfSubmission.capacitor.printPage=You should <a href="{0}">print or s
 confirmationOfSubmission.capacitor.noId.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
 confirmationOfSubmission.personalRep.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
 confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client's Capital Gain Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
 
 
 confirmationOfSubmission.whatNext=What you need to do next
@@ -3665,8 +3665,8 @@ confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Asses
 confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from this return in the trust’s next Self Assessment tax return.
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details from this return in the person’s Self Assessment tax return.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa.p1=You'll need to provide details from this return in the estate's Self Assessment tax return.
-confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa.p1=Your client will need to provide details from this return in the estate's Self Assessment tax return.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa.p1=You’ll need to provide details from this return in the estate’s Self Assessment tax return.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa.p1=Your client will need to provide details from this return in the estate’s Self Assessment tax return.
 
 confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
 confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="{0}">Capital Gains Tax on UK property account home</a>.
