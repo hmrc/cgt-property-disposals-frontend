@@ -2200,7 +2200,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           val individualUserType = draftReturn.triageAnswers
             .fold(_.individualUserType, _.individualUserType)
           val userKey            = userMessageKey(individualUserType, userType)
-          val arg                = TimeUtils.govShortDisplayFormat(dateOfDeath)
+          val arg                = TimeUtils.govDisplayFormat(dateOfDeath)
 
           checkPageIsDisplayed(
             performAction(),
