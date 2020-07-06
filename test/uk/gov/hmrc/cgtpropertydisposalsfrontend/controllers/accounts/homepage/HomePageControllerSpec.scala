@@ -782,14 +782,16 @@ class HomePageControllerSpec
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
           Right(sample[IncompleteSingleDisposalTriageAnswers]),
-          None
+          None,
+          Some(subscribed.sentReturns)
         )
 
         val fillingOurReturn    = FillingOutReturn(
           subscribed.subscribedDetails,
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
-          sample[DraftSingleDisposalReturn]
+          sample[DraftSingleDisposalReturn],
+          Some(subscribed.sentReturns)
         )
         val justSubmittedReturn = JustSubmittedReturn(
           subscribed.subscribedDetails,
@@ -965,7 +967,8 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
-                    None
+                    None,
+                    Some(subscribed.sentReturns)
                   )
                 )
               )
@@ -998,7 +1001,8 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
-                    None
+                    None,
+                    Some(subscribed.sentReturns)
                   )
                 )
               )
@@ -1034,7 +1038,8 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
-                    None
+                    None,
+                    Some(subscribed.sentReturns)
                   )
                 )
               )
@@ -1057,24 +1062,6 @@ class HomePageControllerSpec
             subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
             sentReturns = List.empty,
             draftReturns = List(sample[DraftSingleDisposalReturn])
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithSubscribed(subscribed))
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.HomePageController.exitForSubsequentReturn()
-          )
-        }
-
-        "there is a submitted return" in {
-          val subscribed = sample[Subscribed].copy(
-            subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
-            draftReturns = List.empty,
-            sentReturns = List(sample[ReturnSummary])
           )
 
           inSequence {
@@ -1166,7 +1153,8 @@ class HomePageControllerSpec
         subscribed.subscribedDetails,
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
-        draftReturn
+        draftReturn,
+        Some(subscribed.sentReturns)
       )
 
       "show an error page" when {

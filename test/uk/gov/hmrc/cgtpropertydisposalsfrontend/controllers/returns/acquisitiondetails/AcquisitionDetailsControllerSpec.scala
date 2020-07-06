@@ -127,10 +127,10 @@ class AcquisitionDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn)
+        case FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _)
             if hasValidPeriodOfAdminState(d.triageAnswers, d.representeeAnswers) =>
           true
-        case FillingOutReturn(_, _, _, d: DraftSingleIndirectDisposalReturn)
+        case FillingOutReturn(_, _, _, d: DraftSingleIndirectDisposalReturn, _)
             if hasValidPeriodOfAdminState(d.triageAnswers, d.representeeAnswers) =>
           true
         case _ => false

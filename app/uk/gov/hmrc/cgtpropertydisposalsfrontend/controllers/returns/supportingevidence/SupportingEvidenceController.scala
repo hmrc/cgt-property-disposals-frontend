@@ -93,7 +93,7 @@ class SupportingEvidenceController @Inject() (
       case Some(
             (
               s,
-              r @ FillingOutReturn(_: SubscribedDetails, _, _, d: DraftReturn)
+              r @ FillingOutReturn(_: SubscribedDetails, _, _, d: DraftReturn, _)
             )
           ) =>
         val maybeSupportingEvidenceAnswers = d.fold(

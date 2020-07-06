@@ -194,7 +194,8 @@ class InitialGainOrLossController @Inject() (
               _,
               _,
               _,
-              d: DraftSingleDisposalReturn
+              d: DraftSingleDisposalReturn,
+              _
             )
           ) =>
         processReturnAndAnswersIntoResult(

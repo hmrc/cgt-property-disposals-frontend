@@ -83,7 +83,7 @@ class DisposalDetailsController @Inject() (
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
           ) =>
         d.disposalDetailsAnswers
           .fold[Future[Result]](
@@ -97,7 +97,8 @@ class DisposalDetailsController @Inject() (
                 _,
                 _,
                 _,
-                d: DraftSingleIndirectDisposalReturn
+                d: DraftSingleIndirectDisposalReturn,
+                _
               )
             )
           ) =>

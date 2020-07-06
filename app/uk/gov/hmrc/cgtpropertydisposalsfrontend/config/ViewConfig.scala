@@ -176,4 +176,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val periodOfAdminEnabled: Boolean = servicesConfig.getBoolean("period-of-admin.enabled")
 
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enable-language-switching")
+
+  val furtherReturnsEnabled: Boolean = servicesConfig.getBoolean("further-returns.enabled")
+
 }

@@ -81,7 +81,7 @@ class MixedUsePropertyDetailsController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, EnteringSingleMixedUsePropertyDetails)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, f @ FillingOutReturn(_, _, _, draftReturn: DraftSingleMixedUseDisposalReturn))) =>
+      case Some((sessionData, f @ FillingOutReturn(_, _, _, draftReturn: DraftSingleMixedUseDisposalReturn, _))) =>
         val answers = draftReturn.mixedUsePropertyDetailsAnswers
           .getOrElse(IncompleteMixedUsePropertyDetailsAnswers.empty)
         Right(
@@ -94,7 +94,7 @@ class MixedUsePropertyDetailsController @Inject() (
           )
         )
 
-      case _                                                                                                  => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                                                                                     => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(

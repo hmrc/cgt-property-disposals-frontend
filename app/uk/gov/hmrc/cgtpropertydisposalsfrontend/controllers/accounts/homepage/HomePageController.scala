@@ -60,7 +60,6 @@ class HomePageController @Inject() (
     with SessionUpdates
     with Logging {
 
-  // homepage for after private beta: includes functionality to do with returns
   def homepage(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser((_, subscribed) => Ok(homePage(subscribed)))(
@@ -71,45 +70,47 @@ class HomePageController @Inject() (
   def startNewReturn(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSubscribedUser { (_, subscribed) =>
-        val exitForSubsequentReturnFlag =
-          subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty
+        val redirectToExitPage =
+          if (viewConfig.furtherReturnsEnabled)
+            subscribed.draftReturns.nonEmpty
+          else
+            subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty
 
-        exitForSubsequentReturnFlag match {
-          case true =>
-            Redirect(routes.HomePageController.exitForSubsequentReturn())
+        if (redirectToExitPage)
+          Redirect(routes.HomePageController.exitForSubsequentReturn())
+        else {
+          val redirectTo = subscribed.subscribedDetails
+            .userType()
+            .fold(
+              _ =>
+                triage.routes.CommonTriageQuestionsController
+                  .howManyProperties(),
+              _ =>
+                triage.routes.CommonTriageQuestionsController
+                  .whoIsIndividualRepresenting()
+            )
 
-          case _    =>
-            val redirectTo = subscribed.subscribedDetails
-              .userType()
-              .fold(
-                _ =>
-                  triage.routes.CommonTriageQuestionsController
-                    .howManyProperties(),
-                _ =>
-                  triage.routes.CommonTriageQuestionsController
-                    .whoIsIndividualRepresenting()
-              )
-
-            updateSession(sessionStore, request)(
-              _.copy(
-                journeyStatus = Some(
-                  StartingNewDraftReturn(
-                    subscribed.subscribedDetails,
-                    subscribed.ggCredId,
-                    subscribed.agentReferenceNumber,
-                    Right(IncompleteSingleDisposalTriageAnswers.empty),
-                    None
-                  )
+          updateSession(sessionStore, request)(
+            _.copy(
+              journeyStatus = Some(
+                StartingNewDraftReturn(
+                  subscribed.subscribedDetails,
+                  subscribed.ggCredId,
+                  subscribed.agentReferenceNumber,
+                  Right(IncompleteSingleDisposalTriageAnswers.empty),
+                  None,
+                  Some(subscribed.sentReturns)
                 )
               )
-            ).map {
-              case Left(e)  =>
-                logger.warn("Could not update session", e)
-                errorHandler.errorResult()
+            )
+          ).map {
+            case Left(e)  =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult()
 
-              case Right(_) =>
-                Redirect(redirectTo)
-            }
+            case Right(_) =>
+              Redirect(redirectTo)
+          }
         }
       }(withUplift = false)
     }
@@ -133,7 +134,8 @@ class HomePageController @Inject() (
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    draftReturn
+                    draftReturn,
+                    Some(subscribed.sentReturns)
                   )
                 )
               )
