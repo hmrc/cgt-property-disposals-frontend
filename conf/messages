@@ -2905,7 +2905,7 @@ inYearLosses.trust.helpText=For example, the trust would make a loss if it sold 
 inYearLosses.capacitor.helpText=For example, if a property was sold for less than it was bought for, the seller would make a loss.<br/> Including any other Capital Gains Tax losses the person made in this tax year will reduce their gain. The person must have made the losses before {0}.
 inYearLosses.personalRep.helpText=For example, if a property was sold for less than it was bought for, the seller would make a loss.<br/> Including any other Capital Gains Tax losses the person made in this tax year will reduce their gain. The person must have made the losses before {0}.
 inYearLosses.personalRepInPeriodOfAdmin.helpText=An example of a loss would be where you, or the estate, sold a property or shares for less than the market value on the person’s date of death.<br/>Including any other Capital Gains Tax losses the estate made in this tax year will reduce its gain.
-inYearLosses.personalRepInPeriodOfAdmin.agent.helpText=	An example of a loss would be where your client, or the estate, sold a property or shares for less than the market value on the person’s date of death.<br/>Including any other Capital Gains Tax losses the estate made in this tax year will reduce its gain.
+inYearLosses.personalRepInPeriodOfAdmin.agent.helpText=An example of a loss would be where your client, or the estate, sold a property or shares for less than the market value on the person’s date of death.<br/>Including any other Capital Gains Tax losses the estate made in this tax year will reduce its gain.
 
 inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.agent.error.required=Select yes if you want to include any other Capital Gains Tax losses your client made in the tax year
@@ -2913,7 +2913,7 @@ inYearLosses.trust.error.required=Select yes if you want to include any other Ca
 inYearLosses.capacitor.error.required=Select yes if the person wants to include any Capital Gains Tax losses they made in this tax year
 inYearLosses.personalRep.error.required=Select yes if you want to include any Capital Gains Tax losses the person made in this tax year
 inYearLosses.personalRepInPeriodOfAdmin.error.required=Select yes if you want to include any Capital Gains Tax losses the estate made in this tax year
-inYearLosses.personalRepInPeriodOfAdmin.agent.error.required=	Select yes if your client wants to include any Capital Gains Tax losses the estate made in this tax year
+inYearLosses.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client wants to include any Capital Gains Tax losses the estate made in this tax year
 
 inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.agent.error.invalid=Select yes if you want to include any other Capital Gains Tax losses your client made in the tax year
@@ -3000,8 +3000,8 @@ previousYearsLosses.capacitor.uk.helpText=You can include previous losses in thi
 previousYearsLosses.capacitor.nonUk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
 previousYearsLosses.personalRep.uk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
 previousYearsLosses.personalRep.nonUk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
-previousYearsLosses.personalRepInPeriodOfAdmin.uk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>	You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
-previousYearsLosses.personalRepInPeriodOfAdmin.nonUk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>	You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
+previousYearsLosses.personalRepInPeriodOfAdmin.uk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
+previousYearsLosses.personalRepInPeriodOfAdmin.nonUk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.uk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
 previousYearsLosses.personalRepInPeriodOfAdmin.agent.nonUk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
 
