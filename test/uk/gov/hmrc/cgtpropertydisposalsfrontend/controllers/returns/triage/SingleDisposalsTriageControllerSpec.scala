@@ -2145,7 +2145,11 @@ class SingleDisposalsTriageControllerSpec
               IncompleteSingleDisposalTriageAnswers(
                 completeJourney.individualUserType,
                 true,
-                Some(completeJourney.disposalMethod),
+                Some(
+                  if (completeJourney.representativeType() === Some(PersonalRepresentativeInPeriodOfAdmin))
+                    DisposalMethod.Sold
+                  else completeJourney.disposalMethod
+                ),
                 Some(completeJourney.countryOfResidence.isUk()),
                 if (completeJourney.countryOfResidence.isUk()) None
                 else Some(completeJourney.countryOfResidence),

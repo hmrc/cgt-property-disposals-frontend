@@ -64,7 +64,7 @@
 }
 @titleArg = @{
     dateOfDeath match {
-        case Some(date) => TimeUtils.govShortDisplayFormat(date.value)
+        case Some(date) => TimeUtils.govDisplayFormat(date.value)
         case _ => ""
     }
 }
