@@ -2897,7 +2897,7 @@ inYearLosses.trust.title=Do you want to include any other Capital Gains Tax loss
 inYearLosses.capacitor.title=Are you including any other Capital Gains Tax losses the person made in tax year {0} to {1}?
 inYearLosses.personalRep.title=Are you including any other Capital Gains Tax losses the person made in tax year {0} to {1}?
 inYearLosses.personalRepInPeriodOfAdmin.title=Are you including any other Capital Gains Tax losses the estate made during the tax year {0} to {1}?
-inYearLosses.personalRepInPeriodOfAdmin.agent.title=Is your client including any other Capital Gains Tax losses the estate made during the tax yea {0} to {1}?
+inYearLosses.personalRepInPeriodOfAdmin.agent.title=Is your client including any other Capital Gains Tax losses the estate made during the tax year {0} to {1}?
 
 inYearLosses.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
 inYearLosses.agent.helpText=An example of a loss would be where your client, or the estate, sold a property or shares for less than the market value on the person’s date of death.<br/>Including any other Capital Gains Tax losses the estate made in this tax year will reduce its gain.
