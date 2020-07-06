@@ -2921,7 +2921,7 @@ inYearLosses.trust.error.invalid=Select yes if you want to include any other Cap
 inYearLosses.capacitor.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.personalRep.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.personalRepInPeriodOfAdmin.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
-inYearLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
+inYearLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Select yes if your client wants to include any Capital Gains Tax losses the estate made in this tax year
 
 inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
