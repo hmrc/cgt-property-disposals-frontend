@@ -80,6 +80,9 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val annualExemptAmountUrl: String                   = getString(
     "external-url.annual-exempt-amount"
   )
+  val taxFreeAllowanceUrl: String                     = getString(
+    "external-url.tax-free-allowance"
+  )
   val personalAllowanceUrl: String                    = getString(
     "external-url.personal-allowance"
   )
