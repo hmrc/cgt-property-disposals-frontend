@@ -59,7 +59,8 @@
 @userKey = @{
     representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => ".personalRepInPeriodOfAdmin"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) if(isAgent) => ".personalRepInPeriodOfAdmin.agent"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -67,6 +68,13 @@
           else ""
   }
 }
+
+@details = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key$userKey.link", appConfig.personalRepresentativeUrl)
+        case _ => messages(s"$key$userKey.link", appConfig.cgtLossesUrl)
+}}
+
 
 @title = @{messages(
   s"$key$userKey.title",
@@ -131,7 +139,9 @@
             )),
             customErrorKey = Some(s"$key$userKey")
         )
-        <p>@Html(messages(s"$key$userKey.link", appConfig.cgtLossesUrl))</p>
+
+
+        <p>@Html(details)</p>
 
         @submitButton(messages("button.saveAndContinue"))
     }
