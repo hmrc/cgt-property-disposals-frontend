@@ -54,7 +54,8 @@ class DraftReturnSavedController @Inject() (
                 subscribedDetails,
                 _,
                 agentReferenceNumber,
-                draftReturn
+                draftReturn,
+                _
               )
             ) =>
           val draftReturnWithLastUpdated = draftReturn.fold(

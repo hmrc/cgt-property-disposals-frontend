@@ -62,8 +62,8 @@ class MixedUsePropertyDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case FillingOutReturn(_, _, _, _: DraftSingleMixedUseDisposalReturn) => true
-        case _                                                               => false
+        case FillingOutReturn(_, _, _, _: DraftSingleMixedUseDisposalReturn, _) => true
+        case _                                                                  => false
       }
     )
 

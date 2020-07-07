@@ -29,7 +29,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExampleCompanyDetailsAnswers.CompleteExampleCompanyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.CompleteMixedUsePropertyDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
@@ -368,15 +367,15 @@ object CompleteReturn {
   ): Option[Option[CompleteRepresenteeAnswers]] =
     (individualUserType, representeeAnswers) match {
       case (
-            Some(Capacitor) | Some(PersonalRepresentative),
+            Some(_: RepresentativeType),
             Some(r: CompleteRepresenteeAnswers)
           ) =>
         Some(Some(r))
 
-      case (Some(Capacitor) | Some(PersonalRepresentative), _) =>
+      case (Some(_: RepresentativeType), _) =>
         None
 
-      case _                                                   =>
+      case _                                =>
         Some(None)
     }
 

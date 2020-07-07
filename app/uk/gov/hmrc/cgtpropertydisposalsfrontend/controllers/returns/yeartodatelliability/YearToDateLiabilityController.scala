@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, M
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
@@ -100,7 +101,7 @@ class YearToDateLiabilityController @Inject() (
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
           ) =>
         d.yearToDateLiabilityAnswers match {
           case Some(y) => f(s, r, y)
@@ -127,7 +128,7 @@ class YearToDateLiabilityController @Inject() (
         }
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftMultipleDisposalsReturn))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftMultipleDisposalsReturn, _))
           ) =>
         d.yearToDateLiabilityAnswers.fold[Future[Result]](
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
@@ -140,7 +141,8 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 _,
-                d: DraftSingleIndirectDisposalReturn
+                d: DraftSingleIndirectDisposalReturn,
+                _
               )
             )
           ) =>
@@ -155,7 +157,8 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 _,
-                d: DraftMultipleIndirectDisposalsReturn
+                d: DraftMultipleIndirectDisposalsReturn,
+                _
               )
             )
           ) =>
@@ -170,7 +173,8 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 _,
-                d: DraftSingleMixedUseDisposalReturn
+                d: DraftSingleMixedUseDisposalReturn,
+                _
               )
             )
           ) =>
@@ -221,7 +225,7 @@ class YearToDateLiabilityController @Inject() (
                                           estimatedIncome,
                                           personalAllowance,
                                           draftReturn.initialGainOrLoss,
-                                          fillingOutReturn.subscribedDetails.isATrust
+                                          isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn)
                                         )
                                       )
                 _                <- EitherT(
@@ -469,7 +473,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
-          case (_, _) if isATrust(fillingOutReturn) =>
+          case (_, _) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
@@ -497,7 +501,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                    =>
+          case _                                                                         =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -507,7 +511,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
-          case (_, _) if isATrust(fillingOutReturn) =>
+          case (_, _) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
@@ -566,7 +570,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                    =>
+          case _                                                                         =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -576,7 +580,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
-          case (_, _) if isATrust(fillingOutReturn) =>
+          case (_, _) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
@@ -617,7 +621,7 @@ class YearToDateLiabilityController @Inject() (
                 }
               }
             }
-          case _                                    =>
+          case _                                                                         =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -627,7 +631,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
-          case (_, _) if isATrust(fillingOutReturn) =>
+          case (_, _) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
@@ -688,7 +692,7 @@ class YearToDateLiabilityController @Inject() (
                 }
               }
             }
-          case _                                    =>
+          case _                                                                         =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -718,23 +722,17 @@ class YearToDateLiabilityController @Inject() (
               )
             )(
               requiredPreviousAnswer = answers =>
-                if (isATrust(fillingOutReturn))
-                  Some(AmountInPence(0))
-                else
-                  answers.fold(
-                    _.taxableGainOrLoss,
-                    c => Some(c.taxableGainOrLoss)
-                  ),
-              redirectToIfNoRequiredPreviousAnswer =
-                if (isATrust(fillingOutReturn))
-                  controllers.returns.routes.TaskListController.taskList()
-                else routes.YearToDateLiabilityController.taxableGainOrLoss()
+                answers.fold(
+                  _.taxableGainOrLoss,
+                  c => Some(c.taxableGainOrLoss)
+                ),
+              redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxableGainOrLoss()
             )
 
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
                 _: DraftSingleDisposalReturn
-              ) if !isATrust(fillingOutReturn) =>
+              ) if !isATrust(fillingOutReturn) && !isPeriodOfAdmin(fillingOutReturn) =>
             withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
               displayForEstimatedDetails(
                 fillingOutReturn,
@@ -746,7 +744,7 @@ class YearToDateLiabilityController @Inject() (
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
                 _: DraftSingleDisposalReturn
-              ) if isATrust(fillingOutReturn) =>
+              ) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             displayForEstimatedDetails(
               fillingOutReturn,
               calculatedAnswers,
@@ -830,7 +828,7 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftSingleDisposalReturn,
     fillingOutReturn: FillingOutReturn
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    if (isATrust(fillingOutReturn))
+    if (isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn))
       estimatedDetailsSubmit(
         calculatedAnswers,
         draftReturn,
@@ -911,9 +909,7 @@ class YearToDateLiabilityController @Inject() (
         draftReturn.representativeType()
       )
     )(
-      requiredPreviousAnswer = answers =>
-        if (isATrust(fillingOutReturn)) Some(AmountInPence(0))
-        else answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
+      requiredPreviousAnswer = answers => answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
       redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxableGainOrLoss()
     ) { (hasEstimated, draftReturn) =>
       if (
@@ -947,7 +943,7 @@ class YearToDateLiabilityController @Inject() (
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
                 draftReturn: DraftSingleDisposalReturn
-              ) if isATrust(fillingOutReturn) =>
+              ) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             taxDueDisplay(
               fillingOutReturn,
               calculatedAnswers,
@@ -1045,7 +1041,7 @@ class YearToDateLiabilityController @Inject() (
           case (
                 calculatedAnswers: CalculatedYTDAnswers,
                 draftReturn: DraftSingleDisposalReturn
-              ) if isATrust(fillingOutReturn) =>
+              ) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
             baseTaxDueSubmit(
               fillingOutReturn,
               calculatedAnswers,
@@ -1864,6 +1860,9 @@ class YearToDateLiabilityController @Inject() (
   private def isATrust(fillingOutReturn: FillingOutReturn): Boolean =
     fillingOutReturn.subscribedDetails.isATrust
 
+  private def isPeriodOfAdmin(fillingOutReturn: FillingOutReturn): Boolean =
+    fillingOutReturn.draftReturn.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin)
+
   private def checkYourAnswersHandleCalculated(
     answers: CalculatedYTDAnswers,
     fillingOutReturn: FillingOutReturn,
@@ -1872,7 +1871,7 @@ class YearToDateLiabilityController @Inject() (
     wasUkResident: Boolean
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
-      case c: CompleteCalculatedYTDAnswers                                                          =>
+      case c: CompleteCalculatedYTDAnswers                           =>
         Ok(
           calculatedCheckYouAnswersPage(
             c,
@@ -1918,20 +1917,21 @@ class YearToDateLiabilityController @Inject() (
             )
         )
 
-      case IncompleteCalculatedYTDAnswers(None, _, _, _, _, _, _, _) if !isATrust(fillingOutReturn) =>
+      case IncompleteCalculatedYTDAnswers(None, _, _, _, _, _, _, _)
+          if !isATrust(fillingOutReturn) && !isPeriodOfAdmin(fillingOutReturn) =>
         Redirect(routes.YearToDateLiabilityController.estimatedIncome())
 
       case IncompleteCalculatedYTDAnswers(Some(p), None, _, _, _, _, _, _)
-          if !isATrust(fillingOutReturn) && p.value > 0L =>
+          if !isATrust(fillingOutReturn) && !isPeriodOfAdmin(fillingOutReturn) && p.value > 0L =>
         Redirect(routes.YearToDateLiabilityController.personalAllowance())
 
-      case IncompleteCalculatedYTDAnswers(_, _, None, _, _, _, _, _)                                =>
+      case IncompleteCalculatedYTDAnswers(_, _, None, _, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, None, _, _, _, _)                                =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, None, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxDue())
 
-      case IncompleteCalculatedYTDAnswers(_, _, _, _, None, _, _, _)                                =>
+      case IncompleteCalculatedYTDAnswers(_, _, _, _, None, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxDue())
 
       case IncompleteCalculatedYTDAnswers(
@@ -1955,7 +1955,7 @@ class YearToDateLiabilityController @Inject() (
             m,
             _,
             _
-          ) if isATrust(fillingOutReturn) =>
+          ) if isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn) =>
         fromIncompleteToCompleteCalculatedYTDAnswers(
           fillingOutReturn,
           draftReturn,

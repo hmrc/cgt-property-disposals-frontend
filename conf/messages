@@ -861,6 +861,20 @@ numberOfProperties.error.required=Select how many UK properties you are includin
 
 numberOfProperties.cyaChange=how many properties you want to include in this return
 
+previousReturnExistsWithSameCompletionDate.title=You cannot complete this return online
+
+previousReturnExistsWithSameCompletionDate.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your previous returns.
+previousReturnExistsWithSameCompletionDate.trust.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your trust’s previous returns.
+previousReturnExistsWithSameCompletionDate.agent.p1=You must <a href="{0}">contact HMRC</a>. Tell them you need to amend one of your client’s previous returns.
+
+previousReturnExistsWithSameCompletionDate.propertyDisposals.title=Property disposals
+previousReturnExistsWithSameCompletionDate.propertyDisposals.p1=You’ll need to amend the return with the property that had:
+previousReturnExistsWithSameCompletionDate.propertyDisposals.li1=the same completion date as the one you’re wanting to report now
+previousReturnExistsWithSameCompletionDate.propertyDisposals.li2=a contract exchange date in the same tax year as the one you’re wanting to report now
+previousReturnExistsWithSameCompletionDate.indirectDisposals.title=Indirect disposals
+previousReturnExistsWithSameCompletionDate.indirectDisposals.p1=You’ll need to amend the return that had shares with the same sale of disposal date as the disposal you’re wanting to report now.
+
+
 #===================================================
 # COMMON TRIAGE PAGES - END
 #===================================================
@@ -2950,66 +2964,88 @@ inYearLosses.agent.title=Do you want to include any other Capital Gains Tax loss
 inYearLosses.trust.title=Do you want to include any other Capital Gains Tax losses made in tax year {0} to {1}?
 inYearLosses.capacitor.title=Are you including any other Capital Gains Tax losses the person made in tax year {0} to {1}?
 inYearLosses.personalRep.title=Are you including any other Capital Gains Tax losses the person made in tax year {0} to {1}?
+inYearLosses.personalRepInPeriodOfAdmin.title=Are you including any other Capital Gains Tax losses the estate made during the tax year {0} to {1}?
+inYearLosses.personalRepInPeriodOfAdmin.agent.title=Is your client including any other Capital Gains Tax losses the estate made during the tax year {0} to {1}?
 
 inYearLosses.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
 inYearLosses.agent.helpText=For example, your client would make a loss if they sold a property for less than they paid for it.<br/> Including any other Capital Gains Tax losses your client made in this tax year will reduce their gain. Your client must have made the losses before {0}.
 inYearLosses.trust.helpText=For example, the trust would make a loss if it sold a property for less than it paid for it.<br/> Including any other Capital Gains Tax losses the trust made in this tax year will reduce its gain. The trust must have made the losses before {0}.
 inYearLosses.capacitor.helpText=For example, if a property was sold for less than it was bought for, the seller would make a loss.<br/> Including any other Capital Gains Tax losses the person made in this tax year will reduce their gain. The person must have made the losses before {0}.
 inYearLosses.personalRep.helpText=For example, if a property was sold for less than it was bought for, the seller would make a loss.<br/> Including any other Capital Gains Tax losses the person made in this tax year will reduce their gain. The person must have made the losses before {0}.
+inYearLosses.personalRepInPeriodOfAdmin.helpText=An example of a loss would be where you, or the estate, sold a property or shares for less than the market value on the person’s date of death.<br/>Including any other Capital Gains Tax losses the estate made in this tax year will reduce its gain.
+inYearLosses.personalRepInPeriodOfAdmin.agent.helpText=An example of a loss would be where your client, or the estate, sold a property or shares for less than the market value on the person’s date of death.<br/>Including any other Capital Gains Tax losses the estate made in this tax year will reduce its gain.
 
 inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.agent.error.required=Select yes if you want to include any other Capital Gains Tax losses your client made in the tax year
 inYearLosses.trust.error.required=Select yes if you want to include any other Capital Gains Tax losses the trust made in the tax year
 inYearLosses.capacitor.error.required=Select yes if the person wants to include any Capital Gains Tax losses they made in this tax year
 inYearLosses.personalRep.error.required=Select yes if you want to include any Capital Gains Tax losses the person made in this tax year
+inYearLosses.personalRepInPeriodOfAdmin.error.required=Select yes if you want to include any Capital Gains Tax losses the estate made in this tax year
+inYearLosses.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client wants to include any Capital Gains Tax losses the estate made in this tax year
 
 inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.agent.error.invalid=Select yes if you want to include any other Capital Gains Tax losses your client made in the tax year
 inYearLosses.trust.error.invalid=Select yes if you want to include any other Capital Gains Tax losses the trust made in the tax year
 inYearLosses.capacitor.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.personalRep.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
+inYearLosses.personalRepInPeriodOfAdmin.error.invalid=Select yes if the person want to include any Capital Gains Tax losses you made in this tax year
+inYearLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Select yes if your client wants to include any Capital Gains Tax losses the estate made in this tax year
 
 inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 inYearLosses.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 inYearLosses.trust.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 inYearLosses.capacitor.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 inYearLosses.personalRep.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+inYearLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 
 inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.trust.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.capacitor.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 inYearLossesValue.personalRep.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+inYearLossesValue.personalRepInPeriodOfAdmin.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+inYearLossesValue.personalRepInPeriodOfAdmin.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 
 inYearLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 inYearLossesValue.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 inYearLossesValue.trust.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 inYearLossesValue.capacitor.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 inYearLossesValue.personalRep.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+inYearLossesValue.personalRepInPeriodOfAdmin.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+inYearLossesValue.personalRepInPeriodOfAdmin.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 
 inYearLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 inYearLossesValue.agent.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 inYearLossesValue.trust.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 inYearLossesValue.capacitor.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 inYearLossesValue.personalRep.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+inYearLossesValue.personalRepInPeriodOfAdmin.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+inYearLossesValue.personalRepInPeriodOfAdmin.agent.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 
 inYearLossesValue.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 inYearLossesValue.agent.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 inYearLossesValue.trust.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 inYearLossesValue.capacitor.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 inYearLossesValue.personalRep.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+inYearLossesValue.personalRepInPeriodOfAdmin.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+inYearLossesValue.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 
 inYearLossesValue.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 inYearLossesValue.trust.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 inYearLossesValue.agent.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 inYearLossesValue.capacitor.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 inYearLossesValue.personalRep.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+inYearLossesValue.personalRepInPeriodOfAdmin.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+inYearLossesValue.personalRepInPeriodOfAdmin.agent.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 
 inYearLossesValue.label=Amount of losses from this tax year
 inYearLossesValue.agent.label=Amount of losses from this tax year
 inYearLossesValue.trust.label=Amount of losses from this tax year
 inYearLossesValue.capacitor.label=Amount of losses from this tax year
 inYearLossesValue.personalRep.label=Amount of losses from this tax year
+inYearLossesValue.personalRepInPeriodOfAdmin.label=Amount of losses from this tax year
+inYearLossesValue.personalRepInPeriodOfAdmin.agent.label=Amount of losses from this tax year
 
 inYearLosses.cyaChange=if Capital Gains Tax losses made in the tax year {0} to {1} are being included
 inYearLossesValue.cyaChange=the amount of Capital Gains Tax losses in the tax year {0} to {1} that are included
@@ -3019,6 +3055,8 @@ previousYearsLosses.agent.title=Do you want to include any other Capital Gains T
 previousYearsLosses.trust.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.capacitor.title=Does the person want to include any other Capital Gains Tax losses they made in previous tax years?
 previousYearsLosses.personalRep.title=Does the person want to include any other Capital Gains Tax losses they made in previous tax years?
+previousYearsLosses.personalRepInPeriodOfAdmin.title=Are you including any other Capital Gains Tax losses the estate made in previous tax years?
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.title=Is your client including any other Capital Gains Tax losses the estate made in previous tax years?
 
 previousYearsLosses.uk.helpText=You can include previous losses in this return to reduce your gain. You can only include other losses made on other UK property sales or disposals that you have already reported to HMRC.
 previousYearsLosses.nonUk.helpText=You can include previous losses that are liable for UK tax in this return. They will reduce your gain. You can only include other losses you have already reported to HMRC.
@@ -3030,60 +3068,82 @@ previousYearsLosses.capacitor.uk.helpText=You can include previous losses in thi
 previousYearsLosses.capacitor.nonUk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
 previousYearsLosses.personalRep.uk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
 previousYearsLosses.personalRep.nonUk.helpText=You can include previous losses in this return to reduce the person’s gain. You can only include other losses that have already been reported to HMRC. For example, losses on shares or other UK property sales or disposals.
+previousYearsLosses.personalRepInPeriodOfAdmin.uk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
+previousYearsLosses.personalRepInPeriodOfAdmin.nonUk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.uk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.nonUk.helpText=You can include previous losses in this return to reduce the estate’s gain.<br/>You can only include the estate’s other losses if they have already been reported to HMRC. For example, losses on shares or other UK property.
 
 previousYearsLosses.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLosses.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLosses.trust.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLosses.capacitor.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLosses.personalRep.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLosses.personalRepInPeriodOfAdmin.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 
 previousYearsLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
 previousYearsLosses.agent.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
 previousYearsLosses.trust.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
 previousYearsLosses.capacitor.error.required=Select yes if the person wants to include any Capital Gains Tax losses the person made in previous tax years
 previousYearsLosses.personalRep.error.required=Select yes if you want to include any Capital Gains Tax losses the person made in this tax year
+previousYearsLosses.personalRepInPeriodOfAdmin.error.required=Select yes if you are including any other Capital Gains Tax losses the estate made in previous tax years
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client is including any other Capital Gains Tax losses the estate made in previous tax years
 
 previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
 previousYearsLosses.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
 previousYearsLosses.trust.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
 previousYearsLosses.capacitor.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
 previousYearsLosses.personalRep.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+previousYearsLosses.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
 
 previousYearsLossesValue.label=Amount of losses from previous tax years
 previousYearsLossesValue.agent.label=Amount of losses from previous tax years
 previousYearsLossesValue.trust.label=Amount of losses from previous tax years
 previousYearsLossesValue.capacitor.label=Amount of losses from previous tax years
 previousYearsLossesValue.personalRep.label=Amount of losses from previous tax years
+previousYearsLossesValue.personalRepInPeriodOfAdmin.label=Amount of losses from previous tax years
+previousYearsLossesValue.personalRepInPeriodOfAdmin.agent.label=Amount of losses from previous tax years
 
 previousYearsLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLossesValue.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLossesValue.trust.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLossesValue.capacitor.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLossesValue.personalRep.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLossesValue.personalRepInPeriodOfAdmin.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLossesValue.personalRepInPeriodOfAdmin.agent.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 
 previousYearsLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 previousYearsLossesValue.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 previousYearsLossesValue.trust.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 previousYearsLossesValue.capacitor.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 previousYearsLossesValue.personalRep.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+previousYearsLossesValue.personalRepInPeriodOfAdmin.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
+previousYearsLossesValue.personalRepInPeriodOfAdmin.agent.error.tooSmall=Amount of Capital Gains Tax losses must be more than 0, or select no
 
 previousYearsLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 previousYearsLossesValue.agent.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 previousYearsLossesValue.trust.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 previousYearsLossesValue.capacitor.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 previousYearsLossesValue.personalRep.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLossesValue.personalRepInPeriodOfAdmin.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLossesValue.personalRepInPeriodOfAdmin.agent.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
 
 previousYearsLossesValue.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 previousYearsLossesValue.agent.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 previousYearsLossesValue.trust.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 previousYearsLossesValue.capacitor.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 previousYearsLossesValue.personalRep.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+previousYearsLossesValue.personalRepInPeriodOfAdmin.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+previousYearsLossesValue.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
 
 previousYearsLossesValue.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 previousYearsLossesValue.agent.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 previousYearsLossesValue.trust.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 previousYearsLossesValue.capacitor.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 previousYearsLossesValue.personalRep.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+previousYearsLossesValue.personalRepInPeriodOfAdmin.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+previousYearsLossesValue.personalRepInPeriodOfAdmin.agent.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
 
 previousYearsLosses.cyaChange=if losses made from previous tax years are being included
 previousYearsLossesValue.cyaChange=the amount of losses from previous tax years
@@ -3093,17 +3153,23 @@ annualExemptAmount.agent.title=How much of your client’s Capital Gains Tax Ann
 annualExemptAmount.trust.title=How much of the trust’s Capital Gains Tax Annual Exempt Amount does it want to use?
 annualExemptAmount.capacitor.title=How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?
 annualExemptAmount.personalRep.title=How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?
+annualExemptAmount.personalRepInPeriodOfAdmin.title=How much of the Annual Exempt Amount are you including?
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.title=How much of the Annual Exempt Amount are you including?
 
 annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.agent.helpText=In the tax year {0} to {1}, your client only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.trust.helpText=In the tax year {0} to {1}, most trustees only have to pay Capital Gains Tax on gains above {2}. This is called the Annual Exempt Amount. <br/> <br/>The Annual Exempt Amount for trusts for vulnerable beneficiaries is {3}.
 annualExemptAmount.capacitor.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
 annualExemptAmount.personalRep.helpText=In the tax year {0} to {1}, the person only has to pay Capital Gains Tax on gains above {3}.
+annualExemptAmount.personalRepInPeriodOfAdmin.helpText=During the period of administration, all of the Annual Exempt Amount can be included in the estate’s return. This is the case even if the time between 6 April and the day the person died was very short.
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.helpText=During the period of administration, all of the Annual Exempt Amount can be included in the estate’s return. This is the case even if the time between 6 April and the day the person died was very short.
 
 annualExemptAmount.details.1.header=What is the Annual Exempt Amount?
 annualExemptAmount.details.1.body=Each tax year a trust gets an annual tax-free allowance. This is known as the <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a>. Trustees only pay Capital Gains Tax if the trust’s taxable gains for the tax year are above the Annual Exempt Amount.
-annualExemptAmount.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
 annualExemptAmount.details.2.header=Who are vulnerable beneficiaries?
+annualExemptAmount.details.2.body=<a href="{0}" target="_blank">A vulnerable beneficiary (opens in a new window)</a> could be someone under 18 whose parent has died. It could also be a disabled person who is eligible for certain benefits.
+annualExemptAmount.details.3.header=What is the Annual Exempt Amount?
+annualExemptAmount.details.3.body=The <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a> is an annual tax-free allowance. It is available to certain people who need to pay Capital Gains Tax. Most people only have to pay Capital Gains Tax on their gains for the tax year above the Annual Exempt Amount. Any losses or reliefs must have been subtracted from the gain already.
 
 annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
 
@@ -3112,30 +3178,40 @@ annualExemptAmount.agent.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.trust.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.capacitor.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.personalRep.error.tooLarge=Annual Exempt Amount must be {0} or less
+annualExemptAmount.personalRepInPeriodOfAdmin.error.tooLarge=Enter how much of the Annual Exempt Amount are you including, like 0 or 12,300
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.tooLarge=Enter how much of the Annual Exempt Amount are you including, like 0 or 12,300
 
 annualExemptAmount.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,300
 annualExemptAmount.agent.error.required=Enter how much of your client’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
 annualExemptAmount.trust.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,300
 annualExemptAmount.capacitor.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
 annualExemptAmount.personalRep.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
+annualExemptAmount.personalRepInPeriodOfAdmin.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
 
 annualExemptAmount.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
 annualExemptAmount.agent.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
 annualExemptAmount.trust.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
 annualExemptAmount.capacitor.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
 annualExemptAmount.personalRep.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
+annualExemptAmount.personalRepInPeriodOfAdmin.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
 
 annualExemptAmount.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.agent.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.trust.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.capacitor.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.personalRep.error.tooSmall=Annual Exempt Amount must be 0 or more
+annualExemptAmount.personalRepInPeriodOfAdmin.error.tooSmall=Annual Exempt Amount must be 0 or more
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.tooSmall=Annual Exempt Amount must be 0 or more
 
 annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 annualExemptAmount.agent.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 annualExemptAmount.trust.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 annualExemptAmount.capacitor.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 annualExemptAmount.personalRep.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
+annualExemptAmount.personalRepInPeriodOfAdmin.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
 
 annualExemptAmount.cyaChange=how much Annual Exempt Amount is being used
 
@@ -3161,11 +3237,16 @@ taxableGainOrLoss.capacitor.title=Did the person make an overall gain or loss on
 taxableGainOrLoss.capacitor.multiple.title=Did the person make an overall gain or loss on the property sales or disposals in this return?
 taxableGainOrLoss.personalRep.title=Was an overall gain or loss made on the property sale or disposal?
 taxableGainOrLoss.personalRep.multiple.title=Was an overall gain or loss made on the property sales or disposals in this return?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.title=Did the estate make an overall gain or loss on the property sale or disposal?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title=Did the estate make an overall gain or loss on the property sales or disposals in this return?
+
 taxableGainOrLoss.helpText=To work out if you made an overall gain or loss, you’ll need to take your initial gain or loss and subtract any reliefs, losses, or other allowances you are entitled to.
 taxableGainOrLoss.agent.helpText=To work out if your client made an overall gain or loss, you’ll need to take your client’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
 taxableGainOrLoss.trust.helpText=To work out if the trust made an overall gain or loss, you’ll need to take the trust’s initial gain or loss and subtract any reliefs, losses, or other allowances it is entitled to.
 taxableGainOrLoss.capacitor.helpText=To work out if the person made an overall gain or loss, you’ll need to take the person’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
 taxableGainOrLoss.personalRep.helpText=To work out if there was an overall gain or loss, you’ll need to take the initial gain or loss and subtract any reliefs, losses, or other allowances the person was entitled to.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.helpText=Take the gain or loss and subtract any reliefs, losses, or other allowances the estate is entitled to.
+
 taxableGainOrLoss.error.required=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.multiple.error.required=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.agent.error.required=Select yes if your client made an overall gain on the property sale or disposal
@@ -3176,6 +3257,10 @@ taxableGainOrLoss.capacitor.error.required=Select yes if the person made an over
 taxableGainOrLoss.capacitor.multiple.error.required=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRep.error.required=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRep.multiple.error.required=Select yes if the person made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.error.required=Select yes if the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.error.required=Select yes if the estate made an overall gain
+
+
 taxableGainOrLoss.error.invalid=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.error.multiple.invalid=Select yes if you made an overall gain on the property sales or disposals in this return
 taxableGainOrLoss.agent.error.invalid=Select yes if your client made an overall gain on the property sale or disposal
@@ -3186,6 +3271,8 @@ taxableGainOrLoss.capacitor.error.invalid=Select yes if the person made an overa
 taxableGainOrLoss.capacitor.multiple.error.invalid=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRep.error.invalid=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRep.multiple.error.invalid=Select yes if the person made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.error.invalid=Select yes if the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.error.invalid=Select yes if the estate made an overall gain
 
 taxableGainOrLoss.cyaChange=if an overall gain or loss was made on the property sale or disposal
 
@@ -3194,6 +3281,7 @@ taxableGainOrLoss.agent.gain.label=Yes, my client made an overall gain
 taxableGainOrLoss.trust.gain.label=Yes, the trust made an overall gain
 taxableGainOrLoss.capacitor.gain.label=Yes, the person made an overall gain
 taxableGainOrLoss.personalRep.gain.label=Yes, the person made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=Yes, the estate made an overall gain
 
 taxableGain.label=Amount of overall gain
 taxableGain.error.required=Enter the amount of overall gain
@@ -3206,6 +3294,8 @@ taxableGain.capacitor.error.required=Enter the amount of overall gain
 taxableGain.capacitor.multiple.error.required=Enter the amount of overall gain
 taxableGain.personalRep.error.required=Enter the amount of overall gain
 taxableGain.personalRep.multiple.error.required=Enter the amount of overall gain
+taxableGain.personalRepInPeriodOfAdmin.error.required=Enter the amount of overall gain
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.required=Enter the amount of overall gain
 
 taxableGain.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
@@ -3217,6 +3307,8 @@ taxableGain.capacitor.error.invalid=Overall gain must be an amount of money, lik
 taxableGain.capacitor.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.personalRep.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.personalRep.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 
 taxableGain.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
@@ -3228,6 +3320,8 @@ taxableGain.capacitor.error.tooSmall=Overall gain must be an amount of money bet
 taxableGain.capacitor.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 
 taxableGain.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
@@ -3239,6 +3333,8 @@ axableGain.capacitor.error.tooLarge=Overall gain must be an amount of money betw
 taxableGain.capacitor.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 
 taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
@@ -3250,12 +3346,15 @@ taxableGain.capacitor.error.tooManyDecimals=Overall gain must be an amount of mo
 taxableGain.capacitor.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.personalRep.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.personalRep.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
 taxableGainOrLoss.trust.loss.label=No, the trust made an overall loss
 taxableGainOrLoss.capacitor.loss.label=No, the person made an overall loss
 taxableGainOrLoss.personalRep.loss.label=No, the person made an overall loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.loss.label=No, the estate made an overall loss
 
 netLoss.label=Amount of overall loss
 
@@ -3269,6 +3368,8 @@ netLoss.capacitor.error.required=Enter the amount of overall loss
 netLoss.capacitor.multiple.error.required=Enter the amount of overall loss
 netLoss.personalRep.error.required=Enter the amount of overall loss
 netLoss.personalRep.multiple.error.required=Enter the amount of overall loss
+netLoss.personalRepInPeriodOfAdmin.error.required=Enter the amount of overall loss
+netLoss.personalRepInPeriodOfAdmin.multiple.error.required=Enter the amount of overall loss
 
 netLoss.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
@@ -3280,6 +3381,8 @@ netLoss.capacitor.error.invalid=Overall loss must be must be an amount of money,
 netLoss.capacitor.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.personalRep.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.personalRep.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 
 netLoss.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
@@ -3291,6 +3394,8 @@ netLoss.capacitor.error.tooSmall=Overall loss must be an amount of money between
 netLoss.capacitor.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRep.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRep.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 
 netLoss.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
@@ -3302,6 +3407,8 @@ netLoss.capacitor.error.tooLarge=Overall loss must be an amount of money between
 netLoss.capacitor.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRep.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRep.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 
 netLoss.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
@@ -3313,6 +3420,8 @@ netLoss.capacitor.error.tooManyDecimals=Overall loss must be an amount of money 
 netLoss.capacitor.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.personalRep.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.personalRep.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
@@ -3420,6 +3529,7 @@ hasEstimatedDetails.agent.yes.content=The amounts will need to be confirmed with
 hasEstimatedDetails.trust.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the trust needs to complete a Self Assessment tax return this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.capacitor.yes.content=The amounts will need to be confirmed with HMRC when they become available. If the person needs to complete a Self Assessment tax return this can be done in their next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.personalRep.yes.content=The amounts will need to be confirmed with HMRC when they become available. If you need to complete a Self Assessment tax return for the person this can be done in through their Self Assessment return. If not, it can be done through this service.
+hasEstimatedDetails.personalRepInPeriodOfAdmin.yes.content=The amounts will need to be confirmed with HMRC when they become available. If you need to complete a Self Assessment tax return for the estate this can be done in its next Self Assessment return. If not, it can be done through this service.
 hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
@@ -3496,6 +3606,8 @@ calculator.incomeAboveThreshold=The amount of taxable gain to be charged at basi
 calculator.trustRateInfo.p1=Most trusts disposing of this property type pay taxable gains at {0}.
 calculator.trustRateInfo.p2=Trusts for vulnerable beneficiaries get special tax treatment. If you’re a trustee of this type of trust you’ll need to work out the amount of tax due.
 calculator.agent.trustRateInfo.p2=Trusts for vulnerable beneficiaries get special tax treatment. If your client is this type of trust you’ll need to work out the amount of tax due.
+calculator.periodOfAdminRateInfo.p1=Most personal representatives or estates disposing of this property type pay taxable gains at {0}.
+
 calculator.ukThreshold=UK threshold for basic rate tax
 calculator.total.ukThresholdLessTaxableIncome=UK threshold for basic rate tax less taxable income
 calculator.basicRateRule=To work out the amount to be charged at the basic rate of Capital Gains Tax we took the lower of these amounts:
@@ -3669,11 +3781,17 @@ confirmationOfSubmission.trust.printPage=<a href="{0}">Print or save this page a
 confirmationOfSubmission.capacitor.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The person can view the return from their Capital Gains Tax on UK property account.
 confirmationOfSubmission.capacitor.noId.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
 confirmationOfSubmission.personalRep.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.printPage=You should <a href="{0}">print or save this page as a PDF</a> for the person. The return details will not appear in your Capital Gains Tax on UK property account.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.printPage=You should <a href="{0}">print or save this page as a PDF</a> for your records. The return details will not appear in your client’s Capital Gain Tax on UK property account.
+
 
 confirmationOfSubmission.whatNext=What you need to do next
 confirmationOfSubmission.agent.whatNext=What happens next
 confirmationOfSubmission.trust.whatNext=What happens next
 confirmationOfSubmission.capacitor.whatNext=What happens next
+confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=What happens next
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=What happens next
+
 
 confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
 confirmationOfSubmission.agent.warning=Your client must pay their Capital Gains Tax on UK property by {0}. Your client may be charged interest on late payments.
@@ -3688,6 +3806,8 @@ confirmationOfSubmission.agent.howToPay.p1=They will need to provide their payme
 confirmationOfSubmission.trust.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.capacitor.howToPay.p1=The person can pay online or by bank transfer. They will need their payment reference number: <strong class="bold">{0}</strong>.
 confirmationOfSubmission.personalRep.howToPay.p1=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.howToPay.p1=HMRC will contact you using the details you provided. They will tell you how and when you need to pay the tax.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.howToPay.p1=HMRC will contact you using the details you provided. They will tell you how and when you need to pay the tax.
 
 confirmationOfSubmission.paymentNotice=It takes 3 to 5 days for payments or charges to show in your account.
 confirmationOfSubmission.agent.paymentNotice=It takes 3 to 5 days for payments or charges to show in your client’s account.
@@ -3703,12 +3823,16 @@ confirmationOfSubmission.agent.ifSa=Self Assessment
 confirmationOfSubmission.trust.ifSa=If the trust needs to send a Self Assessment tax return
 confirmationOfSubmission.capacitor.ifSa=Self Assessment
 confirmationOfSubmission.personalRep.ifSa=If you need to do a Self Assessment tax return for the person
+confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa=If you need to do a Self Assessment tax return for the estate
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa=If your client needs to do a Self Assessment tax return for the estate
 
 confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
 confirmationOfSubmission.agent.ifSa.p1=If your client needs to send a Self Assessment tax return they’ll need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.trust.ifSa.p1=You’ll need to provide details from this return in the trust’s next Self Assessment tax return.
 confirmationOfSubmission.capacitor.ifSa.p1=If the person needs to file a Self Assessment tax return, they will need to provide details from this return in their next Self Assessment tax return.
 confirmationOfSubmission.personalRep.ifSa.p1=You’ll need to provide details from this return in the person’s Self Assessment tax return.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.ifSa.p1=You’ll need to provide details from this return in the estate’s Self Assessment tax return.
+confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.ifSa.p1=Your client will need to provide details from this return in the estate’s Self Assessment tax return.
 
 confirmationOfSubmission.returnToAccountHome=Go to your <a href="{0}">Capital Gains Tax on UK property account home</a>.
 confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="{0}">Capital Gains Tax on UK property account home</a>.

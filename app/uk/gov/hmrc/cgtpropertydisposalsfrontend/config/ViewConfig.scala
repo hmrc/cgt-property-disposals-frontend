@@ -80,6 +80,9 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val annualExemptAmountUrl: String                   = getString(
     "external-url.annual-exempt-amount"
   )
+  val taxFreeAllowanceUrl: String                     = getString(
+    "external-url.tax-free-allowance"
+  )
   val personalAllowanceUrl: String                    = getString(
     "external-url.personal-allowance"
   )
@@ -125,9 +128,10 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     s"${getString("external-url.report-accessibility-problem")}?service=cgtpd"
   val contactHmrc: String                             = getString("external-url.contact-hmrc")
 
-  val personalRepresentative: String      = getString(
+  val personalRepresentativeUrl: String = getString(
     "external-url.personal-representative"
   )
+
   val calculateCgt: String                = getString("external-url.calculate-cgt")
   val payYourTax: String                  = getString("external-url.pay-your-tax")
   val payTheirTaxBill: String             = getString("external-url.pay-their-tax-bill")
@@ -172,4 +176,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val periodOfAdminEnabled: Boolean = servicesConfig.getBoolean("period-of-admin.enabled")
 
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enable-language-switching")
+
+  val furtherReturnsEnabled: Boolean = servicesConfig.getBoolean("further-returns.enabled")
+
 }

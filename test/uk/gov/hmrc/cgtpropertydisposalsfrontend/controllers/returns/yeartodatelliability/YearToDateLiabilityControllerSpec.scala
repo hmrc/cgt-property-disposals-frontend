@@ -363,12 +363,13 @@ class YearToDateLiabilityControllerSpec
   def singleDispsaslDraftReturnWithCompleteJourneys(
     yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: DisposalDate,
-    reliefDetailsAnswers: ReliefDetailsAnswers
+    reliefDetailsAnswers: ReliefDetailsAnswers,
+    individualUserType: Option[IndividualUserType] = None
   ): DraftSingleDisposalReturn =
     DraftSingleDisposalReturn(
       UUID.randomUUID(),
       sample[CompleteSingleDisposalTriageAnswers]
-        .copy(disposalDate = disposalDate),
+        .copy(disposalDate = disposalDate, individualUserType = individualUserType),
       Some(sample[UkAddress]),
       Some(sample[CompleteDisposalDetailsAnswers]),
       Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -674,6 +675,29 @@ class YearToDateLiabilityControllerSpec
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
+
+        "the user is a personal rep in period of admin" in {
+          val (session, _, _) = sessionWithSingleDisposalState(
+            None,
+            Some(sample[DisposalDate]),
+            UserType.Individual,
+            wasUkResident = true,
+            Some(completeReliefDetailsAnswersWithNoOtherReliefs),
+            individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              session
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
       }
 
     }
@@ -723,7 +747,8 @@ class YearToDateLiabilityControllerSpec
             IncompleteCalculatedYTDAnswers.empty
               .copy(estimatedIncome = Some(AmountInPence(100L))),
             completeReliefDetailsAnswersWithNoOtherReliefs,
-            sample[DisposalDate]
+            sample[DisposalDate],
+            None
           )
         }
 
@@ -857,6 +882,29 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+
+        "the user is a personal rep in period of admin" in {
+          val (session, _, _) = sessionWithSingleDisposalState(
+            None,
+            Some(sample[DisposalDate]),
+            UserType.Individual,
+            wasUkResident = true,
+            Some(completeReliefDetailsAnswersWithNoOtherReliefs),
+            individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              session
+            )
           }
 
           checkIsRedirect(
@@ -1435,7 +1483,7 @@ class YearToDateLiabilityControllerSpec
                 taxableGainOrLoss = Some(AmountInPence(100)),
                 hasEstimatedDetails = None
               ),
-              returns.routes.TaskListController.taskList()
+              routes.YearToDateLiabilityController.taxableGainOrLoss()
             )
           }
 
@@ -1830,8 +1878,6 @@ class YearToDateLiabilityControllerSpec
       def performAction(): Future[Result] = controller.taxDue()(FakeRequest())
 
       val disposalDate              = sample[DisposalDate]
-      val triageAnswers             = sample[CompleteSingleDisposalTriageAnswers]
-        .copy(disposalDate = disposalDate)
       val disposalDetailsAnswers    = sample[CompleteDisposalDetailsAnswers]
       val acquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
       val reliefDetailsAnswers      = sample[CompleteReliefDetailsAnswers]
@@ -1839,9 +1885,13 @@ class YearToDateLiabilityControllerSpec
       val initialGainOrLossAnswers  = sample[AmountInPence]
 
       def draftReturnWithAnswers(
-        yearToDateLiabilityAnswers: YearToDateLiabilityAnswers
-      ): DraftSingleDisposalReturn =
-        sample[DraftSingleDisposalReturn].copy(
+        yearToDateLiabilityAnswers: YearToDateLiabilityAnswers,
+        individualUserType: Option[IndividualUserType],
+        disposalDate: DisposalDate = disposalDate
+      ): (DraftSingleDisposalReturn, CompleteSingleDisposalTriageAnswers) = {
+        val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(individualUserType = individualUserType, disposalDate = disposalDate)
+        val draftReturn   = sample[DraftSingleDisposalReturn].copy(
           triageAnswers = triageAnswers,
           disposalDetailsAnswers = Some(disposalDetailsAnswers),
           acquisitionDetailsAnswers = Some(acquisitionDetailsAnswers),
@@ -1850,11 +1900,14 @@ class YearToDateLiabilityControllerSpec
           yearToDateLiabilityAnswers = Some(yearToDateLiabilityAnswers),
           initialGainOrLoss = Some(initialGainOrLossAnswers)
         )
+        draftReturn -> triageAnswers
+      }
 
       def calculateRequest(
         estimatedIncome: AmountInPence,
         personalAllowance: AmountInPence,
-        isATrust: Boolean
+        isATrust: Boolean,
+        triageAnswers: CompleteSingleDisposalTriageAnswers
       ) =
         CalculateCgtTaxDueRequest(
           triageAnswers,
@@ -1947,10 +2000,13 @@ class YearToDateLiabilityControllerSpec
             hasEstimatedDetails = Some(false)
           )
 
+          val (draftReturn, triageAnswers) = draftReturnWithAnswers(answers, None)
+
           val calculateCgtTaxDueRequest = calculateRequest(
             AmountInPence(1L),
             AmountInPence(2L),
-            isATrust = false
+            isATrust = false,
+            triageAnswers
           )
 
           inSequence {
@@ -1961,7 +2017,7 @@ class YearToDateLiabilityControllerSpec
                   sample[FillingOutReturn]
                     .copy(
                       subscribedDetails = subscribedDetails,
-                      draftReturn = draftReturnWithAnswers(answers)
+                      draftReturn = draftReturn
                     )
                 )
               )
@@ -1976,30 +2032,29 @@ class YearToDateLiabilityControllerSpec
           val subscribedDetails =
             sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
 
-          val answers = IncompleteCalculatedYTDAnswers.empty.copy(
+          val calculatedTaxDue             = sample[CalculatedTaxDue]
+          val answers                      = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome = Some(AmountInPence(1L)),
             personalAllowance = Some(AmountInPence(2L)),
             hasEstimatedDetails = Some(false)
           )
-
-          val calculateCgtTaxDueRequest = calculateRequest(
-            AmountInPence(1L),
-            AmountInPence(2L),
-            isATrust = false
-          )
-          val calculatedTaxDue          = sample[CalculatedTaxDue]
-          val draftReturn               = draftReturnWithAnswers(answers)
-          val fillingOutReturn          =
+          val (draftReturn, triageAnswers) = draftReturnWithAnswers(answers, individualUserType = None)
+          val fillingOutReturn             =
             sample[FillingOutReturn].copy(
               draftReturn = draftReturn,
               subscribedDetails = subscribedDetails
             )
-          val updatedFillingOutReturn   = fillingOutReturn.copy(draftReturn =
+          val updatedFillingOutReturn      = fillingOutReturn.copy(draftReturn =
             draftReturn.copy(
               yearToDateLiabilityAnswers = Some(answers.copy(calculatedTaxDue = Some(calculatedTaxDue)))
             )
           )
-
+          val calculateCgtTaxDueRequest    = calculateRequest(
+            AmountInPence(1L),
+            AmountInPence(2L),
+            isATrust = false,
+            triageAnswers
+          )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -2024,14 +2079,16 @@ class YearToDateLiabilityControllerSpec
         def test(
           answers: YearToDateLiabilityAnswers,
           subscribedDetails: SubscribedDetails,
+          individualUserType: Option[IndividualUserType],
           mockCalculateTaxDue: (
             FillingOutReturn,
-            DraftSingleDisposalReturn
+            DraftSingleDisposalReturn,
+            CompleteSingleDisposalTriageAnswers
           ) => Unit,
           backLink: Call
         ): Unit = {
-          val draftReturn      = draftReturnWithAnswers(answers)
-          val fillingOutReturn = sample[FillingOutReturn].copy(
+          val (draftReturn, triageAnswers) = draftReturnWithAnswers(answers, individualUserType)
+          val fillingOutReturn             = sample[FillingOutReturn].copy(
             subscribedDetails = subscribedDetails,
             draftReturn = draftReturn
           )
@@ -2041,7 +2098,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockCalculateTaxDue(fillingOutReturn, draftReturn)
+            mockCalculateTaxDue(fillingOutReturn, draftReturn, triageAnswers)
           }
 
           checkPageIsDisplayed(
@@ -2058,7 +2115,7 @@ class YearToDateLiabilityControllerSpec
           )
         }
 
-        "the section is incomplete and a calculation hasn't already been done" in {
+        "the section is incomplete and a calculation hasn't already been done" when {
           val answers = IncompleteCalculatedYTDAnswers(
             Some(AmountInPence.zero),
             None,
@@ -2072,37 +2129,140 @@ class YearToDateLiabilityControllerSpec
 
           val calculatedTaxDue = sample[CalculatedTaxDue]
 
-          test(
-            answers,
-            sample[SubscribedDetails]
-              .copy(name = Right(sample[IndividualName])),
-            {
-              case (fillingOutReturn, draftReturn) =>
-                mockCalculationService(
-                  calculateRequest(
-                    AmountInPence.zero,
-                    AmountInPence.zero,
-                    isATrust = false
+          "the user is an individual" in {
+            test(
+              answers,
+              sample[SubscribedDetails]
+                .copy(name = Right(sample[IndividualName])),
+              None,
+              {
+                case (fillingOutReturn, draftReturn, triageAnswers) =>
+                  mockCalculationService(
+                    calculateRequest(
+                      AmountInPence.zero,
+                      AmountInPence.zero,
+                      isATrust = false,
+                      triageAnswers
+                    )
+                  )(
+                    Right(calculatedTaxDue)
                   )
-                )(
-                  Right(calculatedTaxDue)
-                )
-                mockStoreSession(
-                  SessionData.empty.copy(
-                    journeyStatus = Some(
-                      fillingOutReturn.copy(draftReturn =
-                        draftReturn.copy(
-                          yearToDateLiabilityAnswers = Some(
-                            answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                  mockStoreSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        fillingOutReturn.copy(draftReturn =
+                          draftReturn.copy(
+                            yearToDateLiabilityAnswers = Some(
+                              answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                            )
                           )
                         )
                       )
                     )
+                  )(Right(()))
+              },
+              routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+          }
+
+          "the user is a trust" in {
+            val answers = IncompleteCalculatedYTDAnswers(
+              Some(AmountInPence.zero),
+              None,
+              Some(true),
+              None,
+              None,
+              None,
+              None,
+              None
+            )
+
+            val calculatedTaxDue = sample[CalculatedTaxDue]
+
+            test(
+              answers,
+              sample[SubscribedDetails]
+                .copy(name = Left(sample[TrustName])),
+              None,
+              {
+                case (fillingOutReturn, draftReturn, triageAnswers) =>
+                  mockCalculationService(
+                    calculateRequest(
+                      AmountInPence.zero,
+                      AmountInPence.zero,
+                      isATrust = true,
+                      triageAnswers
+                    )
+                  )(
+                    Right(calculatedTaxDue)
                   )
-                )(Right(()))
-            },
-            routes.YearToDateLiabilityController.hasEstimatedDetails()
-          )
+                  mockStoreSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        fillingOutReturn.copy(draftReturn =
+                          draftReturn.copy(
+                            yearToDateLiabilityAnswers = Some(
+                              answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )(Right(()))
+              },
+              routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+          }
+
+          "the user is a personal rep in period of admin" in {
+            val answers = IncompleteCalculatedYTDAnswers(
+              Some(AmountInPence.zero),
+              None,
+              Some(true),
+              None,
+              None,
+              None,
+              None,
+              None
+            )
+
+            val calculatedTaxDue = sample[CalculatedTaxDue]
+
+            test(
+              answers,
+              sample[SubscribedDetails]
+                .copy(name = Right(sample[IndividualName])),
+              Some(PersonalRepresentativeInPeriodOfAdmin),
+              {
+                case (fillingOutReturn, draftReturn, triageAnswers) =>
+                  mockCalculationService(
+                    calculateRequest(
+                      AmountInPence.zero,
+                      AmountInPence.zero,
+                      isATrust = true,
+                      triageAnswers
+                    )
+                  )(
+                    Right(calculatedTaxDue)
+                  )
+                  mockStoreSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        fillingOutReturn.copy(draftReturn =
+                          draftReturn.copy(
+                            yearToDateLiabilityAnswers = Some(
+                              answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )(Right(()))
+              },
+              routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+          }
+
         }
 
         "the section is incomplete and a calculation has already been done" in {
@@ -2120,7 +2280,8 @@ class YearToDateLiabilityControllerSpec
           test(
             answers,
             sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
-            { case (_, _) => () },
+            None,
+            { case (_, _, _) => () },
             routes.YearToDateLiabilityController.hasEstimatedDetails()
           )
         }
@@ -2130,7 +2291,8 @@ class YearToDateLiabilityControllerSpec
           test(
             answers,
             sample[SubscribedDetails],
-            { case (_, _) => () },
+            None,
+            { case (_, _, _) => () },
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
@@ -2441,6 +2603,28 @@ class YearToDateLiabilityControllerSpec
           checkIsRedirect(performAction(), expectedRedirect)
         }
 
+        def testRedirectWhenIsPeriodOfAdmin(
+          answers: IncompleteCalculatedYTDAnswers,
+          expectedRedirect: Call
+        ): Unit = {
+
+          val (sessionData, _, _) =
+            sessionWithSingleDisposalState(
+              Some(answers),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkIsRedirect(performAction(), expectedRedirect)
+        }
+
         behave like redirectToStartBehaviour(performAction)
 
         behave like unsuccessfulUpdateBehaviourForSingleDisposal(
@@ -2468,6 +2652,14 @@ class YearToDateLiabilityControllerSpec
               routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
           }
+
+          "the user is a personal rep in period of admin" in {
+            testRedirectWhenIsPeriodOfAdmin(
+              allQuestionAnswered
+                .copy(estimatedIncome = None, hasEstimatedDetails = None),
+              routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+          }
         }
 
         "redirect to the personal allowance page" when {
@@ -2487,6 +2679,14 @@ class YearToDateLiabilityControllerSpec
         "do NOT redirect to the personal allowance page" when {
           "the user is a Trust" in {
             testRedirectWhenIsATrust(
+              allQuestionAnswered
+                .copy(personalAllowance = None, hasEstimatedDetails = None),
+              routes.YearToDateLiabilityController.hasEstimatedDetails()
+            )
+          }
+
+          "the user is a personal rep in period of admin" in {
+            testRedirectWhenIsPeriodOfAdmin(
               allQuestionAnswered
                 .copy(personalAllowance = None, hasEstimatedDetails = None),
               routes.YearToDateLiabilityController.hasEstimatedDetails()
@@ -3365,6 +3565,47 @@ class YearToDateLiabilityControllerSpec
                 .attr("checked") shouldBe "checked"
           )
 
+        }
+
+        "the user is a personal rep in period of admin for a single disposal journey" in {
+          test(
+            sessionWithSingleMixedUseDisposalState(
+              Some(
+                sample[CompleteNonCalculatedYTDAnswers]
+                  .copy(taxableGainOrLoss = AmountInPence(0L))
+              ),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            )._1,
+            routes.YearToDateLiabilityController.checkYourAnswers(),
+            "taxableGainOrLoss.personalRepInPeriodOfAdmin.title",
+            doc =>
+              doc
+                .select("#taxableGainOrLoss-2")
+                .attr("checked") shouldBe "checked"
+          )
+        }
+
+        "the user is a personal rep in period of admin for a multiple disposals journey" in {
+          test(
+            sessionWithMultipleDisposalsState(
+              Some(
+                sample[CompleteNonCalculatedYTDAnswers]
+                  .copy(taxableGainOrLoss = AmountInPence(0L))
+              ),
+              UserType.Individual,
+              wasUkResident = true,
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            )._1,
+            routes.YearToDateLiabilityController.checkYourAnswers(),
+            "taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title",
+            doc =>
+              doc
+                .select("#taxableGainOrLoss-2")
+                .attr("checked") shouldBe "checked"
+          )
         }
 
       }
@@ -4922,12 +5163,14 @@ class YearToDateLiabilityControllerSpec
     oldAnswers: Option[YearToDateLiabilityAnswers],
     newAnswers: YearToDateLiabilityAnswers,
     reliefDetailsAnswers: ReliefDetailsAnswers,
-    disposalDate: DisposalDate
+    disposalDate: DisposalDate,
+    individualUserType: Option[IndividualUserType]
   ): Unit = {
     val draftReturn    = singleDispsaslDraftReturnWithCompleteJourneys(
       oldAnswers,
       disposalDate,
-      reliefDetailsAnswers
+      reliefDetailsAnswers,
+      individualUserType
     )
     val newDraftReturn = draftReturn.copy(
       yearToDateLiabilityAnswers = Some(newAnswers),
@@ -4971,14 +5214,16 @@ class YearToDateLiabilityControllerSpec
     oldAnswers: YearToDateLiabilityAnswers,
     newAnswers: YearToDateLiabilityAnswers,
     reliefDetailsAnswers: ReliefDetailsAnswers = sample[CompleteReliefDetailsAnswers],
-    disposalDate: DisposalDate = sample[DisposalDate]
+    disposalDate: DisposalDate = sample[DisposalDate],
+    individualUserType: Option[IndividualUserType] = None
   ): Unit =
     testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
       result,
       Some(oldAnswers),
       newAnswers,
       reliefDetailsAnswers,
-      disposalDate
+      disposalDate,
+      individualUserType
     )
 
   def commonUploadMandatoryEvidenceBehaviour(
@@ -5096,9 +5341,10 @@ object YearToDateLiabilityControllerSpec extends Matchers {
     individualUserType: Option[IndividualUserType]
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     val userKey = individualUserType match {
-      case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
-      case Some(Capacitor)                                                      => ".capacitor"
-      case _                                                                    =>
+      case Some(PersonalRepresentative)                => ".personalRep"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+      case Some(Capacitor)                             => ".capacitor"
+      case _                                           =>
         userType match {
           case Some(UserType.Individual)   => ""
           case Some(UserType.Organisation) => ".trust"

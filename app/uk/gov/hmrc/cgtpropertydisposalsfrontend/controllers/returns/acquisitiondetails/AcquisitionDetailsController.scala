@@ -119,7 +119,7 @@ class AcquisitionDetailsController @Inject() (
 
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
           ) =>
         d.acquisitionDetailsAnswers.fold[Future[Result]](
           defaultAnswers(d.triageAnswers, d.representeeAnswers, isIndirectDisposal = false).fold[Future[Result]](
@@ -134,7 +134,8 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 _,
                 _,
-                d: DraftSingleIndirectDisposalReturn
+                d: DraftSingleIndirectDisposalReturn,
+                _
               )
             )
           ) =>

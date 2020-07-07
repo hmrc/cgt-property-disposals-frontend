@@ -119,10 +119,10 @@ class MultipleDisposalsTriageControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
-      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft       => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn)         => true
-      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn) => true
-      case _                                                                  => false
+      case r: StartingNewDraftReturn if r.newReturnTriageAnswers.isLeft          => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn, _)         => true
+      case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _) => true
+      case _                                                                     => false
     }
 
   def setIndividualUserType(
@@ -134,7 +134,8 @@ class MultipleDisposalsTriageControllerSpec
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
-    representativeType: Option[RepresentativeType] = None
+    representativeType: Option[RepresentativeType] = None,
+    previousSentReturns: Option[List[ReturnSummary]] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers),
@@ -153,7 +154,8 @@ class MultipleDisposalsTriageControllerSpec
           )
         else if (representativeType.contains(Capacitor))
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-        else None
+        else None,
+      previousSentReturns = previousSentReturns
     )
     SessionData.empty.copy(
       journeyStatus = Some(startingNewDraftReturn),
@@ -165,7 +167,8 @@ class MultipleDisposalsTriageControllerSpec
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
-    representativeType: Option[RepresentativeType] = None
+    representativeType: Option[RepresentativeType] = None,
+    previousSentReturns: Option[List[ReturnSummary]] = None
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
       triageAnswers = multipleDisposalsAnswers,
@@ -187,7 +190,8 @@ class MultipleDisposalsTriageControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       agentReferenceNumber =
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
-        else None
+        else None,
+      previousSentReturns = previousSentReturns
     )
     val session     = SessionData.empty.copy(
       userType = Some(userType),
@@ -3192,7 +3196,9 @@ class MultipleDisposalsTriageControllerSpec
             sessionDataWithFillingOutReturn(answers)
 
           val updatedAnswers     =
-            answers.copy(completionDate = CompletionDate(TimeUtils.today()))
+            IncompleteMultipleDisposalsTriageAnswers
+              .fromCompleteAnswers(answers)
+              .copy(completionDate = Some(CompletionDate(TimeUtils.today())))
           val updatedDraftReturn =
             updateDraftReturn(draftReturn, updatedAnswers)
 
@@ -3222,8 +3228,12 @@ class MultipleDisposalsTriageControllerSpec
 
           val newCompletionDate =
             CompletionDate(answers.completionDate.value.minusDays(1L))
+          val updatedAnswers    =
+            IncompleteMultipleDisposalsTriageAnswers
+              .fromCompleteAnswers(answers)
+              .copy(completionDate = Some(newCompletionDate))
           val updatedJourney    =
-            journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = newCompletionDate)))
+            journey.copy(newReturnTriageAnswers = Left(updatedAnswers))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -3276,8 +3286,12 @@ class MultipleDisposalsTriageControllerSpec
 
               val newCompletionDate =
                 CompletionDate(answers.completionDate.value.minusDays(1L))
-              val updatedJourney    =
-                journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = newCompletionDate)))
+              val updatedAnswers    = IncompleteMultipleDisposalsTriageAnswers
+                .fromCompleteAnswers(answers)
+                .copy(completionDate = Some(newCompletionDate))
+
+              val updatedJourney =
+                journey.copy(newReturnTriageAnswers = Left(updatedAnswers))
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -3306,7 +3320,9 @@ class MultipleDisposalsTriageControllerSpec
               sessionDataWithFillingOutReturn(answers)
 
             val updatedAnswers     =
-              answers.copy(completionDate = CompletionDate(TimeUtils.today()))
+              IncompleteMultipleDisposalsTriageAnswers
+                .fromCompleteAnswers(answers)
+                .copy(completionDate = Some(CompletionDate(TimeUtils.today())))
             val updatedDraftReturn =
               updateDraftReturn(draftReturn, updatedAnswers)
             val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
@@ -3648,14 +3664,19 @@ class MultipleDisposalsTriageControllerSpec
 
       def testRedirectWhenIncomplete(
         answers: IncompleteMultipleDisposalsTriageAnswers,
-        expectedRedirect: Call
+        expectedRedirect: Call,
+        name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+        userType: UserType = UserType.Individual,
+        previousSentReturns: Option[List[ReturnSummary]] = None
       ): Unit = {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionDataWithStartingNewDraftReturn(
               answers,
-              Right(sample[IndividualName])
+              name,
+              userType,
+              previousSentReturns = previousSentReturns
             )._1
           )
         }
@@ -3889,6 +3910,42 @@ class MultipleDisposalsTriageControllerSpec
             allQuestionsAnsweredUk.copy(completionDate = None),
             routes.MultipleDisposalsTriageController.completionDate()
           )
+        }
+
+      }
+
+      "redirect to the previousReturnExistsWithSameCompletionDate exit page" when {
+
+        val previousSentReturns = List(
+          sample[ReturnSummary].copy(completionDate = completeAnswersUk.completionDate.value)
+        )
+
+        "a completion date is submitted which already exists in a previously sent return" when {
+
+          "the user is a trust" in {
+            testRedirectWhenIncomplete(
+              allQuestionsAnsweredUk.copy(
+                individualUserType = None
+              ),
+              routes.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate(),
+              Left(sample[TrustName]),
+              UserType.Organisation,
+              Some(previousSentReturns)
+            )
+          }
+
+          "the user is doing the return for themselves" in {
+            testRedirectWhenIncomplete(
+              allQuestionsAnsweredUk.copy(
+                individualUserType = Some(IndividualUserType.Self)
+              ),
+              routes.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate(),
+              Right(sample[IndividualName]),
+              UserType.Individual,
+              Some(previousSentReturns)
+            )
+          }
+
         }
 
       }
@@ -4153,6 +4210,44 @@ class MultipleDisposalsTriageControllerSpec
           }
         }
 
+        "the user has a completion date which already exists in a previous return and" when {
+
+          def test(representativeType: RepresentativeType) = {
+            val triageAnswers = completeAnswersUk.copy(individualUserType = Some(representativeType))
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithFillingOutReturn(
+                  triageAnswers,
+                  Right(sample[IndividualName]),
+                  UserType.Individual,
+                  Some(representativeType),
+                  Some(
+                    List(sample[ReturnSummary].copy(completionDate = triageAnswers.completionDate.value))
+                  )
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposals.triage.cya.title")
+            )
+          }
+
+          "the user is a capacitor" in {
+            test(IndividualUserType.Capacitor)
+          }
+
+          "the user is a personal rep" in {
+            test(IndividualUserType.PersonalRepresentative)
+          }
+
+          "the user is a personal rep in period of admin" in {
+            test(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
+          }
+        }
+
       }
     }
 
@@ -4186,7 +4281,8 @@ class MultipleDisposalsTriageControllerSpec
           journey.subscribedDetails,
           journey.ggCredId,
           journey.agentReferenceNumber,
-          newDraftReturn
+          newDraftReturn,
+          journey.previousSentReturns
         )
 
         "show an error page" when {

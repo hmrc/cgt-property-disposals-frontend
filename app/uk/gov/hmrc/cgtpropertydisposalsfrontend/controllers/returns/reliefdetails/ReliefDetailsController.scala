@@ -81,7 +81,7 @@ class ReliefDetailsController @Inject() (
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
           ) if d.triageAnswers.isPeriodOfAdmin() =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
@@ -98,7 +98,7 @@ class ReliefDetailsController @Inject() (
         )
 
       case Some(
-            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
           ) =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)

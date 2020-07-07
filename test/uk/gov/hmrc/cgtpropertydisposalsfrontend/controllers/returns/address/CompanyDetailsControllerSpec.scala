@@ -64,9 +64,9 @@ class CompanyDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction,
       {
-        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn)    => true
-        case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn) => true
-        case _                                                                  => false
+        case FillingOutReturn(_, _, _, _: DraftSingleIndirectDisposalReturn, _)    => true
+        case FillingOutReturn(_, _, _, _: DraftMultipleIndirectDisposalsReturn, _) => true
+        case _                                                                     => false
       }
     )
 

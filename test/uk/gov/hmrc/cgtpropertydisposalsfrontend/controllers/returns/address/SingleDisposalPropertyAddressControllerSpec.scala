@@ -65,7 +65,8 @@ class SingleDisposalPropertyDetailsControllerSpec
       sample[SubscribedDetails],
       sample[GGCredId],
       None,
-      draftReturn
+      draftReturn,
+      None
     ),
     Right(draftReturn),
     None

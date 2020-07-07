@@ -33,7 +33,8 @@
     personalAllowance: AmountInPence,
     calculatedTax: CalculatedTaxDue,
     taxYear: TaxYear,
-    isATrust: Boolean
+    isATrust: Boolean,
+    isPeriodOfAdmin: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @taxableIncome = @{ calculatedTax match {
@@ -88,7 +89,13 @@
       </em>
     </p>
   } else {
-
+    @if(isPeriodOfAdmin){
+      <p>
+        <em>
+        @messages("calculator.periodOfAdminRateInfo.p1", higherRateDisplay)
+        </em>
+      </p>
+    } else {
     @taxableIncome.map { t =>
 
       @calcSum(
@@ -219,7 +226,7 @@
 
       }
     }
-
+    }
   }
 
   @taxDueAtHigherRate.map { h =>

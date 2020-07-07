@@ -73,6 +73,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{ triageAnswers.disposalDate.taxYear }
 
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
   representativeType match {
@@ -141,7 +142,7 @@
         @calcRow(calculatedTax.amountOfTaxDue, messages(s"$key.amountOfTaxDue"), showGainType = false)
         @details(
           messages("calculator.showWorkings"),
-          taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, isATrust),
+          taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, isATrust, isPeriodOfAdmin),
           Some(messages(s"$key.assistive.amountOfTaxDue"))
         )
       </li>
