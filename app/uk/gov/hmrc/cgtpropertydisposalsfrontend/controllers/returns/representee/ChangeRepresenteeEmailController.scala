@@ -146,7 +146,8 @@ class ChangeRepresenteeEmailController @Inject() (
             complete.dateOfDeath,
             Some(newContactDetails),
             hasConfirmedPerson = true,
-            hasConfirmedContactDetails = false
+            hasConfirmedContactDetails = false,
+            Some(complete.isFirstReturn)
           )
       )
 

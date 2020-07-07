@@ -230,7 +230,14 @@ class HomePageController @Inject() (
 
   def exitForSubsequentReturn(): Action[AnyContent] =
     authenticatedActionWithSessionData { implicit request =>
-      Ok(subsequentReturnExitPage(routes.HomePageController.homepage()))
+      val backLink = request.sessionData.flatMap(_.journeyStatus) match {
+        case Some(_: StartingNewDraftReturn | _: FillingOutReturn) =>
+          controllers.returns.representee.routes.RepresenteeController.isFirstReturn()
+
+        case _                                                     =>
+          routes.HomePageController.homepage()
+      }
+      Ok(subsequentReturnExitPage(backLink))
     }
 
   private def withSubscribedUser(
