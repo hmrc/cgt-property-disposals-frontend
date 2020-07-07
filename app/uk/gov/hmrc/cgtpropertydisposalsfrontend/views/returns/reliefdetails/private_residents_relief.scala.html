@@ -55,7 +55,8 @@
 @userKey = @{
   representativeType match {
       case Some(PersonalRepresentative) => ".personalRep"
-      case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+      case Some(PersonalRepresentativeInPeriodOfAdmin) =>
+          if(isAgent) ".personalRepInPeriodOfAdmin.agent" else ".personalRepInPeriodOfAdmin"
       case Some(Capacitor) => ".capacitor"
       case None =>
           if (isAgent) ".agent"
@@ -73,7 +74,8 @@
 
 @legend = @{messages(s"$key$userKey.title")}
 @title = @{if(isPeriodOfAdmin) messages(s"$key$userKey.main.title") else legend}
-@label = @{if(isPeriodOfAdmin) pageHeading(legend) else Html(s"""<h2 class="heading-medium">$legend</h2>""")}
+@label = @{if(isPeriodOfAdmin) Html(s"""<h2 class="heading-medium">$legend</h2>""") else pageHeading(legend)}
+
 @helpText = @{ if(isPeriodOfAdmin) None else Some(Html(messages(s"$key$userKey.helpText")))}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

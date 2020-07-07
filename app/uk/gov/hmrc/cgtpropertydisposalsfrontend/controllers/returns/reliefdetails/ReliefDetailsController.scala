@@ -82,10 +82,28 @@ class ReliefDetailsController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some(
             (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
+          ) if d.triageAnswers.isPeriodOfAdmin() =>
+        d.reliefDetailsAnswers.fold[Future[Result]](
+          f(s, r, d, IncompleteReliefDetailsAnswers.empty)
+        )(relief =>
+          f(
+            s,
+            r,
+            d,
+            relief.fold(
+              _.copy(lettingsRelief = Some(AmountInPence.zero)),
+              _.copy(lettingsRelief = AmountInPence.zero)
+            )
+          )
+        )
+
+      case Some(
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))
           ) =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
         )(f(s, r, d, _))
+
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
@@ -325,6 +343,11 @@ class ReliefDetailsController @Inject() (
       complete => f(complete.disposalDate.taxYear)
     )
 
+  private def otherReliefsBackLink(answers: SingleDisposalTriageAnswers): Call =
+    if (answers.isPeriodOfAdmin())
+      routes.ReliefDetailsController.privateResidentsRelief()
+    else routes.ReliefDetailsController.lettingsRelief()
+
   def otherReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
@@ -359,7 +382,7 @@ class ReliefDetailsController @Inject() (
           )
         )(
           hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForOtherReliefs,
-          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
+          redirectToIfNoRequiredPreviousAnswer = _ => otherReliefsBackLink(draftReturn.triageAnswers)
         )
       }
     }
@@ -378,7 +401,7 @@ class ReliefDetailsController @Inject() (
           )
         )(
           hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForOtherReliefs,
-          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
+          redirectToIfNoRequiredPreviousAnswer = _ => otherReliefsBackLink(draftReturn.triageAnswers)
         )(
           updateDraftReturn = { (maybeOtherReliefs, draftReturn) =>
             val existingOtherReliefs =

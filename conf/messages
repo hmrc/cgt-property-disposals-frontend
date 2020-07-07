@@ -2703,6 +2703,7 @@ privateResidentsRelief.agent.title=Is your client entitled to claim Private Resi
 privateResidentsRelief.trust.title=Is the trust entitled to claim Private Residence Relief?
 privateResidentsRelief.capacitor.title=Is the person entitled to claim Private Residence Relief?
 privateResidentsRelief.personalRep.title=Was the person entitled to claim Private Residence Relief?
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=Is Private Residence Relief being claimed?
 privateResidentsRelief.personalRepInPeriodOfAdmin.title=Is Private Residence Relief being claimed?
 
 privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Tell us if Private Residence Relief is being claimed
@@ -2713,6 +2714,10 @@ privateResidentsRelief.trust.helpText=The trust might qualify for this relief if
 privateResidentsRelief.capacitor.helpText=The person might qualify for this relief if the property had been their main home at some point.
 privateResidentsRelief.personalRep.helpText=The person might have qualified for this relief if the property had been their main home at some point.
 
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.helpText.p1=Private Residence Relief can be claimed only if:
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.helpText.li1=the property had been the only home of a beneficiary, both before and after the deceased’s death
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.helpText.li2=that beneficiary was also entitled to at least 75% of the proceeds of the disposal of the property (assuming that none of the proceeds are needed to meet any liabilities of the deceased person’s estate)
+
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.p1=Private Residence Relief can be claimed only if:
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li1=the property had been the only home of a beneficiary, both before and after the deceased’s death
 privateResidentsRelief.personalRepInPeriodOfAdmin.helpText.li2=that beneficiary was also entitled to at least 75% of the proceeds of the disposal of the property (assuming that none of the proceeds are needed to meet any liabilities of the deceased person’s estate)
@@ -2722,6 +2727,7 @@ privateResidentsReliefValue.agent.label=Amount of Private Residence Relief your 
 privateResidentsReliefValue.trust.label=Amount of Private Residence Relief the trust is entitled to
 privateResidentsReliefValue.capacitor.label=Amount of Private Residence Relief the person is entitled to
 privateResidentsReliefValue.personalRep.label=Amount of Private Residence Relief the person was entitled to
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.label=Amount of Private Residence Relief being claimed
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.label=Amount of Private Residence Relief being claimed
 
 privateResidentsRelief.furtherInfoLink=Find out about Private Residence Relief (opens in a new window)
@@ -2731,13 +2737,15 @@ privateResidentsRelief.agent.error.required=Select yes if your client is entitle
 privateResidentsRelief.trust.error.required=Select yes if the trust is entitled to claim Private Residence Relief
 privateResidentsRelief.capacitor.error.required=Select yes if the person is entitled to Private Residence Relief
 privateResidentsRelief.personalRep.error.required=Select yes if the person was entitled to Private Residence Relief
-privateResidentsRelief.personalRepInPeriodOfAdmin.error.required=Select yes if your client is claiming Private Residence Relief
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client is claiming Private Residence Relief
+privateResidentsRelief.personalRepInPeriodOfAdmin.error.required=Select yes if you are claiming Private Residence Relief
 
 privateResidentsReliefValue.error.required=Enter the amount of Private Residence Relief, like 108 or 2,940.54
 privateResidentsReliefValue.agent.error.required=Enter the amount of Private Residence Relief your client is entitled to
 privateResidentsReliefValue.trust.error.required=Enter the amount of Private Residence Relief the trust is entitled to
 privateResidentsReliefValue.capacitor.error.required=Enter the amount of Private Residence Relief the person is entitled to
 privateResidentsReliefValue.personalRep.error.required=Enter the amount of Private Residence Relief the person was entitled to
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.required=Enter the amount of Private Residence Relief being claimed
 privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.required=Enter the amount of Private Residence Relief being claimed
 
 privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
@@ -2745,24 +2753,32 @@ privateResidentsReliefValue.agent.error.tooSmall=Amount of Private Residence Rel
 privateResidentsReliefValue.trust.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.capacitor.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.personalRep.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooSmall=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 
 privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.agent.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.trust.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.capacitor.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 privateResidentsReliefValue.personalRep.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooLarge=Amount of Private Residence Relief must be an amount of money between 1 and 50,000,000,000
 
 privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 privateResidentsReliefValue.agent.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 privateResidentsReliefValue.trust.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 privateResidentsReliefValue.capacitor.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 privateResidentsReliefValue.personalRep.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.invalid=Amount of Private Residence Relief must be an amount of money, like 108 or 2,940.54
 
 privateResidentsReliefValue.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
 privateResidentsReliefValue.agent.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
 privateResidentsReliefValue.trust.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
 privateResidentsReliefValue.capacitor.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
 privateResidentsReliefValue.personalRep.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
+privateResidentsReliefValue.personalRepInPeriodOfAdmin.error.tooManyDecimals=Amount of Private Residence Relief must be an amount of money with pence as 2 decimal places or less, like 108 or 2,940.54
 
 privateResidentsRelief.cyaChange=if Private Residence Relief is being claimed
 privateResidentsReliefValue.cyaChange=the amount of Private Residence Relief
@@ -2806,84 +2822,112 @@ otherReliefs.agent.title=Does your client want to claim any other reliefs?
 otherReliefs.trust.title=Does the trust want to claim any other reliefs?
 otherReliefs.capacitor.title=Does the person want to claim any other reliefs?
 otherReliefs.personalRep.title=Was the person entitled to claim any other reliefs?
+otherReliefs.personalRepInPeriodOfAdmin.agent.title= Are any other reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.title= Are any other reliefs being claimed?
 
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
 otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
 otherReliefs.trust.helpText=You will need to tell us what other reliefs the trust is claiming and what the total amount of these is.
 otherReliefs.capacitor.helpText=You will need to tell us what other reliefs the person is claiming and what the total amount of these is.
 otherReliefs.personalRep.helpText=You will need to tell us what other reliefs the person was entitled to claim and what the total amount of these is.
+otherReliefs.personalRepInPeriodOfAdmin.agent.helpText=You will need to tell us what other reliefs your client, or the estate, are claiming and what the total amount of these is.
+otherReliefs.personalRepInPeriodOfAdmin.helpText=You will need to tell us what other reliefs you, or the estate, are claiming and what the total amount of these is.
 
 otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new window)
 otherReliefs.agent.furtherInfoLink=Find out about reliefs your client might qualify for (opens in a new window)
 otherReliefs.trust.furtherInfoLink=Find out about reliefs the trust might qualify for (opens in a new window)
 otherReliefs.capacitor.furtherInfoLink=Find out about reliefs the person might qualify for (opens in a new window)
 otherReliefs.personalRep.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new window)
+otherReliefs.personalRepInPeriodOfAdmin.agent.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new window)
+otherReliefs.personalRepInPeriodOfAdmin.furtherInfoLink=Find out about reliefs the person might have qualified for (opens in a new window)
 
 otherReliefs.error.required=Select yes if you are claiming other reliefs
 otherReliefs.agent.error.required=Select yes if your client is claiming other reliefs
 otherReliefs.trust.error.required=Select yes if the trust is claiming other reliefs
 otherReliefs.capacitor.error.required=Select yes if the person is entitled to claim any other reliefs
 otherReliefs.personalRep.error.required=Select yes if the person was entitled to claim any other reliefs
+otherReliefs.personalRepInPeriodOfAdmin.error.agent.required=Select yes if your client, or the estate, are claiming any other reliefs
+otherReliefs.personalRepInPeriodOfAdmin.error.required=Select yes if you, or the estate, are claiming any other reliefs
 
 otherReliefsName.label=Names of the other reliefs you are claiming
 otherReliefsName.agent.label=Names of the other reliefs your client is claiming
 otherReliefsName.trust.label=Names of the other reliefs the trust is claiming
 otherReliefsName.capacitor.label=Names of the other reliefs the person is claiming
 otherReliefsName.personalRep.label=Names of the other reliefs being claimed
+otherReliefsName.personalRepInPeriodOfAdmin.agent.label=Names of the other reliefs being claimed
+otherReliefsName.personalRepInPeriodOfAdmin.label=Names of the other reliefs being claimed
 
 otherReliefsName.error.required=Enter the names of all other reliefs you are claiming
 otherReliefsName.agent.error.required=Enter the names of all other reliefs your client is claiming
 otherReliefsName.trust.error.required=Enter the names of all other reliefs the trust is claiming
 otherReliefsName.capacitor.error.required=Enter the names of all other reliefs the person is claiming
 otherReliefsName.personalRep.error.required=Enter the names of all other reliefs being claimed
+otherReliefsName.personalRepInPeriodOfAdmin.agent.error.required=Enter the names of all other reliefs being claimed
+otherReliefsName.personalRepInPeriodOfAdmin.error.required=Enter the names of all other reliefs being claimed
 
 otherReliefsName.error.tooLong=The names of the other reliefs you are claiming must be 105 characters or less
 otherReliefsName.agent.error.tooLong=The names of the other reliefs your client is claiming must be 105 characters or less
 otherReliefsName.trust.error.tooLong=The names of the other reliefs the trust is claiming must be 105 characters or less
 otherReliefsName.capacitor.error.tooLong=The names of the other reliefs the person is claiming must be 105 characters or less
 otherReliefsName.personalRep.error.tooLong=The names of the other reliefs being claimed must be 105 characters or less
+otherReliefsName.personalRepInPeriodOfAdmin.agent.error.tooLong=The names of the other reliefs being claimed must be 105 characters or less
+otherReliefsName.personalRepInPeriodOfAdmin.error.tooLong=The names of the other reliefs being claimed must be 105 characters or less
 
 otherReliefsName.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 otherReliefsName.agent.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 otherReliefsName.trust.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 otherReliefsName.capacitor.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 otherReliefsName.personalRep.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
+otherReliefsName.personalRepInPeriodOfAdmin.agent.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
+otherReliefsName.personalRepInPeriodOfAdmin.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
 
 otherReliefsAmount.label=Total amount of other reliefs you are claiming
 otherReliefsAmount.agent.label=Total amount of other reliefs your client is claiming
 otherReliefsAmount.trust.label=Total amount of other reliefs the trust is claiming
 otherReliefsAmount.capacitor.label=Total amount of other reliefs the person is claiming
 otherReliefsAmount.personalRep.label=Total amount of other reliefs being claimed
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.label=Total amount of other reliefs being claimed
+otherReliefsAmount.personalRepInPeriodOfAdmin.label=Total amount of other reliefs being claimed
 
 otherReliefsAmount.error.required=Enter the total amount of the other reliefs you are claiming
 otherReliefsAmount.agent.error.required=Enter the total amount of the other reliefs your client is claiming
 otherReliefsAmount.trust.error.required=Enter the total amount of the other reliefs the trust is claiming
 otherReliefsAmount.capacitor.error.required=Enter the total amount of the other reliefs the person is claiming
 otherReliefsAmount.personalRep.error.required=Enter the total amount of the other reliefs being claimed
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.required=Enter the total amount of the other reliefs being claimed
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.required=Enter the total amount of the other reliefs being claimed
 
 otherReliefsAmount.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 otherReliefsAmount.agent.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 otherReliefsAmount.trust.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 otherReliefsAmount.capacitor.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 otherReliefsAmount.personalRep.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.tooSmall=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 
 otherReliefsAmount.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 otherReliefsAmount.agent.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 otherReliefsAmount.trust.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 otherReliefsAmount.capacitor.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 otherReliefsAmount.personalRep.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.tooLarge=Amount of other reliefs must be an amount of money between 0 and 50,000,000,000
 
 otherReliefsAmount.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 otherReliefsAmount.agent.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 otherReliefsAmount.trust.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 otherReliefsAmount.capacitor.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 otherReliefsAmount.personalRep.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.invalid=Amount of other reliefs must be an amount of money, like 108 or 2,940.54
 
 otherReliefsAmount.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 otherReliefsAmount.agent.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 otherReliefsAmount.trust.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 otherReliefsAmount.capacitor.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 otherReliefsAmount.personalRep.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+otherReliefsAmount.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+otherReliefsAmount.personalRepInPeriodOfAdmin.error.tooManyDecimals=Amount of other reliefs must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 otherReliefs.cyaChange=if other reliefs are being claimed
 otherReliefsName.cyaChange=the names of other reliefs being claimed

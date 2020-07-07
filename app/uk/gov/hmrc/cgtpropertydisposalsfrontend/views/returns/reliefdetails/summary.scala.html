@@ -29,9 +29,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-      cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-      cyaRow:     uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-      cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow:     uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
@@ -53,6 +53,14 @@
           else ""
   }
 }
+
+@isPeriodOfAdmin = @{
+  representativeType match {
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => true
+    case _ => false
+  }
+}
+
 @cyaSection() {
   @if(answers.privateResidentsRelief.value === 0L) {
     @cyaRow(
@@ -85,36 +93,38 @@
     )
   }
 
-  @if(answers.privateResidentsRelief.isPositive) {
-    @if(answers.lettingsRelief.value === 0L) {
-      @cyaRow(
-        messages(s"lettingsRelief$userKey.title"),
-        Html(messages("generic.no")),
-        Some(cyaChange(
-          messages("lettingsRelief.cyaChange"),
-          routes.ReliefDetailsController.lettingsRelief().url
-        )),
-        "lettingsReliefValue"
-      )
-    } else {
-      @cyaRow(
-        messages(s"lettingsRelief$userKey.title"),
-        Html(messages("generic.yes")),
-        Some(cyaChange(
-          messages("lettingsRelief.cyaChange"),
-          routes.ReliefDetailsController.lettingsRelief().url
-        )),
-        "lettingsRelief"
-      )
-      @cyaRow(
-        messages("lettingsReliefValue.label"),
-        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.lettingsRelief.inPounds())),
-        Some(cyaChange(
-          messages("lettingsReliefValue.cyaChange"),
-          routes.ReliefDetailsController.lettingsRelief().url
-        )),
-        "lettingsReliefValue"
-      )
+  @if(!isPeriodOfAdmin){
+    @if(answers.privateResidentsRelief.isPositive) {
+      @if(answers.lettingsRelief.value === 0L) {
+        @cyaRow(
+          messages(s"lettingsRelief$userKey.title"),
+          Html(messages("generic.no")),
+          Some(cyaChange(
+            messages("lettingsRelief.cyaChange"),
+            routes.ReliefDetailsController.lettingsRelief().url
+          )),
+          "lettingsReliefValue"
+        )
+      } else {
+        @cyaRow(
+          messages(s"lettingsRelief$userKey.title"),
+          Html(messages("generic.yes")),
+          Some(cyaChange(
+            messages("lettingsRelief.cyaChange"),
+            routes.ReliefDetailsController.lettingsRelief().url
+          )),
+          "lettingsRelief"
+        )
+        @cyaRow(
+          messages("lettingsReliefValue.label"),
+          Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.lettingsRelief.inPounds())),
+          Some(cyaChange(
+            messages("lettingsReliefValue.cyaChange"),
+            routes.ReliefDetailsController.lettingsRelief().url
+          )),
+          "lettingsReliefValue"
+        )
+      }
     }
   }
 
