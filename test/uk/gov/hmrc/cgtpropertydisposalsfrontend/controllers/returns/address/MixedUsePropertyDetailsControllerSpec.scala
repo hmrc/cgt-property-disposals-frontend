@@ -158,6 +158,21 @@ class MixedUsePropertyDetailsControllerSpec
     else if (isATrust) ".trust"
     else ""
 
+  def userMessageKey(
+    individualUserType: Option[IndividualUserType],
+    userType: UserType
+  ): String =
+    (individualUserType, userType) match {
+      case (Some(Capacitor), _)                                          => ".capacitor"
+      case (Some(PersonalRepresentative), _)                             => ".personalRep"
+      case (Some(PersonalRepresentativeInPeriodOfAdmin), UserType.Agent) => ".personalRepInPeriodOfAdmin.agent"
+      case (Some(PersonalRepresentativeInPeriodOfAdmin), _)              => ".personalRepInPeriodOfAdmin"
+      case (_, UserType.Individual)                                      => ""
+      case (_, UserType.Organisation)                                    => ".trust"
+      case (_, UserType.Agent)                                           => ".agent"
+      case other                                                         => sys.error(s"User type '$other' not handled")
+    }
+
   "MixedUsePropertyDetailsController" when {
 
     "handling requests to display the enter postcode page" must {
@@ -894,17 +909,18 @@ class MixedUsePropertyDetailsControllerSpec
       "show a form error for amount" when {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+          val draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
+            mixedUsePropertyDetailsAnswers = Some(
+              sample[CompleteMixedUsePropertyDetailsAnswers]
+            )
+          )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
-                      mixedUsePropertyDetailsAnswers = Some(
-                        sample[CompleteMixedUsePropertyDetailsAnswers]
-                      )
-                    ),
+                    draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = Right(sample[IndividualName])
                     )
@@ -914,9 +930,12 @@ class MixedUsePropertyDetailsControllerSpec
             )
           }
 
+          val userKey =
+            userMessageKey(draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType), Individual)
+
           checkPageIsDisplayed(
             performAction(data: _*),
-            messageFromMessageKey(s"$key.title"),
+            messageFromMessageKey(s"$key$userKey.title"),
             doc =>
               doc
                 .select("#error-summary-display > ul > li > a")

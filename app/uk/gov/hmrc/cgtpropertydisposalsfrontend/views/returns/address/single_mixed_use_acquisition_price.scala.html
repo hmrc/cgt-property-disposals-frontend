@@ -26,6 +26,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DateOfDeath
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -43,7 +45,8 @@
     form: Form[BigDecimal],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    dateOfDeath: Option[DateOfDeath]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "singleMixedUseDisposalsAcquisitionPrice" }
@@ -51,7 +54,8 @@
 @userKey = @{
     representativeType match {
         case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => ".personalRepInPeriodOfAdmin"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if(isAgent) => ".personalRepInPeriodOfAdmin.agent"
         case Some(Capacitor) => ".capacitor"
         case None =>
             if (isAgent) ".agent"
@@ -60,7 +64,13 @@
     }
 }
 
-@title = @{messages(s"$key.title")}
+@titleArg = @{
+    dateOfDeath match {
+        case Some(date) => TimeUtils.govDisplayFormat(date.value)
+        case _ => ""
+    }
+}
+@title = @{messages(s"$key$userKey.title", titleArg)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {

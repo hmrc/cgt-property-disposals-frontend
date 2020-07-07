@@ -162,7 +162,8 @@ class MixedUsePropertyDetailsController @Inject() (
             )
         Ok(
           singleMixedUseGuidance(
-            backLink
+            backLink,
+            r.representativeType
           )
         )
       }
@@ -294,7 +295,8 @@ class MixedUsePropertyDetailsController @Inject() (
             form,
             backLink,
             r.journey.subscribedDetails.isATrust,
-            r.representativeType
+            r.representativeType,
+            extractDateOfDeath(r)
           )
         )
       }
@@ -315,7 +317,8 @@ class MixedUsePropertyDetailsController @Inject() (
                   formWithErrors,
                   backLink,
                   r.journey.subscribedDetails.isATrust,
-                  r.representativeType
+                  r.representativeType,
+                  extractDateOfDeath(r)
                 )
               ),
             acquisitionPrice =>
@@ -395,6 +398,11 @@ class MixedUsePropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request)((_, _) => Redirect(returnsRoutes.TaskListController.taskList()))
     }
+
+  private def extractDateOfDeath(
+    f: EnteringSingleMixedUsePropertyDetails
+  ): Option[DateOfDeath] =
+    f.draftReturn.representeeAnswers.flatMap(e => e.fold(_.dateOfDeath, _.dateOfDeath))
 }
 
 object MixedUsePropertyDetailsController {
