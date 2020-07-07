@@ -126,10 +126,10 @@
     @if(isPeriodOfAdmin) {
         @pageHeading(title)
         <p>@messages(s"$key$userKey.helpText.p1")</p>
-        <ui class="list-bullet">
+        <ul class="list-bullet">
             <li>@messages(s"$key$userKey.helpText.li1")</li>
             <li>@messages(s"$key$userKey.helpText.li2")</li>
-        </ui>
+        </ul>
     }
 
     @formWrapper(routes.ReliefDetailsController.privateResidentsReliefSubmit(), 'novalidate -> "novalidate") {
