@@ -243,17 +243,25 @@ class ReliefDetailsController @Inject() (
                 .contains(p)
             )
               draftReturn
-            else
-              draftReturn.copy(
-                reliefDetailsAnswers = Some(
+            else {
+              val updatedAnswers =
+                if (draftReturn.triageAnswers.isPeriodOfAdmin)
+                  answers.fold(
+                    _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p))),
+                    _.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
+                  )
+                else
                   answers
                     .unset(_.lettingsRelief)
                     .copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)))
-                ),
+
+              draftReturn.copy(
+                reliefDetailsAnswers = Some(updatedAnswers),
                 yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                   _.unsetAllButIncomeDetails()
                 )
               )
+            }
           }
         )
       }
