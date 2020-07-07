@@ -1451,8 +1451,10 @@ class ReliefDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers     = sample[CompleteReliefDetailsAnswers]
-          .copy(otherReliefs = Some(NoOtherReliefs))
+        val currentAnswers     = sample[CompleteReliefDetailsAnswers].copy(
+          otherReliefs = Some(NoOtherReliefs),
+          lettingsRelief = AmountInPence.zero
+        )
         val currentDraftReturn = sample[DraftSingleDisposalReturn].copy(
           reliefDetailsAnswers = Some(currentAnswers),
           exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers]),
@@ -1463,8 +1465,9 @@ class ReliefDetailsControllerSpec
           draftReturn = currentDraftReturn
         )
 
-        val currentSession  =
-          SessionData.empty.copy(journeyStatus = Some(currentJourney))
+        val currentSession  = SessionData.empty.copy(
+          journeyStatus = Some(currentJourney)
+        )
         val newOtherReliefs =
           OtherReliefs("ReliefName", AmountInPence.fromPounds(2))
         val newDraftReturn  = currentDraftReturn.copy(
@@ -1583,12 +1586,11 @@ class ReliefDetailsControllerSpec
 
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers  = sample[IncompleteReliefDetailsAnswers]
-            .copy(
-              privateResidentsRelief = Some(AmountInPence.zero),
-              lettingsRelief = Some(sample[AmountInPence]),
-              otherReliefs = None
-            )
+          val currentAnswers  = sample[IncompleteReliefDetailsAnswers].copy(
+            privateResidentsRelief = Some(AmountInPence.zero),
+            lettingsRelief = Some(AmountInPence.zero),
+            otherReliefs = None
+          )
           val newOtherReliefs =
             OtherReliefs("ReliefName", AmountInPence.fromPounds(3d))
           val updatedAnswers  = currentAnswers.copy(
@@ -1631,7 +1633,10 @@ class ReliefDetailsControllerSpec
             val newOtherReliefs =
               OtherReliefs("ReliefName2", AmountInPence.fromPounds(2d))
 
-            val currentAnswers = c.copy(otherReliefs = Some(otherReliefs))
+            val currentAnswers = c.copy(
+              lettingsRelief = AmountInPence.zero,
+              otherReliefs = Some(otherReliefs)
+            )
             val updatedAnswers =
               currentAnswers.copy(otherReliefs = Some(newOtherReliefs))
             val oldDraftReturn = sample[DraftSingleDisposalReturn].copy(
