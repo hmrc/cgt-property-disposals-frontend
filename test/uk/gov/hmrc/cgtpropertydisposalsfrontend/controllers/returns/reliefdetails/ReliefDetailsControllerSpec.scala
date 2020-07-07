@@ -1501,6 +1501,7 @@ class ReliefDetailsControllerSpec
               )
             )
           )
+
         }
 
         "there is an error updating the session data" in {
@@ -1584,7 +1585,7 @@ class ReliefDetailsControllerSpec
           "and the draft return and session data has been successfully updated" in {
           val currentAnswers  = sample[IncompleteReliefDetailsAnswers]
             .copy(
-              privateResidentsRelief = Some(sample[AmountInPence]),
+              privateResidentsRelief = Some(AmountInPence.zero),
               lettingsRelief = Some(sample[AmountInPence]),
               otherReliefs = None
             )
@@ -1619,6 +1620,7 @@ class ReliefDetailsControllerSpec
             oldDraftReturn,
             newDraftReturn
           )
+
         }
 
         "the user has answered all of the relief details questions " +
