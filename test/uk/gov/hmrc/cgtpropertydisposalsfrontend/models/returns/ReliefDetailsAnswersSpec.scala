@@ -79,7 +79,7 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
 
       }
 
-      "have a method which unsets values of private residence relief and letting relief" in {
+      "have a method which unsets values of prr and letting relief for periodofadmin" in {
         val expectedResult =
           IncompleteReliefDetailsAnswers(
             None,
@@ -89,6 +89,18 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
 
         incompleteAnswers.unsetPrrAndLettingRelief(true) shouldBe expectedResult
         completeAnswers.unsetPrrAndLettingRelief(true)   shouldBe expectedResult
+      }
+
+      "have a method which unsets values of prr and letting relief for non-periodofadmin" in {
+        val expectedResult =
+          IncompleteReliefDetailsAnswers(
+            None,
+            None,
+            Some(otherReliefs)
+          )
+
+        incompleteAnswers.unsetPrrAndLettingRelief(false) shouldBe expectedResult
+        completeAnswers.unsetPrrAndLettingRelief(false)   shouldBe expectedResult
       }
 
     }
