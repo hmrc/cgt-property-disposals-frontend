@@ -297,22 +297,32 @@ class AcquisitionDetailsController @Inject() (
   private def commonUpdateDraftReturn(
     d: JourneyState,
     newAnswers: AcquisitionDetailsAnswers
-  ) =
+  ): Either[DraftSingleIndirectDisposalReturn, DraftSingleDisposalReturn] =
     d.bimap(
       i =>
         i.copy(
           acquisitionDetailsAnswers = Some(newAnswers),
           yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         ),
-      s =>
+      s => {
+
+        val reliefDetailsAnswers =
+          if (s.triageAnswers.isPeriodOfAdmin)
+            s.reliefDetailsAnswers.map(
+              _.unset(_.privateResidentsRelief)
+            )
+          else
+            s.reliefDetailsAnswers.map(
+              _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
+            )
+
         s.copy(
           acquisitionDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
-          reliefDetailsAnswers = s.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers = reliefDetailsAnswers,
           yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
+      }
     )
 
   def acquisitionMethod(): Action[AnyContent] =

@@ -305,9 +305,7 @@ class AcquisitionDetailsControllerSpec
     d.copy(
       acquisitionDetailsAnswers = Some(newAnswers),
       initialGainOrLoss = None,
-      reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-        _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
-      ),
+      reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
     )
 

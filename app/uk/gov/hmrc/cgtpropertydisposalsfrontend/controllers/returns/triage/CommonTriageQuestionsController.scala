@@ -586,7 +586,8 @@ class CommonTriageQuestionsController @Inject() (
                 propertyAddress = None,
                 disposalDetailsAnswers = None,
                 acquisitionDetailsAnswers = None,
-                reliefDetailsAnswers = single.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+                reliefDetailsAnswers =
+                  single.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(single.triageAnswers.isPeriodOfAdmin)),
                 yearToDateLiabilityAnswers = None,
                 initialGainOrLoss = None,
                 supportingEvidenceAnswers = None

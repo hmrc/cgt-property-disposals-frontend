@@ -266,7 +266,8 @@ class InitialGainOrLossControllerSpec
       ) =
         d.copy(
           initialGainOrLoss = Some(newAnswer),
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief()),
+          reliefDetailsAnswers =
+            d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 

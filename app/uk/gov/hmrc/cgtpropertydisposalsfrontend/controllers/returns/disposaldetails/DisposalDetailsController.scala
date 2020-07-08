@@ -301,7 +301,7 @@ class DisposalDetailsController @Inject() (
                         s.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(s.triageAnswers)),
                       initialGainOrLoss = None,
                       reliefDetailsAnswers = s.reliefDetailsAnswers
-                        .map(_.unsetPrrAndLettingRelief()),
+                        .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
                       yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers
                         .flatMap(_.unsetAllButIncomeDetails())
                     )
@@ -392,7 +392,7 @@ class DisposalDetailsController @Inject() (
                           disposalDetailsAnswers = Some(newAnswers),
                           initialGainOrLoss = None,
                           reliefDetailsAnswers = s.reliefDetailsAnswers
-                            .map(_.unsetPrrAndLettingRelief()),
+                            .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
                           yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(
                             _.unsetAllButIncomeDetails()
                           )
@@ -482,7 +482,7 @@ class DisposalDetailsController @Inject() (
                           disposalDetailsAnswers = Some(newAnswers),
                           initialGainOrLoss = None,
                           reliefDetailsAnswers = s.reliefDetailsAnswers
-                            .map(_.unsetPrrAndLettingRelief()),
+                            .map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin)),
                           yearToDateLiabilityAnswers = s.yearToDateLiabilityAnswers.flatMap(
                             _.unsetAllButIncomeDetails()
                           )
