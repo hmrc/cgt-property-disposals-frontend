@@ -2319,6 +2319,10 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"
+    else if (individualUserType === PersonalRepresentativeInPeriodOfAdmin)
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of the Annual Exempt Amount are you including?"
     else if (isATrust)
       doc
         .select("#annualExemptAmount-question")

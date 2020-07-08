@@ -20,6 +20,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.CompleteMixedUsePropertyDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DateOfDeath
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -30,7 +32,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.sin
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(answers: CompleteMixedUsePropertyDetailsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteMixedUsePropertyDetailsAnswers, representativeType: Option[RepresentativeType], dateOfDeath: Option[DateOfDeath])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("singleMixedUse.cya.title")}
 
@@ -38,7 +40,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 
 @caption(messages("singleMixedUse.caption"))
 
-@summary(answers)
+@summary(answers, representativeType, dateOfDeath)
 
 @formWrapper(routes.MixedUsePropertyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))

@@ -21,6 +21,10 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.CompleteMixedUsePropertyDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DateOfDeath
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
     cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -29,7 +33,20 @@
     addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteMixedUsePropertyDetailsAnswers)(implicit messages:Messages)
+@(answers: CompleteMixedUsePropertyDetailsAnswers, representativeType: Option[RepresentativeType], dateOfDeath: Option[DateOfDeath])(implicit messages:Messages)
+
+@userKey = @{ representativeType match {
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+    case _ => ""
+    }
+}
+
+@acquisitionTitleArguement = @{
+    dateOfDeath match {
+        case Some(d) => TimeUtils.govDisplayFormat(d.value)
+        case None => ""
+    }
+}
 
 @cyaSection() {
 @cyaRow(
@@ -40,7 +57,7 @@
     )
 
     @cyaRow(
-        messages("returns.property-address.cyaLabel.disposal-price"),
+        messages(s"returns.property-address$userKey.cyaLabel.disposal-price"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
         Some(cyaChange(messages("returns.property-address.cyaLabel.disposal-price"),
             returns.address.routes.MixedUsePropertyDetailsController.enterDisposalValue().url)),
@@ -48,7 +65,7 @@
     )
 
     @cyaRow(
-        messages("returns.property-address.cyaLabel.acquisition-price"),
+        messages(s"returns.property-address$userKey.cyaLabel.acquisition-price", acquisitionTitleArguement),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
         Some(cyaChange(messages("returns.property-address.cyaLabel.acquisition-price"),
             returns.address.routes.MixedUsePropertyDetailsController.enterAcquisitionValue().url)),
