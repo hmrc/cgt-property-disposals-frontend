@@ -2831,13 +2831,13 @@ lettingsRelief.cyaChange=if Letting Relief is being claimed
 lettingsReliefValue.cyaChange=the amount of Letting Relief
 
 
-otherReliefs.title=Do you want to claim any other reliefs?
-otherReliefs.agent.title=Does your client want to claim any other reliefs?
-otherReliefs.trust.title=Does the trust want to claim any other reliefs?
-otherReliefs.capacitor.title=Does the person want to claim any other reliefs?
-otherReliefs.personalRep.title=Was the person entitled to claim any other reliefs?
-otherReliefs.personalRepInPeriodOfAdmin.agent.title= Are any other reliefs being claimed?
-otherReliefs.personalRepInPeriodOfAdmin.title= Are any other reliefs being claimed?
+otherReliefs.title=Do you want to claim any other Capital Gains Tax reliefs?
+otherReliefs.agent.title=Does your client want to claim any other Capital Gains Tax reliefs?
+otherReliefs.trust.title=Does the trust want to claim any other Capital Gains Tax reliefs?
+otherReliefs.capacitor.title=Does the person want to claim any other Capital Gains Tax reliefs?
+otherReliefs.personalRep.title=Was the person entitled to claim any other Capital Gains Tax reliefs?
+otherReliefs.personalRepInPeriodOfAdmin.agent.title=Are any other Capital Gains Tax reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.title=Are any other Capital Gains Tax reliefs being claimed?
 
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
 otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
@@ -2846,6 +2846,14 @@ otherReliefs.capacitor.helpText=You will need to tell us what other reliefs the 
 otherReliefs.personalRep.helpText=You will need to tell us what other reliefs the person was entitled to claim and what the total amount of these is.
 otherReliefs.personalRepInPeriodOfAdmin.agent.helpText=You will need to tell us what other reliefs your client, or the estate, are claiming and what the total amount of these is.
 otherReliefs.personalRepInPeriodOfAdmin.helpText=You will need to tell us what other reliefs you, or the estate, are claiming and what the total amount of these is.
+
+otherReliefs.helpText2=Do not enter the Annual Exempt Amount, called your personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.agent.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.trust.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.capacitor.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.personalRep.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.personalRepInPeriodOfAdmin.agent.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.personalRepInPeriodOfAdmin.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
 
 otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new window)
 otherReliefs.agent.furtherInfoLink=Find out about reliefs your client might qualify for (opens in a new window)
