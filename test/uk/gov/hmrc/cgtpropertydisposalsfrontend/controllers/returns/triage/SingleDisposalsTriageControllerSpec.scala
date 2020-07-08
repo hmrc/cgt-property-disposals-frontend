@@ -813,10 +813,7 @@ class SingleDisposalsTriageControllerSpec
           disposalDetailsAnswers = None,
           acquisitionDetailsAnswers = None,
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief)
-              .unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           exemptionAndLossesAnswers = None,
           yearToDateLiabilityAnswers = None,
           supportingEvidenceAnswers = None
@@ -1931,10 +1928,7 @@ class SingleDisposalsTriageControllerSpec
           triageAnswers = newAnswers,
           acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(newAnswers)),
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief)
-              .unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
             case _: NonCalculatedYTDAnswers => None
             case c: CalculatedYTDAnswers    =>
@@ -2497,10 +2491,7 @@ class SingleDisposalsTriageControllerSpec
                 .unset(_.shouldUseRebase)
           ),
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief)
-              .unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
             case _: NonCalculatedYTDAnswers => None
             case c: CalculatedYTDAnswers    =>
@@ -3489,9 +3480,7 @@ class SingleDisposalsTriageControllerSpec
           disposalDetailsAnswers = None,
           acquisitionDetailsAnswers = None,
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
             case c: CalculatedYTDAnswers    =>
               Some(
@@ -4118,10 +4107,7 @@ class SingleDisposalsTriageControllerSpec
           triageAnswers = newAnswers,
           acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(d.triageAnswers)),
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief)
-              .unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers = d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
             case _: NonCalculatedYTDAnswers => None
             case c: CalculatedYTDAnswers    =>

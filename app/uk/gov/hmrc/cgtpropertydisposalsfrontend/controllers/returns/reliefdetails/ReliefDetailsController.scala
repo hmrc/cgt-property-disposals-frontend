@@ -82,10 +82,28 @@ class ReliefDetailsController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some(
             (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
+          ) if d.triageAnswers.isPeriodOfAdmin() =>
+        d.reliefDetailsAnswers.fold[Future[Result]](
+          f(s, r, d, IncompleteReliefDetailsAnswers.empty)
+        )(relief =>
+          f(
+            s,
+            r,
+            d,
+            relief.fold(
+              _.copy(lettingsRelief = Some(AmountInPence.zero)),
+              _.copy(lettingsRelief = AmountInPence.zero)
+            )
+          )
+        )
+
+      case Some(
+            (s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn, _))
           ) =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
         )(f(s, r, d, _))
+
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
@@ -225,17 +243,25 @@ class ReliefDetailsController @Inject() (
                 .contains(p)
             )
               draftReturn
-            else
-              draftReturn.copy(
-                reliefDetailsAnswers = Some(
+            else {
+              val updatedAnswers =
+                if (draftReturn.triageAnswers.isPeriodOfAdmin)
+                  answers.fold(
+                    _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p))),
+                    _.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
+                  )
+                else
                   answers
                     .unset(_.lettingsRelief)
                     .copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)))
-                ),
+
+              draftReturn.copy(
+                reliefDetailsAnswers = Some(updatedAnswers),
                 yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers.flatMap(
                   _.unsetAllButIncomeDetails()
                 )
               )
+            }
           }
         )
       }
@@ -325,6 +351,11 @@ class ReliefDetailsController @Inject() (
       complete => f(complete.disposalDate.taxYear)
     )
 
+  private def otherReliefsBackLink(answers: SingleDisposalTriageAnswers): Call =
+    if (answers.isPeriodOfAdmin())
+      routes.ReliefDetailsController.privateResidentsRelief()
+    else routes.ReliefDetailsController.lettingsRelief()
+
   def otherReliefs(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
@@ -359,7 +390,7 @@ class ReliefDetailsController @Inject() (
           )
         )(
           hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForOtherReliefs,
-          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
+          redirectToIfNoRequiredPreviousAnswer = _ => otherReliefsBackLink(draftReturn.triageAnswers)
         )
       }
     }
@@ -378,7 +409,7 @@ class ReliefDetailsController @Inject() (
           )
         )(
           hasRequiredPreviousAnswer = hasRequiredPreviousAnswerForOtherReliefs,
-          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
+          redirectToIfNoRequiredPreviousAnswer = _ => otherReliefsBackLink(draftReturn.triageAnswers)
         )(
           updateDraftReturn = { (maybeOtherReliefs, draftReturn) =>
             val existingOtherReliefs =

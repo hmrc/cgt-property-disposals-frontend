@@ -104,7 +104,7 @@ class InitialGainOrLossController @Inject() (
                     draftReturn.copy(
                       initialGainOrLoss = Some(AmountInPence.fromPounds(value)),
                       reliefDetailsAnswers = draftReturn.reliefDetailsAnswers
-                        .map(_.unsetPrrAndLettingRelief()),
+                        .map(_.unsetPrrAndLettingRelief(draftReturn.triageAnswers.isPeriodOfAdmin)),
                       yearToDateLiabilityAnswers = draftReturn.yearToDateLiabilityAnswers
                         .flatMap(_.unsetAllButIncomeDetails())
                     )

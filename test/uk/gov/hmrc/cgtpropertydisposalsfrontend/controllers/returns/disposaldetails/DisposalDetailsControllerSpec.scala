@@ -42,6 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, Tru
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, DraftSingleIndirectDisposalReturn, IndividualUserType, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
@@ -101,15 +102,23 @@ class DisposalDetailsControllerSpec
     userType: UserType,
     individualUserType: Option[IndividualUserType]
   ): (FillingOutReturn, DraftSingleDisposalReturn) = {
-    val answers           = sample[CompleteSingleDisposalTriageAnswers].copy(
+    val answers       = sample[CompleteSingleDisposalTriageAnswers].copy(
       disposalMethod = disposalMethod,
       individualUserType = individualUserType
     )
+    val reliefDetails =
+      if (individualUserType.contains(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin))
+        sample[CompleteReliefDetailsAnswers].copy(
+          lettingsRelief = AmountInPence.zero
+        )
+      else sample[CompleteReliefDetailsAnswers]
+
     val subscribedDetails = sample[SubscribedDetails].copy(
       name = setNameForUserType(userType)
     )
     val draftReturn       = sample[DraftSingleDisposalReturn].copy(
-      triageAnswers = answers
+      triageAnswers = answers,
+      reliefDetailsAnswers = Some(reliefDetails)
     )
 
     val fillingOutReturn = sample[FillingOutReturn].copy(
@@ -367,10 +376,8 @@ class DisposalDetailsControllerSpec
           disposalDetailsAnswers = Some(newAnswers),
           acquisitionDetailsAnswers = d.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(d.triageAnswers)),
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief)
-              .unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers =
+            d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -1203,10 +1210,8 @@ class DisposalDetailsControllerSpec
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief)
-              .unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers =
+            d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -1884,10 +1889,8 @@ class DisposalDetailsControllerSpec
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.privateResidentsRelief)
-              .unset(_.lettingsRelief)
-          ),
+          reliefDetailsAnswers =
+            d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -2617,10 +2620,8 @@ class DisposalDetailsControllerSpec
         d.copy(
           disposalDetailsAnswers = Some(newAnswers),
           initialGainOrLoss = None,
-          reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-            _.unset(_.lettingsRelief)
-              .unset(_.privateResidentsRelief)
-          ),
+          reliefDetailsAnswers =
+            d.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(d.triageAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap(_.unsetAllButIncomeDetails())
         )
 
@@ -2855,7 +2856,7 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen
+            acceptedIndividualUserType
           ) {
             (
               userType: UserType,
@@ -2881,8 +2882,7 @@ class DisposalDetailsControllerSpec
               val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
                 disposalFees = Some(AmountInPence.fromPounds(disposalFees))
               )
-              val newDraftReturn =
-                updateDraftReturn(draftReturn, updatedAnswers)
+              val newDraftReturn = updateDraftReturn(draftReturn, updatedAnswers)
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -2914,7 +2914,7 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen
+            acceptedIndividualUserType
           ) {
             (
               userType: UserType,
@@ -2973,7 +2973,7 @@ class DisposalDetailsControllerSpec
           forAll(
             acceptedUserTypeGen,
             disposalMethodGen,
-            individualUserTypeGen
+            acceptedIndividualUserType
           ) {
             (
               userType: UserType,

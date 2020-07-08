@@ -290,7 +290,7 @@ class SingleDisposalsTriageController @Inject() (
                       acquisitionDetailsAnswers = None,
                       initialGainOrLoss = None,
                       reliefDetailsAnswers = d.reliefDetailsAnswers
-                        .map(_.unsetPrrAndLettingRelief()),
+                        .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
                       exemptionAndLossesAnswers = None,
                       yearToDateLiabilityAnswers = None,
                       supportingEvidenceAnswers = None
@@ -550,7 +550,7 @@ class SingleDisposalsTriageController @Inject() (
             .map(_.unsetAllButAcquisitionMethod(currentDraftReturn.triageAnswers)),
           initialGainOrLoss = None,
           reliefDetailsAnswers = currentDraftReturn.reliefDetailsAnswers
-            .map(_.unsetPrrAndLettingRelief()),
+            .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
           yearToDateLiabilityAnswers = currentDraftReturn.yearToDateLiabilityAnswers
             .flatMap(_.unsetAllButIncomeDetails()),
           supportingEvidenceAnswers = None
@@ -688,7 +688,7 @@ class SingleDisposalsTriageController @Inject() (
                       },
                       initialGainOrLoss = None,
                       reliefDetailsAnswers = d.reliefDetailsAnswers
-                        .map(_.unsetPrrAndLettingRelief()),
+                        .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
                       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
                         .flatMap(_.unsetAllButIncomeDetails())
                     )
@@ -942,7 +942,7 @@ class SingleDisposalsTriageController @Inject() (
                         acquisitionDetailsAnswers = None,
                         initialGainOrLoss = None,
                         reliefDetailsAnswers = d.reliefDetailsAnswers
-                          .map(_.unsetPrrAndLettingRelief()),
+                          .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
                         yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
                           .flatMap(_.unsetAllButIncomeDetails()),
                         supportingEvidenceAnswers = None

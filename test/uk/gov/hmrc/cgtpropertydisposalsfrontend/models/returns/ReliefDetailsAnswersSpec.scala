@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 
 class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
@@ -43,7 +44,10 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
 
       val otherReliefs      = sample[OtherReliefsOption.OtherReliefs]
       val completeAnswers   = sample[CompleteReliefDetailsAnswers]
-        .copy(otherReliefs = Some(otherReliefs))
+        .copy(
+          otherReliefs = Some(otherReliefs),
+          lettingsRelief = AmountInPence.zero
+        )
       val incompleteAnswers =
         IncompleteReliefDetailsAnswers(
           Some(completeAnswers.privateResidentsRelief),
@@ -75,7 +79,19 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
 
       }
 
-      "have a method which unsets values of private residence relief and letting relief" in {
+      "have a method which unsets values of prr and letting relief for periodofadmin" in {
+        val expectedResult =
+          IncompleteReliefDetailsAnswers(
+            None,
+            Some(AmountInPence.zero),
+            Some(otherReliefs)
+          )
+
+        incompleteAnswers.unsetPrrAndLettingRelief(true) shouldBe expectedResult
+        completeAnswers.unsetPrrAndLettingRelief(true)   shouldBe expectedResult
+      }
+
+      "have a method which unsets values of prr and letting relief for non-periodofadmin" in {
         val expectedResult =
           IncompleteReliefDetailsAnswers(
             None,
@@ -83,8 +99,8 @@ class ReliefDetailsAnswersSpec extends WordSpec with Matchers with ScalaCheckDri
             Some(otherReliefs)
           )
 
-        incompleteAnswers.unsetPrrAndLettingRelief() shouldBe expectedResult
-        completeAnswers.unsetPrrAndLettingRelief()   shouldBe expectedResult
+        incompleteAnswers.unsetPrrAndLettingRelief(false) shouldBe expectedResult
+        completeAnswers.unsetPrrAndLettingRelief(false)   shouldBe expectedResult
       }
 
     }
