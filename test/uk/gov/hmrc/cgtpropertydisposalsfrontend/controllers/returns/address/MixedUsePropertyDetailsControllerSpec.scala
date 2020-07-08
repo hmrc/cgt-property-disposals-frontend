@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import cats.Eq
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyD
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -76,6 +76,8 @@ class MixedUsePropertyDetailsControllerSpec
   lazy val controller = instanceOf[MixedUsePropertyDetailsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
+  implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
   def sessionWithDraftMixedUseDisposal(
     name: Either[TrustName, IndividualName],
@@ -1294,17 +1296,18 @@ class MixedUsePropertyDetailsControllerSpec
       "show a form error for amount" when {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+          val draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
+            mixedUsePropertyDetailsAnswers = Some(
+              sample[CompleteMixedUsePropertyDetailsAnswers]
+            )
+          )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
-                      mixedUsePropertyDetailsAnswers = Some(
-                        sample[CompleteMixedUsePropertyDetailsAnswers]
-                      )
-                    ),
+                    draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = Right(sample[IndividualName])
                     )
@@ -1313,10 +1316,13 @@ class MixedUsePropertyDetailsControllerSpec
               )
             )
           }
-
+          val userKey     =
+            userMessageKey(draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType), Individual)
+          val dateOfDeath = draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+          val titleArg    = dateOfDeath.map(e => TimeUtils.govDisplayFormat(e.value))
           checkPageIsDisplayed(
             performAction(data: _*),
-            messageFromMessageKey(s"$key.title"),
+            messageFromMessageKey(s"$key$userKey.title", titleArg),
             doc =>
               doc
                 .select("#error-summary-display > ul > li > a")

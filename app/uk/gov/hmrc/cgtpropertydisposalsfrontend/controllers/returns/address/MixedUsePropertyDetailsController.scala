@@ -379,14 +379,20 @@ class MixedUsePropertyDetailsController @Inject() (
                 _ =>
                   Ok(
                     singleMixedUseCheckYourAnswersPage(
-                      completeAnswers
+                      completeAnswers,
+                      r.representativeType,
+                      r.draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
                     )
                   )
               )
 
             case c: CompleteMixedUsePropertyDetailsAnswers                             =>
               Ok(
-                singleMixedUseCheckYourAnswersPage(c)
+                singleMixedUseCheckYourAnswersPage(
+                  c,
+                  r.representativeType,
+                  r.draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+                )
               )
 
           }

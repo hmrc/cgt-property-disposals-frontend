@@ -269,7 +269,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         @singleDisposalTriageSummary(singleMixedUse.triageAnswers, subscribedDetails.isATrust, representativeType, singleMixedUse.representeeAnswers)
 
         <h2 class="heading-medium">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
-        @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers)
+        @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers, representativeType, singleMixedUse.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)

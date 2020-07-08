@@ -1457,7 +1457,9 @@ returns.property-details.multiple-disposals.cya.guidanceLink=Help completing thi
 returns.property-address.cyaLabel.property-address=Property address
 returns.property-address.cyaLabel.disposal-date=What date did you exchange contracts when disposing of the property?
 returns.property-address.cyaLabel.disposal-price=What was the disposal amount?
+returns.property-address.personalRepInPeriodOfAdmin.cyaLabel.disposal-price=What were the proceeds of the disposal?
 returns.property-address.cyaLabel.acquisition-price=What was the acquisition amount?
+returns.property-address.personalRepInPeriodOfAdmin.cyaLabel.acquisition-price=What was the market value of the property on {0}?
 returns.property-address.cyaChange.property-address=the address of the property
 
 #===================================================
@@ -3882,8 +3884,8 @@ multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got
 multipleDisposalsDisposalPrice.trust.helpText=This is the amount the trust got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.capacitor.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.personalRep.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs. <br/> If the property was a mixed use property you should consider both the commercial and the residential parts of the property as one property.
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs. <br/> If the property was a mixed use property you should consider both the commercial and the residential parts of the property as one property.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
 
 multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
@@ -4094,8 +4096,8 @@ singleMixedUseDisposalsAcquisitionPrice.personalRep.helpText=This is the amount 
 singleMixedUseDisposalsAcquisitionPrice.capacitor.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when it bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate's share. You should add on any improvement or acquisition costs.
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate's share. You should add on any improvement or acquisition costs.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
 
 singleMixedUseDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
 singleMixedUseDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
@@ -4113,8 +4115,8 @@ singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p3=If the person sha
 singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
 singleMixedUseDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of the costs, they can only claim their share.
 singleMixedUseDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, they can only claim its share.
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=If the person shared any of the costs, you can only include the person's share.
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If the person shared any of the costs, you can only include the person's share.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=If the person shared any of the costs, you can only include the person’s share.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If the person shared any of the costs, you can only include the person’s share.
 
 singleMixedUseDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property
 singleMixedUseDisposalsAcquisitionPrice.error.invalid=The acquisition value of the property must be an amount of money, like 160,000 or 23,040.50
