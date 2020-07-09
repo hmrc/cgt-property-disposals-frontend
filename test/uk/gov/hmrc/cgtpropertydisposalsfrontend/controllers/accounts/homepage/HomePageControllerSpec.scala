@@ -1104,15 +1104,10 @@ class HomePageControllerSpec
         controller.exitForSubsequentReturn()(FakeRequest())
 
       val expectedPageTitleMessageKey = "subsequentReturnExit.title"
-      val expectedBackLink            = routes.HomePageController.homepage()
 
       "display the page" when {
 
-        "there is a draft or subsequent return" in {
-          val sessionData = SessionData.empty.copy(
-            journeyStatus = Some(sample[Subscribed])
-          )
-
+        def test(sessionData: SessionData, expectedBackLink: Call): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
@@ -1122,6 +1117,33 @@ class HomePageControllerSpec
             performAction(),
             messageFromMessageKey(expectedPageTitleMessageKey),
             doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
+          )
+        }
+
+        "there is a draft or subsequent return" in {
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(sample[Subscribed])
+            ),
+            routes.HomePageController.homepage()
+          )
+        }
+
+        "the user is on a starting new draft return journey" in {
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(sample[StartingNewDraftReturn])
+            ),
+            controllers.returns.representee.routes.RepresenteeController.isFirstReturn()
+          )
+        }
+
+        "the user is on a filling out return journey" in {
+          test(
+            SessionData.empty.copy(
+              journeyStatus = Some(sample[FillingOutReturn])
+            ),
+            controllers.returns.representee.routes.RepresenteeController.isFirstReturn()
           )
         }
 

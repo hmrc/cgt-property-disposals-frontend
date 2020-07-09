@@ -13,6 +13,9 @@ POST  /about-person/details-did-not-match-records    uk.gov.hmrc.cgtpropertydisp
 GET /about-person/confirm-person    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.confirmPerson()
 POST /about-person/confirm-person   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.confirmPersonSubmit()
 
+GET  /about-person/is-first-return-for-tax-year      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.isFirstReturn()
+POST /about-person/is-first-return-for-tax-year      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.isFirstReturnSubmit()
+
 GET  /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetails()
 POST /about-person/check-contact-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.checkContactDetailsSubmit()
 
