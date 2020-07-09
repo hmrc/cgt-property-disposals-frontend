@@ -3172,6 +3172,7 @@ annualExemptAmount.details.3.body=The <a href="{0}" target="_blank"> Annual Exem
 
 annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
 annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window).</a>
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window).</a>
 
 annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.agent.error.tooLarge=Annual Exempt Amount must be {0} or less
