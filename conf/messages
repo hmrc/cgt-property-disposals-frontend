@@ -3202,7 +3202,7 @@ annualExemptAmount.agent.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.trust.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.capacitor.error.tooSmall=Annual Exempt Amount must be 0 or more
 annualExemptAmount.personalRep.error.tooSmall=Annual Exempt Amount must be 0 or more
-annualExemptAmount.personalRepInPeriodOfAdmin.error.tooSmall=Annual Exempt Amount must be 0 or more
+annualExemptAmount.personalRepInPeriodOfAdmin.error.tooSmall=Annual Exempt Amount must be 0 or moreEx
 annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.tooSmall=Annual Exempt Amount must be 0 or more
 
 annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
