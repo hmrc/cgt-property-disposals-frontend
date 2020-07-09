@@ -512,6 +512,11 @@ class ReliefDetailsControllerSpec
 
           val oldDraftReturn = sample[DraftSingleDisposalReturn]
             .copy(reliefDetailsAnswers = Some(oldAnswers))
+
+          val lettingsRelief =
+            if (oldDraftReturn.triageAnswers.isPeriodOfAdmin) Some(AmountInPence.zero)
+            else None
+
           val newDraftReturn =
             updateDraftReturn(
               oldDraftReturn,
@@ -519,7 +524,7 @@ class ReliefDetailsControllerSpec
                 privateResidentsRelief = Some(
                   AmountInPence.fromPounds(newPrivateResidentsReliefValue)
                 ),
-                lettingsRelief = None
+                lettingsRelief = lettingsRelief
               )
             )
 
@@ -616,6 +621,7 @@ class ReliefDetailsControllerSpec
           }
 
         }
+
       }
 
     }
