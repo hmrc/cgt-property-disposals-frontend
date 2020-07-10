@@ -1319,7 +1319,7 @@ class MixedUsePropertyDetailsControllerSpec
           val userKey     =
             userMessageKey(draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType), Individual)
           val dateOfDeath = draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
-          val titleArg    = dateOfDeath.map(e => TimeUtils.govDisplayFormat(e.value))
+          val titleArg    = dateOfDeath.map(e => TimeUtils.govDisplayFormat(e.value)).getOrElse("")
           checkPageIsDisplayed(
             performAction(data: _*),
             messageFromMessageKey(s"$key$userKey.title", titleArg),
