@@ -18,10 +18,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
+class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   private def getString(key: String): String = servicesConfig.getString(key)
 
@@ -178,5 +179,14 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enable-language-switching")
 
   val furtherReturnsEnabled: Boolean = servicesConfig.getBoolean("further-returns.enabled")
+
+  logger.info {
+    val flags = List(
+      "periodOfAdminEnabled"     -> periodOfAdminEnabled,
+      "languageSwitchingEnabled" -> enableLanguageSwitching,
+      "furtherReturnsEnabled"    -> furtherReturnsEnabled
+    )
+    s"Application started with feature flags: [${flags.mkString("; ")}"
+  }
 
 }

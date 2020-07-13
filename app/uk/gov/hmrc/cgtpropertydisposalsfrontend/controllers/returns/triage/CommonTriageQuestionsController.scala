@@ -725,7 +725,9 @@ object CommonTriageQuestionsController {
     )(identity)(Some(_))
   )
 
-  val sharesDisposalDateForm: Form[ShareDisposalDate] = {
+  def sharesDisposalDateForm(
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
+  ): Form[ShareDisposalDate] = {
     val key = "sharesDisposalDate"
     Form(
       mapping(
@@ -736,7 +738,8 @@ object CommonTriageQuestionsController {
             s"$key-day",
             s"$key-month",
             s"$key-year",
-            key
+            key,
+            List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
           )
         )
       )(ShareDisposalDate(_))(d => Some(d.value))

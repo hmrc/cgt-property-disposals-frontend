@@ -22,7 +22,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.either._
-import cats.syntax.eq._
+import cats.syntax.order._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.libs.json.{Json, OFormat}
@@ -32,9 +32,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
@@ -133,35 +135,37 @@ class ReturnsServiceImpl @Inject() (
     sentReturns: List[ReturnSummary]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
     for {
-      httpResponse                          <- connector.getDraftReturns(cgtReference)
-                                                 .subflatMap(r =>
-                                                   if (r.status === OK) Right(r)
-                                                   else
-                                                     Left(
-                                                       Error(
-                                                         s"Call to get draft returns came back with status ${r.status}}"
+      httpResponse                            <- connector.getDraftReturns(cgtReference)
+                                                   .subflatMap(r =>
+                                                     if (r.status === OK) Right(r)
+                                                     else
+                                                       Left(
+                                                         Error(
+                                                           s"Call to get draft returns came back with status ${r.status}}"
+                                                         )
                                                        )
-                                                     )
+                                                   )
+      draftReturns                            <- EitherT.fromEither(
+                                                   httpResponse.parseJSON[GetDraftReturnResponse]()
+                                                     .leftMap(Error(_))
+                                                     .map(_.draftReturns)
                                                  )
-      draftReturns                          <- EitherT.fromEither(
-                                                 httpResponse.parseJSON[GetDraftReturnResponse]()
-                                                   .leftMap(Error(_))
-                                                   .map(_.draftReturns)
-                                               )
-      (sentDraftReturns, unsentDraftReturns) = draftReturns.partition(hasBeenSent(sentReturns))
-      _                                     <- if (sentDraftReturns.nonEmpty)
-                                                 EitherT.liftF[Future, Error, Unit](
-                                                   deleteSentDraftReturns(sentDraftReturns)
-                                                 )
-                                               else EitherT.rightT[Future, Error](())
+      (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid)
+      (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
+      toDelete                                 = invalidDraftReturns ::: sentDraftReturns
+      _                                       <- if (toDelete.nonEmpty)
+                                                   EitherT.liftF[Future, Error, Unit](
+                                                     deleteSentOrInvalidDraftReturns(toDelete)
+                                                   )
+                                                 else EitherT.rightT[Future, Error](())
     } yield unsentDraftReturns
 
-  private def deleteSentDraftReturns(
+  private def deleteSentOrInvalidDraftReturns(
     sentDraftReturns: List[DraftReturn]
   )(implicit hc: HeaderCarrier): Future[Unit] = {
     val ids = sentDraftReturns.map(_.id)
     logger.info(
-      s"Deleting draft returns that have been sent: ${ids.mkString(", ")}"
+      s"Deleting draft returns that have been sent or are invalid: ${ids.mkString(", ")}"
     )
     deleteDraftReturns(ids).fold(
       e =>
@@ -171,6 +175,52 @@ class ReturnsServiceImpl @Inject() (
         ),
       _ => logger.info(s"Deleted draft returns with ids [${ids.mkString(" ")}] ")
     )
+  }
+
+  private def isValid(draftReturn: DraftReturn): Boolean = {
+    val dateOfDeath =
+      draftReturn.representeeAnswers().flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+
+    val disposalOrCompletionDate = {
+      def fromSingleDisposal(s: SingleDisposalTriageAnswers)       =
+        s.fold(_.disposalDate.map(_.value), c => Some(c.disposalDate.value))
+      def fromMultipleDisposals(m: MultipleDisposalsTriageAnswers) =
+        m.fold(_.completionDate.map(_.value), c => Some(c.completionDate.value))
+
+      draftReturn.fold(
+        m => fromMultipleDisposals(m.triageAnswers),
+        s => fromSingleDisposal(s.triageAnswers),
+        s => fromSingleDisposal(s.triageAnswers),
+        m => fromMultipleDisposals(m.triageAnswers),
+        s => fromSingleDisposal(s.triageAnswers)
+      )
+    }
+
+    val periodOfAdminDateOfDeathValid =
+      if (draftReturn.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
+        dateOfDeath.forall(death =>
+          disposalOrCompletionDate.forall(
+            _ > death.value
+          )
+        )
+      else
+        true
+
+    val nonPeriodOfAdminDateOfDeathValid =
+      if (draftReturn.representativeType().contains(PersonalRepresentative))
+        dateOfDeath.forall(death =>
+          disposalOrCompletionDate.forall(
+            _ <= death.value
+          )
+        )
+      else true
+
+    if (periodOfAdminDateOfDeathValid)
+      logger.warn("Found draft return for period of admin personal rep with invalid disposal or completion date")
+    if (nonPeriodOfAdminDateOfDeathValid)
+      logger.warn("Found draft return for non-period of admin personal rep with invalid disposal or completion date")
+
+    periodOfAdminDateOfDeathValid && nonPeriodOfAdminDateOfDeathValid
   }
 
   private def extractCountryCodeOrPostcode(
@@ -235,10 +285,19 @@ class ReturnsServiceImpl @Inject() (
         .map(_.startDateInclusive.getYear.toString)
         .contains(r.taxYear) &&
       draftReturnCompletionDate.map(_.value).contains(r.completionDate) &&
-      draftCountryOrPostcode.contains(
-        extractCountryCodeOrPostcode(r.propertyAddress)
-      )
+      draftCountryOrPostcode
+        .map(toUpperCaseWithoutSpaces)
+        .contains(
+          toUpperCaseWithoutSpaces(extractCountryCodeOrPostcode(r.propertyAddress))
+        )
     }
+  }
+
+  private def toUpperCaseWithoutSpaces(
+    countryOrPostcode: Either[CountryCode, Postcode]
+  ): Either[CountryCode, Postcode] = {
+    def format(s: String): CountryCode = s.replaceAllLiterally(" ", "").toUpperCase()
+    countryOrPostcode.bimap(format, p => Postcode(format(p.value)))
   }
 
   def submitReturn(

@@ -437,26 +437,29 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case Right(_: DraftSingleDisposalReturn)   =>
             Redirect(routes.PropertyDetailsController.checkYourAnswers())
+
           case Left(m: DraftMultipleDisposalsReturn) =>
             m.triageAnswers.fold(
               i => i.taxYear -> i.completionDate,
               c => Some(c.taxYear) -> Some(c.completionDate)
             ) match {
               case (Some(taxYear), Some(completionDate)) =>
-                val answers = m.examplePropertyDetailsAnswers
-                  .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+                withPersonalRepresentativeDetails(m) { personalRepDetails =>
+                  val answers = m.examplePropertyDetailsAnswers
+                    .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                val disposalDate =
-                  answers.fold(_.disposalDate, c => Some(c.disposalDate))
+                  val disposalDate =
+                    answers.fold(_.disposalDate, c => Some(c.disposalDate))
 
-                val f    = getDisposalDateFrom(taxYear, completionDate)
-                val form = disposalDate.fold(f)(c => f.fill(c.value))
-                Ok(
-                  multipleDisposalsDisposalDatePage(
-                    form,
-                    r.journey.subscribedDetails.isATrust
+                  val f    = getDisposalDateForm(taxYear, completionDate, personalRepDetails)
+                  val form = disposalDate.fold(f)(c => f.fill(c.value))
+                  Ok(
+                    multipleDisposalsDisposalDatePage(
+                      form,
+                      r.journey.subscribedDetails.isATrust
+                    )
                   )
-                )
+                }
 
               case _                                     =>
                 Redirect(
@@ -479,80 +482,82 @@ class PropertyDetailsController @Inject() (
               c => Some(c.taxYear) -> Some(c.completionDate)
             ) match {
               case (Some(taxYear), Some(completionDate)) =>
-                val answers = m.examplePropertyDetailsAnswers
-                  .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+                withPersonalRepresentativeDetails(m) { personalRepDetails =>
+                  val answers = m.examplePropertyDetailsAnswers
+                    .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                getDisposalDateFrom(taxYear, completionDate)
-                  .bindFromRequest()
-                  .fold(
-                    formWithErrors => {
-                      val param1                = taxYear.startDateInclusive.getYear.toString
-                      val param2                = taxYear.endDateExclusive.getYear.toString
-                      val updatedFormWithErrors = formWithErrors.errors.map {
-                        _.copy(args = Seq(param1, param2))
-                      }
+                  getDisposalDateForm(taxYear, completionDate, personalRepDetails)
+                    .bindFromRequest()
+                    .fold(
+                      formWithErrors => {
+                        val param1                = taxYear.startDateInclusive.getYear.toString
+                        val param2                = taxYear.endDateExclusive.getYear.toString
+                        val updatedFormWithErrors = formWithErrors.errors.map {
+                          _.copy(args = Seq(param1, param2))
+                        }
 
-                      BadRequest(
-                        multipleDisposalsDisposalDatePage(
-                          formWithErrors.copy(errors = updatedFormWithErrors),
-                          r.journey.subscribedDetails.isATrust
+                        BadRequest(
+                          multipleDisposalsDisposalDatePage(
+                            formWithErrors.copy(errors = updatedFormWithErrors),
+                            r.journey.subscribedDetails.isATrust
+                          )
                         )
-                      )
-                    },
-                    { date =>
-                      val disposalDate = DisposalDate(date, taxYear)
+                      },
+                      { date =>
+                        val disposalDate = DisposalDate(date, taxYear)
 
-                      if (
-                        answers
-                          .fold(_.disposalDate, c => Some(c.disposalDate))
-                          .contains(disposalDate)
-                      )
-                        Redirect(
-                          routes.PropertyDetailsController.checkYourAnswers()
-                        )
-                      else {
-                        val updatedAnswers     =
+                        if (
                           answers
-                            .fold(
-                              _.copy(disposalDate = Some(disposalDate)),
-                              _.copy(disposalDate = disposalDate)
-                            )
-                        val updatedDraftReturn =
-                          m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
-                        val result             = for {
-                          _ <- returnsService.storeDraftReturn(
-                                 updatedDraftReturn,
-                                 r.journey.subscribedDetails.cgtReference,
-                                 r.journey.agentReferenceNumber
-                               )
-                          _ <- EitherT(
-                                 updateSession(sessionStore, request)(
-                                   _.copy(journeyStatus =
-                                     Some(
-                                       r.journey
-                                         .copy(draftReturn = updatedDraftReturn)
+                            .fold(_.disposalDate, c => Some(c.disposalDate))
+                            .contains(disposalDate)
+                        )
+                          Redirect(
+                            routes.PropertyDetailsController.checkYourAnswers()
+                          )
+                        else {
+                          val updatedAnswers     =
+                            answers
+                              .fold(
+                                _.copy(disposalDate = Some(disposalDate)),
+                                _.copy(disposalDate = disposalDate)
+                              )
+                          val updatedDraftReturn =
+                            m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
+                          val result             = for {
+                            _ <- returnsService.storeDraftReturn(
+                                   updatedDraftReturn,
+                                   r.journey.subscribedDetails.cgtReference,
+                                   r.journey.agentReferenceNumber
+                                 )
+                            _ <- EitherT(
+                                   updateSession(sessionStore, request)(
+                                     _.copy(journeyStatus =
+                                       Some(
+                                         r.journey
+                                           .copy(draftReturn = updatedDraftReturn)
+                                       )
                                      )
                                    )
                                  )
-                               )
-                        } yield ()
+                          } yield ()
 
-                        result.fold(
-                          { e =>
-                            logger.warn("Could not update draft return", e)
-                            errorHandler.errorResult()
-                          },
-                          _ =>
-                            Redirect(
-                              routes.PropertyDetailsController
-                                .checkYourAnswers()
-                            )
-                        )
+                          result.fold(
+                            { e =>
+                              logger.warn("Could not update draft return", e)
+                              errorHandler.errorResult()
+                            },
+                            _ =>
+                              Redirect(
+                                routes.PropertyDetailsController
+                                  .checkYourAnswers()
+                              )
+                          )
+
+                        }
 
                       }
-
-                    }
-                  )
+                    )
+                }
 
               case _                                     =>
                 Redirect(
@@ -901,9 +906,10 @@ class PropertyDetailsController @Inject() (
       withValidJourney(request)((_, _) => Redirect(returnsRoutes.TaskListController.taskList()))
     }
 
-  private def getDisposalDateFrom(
+  private def getDisposalDateForm(
     taxYear: TaxYear,
-    completionDate: CompletionDate
+    completionDate: CompletionDate,
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
   ): Form[LocalDate] = {
     val startDateOfTaxYear = taxYear.startDateInclusive
     val endDateOfTaxYear   = taxYear.endDateExclusive
@@ -912,7 +918,7 @@ class PropertyDetailsController @Inject() (
       if (endDateOfTaxYear.isBefore(completionDate.value)) endDateOfTaxYear
       else completionDate.value
 
-    disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
+    disposalDateForm(maximumDateInclusive, startDateOfTaxYear, personalRepresentativeDetails)
   }
 
   private def extractIndividualUserType(
@@ -949,6 +955,19 @@ class PropertyDetailsController @Inject() (
       .fold(
         _ => routes.PropertyDetailsController.disposalPrice(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
+      )
+
+  private def withPersonalRepresentativeDetails(draftReturn: DraftMultipleDisposalsReturn)(
+    f: Option[PersonalRepresentativeDetails] => Future[Result]
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+    PersonalRepresentativeDetails
+      .fromDraftReturn(draftReturn)
+      .fold(
+        { e =>
+          logger.warn(s"Could not get personal representative details: $e")
+          errorHandler.errorResult()
+        },
+        f
       )
 
   // the following aren't used for the returns journey - the returns journey only handles uk addresses
@@ -992,7 +1011,8 @@ object PropertyDetailsController {
 
   def disposalDateForm(
     maximumDateInclusive: LocalDate,
-    minimumDateInclusive: LocalDate
+    minimumDateInclusive: LocalDate,
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
   ): Form[LocalDate] = {
     val key = "multipleDisposalsDisposalDate"
 
@@ -1005,7 +1025,11 @@ object PropertyDetailsController {
             s"$key-day",
             s"$key-month",
             s"$key-year",
-            key
+            key,
+            List(
+              TimeUtils
+                .personalRepresentativeDateValidation(personalRepresentativeDetails, key)
+            )
           )
         )
       )(identity)(Some(_))

@@ -1021,8 +1021,11 @@ sharesDisposalDate-year.error.invalid=Enter a real disposal date
 sharesDisposalDate-month.error.monthAndYearRequired=Date of disposal must include a month and a year
 sharesDisposalDate-day.error.dayAndYearRequired=Date of disposal must include a day and a year
 sharesDisposalDate-day.error.dayAndMonthRequired=Date of disposal must include a day and a month
-sharesDisposalDate.error.tooFarInFuture=The date you disposed of the shares cannot be in the future
-sharesDisposalDate.error.before1900=The date you disposed of the shares must be on or after 01 01 1900, contact HMRC if the date is before this
+sharesDisposalDate.error.tooFarInFuture=The disposal date cannot be in the future
+sharesDisposalDate.error.before1900=The disposal date must be on or after 01 01 1900, contact HMRC if the date is before this
+sharesDisposalDate.error.periodOfAdminDeathNotAfterDate=The disposal date cannot be before the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+sharesDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The disposal date cannot be after the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+
 sharesDisposalDate.cyaChange=when the shares were sold
 
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
@@ -1083,7 +1086,8 @@ disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exc
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
-disposalDate.error.before1900=The contract exchange date must be on or after 01 01 1900, contact HMRC if the date is before this
+disposalDate.error.periodOfAdminDeathNotAfterDate=The contract exchange date cannot be before the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+disposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 disposalDate-day.error.required=Contract exchange date must include a day
 disposalDate-month.error.required=Contract exchange date must include a month
@@ -1246,7 +1250,7 @@ assetTypeNotYetImplemented.p1=You cannot use this service to report Capital Gain
 assetTypeNotYetImplemented.li1=disposals of mixed-use UK property
 assetTypeNotYetImplemented.li2=indirect disposals of UK land
 assetTypeNotYetImplemented.h2=What you’ll need to do next
-assetTypeNotYetImplemented.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Captial Gains Tax on UK property or land form</a>.
+assetTypeNotYetImplemented.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 
 multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
 multipleDisposalsTaxYear.link=What happens on the exchange date?
@@ -1310,6 +1314,8 @@ multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
 multipleDisposalsCompletionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
+multipleDisposalsCompletionDate.error.periodOfAdminDeathNotAfterDate=The completion date cannot be before the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+multipleDisposalsCompletionDate.error.nonPeriodOfAdminDeathAfterDate=The completion date cannot be after the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
@@ -3330,7 +3336,7 @@ taxableGain.agent.error.tooLarge=Overall gain must be an amount of money between
 taxableGain.agent.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.trust.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.trust.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
-axableGain.capacitor.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.capacitor.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.capacitor.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRep.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
@@ -4060,6 +4066,8 @@ multipleDisposalsDisposalDate-year.error.invalid=Enter a real contract exchange 
 multipleDisposalsDisposalDate-month.error.monthAndYearRequired=Contract exchange date must include a month and a year
 multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
+multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=The contact exchange date cannot be before the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 multipleDisposalsDisposalDate.cyaChange=the contract exchange date
 
@@ -4136,11 +4144,11 @@ singleMixedUseDisposalsDisposalPrice.error.tooLarge=The disposal value of the pr
 singleMixedUseDisposalsDisposalPrice.error.tooSmall=The disposal value of the property must be an amount of money between 1 and 50,000,000,000
 singleMixedUseDisposalsDisposalPrice.error.tooManyDecimals=The disposal value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
-singleMixedUseDisposalsAcquisitionPrice.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.personalRep.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.capacitor.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.agent.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.trust.title=What was the acquistion value of the property?
+singleMixedUseDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
+singleMixedUseDisposalsAcquisitionPrice.personalRep.title=What was the acquisition value of the property?
+singleMixedUseDisposalsAcquisitionPrice.capacitor.title=What was the acquisition value of the property?
+singleMixedUseDisposalsAcquisitionPrice.agent.title=What was the acquisition value of the property?
+singleMixedUseDisposalsAcquisitionPrice.trust.title=What was the acquisition value of the property?
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=What was the market value of the property on {0}?
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What was the market value of the property on {0}?
 

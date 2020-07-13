@@ -230,6 +230,16 @@ object DraftReturn {
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType()
       )
+
+    def representeeAnswers(): Option[RepresenteeAnswers] =
+      fold(
+        _.representeeAnswers,
+        _.representeeAnswers,
+        _.representeeAnswers,
+        _.representeeAnswers,
+        _.representeeAnswers
+      )
+
   }
 
   implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals

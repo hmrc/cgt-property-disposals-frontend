@@ -1149,6 +1149,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like noDateOfDeathForPersonalRepBehaviour(performAction)
+
       "redirect to the check your answers page" when {
 
         "the user is on a single disposal journey" in {
@@ -1407,7 +1409,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           "multipleDisposalsDisposalDate-year"  -> d.getYear.toString
         )
 
+      val today = TimeUtils.today()
+
       behave like redirectToStartBehaviour(() => performAction())
+
+      behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
 
       "redirect to the task list page" when {
 
@@ -1460,6 +1466,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       }
 
       "not update the session" when {
+
         "the date submitted is the same as one that already exists in session" in {
 
           val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
@@ -1471,7 +1478,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(
                 taxYear = taxYear,
-                completionDate = CompletionDate(taxYear.endDateExclusive)
+                completionDate = CompletionDate(taxYear.endDateExclusive),
+                individualUserType = Some(Self)
               ),
             examplePropertyDetailsAnswers = Some(answers)
           )
@@ -1502,7 +1510,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "show a form error" when {
 
+        val completionDate = CompletionDate(
+          taxYear.endDateExclusive.minusDays(10L)
+        )
+
         def testFormError(
+          individualUserType: Option[IndividualUserType] = Some(Self),
+          representeeAnswers: Option[RepresenteeAnswers] = None
+        )(
           formData: List[(String, String)]
         )(expectedErrorMessageKey: String, args: Seq[String] = Seq()) = {
           inSequence {
@@ -1514,10 +1529,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                     draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                         taxYear = taxYear,
-                        completionDate = CompletionDate(
-                          taxYear.endDateExclusive.minusDays(10L)
-                        )
+                        completionDate = completionDate,
+                        individualUserType = individualUserType
                       ),
+                      representeeAnswers = representeeAnswers,
                       examplePropertyDetailsAnswers = None
                     ),
                     subscribedDetails = sample[SubscribedDetails].copy(
@@ -1554,13 +1569,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   s"$key-year"  -> scenario.yearInput
                 ).collect { case (key, Some(value)) => key -> value }
 
-                testFormError(data)(scenario.expectedErrorMessageKey)
+                testFormError()(data)(scenario.expectedErrorMessageKey)
               }
             }
         }
 
         "the date entered is too far in future" in {
-          testFormError(formData(TimeUtils.today().plusYears(2L)))(
+          testFormError()(formData(today.plusYears(2L)))(
             s"$key.error.tooFarInFuture"
           )
         }
@@ -1568,9 +1583,42 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the date entered is too far in past" in {
           val param1 = taxYear.startDateInclusive.getYear.toString
           val param2 = taxYear.endDateExclusive.getYear.toString
-          testFormError(formData(taxYear.startDateInclusive.minusYears(2L)))(
+          testFormError()(formData(taxYear.startDateInclusive.minusYears(2L)))(
             s"$key.error.tooFarInPast",
             Seq(param1, param2)
+          )
+        }
+
+        "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentative),
+            Some(
+              sample[CompleteRepresenteeAnswers]
+                .copy(dateOfDeath = Some(DateOfDeath(completionDate.value.minusDays(2L))))
+            )
+          )(formData(completionDate.value.minusDays(1L)))(
+            s"$key.error.nonPeriodOfAdminDeathAfterDate"
+          )
+        }
+
+        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentativeInPeriodOfAdmin),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(completionDate.value))))
+          )(formData(completionDate.value))(
+            s"$key.error.periodOfAdminDeathNotAfterDate"
+          )
+        }
+
+        "the disposal date is strictly before the date of death and the user is a period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentativeInPeriodOfAdmin),
+            Some(
+              sample[CompleteRepresenteeAnswers]
+                .copy(dateOfDeath = Some(DateOfDeath(completionDate.value.minusDays(1L))))
+            )
+          )(formData(completionDate.value.minusDays(2L)))(
+            s"$key.error.periodOfAdminDeathNotAfterDate"
           )
         }
 
@@ -1621,7 +1669,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(
                   taxYear = taxYear,
-                  completionDate = CompletionDate(taxYear.endDateExclusive)
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  individualUserType = Some(Self)
                 ),
               examplePropertyDetailsAnswers = Some(answers)
             )
@@ -1655,7 +1704,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(
                   taxYear = taxYear,
-                  completionDate = CompletionDate(taxYear.endDateExclusive)
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  individualUserType = Some(Self)
                 ),
               examplePropertyDetailsAnswers = Some(answers)
             )
@@ -1689,7 +1739,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
             val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
               disposalDate = disposalDate.copy(
-                value = TimeUtils.today().minusDays(10L)
+                value = today.minusDays(10L)
               )
             )
 
@@ -1697,7 +1747,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(
                   taxYear = taxYear,
-                  completionDate = CompletionDate(taxYear.endDateExclusive)
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  individualUserType = Some(Self)
                 ),
               examplePropertyDetailsAnswers = Some(answers)
             )
@@ -3060,6 +3111,41 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       }
     }
 
+  def noDateOfDeathForPersonalRepBehaviour(performAction: () => Future[Result]): Unit =
+    "show an error page" when {
+
+      def sessionWithNoDateOfDeath(individualUserType: IndividualUserType): SessionData =
+        SessionData.empty.copy(
+          journeyStatus = Some(
+            sample[FillingOutReturn].copy(
+              draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                  individualUserType = Some(individualUserType)
+                ),
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+              )
+            )
+          )
+        )
+
+      "there is no date of death found for a personal rep" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithNoDateOfDeath(PersonalRepresentative))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+
+      "there is no date of death found for a personal rep in period of admin" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithNoDateOfDeath(PersonalRepresentativeInPeriodOfAdmin))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+    }
 }
 
 object MultipleDisposalsPropertyDetailsControllerSpec extends Matchers {

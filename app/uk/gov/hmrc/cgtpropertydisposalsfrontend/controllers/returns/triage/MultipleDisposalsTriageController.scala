@@ -767,84 +767,88 @@ class MultipleDisposalsTriageController @Inject() (
   def completionDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
-        val completionDate =
-          answers.fold(_.completionDate, c => Some(c.completionDate))
-        val today          = TimeUtils.today()
-        val form           = completionDate.fold(completionDateForm(today))(
-          completionDateForm(today).fill
-        )
-        val backLink       = answers.fold(
-          _ =>
-            routes.MultipleDisposalsTriageController
-              .whenWereContractsExchanged(),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-        Ok(completionDatePage(form, backLink, state.isRight))
+        withPersonalRepresentativeDetails(state) { personalRepDetails =>
+          val completionDate =
+            answers.fold(_.completionDate, c => Some(c.completionDate))
+          val today          = TimeUtils.today()
+          val form           = completionDate.fold(completionDateForm(today, personalRepDetails))(
+            completionDateForm(today, personalRepDetails).fill
+          )
+          val backLink       = answers.fold(
+            _ =>
+              routes.MultipleDisposalsTriageController
+                .whenWereContractsExchanged(),
+            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+          Ok(completionDatePage(form, backLink, state.isRight))
+        }
       }
     }
 
   def completionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
-        completionDateForm(TimeUtils.today())
-          .bindFromRequest()
-          .fold(
-            { formWithErrors =>
-              val backLink = answers.fold(
-                _ =>
-                  routes.MultipleDisposalsTriageController
-                    .whenWereContractsExchanged(),
-                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-              )
-              BadRequest(
-                completionDatePage(
-                  formWithErrors,
-                  backLink,
-                  state.isRight
+        withPersonalRepresentativeDetails(state) { personalRepDetails =>
+          completionDateForm(TimeUtils.today(), personalRepDetails)
+            .bindFromRequest()
+            .fold(
+              { formWithErrors =>
+                val backLink = answers.fold(
+                  _ =>
+                    routes.MultipleDisposalsTriageController
+                      .whenWereContractsExchanged(),
+                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              )
-            },
-            completionDate =>
-              if (
-                answers
-                  .fold(_.completionDate, c => Some(c.completionDate))
-                  .contains(completionDate)
-              )
-                Redirect(
-                  routes.MultipleDisposalsTriageController.checkYourAnswers()
+                BadRequest(
+                  completionDatePage(
+                    formWithErrors,
+                    backLink,
+                    state.isRight
+                  )
                 )
-              else {
-                val updatedAnswers =
-                  answers.unset(_.completionDate).copy(completionDate = Some(completionDate))
-
-                val newState = updateState(
-                  state,
-                  updatedAnswers,
-                  d =>
-                    d.bimap(
-                      multipleIndirect =>
-                        multipleIndirect.copy(
-                          exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
-                          yearToDateLiabilityAnswers = None
-                        ),
-                      multiple =>
-                        multiple.copy(
-                          examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
-                            _.unset(_.disposalDate)
-                          ),
-                          yearToDateLiabilityAnswers = None
-                        )
-                    )
+              },
+              completionDate =>
+                if (
+                  answers
+                    .fold(_.completionDate, c => Some(c.completionDate))
+                    .contains(completionDate)
                 )
-                updateStateAndThen(
-                  newState,
                   Redirect(
                     routes.MultipleDisposalsTriageController.checkYourAnswers()
                   )
-                )
+                else {
+                  val updatedAnswers =
+                    answers.unset(_.completionDate).copy(completionDate = Some(completionDate))
 
-              }
-          )
+                  val newState = updateState(
+                    state,
+                    updatedAnswers,
+                    d =>
+                      d.bimap(
+                        multipleIndirect =>
+                          multipleIndirect.copy(
+                            exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
+                            yearToDateLiabilityAnswers = None
+                          ),
+                        multiple =>
+                          multiple.copy(
+                            examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
+                              _.unset(_.disposalDate)
+                            ),
+                            yearToDateLiabilityAnswers = None
+                          )
+                      )
+                  )
+                  updateStateAndThen(
+                    newState,
+                    Redirect(
+                      routes.MultipleDisposalsTriageController.checkYourAnswers()
+                    )
+                  )
+
+                }
+            )
+        }
       }
     }
 
@@ -870,131 +874,125 @@ class MultipleDisposalsTriageController @Inject() (
   def disposalDateOfShares(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
-        val backLink = answers.fold(
-          _ =>
-            routes.MultipleDisposalsTriageController
-              .assetTypeForNonUkResidents(),
-          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-        val form     =
-          answers.fold(_.completionDate, e => Some(e.completionDate)) match {
-            case Some(value) =>
-              sharesDisposalDateForm.fill(ShareDisposalDate(value.value))
-            case None        => sharesDisposalDateForm
-          }
-        Ok(
-          disposalDateOfSharesForNonUk(
-            form,
-            backLink,
-            state.isRight,
-            routes.MultipleDisposalsTriageController
-              .disposalDateOfSharesSubmit()
+        withPersonalRepresentativeDetails(state) { personalRepDetails =>
+          val backLink = answers.fold(
+            _ =>
+              routes.MultipleDisposalsTriageController
+                .assetTypeForNonUkResidents(),
+            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
-        )
+          val form     =
+            answers.fold(_.completionDate, e => Some(e.completionDate)) match {
+              case Some(value) =>
+                sharesDisposalDateForm(None).fill(ShareDisposalDate(value.value))
+              case None        => sharesDisposalDateForm(personalRepDetails)
+            }
+          Ok(
+            disposalDateOfSharesForNonUk(
+              form,
+              backLink,
+              state.isRight,
+              routes.MultipleDisposalsTriageController
+                .disposalDateOfSharesSubmit()
+            )
+          )
+        }
       }
     }
 
   def disposalDateOfSharesSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
-        sharesDisposalDateForm
-          .bindFromRequest()
-          .fold(
-            { formWithErrors =>
-              val backLink = answers.fold(
-                _ =>
-                  routes.MultipleDisposalsTriageController
-                    .assetTypeForNonUkResidents(),
-                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-              )
-              BadRequest(
-                disposalDateOfSharesForNonUk(
-                  formWithErrors,
-                  backLink,
-                  state.isRight,
-                  routes.MultipleDisposalsTriageController
-                    .disposalDateOfSharesSubmit()
+        withPersonalRepresentativeDetails(state) { personalRepDetails =>
+          sharesDisposalDateForm(personalRepDetails)
+            .bindFromRequest()
+            .fold(
+              { formWithErrors =>
+                val backLink = answers.fold(
+                  _ =>
+                    routes.MultipleDisposalsTriageController
+                      .assetTypeForNonUkResidents(),
+                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              )
-            },
-            shareDisposalDate =>
-              if (
-                answers
-                  .fold(_.completionDate, c => Some(c.completionDate))
-                  .contains(CompletionDate(shareDisposalDate.value))
-              )
-                Redirect(
-                  routes.MultipleDisposalsTriageController.checkYourAnswers()
+                BadRequest(
+                  disposalDateOfSharesForNonUk(
+                    formWithErrors,
+                    backLink,
+                    state.isRight,
+                    routes.MultipleDisposalsTriageController
+                      .disposalDateOfSharesSubmit()
+                  )
                 )
-              else {
-                val result =
-                  for {
-                    taxYear        <- taxYearService.taxYear(shareDisposalDate.value)
-                    updatedAnswers <- EitherT
-                                        .fromEither[Future](
-                                          Right(
-                                            answers
-                                              .unset(_.completionDate)
-                                              .copy(
-                                                taxYear = taxYear,
-                                                completionDate = Some(CompletionDate(shareDisposalDate.value)),
-                                                taxYearAfter6April2020 = Some(taxYear.isDefined)
-                                              )
+              },
+              shareDisposalDate =>
+                if (
+                  answers
+                    .fold(_.completionDate, c => Some(c.completionDate))
+                    .contains(CompletionDate(shareDisposalDate.value))
+                )
+                  Redirect(
+                    routes.MultipleDisposalsTriageController.checkYourAnswers()
+                  )
+                else {
+                  val result =
+                    for {
+                      taxYear        <- taxYearService.taxYear(shareDisposalDate.value)
+                      updatedAnswers <- EitherT
+                                          .fromEither[Future](
+                                            Right(
+                                              answers
+                                                .unset(_.completionDate)
+                                                .copy(
+                                                  taxYear = taxYear,
+                                                  completionDate = Some(CompletionDate(shareDisposalDate.value)),
+                                                  taxYearAfter6April2020 = Some(taxYear.isDefined)
+                                                )
+                                            )
+                                          )
+                      newState        = updateState(
+                                          state,
+                                          updatedAnswers,
+                                          d =>
+                                            d.bimap(
+                                              multipleIndirect =>
+                                                multipleIndirect.copy(
+                                                  exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
+                                                  yearToDateLiabilityAnswers = None
+                                                ),
+                                              multiple =>
+                                                multiple.copy(
+                                                  examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers
+                                                    .map(_.unset(_.disposalDate)),
+                                                  yearToDateLiabilityAnswers = None
+                                                )
+                                            )
+                                        )
+                      _              <- newState.fold(
+                                          _ => EitherT.pure[Future, Error](()),
+                                          r =>
+                                            returnsService.storeDraftReturn(
+                                              r.draftReturn,
+                                              r.subscribedDetails.cgtReference,
+                                              r.agentReferenceNumber
+                                            )
+                                        )
+                      _              <- EitherT(
+                                          updateSession(sessionStore, request)(
+                                            _.copy(journeyStatus = Some(newState.merge))
                                           )
                                         )
-                    newState        = updateState(
-                                        state,
-                                        updatedAnswers,
-                                        d =>
-                                          d.bimap(
-                                            multipleIndirect =>
-                                              multipleIndirect.copy(
-                                                exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
-                                                yearToDateLiabilityAnswers = None
-                                              ),
-                                            multiple =>
-                                              multiple.copy(
-                                                examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers
-                                                  .map(_.unset(_.disposalDate)),
-                                                yearToDateLiabilityAnswers = None
-                                              )
-                                          )
-                                      )
-                    _              <- newState.fold(
-                                        _ => EitherT.pure[Future, Error](()),
-                                        r =>
-                                          returnsService.storeDraftReturn(
-                                            r.draftReturn,
-                                            r.subscribedDetails.cgtReference,
-                                            r.agentReferenceNumber
-                                          )
-                                      )
-                    _              <- EitherT(
-                                        updateSession(sessionStore, request)(
-                                          _.copy(journeyStatus = Some(newState.merge))
-                                        )
-                                      )
-                  } yield taxYear
+                    } yield taxYear
 
-                result.fold(
-                  { e =>
-                    logger.warn("Could not find tax year or update session", e)
-                    errorHandler.errorResult()
-                  },
-                  taxYear =>
-                    if (taxYear.isEmpty)
-                      Redirect(
-                        routes.CommonTriageQuestionsController
-                          .disposalsOfSharesTooEarly()
-                      )
-                    else
-                      Redirect(
-                        routes.MultipleDisposalsTriageController
-                          .checkYourAnswers()
-                      )
-                )
-              }
-          )
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not find tax year or update session", e)
+                      errorHandler.errorResult()
+                    },
+                    _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                  )
+                }
+            )
+        }
       }
     }
 
@@ -1200,13 +1198,15 @@ class MultipleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                _,
+                assetTypes,
                 Some(false),
                 _,
                 _
               ) =>
             Redirect(
-              routes.CommonTriageQuestionsController.disposalDateTooEarly()
+              if (assetTypes.contains(List(IndirectDisposal)))
+                routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
+              else routes.CommonTriageQuestionsController.disposalDateTooEarly()
             )
 
           case IncompleteMultipleDisposalsTriageAnswers(
@@ -1486,6 +1486,25 @@ class MultipleDisposalsTriageController @Inject() (
         previousSentCompletionDates.contains(completionDate.value)
     }
 
+  private def withPersonalRepresentativeDetails(state: JourneyState)(
+    f: Option[PersonalRepresentativeDetails] => Future[Result]
+  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+    val personalRepresentativeDetails = state.fold(
+      PersonalRepresentativeDetails.fromStartingNewDraftReturn,
+      {
+        case (fillingOutReturn, _) => PersonalRepresentativeDetails.fromDraftReturn(fillingOutReturn.draftReturn)
+      }
+    )
+
+    personalRepresentativeDetails.fold(
+      { e =>
+        logger.warn(s"Could not get personal representative details: $e")
+        errorHandler.errorResult()
+      },
+      f
+    )
+  }
+
 }
 
 object MultipleDisposalsTriageController {
@@ -1587,7 +1606,8 @@ object MultipleDisposalsTriageController {
   }
 
   def completionDateForm(
-    maximumDateInclusive: LocalDate
+    maximumDateInclusive: LocalDate,
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
   ): Form[CompletionDate] =
     Form(
       mapping(
@@ -1598,7 +1618,11 @@ object MultipleDisposalsTriageController {
             "multipleDisposalsCompletionDate-day",
             "multipleDisposalsCompletionDate-month",
             "multipleDisposalsCompletionDate-year",
-            "multipleDisposalsCompletionDate"
+            "multipleDisposalsCompletionDate",
+            List(
+              TimeUtils
+                .personalRepresentativeDateValidation(personalRepresentativeDetails, "multipleDisposalsCompletionDate")
+            )
           )
         )
       )(CompletionDate(_))(d => Some(d.value))

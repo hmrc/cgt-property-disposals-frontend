@@ -30,10 +30,14 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
@@ -185,10 +189,16 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
       "return an ok response" when {
 
-        val draftReturnsResponse =
-          GetDraftReturnResponse(List(sample[DraftSingleDisposalReturn]))
-
         "the http call came back with a 200 and the body can be parsed" in {
+          val draftReturnsResponse =
+            GetDraftReturnResponse(
+              List(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
+                )
+              )
+            )
+
           mockGetDraftReturns(cgtReference)(
             Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse))))
           )
@@ -202,23 +212,24 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "there are draft returns which are found to have been already sent and" when {
 
-          val cgtReference = sample[CgtReference]
-
-          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-          val address       = sample[UkAddress]
-
           "the draft return is a single disposal draft return and" when {
+            val cgtReference  = sample[CgtReference]
+            val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None)
+            val address       = sample[UkAddress]
+            val draftReturnId = UUID.randomUUID()
 
-            val draftReturn          = sample[DraftSingleDisposalReturn].copy(
-              triageAnswers = triageAnswers,
-              propertyAddress = Some(address)
-            )
+            val draftReturn          =
+              sample[DraftSingleDisposalReturn].copy(
+                triageAnswers = triageAnswers,
+                propertyAddress = Some(address.copy(postcode = Postcode(" z Z 01 Zz  "))),
+                id = draftReturnId
+              )
             val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
 
             val sentReturn  = sample[ReturnSummary].copy(
               taxYear = triageAnswers.disposalDate.taxYear.startDateInclusive.getYear.toString,
               completionDate = triageAnswers.completionDate.value,
-              propertyAddress = address
+              propertyAddress = address.copy(postcode = Postcode("ZZ01ZZ"))
             )
             val sentReturns = List(sentReturn)
 
@@ -229,7 +240,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
                     HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))
                   )
                 )
-                mockDeleteDraftReturns(List(draftReturn.id))(
+                mockDeleteDraftReturns(List(draftReturnId))(
                   Right(HttpResponse(OK))
                 )
               }
@@ -246,7 +257,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
                     HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))
                   )
                 )
-                mockDeleteDraftReturns(List(draftReturn.id))(Left(Error("")))
+                mockDeleteDraftReturns(List(draftReturnId))(Left(Error("")))
               }
 
               await(
@@ -254,6 +265,310 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
               ) shouldBe Right(List.empty)
             }
 
+          }
+
+        }
+
+        "there are draft returns which have disposal dates or completion dates incompatible with dates of death" when {
+
+          def testDraftReturnIsDeleted(draftReturn: DraftReturn): Unit = {
+            val cgtReference         = sample[CgtReference]
+            val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
+
+            inSequence {
+              mockGetDraftReturns(cgtReference)(
+                Right(
+                  HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))
+                )
+              )
+              mockDeleteDraftReturns(List(draftReturn.id))(
+                Right(HttpResponse(OK))
+              )
+            }
+
+            await(
+              service.getDraftReturns(cgtReference, List.empty).value
+            ) shouldBe Right(List.empty)
+          }
+
+          "the user is a period of admin personal rep and" when {
+
+            val dateOfDeath = LocalDate.now()
+
+            val representeeAnswers =
+              sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))
+
+            val singleDisposalTriageAnswers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+                disposalDate = DisposalDate(dateOfDeath, sample[TaxYear])
+              )
+
+            val multipleDisposalsTriageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+                completionDate = CompletionDate(dateOfDeath)
+              )
+
+            "the user is on a single disposal journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a multiple disposal journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftMultipleDisposalsReturn].copy(
+                  triageAnswers = multipleDisposalsTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a single indirect disposal journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftSingleIndirectDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a multiple indirect disposal journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftMultipleIndirectDisposalsReturn].copy(
+                  triageAnswers = multipleDisposalsTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a single mixed use journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftSingleMixedUseDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+          }
+
+          "the user is a non-period of admin personal rep and" when {
+
+            val dateOfDeath = LocalDate.now()
+
+            val representeeAnswers =
+              sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))
+
+            val singleDisposalTriageAnswers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(PersonalRepresentative),
+                disposalDate = DisposalDate(dateOfDeath.plusDays(1L), sample[TaxYear])
+              )
+
+            val multipleDisposalsTriageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  individualUserType = Some(PersonalRepresentative),
+                  completionDate = CompletionDate(dateOfDeath.plusDays(1L))
+                )
+
+            "the user is on a single disposal journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a multiple disposal journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftMultipleDisposalsReturn].copy(
+                  triageAnswers = multipleDisposalsTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a single indirect disposal journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftSingleIndirectDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a multiple indirect disposal journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftMultipleIndirectDisposalsReturn].copy(
+                  triageAnswers = multipleDisposalsTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a single mixed use journey" in {
+              testDraftReturnIsDeleted(
+                sample[DraftSingleMixedUseDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+          }
+
+        }
+
+        "there are draft returns which have disposal dates or completion dates compatible with dates of death" when {
+
+          def testDraftReturnIsNotDeleted(draftReturn: DraftReturn): Unit = {
+            val cgtReference         = sample[CgtReference]
+            val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
+
+            inSequence {
+              mockGetDraftReturns(cgtReference)(
+                Right(
+                  HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))
+                )
+              )
+            }
+
+            await(
+              service.getDraftReturns(cgtReference, List.empty).value
+            ) shouldBe Right(List(draftReturn))
+          }
+
+          "the user is a period of admin personal rep and" when {
+
+            val dateOfDeath = LocalDate.now()
+
+            val representeeAnswers =
+              sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))
+
+            val singleDisposalTriageAnswers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+                disposalDate = DisposalDate(dateOfDeath.plusDays(1L), sample[TaxYear])
+              )
+
+            val multipleDisposalsTriageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+                completionDate = CompletionDate(dateOfDeath.plusDays(1L))
+              )
+
+            "the user is on a single disposal journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a multiple disposal journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftMultipleDisposalsReturn].copy(
+                  triageAnswers = multipleDisposalsTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a single indirect disposal journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftSingleIndirectDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a multiple indirect disposal journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftMultipleIndirectDisposalsReturn].copy(
+                  triageAnswers = multipleDisposalsTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a single mixed use journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftSingleMixedUseDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+          }
+
+          "the user is a non-period of admin personal rep and" when {
+
+            val dateOfDeath = LocalDate.now()
+
+            val representeeAnswers =
+              sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))
+
+            val singleDisposalTriageAnswers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(
+                individualUserType = Some(PersonalRepresentative),
+                disposalDate = DisposalDate(dateOfDeath, sample[TaxYear])
+              )
+
+            val multipleDisposalsTriageAnswers =
+              sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentative), completionDate = CompletionDate(dateOfDeath))
+
+            "the user is on a single disposal journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftSingleDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a multiple disposal journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftMultipleDisposalsReturn].copy(
+                  triageAnswers = multipleDisposalsTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a single indirect disposal journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftSingleIndirectDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a multiple indirect disposal journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftMultipleIndirectDisposalsReturn].copy(
+                  triageAnswers = multipleDisposalsTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
+
+            "the user is on a single mixed use journey" in {
+              testDraftReturnIsNotDeleted(
+                sample[DraftSingleMixedUseDisposalReturn].copy(
+                  triageAnswers = singleDisposalTriageAnswers,
+                  representeeAnswers = Some(representeeAnswers)
+                )
+              )
+            }
           }
 
         }
