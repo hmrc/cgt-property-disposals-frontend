@@ -2712,6 +2712,7 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=Is Private Residen
 privateResidentsRelief.personalRepInPeriodOfAdmin.title=Is Private Residence Relief being claimed?
 
 privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Tell us if Private Residence Relief is being claimed
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.main.title=Tell us if Private Residence Relief is being claimed
 
 privateResidentsRelief.helpText=You might qualify for this relief if the property had been your main home at some point.
 privateResidentsRelief.agent.helpText=Your client might qualify for this relief if the property had been their main home at some point.
@@ -2827,8 +2828,8 @@ otherReliefs.agent.title=Does your client want to claim any other Capital Gains 
 otherReliefs.trust.title=Does the trust want to claim any other Capital Gains Tax reliefs?
 otherReliefs.capacitor.title=Does the person want to claim any other Capital Gains Tax reliefs?
 otherReliefs.personalRep.title=Was the person entitled to claim any other Capital Gains Tax reliefs?
-otherReliefs.personalRepInPeriodOfAdmin.agent.title=Are any other Capital Gains Tax reliefs being claimed?
-otherReliefs.personalRepInPeriodOfAdmin.title=Are any other Capital Gains Tax reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.agent.title= Are any other reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.title= Are any other reliefs being claimed?
 
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
 otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
@@ -2861,6 +2862,7 @@ otherReliefs.capacitor.error.required=Select yes if the person is entitled to cl
 otherReliefs.personalRep.error.required=Select yes if the person was entitled to claim any other reliefs
 otherReliefs.personalRepInPeriodOfAdmin.error.agent.required=Select yes if your client, or the estate, are claiming any other reliefs
 otherReliefs.personalRepInPeriodOfAdmin.error.required=Select yes if you, or the estate, are claiming any other reliefs
+otherReliefs.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client, or the estate, are claiming any other reliefs
 
 otherReliefsName.label=Names of the other reliefs you are claiming
 otherReliefsName.agent.label=Names of the other reliefs your client is claiming
