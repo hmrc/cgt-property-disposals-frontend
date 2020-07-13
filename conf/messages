@@ -709,7 +709,7 @@ account.manageYourDetails.betaNotice=This service is in private beta until 6 Apr
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
 account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
-account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
+account.manageYourDetails.organisation.p2=If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
 account.manageYourDetails.ContactName.changed=Contact name changed
 account.manageYourDetails.Email.changed=Contact email address changed
@@ -2169,7 +2169,7 @@ acquisitionDate-year.capacitor.error.invalid=The date the person acquired the pr
 acquisitionDate-year.personalRep.error.invalid=The date the person acquired the property must be a real date
 
 acquisitionDate-year.indirect.error.invalid=The date you got the shares must be a real date
-acquisitionDate-year.agent.indirect.error.invalid= The date your client acquired the shares must be a real date
+acquisitionDate-year.agent.indirect.error.invalid=The date your client acquired the shares must be a real date
 acquisitionDate-year.trust.indirect.error.invalid=The date the trust acquired the shares must be a real date
 acquisitionDate-year.capacitor.indirect.error.invalid=The date the person got the shares must be a real date
 acquisitionDate-year.personalRep.indirect.error.invalid=The date the person got the shares must be a real date
@@ -2712,6 +2712,7 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=Is Private Residen
 privateResidentsRelief.personalRepInPeriodOfAdmin.title=Is Private Residence Relief being claimed?
 
 privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Tell us if Private Residence Relief is being claimed
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.main.title=Tell us if Private Residence Relief is being claimed
 
 privateResidentsRelief.helpText=You might qualify for this relief if the property had been your main home at some point.
 privateResidentsRelief.agent.helpText=Your client might qualify for this relief if the property had been their main home at some point.
@@ -2861,6 +2862,7 @@ otherReliefs.capacitor.error.required=Select yes if the person is entitled to cl
 otherReliefs.personalRep.error.required=Select yes if the person was entitled to claim any other reliefs
 otherReliefs.personalRepInPeriodOfAdmin.error.agent.required=Select yes if your client, or the estate, are claiming any other reliefs
 otherReliefs.personalRepInPeriodOfAdmin.error.required=Select yes if you, or the estate, are claiming any other reliefs
+otherReliefs.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client, or the estate, are claiming any other reliefs
 
 otherReliefsName.label=Names of the other reliefs you are claiming
 otherReliefsName.agent.label=Names of the other reliefs your client is claiming
@@ -3879,8 +3881,8 @@ viewReturn.charge.paymentMethod.DebitCardByTelephone=debit card payment received
 viewReturn.charge.paymentMethod.CreditCardByTelephone=credit card payment received
 viewReturn.charge.paymentMethod.PTAOnlineWorldpayDebitCardPayment=debit card payment received
 viewReturn.charge.paymentMethod.PTAOnlineWorldpayCreditCardPayment=credit card payment received
-viewReturn.charge.paymentMethod.GIROReceipts= Bank Giro payment received
-viewReturn.charge.paymentMethod.GIROCredits= Bank Giro payment received
+viewReturn.charge.paymentMethod.GIROReceipts=Bank Giro payment received
+viewReturn.charge.paymentMethod.GIROCredits=Bank Giro payment received
 viewReturn.charge.paymentMethod.ChequeReceipts=cheque received
 viewReturn.charge.paymentMethod.DirectDebit=direct debit payment received
 viewReturn.charge.paymentMethod.FasterPayment=Faster Payment received
@@ -3996,7 +3998,7 @@ multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What wa
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
 multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-multipleDisposalsAcquisitionPrice.capacitor.helpText= This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.capacitor.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.

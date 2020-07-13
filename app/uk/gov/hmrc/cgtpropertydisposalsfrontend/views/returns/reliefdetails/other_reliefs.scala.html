@@ -138,6 +138,21 @@
     })
 }
 
+@isPeriodOfAdmin = @{
+    representativeType match {
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => true
+        case _ => false
+    }
+}
+
+@helpText = @{
+    if(isPeriodOfAdmin)
+        s"""${messages(s"$key$userKey.helpText")}<br/>"""
+    else
+        s"""${messages(s"$key$userKey.helpText")}<br/><br/>${messages(s"$key$userKey.helpText2")}"""
+}
+
+
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
@@ -155,7 +170,7 @@
             selected = selectedIndex,
             error = form.error(key),
             options = options,
-            helpText = Some(Html(s"""${messages(s"$key$userKey.helpText")}<br/><br/>${messages(s"$key$userKey.helpText2")}""")),
+            helpText = Some(Html(helpText)),
             customErrorKey = Some(s"$key$userKey")
         )
         <p>
