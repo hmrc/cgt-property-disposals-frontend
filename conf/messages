@@ -709,7 +709,7 @@ account.manageYourDetails.betaNotice=This service is in private beta until 6 Apr
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
 account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
-account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
+account.manageYourDetails.organisation.p2=If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
 account.manageYourDetails.ContactName.changed=Contact name changed
 account.manageYourDetails.Email.changed=Contact email address changed
@@ -2169,7 +2169,7 @@ acquisitionDate-year.capacitor.error.invalid=The date the person acquired the pr
 acquisitionDate-year.personalRep.error.invalid=The date the person acquired the property must be a real date
 
 acquisitionDate-year.indirect.error.invalid=The date you got the shares must be a real date
-acquisitionDate-year.agent.indirect.error.invalid= The date your client acquired the shares must be a real date
+acquisitionDate-year.agent.indirect.error.invalid=The date your client acquired the shares must be a real date
 acquisitionDate-year.trust.indirect.error.invalid=The date the trust acquired the shares must be a real date
 acquisitionDate-year.capacitor.indirect.error.invalid=The date the person got the shares must be a real date
 acquisitionDate-year.personalRep.indirect.error.invalid=The date the person got the shares must be a real date
@@ -2828,8 +2828,8 @@ otherReliefs.agent.title=Does your client want to claim any other Capital Gains 
 otherReliefs.trust.title=Does the trust want to claim any other Capital Gains Tax reliefs?
 otherReliefs.capacitor.title=Does the person want to claim any other Capital Gains Tax reliefs?
 otherReliefs.personalRep.title=Was the person entitled to claim any other Capital Gains Tax reliefs?
-otherReliefs.personalRepInPeriodOfAdmin.agent.title= Are any other reliefs being claimed?
-otherReliefs.personalRepInPeriodOfAdmin.title= Are any other reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.agent.title=Are any other reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.title=Are any other reliefs being claimed?
 
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
 otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
@@ -3881,8 +3881,8 @@ viewReturn.charge.paymentMethod.DebitCardByTelephone=debit card payment received
 viewReturn.charge.paymentMethod.CreditCardByTelephone=credit card payment received
 viewReturn.charge.paymentMethod.PTAOnlineWorldpayDebitCardPayment=debit card payment received
 viewReturn.charge.paymentMethod.PTAOnlineWorldpayCreditCardPayment=credit card payment received
-viewReturn.charge.paymentMethod.GIROReceipts= Bank Giro payment received
-viewReturn.charge.paymentMethod.GIROCredits= Bank Giro payment received
+viewReturn.charge.paymentMethod.GIROReceipts=Bank Giro payment received
+viewReturn.charge.paymentMethod.GIROCredits=Bank Giro payment received
 viewReturn.charge.paymentMethod.ChequeReceipts=cheque received
 viewReturn.charge.paymentMethod.DirectDebit=direct debit payment received
 viewReturn.charge.paymentMethod.FasterPayment=Faster Payment received
@@ -3998,7 +3998,7 @@ multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What wa
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
 multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-multipleDisposalsAcquisitionPrice.capacitor.helpText= This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.capacitor.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
