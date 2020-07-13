@@ -1549,7 +1549,7 @@ class RepresenteeControllerSpec
 
       "redirect the page to cya" when {
 
-        "the user has no id " when {
+        "the user has no id " in {
           val requiredPreviousAnswers =
             IncompleteRepresenteeAnswers(
               Some(IndividualName("First", "Last")),
@@ -1560,22 +1560,49 @@ class RepresenteeControllerSpec
               false,
               None
             )
-          "redirect to enter id page" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionWithStartingNewDraftReturn(
-                  requiredPreviousAnswers,
-                  PersonalRepresentative
-                )._1
-              )
-            }
-            checkIsRedirect(
-              performAction(),
-              routes.RepresenteeController.checkYourAnswers()
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithStartingNewDraftReturn(
+                requiredPreviousAnswers,
+                PersonalRepresentative
+              )._1
             )
           }
+          checkIsRedirect(
+            performAction(),
+            routes.RepresenteeController.checkYourAnswers()
+          )
         }
+
+        "the user has no name " in {
+          val requiredPreviousAnswers =
+            IncompleteRepresenteeAnswers(
+              None,
+              Some(sample[RepresenteeReferenceId]),
+              None,
+              None,
+              true,
+              true,
+              None
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithStartingNewDraftReturn(
+                requiredPreviousAnswers,
+                PersonalRepresentative
+              )._1
+            )
+          }
+          checkIsRedirect(
+            performAction(),
+            routes.RepresenteeController.checkYourAnswers()
+          )
+        }
+
       }
 
     }

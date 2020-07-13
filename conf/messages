@@ -3952,7 +3952,7 @@ multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.required=Enter t
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the proceeds of the disposal
 
 multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
-multipleDisposalsDisposalPrice.capacitor.error.=The disposal value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.capacitor.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.personalRep.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.trust.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.agent.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
