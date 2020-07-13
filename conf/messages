@@ -1688,7 +1688,7 @@ disposalPrice.trust.indirect.Gifted.helpText=You can provide a valuation or a re
 disposalPrice.personalRep.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
 disposalPrice.personalRep.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 disposalPrice.personalRepInPeriodOfAdmin.Gifted.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.helpText=This is the amount the estate got when the shares were sold. You should subtract any selling or disposal costs.
+disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.helpText=You’ll be able to enter any additional costs later.
 disposalPrice.capacitor.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
 disposalPrice.capacitor.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 
@@ -1780,7 +1780,7 @@ disposalPrice.trust.indirect.SoldOther.helpText=You’ll be able to include acqu
 disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.personalRep.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
 disposalPrice.personalRepInPeriodOfAdmin.SoldOther.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.helpText=This is the amount the estate got when the shares were sold. You should subtract any selling or disposal costs.
+disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.helpText=You’ll be able to enter any additional costs later.
 disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.capacitor.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
 
@@ -1861,7 +1861,7 @@ disposalFees.trust.indirect.title=How much were the additional costs when the sh
 disposalFees.personalRep.title=What were the person’s additional disposal costs?
 disposalFees.personalRep.indirect.title=How much were the additional costs when the shares were sold or disposed of?
 disposalFees.personalRepInPeriodOfAdmin.title=What were the additional disposal costs?
-disposalFees.personalRepInPeriodOfAdmin.indirect.title=How much were the additional disposal costs?
+disposalFees.personalRepInPeriodOfAdmin.indirect.title=What were the additional disposal costs?
 disposalFees.capacitor.title=What were the person’s additional disposal costs?
 disposalFees.capacitor.indirect.title=How much were the person’s additional costs when they sold or disposed of the shares?
 
@@ -1874,10 +1874,9 @@ disposalFees.trust.indirect.helpText=Additional costs might include stock broker
 disposalFees.personalRep.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
 disposalFees.personalRep.indirect.helpText=Additional costs might include stock broker’s fees.
 disposalFees.personalRepInPeriodOfAdmin.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
-disposalFees.personalRepInPeriodOfAdmin.indirect.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
+disposalFees.personalRepInPeriodOfAdmin.indirect.helpText=Additional costs might include stock broker’s fees.
 disposalFees.personalRepInPeriodOfAdmin.agent.helpText=For example, the amount the estate paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
-disposalFees.personalRepInPeriodOfAdmin.agent.indirect.helpText=For example, the amount the estate paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
-
+disposalFees.personalRepInPeriodOfAdmin.agent.indirect.helpText=Additional costs might include stock broker’s fees.
 disposalFees.capacitor.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
 disposalFees.capacitor.indirect.helpText=Additional costs might include stock broker’s fees.
 
@@ -2610,6 +2609,7 @@ periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or
 periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
 periodOfAdminMarketValue.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
 periodOfAdminMarketValue.agent.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
+periodOfAdminMarketValue.personalRepInPeriodOfAdmin.indirect.helpText=You can provide a valuation or a realistic estimate.
 
 periodOfAdminMarketValue.label=Property’s market value on {0}
 periodOfAdminMarketValue.error.required=Enter the market value of the property on {0}
