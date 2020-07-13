@@ -2828,8 +2828,8 @@ otherReliefs.agent.title=Does your client want to claim any other Capital Gains 
 otherReliefs.trust.title=Does the trust want to claim any other Capital Gains Tax reliefs?
 otherReliefs.capacitor.title=Does the person want to claim any other Capital Gains Tax reliefs?
 otherReliefs.personalRep.title=Was the person entitled to claim any other Capital Gains Tax reliefs?
-otherReliefs.personalRepInPeriodOfAdmin.agent.title=Are any other reliefs being claimed?
-otherReliefs.personalRepInPeriodOfAdmin.title=Are any other reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.agent.title=Are any other Capital Gains Tax reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.title=Are any other Capital Gains Tax reliefs being claimed?
 
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
 otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
