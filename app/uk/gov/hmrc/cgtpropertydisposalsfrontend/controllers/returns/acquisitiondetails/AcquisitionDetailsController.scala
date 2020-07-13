@@ -306,15 +306,7 @@ class AcquisitionDetailsController @Inject() (
         ),
       s => {
 
-        val reliefDetailsAnswers =
-          if (s.triageAnswers.isPeriodOfAdmin)
-            s.reliefDetailsAnswers.map(
-              _.unset(_.privateResidentsRelief)
-            )
-          else
-            s.reliefDetailsAnswers.map(
-              _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
-            )
+        val reliefDetailsAnswers = s.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin))
 
         s.copy(
           acquisitionDetailsAnswers = Some(newAnswers),
