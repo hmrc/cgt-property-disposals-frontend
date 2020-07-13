@@ -77,7 +77,7 @@ object ReliefDetailsAnswers {
       )
 
     def unsetPrrAndLettingRelief(isPeriodOfAdmin: Boolean): IncompleteReliefDetailsAnswers =
-      if (isPeriodOfAdmin) unset(_.privateResidentsRelief)
+      if (isPeriodOfAdmin) unset(_.privateResidentsRelief).copy(lettingsRelief = Some(AmountInPence.zero))
       else unset(_.privateResidentsRelief).unset(_.lettingsRelief)
 
   }
