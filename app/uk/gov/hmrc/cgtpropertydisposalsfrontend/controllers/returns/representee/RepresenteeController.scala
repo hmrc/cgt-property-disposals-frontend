@@ -229,9 +229,9 @@ class RepresenteeController @Inject() (
                 Some(name),
                 Some(id),
                 _,
-                None,
-                false,
-                false,
+                _,
+                _,
+                _,
                 _
               ) =>
             Ok(
