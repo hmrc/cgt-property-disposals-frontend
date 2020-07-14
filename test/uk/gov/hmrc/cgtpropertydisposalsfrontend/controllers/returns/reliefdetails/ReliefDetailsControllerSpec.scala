@@ -1877,7 +1877,8 @@ class ReliefDetailsControllerSpec
       }
 
       "redirect to the lettings relief page" when {
-        "the user has not answered that question and the amount of private residence relief is greater them zero" in {
+
+        "the user has not answered that question and the amount of private residence relief is greater than zero" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeForLettingsRelief) {
             (userType: UserType, individualUserType: IndividualUserType) =>
               inSequence {
@@ -1898,6 +1899,35 @@ class ReliefDetailsControllerSpec
               checkIsRedirect(
                 performAction(),
                 routes.ReliefDetailsController.lettingsRelief()
+              )
+          }
+        }
+
+      }
+
+      "redirect to the other CGT reliefs page" when {
+
+        "the user has not answered that question and the amount of private residence relief is zero" in {
+          forAll(acceptedUserTypeGen, acceptedIndividualUserTypeForLettingsRelief) {
+            (userType: UserType, individualUserType: IndividualUserType) =>
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  sessionWithReliefDetailsAnswers(
+                    allQuestionsAnswered.copy(
+                      privateResidentsRelief = Some(AmountInPence(0)),
+                      lettingsRelief = None,
+                      otherReliefs = None
+                    ),
+                    userType,
+                    individualUserType
+                  )._1
+                )
+              }
+
+              checkIsRedirect(
+                performAction(),
+                routes.ReliefDetailsController.otherReliefs()
               )
           }
         }
@@ -2026,15 +2056,17 @@ class ReliefDetailsControllerSpec
         "the user has just answered all the questions and all updates are successful" in {
           forAll(acceptedUserTypeGen, acceptedIndividualUserTypeForLettingsRelief) {
             (userType: UserType, individualUserType: IndividualUserType) =>
-              val (session, journey, draftReturn) =
-                sessionWithReliefDetailsAnswers(
-                  allQuestionsAnswered,
-                  userType,
-                  individualUserType
-                )
-              val newDraftReturn                  =
-                draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
-              val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
+              val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(
+                allQuestionsAnswered,
+                userType,
+                individualUserType
+              )
+              val newDraftReturn                  = draftReturn.copy(
+                reliefDetailsAnswers = Some(completeAnswers)
+              )
+              val updatedJourney                  = journey.copy(
+                draftReturn = newDraftReturn
+              )
 
               inSequence {
                 mockAuthWithNoRetrievals()
