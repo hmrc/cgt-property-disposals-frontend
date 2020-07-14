@@ -176,20 +176,9 @@ agentsLandingPage.ways-your-client-can-pay.h3=Ways your client can pay
 agentsLandingPage.ways-your-client-can-pay.p1=Your client can pay by bank transfer, debit card or corporate credit card from their account. They will need to provide their payment reference number. They can find it in their Capital Gains Tax on UK property account.
 
 subsequentReturnExit.title=You’ll need to contact HMRC
-subsequentReturnExit.p1=At the moment, only the first return for UK property sale or disposal in the tax year can be submitted online.
-subsequentReturnExit.p2=You’ll need to contact HMRC and ask for a paper return to be posted to you.
-subsequentReturnExit.p3=Have your National Insurance number or your Self Assessment Unique Taxpayer Reference to hand if you have one.
+subsequentReturnExit.p1=Only first returns for UK property sales or disposals in the tax year can be completed online.
+subsequentReturnExit.p2=You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper return to be posted to you.
 
-subsequentReturnExit.openingTimes.title=Opening times:
-subsequentReturnExit.openingTimes.monToFri=8am to 4pm, Monday to Friday
-subsequentReturnExit.closingTimes=Closed weekends and bank holidays
-subsequentReturnExit.phoneAgent.title=Agent Dedicated Line:
-subsequentReturnExit.telephone.title=Telephone:
-subsequentReturnExit.inside-uk-telephone.title=Inside UK:
-subsequentReturnExit.outside-uk-telephone.title=Outside UK:
-subsequentReturnExit.getHelp=Get help
-subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
-subsequentReturnExit.helpWithCallCharges=Find out about call charges
 
 #===================================================
 # TRANSLATION NOT REQUIRED = END
@@ -720,7 +709,7 @@ account.manageYourDetails.betaNotice=This service is in private beta until 6 Apr
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
 account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
-account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
+account.manageYourDetails.organisation.p2=If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
 account.manageYourDetails.ContactName.changed=Contact name changed
 account.manageYourDetails.Email.changed=Contact email address changed
@@ -1457,7 +1446,9 @@ returns.property-details.multiple-disposals.cya.guidanceLink=Help completing thi
 returns.property-address.cyaLabel.property-address=Property address
 returns.property-address.cyaLabel.disposal-date=What date did you exchange contracts when disposing of the property?
 returns.property-address.cyaLabel.disposal-price=What was the disposal amount?
+returns.property-address.personalRepInPeriodOfAdmin.cyaLabel.disposal-price=What were the proceeds of the disposal?
 returns.property-address.cyaLabel.acquisition-price=What was the acquisition amount?
+returns.property-address.personalRepInPeriodOfAdmin.cyaLabel.acquisition-price=What was the market value of the property on {0}?
 returns.property-address.cyaChange.property-address=the address of the property
 
 #===================================================
@@ -2191,7 +2182,7 @@ acquisitionDate-year.capacitor.error.invalid=The date the person acquired the pr
 acquisitionDate-year.personalRep.error.invalid=The date the person acquired the property must be a real date
 
 acquisitionDate-year.indirect.error.invalid=The date you got the shares must be a real date
-acquisitionDate-year.agent.indirect.error.invalid= The date your client acquired the shares must be a real date
+acquisitionDate-year.agent.indirect.error.invalid=The date your client acquired the shares must be a real date
 acquisitionDate-year.trust.indirect.error.invalid=The date the trust acquired the shares must be a real date
 acquisitionDate-year.capacitor.indirect.error.invalid=The date the person got the shares must be a real date
 acquisitionDate-year.personalRep.indirect.error.invalid=The date the person got the shares must be a real date
@@ -2735,6 +2726,7 @@ privateResidentsRelief.personalRepInPeriodOfAdmin.agent.title=Is Private Residen
 privateResidentsRelief.personalRepInPeriodOfAdmin.title=Is Private Residence Relief being claimed?
 
 privateResidentsRelief.personalRepInPeriodOfAdmin.main.title=Tell us if Private Residence Relief is being claimed
+privateResidentsRelief.personalRepInPeriodOfAdmin.agent.main.title=Tell us if Private Residence Relief is being claimed
 
 privateResidentsRelief.helpText=You might qualify for this relief if the property had been your main home at some point.
 privateResidentsRelief.agent.helpText=Your client might qualify for this relief if the property had been their main home at some point.
@@ -2845,13 +2837,13 @@ lettingsRelief.cyaChange=if Letting Relief is being claimed
 lettingsReliefValue.cyaChange=the amount of Letting Relief
 
 
-otherReliefs.title=Do you want to claim any other reliefs?
-otherReliefs.agent.title=Does your client want to claim any other reliefs?
-otherReliefs.trust.title=Does the trust want to claim any other reliefs?
-otherReliefs.capacitor.title=Does the person want to claim any other reliefs?
-otherReliefs.personalRep.title=Was the person entitled to claim any other reliefs?
-otherReliefs.personalRepInPeriodOfAdmin.agent.title= Are any other reliefs being claimed?
-otherReliefs.personalRepInPeriodOfAdmin.title= Are any other reliefs being claimed?
+otherReliefs.title=Do you want to claim any other Capital Gains Tax reliefs?
+otherReliefs.agent.title=Does your client want to claim any other Capital Gains Tax reliefs?
+otherReliefs.trust.title=Does the trust want to claim any other Capital Gains Tax reliefs?
+otherReliefs.capacitor.title=Does the person want to claim any other Capital Gains Tax reliefs?
+otherReliefs.personalRep.title=Was the person entitled to claim any other Capital Gains Tax reliefs?
+otherReliefs.personalRepInPeriodOfAdmin.agent.title=Are any other Capital Gains Tax reliefs being claimed?
+otherReliefs.personalRepInPeriodOfAdmin.title=Are any other Capital Gains Tax reliefs being claimed?
 
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
 otherReliefs.agent.helpText=You will need to tell us what other reliefs your client is claiming and what the total amount of these is.
@@ -2860,6 +2852,14 @@ otherReliefs.capacitor.helpText=You will need to tell us what other reliefs the 
 otherReliefs.personalRep.helpText=You will need to tell us what other reliefs the person was entitled to claim and what the total amount of these is.
 otherReliefs.personalRepInPeriodOfAdmin.agent.helpText=You will need to tell us what other reliefs your client, or the estate, are claiming and what the total amount of these is.
 otherReliefs.personalRepInPeriodOfAdmin.helpText=You will need to tell us what other reliefs you, or the estate, are claiming and what the total amount of these is.
+
+otherReliefs.helpText2=Do not enter the Annual Exempt Amount, called your personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.agent.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.trust.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.capacitor.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.personalRep.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.personalRepInPeriodOfAdmin.agent.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
+otherReliefs.personalRepInPeriodOfAdmin.helpText2=Do not enter the Annual Exempt Amount, called the personal Capital Gains Tax tax-free allowance, or losses here.
 
 otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new window)
 otherReliefs.agent.furtherInfoLink=Find out about reliefs your client might qualify for (opens in a new window)
@@ -2876,6 +2876,7 @@ otherReliefs.capacitor.error.required=Select yes if the person is entitled to cl
 otherReliefs.personalRep.error.required=Select yes if the person was entitled to claim any other reliefs
 otherReliefs.personalRepInPeriodOfAdmin.error.agent.required=Select yes if your client, or the estate, are claiming any other reliefs
 otherReliefs.personalRepInPeriodOfAdmin.error.required=Select yes if you, or the estate, are claiming any other reliefs
+otherReliefs.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client, or the estate, are claiming any other reliefs
 
 otherReliefsName.label=Names of the other reliefs you are claiming
 otherReliefsName.agent.label=Names of the other reliefs your client is claiming
@@ -3186,22 +3187,24 @@ annualExemptAmount.details.3.header=What is the Annual Exempt Amount?
 annualExemptAmount.details.3.body=The <a href="{0}" target="_blank"> Annual Exempt Amount (opens in a new window)</a> is an annual tax-free allowance. It is available to certain people who need to pay Capital Gains Tax. Most people only have to pay Capital Gains Tax on their gains for the tax year above the Annual Exempt Amount. Any losses or reliefs must have been subtracted from the gain already.
 
 annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
+annualExemptAmount.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window).</a>
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount during the period of administration (opens in a new window).</a>
 
 annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.agent.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.trust.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.capacitor.error.tooLarge=Annual Exempt Amount must be {0} or less
 annualExemptAmount.personalRep.error.tooLarge=Annual Exempt Amount must be {0} or less
-annualExemptAmount.personalRepInPeriodOfAdmin.error.tooLarge=Enter how much of the Annual Exempt Amount are you including, like 0 or 12,300
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.tooLarge=Enter how much of the Annual Exempt Amount are you including, like 0 or 12,300
+annualExemptAmount.personalRepInPeriodOfAdmin.error.tooLarge=Annual Exempt Amount must be {0} or less
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.tooLarge=Annual Exempt Amount must be {0} or less
 
 annualExemptAmount.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,300
 annualExemptAmount.agent.error.required=Enter how much of your client’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
 annualExemptAmount.trust.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,300
 annualExemptAmount.capacitor.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
 annualExemptAmount.personalRep.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
-annualExemptAmount.personalRepInPeriodOfAdmin.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
-annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.required=Enter how much of the person’s Capital Gains Tax Annual Exempt Amount they want to use, like 0 or 12,300
+annualExemptAmount.personalRepInPeriodOfAdmin.error.required=Enter how much of the Annual Exempt Amount are you including, like 0 or 12,300
+annualExemptAmount.personalRepInPeriodOfAdmin.agent.error.required=Enter how much of the Annual Exempt Amount are you including, like 0 or 12,300
 
 annualExemptAmount.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
 annualExemptAmount.agent.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,300
@@ -3892,8 +3895,8 @@ viewReturn.charge.paymentMethod.DebitCardByTelephone=debit card payment received
 viewReturn.charge.paymentMethod.CreditCardByTelephone=credit card payment received
 viewReturn.charge.paymentMethod.PTAOnlineWorldpayDebitCardPayment=debit card payment received
 viewReturn.charge.paymentMethod.PTAOnlineWorldpayCreditCardPayment=credit card payment received
-viewReturn.charge.paymentMethod.GIROReceipts= Bank Giro payment received
-viewReturn.charge.paymentMethod.GIROCredits= Bank Giro payment received
+viewReturn.charge.paymentMethod.GIROReceipts=Bank Giro payment received
+viewReturn.charge.paymentMethod.GIROCredits=Bank Giro payment received
 viewReturn.charge.paymentMethod.ChequeReceipts=cheque received
 viewReturn.charge.paymentMethod.DirectDebit=direct debit payment received
 viewReturn.charge.paymentMethod.FasterPayment=Faster Payment received
@@ -3950,8 +3953,8 @@ multipleDisposalsDisposalPrice.agent.helpText=This is the amount your client got
 multipleDisposalsDisposalPrice.trust.helpText=This is the amount the trust got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.capacitor.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 multipleDisposalsDisposalPrice.personalRep.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs. <br/> If the property was a mixed use property you should consider both the commercial and the residential parts of the property as one property.
-multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs. <br/> If the property was a mixed use property you should consider both the commercial and the residential parts of the property as one property.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
 
 multipleDisposalsDisposalPrice.link=What are disposal costs?
 multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
@@ -3965,7 +3968,7 @@ multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.required=Enter t
 multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the proceeds of the disposal
 
 multipleDisposalsDisposalPrice.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
-multipleDisposalsDisposalPrice.capacitor.error.=The disposal value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsDisposalPrice.capacitor.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.personalRep.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.trust.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
 multipleDisposalsDisposalPrice.agent.error.invalid=The disposal value must be an amount of money, like 160,000 or 23,040.50
@@ -4009,7 +4012,7 @@ multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What wa
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
 multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
-multipleDisposalsAcquisitionPrice.capacitor.helpText= This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+multipleDisposalsAcquisitionPrice.capacitor.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
@@ -4119,13 +4122,27 @@ singleMixedUse.guidance.list.title=You’ll need to enter the:
 singleMixedUse.guidance.list.l1=property’s UK address
 singleMixedUse.guidance.list.l2=disposal value of the property
 singleMixedUse.guidance.list.l3=acquisition value of the property
+
+singleMixedUse.guidance.personalRepInPeriodOfAdmin.p1=For this section of the return, you should consider both the commercial and the residential parts of the property as one property.
+singleMixedUse.guidance.personalRepInPeriodOfAdmin.list.l1=property’s UK address
+singleMixedUse.guidance.personalRepInPeriodOfAdmin.list.l2=disposal value of the whole property
+singleMixedUse.guidance.personalRepInPeriodOfAdmin.list.l3=acquisition value of the whole property
+
 singleMixedUseDisposalsDisposalPrice.title=What was the disposal value of the property?
+singleMixedUseDisposalsDisposalPrice.personalRep.title=What was the disposal value of the property?
+singleMixedUseDisposalsDisposalPrice.capacitor.title=What was the disposal value of the property?
+singleMixedUseDisposalsDisposalPrice.agent.title=What was the disposal value of the property?
+singleMixedUseDisposalsDisposalPrice.trust.title=What was the disposal value of the property?
+singleMixedUseDisposalsDisposalPrice.personalRepInPeriodOfAdmin.title=What were the proceeds of the disposal?
+singleMixedUseDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.title=What were the proceeds of the disposal?
 
 singleMixedUseDisposalsDisposalPrice.helpText=This is the amount you got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 singleMixedUseDisposalsDisposalPrice.personalRep.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 singleMixedUseDisposalsDisposalPrice.capacitor.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 singleMixedUseDisposalsDisposalPrice.agent.helpText=This is the amount the person got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
 singleMixedUseDisposalsDisposalPrice.trust.helpText=This is the amount the the trust got when the property was sold or its market value if it was disposed of another way. You should subtract any selling or disposal costs.
+singleMixedUseDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
+singleMixedUseDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
 
 singleMixedUseDisposalsDisposalPrice.link=What are disposal costs?
 singleMixedUseDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
@@ -4136,11 +4153,20 @@ singleMixedUseDisposalsDisposalPrice.error.tooSmall=The disposal value of the pr
 singleMixedUseDisposalsDisposalPrice.error.tooManyDecimals=The disposal value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
 singleMixedUseDisposalsAcquisitionPrice.title=What was the acquistion value of the property?
+singleMixedUseDisposalsAcquisitionPrice.personalRep.title=What was the acquistion value of the property?
+singleMixedUseDisposalsAcquisitionPrice.capacitor.title=What was the acquistion value of the property?
+singleMixedUseDisposalsAcquisitionPrice.agent.title=What was the acquistion value of the property?
+singleMixedUseDisposalsAcquisitionPrice.trust.title=What was the acquistion value of the property?
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=What was the market value of the property on {0}?
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What was the market value of the property on {0}?
+
 singleMixedUseDisposalsAcquisitionPrice.helpText=This is the amount you paid when they bought the property or its market value if you inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.personalRep.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.capacitor.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 singleMixedUseDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when it bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share. You should add on any improvement or acquisition costs.
 
 singleMixedUseDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
 singleMixedUseDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
@@ -4148,6 +4174,8 @@ singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p1=The costs of impr
 singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p1=The person can include the cost of improvements that added value to the property. For example, if the person built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
 singleMixedUseDisposalsAcquisitionPrice.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if your client built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
 singleMixedUseDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=The cost of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=The cost of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
 
 singleMixedUseDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
 
@@ -4156,6 +4184,8 @@ singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p3=If the person sha
 singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
 singleMixedUseDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of the costs, they can only claim their share.
 singleMixedUseDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, they can only claim its share.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=If the person shared any of the costs, you can only include the person’s share.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If the person shared any of the costs, you can only include the person’s share.
 
 singleMixedUseDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property
 singleMixedUseDisposalsAcquisitionPrice.error.invalid=The acquisition value of the property must be an amount of money, like 160,000 or 23,040.50
@@ -4295,6 +4325,17 @@ tmpCustomError.title=Sorry, we are experiencing technical difficulties - 500
 tmpCustomError.heading=Sorry, we’re experiencing technical difficulties
 tmpCustomError.p1=In order for us to resolve the issue, please click on the ‘get help with this page’ link.
 tmpCustomError.p2=We apologise for the inconvenience and thank you for your patience while we resolve the issue.
+
+representeeIsFirstReturn.capacitor.title=Is this the person’s first return for the tax year so far?
+representeeIsFirstReturn.personalRep.title=Is this the person who died’s first return for the tax year so far?
+
+representeeIsFirstReturn.helpText=Only include their Capital Gains Tax on UK property returns.
+
+representeeIsFirstReturn.capacitor.error.required=Select yes if this the person’s first return for the tax year so far
+representeeIsFirstReturn.personalRep.error.required=Select yes if this the person who died’s first return for the tax year so far
+representeeIsFirstReturn.capacitor.error.boolean=Select yes if this the person’s first return for the tax year so far
+representeeIsFirstReturn.personalRep.error.boolean=Select yes if this the person who died’s first return for the tax year so far
+representee.cyaChange.isFirstReturn=if this is the first return in this tax year so far
 
 #===================================================
 # PERSON REPRESENTED PAGES - END

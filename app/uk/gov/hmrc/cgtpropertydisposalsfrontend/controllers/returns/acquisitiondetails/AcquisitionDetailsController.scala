@@ -102,7 +102,7 @@ class AcquisitionDetailsController @Inject() (
         triageAnswers.fold(_.individualUserType, _.individualUserType) match {
           case Some(PersonalRepresentativeInPeriodOfAdmin) =>
             representeeAnswers.collect {
-              case CompleteRepresenteeAnswers(_, _, Some(dateOfDeath), _) =>
+              case CompleteRepresenteeAnswers(_, _, Some(dateOfDeath), _, _) =>
                 IncompleteAcquisitionDetailsAnswers.empty.copy(
                   acquisitionDate = Some(AcquisitionDate(dateOfDeath.value)),
                   acquisitionMethod = Some(AcquisitionMethod.Other("period of admin"))
@@ -307,14 +307,7 @@ class AcquisitionDetailsController @Inject() (
       s => {
 
         val reliefDetailsAnswers =
-          if (s.triageAnswers.isPeriodOfAdmin)
-            s.reliefDetailsAnswers.map(
-              _.unset(_.privateResidentsRelief)
-            )
-          else
-            s.reliefDetailsAnswers.map(
-              _.unset(_.privateResidentsRelief).unset(_.lettingsRelief)
-            )
+          s.reliefDetailsAnswers.map(_.unsetPrrAndLettingRelief(s.triageAnswers.isPeriodOfAdmin))
 
         s.copy(
           acquisitionDetailsAnswers = Some(newAnswers),

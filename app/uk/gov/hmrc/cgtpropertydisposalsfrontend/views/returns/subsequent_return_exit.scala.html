@@ -16,6 +16,7 @@
 
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
+@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -37,41 +38,7 @@
 
     @pageHeading(title)
     <p>@messages(s"$key.p1")</p>
-    <p>@messages(s"$key.p2")</p>
-    <p>@messages(s"$key.p3")</p>
+    <p>@Html(messages(s"$key.p2", viewConfig.contactHmrc))</p>
 
-    <p>
-        <h2 class="heading-medium">@messages(s"$key.telephone.title")</h2>
-    </p>
-
-    <div class="panel panel-border-wide">
-        <p>
-            @messages(s"$key.inside-uk-telephone.title")
-            <br />
-            <span class="bold">@viewConfig.hmrcTelephone</span>
-        </p>
-        <p>
-            @messages(s"$key.outside-uk-telephone.title")
-            <br />
-            <span class="bold">@viewConfig.outsideUkPhone</span>
-        </p>
-        <p>
-            @messages(s"$key.phoneAgent.title")
-            <br />
-            <span class="bold">@viewConfig.agentDedicatedLine</span>
-        </p>
-    </div>
-
-    <p>
-        <h2 class="heading-medium">@messages(s"$key.openingTimes.title")</h2>
-    </p>
-    <p>@messages(s"$key.openingTimes.monToFri")
-    <p>@messages(s"$key.closingTimes")</p>
-
-    <p>
-        @messages(s"$key.getHelp") <a href="@viewConfig.additionalNeedsUrl">@messages(s"$key.additionalNeedsLink")</a>.
-    </p>
-
-    <p><a href="@viewConfig.callChargesUrl">@messages(s"$key.helpWithCallCharges")</a></p>
 
 }

@@ -20,6 +20,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -31,11 +33,18 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(backLink: Call, representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"singleMixedUse.guidance"}
 
 @title = @{messages(s"$key.title")}
+
+@userKey = @{ representativeType match {
+ case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+ case _ => ""
+}
+
+}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 @backLinkComponent(backLink)
@@ -44,14 +53,19 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 @pageHeading(title)
 
-<p>
- @messages(s"$key.list.title")
-</p>
 
-<ul class="list-bullet">
- <li>@messages(s"$key.list.l1")</li>
- <li>@messages(s"$key.list.l2")</li>
- <li>@messages(s"$key.list.l3")</li>
+  @representativeType match {
+   case Some(PersonalRepresentativeInPeriodOfAdmin) => {
+    <p>@messages(s"$key$userKey.p1")</p>
+   }
+   case _ => { }
+  }
+ <strong class="bold">@messages(s"$key.list.title")</strong>
+
+ <ul class="list-bullet">
+ <li>@messages(s"$key$userKey.list.l1")</li>
+ <li>@messages(s"$key$userKey.list.l2")</li>
+ <li>@messages(s"$key$userKey.list.l3")</li>
 </ul>
 
 @formWrapper(routes.MixedUsePropertyDetailsController.singleMixedUseGuidanceSubmit()) {

@@ -120,7 +120,8 @@
           @details(messages(s"$key.details.1.header"), Html(messages(s"$key.details.1.body", appConfig.trustsTaxFreeAllowance)))
           @details(messages(s"$key.details.2.header"),  Html(messages(s"$key.details.2.body", appConfig.trustsForVulnerable)))
         } else if(isPeriodOfAdmin){
-            @details(messages(s"$key.details.3.header"),  Html(messages(s"$key.details.3.body", appConfig.taxFreeAllowanceUrl)))
+            @details(messages(s"$key.details.3.header"),  Html(messages(s"$key.details.3.body", appConfig.personalAllowanceUrl)))
+            <p>@Html(messages(s"$key$userKey.link", appConfig.taxFreeAllowanceUrl))</p>
         }else {
             <p>@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>
         }

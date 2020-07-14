@@ -30,7 +30,8 @@ object RepresenteeAnswers {
     dateOfDeath: Option[DateOfDeath],
     contactDetails: Option[RepresenteeContactDetails],
     hasConfirmedPerson: Boolean,
-    hasConfirmedContactDetails: Boolean
+    hasConfirmedContactDetails: Boolean,
+    isFirstReturn: Option[Boolean]
   ) extends RepresenteeAnswers
 
   object IncompleteRepresenteeAnswers {
@@ -42,7 +43,8 @@ object RepresenteeAnswers {
         None,
         None,
         hasConfirmedPerson = false,
-        hasConfirmedContactDetails = false
+        hasConfirmedContactDetails = false,
+        None
       )
 
   }
@@ -51,7 +53,8 @@ object RepresenteeAnswers {
     name: IndividualName,
     id: RepresenteeReferenceId,
     dateOfDeath: Option[DateOfDeath],
-    contactDetails: RepresenteeContactDetails
+    contactDetails: RepresenteeContactDetails,
+    isFirstReturn: Boolean
   ) extends RepresenteeAnswers
 
   implicit class RepresenteeAnswersOps(private val r: RepresenteeAnswers) extends AnyVal {

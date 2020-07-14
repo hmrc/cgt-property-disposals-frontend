@@ -471,10 +471,7 @@ class CommonTriageQuestionsControllerSpec
             propertyAddress = None,
             disposalDetailsAnswers = None,
             acquisitionDetailsAnswers = None,
-            reliefDetailsAnswers = draftReturn.reliefDetailsAnswers.map(
-              _.unset(_.privateResidentsRelief)
-                .unset(_.lettingsRelief)
-            ),
+            reliefDetailsAnswers = None,
             yearToDateLiabilityAnswers = None,
             initialGainOrLoss = None,
             supportingEvidenceAnswers = None
@@ -511,6 +508,7 @@ class CommonTriageQuestionsControllerSpec
 
           checkIsTechnicalErrorPage(performAction(formData))
         }
+
       }
 
       "handle valid data" when {
@@ -645,10 +643,7 @@ class CommonTriageQuestionsControllerSpec
                   propertyAddress = None,
                   disposalDetailsAnswers = None,
                   acquisitionDetailsAnswers = None,
-                  reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-                    _.unset(_.privateResidentsRelief)
-                      .unset(_.lettingsRelief)
-                  ),
+                  reliefDetailsAnswers = None,
                   yearToDateLiabilityAnswers = None,
                   initialGainOrLoss = None,
                   supportingEvidenceAnswers = None
@@ -658,9 +653,9 @@ class CommonTriageQuestionsControllerSpec
           }
 
           "the user is on a single disposal journey and they have completed the triage section" in {
-            val answers =
-              sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = Some(IndividualUserType.Self))
+            val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(IndividualUserType.Self)
+            )
 
             val newAnswers =
               IncompleteSingleDisposalTriageAnswers
@@ -686,10 +681,7 @@ class CommonTriageQuestionsControllerSpec
                   propertyAddress = None,
                   disposalDetailsAnswers = None,
                   acquisitionDetailsAnswers = None,
-                  reliefDetailsAnswers = d.reliefDetailsAnswers.map(
-                    _.unset(_.privateResidentsRelief)
-                      .unset(_.lettingsRelief)
-                  ),
+                  reliefDetailsAnswers = None,
                   yearToDateLiabilityAnswers = None,
                   initialGainOrLoss = None,
                   supportingEvidenceAnswers = None
@@ -734,6 +726,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
         }
+
       }
 
       "not do any updates" when {

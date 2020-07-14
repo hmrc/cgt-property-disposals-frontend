@@ -38,18 +38,16 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         representativeType: RepresentativeType
 )(implicit messages: Messages)
 
-@whoForValueMessage = @{
-    val representativeTypeInterpolator = representativeType match {
+@userKey = @{ representativeType match {
     case Capacitor => "capacitor"
     case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin  => "personalRep"
-    }
-    messages(s"representee.cyaValue.whoFor.$representativeTypeInterpolator")
+}
 }
 
 @cyaSection() {
     @cyaRow(
         messages("representee.cyaLabel.whoFor"),
-        Html(whoForValueMessage),
+        Html(messages(s"representee.cyaValue.whoFor.$userKey")),
         Some(cyaChange(messages("representee.cyaChange.whoFor"), triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
         "whoFor"
     )
@@ -65,6 +63,13 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         Some(cyaChange(messages("representee.cyaChange.personRepresented"), routes.RepresenteeController.enterName().url)),
         "personRepresented"
     )
+
+  @cyaRow(
+    messages(s"representeeIsFirstReturn.$userKey.title"),
+      Html(messages(s"generic.${if(answers.isFirstReturn) "yes" else "no"}")),
+      Some(cyaChange(messages("representee.cyaChange.isFirstReturn"), routes.RepresenteeController.isFirstReturn().url)),
+      "isFirstReturn"
+  )
 
     @answers.dateOfDeath.map(date => {
         cyaRow(

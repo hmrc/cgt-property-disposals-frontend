@@ -103,12 +103,14 @@ class ExemptionAndLossesControllerSpec
     userType: UserType
   ): String =
     (individualUserType, userType) match {
-      case (Capacitor, _)                                                      => ".capacitor"
-      case (PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin, _) => ".personalRep"
-      case (_, UserType.Individual)                                            => ""
-      case (_, UserType.Organisation)                                          => ".trust"
-      case (_, UserType.Agent)                                                 => ".agent"
-      case other                                                               => sys.error(s"User type '$other' not handled")
+      case (Capacitor, _)                                          => ".capacitor"
+      case (PersonalRepresentative, _)                             => ".personalRep"
+      case (PersonalRepresentativeInPeriodOfAdmin, UserType.Agent) => ".personalRepInPeriodOfAdmin.agent"
+      case (PersonalRepresentativeInPeriodOfAdmin, _)              => ".personalRepInPeriodOfAdmin"
+      case (_, UserType.Individual)                                => ""
+      case (_, UserType.Organisation)                              => ".trust"
+      case (_, UserType.Agent)                                     => ".agent"
+      case other                                                   => sys.error(s"User type '$other' not handled")
     }
 
   private def sampleSingleDisposalTriageAnswers(
@@ -277,8 +279,8 @@ class ExemptionAndLossesControllerSpec
 
   val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
     individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative => true
-      case _                                         => false
+      case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
+      case _                                                                                 => false
     }
 
   "ExemptionAndLossesController" when {
@@ -2319,6 +2321,10 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"
+    else if (individualUserType === PersonalRepresentativeInPeriodOfAdmin)
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe "How much of the Annual Exempt Amount are you including?"
     else if (isATrust)
       doc
         .select("#annualExemptAmount-question")
