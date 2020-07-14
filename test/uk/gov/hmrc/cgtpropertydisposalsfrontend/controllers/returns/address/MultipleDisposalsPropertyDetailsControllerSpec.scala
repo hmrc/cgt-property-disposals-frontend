@@ -2227,7 +2227,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None,
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                .copy(individualUserType = None)
+                .copy(individualUserType = Some(Self))
             ),
             routes.PropertyDetailsController.disposalPrice(),
             Individual
@@ -2285,6 +2285,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "individual user has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                individualUserType = Some(Self)
+              ),
               examplePropertyDetailsAnswers = Some(
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = None
@@ -2321,7 +2324,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 )
               ),
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                .copy(individualUserType = None)
+                .copy(individualUserType = Some(Self))
             ),
             routes.PropertyDetailsController.disposalPrice(),
             Agent
@@ -2343,7 +2346,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             Individual
           )
         }
-        "estate has started but not completed this section" in {
+
+        "period of admin personal rep has started but not completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
@@ -2454,6 +2458,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             Individual
           )
         }
+
         "personal representative user has completed this section" in {
           test(
             sample[DraftMultipleDisposalsReturn].copy(
@@ -2464,6 +2469,22 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               ),
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                 .copy(individualUserType = Some(PersonalRepresentative))
+            ),
+            routes.PropertyDetailsController.checkYourAnswers(),
+            Individual
+          )
+        }
+
+        "period of admin personal representative user has completed this section" in {
+          test(
+            sample[DraftMultipleDisposalsReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
+                  acquisitionPrice = sample[AmountInPence]
+                )
+              ),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))
             ),
             routes.PropertyDetailsController.checkYourAnswers(),
             Individual
@@ -2522,19 +2543,16 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "show a form error for amount" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+        def test(
+          data: (String, String)*
+        )(draftReturn: DraftMultipleDisposalsReturn, expectedTitle: String, expectedErrorMessage: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
-                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
-                      examplePropertyDetailsAnswers = Some(
-                        sample[CompleteExamplePropertyDetailsAnswers]
-                      )
-                    ),
+                    draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = Right(sample[IndividualName])
                     )
@@ -2546,23 +2564,60 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data: _*),
-            messageFromMessageKey(s"$key.title"),
+            expectedTitle,
             doc =>
               doc
                 .select("#error-summary-display > ul > li > a")
-                .text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey
-              ),
+                .text() shouldBe expectedErrorMessage,
             BAD_REQUEST
           )
         }
 
         "the data is invalid" in {
-          amountOfMoneyErrorScenarios(key).foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data = scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+          forAll { individualUserType: Option[IndividualUserType] =>
+            whenever(!individualUserType.contains(PersonalRepresentativeInPeriodOfAdmin)) {
+              amountOfMoneyErrorScenarios(key).foreach { scenario =>
+                withClue(s"For $scenario: ") {
+                  test(scenario.formData: _*)(
+                    sample[DraftMultipleDisposalsReturn].copy(
+                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
+                      examplePropertyDetailsAnswers = Some(
+                        sample[CompleteExamplePropertyDetailsAnswers]
+                      )
+                    ),
+                    messageFromMessageKey(s"$key.title"),
+                    messageFromMessageKey(scenario.expectedErrorMessageKey)
+                  )
+                }
+              }
             }
+          }
+        }
+
+        "the data is invalid for a period of admin personal rep" in {
+          val dateOfDeath = LocalDate.ofEpochDay(0L)
+
+          amountOfMoneyErrorScenarios(key, errorContext = Some(s"$key.personalRepInPeriodOfAdmin")).foreach {
+            scenario =>
+              withClue(s"For $scenario: ") {
+                val data = scenario.formData
+                test(data: _*)(
+                  sample[DraftMultipleDisposalsReturn].copy(
+                    triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                      .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+                    representeeAnswers =
+                      Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath)))),
+                    examplePropertyDetailsAnswers = Some(
+                      sample[CompleteExamplePropertyDetailsAnswers]
+                    )
+                  ),
+                  messageFromMessageKey(
+                    s"$key.personalRepInPeriodOfAdmin.title",
+                    TimeUtils.govDisplayFormat(dateOfDeath)
+                  ),
+                  messageFromMessageKey(scenario.expectedErrorMessageKey)
+                )
+              }
           }
         }
 

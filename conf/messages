@@ -4010,23 +4010,37 @@ multipleDisposalsAcquisitionPrice.agent.details.p1=Your client can include the c
 multipleDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. The trust cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.capacitor.details.p1=The person can include the cost of improvements that added value to the property. For example, if the person built an extension or replaced a basic kitchen with a luxury one. They cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.personalRep.details.p1=The cost of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if your client built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=The cost of improvements that added value to the property can be included. For example, if the estate built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=The cost of improvements that added value to the property can be included. For example, if the estate built an extension or replaced a basic kitchen with a luxury one. Your client cannot include the cost of mortgage interest, decorating or maintenance.
 
 multipleDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
+
 multipleDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
 multipleDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of the costs, they can only claim their share.
 multipleDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, it can only claim its share.
 multipleDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
 multipleDisposalsAcquisitionPrice.personalRep.details.p3=If the person shared any of the costs, you can only include the person’s share.
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If your client shared any of the costs, they can only claim their share.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=If the estate shared any of the costs, you can only include the estate’s share.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If the estate shared any of the costs, your client can only include the estate’s share.
 
 multipleDisposalsAcquisitionPrice.error.invalid=The acquisition value must be an amount of money
 multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86
 multipleDisposalsAcquisitionPrice.error.tooLarge=The acquisition value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.error.tooSmall=The acquisition value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.invalid=The market value must be an amount of money
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.required=Enter the market value of the property, for example 20,520.86
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.invalid=The market value must be an amount of money
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the market value of the property, for example 20,520.86
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
 
 multipleDisposalsAcquisitionPrice.cyaChange=the acquisition value of the property
 
@@ -4138,11 +4152,11 @@ singleMixedUseDisposalsDisposalPrice.error.tooLarge=The disposal value of the pr
 singleMixedUseDisposalsDisposalPrice.error.tooSmall=The disposal value of the property must be an amount of money between 1 and 50,000,000,000
 singleMixedUseDisposalsDisposalPrice.error.tooManyDecimals=The disposal value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
-singleMixedUseDisposalsAcquisitionPrice.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.personalRep.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.capacitor.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.agent.title=What was the acquistion value of the property?
-singleMixedUseDisposalsAcquisitionPrice.trust.title=What was the acquistion value of the property?
+singleMixedUseDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
+singleMixedUseDisposalsAcquisitionPrice.personalRep.title=What was the acquisition value of the property?
+singleMixedUseDisposalsAcquisitionPrice.capacitor.title=What was the acquisition value of the property?
+singleMixedUseDisposalsAcquisitionPrice.agent.title=What was the acquisition value of the property?
+singleMixedUseDisposalsAcquisitionPrice.trust.title=What was the acquisition value of the property?
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=What was the market value of the property on {0}?
 singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What was the market value of the property on {0}?
 
@@ -4160,8 +4174,8 @@ singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p1=The costs of impr
 singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p1=The person can include the cost of improvements that added value to the property. For example, if the person built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
 singleMixedUseDisposalsAcquisitionPrice.agent.details.p1=Your client can include the cost of improvements that added value to the property. For example, if your client built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
 singleMixedUseDisposalsAcquisitionPrice.trust.details.p1=The trust can include the cost of improvements that added value to the property. For example, if the trust built an extension or replaced a basic kitchen with a luxury one. Mortgage interest, decorating or maintenance costs cannot be claimed.
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=The cost of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=The cost of improvements that added value to the property can be included. For example, if the person built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=The cost of improvements that added value to the property can be included. For example, if the estate built an extension or replaced a basic kitchen with a luxury one. You cannot include the cost of mortgage interest, decorating or maintenance.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=The cost of improvements that added value to the property can be included. For example, if the estate built an extension or replaced a basic kitchen with a luxury one. Your client cannot include the cost of mortgage interest, decorating or maintenance.
 
 singleMixedUseDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
 
@@ -4170,14 +4184,27 @@ singleMixedUseDisposalsAcquisitionPrice.personalRep.details.p3=If the person sha
 singleMixedUseDisposalsAcquisitionPrice.capacitor.details.p3=If the person shared any of the costs, they can only claim their share.
 singleMixedUseDisposalsAcquisitionPrice.agent.details.p3=If your client shared any of the costs, they can only claim their share.
 singleMixedUseDisposalsAcquisitionPrice.trust.details.p3=If the trust shared any of the costs, they can only claim its share.
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=If the person shared any of the costs, you can only include the person’s share.
-singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If the person shared any of the costs, you can only include the person’s share.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=If the estate shared any of the costs, you can only include the estate’s share.
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=If the estate shared any of the costs, your client can only include the estate’s share.
 
 singleMixedUseDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property
 singleMixedUseDisposalsAcquisitionPrice.error.invalid=The acquisition value of the property must be an amount of money, like 160,000 or 23,040.50
 singleMixedUseDisposalsAcquisitionPrice.error.tooLarge=The acquisition value of the property must be an amount of money between 1 and 50,000,000,000
 singleMixedUseDisposalsAcquisitionPrice.error.tooSmall=The acquisition value of the property must be an amount of money between 1 and 50,000,000,000
 singleMixedUseDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.required=Enter the market value of the property
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.invalid=The market value of the property must be an amount of money, like 160,000 or 23,040.50
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooLarge=The market value of the property must be an amount of money between 1 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooSmall=The market value of the property must be an amount of money between 1 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=The market value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the market value of the property
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.invalid=The market value of the property must be an amount of money, like 160,000 or 23,040.50
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The market value of the property must be an amount of money between 1 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The market value of the property must be an amount of money between 1 and 50,000,000,000
+singleMixedUseDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=The market value of the property must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
+
 
 #===================================================
 # SINGLE MIXED USE PROPERTY DETAILS PAGES - END

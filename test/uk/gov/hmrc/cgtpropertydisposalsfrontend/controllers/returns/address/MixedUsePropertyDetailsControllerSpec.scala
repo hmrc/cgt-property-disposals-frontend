@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
+import java.time.LocalDate
+
 import cats.Eq
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
@@ -1068,8 +1070,11 @@ class MixedUsePropertyDetailsControllerSpec
         def test(
           draftReturn: DraftSingleMixedUseDisposalReturn,
           expectedBackLink: Call,
-          userType: UserType
+          userType: UserType,
+          titleArgs: Seq[String] = Seq.empty
         ): Unit = {
+          val individualUserType = draftReturn.triageAnswers.fold(_.individualUserType, _.individualUserType)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1077,9 +1082,7 @@ class MixedUsePropertyDetailsControllerSpec
                 userType = Some(userType),
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = draftReturn.copy(triageAnswers =
-                      sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = None)
-                    ),
+                    draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name =
                         if (userType === Organisation) Left(sample[TrustName])
@@ -1094,10 +1097,10 @@ class MixedUsePropertyDetailsControllerSpec
             )
           }
 
-          val userKey = deriveUserKey(userType === Agent, userType === Organisation)
+          val userKey = userMessageKey(individualUserType, userType)
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"$key.title"),
+            messageFromMessageKey(s"$key$userKey.title", titleArgs: _*),
             { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
@@ -1117,7 +1120,7 @@ class MixedUsePropertyDetailsControllerSpec
             sample[DraftSingleMixedUseDisposalReturn].copy(
               mixedUsePropertyDetailsAnswers = None,
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None)
+                .copy(individualUserType = Some(Self))
             ),
             routes.MixedUsePropertyDetailsController.enterDisposalValue(),
             Individual
@@ -1141,7 +1144,7 @@ class MixedUsePropertyDetailsControllerSpec
             sample[DraftSingleMixedUseDisposalReturn].copy(
               mixedUsePropertyDetailsAnswers = None,
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None)
+                .copy(individualUserType = Some(Self))
             ),
             routes.MixedUsePropertyDetailsController.enterDisposalValue(),
             Agent
@@ -1151,6 +1154,8 @@ class MixedUsePropertyDetailsControllerSpec
         "individual user has started but not completed this section" in {
           test(
             sample[DraftSingleMixedUseDisposalReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(individualUserType = Some(Capacitor)),
               mixedUsePropertyDetailsAnswers = Some(
                 sample[IncompleteMixedUsePropertyDetailsAnswers].copy(
                   acquisitionPrice = None
@@ -1179,6 +1184,8 @@ class MixedUsePropertyDetailsControllerSpec
         }
 
         "agent user has started but not completed this section" in {
+          val dateOfDeath = LocalDate.ofEpochDay(0L)
+
           test(
             sample[DraftSingleMixedUseDisposalReturn].copy(
               mixedUsePropertyDetailsAnswers = Some(
@@ -1187,10 +1194,13 @@ class MixedUsePropertyDetailsControllerSpec
                 )
               ),
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None)
+                .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+              representeeAnswers =
+                Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(dateOfDeath))))
             ),
             routes.MixedUsePropertyDetailsController.enterDisposalValue(),
-            Agent
+            Agent,
+            Seq(TimeUtils.govDisplayFormat(dateOfDeath))
           )
         }
 
@@ -1203,7 +1213,7 @@ class MixedUsePropertyDetailsControllerSpec
                 )
               ),
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None)
+                .copy(individualUserType = Some(PersonalRepresentative))
             ),
             routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             Individual
@@ -1235,7 +1245,7 @@ class MixedUsePropertyDetailsControllerSpec
                 )
               ),
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(individualUserType = None)
+                .copy(individualUserType = Some(Self))
             ),
             routes.MixedUsePropertyDetailsController.checkYourAnswers(),
             Agent
@@ -1295,12 +1305,13 @@ class MixedUsePropertyDetailsControllerSpec
 
       "show a form error for amount" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
-          val draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
-            mixedUsePropertyDetailsAnswers = Some(
-              sample[CompleteMixedUsePropertyDetailsAnswers]
-            )
-          )
+        def test(
+          data: (String, String)*
+        )(
+          draftReturn: DraftSingleMixedUseDisposalReturn,
+          agentReferenceNumber: Option[AgentReferenceNumber],
+          expectedErrorMessageKey: String
+        ) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1310,7 +1321,8 @@ class MixedUsePropertyDetailsControllerSpec
                     draftReturn = draftReturn,
                     subscribedDetails = sample[SubscribedDetails].copy(
                       name = Right(sample[IndividualName])
-                    )
+                    ),
+                    agentReferenceNumber = agentReferenceNumber
                   )
                 )
               )
@@ -1334,11 +1346,46 @@ class MixedUsePropertyDetailsControllerSpec
         }
 
         "the data is invalid" in {
-          amountOfMoneyErrorScenarios(key).foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data = scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+          forAll { individualUserType: Option[IndividualUserType] =>
+            whenever(!individualUserType.contains(PersonalRepresentativeInPeriodOfAdmin)) {
+              amountOfMoneyErrorScenarios(key).foreach { scenario =>
+                withClue(s"For $individualUserType and $scenario: ") {
+                  val data = scenario.formData
+                  test(data: _*)(
+                    sample[DraftSingleMixedUseDisposalReturn].copy(
+                      triageAnswers =
+                        sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = individualUserType),
+                      mixedUsePropertyDetailsAnswers = Some(
+                        sample[CompleteMixedUsePropertyDetailsAnswers]
+                      )
+                    ),
+                    None,
+                    scenario.expectedErrorMessageKey
+                  )
+                }
+              }
             }
+          }
+        }
+
+        "the data is invalid for period of admin" in {
+          amountOfMoneyErrorScenarios(key, errorContext = Some(s"$key.personalRepInPeriodOfAdmin")).foreach {
+            scenario =>
+              withClue(s"For $scenario: ") {
+                val data = scenario.formData
+                test(data: _*)(
+                  sample[DraftSingleMixedUseDisposalReturn].copy(
+                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                      .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+                    mixedUsePropertyDetailsAnswers = Some(
+                      sample[CompleteMixedUsePropertyDetailsAnswers]
+                    )
+                  ),
+                  None,
+                  scenario.expectedErrorMessageKey
+                )
+              }
+
           }
         }
 
