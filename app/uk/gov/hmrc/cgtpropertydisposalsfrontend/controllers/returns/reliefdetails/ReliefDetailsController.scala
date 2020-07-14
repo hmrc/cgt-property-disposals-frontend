@@ -21,7 +21,7 @@ import cats.instances.boolean._
 import cats.instances.future._
 import cats.syntax.apply._
 import cats.syntax.either._
-import cats.syntax.eq._
+import cats.syntax.order._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
@@ -491,7 +491,7 @@ class ReliefDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndReliefDetailsAnswers(request) { (_, fillingOutReturn, draftReturn, answers) =>
         answers match {
-          case c: CompleteReliefDetailsAnswers                         =>
+          case c: CompleteReliefDetailsAnswers                                                =>
             Ok(
               checkYouAnswersPage(
                 c,
@@ -500,7 +500,7 @@ class ReliefDetailsController @Inject() (
               )
             )
 
-          case IncompleteReliefDetailsAnswers(None, _, _)              =>
+          case IncompleteReliefDetailsAnswers(None, _, _)                                     =>
             Redirect(routes.ReliefDetailsController.privateResidentsRelief())
 
           case IncompleteReliefDetailsAnswers(
@@ -510,13 +510,13 @@ class ReliefDetailsController @Inject() (
               ) =>
             Redirect(routes.ReliefDetailsController.otherReliefs())
 
-          case IncompleteReliefDetailsAnswers(_, None, None)           =>
+          case IncompleteReliefDetailsAnswers(Some(prr), None, _) if prr > AmountInPence.zero =>
             Redirect(routes.ReliefDetailsController.lettingsRelief())
 
-          case IncompleteReliefDetailsAnswers(_, _, None)              =>
+          case IncompleteReliefDetailsAnswers(_, _, None)                                     =>
             Redirect(routes.ReliefDetailsController.otherReliefs())
 
-          case IncompleteReliefDetailsAnswers(Some(prr), None, or)     =>
+          case IncompleteReliefDetailsAnswers(Some(prr), None, or)                            =>
             completeRelief(
               fillingOutReturn,
               draftReturn,
@@ -525,7 +525,7 @@ class ReliefDetailsController @Inject() (
               or
             )
 
-          case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or) =>
+          case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or)                        =>
             completeRelief(fillingOutReturn, draftReturn, prr, lr, or)
         }
       }
