@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.{Clock, LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{Clock, LocalDate, LocalDateTime}
 
 import cats.Order
 import cats.syntax.either._
@@ -26,6 +26,7 @@ import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.PersonalRepresentativeDetails
 
 import scala.util.Try
 
@@ -50,7 +51,8 @@ object TimeUtils {
     dayKey: String,
     monthKey: String,
     yearKey: String,
-    dateKey: String
+    dateKey: String,
+    extraValidation: List[LocalDate => Either[FormError, Unit]] = List.empty
   ): Formatter[LocalDate] =
     new Formatter[LocalDate] {
       def dateFieldStringValues(
@@ -106,7 +108,12 @@ object TimeUtils {
                        Left(FormError(dateKey, "error.tooFarInPast"))
                      else if (date.isBefore(minimumDate))
                        Left(FormError(dateKey, "error.before1900"))
-                     else Right(date)
+                     else
+                       extraValidation
+                         .map(_(date))
+                         .find(_.isLeft)
+                         .getOrElse(Right(()))
+                         .map(_ => date)
                    )
         } yield date
 
@@ -142,5 +149,27 @@ object TimeUtils {
     if (date < currentCalendarTaxYearStart) currentCalendarTaxYearStart.minusYears(1L)
     else currentCalendarTaxYearStart
   }
+
+  def personalRepresentativeDateValidation(
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
+    formErrorKey: String
+  )(
+    date: LocalDate
+  ): Either[FormError, Unit] =
+    personalRepresentativeDetails.fold[Either[FormError, Unit]](
+      Right(())
+    ) {
+      case PersonalRepresentativeDetails(personalRepType, dateOfDeath) =>
+        personalRepType.fold(
+          _ =>
+            if (date > dateOfDeath.value) Right(())
+            else Left(FormError(formErrorKey, "error.periodOfAdminDeathNotAfterDate")),
+          _ =>
+            if (date > dateOfDeath.value)
+              Left(FormError(formErrorKey, "error.nonPeriodOfAdminDeathAfterDate"))
+            else Right(())
+        )
+
+    }
 
 }

@@ -230,6 +230,25 @@ object DraftReturn {
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType()
       )
+
+    def representeeAnswers(): Option[RepresenteeAnswers] =
+      fold(
+        _.representeeAnswers,
+        _.representeeAnswers,
+        _.representeeAnswers,
+        _.representeeAnswers,
+        _.representeeAnswers
+      )
+
+    def triageAnswers(): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =
+      fold(
+        multiple => Left(multiple.triageAnswers),
+        single => Right(single.triageAnswers),
+        singleIndirect => Right(singleIndirect.triageAnswers),
+        multipleIndirect => Left(multipleIndirect.triageAnswers),
+        singleMixedUse => Right(singleMixedUse.triageAnswers)
+      )
+
   }
 
   implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals

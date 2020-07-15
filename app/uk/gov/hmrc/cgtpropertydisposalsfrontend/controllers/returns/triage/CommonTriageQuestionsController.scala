@@ -200,13 +200,7 @@ class CommonTriageQuestionsController @Inject() (
           _.representativeType(),
           _.representativeType()
         ),
-        _.draftReturn.fold(
-          _.triageAnswers.representativeType(),
-          _.triageAnswers.representativeType(),
-          _.triageAnswers.representativeType(),
-          _.triageAnswers.representativeType(),
-          _.triageAnswers.representativeType()
-        )
+        _.draftReturn.representativeType()
       )
 
   def howManyPropertiesSubmit(): Action[AnyContent] =
@@ -493,13 +487,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.fold(
-                  _.representeeAnswers,
-                  _.representeeAnswers,
-                  _.representeeAnswers,
-                  _.representeeAnswers,
-                  _.representeeAnswers
-                )
+                fillingOutReturn.draftReturn.representeeAnswers()
               )
             )
         )
@@ -517,13 +505,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.fold(
-                  _.representeeAnswers,
-                  _.representeeAnswers,
-                  _.representeeAnswers,
-                  _.representeeAnswers,
-                  _.representeeAnswers
-                )
+                fillingOutReturn.draftReturn.representeeAnswers()
               )
             )
         )
@@ -665,14 +647,7 @@ class CommonTriageQuestionsController @Inject() (
     state
       .bimap(
         _.newReturnTriageAnswers,
-        r =>
-          r.draftReturn.fold(
-            m => Left(m.triageAnswers),
-            s => Right(s.triageAnswers),
-            s => Right(s.triageAnswers),
-            m => Left(m.triageAnswers),
-            s => Right(s.triageAnswers)
-          )
+        _.draftReturn.triageAnswers()
       )
       .merge
 
@@ -724,7 +699,9 @@ object CommonTriageQuestionsController {
     )(identity)(Some(_))
   )
 
-  val sharesDisposalDateForm: Form[ShareDisposalDate] = {
+  def sharesDisposalDateForm(
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
+  ): Form[ShareDisposalDate] = {
     val key = "sharesDisposalDate"
     Form(
       mapping(
@@ -735,7 +712,8 @@ object CommonTriageQuestionsController {
             s"$key-day",
             s"$key-month",
             s"$key-year",
-            key
+            key,
+            List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
           )
         )
       )(ShareDisposalDate(_))(d => Some(d.value))

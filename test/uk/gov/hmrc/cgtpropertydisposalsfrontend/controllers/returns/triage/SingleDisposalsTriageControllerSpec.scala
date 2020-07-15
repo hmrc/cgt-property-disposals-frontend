@@ -94,13 +94,13 @@ class SingleDisposalsTriageControllerSpec
   def sessionDataWithStartingNewDraftReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
-    representeeAnswers: RepresenteeAnswers = sample[IncompleteRepresenteeAnswers],
+    representeeAnswers: Option[RepresenteeAnswers] = None,
     previousSentReturns: Option[List[ReturnSummary]] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       newReturnTriageAnswers = Right(singleDisposalTriageAnswers),
-      representeeAnswers = Some(representeeAnswers),
+      representeeAnswers = representeeAnswers,
       previousSentReturns = previousSentReturns
     )
 
@@ -137,12 +137,12 @@ class SingleDisposalsTriageControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
-    representeeAnswers: RepresenteeAnswers = sample[IncompleteRepresenteeAnswers],
+    representeeAnswers: Option[RepresenteeAnswers] = Some(sample[IncompleteRepresenteeAnswers]),
     previousSentReturns: Option[List[ReturnSummary]] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers,
-      representeeAnswers = Some(representeeAnswers)
+      representeeAnswers = representeeAnswers
     )
 
     val (session, journey) = sessionDataWithFillingOurReturn(
@@ -298,7 +298,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers.copy(
@@ -313,7 +313,7 @@ class SingleDisposalsTriageControllerSpec
           )
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers.copy(
@@ -736,7 +736,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers.copy(
@@ -752,7 +752,7 @@ class SingleDisposalsTriageControllerSpec
           )
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers.copy(
@@ -1251,7 +1251,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
         "didYouDisposeOfResidentialProperty.agent.title",
@@ -1262,7 +1262,7 @@ class SingleDisposalsTriageControllerSpec
           )
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers.copy(
@@ -1569,6 +1569,8 @@ class SingleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like noDateOfDeathForPersonalRepBehaviour(performAction)
+
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](
         performAction
       )(
@@ -1630,7 +1632,8 @@ class SingleDisposalsTriageControllerSpec
           disposalDate = Some(disposalDate),
           individualUserType = Some(PersonalRepresentative)
         ),
-        Some("the user was a uk resident")
+        Some("the user was a uk resident"),
+        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
       )(
         "disposalDate.personalRep.title",
         checkContent(
@@ -1707,7 +1710,8 @@ class SingleDisposalsTriageControllerSpec
           disposalDate = Some(disposalDate),
           individualUserType = Some(PersonalRepresentative)
         ),
-        Some("the user was not a uk resident")
+        Some("the user was not a uk resident"),
+        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
       )(
         "disposalDate.personalRep.title",
         checkContent(
@@ -1765,7 +1769,8 @@ class SingleDisposalsTriageControllerSpec
           tooEarlyDisposalDate = Some(disposalDate.value),
           individualUserType = Some(PersonalRepresentative)
         ),
-        Some("the user had not disposed of their property in a valid tax year")
+        Some("the user had not disposed of their property in a valid tax year"),
+        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
       )(
         "disposalDate.personalRep.title",
         checkContent(
@@ -1824,7 +1829,8 @@ class SingleDisposalsTriageControllerSpec
           assetType = AssetType.Residential,
           disposalDate = disposalDate,
           individualUserType = Some(PersonalRepresentative)
-        )
+        ),
+        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
       )(
         "disposalDate.personalRep.title",
         { doc =>
@@ -1836,7 +1842,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswersUkResident
@@ -1851,13 +1857,14 @@ class SingleDisposalsTriageControllerSpec
           )
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswersUkResident.copy(
           disposalDate = Some(disposalDate),
           individualUserType = Some(PersonalRepresentative)
-        )
+        ),
+        Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(sample[DateOfDeath])))
       )(
         "disposalDate.personalRep.title",
         doc =>
@@ -2062,13 +2069,17 @@ class SingleDisposalsTriageControllerSpec
 
       "show a form error with personal representative type" when {
 
-        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+        def test(
+          personalRepType: Either[PersonalRepresentativeInPeriodOfAdmin.type, PersonalRepresentative.type],
+          dateOfDeath: DateOfDeath = DateOfDeath(LocalDate.of(1800, 1, 1))
+        )(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "disposalDate.personalRep.title")(
             formData,
             expectedErrorKey,
             requiredPreviousAnswers.copy(
-              individualUserType = Some(PersonalRepresentative)
-            )
+              individualUserType = Some(personalRepType.merge)
+            ),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath)))
           )
 
         "the date is invalid" in {
@@ -2079,7 +2090,7 @@ class SingleDisposalsTriageControllerSpec
                 "disposalDate-month" -> scenario.monthInput,
                 "disposalDate-year"  -> scenario.yearInput
               ).collect { case (id, Some(input)) => id -> input }
-              test(formData, scenario.expectedErrorMessageKey)
+              test(Right(PersonalRepresentative))(formData, scenario.expectedErrorMessageKey)
             }
           }
         }
@@ -2092,7 +2103,37 @@ class SingleDisposalsTriageControllerSpec
             "disposalDate.error.tooFarInFuture"
           )
 
-          test(formData(tomorrow), "disposalDate.error.tooFarInFuture")
+          test(Left(PersonalRepresentativeInPeriodOfAdmin))(formData(tomorrow), "disposalDate.error.tooFarInFuture")
+        }
+
+        "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
+          test(
+            Right(PersonalRepresentative),
+            dateOfDeath = DateOfDeath(today.minusDays(1L))
+          )(
+            formData(today),
+            "disposalDate.error.nonPeriodOfAdminDeathAfterDate"
+          )
+        }
+
+        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+          test(
+            Left(PersonalRepresentativeInPeriodOfAdmin),
+            dateOfDeath = DateOfDeath(today.minusDays(1L))
+          )(
+            formData(today.minusDays(1L)),
+            "disposalDate.error.periodOfAdminDeathNotAfterDate"
+          )
+        }
+
+        "the disposal date is strictly before the date of death and the user is a period of admin personal rep" in {
+          test(
+            Left(PersonalRepresentativeInPeriodOfAdmin),
+            dateOfDeath = DateOfDeath(today.minusDays(1L))
+          )(
+            formData(today.minusDays(2L)),
+            "disposalDate.error.periodOfAdminDeathNotAfterDate"
+          )
         }
 
       }
@@ -2127,7 +2168,8 @@ class SingleDisposalsTriageControllerSpec
                 _,
                 routes.CommonTriageQuestionsController.disposalDateTooEarly()
               ),
-              () => mockGetTaxYear(today)(Right(None))
+              () => mockGetTaxYear(today)(Right(None)),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(LocalDate.of(1800, 1, 1)))))
             )
 
           }
@@ -2135,7 +2177,10 @@ class SingleDisposalsTriageControllerSpec
           "a tax year can be found and the journey was complete" in {
             val completeJourney =
               sample[CompleteSingleDisposalTriageAnswers]
-                .copy(disposalDate = DisposalDate(today, taxYear))
+                .copy(
+                  individualUserType = Some(Self),
+                  disposalDate = DisposalDate(today, taxYear)
+                )
             val date            = today.minusDays(1L)
 
             testSuccessfulUpdateStartingNewDraft(
@@ -2193,6 +2238,7 @@ class SingleDisposalsTriageControllerSpec
           "the section is complete" in {
             forAll { c: CompleteSingleDisposalTriageAnswers =>
               val completeJourney = c.copy(
+                individualUserType = Some(Self),
                 disposalDate = DisposalDate(today, taxYear),
                 disposalMethod = DisposalMethod.Sold
               )
@@ -2223,6 +2269,69 @@ class SingleDisposalsTriageControllerSpec
                 () => mockGetTaxYear(date)(Right(Some(taxYear)))
               )
             }
+          }
+
+          "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
+            val answers = requiredPreviousAnswers.copy(individualUserType = Some(PersonalRepresentative))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              answers,
+              formData(today),
+              updateDraftReturn(
+                _,
+                answers.copy(disposalDate = Some(DisposalDate(today, taxYear)))
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              ),
+              () => mockGetTaxYear(today)(Right(Some(taxYear))),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+            )
+
+          }
+
+          "the disposal date is strictly before the date of death when the user is a period of admin personal rep" in {
+            val answers         = requiredPreviousAnswers.copy(individualUserType = Some(PersonalRepresentative))
+            val newDisposalDate = DisposalDate(today.minusDays(1L), taxYear)
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              answers,
+              formData(newDisposalDate.value),
+              updateDraftReturn(
+                _,
+                answers.copy(disposalDate = Some(newDisposalDate))
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              ),
+              () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+            )
+          }
+
+          "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
+            val answers         = requiredPreviousAnswers.copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))
+            val newDisposalDate = DisposalDate(today, taxYear)
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              answers,
+              formData(newDisposalDate.value),
+              updateDraftReturn(
+                _,
+                answers.copy(disposalDate = Some(newDisposalDate), disposalMethod = Some(DisposalMethod.Sold))
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              ),
+              () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+            )
           }
 
         }
@@ -2393,7 +2502,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers
@@ -2407,7 +2516,7 @@ class SingleDisposalsTriageControllerSpec
           )
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers.copy(
@@ -2955,7 +3064,7 @@ class SingleDisposalsTriageControllerSpec
           )
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
         "triage.enterCountry.agent.title",
@@ -2966,7 +3075,7 @@ class SingleDisposalsTriageControllerSpec
           )
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers.copy(
@@ -3414,7 +3523,7 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
         "assetTypeForNonUkResidents.agent.title",
@@ -3425,7 +3534,7 @@ class SingleDisposalsTriageControllerSpec
           )
       )
 
-      behave like displayCustomContentForAgentWithSelfAndPersonalRepType(
+      behave like displayCustomContentForAgentWithSelfAndTrustType(
         performAction
       )(
         requiredPreviousAnswers.copy(
@@ -4038,7 +4147,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
+          individualUserType = Some(Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod = Some(DisposalMethod.Other),
           wasAUKResident = Some(false),
@@ -4047,6 +4156,8 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(): Future[Result] =
         controller.disposalDateOfShares()(FakeRequest())
+
+      behave like noDateOfDeathForPersonalRepBehaviour(performAction)
 
       "Page is displayed correctly" in {
         inSequence {
@@ -4129,7 +4240,7 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
+          individualUserType = Some(Self),
           hasConfirmedSingleDisposal = true,
           disposalMethod = Some(DisposalMethod.Other),
           wasAUKResident = Some(false),
@@ -4154,6 +4265,8 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
+      behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
+
       "show an error page" when {
 
         "there is a problem getting the tax year" in {
@@ -4172,11 +4285,15 @@ class SingleDisposalsTriageControllerSpec
 
       "show a form error" when {
 
-        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+        def test(
+          individualUserType: Option[IndividualUserType] = Some(Self),
+          representeeAnswers: Option[RepresenteeAnswers] = None
+        )(formData: Seq[(String, String)], expectedErrorKey: String) =
           testFormError(performAction, "sharesDisposalDate.title")(
             formData,
             expectedErrorKey,
-            requiredPreviousAnswers
+            requiredPreviousAnswers.copy(individualUserType = individualUserType),
+            representeeAnswers
           )
 
         "the date is invalid" in {
@@ -4187,7 +4304,7 @@ class SingleDisposalsTriageControllerSpec
                 "sharesDisposalDate-month" -> scenario.monthInput,
                 "sharesDisposalDate-year"  -> scenario.yearInput
               ).collect { case (id, Some(input)) => id -> input }
-              test(formData, scenario.expectedErrorMessageKey)
+              test()(formData, scenario.expectedErrorMessageKey)
             }
           }
         }
@@ -4200,7 +4317,37 @@ class SingleDisposalsTriageControllerSpec
             "sharesDisposalDate.error.tooFarInFuture"
           )
 
-          test(formData(tomorrow), "sharesDisposalDate.error.tooFarInFuture")
+          test()(formData(tomorrow), "sharesDisposalDate.error.tooFarInFuture")
+        }
+
+        "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
+          test(
+            Some(PersonalRepresentative),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+          )(
+            formData(today),
+            "sharesDisposalDate.error.nonPeriodOfAdminDeathAfterDate"
+          )
+        }
+
+        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+          test(
+            Some(PersonalRepresentativeInPeriodOfAdmin),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+          )(
+            formData(today),
+            "sharesDisposalDate.error.periodOfAdminDeathNotAfterDate"
+          )
+        }
+
+        "the disposal date is strictly before the date of death and the user is a period of admin personal rep" in {
+          test(
+            Some(PersonalRepresentativeInPeriodOfAdmin),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+          )(
+            formData(today.minusDays(1L)),
+            "sharesDisposalDate.error.periodOfAdminDeathNotAfterDate"
+          )
         }
 
       }
@@ -4251,6 +4398,7 @@ class SingleDisposalsTriageControllerSpec
 
           "a tax year can be found and the journey was complete" in {
             val completeJourney = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
               disposalDate = DisposalDate(today, taxYear),
               completionDate = CompletionDate(today),
               assetType = IndirectDisposal,
@@ -4315,6 +4463,7 @@ class SingleDisposalsTriageControllerSpec
           "the section is complete" in {
             forAll { c: CompleteSingleDisposalTriageAnswers =>
               val completeJourney = c.copy(
+                individualUserType = Some(Self),
                 disposalDate = DisposalDate(today, taxYear),
                 completionDate = CompletionDate(today),
                 assetType = IndirectDisposal,
@@ -4347,6 +4496,79 @@ class SingleDisposalsTriageControllerSpec
                 () => mockGetTaxYear(date)(Right(Some(taxYear)))
               )
             }
+          }
+
+          "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
+            val answers = requiredPreviousAnswers.copy(individualUserType = Some(PersonalRepresentative))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              answers,
+              formData(today),
+              updateDraftReturn(
+                _,
+                answers.copy(
+                  disposalDate = Some(DisposalDate(today, taxYear)),
+                  completionDate = Some(CompletionDate(today))
+                )
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              ),
+              () => mockGetTaxYear(today)(Right(Some(taxYear))),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+            )
+
+          }
+
+          "the disposal date is strictly before the date of death when the user is a non-period of admin personal rep" in {
+            val answers         = requiredPreviousAnswers.copy(individualUserType = Some(PersonalRepresentative))
+            val newDisposalDate = DisposalDate(today.minusDays(1L), taxYear)
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              answers,
+              formData(newDisposalDate.value),
+              updateDraftReturn(
+                _,
+                answers.copy(
+                  disposalDate = Some(newDisposalDate),
+                  completionDate = Some(CompletionDate(newDisposalDate.value))
+                )
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              ),
+              () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+            )
+          }
+
+          "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
+            val answers         = requiredPreviousAnswers.copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))
+            val newDisposalDate = DisposalDate(today, taxYear)
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              answers,
+              formData(newDisposalDate.value),
+              updateDraftReturn(
+                _,
+                answers.copy(
+                  disposalDate = Some(newDisposalDate),
+                  completionDate = Some(CompletionDate(newDisposalDate.value)),
+                  disposalMethod = Some(DisposalMethod.Sold)
+                )
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              ),
+              () => mockGetTaxYear(newDisposalDate.value)(Right(Some(taxYear))),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+            )
           }
 
         }
@@ -4573,7 +4795,7 @@ class SingleDisposalsTriageControllerSpec
             sessionDataWithStartingNewDraftReturn(
               _,
               _,
-              representeeAnswers = sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None),
+              representeeAnswers = Some(sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None)),
               _
             )._1
           )
@@ -4584,7 +4806,7 @@ class SingleDisposalsTriageControllerSpec
             sessionDataWithFillingOutReturn(
               _,
               _,
-              representeeAnswers = sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None),
+              representeeAnswers = Some(sample[IncompleteRepresenteeAnswers].copy(dateOfDeath = None)),
               _
             )._1
           )
@@ -4597,7 +4819,7 @@ class SingleDisposalsTriageControllerSpec
         "all the questions have now been answered but the session data cannot be updated" in {
           val (session, journey) = sessionDataWithStartingNewDraftReturn(
             allQuestionsAnswered,
-            representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
           )
           val updatedJourney     = journey.copy(newReturnTriageAnswers = Right(completeTriageQuestions))
           val updatedSession     =
@@ -4635,7 +4857,7 @@ class SingleDisposalsTriageControllerSpec
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
           val (session, journey) = sessionDataWithStartingNewDraftReturn(
             allQuestionsAnswered,
-            representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
           )
           val updatedJourney     = journey.copy(newReturnTriageAnswers = Right(completeTriageQuestions))
           val updatedSession     =
@@ -4658,7 +4880,7 @@ class SingleDisposalsTriageControllerSpec
         "all the questions have now been answered and the session is updated when a draft return has been created" in {
           val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(
             allQuestionsAnswered,
-            representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
           )
           val updatedJourney                  =
             journey.copy(draftReturn = draftReturn.copy(triageAnswers = completeTriageQuestions))
@@ -4685,7 +4907,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 completeTriageQuestions,
-                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
               )._1
             )
           }
@@ -4704,7 +4926,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithFillingOutReturn(
                 completeTriageQuestions,
-                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
               )._1
             )
           }
@@ -4729,7 +4951,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithFillingOutReturn(
                 completeTriageQuestionsWithIndirectDisposal,
-                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
               )._1
             )
           }
@@ -4748,7 +4970,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithFillingOutReturn(
                 completeTriageQuestions,
-                representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)
+                representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
               )._1.copy(userType = Some(UserType.Agent))
             )
           }
@@ -4770,7 +4992,7 @@ class SingleDisposalsTriageControllerSpec
               mockGetSession(
                 sessionDataWithFillingOutReturn(
                   triageAnswers,
-                  representeeAnswers = sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None),
+                  representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None)),
                   previousSentReturns = Some(
                     List(sample[ReturnSummary].copy(completionDate = triageAnswers.completionDate.value))
                   )
@@ -5070,11 +5292,12 @@ class SingleDisposalsTriageControllerSpec
   )(
     formData: Seq[(String, String)],
     expectedErrorMessageKey: String,
-    currentAnswers: SingleDisposalTriageAnswers
+    currentAnswers: SingleDisposalTriageAnswers,
+    representeeAnswers: Option[RepresenteeAnswers] = None
   ): Unit = {
     inSequence {
       mockAuthWithNoRetrievals()
-      mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers)._1)
+      mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers, representeeAnswers = representeeAnswers)._1)
     }
 
     val result  = performAction(formData)
@@ -5090,7 +5313,8 @@ class SingleDisposalsTriageControllerSpec
   )(
     requiredPreviousAnswers: IncompleteSingleDisposalTriageAnswers,
     answersWithCurrentAnswer: IncompleteSingleDisposalTriageAnswers,
-    description: Option[String] = None
+    description: Option[String] = None,
+    representeeAnswers: Option[RepresenteeAnswers] = None
   )(
     pageTitleKey: String,
     checkContent: Document => Unit,
@@ -5100,8 +5324,8 @@ class SingleDisposalsTriageControllerSpec
 
     s"display the page when ${scenarioDescription}no option has been selected before for ${userType(answersWithCurrentAnswer)}" in {
       List(
-        sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers)._1,
-        sessionDataWithFillingOutReturn(requiredPreviousAnswers)._1
+        sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers, representeeAnswers = representeeAnswers)._1,
+        sessionDataWithFillingOutReturn(requiredPreviousAnswers, representeeAnswers = representeeAnswers)._1
       ).foreach { currentSession =>
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
@@ -5120,8 +5344,8 @@ class SingleDisposalsTriageControllerSpec
 
     s"display the page when ${scenarioDescription}an option has been selected before for ${userType(answersWithCurrentAnswer)}" in {
       List(
-        sessionDataWithStartingNewDraftReturn(answersWithCurrentAnswer)._1,
-        sessionDataWithFillingOutReturn(answersWithCurrentAnswer)._1
+        sessionDataWithStartingNewDraftReturn(answersWithCurrentAnswer, representeeAnswers = representeeAnswers)._1,
+        sessionDataWithFillingOutReturn(answersWithCurrentAnswer, representeeAnswers = representeeAnswers)._1
       ).foreach { currentSession =>
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
@@ -5153,14 +5377,14 @@ class SingleDisposalsTriageControllerSpec
 
   def displayIndividualTriagePageBehaviorCompleteJourney(
     performAction: () => Future[Result]
-  )(answers: CompleteSingleDisposalTriageAnswers)(
+  )(answers: CompleteSingleDisposalTriageAnswers, representeeAnswers: Option[RepresenteeAnswers] = None)(
     pageTitleKey: String,
     checkContent: Document => Unit
   ): Unit =
     s"display the page when the journey has already been completed for ${userType(answers)}" in {
       List(
-        sessionDataWithStartingNewDraftReturn(answers)._1,
-        sessionDataWithFillingOutReturn(answers)._1
+        sessionDataWithStartingNewDraftReturn(answers, representeeAnswers = representeeAnswers)._1,
+        sessionDataWithFillingOutReturn(answers, representeeAnswers = representeeAnswers)._1
       ).foreach { currentSession =>
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
@@ -5177,9 +5401,9 @@ class SingleDisposalsTriageControllerSpec
       }
     }
 
-  def displayCustomContentForAgentWithSelfAndPersonalRepType(
+  def displayCustomContentForAgentWithSelfAndTrustType(
     performAction: () => Future[Result]
-  )(answers: IncompleteSingleDisposalTriageAnswers)(
+  )(answers: IncompleteSingleDisposalTriageAnswers, representeeAnswers: Option[RepresenteeAnswers] = None)(
     pageTitleKey: String,
     checkContent: Document => Unit
   ): Unit =
@@ -5199,7 +5423,8 @@ class SingleDisposalsTriageControllerSpec
                     name = Right(sample[IndividualName])
                   ),
                   draftReturn = sample[DraftSingleDisposalReturn].copy(
-                    triageAnswers = answers
+                    triageAnswers = answers,
+                    representeeAnswers = representeeAnswers
                   )
                 )
               )
@@ -5228,7 +5453,8 @@ class SingleDisposalsTriageControllerSpec
                     name = Left(sample[TrustName])
                   ),
                   draftReturn = sample[DraftSingleDisposalReturn].copy(
-                    triageAnswers = answers
+                    triageAnswers = answers,
+                    representeeAnswers = representeeAnswers
                   )
                 )
               )
@@ -5375,10 +5601,12 @@ class SingleDisposalsTriageControllerSpec
     formData: Seq[(String, String)],
     updatedAnswers: SingleDisposalTriageAnswers,
     checkNextResult: Future[Result] => Unit,
-    extraMockActions: () => Unit = () => ()
+    extraMockActions: () => Unit = () => (),
+    representeeAnswers: Option[RepresenteeAnswers] = None
   ): Unit = {
     val (session, journey) = sessionDataWithStartingNewDraftReturn(
-      currentAnswers
+      currentAnswers,
+      representeeAnswers = representeeAnswers
     )
     val updatedJourney     =
       journey.copy(newReturnTriageAnswers = Right(updatedAnswers))
@@ -5400,10 +5628,11 @@ class SingleDisposalsTriageControllerSpec
     formData: Seq[(String, String)],
     updateDraftReturn: DraftSingleDisposalReturn => DraftSingleDisposalReturn,
     checkNextResult: Future[Result] => Unit,
-    extraMockActions: () => Unit = () => ()
+    extraMockActions: () => Unit = () => (),
+    representeeAnswers: Option[RepresenteeAnswers] = None
   ): Unit = {
     val draftReturn        =
-      sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
+      sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers, representeeAnswers = representeeAnswers)
     val updatedDraftReturn = updateDraftReturn(draftReturn)
 
     val fillingOutReturn        =
@@ -5462,6 +5691,34 @@ class SingleDisposalsTriageControllerSpec
 
     checkNextResult(performAction(formData))
   }
+
+  def noDateOfDeathForPersonalRepBehaviour(performAction: () => Future[Result]): Unit =
+    "show an error page" when {
+
+      def sessionWithNoDateOfDeath(individualUserType: IndividualUserType): SessionData =
+        sessionDataWithStartingNewDraftReturn(
+          IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(individualUserType)),
+          representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+        )._1
+
+      "there is no date of death found for a personal rep" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithNoDateOfDeath(PersonalRepresentative))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+
+      "there is no date of death found for a personal rep in period of admin" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithNoDateOfDeath(PersonalRepresentativeInPeriodOfAdmin))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+    }
 
 }
 

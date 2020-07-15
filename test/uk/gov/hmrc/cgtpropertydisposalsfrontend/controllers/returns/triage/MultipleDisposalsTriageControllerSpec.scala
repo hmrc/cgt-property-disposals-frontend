@@ -47,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
@@ -134,27 +134,29 @@ class MultipleDisposalsTriageControllerSpec
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
-    representativeType: Option[RepresentativeType] = None,
-    previousSentReturns: Option[List[ReturnSummary]] = None
+    previousSentReturns: Option[List[ReturnSummary]] = None,
+    representeeAnswers: Option[RepresenteeAnswers] = None
   ): (SessionData, StartingNewDraftReturn) = {
+    val individualUserType     = multipleDisposalsAnswers.fold(_.individualUserType, _.individualUserType)
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers),
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       agentReferenceNumber =
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
-      representeeAnswers =
+      representeeAnswers = representeeAnswers.orElse {
         if (
-          representativeType.contains(PersonalRepresentative) || representativeType
+          individualUserType.contains(PersonalRepresentative) || individualUserType
             .contains(PersonalRepresentativeInPeriodOfAdmin)
         )
           Some(
             sample[CompleteRepresenteeAnswers]
               .copy(dateOfDeath = Some(sample[DateOfDeath]))
           )
-        else if (representativeType.contains(Capacitor))
+        else if (individualUserType.contains(Capacitor))
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
-        else None,
+        else None
+      },
       previousSentReturns = previousSentReturns
     )
     SessionData.empty.copy(
@@ -167,25 +169,27 @@ class MultipleDisposalsTriageControllerSpec
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
     userType: UserType = UserType.Individual,
-    representativeType: Option[RepresentativeType] = None,
+    representeeAnswers: Option[RepresenteeAnswers] = None,
     previousSentReturns: Option[List[ReturnSummary]] = None
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
-    val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+    val individualUserType = multipleDisposalsAnswers.fold(_.individualUserType, _.individualUserType)
+    val draftReturn        = sample[DraftMultipleDisposalsReturn].copy(
       triageAnswers = multipleDisposalsAnswers,
-      representeeAnswers =
+      representeeAnswers = representeeAnswers.orElse {
         if (
-          representativeType.contains(PersonalRepresentative) || representativeType
+          individualUserType.contains(PersonalRepresentative) || individualUserType
             .contains(PersonalRepresentativeInPeriodOfAdmin)
         )
           Some(
             sample[CompleteRepresenteeAnswers]
               .copy(dateOfDeath = Some(sample[DateOfDeath]))
           )
-        else if (representativeType.contains(Capacitor))
+        else if (individualUserType.contains(Capacitor))
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
         else None
+      }
     )
-    val journey     = sample[FillingOutReturn].copy(
+    val journey            = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       agentReferenceNumber =
@@ -193,7 +197,7 @@ class MultipleDisposalsTriageControllerSpec
         else None,
       previousSentReturns = previousSentReturns
     )
-    val session     = SessionData.empty.copy(
+    val session            = SessionData.empty.copy(
       userType = Some(userType),
       journeyStatus = Some(journey)
     )
@@ -301,8 +305,7 @@ class MultipleDisposalsTriageControllerSpec
                   sessionDataWithStartingNewDraftReturn(
                     answers,
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )._1,
                   triage.routes.MultipleDisposalsTriageController
                     .checkYourAnswers(),
@@ -345,8 +348,7 @@ class MultipleDisposalsTriageControllerSpec
                     sample[CompleteMultipleDisposalsTriageAnswers]
                       .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )._1,
                   triage.routes.MultipleDisposalsTriageController
                     .checkYourAnswers(),
@@ -845,8 +847,7 @@ class MultipleDisposalsTriageControllerSpec
                     IncompleteMultipleDisposalsTriageAnswers.empty
                       .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController
                     .howManyDisposals(),
@@ -874,8 +875,7 @@ class MultipleDisposalsTriageControllerSpec
                     sample[CompleteMultipleDisposalsTriageAnswers]
                       .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController
                     .checkYourAnswers(),
@@ -920,8 +920,7 @@ class MultipleDisposalsTriageControllerSpec
                     sample[CompleteMultipleDisposalsTriageAnswers]
                       .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController
                     .checkYourAnswers(),
@@ -1129,8 +1128,7 @@ class MultipleDisposalsTriageControllerSpec
               val session = sessionDataWithStartingNewDraftReturn(
                 answers,
                 displayType.name,
-                displayType.userType,
-                displayType.representativeType
+                displayType.userType
               )._1.copy(userType = Some(displayType.userType))
 
               inSequence {
@@ -2107,8 +2105,7 @@ class MultipleDisposalsTriageControllerSpec
                       wasAUKResident = Some(false)
                     ),
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )
 
                 test(
@@ -2141,8 +2138,7 @@ class MultipleDisposalsTriageControllerSpec
                     sample[CompleteMultipleDisposalsTriageAnswers]
                       .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )
                 test(
                   session,
@@ -2568,8 +2564,7 @@ class MultipleDisposalsTriageControllerSpec
                     IncompleteMultipleDisposalsTriageAnswers.empty
                       .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )._1.copy(userType = Some(displayType.userType)),
                   triage.routes.MultipleDisposalsTriageController
                     .countryOfResidence(),
@@ -2598,8 +2593,7 @@ class MultipleDisposalsTriageControllerSpec
                     sample[CompleteMultipleDisposalsTriageAnswers]
                       .copy(individualUserType = Some(setIndividualUserType(displayType))),
                     displayType.name,
-                    displayType.userType,
-                    displayType.representativeType
+                    displayType.userType
                   )._1,
                   triage.routes.MultipleDisposalsTriageController
                     .checkYourAnswers(),
@@ -2913,8 +2907,7 @@ class MultipleDisposalsTriageControllerSpec
               val session = sessionDataWithStartingNewDraftReturn(
                 answers,
                 displayType.name,
-                displayType.userType,
-                displayType.representativeType
+                displayType.userType
               )._1.copy(userType = Some(displayType.userType))
 
               inSequence {
@@ -3016,6 +3009,8 @@ class MultipleDisposalsTriageControllerSpec
         isValidJourney
       )
 
+      behave like noDateOfDeathForPersonalRepBehaviour(performAction)
+
       "display the page" when {
 
         def test(
@@ -3051,7 +3046,7 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithStartingNewDraftReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers]
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self))
               )._1,
               triage.routes.MultipleDisposalsTriageController
                 .checkYourAnswers(),
@@ -3079,7 +3074,7 @@ class MultipleDisposalsTriageControllerSpec
           "the journey is complete" in {
             test(
               sessionDataWithFillingOutReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers]
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self))
               )._1,
               triage.routes.MultipleDisposalsTriageController
                 .checkYourAnswers(),
@@ -3119,21 +3114,29 @@ class MultipleDisposalsTriageControllerSpec
           yearToDateLiabilityAnswers = None
         )
 
+      val today = TimeUtils.today()
+
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
       )
 
+      behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
+
       "show a form error" when {
 
         def testFormError(
+          individualUserType: Option[IndividualUserType] = Some(Self),
+          representeeAnswers: Option[RepresenteeAnswers] = None
+        )(
           formData: List[(String, String)]
         )(expectedErrorMessageKey: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers]
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = individualUserType),
+                representeeAnswers = representeeAnswers
               )._1
             )
           }
@@ -3165,13 +3168,13 @@ class MultipleDisposalsTriageControllerSpec
                   "multipleDisposalsCompletionDate-year"  -> scenario.yearInput
                 ).collect { case (key, Some(value)) => key -> value }
 
-                testFormError(data)(scenario.expectedErrorMessageKey)
+                testFormError()(data)(scenario.expectedErrorMessageKey)
               }
             }
         }
 
         "the date entered is later than today" in {
-          testFormError(formData(TimeUtils.today().plusDays(1L)))(
+          testFormError()(formData(today.plusDays(1L)))(
             "multipleDisposalsCompletionDate.error.tooFarInFuture"
           )
         }
@@ -3179,8 +3182,35 @@ class MultipleDisposalsTriageControllerSpec
         "the date entered is before 01-01-1900" in {
           val date = LocalDate.of(1800, 1, 1)
 
-          testFormError(formData(date))(
+          testFormError()(formData(date))(
             "multipleDisposalsCompletionDate.error.before1900"
+          )
+        }
+
+        "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentative),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+          )(formData(today))(
+            "multipleDisposalsCompletionDate.error.nonPeriodOfAdminDeathAfterDate"
+          )
+        }
+
+        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentativeInPeriodOfAdmin),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+          )(formData(today))(
+            "multipleDisposalsCompletionDate.error.periodOfAdminDeathNotAfterDate"
+          )
+        }
+
+        "the disposal date is strictly before the date of death and the user is a period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentativeInPeriodOfAdmin),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+          )(formData(today.minusDays(1L)))(
+            "multipleDisposalsCompletionDate.error.periodOfAdminDeathNotAfterDate"
           )
         }
 
@@ -3190,7 +3220,8 @@ class MultipleDisposalsTriageControllerSpec
 
         "there is an error updating the draft return" in {
           val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-            completionDate = CompletionDate(TimeUtils.today().minusDays(1L))
+            individualUserType = Some(Self),
+            completionDate = CompletionDate(today.minusDays(1L))
           )
           val (session, journey, draftReturn) =
             sessionDataWithFillingOutReturn(answers)
@@ -3198,7 +3229,7 @@ class MultipleDisposalsTriageControllerSpec
           val updatedAnswers     =
             IncompleteMultipleDisposalsTriageAnswers
               .fromCompleteAnswers(answers)
-              .copy(completionDate = Some(CompletionDate(TimeUtils.today())))
+              .copy(completionDate = Some(CompletionDate(today)))
           val updatedDraftReturn =
             updateDraftReturn(draftReturn, updatedAnswers)
 
@@ -3215,14 +3246,16 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsTechnicalErrorPage(
-            performAction(formData(TimeUtils.today()): _*)
+            performAction(formData(today): _*)
           )
         }
 
         "there is an error updating the session" in {
           val answers            =
-            sample[CompleteMultipleDisposalsTriageAnswers]
-              .copy(completionDate = CompletionDate(TimeUtils.today()))
+            sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              individualUserType = Some(Self),
+              completionDate = CompletionDate(today)
+            )
           val (session, journey) =
             sessionDataWithStartingNewDraftReturn(answers)
 
@@ -3259,7 +3292,7 @@ class MultipleDisposalsTriageControllerSpec
             val (session, journey) =
               sessionDataWithStartingNewDraftReturn(answers)
 
-            val newCompletionDate = CompletionDate(TimeUtils.today())
+            val newCompletionDate = CompletionDate(today)
             val updatedJourney    =
               journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = Some(newCompletionDate))))
 
@@ -3280,7 +3313,10 @@ class MultipleDisposalsTriageControllerSpec
           "the user has already answered the question" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
               val answers            =
-                c.copy(completionDate = CompletionDate(TimeUtils.today()))
+                c.copy(
+                  individualUserType = Some(Self),
+                  completionDate = CompletionDate(today)
+                )
               val (session, journey) =
                 sessionDataWithStartingNewDraftReturn(answers)
 
@@ -3311,18 +3347,16 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has started a draft return and" when {
 
-          "have completed the section and they enter a figure which is " +
-            "different than one they have already entered" in {
-            val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-              completionDate = CompletionDate(TimeUtils.today().minusDays(1L))
-            )
+          def test(
+            currentAnswers: MultipleDisposalsTriageAnswers,
+            representeeAnswers: Option[RepresenteeAnswers],
+            submittedDate: LocalDate
+          ) = {
             val (session, journey, draftReturn) =
-              sessionDataWithFillingOutReturn(answers)
+              sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = representeeAnswers)
 
             val updatedAnswers     =
-              IncompleteMultipleDisposalsTriageAnswers
-                .fromCompleteAnswers(answers)
-                .copy(completionDate = Some(CompletionDate(TimeUtils.today())))
+              currentAnswers.unset(_.completionDate).copy(completionDate = Some(CompletionDate(submittedDate)))
             val updatedDraftReturn =
               updateDraftReturn(draftReturn, updatedAnswers)
             val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
@@ -3334,17 +3368,54 @@ class MultipleDisposalsTriageControllerSpec
                 updatedDraftReturn,
                 journey.subscribedDetails.cgtReference,
                 journey.agentReferenceNumber
-              )(
-                Right(())
-              )
+              )(Right(()))
               mockStoreSession(
                 session.copy(journeyStatus = Some(updatedJourney))
               )(Right(()))
             }
 
             checkIsRedirect(
-              performAction(formData(TimeUtils.today()): _*),
+              performAction(
+                formData(submittedDate): _*
+              ),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            test(
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                individualUserType = Some(Self),
+                completionDate = CompletionDate(today.minusDays(1L))
+              ),
+              None,
+              today
+            )
+          }
+
+          "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
+            test(
+              sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              today
+            )
+          }
+
+          "the disposal date is strictly before the date of death when the user is a non-period of admin personal rep" in {
+            test(
+              sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+              today.minusDays(1L)
+            )
+          }
+
+          "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
+            test(
+              sample[IncompleteMultipleDisposalsTriageAnswers]
+                .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
+              today
             )
           }
 
@@ -3356,6 +3427,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "the date submitted is the same as one that already exists in session" in {
           val answers      = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            individualUserType = Some(Self),
             completionDate = CompletionDate(TimeUtils.today())
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -3379,13 +3451,15 @@ class MultipleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteMultipleDisposalsTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
+          individualUserType = Some(Self),
           wasAUKResident = Some(false),
           countryOfResidence = Some(sample[Country])
         )
 
       def performAction(): Future[Result] =
         controller.disposalDateOfShares()(FakeRequest())
+
+      behave like noDateOfDeathForPersonalRepBehaviour(performAction)
 
       "Page is displayed correctly" in {
         inSequence {
@@ -3438,10 +3512,14 @@ class MultipleDisposalsTriageControllerSpec
           "sharesDisposalDate-year"  -> d.getYear().toString
         )
 
+      val today = TimeUtils.today()
+
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
         isValidJourney
       )
+
+      behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
 
       def updateDraftReturn(
         d: DraftMultipleDisposalsReturn,
@@ -3458,13 +3536,17 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         def testFormError(
+          individualUserType: Option[IndividualUserType] = Some(Self),
+          representeeAnswers: Option[RepresenteeAnswers] = None
+        )(
           formData: List[(String, String)]
         )(expectedErrorMessageKey: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers]
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = individualUserType),
+                representeeAnswers = representeeAnswers
               )._1
             )
           }
@@ -3496,14 +3578,41 @@ class MultipleDisposalsTriageControllerSpec
                   "sharesDisposalDate-year"  -> scenario.yearInput
                 ).collect { case (key, Some(value)) => key -> value }
 
-                testFormError(data)(scenario.expectedErrorMessageKey)
+                testFormError()(data)(scenario.expectedErrorMessageKey)
               }
             }
         }
 
         "the date entered is later than today" in {
-          testFormError(formData(TimeUtils.today().plusDays(1L)))(
+          testFormError()(formData(today.plusDays(1L)))(
             "sharesDisposalDate.error.tooFarInFuture"
+          )
+        }
+
+        "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentative),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
+          )(formData(today))(
+            "sharesDisposalDate.error.nonPeriodOfAdminDeathAfterDate"
+          )
+        }
+
+        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentativeInPeriodOfAdmin),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+          )(formData(today))(
+            "sharesDisposalDate.error.periodOfAdminDeathNotAfterDate"
+          )
+        }
+
+        "the disposal date is strictly before the date of death and the user is a period of admin personal rep" in {
+          testFormError(
+            Some(PersonalRepresentativeInPeriodOfAdmin),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
+          )(formData(today.minusDays(1L)))(
+            "sharesDisposalDate.error.periodOfAdminDeathNotAfterDate"
           )
         }
 
@@ -3513,10 +3622,9 @@ class MultipleDisposalsTriageControllerSpec
 
         "there is an error updating the session" in {
           val taxYear            = sample[TaxYear]
-          val today              = TimeUtils.today()
           val answers            =
             sample[IncompleteMultipleDisposalsTriageAnswers]
-              .copy(completionDate = Some(CompletionDate(today)))
+              .copy(individualUserType = Some(Self), completionDate = Some(CompletionDate(today)))
           val (session, journey) =
             sessionDataWithStartingNewDraftReturn(answers)
 
@@ -3550,46 +3658,83 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the check your answers page" when {
 
-        "redirect to exit page" when {
+        def test(
+          currentAnswers: IncompleteMultipleDisposalsTriageAnswers,
+          representeeAnswers: Option[RepresenteeAnswers],
+          submittedDate: LocalDate,
+          taxYear: Option[TaxYear]
+        ) = {
+          val (session, journey, draftReturn) =
+            sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = representeeAnswers)
 
-          "redirect when tax service returns empty" in {
-            val tooEarlyDate = LocalDate.of(2020, 1, 1)
-            val answers      = sample[IncompleteMultipleDisposalsTriageAnswers]
+          val updatedAnswers     = currentAnswers.copy(
+            completionDate = Some(CompletionDate(submittedDate)),
+            taxYear = taxYear,
+            taxYearAfter6April2020 = Some(taxYear.isDefined)
+          )
+          val updatedDraftReturn =
+            updateDraftReturn(draftReturn, updatedAnswers)
+          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
 
-            val (session, journey, draftReturn) =
-              sessionDataWithFillingOutReturn(answers)
-
-            val updatedAnswers     = answers.copy(
-              completionDate = Some(CompletionDate(tooEarlyDate)),
-              taxYear = None,
-              taxYearAfter6April2020 = Some(false)
-            )
-            val updatedDraftReturn =
-              updateDraftReturn(draftReturn, updatedAnswers)
-            val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(session)
-              mockGetTaxYear(tooEarlyDate)(Right(None))
-              mockStoreDraftReturn(
-                updatedDraftReturn,
-                journey.subscribedDetails.cgtReference,
-                journey.agentReferenceNumber
-              )(Right(()))
-              mockStoreSession(
-                session.copy(journeyStatus = Some(updatedJourney))
-              )(Right(()))
-            }
-
-            checkIsRedirect(
-              performAction(
-                formData(tooEarlyDate): _*
-              ),
-              routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
-            )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetTaxYear(submittedDate)(Right(taxYear))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(updatedJourney))
+            )(Right(()))
           }
+
+          checkIsRedirect(
+            performAction(
+              formData(submittedDate): _*
+            ),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
         }
+
+        "a valid date is submitted but a tax year cannot be found" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(Self)),
+            None,
+            LocalDate.of(2020, 1, 1),
+            None
+          )
+        }
+
+        "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+            today,
+            Some(sample[TaxYear])
+          )
+        }
+
+        "the disposal date is strictly before the date of death when the user is a non-period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
+            today.minusDays(1L),
+            Some(sample[TaxYear])
+          )
+        }
+
+        "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
+          test(
+            sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
+            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
+            today,
+            Some(sample[TaxYear])
+          )
+        }
+
       }
 
       "not perform any updates" when {
@@ -3597,7 +3742,10 @@ class MultipleDisposalsTriageControllerSpec
         "the date submitted is the same as one that already exists in session" in {
           val answers      =
             sample[CompleteMultipleDisposalsTriageAnswers]
-              .copy(completionDate = CompletionDate(TimeUtils.today()))
+              .copy(
+                individualUserType = Some(Self),
+                completionDate = CompletionDate(TimeUtils.today())
+              )
           val (session, _) =
             sessionDataWithStartingNewDraftReturn(answers)
 
@@ -3676,7 +3824,8 @@ class MultipleDisposalsTriageControllerSpec
               answers,
               name,
               userType,
-              previousSentReturns = previousSentReturns
+              previousSentReturns,
+              Some(IncompleteRepresenteeAnswers.empty)
             )._1
           )
         }
@@ -3856,6 +4005,14 @@ class MultipleDisposalsTriageControllerSpec
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(taxYearAfter6April2020 = Some(false)),
             routes.CommonTriageQuestionsController.disposalDateTooEarly()
+          )
+        }
+
+        "the tax year of a share disposal date was before 6th April 2020" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk
+              .copy(assetTypes = Some(List(IndirectDisposal)), taxYearAfter6April2020 = Some(false)),
+            routes.CommonTriageQuestionsController.disposalsOfSharesTooEarly()
           )
         }
 
@@ -4221,8 +4378,7 @@ class MultipleDisposalsTriageControllerSpec
                   triageAnswers,
                   Right(sample[IndividualName]),
                   UserType.Individual,
-                  Some(representativeType),
-                  Some(
+                  previousSentReturns = Some(
                     List(sample[ReturnSummary].copy(completionDate = triageAnswers.completionDate.value))
                   )
                 )._1
@@ -4416,6 +4572,35 @@ class MultipleDisposalsTriageControllerSpec
       }
     )
   }
+
+  def noDateOfDeathForPersonalRepBehaviour(performAction: () => Future[Result]): Unit =
+    "show an error page" when {
+
+      def sessionWithNoDateOfDeath(individualUserType: IndividualUserType): SessionData =
+        sessionDataWithStartingNewDraftReturn(
+          IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(individualUserType)),
+          representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
+        )._1
+
+      "there is no date of death found for a personal rep" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithNoDateOfDeath(PersonalRepresentative))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+
+      "there is no date of death found for a personal rep in period of admin" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithNoDateOfDeath(PersonalRepresentativeInPeriodOfAdmin))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+    }
+
 }
 
 object MultipleDisposalsTriageControllerSpec extends Matchers {
