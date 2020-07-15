@@ -17,6 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import cats.data.EitherT
+import cats.instances.string._
+import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
 import configs.syntax._
@@ -59,7 +61,11 @@ class EmailVerificationConnectorImpl @Inject() (
     val protocol = getEmailVerificationConfig[String]("protocol")
     val host     = getEmailVerificationConfig[String]("host")
     val port     = getEmailVerificationConfig[String]("port")
-    s"$protocol://$host:$port/email-verification/verification-requests"
+    val domain   = getEmailVerificationConfig[String]("domain")
+    if (domain =!= "")
+      s"$protocol://$host:$port/$domain/email-verification/verification-requests"
+    else
+      s"$protocol://$host:$port/email-verification/verification-requests"
   }
 
   val templateId: String = getEmailVerificationConfig[String]("template-id")

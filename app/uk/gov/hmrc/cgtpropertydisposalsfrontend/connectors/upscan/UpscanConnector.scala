@@ -31,7 +31,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
+import cats.instances.string._
+import cats.syntax.eq._
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[UpscanConnectorImpl])
@@ -76,12 +77,16 @@ class UpscanConnectorImpl @Inject() (
     val protocol = getUpscanInitiateConfig[String]("protocol")
     val host     = getUpscanInitiateConfig[String]("host")
     val port     = getUpscanInitiateConfig[String]("port")
-    s"$protocol://$host:$port/upscan/v2/initiate"
+    val domain   = getUpscanInitiateConfig[String]("domain")
+    if (domain =!= "")
+      s"$protocol://$host:$port/$domain/upscan/v2/initiate"
+    else
+      s"$protocol://$host:$port/upscan/v2/initiate"
   }
 
-  val backEndBaseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
-
   val selfBaseUrl: String = config.underlying.get[String]("self.url").value
+
+  val backEndBaseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
 
   private val maxFileSize: Long = getUpscanInitiateConfig[Long]("max-file-size")
 

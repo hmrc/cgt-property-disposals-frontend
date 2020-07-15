@@ -31,10 +31,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
 
-  val (protocol, host, port) = ("http", "host", "port")
-  val templateId             = "id"
-  val linkExpiryTimeMinutes  = 30
-  val selfUrl                = "self"
+  val (protocol, host, port, domain) = ("http", "host", "port", "domain")
+  val templateId                     = "id"
+  val linkExpiryTimeMinutes          = 30
+  val selfUrl                        = "self"
 
   val config = Configuration(
     ConfigFactory.parseString(
@@ -43,6 +43,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
         |  protocol    = "$protocol"
         |  host        = "$host"
         |  port        = "$port"
+        |  domain      = "$domain"
         |  template-id = "$templateId"
         |  link-expiry-time = "$linkExpiryTimeMinutes minutes"
         |}
@@ -59,7 +60,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val expectedUrl                =
-        s"$protocol://$host:$port/email-verification/verification-requests"
+        s"$protocol://$host:$port/$domain/email-verification/verification-requests"
       val email                      = Email("email@test.com")
       val name                       = ContactName("Bob Lob")
       val trustName                  = ContactName("trust")
