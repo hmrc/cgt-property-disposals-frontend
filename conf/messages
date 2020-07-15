@@ -2402,6 +2402,8 @@ improvementCosts.agent.title=Were there any improvement costs?
 improvementCosts.trust.title=Were there any improvement costs?
 improvementCosts.capacitor.title=Does the person want to claim any improvement costs?
 improvementCosts.personalRep.title=Were there any improvement costs?
+improvementCosts.personalRepInPeriodOfAdmin.title=Were there any improvement costs?
+improvementCosts.personalRepInPeriodOfAdmin.agent.title=Were there any improvement costs?
 
 improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.agent.helpText=Your client can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
