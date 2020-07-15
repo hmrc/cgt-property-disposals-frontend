@@ -4035,14 +4035,14 @@ multipleDisposalsAcquisitionPrice.error.tooLarge=The acquisition value must be a
 multipleDisposalsAcquisitionPrice.error.tooSmall=The acquisition value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.error.tooManyDecimals=The acquisition value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.invalid=The market value must be an amount of money
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.required=Enter the market value of the property, for example 20,520.86
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.required=Enter the market value of the property
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
 
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.invalid=The market value must be an amount of money
-multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the market value of the property, for example 20,520.86
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.invalid=The market value must be an amount of money, like 160,000 or 23,040.50
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.required=Enter the market value of the property
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=The market value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=The market value must be an amount of money between 0 and 50,000,000,000
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, like 160,000 or 23,040.50
