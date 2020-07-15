@@ -51,6 +51,7 @@
 
 @key = @{ "singleMixedUseDisposalsAcquisitionPrice" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+@isPeriodOfAdmin = @{ representativeType.contains(PersonalRepresentativeInPeriodOfAdmin) }
 @userKey = @{
     representativeType match {
         case Some(PersonalRepresentative) => ".personalRep"
@@ -72,13 +73,14 @@
 }
 @title = @{messages(s"$key$userKey.title", titleArg)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@customErrorKey = @{ if(isPeriodOfAdmin) Some(s"$key$userKey") else None }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, customErrorKey = customErrorKey)
     }
 
     @caption(messages("returns.property-details.multipleDisposals.caption"))
@@ -96,7 +98,8 @@
         inputClass = Some("small"),
         aspect = "left",
         unit = "£",
-        assistiveText = messages("unit-input.assistive.pounds")
+        assistiveText = messages("unit-input.assistive.pounds"),
+        customErrorKey = customErrorKey
       )
 
       @details(
