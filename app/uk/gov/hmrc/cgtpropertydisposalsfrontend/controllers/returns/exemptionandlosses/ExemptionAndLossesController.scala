@@ -128,28 +128,12 @@ class ExemptionAndLossesController @Inject() (
     draftReturn: DraftReturn
   )(f: Boolean => Future[Result]): Future[Result] = {
     val wasUk =
-      draftReturn.fold(
-        _.triageAnswers.fold(
+      draftReturn
+        .triageAnswers()
+        .fold(
           _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-          c => Some(c.countryOfResidence.isUk())
-        ),
-        _.triageAnswers.fold(
-          _.wasAUKResident,
-          c => Some(c.countryOfResidence.isUk())
-        ),
-        _.triageAnswers.fold(
-          _.wasAUKResident,
-          c => Some(c.countryOfResidence.isUk())
-        ),
-        _.triageAnswers.fold(
-          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
-          c => Some(c.countryOfResidence.isUk())
-        ),
-        _.triageAnswers.fold(
-          _.wasAUKResident,
-          c => Some(c.countryOfResidence.isUk())
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
         )
-      )
 
     wasUk match {
       case Some(d) => f(d)

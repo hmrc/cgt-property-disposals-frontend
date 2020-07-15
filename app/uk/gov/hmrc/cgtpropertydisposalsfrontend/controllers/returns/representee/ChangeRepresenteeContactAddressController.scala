@@ -102,13 +102,7 @@ class ChangeRepresenteeContactAddressController @Inject() (
       case Some((sessionData, f: FillingOutReturn))       =>
         Either.fromOption(
           extractAnswersAndContactDetails(
-            f.draftReturn.fold(
-              _.representeeAnswers,
-              _.representeeAnswers,
-              _.representeeAnswers,
-              _.representeeAnswers,
-              _.representeeAnswers
-            )
+            f.draftReturn.representeeAnswers()
           ).map {
             case (answers, contactDetails) =>
               sessionData -> ChangingRepresenteeContactAddressJourney(

@@ -28,18 +28,8 @@ object PersonalRepresentativeDetails {
 
   def fromDraftReturn(
     draftReturn: DraftReturn
-  ): Either[String, Option[PersonalRepresentativeDetails]] = {
-    val (triageAnswers, representeeAnswers) =
-      draftReturn.fold(
-        d => Left(d.triageAnswers) -> d.representeeAnswers,
-        d => Right(d.triageAnswers) -> d.representeeAnswers,
-        d => Right(d.triageAnswers) -> d.representeeAnswers,
-        d => Left(d.triageAnswers) -> d.representeeAnswers,
-        d => Right(d.triageAnswers) -> d.representeeAnswers
-      )
-
-    fromAnswers(triageAnswers, representeeAnswers)
-  }
+  ): Either[String, Option[PersonalRepresentativeDetails]] =
+    fromAnswers(draftReturn.triageAnswers(), draftReturn.representeeAnswers())
 
   def fromStartingNewDraftReturn(
     startingNewDraftReturn: StartingNewDraftReturn

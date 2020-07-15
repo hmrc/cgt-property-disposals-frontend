@@ -119,21 +119,14 @@ class RepresenteeController @Inject() (
 
       case Some(fillingOutReturn: FillingOutReturn)             =>
         val individualUserType =
-          fillingOutReturn.draftReturn.fold(
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType)
-          )
+          fillingOutReturn.draftReturn
+            .triageAnswers()
+            .fold(
+              _.fold(_.individualUserType, _.individualUserType),
+              _.fold(_.individualUserType, _.individualUserType)
+            )
         val answers            = fillingOutReturn.draftReturn
-          .fold(
-            _.representeeAnswers,
-            _.representeeAnswers,
-            _.representeeAnswers,
-            _.representeeAnswers,
-            _.representeeAnswers
-          )
+          .representeeAnswers()
           .getOrElse(IncompleteRepresenteeAnswers.empty)
         performAction(individualUserType, Right(fillingOutReturn), answers)
 
@@ -732,13 +725,12 @@ class RepresenteeController @Inject() (
       currentJourney.bimap(
         _.copy(representeeAnswers = Some(newAnswers)),
         fillingOutReturn => {
-          val individualUserType = fillingOutReturn.draftReturn.fold(
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType),
-            _.triageAnswers.fold(_.individualUserType, _.individualUserType)
-          )
+          val individualUserType = fillingOutReturn.draftReturn
+            .triageAnswers()
+            .fold(
+              _.fold(_.individualUserType, _.individualUserType),
+              _.fold(_.individualUserType, _.individualUserType)
+            )
 
           val newDraftReturn =
             if (clearDraftReturn)

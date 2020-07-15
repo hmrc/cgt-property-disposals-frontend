@@ -181,20 +181,13 @@ class ReturnsServiceImpl @Inject() (
     val dateOfDeath =
       draftReturn.representeeAnswers().flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
 
-    val disposalOrCompletionDate = {
-      def fromSingleDisposal(s: SingleDisposalTriageAnswers)       =
-        s.fold(_.disposalDate.map(_.value), c => Some(c.disposalDate.value))
-      def fromMultipleDisposals(m: MultipleDisposalsTriageAnswers) =
-        m.fold(_.completionDate.map(_.value), c => Some(c.completionDate.value))
-
-      draftReturn.fold(
-        m => fromMultipleDisposals(m.triageAnswers),
-        s => fromSingleDisposal(s.triageAnswers),
-        s => fromSingleDisposal(s.triageAnswers),
-        m => fromMultipleDisposals(m.triageAnswers),
-        s => fromSingleDisposal(s.triageAnswers)
-      )
-    }
+    val disposalOrCompletionDate =
+      draftReturn
+        .triageAnswers()
+        .fold(
+          _.fold(_.completionDate.map(_.value), c => Some(c.completionDate.value)),
+          _.fold(_.disposalDate.map(_.value), c => Some(c.disposalDate.value))
+        )
 
     val periodOfAdminDateOfDeathValid =
       if (draftReturn.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
@@ -234,28 +227,19 @@ class ReturnsServiceImpl @Inject() (
   private def hasBeenSent(
     sentReturns: List[ReturnSummary]
   )(draftReturn: DraftReturn): Boolean = {
-    val (draftReturnTaxYear, draftReturnCompletionDate) = draftReturn.fold(
-      _.triageAnswers.fold(
-        i => i.taxYear -> i.completionDate,
-        c => Some(c.taxYear) -> Some(c.completionDate)
-      ),
-      _.triageAnswers.fold(
-        i => i.disposalDate.map(_.taxYear) -> i.completionDate,
-        c => Some(c.disposalDate.taxYear) -> Some(c.completionDate)
-      ),
-      _.triageAnswers.fold(
-        i => i.disposalDate.map(_.taxYear) -> i.completionDate,
-        c => Some(c.disposalDate.taxYear) -> Some(c.completionDate)
-      ),
-      _.triageAnswers.fold(
-        i => i.taxYear -> i.completionDate,
-        c => Some(c.taxYear) -> Some(c.completionDate)
-      ),
-      _.triageAnswers.fold(
-        i => i.disposalDate.map(_.taxYear) -> i.completionDate,
-        c => Some(c.disposalDate.taxYear) -> Some(c.completionDate)
-      )
-    )
+    val (draftReturnTaxYear, draftReturnCompletionDate) =
+      draftReturn
+        .triageAnswers()
+        .fold(
+          _.fold(
+            i => i.taxYear -> i.completionDate,
+            c => Some(c.taxYear) -> Some(c.completionDate)
+          ),
+          _.fold(
+            i => i.disposalDate.map(_.taxYear) -> i.completionDate,
+            c => Some(c.disposalDate.taxYear) -> Some(c.completionDate)
+          )
+        )
 
     val draftCountryOrPostcode =
       draftReturn.fold[Option[Either[CountryCode, Postcode]]](
