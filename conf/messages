@@ -3868,6 +3868,7 @@ confirmationOfSubmission.trust.returnToAccountHome=Go to the trust’s <a href="
 
 confirmationOfSubmission.organisationNameLine=Trust: {0}
 confirmationOfSubmission.agentNameLine=Client: {0}
+confirmationOfSubmission.estateNameLine=Estate: {0}
 
 #===================================================
 #  CHECK ALL ANSWERS AND CONFIRMATION PAGES - END
