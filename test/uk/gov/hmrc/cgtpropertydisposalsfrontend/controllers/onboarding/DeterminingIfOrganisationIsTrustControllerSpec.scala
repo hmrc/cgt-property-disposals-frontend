@@ -1109,7 +1109,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           mockActions()
 
           val result =
-            performAction("trustName" -> "trust name;", "trn" -> validTrn.value)
+            performAction("trustName" -> "trust name:", "trn" -> validTrn.value)
           status(result) shouldBe BAD_REQUEST
           contentAsString(result) should include(
             messageFromMessageKey("trustName.error.pattern")
