@@ -62,24 +62,17 @@
   addressJourneyType match {
       case _: AddressJourneyType.Returns.ChangingRepresenteeContactAddressJourney => messages("isUk.representee.title")
       case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-          if(c.draftReturn.isLeft)
-            c.representativeType match {
-                case Some(PersonalRepresentativeInPeriodOfAdmin) =>
-                    messages("companyDetails.isUk.multipleIndirect.personalRepInPeriodOfAdmin.title")
-                case _                                           =>
-                    messages("companyDetails.isUk.multipleIndirect.title")
-            }
-
+          if(c.draftReturn.isLeft)                        messages("companyDetails.isUk.multipleIndirect.title")
           else
-            c.representativeType match {
-                case Some(PersonalRepresentative)                => messages("companyDetails.isUk.personalRep.title")
-                case Some(PersonalRepresentativeInPeriodOfAdmin) => messages("companyDetails.isUk.personalRepInPeriodOfAdmin.title")
-                case Some(Capacitor)                             => messages("companyDetails.isUk.capacitor.title")
-                case None =>
-                  if (c.isATrust)                                 messages("companyDetails.isUk.trust.title")
-                  else if (isAgent)                               messages("companyDetails.isUk.agent.title")
-                  else                                            messages("companyDetails.isUk.title")
-            }
+              c.representativeType match {
+                  case Some(PersonalRepresentative)                => messages("companyDetails.isUk.personalRep.title")
+                  case Some(PersonalRepresentativeInPeriodOfAdmin) => messages("companyDetails.isUk.personalRep.title")
+                  case Some(Capacitor)                             => messages("companyDetails.isUk.capacitor.title")
+                  case None =>
+                      if (c.isATrust)                                 messages("companyDetails.isUk.trust.title")
+                      else if (isAgent)                        messages("companyDetails.isUk.agent.title")
+                      else                                            messages("companyDetails.isUk.title")
+              }
 
       case _ => messages("subscription.isUk.title")
   }

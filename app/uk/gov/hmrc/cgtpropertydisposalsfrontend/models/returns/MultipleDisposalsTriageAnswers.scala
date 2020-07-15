@@ -25,7 +25,6 @@ import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 
 sealed trait MultipleDisposalsTriageAnswers
 
@@ -131,8 +130,6 @@ object MultipleDisposalsTriageAnswers {
           case List(IndirectDisposal) => true
           case _                      => false
         }
-
-    def isPeriodOfAdmin(): Boolean = representativeType().contains(PersonalRepresentativeInPeriodOfAdmin)
 
   }
 

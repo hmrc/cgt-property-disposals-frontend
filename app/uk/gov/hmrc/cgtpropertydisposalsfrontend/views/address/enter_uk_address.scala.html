@@ -84,16 +84,11 @@
       _ => messages(s"$key.uk.returns$titleUserMessageKey.singleDisposal.title")
     )
   case c: AddressJourneyType.Returns.EnteringCompanyDetails =>
-    if(c.draftReturn.isLeft)
-        c.representativeType match {
-            case Some(PersonalRepresentativeInPeriodOfAdmin) =>
-                messages(s"$key.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title")
-            case _ => messages(s"$key.uk.companyDetails.multipleIndirect.title")
-        }
+    if(c.draftReturn.isLeft)                        messages(s"$key.uk.companyDetails.multipleIndirect.title")
     else
         c.representativeType match {
             case Some(PersonalRepresentative) => messages(s"$key.uk.companyDetails.personalRep.title")
-            case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key.uk.companyDetails.personalRepInPeriodOfAdmin.title")
+            case Some(PersonalRepresentativeInPeriodOfAdmin) => messages(s"$key.uk.companyDetails.personalRep.title")
             case Some(Capacitor) => messages(s"$key.uk.companyDetails.capacitor.title")
             case None =>
                 if(c.isATrust)                                  messages(s"$key.uk.companyDetails.trust.title")

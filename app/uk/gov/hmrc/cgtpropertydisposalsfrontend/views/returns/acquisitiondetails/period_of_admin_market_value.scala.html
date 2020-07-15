@@ -27,8 +27,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DateOfDeath
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -45,21 +43,13 @@
     form: Form[BigDecimal],
     backLink: Call,
     dateOfDeath: DateOfDeath,
-    assetType: AssetType,
-    representativeType: Option[RepresentativeType]
+    assetType: AssetType
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{ "periodOfAdminMarketValue" }
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-
-@userKey = @{
-    representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
-        case _ => if (isAgent) ".agent" else ""
-    }
-}
-
+@userKey = @{ if(isAgent) ".agent" else "" }
 @assetTypeKey = @{assetType match {
     case AssetType.IndirectDisposal => ".indirect"
     case _ => ""

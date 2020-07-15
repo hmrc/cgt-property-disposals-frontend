@@ -585,8 +585,7 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 _,
                 dateOfDeath,
-                assetType,
-                state.fold(_.representativeType(), _.representativeType())
+                assetType
               )
             )(
               requiredPreviousAnswer = _ => true,
@@ -613,8 +612,7 @@ class AcquisitionDetailsController @Inject() (
                 _,
                 _,
                 dateOfDeath,
-                assetType,
-                state.fold(_.representativeType(), _.representativeType())
+                assetType
               )
             )(
               requiredPreviousAnswer = _ => true,

@@ -1472,7 +1472,6 @@ companyDetails.isUk.agent.title=Did the company your client held shares in have 
 companyDetails.isUk.trust.title=Did the company the trust held shares in have a UK address?
 companyDetails.isUk.capacitor.title=Did the company the person held shares in have a UK address?
 companyDetails.isUk.personalRep.title=Did the company the person held shares in have a UK address?
-companyDetails.isUk.personalRepInPeriodOfAdmin.title=Did the company the person held shares in have a UK address?
 
 isUk.companyDetails.error.required=Select yes if the company you held shares in had a UK address
 isUk.companyDetails.agent.error.required=Select yes if the company your client held shares in had a UK address
@@ -1485,8 +1484,6 @@ address.uk.companyDetails.agent.title=Enter the name and address of the company 
 address.uk.companyDetails.trust.title=Enter the name and address of the company the trust held shares in
 address.uk.companyDetails.capacitor.title=Enter the name and address of the company the person held shares in
 address.uk.companyDetails.personalRep.title=Enter the name and address of the company the person held shares in
-address.uk.companyDetails.personalRepInPeriodOfAdmin.title=Enter the name and address of the company the person held the shares in
-
 address.uk.companyDetails.helpText=This should be the company’s registered address
 address.uk.companyDetails.line1.label=Company name
 address.uk.companyDetails.line2.label=Street address
@@ -1509,8 +1506,6 @@ nonUkAddress.companyDetails.agent.title=Enter the name and address of the compan
 nonUkAddress.companyDetails.trust.title=Enter the name and address of the company the trust held shares in
 nonUkAddress.companyDetails.capacitor.title=Enter the name and address of the company the person held shares in
 nonUkAddress.companyDetails.personalRep.title=Enter the name and address of the company the person held shares in
-nonUkAddress.companyDetails.personalRepInPeriodOfAdmin.title=Enter the name and address of the company the person held the shares in
-
 nonUkAddress.companyDetails.line1.label=Company name
 nonUkAddress.companyDetails.line2.label=Street address
 nonUkAddress-line1.companyDetails.error.required=Enter a company name
@@ -1538,13 +1533,8 @@ company-details.multiple-indirect-disposals.guidance.p1=You should enter the det
 company-details.multiple-indirect-disposals.guidance.p2=For that one disposal, you’ll need to enter the:
 company-details.multiple-indirect-disposals.guidance.li1=name and address of the company the shares were held in
 company-details.multiple-indirect-disposals.guidance.li2=disposal date of the shares
-
 company-details.multiple-indirect-disposals.guidance.li3=disposal value, less disposal costs
 company-details.multiple-indirect-disposals.guidance.li4=acquisition value, plus acquisition costs
-
-company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li3=proceeds of the disposal less disposal costs
-company-details.multiple-indirect-disposals.guidance.personalRepInPeriodOfAdmin.li4=market value of the shares plus acquisition costs
-
 company-details.multiple-indirect-disposals.guidance.p3=You’ll also need to upload a document later providing details of the other UK property disposals you’re including in this return.
 
 multipleIndirectDisposalsDisposalPrice.title=What was the disposal value of the shares?
@@ -1568,14 +1558,10 @@ multipleIndirectDisposalsAcquisitionPrice.error.tooSmall=The acquisition value o
 returns.company-address.cya.title=Check your answers
 
 companyDetails.isUk.multipleIndirect.title=Do any of the companies the shares were sold in have a registered address in the UK?
-companyDetails.isUk.multipleIndirect.personalRepInPeriodOfAdmin.title=Did the company the person held shares in have a UK address?
-
 companyDetails.isUk.multipleIndirect.helpText=This should be the company’s registered address.
 isUk.multipleIndirect.error.required=Select yes if any of the companies the shares were sold in have a registered address in the UK
 address.uk.companyDetails.multipleIndirect.title=Enter the name and address of one of the companies the shares were held in
-address.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title=Enter the name and address of the company the person held the shares in
 nonUkAddress.companyDetails.multipleIndirect.title=Enter the name and address of one of the companies the shares were held in
-nonUkAddress.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title=Enter the name and address of the company the person held the shares in
 
 returns.company-address.cyaLabel.company-address=Company name and address
 returns.company-address.cyaChange.company-address=the address of the property
@@ -1685,7 +1671,7 @@ disposalPrice.trust.indirect.Gifted.helpText=You can provide a valuation or a re
 disposalPrice.personalRep.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
 disposalPrice.personalRep.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 disposalPrice.personalRepInPeriodOfAdmin.Gifted.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
-disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.helpText=You’ll be able to enter any additional costs later.
+disposalPrice.personalRepInPeriodOfAdmin.indirect.Gifted.helpText=This is the amount the estate got when the shares were sold. You should subtract any selling or disposal costs.
 disposalPrice.capacitor.Gifted.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the person’s share.
 disposalPrice.capacitor.indirect.Gifted.helpText=You can provide a valuation or a realistic estimate.
 
@@ -1777,7 +1763,7 @@ disposalPrice.trust.indirect.SoldOther.helpText=You’ll be able to include acqu
 disposalPrice.personalRep.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.personalRep.indirect.SoldOther.helpText=You’ll be able to include acquisition costs later.
 disposalPrice.personalRepInPeriodOfAdmin.SoldOther.helpText=This is the amount the estate got when the property was sold. You should subtract any selling or disposal costs.
-disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.helpText=You’ll be able to enter any additional costs later.
+disposalPrice.personalRepInPeriodOfAdmin.indirect.SoldOther.helpText=This is the amount the estate got when the shares were sold. You should subtract any selling or disposal costs.
 disposalPrice.capacitor.SoldOther.helpText=If the property was shared, only enter the amount the person got for their share. You’ll be able to enter any additional costs later.
 disposalPrice.capacitor.indirect.SoldOther.helpText=You’ll be able to include buying or acquisition costs later.
 
@@ -1858,7 +1844,7 @@ disposalFees.trust.indirect.title=How much were the additional costs when the sh
 disposalFees.personalRep.title=What were the person’s additional disposal costs?
 disposalFees.personalRep.indirect.title=How much were the additional costs when the shares were sold or disposed of?
 disposalFees.personalRepInPeriodOfAdmin.title=What were the additional disposal costs?
-disposalFees.personalRepInPeriodOfAdmin.indirect.title=What were the additional disposal costs?
+disposalFees.personalRepInPeriodOfAdmin.indirect.title=How much were the additional disposal costs?
 disposalFees.capacitor.title=What were the person’s additional disposal costs?
 disposalFees.capacitor.indirect.title=How much were the person’s additional costs when they sold or disposed of the shares?
 
@@ -1871,9 +1857,10 @@ disposalFees.trust.indirect.helpText=Additional costs might include stock broker
 disposalFees.personalRep.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
 disposalFees.personalRep.indirect.helpText=Additional costs might include stock broker’s fees.
 disposalFees.personalRepInPeriodOfAdmin.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
-disposalFees.personalRepInPeriodOfAdmin.indirect.helpText=Additional costs might include stock broker’s fees.
+disposalFees.personalRepInPeriodOfAdmin.indirect.helpText=For example, the amount you, or the estate, paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
 disposalFees.personalRepInPeriodOfAdmin.agent.helpText=For example, the amount the estate paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
-disposalFees.personalRepInPeriodOfAdmin.agent.indirect.helpText=Additional costs might include stock broker’s fees.
+disposalFees.personalRepInPeriodOfAdmin.agent.indirect.helpText=For example, the amount the estate paid to an estate agent or solicitor. If the costs were shared you can only include the estate’s share.
+
 disposalFees.capacitor.helpText=For example, the amount the person paid to an estate agent or solicitor. If the person shared these costs, they can only claim their share.
 disposalFees.capacitor.indirect.helpText=Additional costs might include stock broker’s fees.
 
@@ -2407,8 +2394,6 @@ improvementCosts.agent.title=Were there any improvement costs?
 improvementCosts.trust.title=Were there any improvement costs?
 improvementCosts.capacitor.title=Does the person want to claim any improvement costs?
 improvementCosts.personalRep.title=Were there any improvement costs?
-improvementCosts.personalRepInPeriodOfAdmin.title=Were there any improvement costs?
-improvementCosts.personalRepInPeriodOfAdmin.agent.title=Were there any improvement costs?
 
 improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance.
 improvementCosts.agent.helpText=Your client can only claim for their share of any costs that added value to the property. They cannot claim for mortgage interest, decorating or maintenance.
@@ -2459,14 +2444,12 @@ acquisitionFees.agent.title=Were there any additional acquisition costs?
 acquisitionFees.trust.title=Were there any additional acquisition costs?
 acquisitionFees.capacitor.title=Does the person want to claim for any additional acquisition costs?
 acquisitionFees.personalRep.title=Were there any additional acquisition costs?
-acquisitionFees.personalRepInPeriodOfAdmin.title=Were there any additional acquisition costs?
 
 acquisitionFees.indirect.title=Do you want to claim any additional costs you paid when you got the shares?
 acquisitionFees.agent.indirect.title=Were there any additional acquisition costs?
 acquisitionFees.trust.indirect.title=Were there any additional acquisition costs?
 acquisitionFees.capacitor.indirect.title=Does the person want to claim any additional costs they paid when they got the shares?
 acquisitionFees.personalRep.indirect.title=Were there any additional acquisition costs?
-acquisitionFees.personalRepInPeriodOfAdmin.indirect.title=Were there any additional acquisition costs?
 
 acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
 acquisitionFees.agent.helpText=For example, fees for surveyors or solicitors. If your client shared these costs, they can only claim their share.
@@ -2608,11 +2591,8 @@ periodOfAdminMarketValue.indirect.title=What was the market value of the shares 
 
 periodOfAdminMarketValue.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
 periodOfAdminMarketValue.agent.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
-periodOfAdminMarketValue.personalRepInPeriodOfAdmin.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of the estate’s share.
-
 periodOfAdminMarketValue.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
 periodOfAdminMarketValue.agent.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
-periodOfAdminMarketValue.personalRepInPeriodOfAdmin.indirect.helpText=You can provide a valuation or a realistic estimate. You should add on any acquisition costs, for example, stock broker’s fees.
 
 periodOfAdminMarketValue.label=Property’s market value on {0}
 periodOfAdminMarketValue.error.required=Enter the market value of the property on {0}

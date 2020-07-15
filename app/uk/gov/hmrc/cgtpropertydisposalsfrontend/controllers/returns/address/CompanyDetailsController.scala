@@ -182,7 +182,6 @@ class CompanyDetailsController @Inject() (
         r.draftReturn match {
           case Right(_: DraftSingleIndirectDisposalReturn)   =>
             Redirect(routes.PropertyDetailsController.checkYourAnswers())
-
           case Left(m: DraftMultipleIndirectDisposalsReturn) =>
             val backLink =
               m.exampleCompanyDetailsAnswers
@@ -190,12 +189,7 @@ class CompanyDetailsController @Inject() (
                   routes.CompanyDetailsController.checkYourAnswers()
                 )
 
-            Ok(
-              multipleIndirectDisposalsGuidancePage(
-                backLink,
-                m.triageAnswers.isPeriodOfAdmin
-              )
-            )
+            Ok(multipleIndirectDisposalsGuidancePage(backLink))
         }
       }
     }
