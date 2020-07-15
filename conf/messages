@@ -2236,7 +2236,6 @@ acquisitionPriceBought.agent.indirect.title=What was the acquisition amount?
 acquisitionPriceBought.trust.indirect.title=What was the acquisition amount?
 acquisitionPriceBought.capacitor.indirect.title=How much did the person pay for the shares?
 acquisitionPriceBought.personalRep.indirect.title=How much did the person pay for the shares?
-acquisitionPriceBought.personalRep.indirect.title=
 
 acquisitionPriceBought.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
 acquisitionPriceBought.agent.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your client’s share.

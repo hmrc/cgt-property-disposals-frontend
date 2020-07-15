@@ -168,10 +168,16 @@ class CompanyDetailsControllerSpec
     (sessionData, fillingOutReturn, draftReturn)
   }
 
-  val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
+  val allIndividualUserTypeGen: Gen[IndividualUserType] =
     individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative => true
-      case _                                         => false
+      case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
+      case _                                                                                 => false
+    }
+
+  def userMessageKey(individualUserType: IndividualUserType): String =
+    individualUserType match {
+      case PersonalRepresentativeInPeriodOfAdmin => ".personalRepInPeriodOfAdmin"
+      case _                                     => ""
     }
 
   def capacitorState(): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
@@ -187,14 +193,6 @@ class CompanyDetailsControllerSpec
       Right(sample[IndividualName]),
       UserType.Agent,
       Some(PersonalRepresentative),
-      None
-    )
-
-  def personalRepInPOAState(): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) =
-    sessionWithDraftSingleIndirectDisposal(
-      Right(sample[IndividualName]),
-      UserType.Agent,
-      Some(PersonalRepresentativeInPeriodOfAdmin),
       None
     )
 
@@ -343,7 +341,7 @@ class CompanyDetailsControllerSpec
           )
 
         "handling all users" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -353,19 +351,10 @@ class CompanyDetailsControllerSpec
               )
             }
 
-            test(performAction(), "companyDetails.isUk.multipleIndirect.title")
-          }
-        }
+            val userMsgKey = userMessageKey(individualUserType)
 
-        "handling personalRepInPeriodOfAdmin user" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              personalRepInPOAState()._1
-            )
+            test(performAction(), s"companyDetails.isUk.multipleIndirect$userMsgKey.title")
           }
-
-          test(performAction(), "companyDetails.isUk.multipleIndirect.personalRepInPeriodOfAdmin.title")
         }
 
       }
@@ -481,29 +470,19 @@ class CompanyDetailsControllerSpec
           )
 
         "nothing is selected" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
 
+            val userKey = userMessageKey(individualUserType)
+
             test()(
               "isUk.multipleIndirect.error.required",
-              "companyDetails.isUk.multipleIndirect.title"
+              s"companyDetails.isUk.multipleIndirect$userKey.title"
             )
           }
-        }
-
-        "nothing is selected for personalRepInPeriodOfAdmin" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(personalRepInPOAState()._1)
-          }
-
-          test()(
-            "isUk.companyDetails.personalRep.error.required",
-            "companyDetails.isUk.multipleIndirect.personalRepInPeriodOfAdmin.title"
-          )
         }
 
       }
@@ -662,23 +641,16 @@ class CompanyDetailsControllerSpec
 
       "display the page for multiple indirect disposals" when {
 
-        def test(result: Future[Result], expectedTitleKey: String)(isPOA: Boolean): Unit =
+        def test(result: Future[Result], expectedTitleKey: String): Unit =
           checkPageIsDisplayed(
             result,
             messageFromMessageKey(expectedTitleKey),
             { doc =>
-              if (isPOA)
-                doc
-                  .select("#address > legend > h1 > span")
-                  .text() shouldBe messageFromMessageKey(
-                  "companyDetails.caption"
-                )
-              else
-                doc
-                  .select("#address > legend > h1 > span")
-                  .text() shouldBe messageFromMessageKey(
-                  "returns.company-details.multipleIndirectDisposals.caption"
-                )
+              doc
+                .select("#address > legend > h1 > span")
+                .text() shouldBe messageFromMessageKey(
+                "returns.company-details.multipleIndirectDisposals.caption"
+              )
 
               doc
                 .select("#address > div:nth-child(2) > label")
@@ -701,23 +673,18 @@ class CompanyDetailsControllerSpec
           )
 
         "handling all users" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
 
-            test(performAction(), "address.uk.companyDetails.multipleIndirect.title")(false)
+            val userMsgKey = userMessageKey(individualUserType)
+            test(
+              performAction(),
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
+            )
           }
-        }
-
-        "handling personalRepInPeriodOfAdmin user" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(personalRepInPOAState()._1)
-          }
-          val msgKey = "address.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title"
-          test(performAction(), msgKey)(true)
         }
 
       }
@@ -947,88 +914,87 @@ class CompanyDetailsControllerSpec
           )
 
         "address line 1 is empty" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
 
+            val userMsgKey = userMessageKey(individualUserType)
+
             test("postcode" -> "W1A2HV")(
               "address-line1.companyDetails.error.required",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
-        "address line 1 is empty for personal rep in poa" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(personalRepInPOAState()._1)
-          }
-
-          test("postcode" -> "W1A2HV")(
-            "address-line1.companyDetails.error.required",
-            "address.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title"
-          )
-        }
-
         "address line 1 is too long" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "address-line1" -> ("a" * 100),
               "postcode"      -> "W1A2HV"
             )(
               "address-line1.companyDetails.error.tooLong",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 1 is invalid" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "address-line1" -> "ab%csd",
               "postcode"      -> "W1A2HV"
             )(
               "address-line1.companyDetails.error.pattern",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 2 is too long" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
+
             test(
               "address-line1" -> "Company name",
               "address-line2" -> ("a" * 100),
               "postcode"      -> "W1A2HV"
             )(
               "address-line2.companyDetails.error.tooLong",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 2 is invalid" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "address-line1" -> "Company name",
@@ -1036,50 +1002,39 @@ class CompanyDetailsControllerSpec
               "postcode"      -> "W1A2HV"
             )(
               "address-line2.companyDetails.error.pattern",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
-        "address line 2 is invalid for personalRepInPeriodOfAdmin" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(personalRepInPOAState()._1)
-          }
-
-          test(
-            "address-line1" -> "Company name",
-            "address-line2" -> "fsdhio*fde@df",
-            "postcode"      -> "W1A2HV"
-          )(
-            "address-line2.companyDetails.error.pattern",
-            "address.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title"
-          )
-        }
-
         "address line 3 is too long" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
+
             test(
               "address-line1" -> "Company name",
               "address-town"  -> ("a" * 100),
               "postcode"      -> "W1A2HV"
             )(
               "address-town.companyDetails.error.tooLong",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 3 is invalid" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "address-line1" -> "Company name",
@@ -1087,34 +1042,39 @@ class CompanyDetailsControllerSpec
               "postcode"      -> "W1A2HV"
             )(
               "address-town.companyDetails.error.pattern",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 4 is too long" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
+
             test(
               "address-line1"  -> "Company name",
               "address-county" -> ("a" * 100),
               "postcode"       -> "W1A2HV"
             )(
               "address-county.companyDetails.error.tooLong",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 4 is invalid" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "address-line1"  -> "Company name",
@@ -1122,71 +1082,61 @@ class CompanyDetailsControllerSpec
               "postcode"       -> "W1A2HV"
             )(
               "address-county.companyDetails.error.pattern",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
-        "address line 4 is invalid for personalRepInPeriodOfAdmin" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(personalRepInPOAState()._1)
-          }
-
-          test(
-            "address-line1"  -> "Company name",
-            "address-county" -> "fsdhio*fde@df",
-            "postcode"       -> "W1A2HV"
-          )(
-            "address-county.companyDetails.error.pattern",
-            "address.uk.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title"
-          )
-        }
-
         "address postcode is empty" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
 
+            val userMsgKey = userMessageKey(individualUserType)
+
             test("address-line1" -> "1 the Street")(
               "postcode.companyDetails.error.required",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "the address postcode contains invalid characters" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "address-line1" -> "1 the Street",
               "postcode"      -> "W1A,2HV"
             )(
               "postcode.companyDetails.error.invalidCharacters",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "the address postcode does not have a valid format" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "address-line1" -> "1 the Street",
               "postcode"      -> "ABC123"
             )(
               "postcode.companyDetails.error.pattern",
-              "address.uk.companyDetails.multipleIndirect.title"
+              s"address.uk.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
@@ -1414,23 +1364,16 @@ class CompanyDetailsControllerSpec
           )
 
         "handling all users" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
 
-            test(performAction(), "nonUkAddress.companyDetails.multipleIndirect.title")(false)
-          }
-        }
+            val userMsgKey = userMessageKey(individualUserType)
 
-        "handling personal personalRepInPeriodOfAdmin user" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(personalRepInPOAState()._1)
+            test(performAction(), s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title")(false)
           }
-          val msgKey = "nonUkAddress.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title"
-          test(performAction(), msgKey)(true)
         }
 
       }
@@ -1647,88 +1590,87 @@ class CompanyDetailsControllerSpec
           )
 
         "address line 1 is empty" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
 
+            val userMsgKey = userMessageKey(individualUserType)
+
             test("countryCode" -> "HK")(
               "nonUkAddress-line1.companyDetails.error.required",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
-        "address line 1 is empty for period of admin" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(personalRepInPOAState()._1)
-          }
-
-          test("countryCode" -> "HK")(
-            "nonUkAddress-line1.companyDetails.error.required",
-            "nonUkAddress.companyDetails.multipleIndirect.personalRepInPeriodOfAdmin.title"
-          )
-        }
-
         "address line 1 is too long" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "nonUkAddress-line1" -> ("a" * 100),
               "countryCode"        -> "HK"
             )(
               "nonUkAddress-line1.companyDetails.error.tooLong",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 1 is invalid" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "nonUkAddress-line1" -> "ab%csd",
               "countryCode"        -> "HK"
             )(
               "nonUkAddress-line1.companyDetails.error.pattern",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 2 is too long" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
+
             test(
               "nonUkAddress-line1" -> "Company name",
               "nonUkAddress-line2" -> ("a" * 100),
               "countryCode"        -> "HK"
             )(
               "nonUkAddress-line2.companyDetails.error.tooLong",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 2 is invalid" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "nonUkAddress-line1" -> "Company name",
@@ -1736,34 +1678,39 @@ class CompanyDetailsControllerSpec
               "countryCode"        -> "HK"
             )(
               "nonUkAddress-line2.companyDetails.error.pattern",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 3 is too long" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
+
             test(
               "nonUkAddress-line1" -> "Company name",
               "nonUkAddress-line3" -> ("a" * 100),
               "countryCode"        -> "HK"
             )(
               "nonUkAddress-line3.companyDetails.error.tooLong",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 3 is invalid" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "nonUkAddress-line1" -> "Company name",
@@ -1771,34 +1718,39 @@ class CompanyDetailsControllerSpec
               "countryCode"        -> "HK"
             )(
               "nonUkAddress-line3.companyDetails.error.pattern",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 4 is too long" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
+
             test(
               "nonUkAddress-line1" -> "Company name",
               "nonUkAddress-line4" -> ("a" * 100),
               "countryCode"        -> "HK"
             )(
               "nonUkAddress-line4.companyDetails.error.tooLong",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "address line 4 is invalid" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "nonUkAddress-line1" -> "Company name",
@@ -1806,40 +1758,44 @@ class CompanyDetailsControllerSpec
               "countryCode"        -> "HK"
             )(
               "nonUkAddress-line4.companyDetails.error.pattern",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "a country is not selected" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "nonUkAddress-line1" -> "Company name"
             )(
               "countryCode.companyDetails.error.required",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
 
         "the country cannot be found" in {
-          forAll(acceptedIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
+          forAll(allIndividualUserTypeGen) { (individualUserType: IndividualUserType) =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithDraftMultipleIndirectDisposals(individualUserType)._1)
             }
+
+            val userMsgKey = userMessageKey(individualUserType)
 
             test(
               "nonUkAddress-line1" -> "Company name",
               "countryCode"        -> "ZZ"
             )(
               "countryCode.companyDetails.error.notFound",
-              "nonUkAddress.companyDetails.multipleIndirect.title"
+              s"nonUkAddress.companyDetails.multipleIndirect$userMsgKey.title"
             )
           }
         }
