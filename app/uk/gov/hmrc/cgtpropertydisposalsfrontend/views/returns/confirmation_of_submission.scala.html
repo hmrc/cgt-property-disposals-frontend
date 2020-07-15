@@ -108,13 +108,13 @@
 <div class="govuk-box-highlight">
      <p id="user-details-name">
          @{
-           representeeName.getOrElse(
-             request.userType match {
-                 case Some(UserType.Organisation) => messages(s"$key.organisationNameLine", name)
-                 case Some(UserType.Agent)        => messages(s"$key.agentNameLine", name)
-                 case _                           => name
+             representativeType match {
+                 case Some(PersonalRepresentativeInPeriodOfAdmin) if(!isAgent) => messages(s"$key.estateNameLine", representeeName.getOrElse(name))
+                 case _ =>
+                     if (isAgent)  messages(s"$key.agentNameLine", representeeName.getOrElse(name))
+                     else if (isATrust) messages(s"$key.organisationNameLine", name)
+                     else representeeName.getOrElse(name)
              }
-           )
          }
      </p>
     <h1 class="heading-xlarge">@title</h1>

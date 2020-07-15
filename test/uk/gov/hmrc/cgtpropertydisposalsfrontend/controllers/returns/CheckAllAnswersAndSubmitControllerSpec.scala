@@ -1439,7 +1439,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Estate in period of administration with tax due",
             UserType.Individual,
             AmountInPence(10000),
-            "",
+            "Estate: ",
             taxDueRefLine,
             List(
               submissionLine,
@@ -1454,7 +1454,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             "Agent of estate in period of administration with tax due",
             UserType.Agent,
             AmountInPence(10000),
-            "",
+            "Client: ",
             taxDueRefLine,
             List(
               submissionLine,
@@ -1541,10 +1541,10 @@ class CheckAllAnswersAndSubmitControllerSpec
                 messageFromMessageKey("confirmationOfSubmission.title"),
                 { doc =>
                   val expectedName =
-                    representeeAnswers
+                    namePrefix + representeeAnswers
                       .map(_.name.makeSingleName())
                       .getOrElse(
-                        namePrefix + name.fold(_.value, _.makeSingleName())
+                        name.fold(_.value, _.makeSingleName())
                       )
 
                   doc.select("#user-details-name").text() shouldBe expectedName
