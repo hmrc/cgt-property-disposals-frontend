@@ -1688,6 +1688,8 @@ class SingleDisposalsTriageController @Inject() (
           )
     }
 
+  // R - the type of previous page's answer that is required before this page can be shown
+  // A - the type of this this page's answer
   private def displayTriagePage[R, A, Page : Writeable](
     state: JourneyState,
     triageAnswers: SingleDisposalTriageAnswers
