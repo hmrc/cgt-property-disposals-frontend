@@ -48,7 +48,6 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
         |        protocol = http
         |        host     = host2
         |        port     = 123
-        |        domain   = stubs
         |        user-agent = agent
         |        max-file-size = 1234
         |      },
@@ -78,7 +77,7 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
     val baseUrl                    = "http://host3:123/cgt-property-disposals"
 
     "Inititalising" must {
-      val expectedUrl  = "http://host2:123/stubs/upscan/v2/initiate"
+      val expectedUrl  = "http://host2:123/upscan/v2/initiate"
       val mockSuccess  = Call("GET", "/mock-success")
       val mockFailiure = Call("GET", "/mock-fail")
 
