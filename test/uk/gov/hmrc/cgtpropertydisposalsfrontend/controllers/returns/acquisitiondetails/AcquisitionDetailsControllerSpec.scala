@@ -1573,8 +1573,9 @@ class AcquisitionDetailsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers]
-                  .copy(acquisitionDate = AcquisitionDate(dateOfDeath.value)),
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = AcquisitionDate(dateOfDeath.value)
+                ),
                 AssetType.Residential,
                 true,
                 UserType.Individual,
@@ -1617,6 +1618,7 @@ class AcquisitionDetailsControllerSpec
         "invalid characters are submitted" in {
           test(key -> "abc")(s"$key.error.invalid")
         }
+
       }
 
       "show an error page" when {
