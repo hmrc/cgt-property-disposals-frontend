@@ -1023,8 +1023,8 @@ sharesDisposalDate-day.error.dayAndYearRequired=Date of disposal must include a 
 sharesDisposalDate-day.error.dayAndMonthRequired=Date of disposal must include a day and a month
 sharesDisposalDate.error.tooFarInFuture=The disposal date cannot be in the future
 sharesDisposalDate.error.before1900=The disposal date must be on or after 01 01 1900, contact HMRC if the date is before this
-sharesDisposalDate.error.periodOfAdminDeathNotAfterDate=The disposal date cannot be before the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
-sharesDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The disposal date cannot be after the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+sharesDisposalDate.error.periodOfAdminDeathNotAfterDate=The disposal date cannot be before the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+sharesDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The disposal date cannot be after the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 sharesDisposalDate.cyaChange=when the shares were sold
 
@@ -1086,8 +1086,8 @@ disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exc
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
-disposalDate.error.periodOfAdminDeathNotAfterDate=The contract exchange date cannot be before the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
-disposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+disposalDate.error.periodOfAdminDeathNotAfterDate=The contract exchange date cannot be before the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+disposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 disposalDate-day.error.required=Contract exchange date must include a day
 disposalDate-month.error.required=Contract exchange date must include a month
@@ -1314,8 +1314,6 @@ multipleDisposalsCompletionDate.error.required=Enter a completion date
 multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
 multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
 multipleDisposalsCompletionDate.error.before1900=Completion date must be on or after 01 01 1900, contact HMRC if the date is before this
-multipleDisposalsCompletionDate.error.periodOfAdminDeathNotAfterDate=The completion date cannot be before the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
-multipleDisposalsCompletionDate.error.nonPeriodOfAdminDeathAfterDate=The completion date cannot be after the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
 multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
@@ -4103,8 +4101,8 @@ multipleDisposalsDisposalDate-year.error.invalid=Enter a real contract exchange 
 multipleDisposalsDisposalDate-month.error.monthAndYearRequired=Contract exchange date must include a month and a year
 multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
-multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=The contact exchange date cannot be before the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
-multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death, go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=The contact exchange date cannot be before the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 multipleDisposalsDisposalDate.cyaChange=the contract exchange date
 
