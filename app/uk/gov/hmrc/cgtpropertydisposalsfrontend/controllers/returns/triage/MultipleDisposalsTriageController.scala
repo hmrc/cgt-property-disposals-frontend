@@ -767,88 +767,84 @@ class MultipleDisposalsTriageController @Inject() (
   def completionDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
-        withPersonalRepresentativeDetails(state) { personalRepDetails =>
-          val completionDate =
-            answers.fold(_.completionDate, c => Some(c.completionDate))
-          val today          = TimeUtils.today()
-          val form           = completionDate.fold(completionDateForm(today, personalRepDetails))(
-            completionDateForm(today, personalRepDetails).fill
-          )
-          val backLink       = answers.fold(
-            _ =>
-              routes.MultipleDisposalsTriageController
-                .whenWereContractsExchanged(),
-            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-          Ok(completionDatePage(form, backLink, state.isRight))
-        }
+        val completionDate =
+          answers.fold(_.completionDate, c => Some(c.completionDate))
+        val today          = TimeUtils.today()
+        val form           = completionDate.fold(completionDateForm(today))(
+          completionDateForm(today).fill
+        )
+        val backLink       = answers.fold(
+          _ =>
+            routes.MultipleDisposalsTriageController
+              .whenWereContractsExchanged(),
+          _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+        Ok(completionDatePage(form, backLink, state.isRight))
       }
     }
 
   def completionDateSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
-        withPersonalRepresentativeDetails(state) { personalRepDetails =>
-          completionDateForm(TimeUtils.today(), personalRepDetails)
-            .bindFromRequest()
-            .fold(
-              { formWithErrors =>
-                val backLink = answers.fold(
-                  _ =>
-                    routes.MultipleDisposalsTriageController
-                      .whenWereContractsExchanged(),
-                  _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+        completionDateForm(TimeUtils.today())
+          .bindFromRequest()
+          .fold(
+            { formWithErrors =>
+              val backLink = answers.fold(
+                _ =>
+                  routes.MultipleDisposalsTriageController
+                    .whenWereContractsExchanged(),
+                _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+              )
+              BadRequest(
+                completionDatePage(
+                  formWithErrors,
+                  backLink,
+                  state.isRight
                 )
-                BadRequest(
-                  completionDatePage(
-                    formWithErrors,
-                    backLink,
-                    state.isRight
-                  )
+              )
+            },
+            completionDate =>
+              if (
+                answers
+                  .fold(_.completionDate, c => Some(c.completionDate))
+                  .contains(completionDate)
+              )
+                Redirect(
+                  routes.MultipleDisposalsTriageController.checkYourAnswers()
                 )
-              },
-              completionDate =>
-                if (
-                  answers
-                    .fold(_.completionDate, c => Some(c.completionDate))
-                    .contains(completionDate)
+              else {
+                val updatedAnswers =
+                  answers.unset(_.completionDate).copy(completionDate = Some(completionDate))
+
+                val newState = updateState(
+                  state,
+                  updatedAnswers,
+                  d =>
+                    d.bimap(
+                      multipleIndirect =>
+                        multipleIndirect.copy(
+                          exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
+                          yearToDateLiabilityAnswers = None
+                        ),
+                      multiple =>
+                        multiple.copy(
+                          examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
+                            _.unset(_.disposalDate)
+                          ),
+                          yearToDateLiabilityAnswers = None
+                        )
+                    )
                 )
+                updateStateAndThen(
+                  newState,
                   Redirect(
                     routes.MultipleDisposalsTriageController.checkYourAnswers()
                   )
-                else {
-                  val updatedAnswers =
-                    answers.unset(_.completionDate).copy(completionDate = Some(completionDate))
+                )
 
-                  val newState = updateState(
-                    state,
-                    updatedAnswers,
-                    d =>
-                      d.bimap(
-                        multipleIndirect =>
-                          multipleIndirect.copy(
-                            exampleCompanyDetailsAnswers = multipleIndirect.exampleCompanyDetailsAnswers,
-                            yearToDateLiabilityAnswers = None
-                          ),
-                        multiple =>
-                          multiple.copy(
-                            examplePropertyDetailsAnswers = multiple.examplePropertyDetailsAnswers.map(
-                              _.unset(_.disposalDate)
-                            ),
-                            yearToDateLiabilityAnswers = None
-                          )
-                      )
-                  )
-                  updateStateAndThen(
-                    newState,
-                    Redirect(
-                      routes.MultipleDisposalsTriageController.checkYourAnswers()
-                    )
-                  )
-
-                }
-            )
-        }
+              }
+          )
       }
     }
 
@@ -1606,8 +1602,7 @@ object MultipleDisposalsTriageController {
   }
 
   def completionDateForm(
-    maximumDateInclusive: LocalDate,
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
+    maximumDateInclusive: LocalDate
   ): Form[CompletionDate] =
     Form(
       mapping(
@@ -1618,11 +1613,7 @@ object MultipleDisposalsTriageController {
             "multipleDisposalsCompletionDate-day",
             "multipleDisposalsCompletionDate-month",
             "multipleDisposalsCompletionDate-year",
-            "multipleDisposalsCompletionDate",
-            List(
-              TimeUtils
-                .personalRepresentativeDateValidation(personalRepresentativeDetails, "multipleDisposalsCompletionDate")
-            )
+            "multipleDisposalsCompletionDate"
           )
         )
       )(CompletionDate(_))(d => Some(d.value))
