@@ -42,7 +42,7 @@ class LandingPageController @Inject() (
 
   def agentsLandingPage(): Action[AnyContent] =
     Action(
-      Redirect(viewConfig.agentsStartPageUrl).withNewSession
+      Redirect(viewConfig.agentsStartPageUrl)
     )
 
   def signInPage(): Action[AnyContent] =
