@@ -205,6 +205,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeReturn.initialGainOrLoss,
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
+          None,
           TimeUtils.today()
         )
 
@@ -370,6 +371,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers),
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
+          None,
           TimeUtils.today()
         )
 
@@ -532,6 +534,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers),
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
+          None,
           TimeUtils.today()
         )
 
@@ -700,6 +703,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers),
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
+          None,
           TimeUtils.today()
         )
 
@@ -860,6 +864,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.yearToDateLiabilityAnswers),
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
+          None,
           TimeUtils.today()
         )
 
@@ -1033,6 +1038,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         Some(completeReturn.yearToDateLiabilityAnswers.merge),
         completeReturn.initialGainOrLoss,
         Some(completeReturn.supportingDocumentAnswers),
+        None,
         None,
         TimeUtils.today()
       )

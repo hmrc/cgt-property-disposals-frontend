@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 sealed trait DraftReturn extends Product with Serializable {
   val id: UUID
   val lastUpdatedDate: LocalDate
+  val gainOrLossAfterReliefs: Option[AmountInPence]
 }
 
 final case class DraftSingleDisposalReturn(
@@ -43,6 +44,7 @@ final case class DraftSingleDisposalReturn(
   initialGainOrLoss: Option[AmountInPence],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -68,6 +70,7 @@ object DraftSingleDisposalReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -81,6 +84,7 @@ final case class DraftMultipleDisposalsReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -99,6 +103,7 @@ object DraftMultipleDisposalsReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -114,6 +119,7 @@ final case class DraftSingleIndirectDisposalReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -134,6 +140,7 @@ object DraftSingleIndirectDisposalReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -147,6 +154,7 @@ final case class DraftMultipleIndirectDisposalsReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -165,6 +173,7 @@ object DraftMultipleIndirectDisposalsReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -178,6 +187,7 @@ final case class DraftSingleMixedUseDisposalReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -196,6 +206,7 @@ object DraftSingleMixedUseDisposalReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
