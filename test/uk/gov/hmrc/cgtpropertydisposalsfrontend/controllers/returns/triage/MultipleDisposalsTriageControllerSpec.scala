@@ -3009,8 +3009,6 @@ class MultipleDisposalsTriageControllerSpec
         isValidJourney
       )
 
-      behave like noDateOfDeathForPersonalRepBehaviour(performAction)
-
       "display the page" when {
 
         def test(
@@ -3121,22 +3119,19 @@ class MultipleDisposalsTriageControllerSpec
         isValidJourney
       )
 
-      behave like noDateOfDeathForPersonalRepBehaviour(() => performAction())
-
       "show a form error" when {
 
         def testFormError(
-          individualUserType: Option[IndividualUserType] = Some(Self),
-          representeeAnswers: Option[RepresenteeAnswers] = None
-        )(
           formData: List[(String, String)]
         )(expectedErrorMessageKey: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = individualUserType),
-                representeeAnswers = representeeAnswers
+                sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                  individualUserType = Some(Self)
+                ),
+                representeeAnswers = None
               )._1
             )
           }
@@ -3168,13 +3163,13 @@ class MultipleDisposalsTriageControllerSpec
                   "multipleDisposalsCompletionDate-year"  -> scenario.yearInput
                 ).collect { case (key, Some(value)) => key -> value }
 
-                testFormError()(data)(scenario.expectedErrorMessageKey)
+                testFormError(data)(scenario.expectedErrorMessageKey)
               }
             }
         }
 
         "the date entered is later than today" in {
-          testFormError()(formData(today.plusDays(1L)))(
+          testFormError(formData(today.plusDays(1L)))(
             "multipleDisposalsCompletionDate.error.tooFarInFuture"
           )
         }
@@ -3182,35 +3177,8 @@ class MultipleDisposalsTriageControllerSpec
         "the date entered is before 01-01-1900" in {
           val date = LocalDate.of(1800, 1, 1)
 
-          testFormError()(formData(date))(
+          testFormError(formData(date))(
             "multipleDisposalsCompletionDate.error.before1900"
-          )
-        }
-
-        "the disposal date is strictly after the date of death and the user is a non-period of admin personal rep" in {
-          testFormError(
-            Some(PersonalRepresentative),
-            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L)))))
-          )(formData(today))(
-            "multipleDisposalsCompletionDate.error.nonPeriodOfAdminDeathAfterDate"
-          )
-        }
-
-        "the disposal date is on the date of death and the user is a period of admin personal rep" in {
-          testFormError(
-            Some(PersonalRepresentativeInPeriodOfAdmin),
-            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
-          )(formData(today))(
-            "multipleDisposalsCompletionDate.error.periodOfAdminDeathNotAfterDate"
-          )
-        }
-
-        "the disposal date is strictly before the date of death and the user is a period of admin personal rep" in {
-          testFormError(
-            Some(PersonalRepresentativeInPeriodOfAdmin),
-            Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today))))
-          )(formData(today.minusDays(1L)))(
-            "multipleDisposalsCompletionDate.error.periodOfAdminDeathNotAfterDate"
           )
         }
 
@@ -3347,13 +3315,16 @@ class MultipleDisposalsTriageControllerSpec
 
         "the user has started a draft return and" when {
 
-          def test(
-            currentAnswers: MultipleDisposalsTriageAnswers,
-            representeeAnswers: Option[RepresenteeAnswers],
-            submittedDate: LocalDate
-          ) = {
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            val currentAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              individualUserType = Some(Self),
+              completionDate = CompletionDate(today.minusDays(1L))
+            )
+            val submittedDate  = today
+
             val (session, journey, draftReturn) =
-              sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = representeeAnswers)
+              sessionDataWithFillingOutReturn(currentAnswers, representeeAnswers = None)
 
             val updatedAnswers     =
               currentAnswers.unset(_.completionDate).copy(completionDate = Some(CompletionDate(submittedDate)))
@@ -3379,43 +3350,6 @@ class MultipleDisposalsTriageControllerSpec
                 formData(submittedDate): _*
               ),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
-            )
-          }
-
-          "have completed the section and they enter a figure which is " +
-            "different than one they have already entered" in {
-            test(
-              sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                individualUserType = Some(Self),
-                completionDate = CompletionDate(today.minusDays(1L))
-              ),
-              None,
-              today
-            )
-          }
-
-          "the disposal date is on the date of death when the user is a non-period of admin personal rep" in {
-            test(
-              sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
-              today
-            )
-          }
-
-          "the disposal date is strictly before the date of death when the user is a non-period of admin personal rep" in {
-            test(
-              sample[IncompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(PersonalRepresentative)),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today)))),
-              today.minusDays(1L)
-            )
-          }
-
-          "the disposal date is strictly after the date of death when the user is a period of admin personal rep" in {
-            test(
-              sample[IncompleteMultipleDisposalsTriageAnswers]
-                .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(today.minusDays(1L))))),
-              today
             )
           }
 
