@@ -442,7 +442,7 @@ class SingleDisposalsTriageController @Inject() (
           displayTriagePage(state, triageAnswers)(
             _.fold(_.assetType, c => Some(c.assetType)),
             answers => disposalDateBackLink(answers)
-          )(_ => disposalDateForm(TimeUtils.today(), personalRepDetails))(
+          )(_ => disposalDateForm(TimeUtils.today(), personalRepDetails, viewConfig.periodOfAdminEnabled))(
             extractField = _.fold(
               i => i.disposalDate.map(_.value).orElse(i.tooEarlyDisposalDate),
               c => Some(c.disposalDate.value)
@@ -478,7 +478,7 @@ class SingleDisposalsTriageController @Inject() (
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case None    => Redirect(disposalDateBackLink(triageAnswers))
             case Some(_) =>
-              disposalDateForm(TimeUtils.today(), personalRepDetails)
+              disposalDateForm(TimeUtils.today(), personalRepDetails, viewConfig.periodOfAdminEnabled)
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
@@ -1031,7 +1031,7 @@ class SingleDisposalsTriageController @Inject() (
               c => Some(c.assetType).filter(e => e === IndirectDisposal)
             ),
             _ => routes.SingleDisposalsTriageController.countryOfResidence()
-          )(_ => sharesDisposalDateForm(personalRepDetails))(
+          )(_ => sharesDisposalDateForm(personalRepDetails, viewConfig.periodOfAdminEnabled))(
             _.fold(
               _.disposalDate.map(d => ShareDisposalDate(d.value)),
               e => Some(ShareDisposalDate(e.disposalDate.value))
@@ -1058,7 +1058,7 @@ class SingleDisposalsTriageController @Inject() (
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case Some(assetType) if assetType === AssetType.IndirectDisposal =>
-              sharesDisposalDateForm(personalRepDetails)
+              sharesDisposalDateForm(personalRepDetails, viewConfig.periodOfAdminEnabled)
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
@@ -1863,7 +1863,8 @@ object SingleDisposalsTriageController {
 
   def disposalDateForm(
     maximumDateInclusive: LocalDate,
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
+    periodOfAdminEnabled: Boolean
   ): Form[LocalDate] =
     Form(
       mapping(
@@ -1875,7 +1876,10 @@ object SingleDisposalsTriageController {
             "disposalDate-month",
             "disposalDate-year",
             "disposalDate",
-            List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, "disposalDate"))
+            if (periodOfAdminEnabled)
+              List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, "disposalDate"))
+            else
+              List.empty
           )
         )
       )(identity)(Some(_))

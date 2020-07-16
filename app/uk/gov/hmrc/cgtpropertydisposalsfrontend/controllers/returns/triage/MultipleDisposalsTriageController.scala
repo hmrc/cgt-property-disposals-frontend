@@ -877,12 +877,12 @@ class MultipleDisposalsTriageController @Inject() (
                 .assetTypeForNonUkResidents(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
-          val form     =
-            answers.fold(_.completionDate, e => Some(e.completionDate)) match {
-              case Some(value) =>
-                sharesDisposalDateForm(None).fill(ShareDisposalDate(value.value))
-              case None        => sharesDisposalDateForm(personalRepDetails)
-            }
+          val form = {
+            val blankForm = sharesDisposalDateForm(personalRepDetails, viewConfig.periodOfAdminEnabled)
+            answers
+              .fold(_.completionDate, e => Some(e.completionDate))
+              .fold(blankForm)(c => blankForm.fill(ShareDisposalDate(c.value)))
+          }
           Ok(
             disposalDateOfSharesForNonUk(
               form,
@@ -900,7 +900,7 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
-          sharesDisposalDateForm(personalRepDetails)
+          sharesDisposalDateForm(personalRepDetails, viewConfig.periodOfAdminEnabled)
             .bindFromRequest()
             .fold(
               { formWithErrors =>

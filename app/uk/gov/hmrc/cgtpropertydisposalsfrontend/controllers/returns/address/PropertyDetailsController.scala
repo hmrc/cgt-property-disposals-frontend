@@ -918,7 +918,12 @@ class PropertyDetailsController @Inject() (
       if (endDateOfTaxYear.isBefore(completionDate.value)) endDateOfTaxYear
       else completionDate.value
 
-    disposalDateForm(maximumDateInclusive, startDateOfTaxYear, personalRepresentativeDetails)
+    disposalDateForm(
+      maximumDateInclusive,
+      startDateOfTaxYear,
+      personalRepresentativeDetails,
+      viewConfig.periodOfAdminEnabled
+    )
   }
 
   private def extractIndividualUserType(
@@ -1012,7 +1017,8 @@ object PropertyDetailsController {
   def disposalDateForm(
     maximumDateInclusive: LocalDate,
     minimumDateInclusive: LocalDate,
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
+    periodOfAdminEnabled: Boolean
   ): Form[LocalDate] = {
     val key = "multipleDisposalsDisposalDate"
 
@@ -1026,10 +1032,13 @@ object PropertyDetailsController {
             s"$key-month",
             s"$key-year",
             key,
-            List(
-              TimeUtils
-                .personalRepresentativeDateValidation(personalRepresentativeDetails, key)
-            )
+            if (periodOfAdminEnabled)
+              List(
+                TimeUtils
+                  .personalRepresentativeDateValidation(personalRepresentativeDetails, key)
+              )
+            else
+              List.empty
           )
         )
       )(identity)(Some(_))

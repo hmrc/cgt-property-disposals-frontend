@@ -700,7 +700,8 @@ object CommonTriageQuestionsController {
   )
 
   def sharesDisposalDateForm(
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
+    periodOfAdminEnabled: Boolean
   ): Form[ShareDisposalDate] = {
     val key = "sharesDisposalDate"
     Form(
@@ -713,7 +714,10 @@ object CommonTriageQuestionsController {
             s"$key-month",
             s"$key-year",
             key,
-            List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
+            if (periodOfAdminEnabled)
+              List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
+            else
+              List.empty
           )
         )
       )(ShareDisposalDate(_))(d => Some(d.value))
