@@ -27,8 +27,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 class LandingPageController @Inject() (
   cc: MessagesControllerComponents,
   val config: Configuration,
-  landing_page: views.html.landing_page,
-  agents_landing_page: views.html.agents_landing_page
+  landing_page: views.html.landing_page
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
@@ -42,10 +41,8 @@ class LandingPageController @Inject() (
     Action(implicit request => Ok(landing_page(indirectDisposalsEnabled, mixedUseEnabled)))
 
   def agentsLandingPage(): Action[AnyContent] =
-    Action(implicit request =>
-      Ok(
-        agents_landing_page(indirectDisposalsEnabled, mixedUseEnabled)
-      )
+    Action(
+      Redirect(viewConfig.agentsStartPageUrl).withNewSession
     )
 
   def signInPage(): Action[AnyContent] =
