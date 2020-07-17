@@ -79,7 +79,13 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
       @answers.individualUserType.filter(i => !viewConfig.periodOfAdminEnabled || i === Self).map { individualUserType =>
       @cyaRow(
           messages("who-are-you-reporting-for.title"),
-          Html(messages(if(isAgent) s"individualUserType.agent.${individualUserType.toString}" else s"individualUserType.${individualUserType.toString}")),
+          Html({
+              val periodOfAdminDisabledKey = if(viewConfig.periodOfAdminEnabled) "" else ".periodOfAdminDisabled"
+              messages(
+                  if(isAgent) s"individualUserType$periodOfAdminDisabledKey.agent.${individualUserType.toString}"
+                  else s"individualUserType$periodOfAdminDisabledKey.${individualUserType.toString}"
+              )
+          }),
           Some(cyaChange(messages("individualUserType.cyaChange"), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
           "individualUserType"
       )
