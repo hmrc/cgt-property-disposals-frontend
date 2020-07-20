@@ -7,6 +7,7 @@
 -> /  initial_gain_or_loss.Routes
 -> /  property_details.Routes
 -> /  upload_supporting_evidence.Routes
+-> /  gain_or_loss_after_reliefs.Routes
 
 GET  /task-list                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()
 

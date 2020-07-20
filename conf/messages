@@ -1358,6 +1358,7 @@ task-list.acquisition-details.link=Enter purchase or acquisition details
 task-list.exemptions-and-losses.link=Enter losses and exemptions
 task-list.save-and-come-back.link=Save and come back later
 task-list.relief-details.link=Enter reliefs
+task-list.gain-or-loss-after-reliefs.link=Enter gain or loss after reliefs
 
 task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
@@ -4381,6 +4382,74 @@ representee.cyaChange.isFirstReturn=if this is the first return in this tax year
 # PERSON REPRESENTED PAGES - END
 #===================================================
 
+
+#===================================================
+#  GAIN OR LOSS AFTER RELIEFS PAGES - START
+#===================================================
+
+gainOrLossAfterReliefs.caption=Gain or loss after reliefs
+
+gainOrLossAfterReliefs.title=Did you make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.agent.title=Did your client make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.trust.title=Did the trust make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.capacitor.title=Did the person make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRep.title=Did the person make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Did the estate make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Did your client make a gain on the disposal in this return after reliefs were subtracted?
+
+gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
+gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss
+gainOrLossAfterReliefs.noLossOrGain.outerLabel=I made no gain or loss after reliefs
+
+gainOrLossAfterReliefs.gain.notSelf.outerLabel=Yes, they made a gain
+gainOrLossAfterReliefs.loss.notSelf.outerLabel=No, they made a loss
+gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel=They made no gain or loss after reliefs
+
+gainOrLossAfterReliefs.gain.innerLabel=Amount of gain
+gainOrLossAfterReliefs.loss.innerLabel=Amount of loss
+
+gainOrLossAfterReliefs.error.required=Select yes if you made a gain
+gainOrLossAfterReliefs.agent.error.required=Select yes if your client made a gain
+gainOrLossAfterReliefs.trust.error.required=Select yes if the trust made a gain
+gainOrLossAfterReliefs.capacitor.error.required=Select yes if the person made a gain
+gainOrLossAfterReliefs.personalRep.error.required=Select yes if the person made a gain
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.error.required=Select yes if the estate made a gain
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client made a gain
+
+gainOrLossAfterReliefs.error.invalid=Select yes if you made a gain
+gainOrLossAfterReliefs.agent.error.invalid=Select yes if your client made a gain
+gainOrLossAfterReliefs.trust.error.invalid=Select yes if the trust made a gain
+gainOrLossAfterReliefs.capacitor.error.invalid=Select yes if the person made a gain
+gainOrLossAfterReliefs.personalRep.error.invalid=Select yes if the person made a gain
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.error.invalid=Select yes if the estate made a gain
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.error.invalid=Select yes if your client made a gain
+
+gainAfterReliefs.error.required=Enter the gain amount, like 50,000 or 52,500.54
+gainAfterReliefs.error.invalid=The gain amount must be a number, like 50,000 or 52,500.54
+gainAfterReliefs.error.tooLarge=The gain amount must be 50,000,000,000.00 or less
+gainAfterReliefs.error.tooManyDecimals=The gain amount must have 2 decimal places or less, like 2,908 or 740.50
+gainAfterReliefs.error.tooSmall=The gain amount must be more than 0
+
+lossAfterReliefs.error.required=Enter the loss amount, like 32,000 or 32,500.83
+lossAfterReliefs.error.invalid=The loss amount must be a number, like 32,000 or 32,500.83
+lossAfterReliefs.error.tooLarge=The loss amount must be 50,000,000,000.00 or less
+lossAfterReliefs.error.tooManyDecimals=The loss amount must have 2 decimal places or less, like 2,908 or 740.50
+lossAfterReliefs.error.tooSmall=The loss amount must be more than 0
+
+gainOrLossAfterReliefs.link=How to work out the overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.agent.link=How to work out your client’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.trust.link=How to work out the trust’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.capacitor.link=How to work out the person’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.personalRep.link=How to work out the person’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link=How to work out the estate’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link=How to work out your client’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+
+gainOrLossAfterReliefs.cya.title=Check your answers
+gainOrLossAfterReliefs.cyaChange=whether a gain, a loss, or no gain or loss was made after reliefs
+
+#===================================================
+#  GAIN OR LOSS AFTER RELIEFS PAGES - END
+#===================================================
 
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English

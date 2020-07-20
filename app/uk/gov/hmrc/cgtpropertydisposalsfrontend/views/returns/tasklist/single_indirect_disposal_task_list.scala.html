@@ -31,7 +31,7 @@
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(draftReturn: DraftSingleIndirectDisposalReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftSingleIndirectDisposalReturn, isFurtherReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("service.title")}
 
@@ -51,12 +51,28 @@
 }
 
 @disposalDetailsState = @{draftReturn.disposalDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
+
 @acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
+
+@gainOrLossAfterReliefsState = @{
+    if(isFurtherReturn.contains(true)){
+        (companyDetailsState, disposalDetailsState, acquistionDetailsState) match {
+            case (Complete, Complete, Complete)  =>
+                Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))
+            case _ =>
+                Some(CannotStart)
+        }
+    } else
+        None
+}
 
 @exemptionsAndLossesState = @{
     (companyDetailsState, disposalDetailsState, acquistionDetailsState) match {
         case (Complete, Complete, Complete) =>
-            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+            gainOrLossAfterReliefsState match {
+                case Some(Complete) | None => draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+                case _                     => CannotStart
+            }
         case _ =>
             CannotStart
     }
@@ -145,6 +161,16 @@
                 @taskLink(messages("task-list.acquisition-details.link"),
                     returns.acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers().url, acquistionDetailsState)
                 </li>
+
+                @gainOrLossAfterReliefsState.map{ state =>
+                    <li id="gainOrLossAfterReliefs" class="app-task-list__item">
+                        @taskLink(
+                            messages("task-list.gain-or-loss-after-reliefs.link"),
+                            returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers().url,
+                            state
+                        )
+                    </li>
+                }
 
             </ul>
         </li>
