@@ -33,10 +33,15 @@ class LandingPageControllerSpec extends ControllerSpec {
         checkPageIsDisplayed(
           controller.landingPage()(FakeRequest()),
           messageFromMessageKey("landingPage.title"),
-          doc =>
+          doc => {
+            doc
+              .select(".panel-border-wide > p > a")
+              .attr("href") shouldBe viewConfig.contactHmrc
+
             doc
               .select(".button")
               .attr("href") shouldBe s"${routes.StartController.start()}"
+          }
         )
       }
 

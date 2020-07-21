@@ -100,7 +100,11 @@
 
     <div class="panel panel-border-wide">
         <p>
-            @Html(messages("landingPage.howTo.firstReturnsOnly", appConfig.contactHmrc))
+            @if(appConfig.furtherReturnsEnabled){
+                @Html(messages("landingPage.howTo.furtherReturns", appConfig.contactHmrc))
+            } else{
+                @Html(messages("landingPage.howTo.firstReturnsOnly", appConfig.contactHmrc))
+            }
         </p>
     </div>
 
