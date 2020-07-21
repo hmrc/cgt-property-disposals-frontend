@@ -53,6 +53,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
     "external-url.legacy-cgt-non-resident"
   )
   val agentsSignInUrl: String                         = getString("external-url.sign-in-to-agents")
+  val agentsStartPageUrl: String                      = getString("external-url.agents-start-page")
   val createAgentsAccountUrl: String                  = getString(
     "external-url.create-agents-account"
   )
