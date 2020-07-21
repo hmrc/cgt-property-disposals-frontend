@@ -150,7 +150,7 @@ class ReturnsServiceImpl @Inject() (
                                                      .leftMap(Error(_))
                                                      .map(_.draftReturns)
                                                  )
-      (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid)
+      (validDraftReturns, invalidDraftReturns) = draftReturns.partition(isValid(_, cgtReference))
       (sentDraftReturns, unsentDraftReturns)   = validDraftReturns.partition(hasBeenSent(sentReturns))
       toDelete                                 = invalidDraftReturns ::: sentDraftReturns
       _                                       <- if (toDelete.nonEmpty)
@@ -177,41 +177,42 @@ class ReturnsServiceImpl @Inject() (
     )
   }
 
-  private def isValid(draftReturn: DraftReturn): Boolean = {
+  private def isValid(draftReturn: DraftReturn, cgtReference: CgtReference): Boolean = {
     val dateOfDeath =
       draftReturn.representeeAnswers().flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
 
-    val disposalOrCompletionDate =
-      draftReturn
-        .triageAnswers()
-        .fold(
-          _.fold(_.completionDate.map(_.value), c => Some(c.completionDate.value)),
-          _.fold(_.disposalDate.map(_.value), c => Some(c.disposalDate.value))
-        )
+    val disposalDate = {
+      def fromTriageAnswers(s: SingleDisposalTriageAnswers) =
+        s.fold(_.disposalDate.map(_.value), c => Some(c.disposalDate.value))
+
+      draftReturn.fold(
+        _.examplePropertyDetailsAnswers.flatMap(_.fold(_.disposalDate.map(_.value), c => Some(c.disposalDate.value))),
+        single => fromTriageAnswers(single.triageAnswers),
+        singleIndirect => fromTriageAnswers(singleIndirect.triageAnswers),
+        _.triageAnswers.fold(_.completionDate.map(_.value), c => Some(c.completionDate.value)),
+        singleMixedUse => fromTriageAnswers(singleMixedUse.triageAnswers)
+      )
+    }
 
     val periodOfAdminDateOfDeathValid =
       if (draftReturn.representativeType().contains(PersonalRepresentativeInPeriodOfAdmin))
-        dateOfDeath.forall(death =>
-          disposalOrCompletionDate.forall(
-            _ > death.value
-          )
-        )
+        dateOfDeath.forall(death => disposalDate.forall(_ > death.value))
       else
         true
 
     val nonPeriodOfAdminDateOfDeathValid =
       if (draftReturn.representativeType().contains(PersonalRepresentative))
-        dateOfDeath.forall(death =>
-          disposalOrCompletionDate.forall(
-            _ <= death.value
-          )
-        )
+        dateOfDeath.forall(death => disposalDate.forall(_ <= death.value))
       else true
 
-    if (periodOfAdminDateOfDeathValid)
-      logger.warn("Found draft return for period of admin personal rep with invalid disposal or completion date")
-    if (nonPeriodOfAdminDateOfDeathValid)
-      logger.warn("Found draft return for non-period of admin personal rep with invalid disposal or completion date")
+    if (!periodOfAdminDateOfDeathValid)
+      logger.warn(
+        s"Found draft return for cgt reference ${cgtReference.value} for period of admin personal rep with invalid disposal or completion date"
+      )
+    if (!nonPeriodOfAdminDateOfDeathValid)
+      logger.warn(
+        s"Found draft return for cgt reference $cgtReference non-period of admin personal rep with invalid disposal or completion date"
+      )
 
     periodOfAdminDateOfDeathValid && nonPeriodOfAdminDateOfDeathValid
   }
