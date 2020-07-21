@@ -31,6 +31,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiond
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.CGTRegistrationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -55,7 +58,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
   checkAllAnswersPage: pages.check_all_answers,
   confirmationOfSubmissionPage: pages.confirmation_of_submission,
   rebasingEligibilityUtil: RebasingEligibilityUtil,
-  submitReturnFailedPage: pages.submit_return_error
+  submitReturnFailedPage: pages.submit_return_error,
+  cgtRegistrationService: CGTRegistrationService
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -69,10 +73,12 @@ class CheckAllAnswersAndSubmitController @Inject() (
           checkAllAnswersPage(
             completeReturn,
             rebasingEligibilityUtil,
-            fillingOutReturn.subscribedDetails.isATrust,
-            completeReturn.representativeType,
-            completeReturn.isIndirectDisposal,
-            fillingOutReturn.isFurtherReturn
+            fillingOutReturn.subscribedDetails,
+            completeReturn.representativeType(),
+            completeReturn.isIndirectDisposal(),
+            fillingOutReturn.agentReferenceNumber,
+            fillingOutReturn.isFurtherReturn,
+            false
           )
         )
       }
@@ -81,75 +87,78 @@ class CheckAllAnswersAndSubmitController @Inject() (
   def checkAllAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCompleteDraftReturn(request) { (_, fillingOutReturn, completeReturn) =>
-        val cyaPageB64Html =
-          B64Html(
-            new String(
-              Base64.getEncoder.encode(
-                checkAllAnswersPage(
-                  completeReturn,
-                  rebasingEligibilityUtil,
-                  fillingOutReturn.subscribedDetails.isATrust,
-                  completeReturn.representativeType,
-                  completeReturn.isIndirectDisposal,
-                  fillingOutReturn.isFurtherReturn
-                ).toString().getBytes
+        withGeneratedCGTReference(completeReturn) { updatedCompleteReturn =>
+          val cyaPageB64Html =
+            B64Html(
+              new String(
+                Base64.getEncoder.encode(
+                  checkAllAnswersPage(
+                    updatedCompleteReturn,
+                    rebasingEligibilityUtil,
+                    fillingOutReturn.subscribedDetails,
+                    completeReturn.representativeType(),
+                    completeReturn.isIndirectDisposal(),
+                    fillingOutReturn.agentReferenceNumber,
+                    fillingOutReturn.isFurtherReturn,
+                    true
+                  ).toString().getBytes
+                )
               )
             )
-          )
 
-        val result =
-          for {
-            response        <- EitherT.liftF(
-                                 submitReturn(completeReturn, fillingOutReturn, cyaPageB64Html)
-                               )
-            newJourneyStatus = response match {
-                                 case _: SubmitReturnError =>
-                                   SubmitReturnFailed(
-                                     fillingOutReturn.subscribedDetails,
-                                     fillingOutReturn.ggCredId,
-                                     fillingOutReturn.agentReferenceNumber
-                                   )
-                                 case SubmitReturnSuccess(
-                                       submitReturnResponse
-                                     ) =>
-                                   JustSubmittedReturn(
-                                     fillingOutReturn.subscribedDetails,
-                                     fillingOutReturn.ggCredId,
-                                     fillingOutReturn.agentReferenceNumber,
-                                     completeReturn,
-                                     submitReturnResponse
-                                   )
-                               }
-            _               <- EitherT(
-                                 updateSession(sessionStore, request)(
-                                   _.copy(journeyStatus = Some(newJourneyStatus))
+          val result =
+            for {
+              response        <- EitherT.liftF(
+                                   submitReturn(updatedCompleteReturn, fillingOutReturn, cyaPageB64Html)
                                  )
-                               )
-          } yield response
+              newJourneyStatus = response match {
+                                   case _: SubmitReturnError =>
+                                     SubmitReturnFailed(
+                                       fillingOutReturn.subscribedDetails,
+                                       fillingOutReturn.ggCredId,
+                                       fillingOutReturn.agentReferenceNumber
+                                     )
+                                   case SubmitReturnSuccess(
+                                         submitReturnResponse
+                                       ) =>
+                                     JustSubmittedReturn(
+                                       fillingOutReturn.subscribedDetails,
+                                       fillingOutReturn.ggCredId,
+                                       fillingOutReturn.agentReferenceNumber,
+                                       updatedCompleteReturn,
+                                       submitReturnResponse
+                                     )
+                                 }
+              _               <- EitherT(
+                                   updateSession(sessionStore, request)(
+                                     _.copy(journeyStatus = Some(newJourneyStatus))
+                                   )
+                                 )
+            } yield response
 
-        result.fold(
-          { e =>
-            logger.warn("Error while trying to update session", e)
-            errorHandler.errorResult()
-          },
-          {
-            case SubmitReturnError(e)   =>
-              logger.warn(s"Could not submit return}", e)
-              Redirect(
-                routes.CheckAllAnswersAndSubmitController.submissionError()
-              )
+          result.fold(
+            { e =>
+              logger.warn("Error while trying to update session", e)
+              errorHandler.errorResult()
+            },
+            {
+              case SubmitReturnError(e)   =>
+                logger.warn(s"Could not submit return}", e)
+                Redirect(
+                  routes.CheckAllAnswersAndSubmitController.submissionError()
+                )
 
-            case SubmitReturnSuccess(r) =>
-              logger.info(
-                s"Successfully submitted return with submission id ${r.formBundleId}"
-              )
-              Redirect(
-                routes.CheckAllAnswersAndSubmitController
-                  .confirmationOfSubmission()
-              )
-          }
-        )
-
+              case SubmitReturnSuccess(r) =>
+                logger.info(
+                  s"Successfully submitted return with submission id ${r.formBundleId}"
+                )
+                Redirect(
+                  routes.CheckAllAnswersAndSubmitController
+                    .confirmationOfSubmission()
+                )
+            }
+          )
+        }
       }
     }
 
@@ -245,6 +254,38 @@ class CheckAllAnswersAndSubmitController @Inject() (
       case _                           => Redirect(baseRoutes.StartController.start())
     }
 
+  def withGeneratedCGTReference(
+    completeReturn: CompleteReturn
+  )(f: CompleteReturn => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
+    completeReturn.representeeAnswers match {
+      case Some(a @ CompleteRepresenteeAnswers(_, NoReferenceId, _, _, _)) =>
+        cgtRegistrationService
+          .extractRepresenteeCgtReference(a)
+          .fold(
+            _ => {
+              logger.warn("Error registering user without id")
+              Future(errorHandler.errorResult())
+            },
+            cgt => {
+              val updatedCompleteReturn: CompleteReturn = completeReturn match {
+                case a: CompleteMultipleDisposalsReturn        =>
+                  a.copy(representeeAnswers = a.representeeAnswers.map(e => e.copy(id = cgt)))
+                case a: CompleteSingleDisposalReturn           =>
+                  a.copy(representeeAnswers = a.representeeAnswers.map(e => e.copy(id = cgt)))
+                case a: CompleteSingleIndirectDisposalReturn   =>
+                  a.copy(representeeAnswers = a.representeeAnswers.map(e => e.copy(id = cgt)))
+                case a: CompleteMultipleIndirectDisposalReturn =>
+                  a.copy(representeeAnswers = a.representeeAnswers.map(e => e.copy(id = cgt)))
+                case a: CompleteSingleMixedUseDisposalReturn   =>
+                  a.copy(representeeAnswers = a.representeeAnswers.map(e => e.copy(id = cgt)))
+              }
+              f(updatedCompleteReturn)
+            }
+          )
+          .flatMap(e => e)
+      case _                                                               => f(completeReturn)
+    }
+
   private def withCompleteDraftReturn(
     request: RequestWithSessionData[_]
   )(
@@ -266,7 +307,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
         CompleteSingleDisposalReturn
           .fromDraftReturn(draftReturn)
           .fold[Future[Result]](
-            Redirect(routes.TaskListController.taskList())
+            Redirect((routes.TaskListController.taskList()))
           )(f(s, r, _))
 
       case Some(
