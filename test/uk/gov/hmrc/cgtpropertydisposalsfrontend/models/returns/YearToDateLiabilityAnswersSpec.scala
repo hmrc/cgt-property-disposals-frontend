@@ -37,7 +37,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
           Some(completeAnswers.taxDue),
           Some(completeAnswers.mandatoryEvidence),
           None,
-          None
+          None,
+          completeAnswers.yearToDateLiability
         )
       }
 
@@ -54,21 +55,23 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         Some(completeAnswers.taxDue),
         Some(completeAnswers.mandatoryEvidence),
         None,
-        None
+        None,
+        completeAnswers.yearToDateLiability
       )
 
     "have a method which unsets fields" when {
 
       "given incomplete answers" in {
-        incompleteAnswers.unset(_.taxableGainOrLoss) shouldBe incompleteAnswers
+        incompleteAnswers.unset(_.taxableGainOrLoss)   shouldBe incompleteAnswers
           .copy(taxableGainOrLoss = None)
         incompleteAnswers.unset(
           _.hasEstimatedDetails
-        )                                            shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
-        incompleteAnswers.unset(_.taxDue)            shouldBe incompleteAnswers
+        )                                              shouldBe incompleteAnswers.copy(hasEstimatedDetails = None)
+        incompleteAnswers.unset(_.taxDue)              shouldBe incompleteAnswers
           .copy(taxDue = None)
-        incompleteAnswers.unset(_.mandatoryEvidence) shouldBe incompleteAnswers
+        incompleteAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers
           .copy(mandatoryEvidence = None)
+        incompleteAnswers.unset(_.yearToDateLiability) shouldBe incompleteAnswers.copy(yearToDateLiability = None)
       }
 
       "given complete answers" in {
@@ -79,6 +82,7 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         completeAnswers.unset(_.taxDue)              shouldBe incompleteAnswers.copy(taxDue = None)
         completeAnswers.unset(_.mandatoryEvidence)   shouldBe incompleteAnswers
           .copy(mandatoryEvidence = None)
+        completeAnswers.unset(_.yearToDateLiability) shouldBe incompleteAnswers.copy(yearToDateLiability = None)
 
       }
 

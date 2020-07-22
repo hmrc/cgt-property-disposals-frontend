@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
@@ -35,7 +36,9 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliabilit
         answers: CompleteNonCalculatedYTDAnswers,
         isMultiple: Boolean,
         isATrust: Boolean,
-        representativeType: Option[RepresentativeType]
+        representativeType: Option[RepresentativeType],
+        isFurtherReturn: Option[Boolean],
+        taxYear: TaxYear
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("ytdLiability.cya.title")}
@@ -44,7 +47,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliabilit
 
  @pageHeading(title, Some(messages("ytdLiability.caption")))
 
- @summary(answers, showFiles = true, isMultiple, isATrust, representativeType)
+ @summary(answers, showFiles = true, isMultiple, isATrust, representativeType, isFurtherReturn, taxYear)
 
  @formWrapper(routes.YearToDateLiabilityController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))
