@@ -73,7 +73,7 @@
   </div>
   <div class="grid-row">
     <div class="column-three-quarters">
-      <a role="button" class="button" id="viewSentReturn-@sentReturn.submissionId" href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
+      <a id="viewSentReturn-@sentReturn.submissionId" href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
       @if(!totalOutstanding.isZero) {
         @messages("returns.list.viewAndPay")
       } else {
