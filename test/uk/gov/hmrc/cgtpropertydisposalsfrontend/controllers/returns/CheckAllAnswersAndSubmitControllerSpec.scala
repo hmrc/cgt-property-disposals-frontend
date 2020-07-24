@@ -287,12 +287,15 @@ class CheckAllAnswersAndSubmitControllerSpec
           }
 
           "the user is on a further return journey" in {
-            val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false)
+            val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(
+              isFirstReturn = false
+            )
 
             val completeReturn = {
               val complete = sample[CompleteSingleDisposalReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(individualUserType = Some(PersonalRepresentative)),
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                  individualUserType = Some(PersonalRepresentative)
+                ),
                 representeeAnswers = Some(representeeAnswers)
               )
               complete.copy(hasAttachments =
@@ -316,9 +319,10 @@ class CheckAllAnswersAndSubmitControllerSpec
               TimeUtils.today()
             )
 
-            val completeFillingOutReturn =
-              sample[FillingOutReturn]
-                .copy(draftReturn = completeDraftReturn, previousSentReturns = Some(List(sample[ReturnSummary])))
+            val completeFillingOutReturn = sample[FillingOutReturn].copy(
+              draftReturn = completeDraftReturn,
+              previousSentReturns = Some(List(sample[ReturnSummary]))
+            )
 
             test(
               sessionWithJourney(completeFillingOutReturn),
@@ -2326,7 +2330,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
         doc,
         isATrust,
         userType.contains(UserType.Agent),
-        individualUserType
+        individualUserType,
+        isFurtherReturn
       )
       completeReturn.yearToDateLiabilityAnswers.fold(
         validateNonCalculatedYearToDateLiabilityPage(
@@ -2422,7 +2427,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
         doc,
         isATrust,
         userType.contains(UserType.Agent),
-        individualUserType
+        individualUserType,
+        isFurtherReturn
       )
 
       validateNonCalculatedYearToDateLiabilityPage(
