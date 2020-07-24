@@ -24,21 +24,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
 )
 
 @(
     answers: CompleteExemptionAndLossesAnswers,
     disposalDate: DisposalDate,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    isFurtherReturn: Option[Boolean]
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
-
 
 @title = @{
     messages("exemptionsAndLosses.cya.title")
@@ -48,7 +48,7 @@
 
     @pageHeading(title, Some(messages("exemptionAndLosses.caption")))
 
-    @summary(answers, disposalDate, isATrust, representativeType)
+    @summary(answers, disposalDate, isATrust, representativeType, isFurtherReturn)
 
     @formWrapper(routes.ExemptionAndLossesController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

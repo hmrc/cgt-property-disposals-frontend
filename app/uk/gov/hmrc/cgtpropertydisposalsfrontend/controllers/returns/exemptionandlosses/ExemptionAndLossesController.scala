@@ -76,7 +76,23 @@ class ExemptionAndLossesController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d, _))) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _))) if r.isFurtherReturn.contains(true) =>
+        val answers = d
+          .fold(
+            _.exemptionAndLossesAnswers,
+            _.exemptionAndLossesAnswers,
+            _.exemptionAndLossesAnswers,
+            _.exemptionAndLossesAnswers,
+            _.exemptionAndLossesAnswers
+          )
+          .getOrElse(
+            IncompleteExemptionAndLossesAnswers.empty.copy(
+              annualExemptAmount = Some(AmountInPence.zero)
+            )
+          )
+        f(s, r, d, answers)
+
+      case Some((s, r @ FillingOutReturn(_, _, _, d, _)))                                     =>
         val answers = d
           .fold(
             _.exemptionAndLossesAnswers,
@@ -87,7 +103,8 @@ class ExemptionAndLossesController @Inject() (
           )
           .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
         f(s, r, d, answers)
-      case _                                              =>
+
+      case _                                                                                  =>
         Redirect(controllers.routes.StartController.start())
     }
 
@@ -516,7 +533,8 @@ class ExemptionAndLossesController @Inject() (
                   c,
                   disposalDate,
                   fillingOutReturn.subscribedDetails.isATrust,
-                  draftReturn.representativeType()
+                  draftReturn.representativeType,
+                  fillingOutReturn.isFurtherReturn
                 )
               )
 
@@ -576,7 +594,8 @@ class ExemptionAndLossesController @Inject() (
                       completeAnswers,
                       disposalDate,
                       fillingOutReturn.subscribedDetails.isATrust,
-                      draftReturn.representativeType()
+                      draftReturn.representativeType,
+                      fillingOutReturn.isFurtherReturn
                     )
                   )
               )

@@ -53,7 +53,7 @@
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
-@furtherReturnEnabled = @{ if(isFurtherReturn.contains(true)) ".furtherReturnEnabled" else "" }
+@furtherReturnKey = @{ if(isFurtherReturn.contains(true)) ".furtherReturn" else "" }
 
 @userKey = @{
     representativeType match {
@@ -68,8 +68,8 @@
   }
 }
 
-@title = @{messages(s"$key$furtherReturnEnabled$userKey.title")}
-@label = @{Html(s"""<h2 class="heading-medium">${messages("previousYearsLosses.furtherReturnEnabled.sub-title")}</h2>""")}
+@title = @{messages(s"$key$furtherReturnKey$userKey.main.title")}
+@label = @{Html(s"""<h2 class="heading-medium">${messages("previousYearsLosses.furtherReturnKey.title")}</h2>""")}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -115,7 +115,7 @@
     @caption(messages("exemptionAndLosses.caption"))
     @pageHeading(title)
 
-    <p>@messages(s"$key$furtherReturnEnabled$userKey.helpText")</p>
+    <p>@messages(s"$key$furtherReturnKey$userKey.helpText")</p>
 
     @formWrapper(routes.ExemptionAndLossesController.previousYearsLossesSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
@@ -128,7 +128,7 @@
             customErrorKey = Some(s"$key$userKey")
         )
 
-        <p>@Html(messages(s"$key$furtherReturnEnabled.link", appConfig.cgtLossesUrl))</p>
+        <p>@Html(messages(s"$key$furtherReturnKey.link", appConfig.cgtLossesUrl))</p>
 
         @submitButton(messages("button.saveAndContinue"))
     }

@@ -63,7 +63,8 @@
     rebasingEligibilityUtil: RebasingEligibilityUtil,
     subscribedDetails: SubscribedDetails,
     representativeType: Option[RepresentativeType],
-    isIndirectDisposal: Boolean
+    isIndirectDisposal: Boolean,
+    isFurtherReturn: Option[Boolean]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("viewReturn.title")}
@@ -173,7 +174,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
           @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust, representativeType)
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-          @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
+          @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @s.yearToDateLiabilityAnswers.fold(
@@ -195,7 +196,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
           @examplePropertyDetailsSummary(m.examplePropertyDetailsAnswers, m.triageAnswers.assetTypes.contains(AssetType.NonResidential), subscribedDetails.isATrust, representativeType, m.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-          @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
+          @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
           <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType)
@@ -233,7 +234,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         )
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-        @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
+        @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType)
@@ -253,7 +254,13 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-        @lossesSummary(multipleIndirect.exemptionsAndLossesDetails, DisposalDate(multipleIndirect.triageAnswers.completionDate.value, multipleIndirect.triageAnswers.taxYear), subscribedDetails.isATrust, representativeType)
+        @lossesSummary(
+            multipleIndirect.exemptionsAndLossesDetails,
+            DisposalDate(multipleIndirect.triageAnswers.completionDate.value, multipleIndirect.triageAnswers.taxYear),
+            subscribedDetails.isATrust,
+            representativeType,
+            isFurtherReturn
+        )
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType)
@@ -272,7 +279,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers, representativeType, singleMixedUse.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-        @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType)
+        @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType)
