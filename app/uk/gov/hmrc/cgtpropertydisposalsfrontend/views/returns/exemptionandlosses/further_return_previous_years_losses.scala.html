@@ -53,7 +53,7 @@
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
-@furtherReturnKey = @{ if(isFurtherReturn.contains(true)) ".furtherReturn.main" else "" }
+@furtherReturnKey = @{ if(isFurtherReturn.contains(true)) ".furtherReturn" else "" }
 
 @userKey = @{
     representativeType match {
@@ -68,7 +68,7 @@
   }
 }
 
-@title = @{messages(s"$key$furtherReturnKey$userKey.title")}
+@title = @{messages(s"$key$furtherReturnKey.main$userKey.title")}
 @label = @{Html(s"""<h2 class="heading-medium">${messages(s"previousYearsLosses$furtherReturnKey$userKey.title")}</h2>""")}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
