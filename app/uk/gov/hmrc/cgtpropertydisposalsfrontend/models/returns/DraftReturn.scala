@@ -30,6 +30,8 @@ sealed trait DraftReturn extends Product with Serializable {
   val id: UUID
   val lastUpdatedDate: LocalDate
   val gainOrLossAfterReliefs: Option[AmountInPence]
+  val yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+  val representeeAnswers: Option[RepresenteeAnswers]
 }
 
 final case class DraftSingleDisposalReturn(
@@ -233,24 +235,6 @@ object DraftReturn {
     def isMultipleIndirectDisposal(): Boolean =
       fold(_ => false, _ => false, _ => false, _ => true, _ => false)
 
-    def representativeType(): Option[RepresentativeType] =
-      fold(
-        _.triageAnswers.representativeType(),
-        _.triageAnswers.representativeType(),
-        _.triageAnswers.representativeType(),
-        _.triageAnswers.representativeType(),
-        _.triageAnswers.representativeType()
-      )
-
-    def representeeAnswers(): Option[RepresenteeAnswers] =
-      fold(
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers
-      )
-
     def triageAnswers(): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =
       fold(
         multiple => Left(multiple.triageAnswers),
@@ -259,6 +243,9 @@ object DraftReturn {
         multipleIndirect => Left(multipleIndirect.triageAnswers),
         singleMixedUse => Right(singleMixedUse.triageAnswers)
       )
+
+    def representativeType(): Option[RepresentativeType] =
+      triageAnswers().fold(_.representativeType(), _.representativeType())
 
   }
 

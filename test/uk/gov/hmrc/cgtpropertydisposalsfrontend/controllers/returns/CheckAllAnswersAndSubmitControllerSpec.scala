@@ -185,13 +185,18 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "the user is on a single disposal journey" must {
 
-        val completeReturn = sample[CompleteSingleDisposalReturn].copy(
-          triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-            .copy(individualUserType = Some(PersonalRepresentative)),
-          representeeAnswers = Some(sample[CompleteRepresenteeAnswers])
-        )
-        val hasAttachments =
-          completeReturn.supportingDocumentAnswers.evidences.nonEmpty || completeReturn.yearToDateLiabilityAnswers.isLeft
+        val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)
+
+        val completeReturn = {
+          val complete = sample[CompleteSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+              .copy(individualUserType = Some(PersonalRepresentative)),
+            representeeAnswers = Some(representeeAnswers)
+          )
+          complete.copy(hasAttachments =
+            complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.isLeft
+          )
+        }
 
         val completeDraftReturn = DraftSingleDisposalReturn(
           UUID.randomUUID(),
@@ -210,7 +215,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -229,9 +234,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
           def test(
             sessionData: SessionData,
+            completeReturn: CompleteSingleDisposalReturn,
             expectedTitleKey: String,
             userType: Option[UserType],
-            isATrust: Boolean
+            isATrust: Boolean,
+            isFurtherReturn: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -244,12 +251,13 @@ class CheckAllAnswersAndSubmitControllerSpec
               { doc =>
                 validateSingleDisposalCheckAllYourAnswersSections(
                   doc,
-                  completeReturn.copy(hasAttachments = hasAttachments),
+                  completeReturn,
                   userType,
                   rebasingEligibilityUtil.isUk(completeReturn),
                   rebasingEligibilityUtil.isEligibleForRebase(completeReturn),
                   isATrust,
-                  completeReturn.triageAnswers.assetType
+                  completeReturn.triageAnswers.assetType,
+                  isFurtherReturn
                 )
                 doc
                   .select("#back")
@@ -270,9 +278,55 @@ class CheckAllAnswersAndSubmitControllerSpec
           "the return is complete" in {
             test(
               sessionWithJourney(completeFillingOutReturn),
+              completeReturn,
               "checkAllAnswers.title",
               None,
-              completeFillingOutReturn.subscribedDetails.isATrust
+              completeFillingOutReturn.subscribedDetails.isATrust,
+              isFurtherReturn = false
+            )
+          }
+
+          "the user is on a further return journey" in {
+            val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false)
+
+            val completeReturn = {
+              val complete = sample[CompleteSingleDisposalReturn].copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(individualUserType = Some(PersonalRepresentative)),
+                representeeAnswers = Some(representeeAnswers)
+              )
+              complete.copy(hasAttachments =
+                complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.isLeft
+              )
+            }
+
+            val completeDraftReturn = DraftSingleDisposalReturn(
+              UUID.randomUUID(),
+              completeReturn.triageAnswers,
+              Some(completeReturn.propertyAddress),
+              Some(completeReturn.disposalDetails),
+              Some(completeReturn.acquisitionDetails),
+              Some(completeReturn.reliefDetails),
+              Some(completeReturn.exemptionsAndLossesDetails),
+              Some(completeReturn.yearToDateLiabilityAnswers.merge),
+              completeReturn.initialGainOrLoss,
+              Some(completeReturn.supportingDocumentAnswers),
+              completeReturn.representeeAnswers,
+              None,
+              TimeUtils.today()
+            )
+
+            val completeFillingOutReturn =
+              sample[FillingOutReturn]
+                .copy(draftReturn = completeDraftReturn, previousSentReturns = Some(List(sample[ReturnSummary])))
+
+            test(
+              sessionWithJourney(completeFillingOutReturn),
+              completeReturn,
+              "checkAllAnswers.title",
+              None,
+              completeFillingOutReturn.subscribedDetails.isATrust,
+              isFurtherReturn = true
             )
           }
 
@@ -290,9 +344,11 @@ class CheckAllAnswersAndSubmitControllerSpec
                 ),
                 userType = userType
               ).copy(userType = Some(userType)),
+              completeReturn,
               "checkAllAnswers.title",
               Some(userType),
-              subscribedDetails.isATrust
+              subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
 
@@ -358,8 +414,10 @@ class CheckAllAnswersAndSubmitControllerSpec
           .copy(
             triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
-            representeeAnswers =
-              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(LocalDate.now)))),
+            representeeAnswers = Some(
+              sample[CompleteRepresenteeAnswers]
+                .copy(dateOfDeath = Some(DateOfDeath(LocalDate.now)), isFirstReturn = true)
+            ),
             hasAttachments = true
           )
 
@@ -376,7 +434,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -397,7 +455,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             sessionData: SessionData,
             expectedTitleKey: String,
             userType: Option[UserType],
-            isATrust: Boolean
+            isATrust: Boolean,
+            isFurtherReturn: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -412,7 +471,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   doc,
                   completeReturn,
                   userType,
-                  isATrust
+                  isATrust,
+                  isFurtherReturn
                 )
                 doc
                   .select("#back")
@@ -435,7 +495,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(completeFillingOutReturn),
               "checkAllAnswers.title",
               None,
-              completeFillingOutReturn.subscribedDetails.isATrust
+              completeFillingOutReturn.subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
 
@@ -455,7 +516,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               ).copy(userType = Some(userType)),
               "checkAllAnswers.title",
               Some(userType),
-              subscribedDetails.isATrust
+              subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
         }
@@ -519,7 +581,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         val completeReturn = sample[CompleteSingleIndirectDisposalReturn].copy(
           triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
             .copy(individualUserType = Some(PersonalRepresentative)),
-          representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
+          representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)),
           yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers],
           hasAttachments = true
         )
@@ -539,7 +601,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -560,7 +622,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             sessionData: SessionData,
             expectedTitleKey: String,
             userType: Option[UserType],
-            isATrust: Boolean
+            isATrust: Boolean,
+            isFurtherReturn: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -582,7 +645,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                     completeReturn.representativeType()
                   ),
                   isATrust,
-                  IndirectDisposal
+                  IndirectDisposal,
+                  isFurtherReturn
                 )
                 doc
                   .select("#back")
@@ -605,7 +669,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(completeFillingOutReturn),
               "checkAllAnswers.title",
               None,
-              completeFillingOutReturn.subscribedDetails.isATrust
+              completeFillingOutReturn.subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
 
@@ -625,7 +690,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               ).copy(userType = Some(userType)),
               "checkAllAnswers.title",
               Some(userType),
-              subscribedDetails.isATrust
+              subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
 
@@ -691,7 +757,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           .copy(
             triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
               .copy(individualUserType = Some(PersonalRepresentative)),
-            representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
+            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)),
             hasAttachments = true
           )
 
@@ -708,7 +774,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -729,7 +795,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             sessionData: SessionData,
             expectedTitleKey: String,
             userType: Option[UserType],
-            isATrust: Boolean
+            isATrust: Boolean,
+            isFurtherReturn: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -744,7 +811,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   doc,
                   completeReturn,
                   userType,
-                  isATrust
+                  isATrust,
+                  isFurtherReturn
                 )
                 doc
                   .select("#back")
@@ -767,7 +835,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(completeFillingOutReturn),
               "checkAllAnswers.title",
               None,
-              completeFillingOutReturn.subscribedDetails.isATrust
+              completeFillingOutReturn.subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
 
@@ -787,7 +856,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               ).copy(userType = Some(userType)),
               "checkAllAnswers.title",
               Some(userType),
-              subscribedDetails.isATrust
+              subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
         }
@@ -852,7 +922,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           .copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
               .copy(individualUserType = Some(PersonalRepresentative)),
-            representeeAnswers = Some(sample[CompleteRepresenteeAnswers]),
+            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = true)),
             hasAttachments = true
           )
 
@@ -869,7 +939,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
 
         val completeFillingOutReturn =
-          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)
+          sample[FillingOutReturn].copy(draftReturn = completeDraftReturn, previousSentReturns = None)
 
         behave like redirectToStartWhenInvalidJourney(
           performAction,
@@ -890,7 +960,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             sessionData: SessionData,
             expectedTitleKey: String,
             userType: Option[UserType],
-            isATrust: Boolean
+            isATrust: Boolean,
+            isFurtherReturn: Boolean
           ): Unit = {
             inSequence {
               mockAuthWithNoRetrievals()
@@ -905,7 +976,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                   doc,
                   completeReturn,
                   userType,
-                  isATrust
+                  isATrust,
+                  isFurtherReturn
                 )
                 doc
                   .select("#back")
@@ -928,7 +1000,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               sessionWithJourney(completeFillingOutReturn),
               "checkAllAnswers.title",
               None,
-              completeFillingOutReturn.subscribedDetails.isATrust
+              completeFillingOutReturn.subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
 
@@ -948,7 +1021,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               ).copy(userType = Some(userType)),
               "checkAllAnswers.title",
               Some(userType),
-              subscribedDetails.isATrust
+              subscribedDetails.isATrust,
+              isFurtherReturn = false
             )
           }
         }
@@ -1074,7 +1148,8 @@ class CheckAllAnswersAndSubmitControllerSpec
             instanceOf[RebasingEligibilityUtil],
             completeFillingOutReturn.subscribedDetails.isATrust,
             completeReturn.representativeType(),
-            completeReturn.isIndirectDisposal()
+            completeReturn.isIndirectDisposal(),
+            completeFillingOutReturn.isFurtherReturn()
           ).toString
 
         SubmitReturnRequest(
@@ -2212,7 +2287,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     isUk: Boolean,
     isRebasing: Boolean,
     isATrust: Boolean,
-    assetType: AssetType
+    assetType: AssetType,
+    isFurtherReturn: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     completeReturn.representeeAnswers.foreach(
@@ -2257,7 +2333,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
           _,
           doc,
           userType,
-          Some(individualUserType)
+          Some(individualUserType),
+          isFurtherReturn
         ),
         validateCalculatedYearToDateLiabilityPage(_, isATrust, doc)
       )
@@ -2268,7 +2345,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     doc: Document,
     completeReturn: CompleteMultipleDisposalsReturn,
     userType: Option[UserType],
-    isATrust: Boolean
+    isATrust: Boolean,
+    isFurtherReturn: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     completeReturn.representeeAnswers.foreach(
       RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
@@ -2297,7 +2375,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
         completeReturn.yearToDateLiabilityAnswers,
         doc,
         userType,
-        Some(individualUserType)
+        Some(individualUserType),
+        isFurtherReturn
       )
     }
 
@@ -2309,7 +2388,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     userType: Option[UserType],
     isRebasing: Boolean,
     isATrust: Boolean,
-    assetType: AssetType
+    assetType: AssetType,
+    isFurtherReturn: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     completeReturn.representeeAnswers.foreach(
@@ -2349,7 +2429,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
         completeReturn.yearToDateLiabilityAnswers,
         doc,
         userType,
-        Some(individualUserType)
+        Some(individualUserType),
+        isFurtherReturn
       )
     }
   }
@@ -2358,7 +2439,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     doc: Document,
     completeReturn: CompleteMultipleIndirectDisposalReturn,
     userType: Option[UserType],
-    isATrust: Boolean
+    isATrust: Boolean,
+    isFurtherReturn: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     completeReturn.representeeAnswers.foreach(
       RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
@@ -2382,7 +2464,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
         completeReturn.yearToDateLiabilityAnswers,
         doc,
         userType,
-        Some(individualUserType)
+        Some(individualUserType),
+        isFurtherReturn
       )
     }
 
@@ -2392,7 +2475,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
     doc: Document,
     completeReturn: CompleteSingleMixedUseDisposalReturn,
     userType: Option[UserType],
-    isATrust: Boolean
+    isATrust: Boolean,
+    isFurtherReturn: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     completeReturn.representeeAnswers.foreach(
       RepresenteeControllerSpec.validateRepresenteeCheckYourAnswersPage(_, doc)
@@ -2417,7 +2501,8 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.yearToDateLiabilityAnswers,
       doc,
       userType,
-      completeReturn.triageAnswers.individualUserType
+      completeReturn.triageAnswers.individualUserType,
+      isFurtherReturn
     )
 
   }

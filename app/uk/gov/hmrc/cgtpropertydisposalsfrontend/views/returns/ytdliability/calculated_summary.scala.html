@@ -20,9 +20,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
@@ -34,15 +33,15 @@
 
 @(
     answers: CompleteCalculatedYTDAnswers,
-    disposalDate: DisposalDate,
+    taxYear: TaxYear,
     showFiles: Boolean,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     wasUkResident: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
-@taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
-@taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
+@taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
+@taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
   representativeType match {

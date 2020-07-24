@@ -3362,6 +3362,95 @@ netLoss.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall loss m
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
+taxableGainOrLoss.furtherReturn.title=Tell us if you made a net gain or loss
+taxableGainOrLoss.agent.furtherReturn.title=Tell us if your client made a net gain or loss
+taxableGainOrLoss.trust.furtherReturn.title=Tell us if the trust made a net gain or loss
+taxableGainOrLoss.capacitor.furtherReturn.title=Tell us if the person made a net gain or loss
+taxableGainOrLoss.personalRep.furtherReturn.title=Tell us if the person made a net gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Tell us if the estate made a net gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Tell us if your client made a net gain or loss
+
+taxableGainOrLoss.furtherReturn.p1=You’ll need to work out if you made a net gain or loss on the UK property-related disposals you are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.agent.furtherReturn.p1=You’ll need to work out if your client made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.trust.furtherReturn.p1=You’ll need to work out if the trust made a net gain or loss on the UK property-related disposals it is paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.capacitor.furtherReturn.p1=You’ll need to work out if the person made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.personalRep.furtherReturn.p1=You’ll need to work out if the person made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.p1=You’ll need to work out if the estate made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.p1=You’ll need to work out if the estate made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+
+taxableGainOrLoss.furtherReturn.p2=To do this, you’ll need to:
+
+taxableGainOrLoss.furtherReturn.li1=Add together all the gains after reliefs from UK property-related disposals.
+taxableGainOrLoss.furtherReturn.li2=Subtract any in-year Capital Gains Tax losses that can be deducted.
+taxableGainOrLoss.furtherReturn.li3=Subtract any allowable losses from previous years that are available.
+
+taxableGainOrLoss.furtherReturn.li4=Subtract the amount of Annual Exempt Amount you want to use.
+taxableGainOrLoss.agent.furtherReturn.li4=Subtract the amount of Annual Exempt Amount they want to use.
+taxableGainOrLoss.trust.furtherReturn.li4=Subtract the amount of Annual Exempt Amount to be used.
+taxableGainOrLoss.capacitor.furtherReturn.li4=Subtract the amount of Annual Exempt Amount they want to use.
+taxableGainOrLoss.personalRep.furtherReturn.li4=Subtract the amount of Annual Exempt Amount they want to use.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.li4=Subtract the amount of Annual Exempt Amount to be used.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.li4=Subtract the amount of Annual Exempt Amount they want to use.
+
+taxableGainOrLoss.furtherReturn.h2=Did you make a net gain on the property disposals that you are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.agent.furtherReturn.h2=Did your client make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.trust.furtherReturn.h2=Did the trust make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.capacitor.furtherReturn.h2=Did the person make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.personalRep.furtherReturn.h2=Did the person make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.h2=Did the estate make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.h2=Did your client, or the estate make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+
+taxableGainOrLoss.furtherReturn.link=How to work out your overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.agent.furtherReturn.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.trust.furtherReturn.link=How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.capacitor.furtherReturn.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.personalRep.furtherReturn.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
+
+taxableGainOrLoss.furtherReturn.gain.label=Yes, I made a net gain
+taxableGainOrLoss.agent.furtherReturn.gain.label=Yes, they made a net gain
+taxableGainOrLoss.trust.furtherReturn.gain.label=Yes, it made a net gain
+taxableGainOrLoss.capacitor.furtherReturn.gain.label=Yes, they made a net gain
+taxableGainOrLoss.personalRep.furtherReturn.gain.label=Yes, they made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.gain.label=Yes, it made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.gain.label=Yes, they made a net gain
+
+taxableGainOrLoss.furtherReturn.loss.label=No, I made a net loss
+taxableGainOrLoss.agent.furtherReturn.loss.label=No, they made a net loss
+taxableGainOrLoss.trust.furtherReturn.loss.label=No, it made a net loss
+taxableGainOrLoss.capacitor.furtherReturn.loss.label=No, they made a net loss
+taxableGainOrLoss.personalRep.furtherReturn.loss.label=No, they made a net loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.loss.label=No, it made a net loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.loss.label=No, they made a net loss
+
+taxableGain.furtherReturn.label=Amount of net gain
+netLoss.furtherReturn.label=Amount of net loss
+taxableGainOrLoss.noLossOrGain.furtherReturn.label=No net gain or loss
+
+taxableGainOrLoss.furtherReturn.error.required=Select yes if you made a net gain
+taxableGainOrLoss.agent.furtherReturn.error.required=Select yes if your client made a net gain
+taxableGainOrLoss.trust.furtherReturn.error.required=Select yes if the trust made a net gain
+taxableGainOrLoss.capacitor.furtherReturn.error.required=Select yes if the person made a net gain
+taxableGainOrLoss.personalRep.furtherReturn.error.required=Select yes if the person made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.error.required=Select yes if the estate made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.error.required=Select yes if your client made a net gain
+
+taxableGain.furtherReturn.error.required=Enter the amount of net gain
+taxableGain.furtherReturn.error.invalid=Net gain must be an amount of money, like 4,820.54 or 539
+taxableGain.furtherReturn.error.tooSmall=Net gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.furtherReturn.error.tooLarge=Net gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.furtherReturn.error.tooManyDecimals=Net gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+
+netLoss.furtherReturn.error.required=Enter the amount of net loss
+netLoss.furtherReturn.error.invalid=Net loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.furtherReturn.error.tooSmall=Net loss must be an amount of money between 0 and 50,000,000,000
+netLoss.furtherReturn.error.tooLarge=Net loss must be an amount of money between 0 and 50,000,000,000
+netLoss.furtherReturn.error.tooManyDecimals=Net loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+
+taxableGainOrLoss.furtherReturn.cyaChange=if a net gain or loss was made on the property sale or disposal
+
+
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
 estimatedIncome.agent.title=What does your client believe their gross income will be in this tax year?
 estimatedIncome.capacitor.title=What does the person believe their gross income will be in this tax year?
@@ -3471,6 +3560,59 @@ hasEstimatedDetails.error.required=Select yes if any of the details in this retu
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
 hasEstimatedDetails.cyaChange=if any of the amounts in the return have been estimated
+
+yearToDateLiability.title=Tell us about your overall liability in tax year 2020 to 2021
+yearToDateLiability.agent.title=Tell us about your client’s overall liability in tax year 2020 to 2021
+yearToDateLiability.trust.title=Tell us about the trust’s overall liability in tax year 2020 to 2021
+yearToDateLiability.capacitor.title=Tell us about the person’s overall liability in tax year 2020 to 2021
+yearToDateLiability.personalRep.title=Tell us about the person’s overall liability in tax year 2020 to 2021
+yearToDateLiability.personalRepInPeriodOfAdmin.title=Tell us about the estate’s overall liability in tax year 2020 to 2021
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.title=Tell us about your client’s overall liability in tax year 2020 to 2021
+
+yearToDateLiability.p1=To work out this amount you’ll need to:
+yearToDateLiability.trust.p1=You’ll need to multiply the trust’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
+yearToDateLiability.personalRepInPeriodOfAdmin.p1=You’ll need to multiply the estate’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.p1=You’ll need to multiply your client, or the estate’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
+
+yearToDateLiability.li1=Multiply the amount of net gain to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new window)</a> for the UK property related disposal for that tax year.
+yearToDateLiability.li2=Multiply the amount to be taxed at the <a href="{0}" target="_blank">higher rate of tax (opens in a new window)</a> for property related disposals for that tax year.
+
+yearToDateLiability.li3=Add these amounts together to get your overall Capital Gains Tax liability on your UK property-related disposals.
+yearToDateLiability.agent.li3=Add these amounts together to get your client’s overall Capital Gains Tax liability on their UK property-related disposals.
+yearToDateLiability.capacitor.li3=Add these amounts together to get the person’s overall Capital Gains Tax liability on their UK property-related disposals.
+yearToDateLiability.personalRep.li3=Add these amounts together to get the person’s overall Capital Gains Tax liability on their UK property-related disposals.
+
+yearToDateLiability.h2=What is your overall liability for your gains made so far in tax year {0} to {1}?
+yearToDateLiability.agent.h2=What is your client’s overall liability for their gains made so far in tax year {0} to {1}?
+yearToDateLiability.trust.h2=What is the trust’s overall liability for its gains made so far in tax year {0} to {1}?
+yearToDateLiability.capacitor.h2=What is the person’s overall liability for their gains made so far in tax year {0} to {1}?
+yearToDateLiability.personalRep.h2=What is the person’s overall liability for their gains made so far in tax year {0} to {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.h2=What is the estate’s overall liability for its gains made so far in tax year {0} to {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.h2=What is your client’s overall liability their your gains made so far in tax year {0} to {1}?
+
+yearToDateLiability.link=How to work out your overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.agent.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.trust.link=How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.capacitor.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.personalRep.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.personalRepInPeriodOfAdmin.link=How to work out the estate’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
+
+yearToDateLiability.error.required=Enter your overall liability for your gains made so far in tax year {0} to {1}
+yearToDateLiability.agent.error.required=Enter your client’s overall liability for their gains made so far in tax year {0} to {1}
+yearToDateLiability.trust.error.required=Enter the trusts’s overall liability for its gains made so far in tax year {0} to {1}
+yearToDateLiability.capacitor.error.required=Enter the person’s overall liability for their gains made so far in tax year {0} to {1}
+yearToDateLiability.personalRep.error.required=Enter the person’s overall liability for their gains made so far in tax year {0} to {1}
+yearToDateLiability.personalRepInPeriodOfAdmin.error.required=Enter the estates’s overall liability for its gains made so far in tax year {0} to {1}
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.error.required=Enter your client’s overall liability for their gains made so far in tax year {0} to {1}
+
+yearToDateLiability.error.invalid=The overall Capital Gains Tax liability must be a number, like 1,500 or 7,300.50
+yearToDateLiability.error.tooManyDecimals=The overall Capital Gains Tax liability must have 2 decimal places or less, for example 33.33
+yearToDateLiability.error.tooSmall=The overall Capital Gains Tax liability must be 0 or more
+yearToDateLiability.error.tooLarge=The overall Capital Gains Tax liability must be 50,000,000,000.00 or less
+
+yearToDateLiability.cyaChange=the overall Capital Gains Tax liability
+
 
 taxDue.title=Enter the Capital Gains Tax due for this return
 taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
