@@ -5060,6 +5060,7 @@ class SingleDisposalsTriageControllerSpec
           None,
           None,
           startingNewDraftReturn.representeeAnswers,
+          None,
           TimeUtils.today()
         ),
         startingNewDraftReturn.previousSentReturns
@@ -5171,6 +5172,7 @@ class SingleDisposalsTriageControllerSpec
                 None,
                 None,
                 startingNewDraftReturn.representeeAnswers,
+                None,
                 TimeUtils.today()
               ),
               startingNewDraftReturn.previousSentReturns
@@ -5214,6 +5216,7 @@ class SingleDisposalsTriageControllerSpec
                 None,
                 None,
                 startingNewDraftReturn.representeeAnswers,
+                None,
                 TimeUtils.today()
               ),
               startingNewDraftReturn.previousSentReturns

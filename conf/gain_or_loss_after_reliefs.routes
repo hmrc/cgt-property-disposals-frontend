@@ -1,0 +1,5 @@
+GET     /gain-loss-after-reliefs                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefs()
+POST    /gain-loss-after-reliefs                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefsSubmit()
+
+GET     /gain-loss-after-reliefs/check-you-answers         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.GainOrLossAfterReliefsController.checkYourAnswers()
+POST    /gain-loss-after-reliefs/check-you-answers         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.GainOrLossAfterReliefsController.checkYourAnswersSubmit()

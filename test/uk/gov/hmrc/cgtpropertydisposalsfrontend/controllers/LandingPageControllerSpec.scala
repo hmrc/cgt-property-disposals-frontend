@@ -33,10 +33,15 @@ class LandingPageControllerSpec extends ControllerSpec {
         checkPageIsDisplayed(
           controller.landingPage()(FakeRequest()),
           messageFromMessageKey("landingPage.title"),
-          doc =>
+          doc => {
+            doc
+              .select(".panel-border-wide > p > a")
+              .attr("href") shouldBe viewConfig.contactHmrc
+
             doc
               .select(".button")
               .attr("href") shouldBe s"${routes.StartController.start()}"
+          }
         )
       }
 
@@ -44,30 +49,13 @@ class LandingPageControllerSpec extends ControllerSpec {
 
     "handling requests to display the agents landing page" must {
 
-      "display the page" in {
-        checkPageIsDisplayed(
+      "redirect to the landing page" in {
+        checkIsRedirect(
           controller.agentsLandingPage()(FakeRequest()),
-          messageFromMessageKey("agentsLandingPage.title"),
-          doc => {
-            doc
-              .select(".button")
-              .attr("href")                        shouldBe viewConfig.agentsSignInUrl
-            doc
-              .select("#nonResidentsRebasingUrl > a")
-              .attr("href")                        shouldBe viewConfig.nonResidentsRebasingUrl
-            doc
-              .select("#createAgentsAccountUrl > a")
-              .attr("href")                        shouldBe viewConfig.createAgentsAccountUrl
-            doc
-              .select("#contact-hmrc-1 > a")
-              .attr("href")                        shouldBe viewConfig.contactHmrc
-            doc
-              .select("#contact-hmrc-2 > a")
-              .attr("href")                        shouldBe viewConfig.contactHmrc
-            doc.select("#cgtUrl > a").attr("href") shouldBe viewConfig.cgtUrl
-          }
+          viewConfig.agentsStartPageUrl
         )
       }
+
     }
 
     "handling requests to display the sign in page" must {

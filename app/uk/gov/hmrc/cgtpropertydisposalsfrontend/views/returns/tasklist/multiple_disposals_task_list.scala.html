@@ -31,7 +31,7 @@
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(draftReturn: DraftMultipleDisposalsReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftMultipleDisposalsReturn, isFurtherReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("service.title")}
 @representeeState = @{
@@ -58,10 +58,26 @@
         messages("task-list.enter-example-property-address.link")
 }
 
+@gainOrLossAfterReliefsState = @{
+  if(isFurtherReturn.contains(true)){
+    examplePropertyDetailsState match {
+        case Complete =>
+            Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))
+        case _ =>
+            Some(CannotStart)
+    }
+  } else
+  None
+}
+
 @exemptionsAndLossesState = @{
     examplePropertyDetailsState match {
         case Complete =>
-            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+          gainOrLossAfterReliefsState match {
+              case Some(Complete) | None => draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+              case _                     => CannotStart
+          }
+
         case _ =>
             CannotStart
     }
@@ -139,6 +155,15 @@
                     examplePropertyDetailsState
                 )
                 </li>
+                @gainOrLossAfterReliefsState.map{ state =>
+                    <li id="gainOrLossAfterReliefs" class="app-task-list__item">
+                        @taskLink(
+                            messages("task-list.gain-or-loss-after-reliefs.link"),
+                            returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers().url,
+                            state
+                        )
+                    </li>
+                }
             </ul>
         </li>
 

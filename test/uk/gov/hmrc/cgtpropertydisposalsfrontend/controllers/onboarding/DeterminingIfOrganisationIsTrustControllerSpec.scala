@@ -46,6 +46,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 class DeterminingIfOrganisationIsTrustControllerSpec
     extends ControllerSpec
     with AuthSupport
@@ -920,7 +921,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
       val validTrn = TRN("123456789012345")
 
-      val validTrustName = TrustName("Some trust")
+      val validTrustName = TrustName("Some trust 123")
 
       val bpr = sample[BusinessPartnerRecord].copy(name = Left(validTrustName))
 
@@ -1098,6 +1099,17 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result =
             performAction("trustName" -> "???", "trn" -> validTrn.value)
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(
+            messageFromMessageKey("trustName.error.pattern")
+          )
+        }
+
+        "a trust name is submitted but it contains colon" in {
+          mockActions()
+
+          val result =
+            performAction("trustName" -> "trust name:", "trn" -> validTrn.value)
           status(result) shouldBe BAD_REQUEST
           contentAsString(result) should include(
             messageFromMessageKey("trustName.error.pattern")

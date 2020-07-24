@@ -487,7 +487,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.representeeAnswers()
+                fillingOutReturn.draftReturn.representeeAnswers
               )
             )
         )
@@ -505,7 +505,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.representeeAnswers()
+                fillingOutReturn.draftReturn.representeeAnswers
               )
             )
         )

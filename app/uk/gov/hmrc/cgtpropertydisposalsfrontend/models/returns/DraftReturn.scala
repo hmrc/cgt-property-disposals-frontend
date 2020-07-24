@@ -29,6 +29,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 sealed trait DraftReturn extends Product with Serializable {
   val id: UUID
   val lastUpdatedDate: LocalDate
+  val gainOrLossAfterReliefs: Option[AmountInPence]
+  val yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+  val representeeAnswers: Option[RepresenteeAnswers]
 }
 
 final case class DraftSingleDisposalReturn(
@@ -43,6 +46,7 @@ final case class DraftSingleDisposalReturn(
   initialGainOrLoss: Option[AmountInPence],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -68,6 +72,7 @@ object DraftSingleDisposalReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -81,6 +86,7 @@ final case class DraftMultipleDisposalsReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -99,6 +105,7 @@ object DraftMultipleDisposalsReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -114,6 +121,7 @@ final case class DraftSingleIndirectDisposalReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -134,6 +142,7 @@ object DraftSingleIndirectDisposalReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -147,6 +156,7 @@ final case class DraftMultipleIndirectDisposalsReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -165,6 +175,7 @@ object DraftMultipleIndirectDisposalsReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -178,6 +189,7 @@ final case class DraftSingleMixedUseDisposalReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
+  gainOrLossAfterReliefs: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -196,6 +208,7 @@ object DraftSingleMixedUseDisposalReturn {
       None,
       None,
       representeeAnswers,
+      None,
       TimeUtils.today()
     )
 
@@ -222,24 +235,6 @@ object DraftReturn {
     def isMultipleIndirectDisposal(): Boolean =
       fold(_ => false, _ => false, _ => false, _ => true, _ => false)
 
-    def representativeType(): Option[RepresentativeType] =
-      fold(
-        _.triageAnswers.representativeType(),
-        _.triageAnswers.representativeType(),
-        _.triageAnswers.representativeType(),
-        _.triageAnswers.representativeType(),
-        _.triageAnswers.representativeType()
-      )
-
-    def representeeAnswers(): Option[RepresenteeAnswers] =
-      fold(
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers,
-        _.representeeAnswers
-      )
-
     def triageAnswers(): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =
       fold(
         multiple => Left(multiple.triageAnswers),
@@ -248,6 +243,9 @@ object DraftReturn {
         multipleIndirect => Left(multipleIndirect.triageAnswers),
         singleMixedUse => Right(singleMixedUse.triageAnswers)
       )
+
+    def representativeType(): Option[RepresentativeType] =
+      triageAnswers().fold(_.representativeType(), _.representativeType())
 
   }
 

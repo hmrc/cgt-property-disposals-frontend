@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
@@ -38,7 +38,9 @@
     showFiles: Boolean,
     isMultiple: Boolean,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    isFurtherReturn: Option[Boolean],
+    taxYear: TaxYear
 )(implicit request: RequestWithSessionData[_], messages: Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -61,22 +63,29 @@
 }
 
 @multipleKey = @{if(isMultiple) ".multiple" else ""}
+@furtherReturnKey = @{if(isFurtherReturn.contains(true)) ".furtherReturn" else "" }
 
 @taxableGainOrLossLabelWithAmount = @{
     if(answers.taxableGainOrLoss > AmountInPence.zero)
-        s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds()))
+        s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$furtherReturnKey.gain.label" -> Some(s"taxableGain$furtherReturnKey.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds()))
     else if(answers.taxableGainOrLoss < AmountInPence.zero)
-        s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds() * -1))
+        s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$furtherReturnKey.loss.label" -> Some(s"netLoss$furtherReturnKey.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxableGainOrLoss.inPounds() * -1))
     else
-        "taxableGainOrLoss.noLossOrGain.label" -> None
+        s"taxableGainOrLoss.noLossOrGain$furtherReturnKey.label" -> None
 }
 
+@taxYearStart = @{ taxYear.startDateInclusive.getYear.toString }
+@taxYearEnd = @{ taxYear.endDateExclusive.getYear.toString }
 
 @cyaSection() {
+
     @cyaRow(
-    messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$multipleKey.title"),
+        if(isFurtherReturn.contains(true))
+            messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin.furtherReturn.h2", taxYearStart, taxYearEnd)
+        else
+            messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$multipleKey.title"),
     Html(messages(taxableGainOrLossLabelWithAmount._1)),
-    Some(cyaChange(messages("taxableGainOrLoss.cyaChange"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
+    Some(cyaChange(messages(s"taxableGainOrLoss$furtherReturnKey.cyaChange"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
     "taxableGainOrLossAnswer"
     )
 
@@ -95,6 +104,17 @@
         Some(cyaChange(messages("hasEstimatedDetails.cyaChange"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
         "hasEstimatedDetails-value"
     )
+
+    @if(isFurtherReturn.contains(true)) {
+        @answers.yearToDateLiability.map { y =>
+            @cyaRow(
+                messages(s"yearToDateLiability$userKeyWithSeparatePeriodOfAdmin.h2", taxYearStart, taxYearEnd),
+                Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(y.inPounds())),
+                Some(cyaChange(messages("yearToDateLiability.cyaChange"), routes.YearToDateLiabilityController.yearToDateLiability().url)),
+                "yearToDateLiability"
+            )
+        }
+    }
 
     @cyaRow(
         messages("nonCalculatedTaxDue.title"),

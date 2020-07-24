@@ -29,7 +29,7 @@ object PersonalRepresentativeDetails {
   def fromDraftReturn(
     draftReturn: DraftReturn
   ): Either[String, Option[PersonalRepresentativeDetails]] =
-    fromAnswers(draftReturn.triageAnswers(), draftReturn.representeeAnswers())
+    fromAnswers(draftReturn.triageAnswers(), draftReturn.representeeAnswers)
 
   def fromStartingNewDraftReturn(
     startingNewDraftReturn: StartingNewDraftReturn

@@ -41,7 +41,7 @@
         taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
 )
 
-@(draftReturn: DraftSingleDisposalReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftSingleDisposalReturn, isFurtherReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
@@ -57,6 +57,7 @@
 }
 @triageState = @{draftReturn.triageAnswers.fold(_ => InProgress, _ => Complete)}
 @propertyAddressState = @{draftReturn.propertyAddress.fold[TaskListStatus](ToDo)(_ => Complete)}
+
 @disposalDetailsState = @{draftReturn.disposalDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
 @acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
 @uploadSupportingDocsState = @{draftReturn.supportingEvidenceAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))}
@@ -80,9 +81,9 @@
 
     (draftReturn.triageAnswers) match {
         case IncompleteSingleDisposalTriageAnswers(individualUserType, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) =>
-            shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
+            isFurtherReturn.contains(false) && shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
         case CompleteSingleDisposalTriageAnswers(individualUserType, _, countryOfResidence, assetType, _, _) =>
-            shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
+            isFurtherReturn.contains(false) && shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers, individualUserType)
         case _ =>
             false
     }
@@ -105,10 +106,25 @@
     }
 }
 
+@gainOrLossAfterReliefsState = @{
+    if(isFurtherReturn.contains(true)){
+        (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState) match {
+            case (Complete, Complete, Complete, Complete)  =>
+                Some(draftReturn.gainOrLossAfterReliefs.fold[TaskListStatus](ToDo)(_ => Complete))
+            case _ =>
+                Some(CannotStart)
+        }
+    } else
+        None
+}
+
 @exemptionsAndLossesState = @{
     reliefDetailsState match {
         case Complete =>
-            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+            gainOrLossAfterReliefsState match {
+                case Some(Complete) | None => draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](ToDo)(_.fold(_ => InProgress, _ => Complete))
+                case _                     => CannotStart
+            }
         case _ => TaskListStatus.CannotStart
     }
 }
@@ -202,6 +218,16 @@
                 @taskLink(messages("task-list.relief-details.link"),
                 returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers().url, reliefDetailsState)
             </li>
+
+            @gainOrLossAfterReliefsState.map{ state =>
+                    <li id="gainOrLossAfterReliefs" class="app-task-list__item">
+                        @taskLink(
+                            messages("task-list.gain-or-loss-after-reliefs.link"),
+                            returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController.checkYourAnswers().url,
+                            state
+                        )
+                    </li>
+            }
 
         </ul>
     </li>

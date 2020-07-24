@@ -28,6 +28,7 @@ landingPage.howTo.list1.bullet2=pay any tax you might owe for that disposal
 landingPage.howTo.list1.bullet3=view your previous and current returns
 
 landingPage.howTo.firstReturnsOnly=At the moment, only the first return for UK property sales or disposals in the tax year can be submitted online. If you need to amend an existing return or complete any further returns for the tax year you will need to <a href="{0}">contact HMRC</a>.
+landingPage.howTo.furtherReturns=If you need to amend an existing return you will need to <a href="{0}">contact HMRC</a>.
 
 landingPage.howTo.p3=If you’re a non-resident you must use this service to report sales or disposals from 6 April 2020 of:
 landingPage.howTo.list2.bullet1=residential UK property or land
@@ -84,101 +85,9 @@ landingPage.sidebar.2=Capital Gains Tax
 landingPage.sidebar.3=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
 landingPage.sidebar.4=Pay your tax
 
-agentsLandingPage.title=Manage your client’s Capital Gains Tax on UK property account
-agentsLandingPage.intro.p1=Find out how to ask your client to authorise you to manage their Capital Gains Tax on UK property account.
-agentsLandingPage.contents.h4=Contents
-agentsLandingPage.contents.list1.ordered1=<a href="{0}">Who needs to report Capital Gains Tax on UK property</a>
-agentsLandingPage.contents.list1.ordered2=<a href="{0}">How to ask for authorisation</a>
-agentsLandingPage.contents.list1.ordered3=<a href="{0}">How to manage your client’s account</a>
-agentsLandingPage.contents.list1.ordered4=<a href="{0}">Send a Capital Gains Tax on UK property return</a>
-agentsLandingPage.contents.list1.ordered5=<a href="{0}">What you’ll need to complete the return</a>
-agentsLandingPage.contents.list1.ordered6=<a href="{0}">Ways your client can pay</a>
-agentsLandingPage.report.h3=Who needs to report Capital Gains Tax on UK property
-agentsLandingPage.report.uk-residents.h4=UK residents
-agentsLandingPage.report.uk-residents.p1=For UK residential property disposals made from 6 April 2020, UK residents have 30 days after the property’s completion date to report and pay Capital Gains Tax on the disposals.
-agentsLandingPage.report.uk-residents.covid.p1=Due to coronavirus (COVID-19), UK residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
-agentsLandingPage.report.uk-residents.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
-agentsLandingPage.report.uk-residents.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
-agentsLandingPage.report.uk-residents.p2=<a href="{0}">Check if your client needs to report and pay Capital Gains Tax on UK property</a>
-agentsLandingPage.report.uk-residents.p3=For UK residential property disposals made from 6 April 2020, UK residents must report their Capital Gains Tax online. You can do this for your clients through their Capital Gains Tax on UK property account.
-agentsLandingPage.report.firstReturnOnly=At the moment, only the first return for UK property sales or disposals in the tax year can be submitted online. If your client needs to amend an existing return or complete any further returns for the tax year they will need to <a href="{0}">contact HMRC</a>.
-agentsLandingPage.report.uk-residents.p4=If your client is a resident who is an individual or a trust, you can use this service to:
-agentsLandingPage.report.uk-residents.list1.bullet1=report your client’s UK residential property disposals made from 6 April 2020
-agentsLandingPage.report.uk-residents.list1.bullet2=tell your client how to pay any tax they might owe for that disposal
-agentsLandingPage.report.uk-residents.list1.bullet3=view your client’s previous and current returns
-agentsLandingPage.report.what-residents-cannot-do.h4=What UK residents cannot do
-agentsLandingPage.report.what-residents-cannot-do.p1=You cannot use your client’s online account to report a disposal made by a deceased’s estate during the period of administration. You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
-agentsLandingPage.report.non-residents.h4=Non-residents
-agentsLandingPage.report.non-residents.p1=Non-residents must report all sales or disposals of UK property within 30 days of the completion date, even if they have no tax to pay or have made a loss.
-agentsLandingPage.report.non-uk-residents.covid.p1=Due to coronavirus (COVID-19), non-residents will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
-agentsLandingPage.report.non-uk-residents.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
-agentsLandingPage.report.non-uk-residents.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
-agentsLandingPage.report.non-residents.p2=If your client is a non-resident use this service to report their UK property disposals made from 6 April 2020 of:
-agentsLandingPage.report.non-residents.list1.bullet1=residential UK property or land
-agentsLandingPage.report.non-residents.list1.bullet2=non-residential UK property or land
-agentsLandingPage.report.non-residents.list1.bullet3=mixed use UK property or land
-agentsLandingPage.report.non-residents.list1.bullet4=rights to assets that derive at least 75% of their value from UK land (indirect disposals)
-
-agentsLandingPage.report.what-non-residents-cannot-do.h4=What non-residents cannot do
-agentsLandingPage.report.what-non-residents-cannot-do.p1=You cannot use your client’s online account to report:
-agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet1=disposals of mixed-use property (part of the property was residential and part was non-residential during the period of ownership) - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
-agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet2=indirect disposals of UK property - complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>
-agentsLandingPage.report.what-non-residents-cannot-do.list1.bullet3=a disposal made by a deceased’s estate during the period of administration - <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you
-agentsLandingPage.report.what-non-residents-cannot-do.period-of-admin=You cannot use your client’s online account to report a disposal made by a deceased’s estate during the period of administration. You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
-agentsLandingPage.how-to-ask-for-authorisation.h3=How to ask for authorisation
-agentsLandingPage.how-to-ask-for-authorisation.p1=Ask your client to:
-agentsLandingPage.how-to-ask-for-authorisation.list1.bullet1=create a Government Gateway user ID if they do not have one
-agentsLandingPage.how-to-ask-for-authorisation.list1.bullet2=use their Government Gateway user ID and password to sign in and <a href = "{0}">create a Capital Gains Tax on UK property account</a>
-agentsLandingPage.how-to-ask-for-authorisation.list1.bullet3=give you their account number
-agentsLandingPage.how-to-ask-for-authorisation.list1.bullet4=give you their UK postcode or country of residence - these details must match their Capital Gains Tax on UK property account details
-agentsLandingPage.how-to-ask-for-authorisation.p2=You’ll need an <a href="{0}">agent services account</a> – this is different from your HMRC online services for agents account.
-agentsLandingPage.how-to-ask-for-authorisation.p3=Sign in to your agent services account then select ‘ask a client to authorise you’.
-agentsLandingPage.how-to-ask-for-authorisation.p4=Enter your client’s details. You’ll then get a link to share with your client. Send your client an email asking them to go to the link to authorise you. The link will expire 14 days after it was created.
-agentsLandingPage.how-to-ask-for-authorisation.p5=Tell your client they’ll need the Government Gateway user ID and password they use for their personal tax affairs (if they’re an individual) or the trust name (if they’re a trust). If they do not have a user ID, they can create one when they go to your link.
-agentsLandingPage.how-to-ask-for-authorisation.p6=When your client selects the link in the email you sent them, you’ll then be able to manage their Capital Gains Tax on UK property account and returns.
-agentsLandingPage.how-to-ask-for-authorisation.p7=You’ll get an email after your client accepts or rejects your request, or if the link has expired after 14 days.
-agentsLandingPage.how-to-ask-for-authorisation.p8=Track your authorisation requests from your agent services account.
-agentsLandingPage.how-to-ask-for-authorisation.p9=You’ll need to ask for authorisation, even if your client has already authorised you to manage their Self Assessment or other tax matters.
-agentsLandingPage.how-to-ask-for-authorisation.p10=Online services may be slow during busy times.
-agentsLandingPage.sign-in-button=Sign in
-agentsLandingPage.sidebar.title=Related content
-agentsLandingPage.sidebar.1=Create an agent services account
-
-agentsLandingPage.how-to-manage-your-clients-account.h3=How to manage your client’s account
-agentsLandingPage.how-to-manage-your-clients-account.p1=After you’ve been authorised, you’ll need to:
-agentsLandingPage.how-to-manage-your-clients-account.list1.bullet1=sign in to your agent services account
-agentsLandingPage.how-to-manage-your-clients-account.list1.bullet2=select ‘report and pay a client’s Capital Gains Tax on UK property’
-agentsLandingPage.how-to-manage-your-clients-account.list1.bullet3=enter your client’s Capital Gains Tax on UK property account number
-agentsLandingPage.how-to-manage-your-clients-account.list1.bullet4=enter your client’s UK postcode or country of residence - these details must match their Capital Gains Tax on UK property account details
-agentsLandingPage.how-to-manage-your-clients-account.p2=Go to ‘manage account’ at the top of your client’s Capital Gains Tax on UK property account to update the contact details for the account.
-
-agentsLandingPage.send-a-cgt-on-uk-property-return.h3=Send a Capital Gains Tax on UK property return
-agentsLandingPage.send-a-cgt-on-uk-property-return.p1=Start a new return from your client’s Capital Gains Tax on UK property ‘account home’.
-agentsLandingPage.send-a-cgt-on-uk-property-return.p2=The return will be saved in your client’s account home for 30 days from the last day it was saved.
-agentsLandingPage.send-a-cgt-on-uk-property-return.p3=If your client disposed of more than one property from 6 April 2020 with the same completion date, you can use this service to report the Capital Gains Tax for all those properties. The properties must also have exchange dates in the same tax year.
-
-agentsLandingPage.what-you-will-need-to-complete-the-return.h3=What you’ll need to complete the return
-agentsLandingPage.what-you-will-need-to-complete-the-return.p1=You need these details about your client’s disposal:
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet1=address and postcode
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet2=date they got the property
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet3=date they exchanged contracts when selling or disposing of the property
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet4=date they stopped being the property’s owner (completion date)
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet5=value of property when they got it
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet6=value of property when they disposed of it
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet7=costs of buying, selling or making improvements to the property
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet8=details of any tax reliefs, allowances or exemptions they’re entitled to claim
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet9=property type, if they’re a non-resident
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet10=property value on 31 March 1982 (known as ‘rebasing’) if they were a UK resident at the time of the disposal and owned the property on or before 31 March 1982
-agentsLandingPage.what-you-will-need-to-complete-the-return.list1.bullet11=<a href="{0}">property value on 5 April 2019 (known as ‘rebasing’)</a> if they were a non-resident at the time of the disposal and owned the property on or before 5 April 2019
-agentsLandingPage.what-you-will-need-to-complete-the-return.p2=You may be asked to upload a document showing how the Capital Gains Tax due was worked out.
-
-agentsLandingPage.ways-your-client-can-pay.h3=Ways your client can pay
-agentsLandingPage.ways-your-client-can-pay.p1=Your client can pay by bank transfer, debit card or corporate credit card from their account. They will need to provide their payment reference number. They can find it in their Capital Gains Tax on UK property account.
-
 subsequentReturnExit.title=You’ll need to contact HMRC
 subsequentReturnExit.p1=Only first returns for UK property sales or disposals in the tax year can be completed online.
 subsequentReturnExit.p2=You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper return to be posted to you.
-
 
 #===================================================
 # TRANSLATION NOT REQUIRED = END
@@ -610,7 +519,7 @@ enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trus
 enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
 trustName.error.tooLong=The name of your trust must be less than 105 characters
-trustName.error.pattern=The trust’s name must only include letters, spaces, commas, ampersands, apostrophes and hyphens
+trustName.error.pattern=The trust’s name must only include letters, numbers, commas, spaces, ampersands, apostrophes and hyphens. Do not include colons.
 
 alreadySubscribedWithDifferentGGAccount.title=You need to sign in with a different Government Gateway account
 alreadySubscribedWithDifferentGGAccount.p=You’ll need to sign in with same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
@@ -1358,6 +1267,7 @@ task-list.acquisition-details.link=Enter purchase or acquisition details
 task-list.exemptions-and-losses.link=Enter losses and exemptions
 task-list.save-and-come-back.link=Save and come back later
 task-list.relief-details.link=Enter reliefs
+task-list.gain-or-loss-after-reliefs.link=Enter gain or loss after reliefs
 
 task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
@@ -3452,6 +3362,95 @@ netLoss.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall loss m
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
+taxableGainOrLoss.furtherReturn.title=Tell us if you made a net gain or loss
+taxableGainOrLoss.agent.furtherReturn.title=Tell us if your client made a net gain or loss
+taxableGainOrLoss.trust.furtherReturn.title=Tell us if the trust made a net gain or loss
+taxableGainOrLoss.capacitor.furtherReturn.title=Tell us if the person made a net gain or loss
+taxableGainOrLoss.personalRep.furtherReturn.title=Tell us if the person made a net gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.title=Tell us if the estate made a net gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.title=Tell us if your client made a net gain or loss
+
+taxableGainOrLoss.furtherReturn.p1=You’ll need to work out if you made a net gain or loss on the UK property-related disposals you are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.agent.furtherReturn.p1=You’ll need to work out if your client made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.trust.furtherReturn.p1=You’ll need to work out if the trust made a net gain or loss on the UK property-related disposals it is paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.capacitor.furtherReturn.p1=You’ll need to work out if the person made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.personalRep.furtherReturn.p1=You’ll need to work out if the person made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.p1=You’ll need to work out if the estate made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.p1=You’ll need to work out if the estate made a net gain or loss on the UK property-related disposals they are paying tax on in the {0} to {1} tax year.
+
+taxableGainOrLoss.furtherReturn.p2=To do this, you’ll need to:
+
+taxableGainOrLoss.furtherReturn.li1=Add together all the gains after reliefs from UK property-related disposals.
+taxableGainOrLoss.furtherReturn.li2=Subtract any in-year Capital Gains Tax losses that can be deducted.
+taxableGainOrLoss.furtherReturn.li3=Subtract any allowable losses from previous years that are available.
+
+taxableGainOrLoss.furtherReturn.li4=Subtract the amount of Annual Exempt Amount you want to use.
+taxableGainOrLoss.agent.furtherReturn.li4=Subtract the amount of Annual Exempt Amount they want to use.
+taxableGainOrLoss.trust.furtherReturn.li4=Subtract the amount of Annual Exempt Amount to be used.
+taxableGainOrLoss.capacitor.furtherReturn.li4=Subtract the amount of Annual Exempt Amount they want to use.
+taxableGainOrLoss.personalRep.furtherReturn.li4=Subtract the amount of Annual Exempt Amount they want to use.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.li4=Subtract the amount of Annual Exempt Amount to be used.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.li4=Subtract the amount of Annual Exempt Amount they want to use.
+
+taxableGainOrLoss.furtherReturn.h2=Did you make a net gain on the property disposals that you are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.agent.furtherReturn.h2=Did your client make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.trust.furtherReturn.h2=Did the trust make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.capacitor.furtherReturn.h2=Did the person make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.personalRep.furtherReturn.h2=Did the person make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.h2=Did the estate make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.h2=Did your client, or the estate make a net gain on the property disposals that they are paying tax on in tax year {0} to {1}?
+
+taxableGainOrLoss.furtherReturn.link=How to work out your overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.agent.furtherReturn.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.trust.furtherReturn.link=How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.capacitor.furtherReturn.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.personalRep.furtherReturn.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
+
+taxableGainOrLoss.furtherReturn.gain.label=Yes, I made a net gain
+taxableGainOrLoss.agent.furtherReturn.gain.label=Yes, they made a net gain
+taxableGainOrLoss.trust.furtherReturn.gain.label=Yes, it made a net gain
+taxableGainOrLoss.capacitor.furtherReturn.gain.label=Yes, they made a net gain
+taxableGainOrLoss.personalRep.furtherReturn.gain.label=Yes, they made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.gain.label=Yes, it made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.gain.label=Yes, they made a net gain
+
+taxableGainOrLoss.furtherReturn.loss.label=No, I made a net loss
+taxableGainOrLoss.agent.furtherReturn.loss.label=No, they made a net loss
+taxableGainOrLoss.trust.furtherReturn.loss.label=No, it made a net loss
+taxableGainOrLoss.capacitor.furtherReturn.loss.label=No, they made a net loss
+taxableGainOrLoss.personalRep.furtherReturn.loss.label=No, they made a net loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.loss.label=No, it made a net loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.loss.label=No, they made a net loss
+
+taxableGain.furtherReturn.label=Amount of net gain
+netLoss.furtherReturn.label=Amount of net loss
+taxableGainOrLoss.noLossOrGain.furtherReturn.label=No net gain or loss
+
+taxableGainOrLoss.furtherReturn.error.required=Select yes if you made a net gain
+taxableGainOrLoss.agent.furtherReturn.error.required=Select yes if your client made a net gain
+taxableGainOrLoss.trust.furtherReturn.error.required=Select yes if the trust made a net gain
+taxableGainOrLoss.capacitor.furtherReturn.error.required=Select yes if the person made a net gain
+taxableGainOrLoss.personalRep.furtherReturn.error.required=Select yes if the person made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.error.required=Select yes if the estate made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.error.required=Select yes if your client made a net gain
+
+taxableGain.furtherReturn.error.required=Enter the amount of net gain
+taxableGain.furtherReturn.error.invalid=Net gain must be an amount of money, like 4,820.54 or 539
+taxableGain.furtherReturn.error.tooSmall=Net gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.furtherReturn.error.tooLarge=Net gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.furtherReturn.error.tooManyDecimals=Net gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+
+netLoss.furtherReturn.error.required=Enter the amount of net loss
+netLoss.furtherReturn.error.invalid=Net loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.furtherReturn.error.tooSmall=Net loss must be an amount of money between 0 and 50,000,000,000
+netLoss.furtherReturn.error.tooLarge=Net loss must be an amount of money between 0 and 50,000,000,000
+netLoss.furtherReturn.error.tooManyDecimals=Net loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+
+taxableGainOrLoss.furtherReturn.cyaChange=if a net gain or loss was made on the property sale or disposal
+
+
 estimatedIncome.title=What do you believe your gross income will be in this tax year?
 estimatedIncome.agent.title=What does your client believe their gross income will be in this tax year?
 estimatedIncome.capacitor.title=What does the person believe their gross income will be in this tax year?
@@ -3561,6 +3560,59 @@ hasEstimatedDetails.error.required=Select yes if any of the details in this retu
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
 hasEstimatedDetails.cyaChange=if any of the amounts in the return have been estimated
+
+yearToDateLiability.title=Tell us about your overall liability in tax year 2020 to 2021
+yearToDateLiability.agent.title=Tell us about your client’s overall liability in tax year 2020 to 2021
+yearToDateLiability.trust.title=Tell us about the trust’s overall liability in tax year 2020 to 2021
+yearToDateLiability.capacitor.title=Tell us about the person’s overall liability in tax year 2020 to 2021
+yearToDateLiability.personalRep.title=Tell us about the person’s overall liability in tax year 2020 to 2021
+yearToDateLiability.personalRepInPeriodOfAdmin.title=Tell us about the estate’s overall liability in tax year 2020 to 2021
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.title=Tell us about your client’s overall liability in tax year 2020 to 2021
+
+yearToDateLiability.p1=To work out this amount you’ll need to:
+yearToDateLiability.trust.p1=You’ll need to multiply the trust’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
+yearToDateLiability.personalRepInPeriodOfAdmin.p1=You’ll need to multiply the estate’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.p1=You’ll need to multiply your client, or the estate’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
+
+yearToDateLiability.li1=Multiply the amount of net gain to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new window)</a> for the UK property related disposal for that tax year.
+yearToDateLiability.li2=Multiply the amount to be taxed at the <a href="{0}" target="_blank">higher rate of tax (opens in a new window)</a> for property related disposals for that tax year.
+
+yearToDateLiability.li3=Add these amounts together to get your overall Capital Gains Tax liability on your UK property-related disposals.
+yearToDateLiability.agent.li3=Add these amounts together to get your client’s overall Capital Gains Tax liability on their UK property-related disposals.
+yearToDateLiability.capacitor.li3=Add these amounts together to get the person’s overall Capital Gains Tax liability on their UK property-related disposals.
+yearToDateLiability.personalRep.li3=Add these amounts together to get the person’s overall Capital Gains Tax liability on their UK property-related disposals.
+
+yearToDateLiability.h2=What is your overall liability for your gains made so far in tax year {0} to {1}?
+yearToDateLiability.agent.h2=What is your client’s overall liability for their gains made so far in tax year {0} to {1}?
+yearToDateLiability.trust.h2=What is the trust’s overall liability for its gains made so far in tax year {0} to {1}?
+yearToDateLiability.capacitor.h2=What is the person’s overall liability for their gains made so far in tax year {0} to {1}?
+yearToDateLiability.personalRep.h2=What is the person’s overall liability for their gains made so far in tax year {0} to {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.h2=What is the estate’s overall liability for its gains made so far in tax year {0} to {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.h2=What is your client’s overall liability their your gains made so far in tax year {0} to {1}?
+
+yearToDateLiability.link=How to work out your overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.agent.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.trust.link=How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.capacitor.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.personalRep.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.personalRepInPeriodOfAdmin.link=How to work out the estate’s overall Capital Gains Tax liability on UK property-related disposals
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
+
+yearToDateLiability.error.required=Enter your overall liability for your gains made so far in tax year {0} to {1}
+yearToDateLiability.agent.error.required=Enter your client’s overall liability for their gains made so far in tax year {0} to {1}
+yearToDateLiability.trust.error.required=Enter the trusts’s overall liability for its gains made so far in tax year {0} to {1}
+yearToDateLiability.capacitor.error.required=Enter the person’s overall liability for their gains made so far in tax year {0} to {1}
+yearToDateLiability.personalRep.error.required=Enter the person’s overall liability for their gains made so far in tax year {0} to {1}
+yearToDateLiability.personalRepInPeriodOfAdmin.error.required=Enter the estates’s overall liability for its gains made so far in tax year {0} to {1}
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.error.required=Enter your client’s overall liability for their gains made so far in tax year {0} to {1}
+
+yearToDateLiability.error.invalid=The overall Capital Gains Tax liability must be a number, like 1,500 or 7,300.50
+yearToDateLiability.error.tooManyDecimals=The overall Capital Gains Tax liability must have 2 decimal places or less, for example 33.33
+yearToDateLiability.error.tooSmall=The overall Capital Gains Tax liability must be 0 or more
+yearToDateLiability.error.tooLarge=The overall Capital Gains Tax liability must be 50,000,000,000.00 or less
+
+yearToDateLiability.cyaChange=the overall Capital Gains Tax liability
+
 
 taxDue.title=Enter the Capital Gains Tax due for this return
 taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
@@ -4381,6 +4433,74 @@ representee.cyaChange.isFirstReturn=if this is the first return in this tax year
 # PERSON REPRESENTED PAGES - END
 #===================================================
 
+
+#===================================================
+#  GAIN OR LOSS AFTER RELIEFS PAGES - START
+#===================================================
+
+gainOrLossAfterReliefs.caption=Gain or loss after reliefs
+
+gainOrLossAfterReliefs.title=Did you make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.agent.title=Did your client make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.trust.title=Did the trust make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.capacitor.title=Did the person make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRep.title=Did the person make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Did the estate make a gain on the disposal in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Did your client make a gain on the disposal in this return after reliefs were subtracted?
+
+gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
+gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss
+gainOrLossAfterReliefs.noLossOrGain.outerLabel=I made no gain or loss after reliefs
+
+gainOrLossAfterReliefs.gain.notSelf.outerLabel=Yes, they made a gain
+gainOrLossAfterReliefs.loss.notSelf.outerLabel=No, they made a loss
+gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel=They made no gain or loss after reliefs
+
+gainOrLossAfterReliefs.gain.innerLabel=Amount of gain
+gainOrLossAfterReliefs.loss.innerLabel=Amount of loss
+
+gainOrLossAfterReliefs.error.required=Select yes if you made a gain
+gainOrLossAfterReliefs.agent.error.required=Select yes if your client made a gain
+gainOrLossAfterReliefs.trust.error.required=Select yes if the trust made a gain
+gainOrLossAfterReliefs.capacitor.error.required=Select yes if the person made a gain
+gainOrLossAfterReliefs.personalRep.error.required=Select yes if the person made a gain
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.error.required=Select yes if the estate made a gain
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.error.required=Select yes if your client made a gain
+
+gainOrLossAfterReliefs.error.invalid=Select yes if you made a gain
+gainOrLossAfterReliefs.agent.error.invalid=Select yes if your client made a gain
+gainOrLossAfterReliefs.trust.error.invalid=Select yes if the trust made a gain
+gainOrLossAfterReliefs.capacitor.error.invalid=Select yes if the person made a gain
+gainOrLossAfterReliefs.personalRep.error.invalid=Select yes if the person made a gain
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.error.invalid=Select yes if the estate made a gain
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.error.invalid=Select yes if your client made a gain
+
+gainAfterReliefs.error.required=Enter the gain amount, like 50,000 or 52,500.54
+gainAfterReliefs.error.invalid=The gain amount must be a number, like 50,000 or 52,500.54
+gainAfterReliefs.error.tooLarge=The gain amount must be 50,000,000,000.00 or less
+gainAfterReliefs.error.tooManyDecimals=The gain amount must have 2 decimal places or less, like 2,908 or 740.50
+gainAfterReliefs.error.tooSmall=The gain amount must be more than 0
+
+lossAfterReliefs.error.required=Enter the loss amount, like 32,000 or 32,500.83
+lossAfterReliefs.error.invalid=The loss amount must be a number, like 32,000 or 32,500.83
+lossAfterReliefs.error.tooLarge=The loss amount must be 50,000,000,000.00 or less
+lossAfterReliefs.error.tooManyDecimals=The loss amount must have 2 decimal places or less, like 2,908 or 740.50
+lossAfterReliefs.error.tooSmall=The loss amount must be more than 0
+
+gainOrLossAfterReliefs.link=How to work out the overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.agent.link=How to work out your client’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.trust.link=How to work out the trust’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.capacitor.link=How to work out the person’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.personalRep.link=How to work out the person’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link=How to work out the estate’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link=How to work out your client’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
+
+gainOrLossAfterReliefs.cya.title=Check your answers
+gainOrLossAfterReliefs.cyaChange=whether a gain, a loss, or no gain or loss was made after reliefs
+
+#===================================================
+#  GAIN OR LOSS AFTER RELIEFS PAGES - END
+#===================================================
 
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English

@@ -137,8 +137,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   def checkIsTechnicalErrorPage(
     result: Future[Result]
   )(implicit messagesApi: MessagesApi): Unit = {
-    status(result)        shouldBe INTERNAL_SERVER_ERROR
-    contentAsString(result) should include(
+    (status(result), redirectLocation(result)) shouldBe (INTERNAL_SERVER_ERROR -> None)
+    contentAsString(result)                      should include(
       messageFromMessageKey("global.error.InternalServerError500.title")
     )
   }
@@ -163,8 +163,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     contentChecks: Document => Unit = _ => (),
     expectedStatus: Int = OK
   ): Unit = {
-    redirectLocation(result) shouldBe None
-    status(result)           shouldBe expectedStatus
+    (status(result), redirectLocation(result)) shouldBe (expectedStatus -> None)
+    status(result)                             shouldBe expectedStatus
 
     val doc = Jsoup.parse(contentAsString(result))
     doc.select("h1").text should include(expectedTitle)

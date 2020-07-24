@@ -125,8 +125,7 @@ class RepresenteeController @Inject() (
               _.fold(_.individualUserType, _.individualUserType),
               _.fold(_.individualUserType, _.individualUserType)
             )
-        val answers            = fillingOutReturn.draftReturn
-          .representeeAnswers()
+        val answers            = fillingOutReturn.draftReturn.representeeAnswers
           .getOrElse(IncompleteRepresenteeAnswers.empty)
         performAction(individualUserType, Right(fillingOutReturn), answers)
 

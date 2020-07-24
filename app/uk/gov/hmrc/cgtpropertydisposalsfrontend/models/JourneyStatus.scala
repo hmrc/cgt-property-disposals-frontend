@@ -196,6 +196,39 @@ object JourneyStatus {
 
   final case object AgentWithoutAgentEnrolment extends JourneyStatus
 
+  implicit class FillingOutReturnOps(private val f: FillingOutReturn) extends AnyVal {
+
+    def isFurtherReturn(): Option[Boolean] = {
+      lazy val hasPreviousSentReturns = f.previousSentReturns.exists(_.nonEmpty)
+      f.subscribedDetails.name match {
+        case Left(_)  =>
+          Some(hasPreviousSentReturns)
+
+        case Right(_) =>
+          val individualUserType = f.draftReturn
+            .triageAnswers()
+            .fold(
+              _.fold(_.individualUserType, _.individualUserType),
+              _.fold(_.individualUserType, _.individualUserType)
+            )
+
+          individualUserType.flatMap {
+            case _: RepresentativeType =>
+              f.draftReturn.representeeAnswers
+                .flatMap(
+                  _.fold(_.isFirstReturn, complete => Some(complete.isFirstReturn))
+                    .map(!_)
+                )
+            case _                     =>
+              Some(hasPreviousSentReturns)
+
+          }
+
+      }
+    }
+
+  }
+
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[JourneyStatus] = derived.oformat()
 
