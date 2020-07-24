@@ -190,7 +190,7 @@ class YearToDateLiabilityController @Inject() (
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(f(s, r, _))
 
-      case _                                                                    => Redirect(controllers.routes.StartController.start())
+      case _                                                                  => Redirect(controllers.routes.StartController.start())
     }
 
   private def withCalculatedTaxDue(
@@ -1647,7 +1647,7 @@ class YearToDateLiabilityController @Inject() (
               )
             }
 
-          case _                                                                                        =>
+          case _                                                                                      =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
@@ -1700,7 +1700,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                                                                        =>
+          case _                                                                                      =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }

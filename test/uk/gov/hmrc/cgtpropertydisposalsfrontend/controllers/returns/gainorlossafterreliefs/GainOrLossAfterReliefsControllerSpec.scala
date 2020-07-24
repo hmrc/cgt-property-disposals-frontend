@@ -57,7 +57,7 @@ class GainOrLossAfterReliefsControllerSpec
       performAction,
       {
         case f: FillingOutReturn if f.isFurtherReturn.contains(true) => true
-        case _                                                         => false
+        case _                                                       => false
       }
     )
 
