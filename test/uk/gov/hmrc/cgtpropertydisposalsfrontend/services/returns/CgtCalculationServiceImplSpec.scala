@@ -50,6 +50,8 @@ class CgtCalculationServiceImplSpec
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
+  private val emptyJsonBody = "{}"
+
   "CgtCalculationServiceImpl" when {
 
     "handling requests to calculate tax due" must {
@@ -67,14 +69,14 @@ class CgtCalculationServiceImplSpec
         }
 
         "the http call comes back with a status other than 200" in {
-          mockCalculateTaxDue(request)(Right(HttpResponse(500)))
+          mockCalculateTaxDue(request)(Right(HttpResponse(500, emptyJsonBody)))
 
           await(service.calculateTaxDue(request).value).isLeft shouldBe true
         }
 
         "the http call comes back with status 200 but the body cannot be parsed" in {
           mockCalculateTaxDue(request)(
-            Right(HttpResponse(200, Some(JsString("hello"))))
+            Right(HttpResponse(200, JsString("hello"), Map[String, Seq[String]]().empty))
           )
 
           await(service.calculateTaxDue(request).value).isLeft shouldBe true
@@ -87,7 +89,7 @@ class CgtCalculationServiceImplSpec
           val calculatedTaxDue = sample[CalculatedTaxDue]
 
           mockCalculateTaxDue(request)(
-            Right(HttpResponse(200, Some(Json.toJson(calculatedTaxDue))))
+            Right(HttpResponse(200, Json.toJson(calculatedTaxDue), Map[String, Seq[String]]().empty))
           )
 
           await(service.calculateTaxDue(request).value) shouldBe Right(

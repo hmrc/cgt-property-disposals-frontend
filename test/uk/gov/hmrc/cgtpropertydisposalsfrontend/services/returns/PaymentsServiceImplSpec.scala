@@ -63,6 +63,8 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
   implicit val hc: HeaderCarrier   = HeaderCarrier()
   implicit val request: Request[_] = FakeRequest()
 
+  private val emptyJsonBody = "{}"
+
   "PaymentsServiceImpl" when {
 
     "handling requests to start a payments journey" must {
@@ -102,15 +104,15 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         }
 
         "the http call came back with a status other than 201" in {
-          test(Right(HttpResponse(INTERNAL_SERVER_ERROR)))
+          test(Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody)))
         }
 
         "the http call came back with status 201 but there is no JSON body" in {
-          test(Right(HttpResponse(CREATED)))
+          test(Right(HttpResponse(CREATED, emptyJsonBody)))
         }
 
         "the http call came back with status 201 and JSON body, but the JSON cannot be parsed" in {
-          test(Right(HttpResponse(CREATED, Some(JsNumber(1)))))
+          test(Right(HttpResponse(CREATED, JsNumber(1), Map[String, Seq[String]]().empty)))
         }
 
       }
@@ -130,12 +132,13 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             Right(
               HttpResponse(
                 CREATED,
-                Some(Json.parse("""
+                Json.parse("""
                                   |{
                                   |  "journeyId": "id",
                                   |   "nextUrl": "/next-url"
                                   |}
-                                  |""".stripMargin))
+                                  |""".stripMargin),
+                Map[String, Seq[String]]().empty
               )
             )
           )

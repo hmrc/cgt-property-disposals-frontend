@@ -18,16 +18,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.Json
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedUpdateDetails, SubscriptionDetails}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
@@ -91,41 +89,41 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
   override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.post(bprUrl, Json.toJson(request)))
+    makeCall(_.POST[JsValue, HttpResponse](bprUrl, Json.toJson(request)))
 
   override def subscribe(
     subscriptionDetails: SubscriptionDetails
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.post(subscribeUrl, Json.toJson(subscriptionDetails)))
+    makeCall(_.POST[JsValue, HttpResponse](subscribeUrl, Json.toJson(subscriptionDetails)))
 
   override def registerWithoutId(registrationDetails: RegistrationDetails)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(
-      _.post(registerWithoutIdAndSubscribeUrl, Json.toJson(registrationDetails))
+      _.POST[JsValue, HttpResponse](registerWithoutIdAndSubscribeUrl, Json.toJson(registrationDetails))
     )
 
   override def getSubscriptionStatus()(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.get(subscriptionStatusUrl))
+    makeCall(_.GET[HttpResponse](subscriptionStatusUrl))
 
   override def getSubscribedDetails(cgtReference: CgtReference)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.get(getSubscribedDetailsUrl(cgtReference)))
+    makeCall(_.GET[HttpResponse](getSubscribedDetailsUrl(cgtReference)))
 
   override def updateSubscribedDetails(
     subscribedUpdateDetails: SubscribedUpdateDetails
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.put(subscriptionUpdateUrl, subscribedUpdateDetails))
+    makeCall(_.PUT[SubscribedUpdateDetails, HttpResponse](subscriptionUpdateUrl, subscribedUpdateDetails))
 
   override def testSubmitToDms(
     cgtReference: CgtReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.get(baseUrl + "/dms-test"))
+    makeCall(_.GET[HttpResponse](baseUrl + "/dms-test"))
 
   private def makeCall(
     call: HttpClient => Future[HttpResponse]

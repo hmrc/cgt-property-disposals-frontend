@@ -20,13 +20,11 @@ import java.net.URLEncoder
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
@@ -49,11 +47,11 @@ class AddressLookupConnectorImpl @Inject() (
   val url: String =
     servicesConfig.baseUrl("address-lookup") + "/v2/uk/addresses"
 
-  val headers: Map[String, String] = {
+  val headers: Seq[(String, String)] = {
     val userAgent = servicesConfig.getString(
       "microservice.services.address-lookup.user-agent"
     )
-    Map("User-Agent" -> userAgent)
+    Seq("User-Agent" -> userAgent)
   }
 
   override def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
@@ -64,11 +62,11 @@ class AddressLookupConnectorImpl @Inject() (
         "postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase
       )
       filter.fold(paramMap)(f => paramMap.updated("filter", URLEncoder.encode(f, "UTF-8")))
-    }
+    }.toSeq
 
     EitherT[Future, Error, HttpResponse](
       http
-        .get(url, queryParameters, headers)
+        .GET[HttpResponse](url, queryParameters, headers)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )

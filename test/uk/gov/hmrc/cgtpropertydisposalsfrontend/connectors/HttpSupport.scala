@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import org.scalamock.handlers.CallHandler4
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.Matchers
 import play.api.libs.json.Writes
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -29,17 +29,44 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val mockHttp: HttpClient = mock[HttpClient]
 
-  private val emptyMap = Map.empty[String, String]
-
   def mockGet[A](
-    url: String,
-    queryParams: Map[String, String] = emptyMap,
-    headers: Map[String, String] = emptyMap
+    url: String
   )(
     response: Option[A]
-  ) =
+  ): CallHandler4[String, HttpReads[A], HeaderCarrier, ExecutionContext, Future[A]] =
     (mockHttp
-      .GET(_: String, _: Seq[(String, String)])(
+      .GET(_: String)( //TODO: make one for accepting only URL
+        _: HttpReads[A],
+        _: HeaderCarrier,
+        _: ExecutionContext
+      ))
+      .expects(where {
+        (
+          u: String,
+          _: HttpReads[A],
+          _: HeaderCarrier,
+          _: ExecutionContext
+        ) ⇒
+          // use matchers here to get useful error messages when the following predicates
+          // are not satisfied - otherwise it is difficult to tell in the logs what went wrong
+          u shouldBe url
+          true
+      })
+      .returning(
+        response.fold(
+          Future.failed[A](new Exception("Test exception message"))
+        )(Future.successful)
+      )
+
+  def mockGetWithQueryWithHeaders[A](
+    url: String,
+    queryParams: Seq[(String, String)],
+    headers: Seq[(String, String)]
+  )(
+    response: Option[A]
+  ): Any =
+    (mockHttp
+      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
         _: HttpReads[A],
         _: HeaderCarrier,
         _: ExecutionContext
@@ -48,15 +75,16 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
         (
           u: String,
           q: Seq[(String, String)],
+          hdrs: Seq[(String, String)],
           _: HttpReads[A],
-          h: HeaderCarrier,
+          _: HeaderCarrier,
           _: ExecutionContext
         ) ⇒
           // use matchers here to get useful error messages when the following predicates
           // are not satisfied - otherwise it is difficult to tell in the logs what went wrong
-          u              shouldBe url
-          q              shouldBe queryParams.toSeq
-          h.extraHeaders shouldBe headers.toSeq
+          u    shouldBe url
+          q    shouldBe queryParams.toSeq
+          hdrs shouldBe headers.toSeq
           true
       })
       .returning(

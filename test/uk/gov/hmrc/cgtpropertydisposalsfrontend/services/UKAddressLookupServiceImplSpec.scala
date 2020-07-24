@@ -50,6 +50,8 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
   val service =
     new UKAddressLookupServiceImpl(mockConnector, MockMetrics.metrics)
 
+  private val emptyJsonBody = "{}"
+
   "AddressLookupServiceImpl" when {
 
     "handling address lookups" must {
@@ -60,7 +62,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
       "return an error" when {
 
         "the http response does not come back with status 200" in {
-          mockLookupAddress(postcode)(Right(HttpResponse(500)))
+          mockLookupAddress(postcode)(Right(HttpResponse(500, emptyJsonBody)))
 
           await(
             service.lookupAddress(postcode, None).value
@@ -76,7 +78,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
         }
 
         "there is no JSON in the body of the response" in {
-          mockLookupAddress(postcode)(Right(HttpResponse(200)))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, emptyJsonBody)))
 
           await(
             service.lookupAddress(postcode, None).value
@@ -85,7 +87,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
 
         "the JSON in the body of the response cannot be parsed" in {
           mockLookupAddress(postcode)(
-            Right(HttpResponse(200, Some(JsNumber(1))))
+            Right(HttpResponse(200, JsNumber(1), Map[String, Seq[String]]().empty))
           )
 
           await(
@@ -112,7 +114,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
               |""".stripMargin
           )
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
 
           await(
             service.lookupAddress(postcode, None).value
@@ -139,7 +141,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
               |""".stripMargin
           )
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
 
           await(
             service.lookupAddress(postcode, None).value
@@ -162,7 +164,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
               |""".stripMargin
           )
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
 
           await(
             service.lookupAddress(postcode, None).value
@@ -185,7 +187,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
               |""".stripMargin
           )
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
 
           await(
             service.lookupAddress(postcode, None).value
@@ -208,7 +210,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
               |""".stripMargin
           )
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
 
           await(
             service.lookupAddress(postcode, None).value
@@ -231,7 +233,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
               |""".stripMargin
           )
 
-          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
 
           await(
             service.lookupAddress(postcode, None).value
@@ -285,7 +287,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
             |""".stripMargin
         )
 
-        mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
+        mockLookupAddress(postcode)(Right(HttpResponse(200, json, Map[String, Seq[String]]().empty)))
 
         await(service.lookupAddress(postcode, None).value) shouldBe Right(
           AddressLookupResult(

@@ -21,10 +21,10 @@ import java.util.UUID
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.{Configuration, Mode}
+import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -48,13 +48,12 @@ class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with H
 
   val connector = new IvConnectorImpl(
     mockHttp,
-    new ServicesConfig(config, new RunMode(config, Mode.Test))
+    new ServicesConfig(config)
   )
 
   "IvConnectorImpl" when {
 
     "handling requests to get a failed journey status" must {
-
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val journeyId                  = UUID.randomUUID()
       val expectedUrl                =
@@ -64,9 +63,6 @@ class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with H
         mockGet[HttpResponse](expectedUrl),
         () => connector.getFailedJourneyStatus(journeyId)
       )
-
     }
-
   }
-
 }

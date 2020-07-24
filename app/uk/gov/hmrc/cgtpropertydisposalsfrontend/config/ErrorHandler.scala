@@ -24,7 +24,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
-import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
+import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 
 @Singleton
 class ErrorHandler @Inject() (

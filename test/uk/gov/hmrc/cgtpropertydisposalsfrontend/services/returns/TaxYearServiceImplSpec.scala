@@ -26,19 +26,21 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.TaxYearResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks with MockFactory {
 
   val mockReturnsConnector = mock[ReturnsConnector]
 
   val service = new TaxYearServiceImpl(mockReturnsConnector)
+
+  private val emptyJsonBody = "{}"
 
   def mockGetTaxYear(date: LocalDate)(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
@@ -63,14 +65,14 @@ class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrive
         }
 
         "the http call comes back with a status other than 200" in {
-          mockGetTaxYear(date)(Right(HttpResponse(500)))
+          mockGetTaxYear(date)(Right(HttpResponse(500, emptyJsonBody)))
 
           await(service.taxYear(date).value).isLeft shouldBe true
         }
 
         "the http call comes back with status 200 but the body cannot be parsed" in {
           mockGetTaxYear(date)(
-            Right(HttpResponse(200, Some(JsString("hello"))))
+            Right(HttpResponse(200, JsString("hello"), Map[String, Seq[String]]().empty))
           )
 
           await(service.taxYear(date).value).isLeft shouldBe true
@@ -85,7 +87,8 @@ class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrive
             Right(
               HttpResponse(
                 200,
-                Some(Json.toJson(TaxYearResponse(Some(taxYear))))
+                Json.toJson(TaxYearResponse(Some(taxYear))),
+                Map[String, Seq[String]]().empty
               )
             )
           )
@@ -95,9 +98,8 @@ class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrive
 
         "the call is successful and a tax year was not found" in {
           mockGetTaxYear(date)(
-            Right(HttpResponse(200, Some(Json.toJson(TaxYearResponse(None)))))
+            Right(HttpResponse(200, Json.toJson(TaxYearResponse(None)), Map[String, Seq[String]]().empty))
           )
-
           await(service.taxYear(date).value) shouldBe Right(None)
         }
 
