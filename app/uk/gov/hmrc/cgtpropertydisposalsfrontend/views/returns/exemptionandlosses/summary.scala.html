@@ -29,17 +29,20 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(
     answers: CompleteExemptionAndLossesAnswers,
     disposalDate: DisposalDate,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    isFurtherReturn: Option[Boolean]
 )(implicit messages: Messages, request: RequestWithSessionData[_])
+
+@furtherReturnKey = @{ if(isFurtherReturn.contains(true)) ".furtherReturn" else "" }
 
 @inYearLossesValueKey = @{ "inYearLossesValue" }
 @previousYearLossesValueKey = @{ "previousYearsLossesValue" }
@@ -65,7 +68,7 @@
   @if(answers.inYearLosses.value === 0L) {
     @cyaRow(
       messages(
-        s"inYearLosses$userKey.title",
+        s"inYearLosses$furtherReturnKey$userKey.title",
         taxYearStart,
         taxYearEnd
       ),
@@ -83,7 +86,7 @@
   } else {
     @cyaRow(
       messages(
-        s"inYearLosses$userKey.title",
+        s"inYearLosses$furtherReturnKey$userKey.title",
         taxYearStart,
         taxYearEnd
       ),
@@ -115,7 +118,7 @@
 
   @if(answers.previousYearsLosses.value === 0L) {
     @cyaRow(
-      messages(s"previousYearsLosses$userKey.title"),
+      messages(s"previousYearsLosses$furtherReturnKey$userKey.title"),
       Html(messages("generic.no")),
       Some(cyaChange(
         messages("previousYearsLosses.cyaChange"),
@@ -125,7 +128,7 @@
     )
   } else {
     @cyaRow(
-      messages(s"previousYearsLosses$userKey.title"),
+      messages(s"previousYearsLosses$furtherReturnKey$userKey.title"),
       Html(messages("generic.yes")),
       Some(cyaChange(
         messages("previousYearsLosses.cyaChange"),
@@ -144,14 +147,16 @@
     )
   }
 
-  @cyaRow(
-    messages(s"$annualExemptAmountKey$userKey.title"),
-    Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),
-    Some(cyaChange(
-      messages("annualExemptAmount.cyaChange"),
-      routes.ExemptionAndLossesController.annualExemptAmount().url
-    )),
-    annualExemptAmountKey
-  )
+  @if(!isFurtherReturn.contains(true)){
+    @cyaRow(
+      messages(s"$annualExemptAmountKey$userKey.title"),
+      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),
+      Some(cyaChange(
+        messages("annualExemptAmount.cyaChange"),
+        routes.ExemptionAndLossesController.annualExemptAmount().url
+      )),
+      annualExemptAmountKey
+    )
+  }
 
 }

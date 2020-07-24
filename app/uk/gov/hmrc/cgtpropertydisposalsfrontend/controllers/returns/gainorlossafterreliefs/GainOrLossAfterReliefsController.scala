@@ -188,7 +188,7 @@ class GainOrLossAfterReliefsController @Inject() (
               d,
               _
             )
-          ) if fillingOutReturn.isFurtherReturn().contains(true) =>
+          ) if fillingOutReturn.isFurtherReturn.contains(true) =>
         processReturnAndAnswersIntoResult(
           fillingOutReturn,
           d,

@@ -2985,6 +2985,46 @@ inYearLossesValue.personalRepInPeriodOfAdmin.agent.label=Amount of losses from t
 inYearLosses.cyaChange=if Capital Gains Tax losses made in the tax year {0} to {1} are being included
 inYearLossesValue.cyaChange=the amount of Capital Gains Tax losses in the tax year {0} to {1} that are included
 
+inYearLosses.furtherReturn.main.title=Tell us about your total allowable in-year losses
+inYearLosses.furtherReturn.main.agent.title=Tell us about your client’s total allowable in-year losses
+inYearLosses.furtherReturn.main.trust.title=Tell us about the trust’s allowable in-year losses
+inYearLosses.furtherReturn.main.capacitor.title=Tell us about the person’s total allowable in-year losses
+inYearLosses.furtherReturn.main.personalRep.title=Tell us about the person’s total allowable in-year losses
+inYearLosses.furtherReturn.main.personalRepInPeriodOfAdmin.title=Tell us about the estate’s total allowable in-year losses
+inYearLosses.furtherReturn.main.personalRepInPeriodOfAdmin.agent.title=Tell us about your client’s total allowable in-year losses
+
+inYearLosses.furtherReturn.title=Are you including any allowable in-year losses in this return?
+inYearLosses.furtherReturn.agent.title=Are you including any allowable in-year losses in this return?
+inYearLosses.furtherReturn.trust.title=Are you including any allowable in-year losses in this return?
+inYearLosses.furtherReturn.capacitor.title=Are you including any allowable in-year losses in this return?
+inYearLosses.furtherReturn.personalRep.title=Are you including any allowable in-year losses in this return?
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.title=Are you including any allowable in-year losses in this return?
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.title=Are you including any allowable in-year losses in this return?
+
+inYearLosses.furtherReturn.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect your Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out your overall Capital Gains Tax liability on your UK property-related disposals so far this tax year.
+inYearLosses.furtherReturn.agent.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect your client’s Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out your client’s overall Capital Gains Tax liability on their UK property-related disposals so far this tax year.
+inYearLosses.furtherReturn.trust.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect the trust’s Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out the trust’s overall Capital Gains Tax liability on its UK property-related disposals so far this tax year.
+inYearLosses.furtherReturn.capacitor.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect the person’s Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out the person’s overall Capital Gains Tax liability on their UK property-related disposals so far this tax year.
+inYearLosses.furtherReturn.personalRep.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect the person’s Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out the person’s overall Capital Gains Tax liability on their UK property-related disposals so far this tax year.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect the estate’s Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out the estate’s overall Capital Gains Tax liability on its UK property-related disposals so far this tax year.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText1=You’ll need to enter the total amount of allowable losses in the year that affect the estate’s Capital Gains Tax liability on UK property-related disposals. You would have worked out this amount when you worked out the estate’s overall Capital Gains Tax liability on its UK property-related disposals so far this tax year.
+
+inYearLosses.furtherReturn.helpText2=If you made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.agent.helpText2=If your client made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.trust.helpText2=If the trust made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.capacitor.helpText2=If the person made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.personalRep.helpText2=If the person made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText2=If the estate made a loss on the disposal you have reported in this return you should also include that amount in this total.
+
+inYearLosses.furtherReturn.link=<a href="{0}" target="_blank">How to work out your overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.agent.link=<a href="{0}" target="_blank">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.trust.link=<a href="{0}" target="_blank">How to work out the trust’s overall Capital Gains Tax liability on UK property-related disposals </a>.
+inYearLosses.furtherReturn.capacitor.link=<a href="{0}" target="_blank">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRep.link=<a href="{0}" target="_blank">How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+inYearLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.link=<a href="{0}" target="_blank">How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals</a>.
+
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.agent.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
 previousYearsLosses.trust.title=Do you want to include any other Capital Gains Tax losses made in previous tax years?
@@ -3082,6 +3122,32 @@ previousYearsLossesValue.personalRepInPeriodOfAdmin.agent.error.required=Enter a
 
 previousYearsLosses.cyaChange=if losses made from previous tax years are being included
 previousYearsLossesValue.cyaChange=the amount of losses from previous tax years
+
+previousYearsLosses.furtherReturn.main.title=Tell us about any allowable Capital Gains Tax losses you made in previous tax years
+previousYearsLosses.furtherReturn.main.agent.title=Tell us about any allowable Capital Gains Tax losses your client made in previous tax years
+previousYearsLosses.furtherReturn.main.trust.title=Tell us about any allowable Capital Gains Tax losses the trust made in previous tax years
+previousYearsLosses.furtherReturn.main.capacitor.title=Tell us about any allowable Capital Gains Tax losses the person made in previous tax years
+previousYearsLosses.furtherReturn.main.personalRep.title=Tell us about any allowable Capital Gains Tax losses the person made in previous tax years
+previousYearsLosses.furtherReturn.main.personalRepInPeriodOfAdmin.title=Tell us about any allowable Capital Gains Tax losses your client made in previous tax years
+previousYearsLosses.furtherReturn.main.personalRepInPeriodOfAdmin.agent.title=Tell us about any allowable Capital Gains Tax losses your client made in previous tax years
+
+previousYearsLosses.furtherReturn.title=Are you including any other allowable Capital Gains Tax losses made in previous tax years?
+previousYearsLosses.furtherReturn.agent.title=Are you including any other allowable Capital Gains Tax losses made in previous tax years?
+previousYearsLosses.furtherReturn.trust.title=Are you including any other allowable Capital Gains Tax losses made in previous tax years?
+previousYearsLosses.furtherReturn.capacitor.title=Are you including any other allowable Capital Gains Tax losses made in previous tax years?
+previousYearsLosses.furtherReturn.personalRep.title=Are you including any other allowable Capital Gains Tax losses made in previous tax years?
+previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.title=Are you including any other allowable Capital Gains Tax losses made in previous tax years?
+previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.title=Are you including any other allowable Capital Gains Tax losses made in previous tax years?
+
+previousYearsLosses.furtherReturn.helpText=You can include previous losses in this return that you have already reported to HMRC and have not already used. For example, losses on shares or other UK property.
+previousYearsLosses.furtherReturn.agent.helpText=You can include previous losses in this return that your client has already reported to HMRC and has not already used. For example, losses on shares or other UK property.
+previousYearsLosses.furtherReturn.trust.helpText=You can include previous losses in this return that the trust has already reported to HMRC and has not already used. For example, losses on shares or other UK property.
+previousYearsLosses.furtherReturn.capacitor.helpText=You can include previous losses in this return that the person has already reported to HMRC and has not already used. For example, losses on shares or other UK property.
+previousYearsLosses.furtherReturn.personalRep.helpText=You can include previous losses in this return that the person has already reported to HMRC and has not already used. For example, losses on shares or other UK property.
+previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.helpText=You can include previous losses in this return that the estate has already reported to HMRC and has not already used. For example, losses on shares or other UK property.
+previousYearsLosses.furtherReturn.personalRepInPeriodOfAdmin.agent.helpText=You can include previous losses in this return that the estate has already reported to HMRC and has not already used. For example, losses on shares or other UK property.
+
+previousYearsLosses.furtherReturn.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
 
 annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
 annualExemptAmount.agent.title=How much of your client’s Capital Gains Tax Annual Exempt Amount do they want to use?

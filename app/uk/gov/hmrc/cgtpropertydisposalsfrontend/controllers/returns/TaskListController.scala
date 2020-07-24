@@ -81,11 +81,11 @@ class TaskListController @Inject() (
               errorHandler.errorResult()
             },
             _.fold(
-              m => Ok(multipleDisposalsTaskListPage(m, f.isFurtherReturn())),
-              s => Ok(singleDisposalTaskListPage(s, f.isFurtherReturn())),
-              si => Ok(singleIndirectDisposalTaskListPage(si, f.isFurtherReturn())),
-              mi => Ok(multipleIndirectDisposalTaskListPage(mi, f.isFurtherReturn())),
-              sm => Ok(singleMixedUseDisposalTaskListPage(sm, f.isFurtherReturn()))
+              m => Ok(multipleDisposalsTaskListPage(m, f.isFurtherReturn)),
+              s => Ok(singleDisposalTaskListPage(s, f.isFurtherReturn)),
+              si => Ok(singleIndirectDisposalTaskListPage(si, f.isFurtherReturn)),
+              mi => Ok(multipleIndirectDisposalTaskListPage(mi, f.isFurtherReturn)),
+              sm => Ok(singleMixedUseDisposalTaskListPage(sm, f.isFurtherReturn))
             )
           )
 

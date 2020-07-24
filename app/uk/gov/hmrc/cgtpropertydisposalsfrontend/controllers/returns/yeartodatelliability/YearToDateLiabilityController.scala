@@ -103,7 +103,7 @@ class YearToDateLiabilityController @Inject() (
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
 
-      case Some((s, r: FillingOutReturn)) if r.isFurtherReturn().contains(true) =>
+      case Some((s, r: FillingOutReturn)) if r.isFurtherReturn.contains(true) =>
         r.draftReturn.yearToDateLiabilityAnswers.fold(
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(y => f(s, r, y))
@@ -190,7 +190,7 @@ class YearToDateLiabilityController @Inject() (
           f(s, r, IncompleteNonCalculatedYTDAnswers.empty)
         )(f(s, r, _))
 
-      case _                                                                    => Redirect(controllers.routes.StartController.start())
+      case _                                                                  => Redirect(controllers.routes.StartController.start())
     }
 
   private def withCalculatedTaxDue(
@@ -1290,7 +1290,7 @@ class YearToDateLiabilityController @Inject() (
                 )
               )(
                 page =
-                  if (fillingOutReturn.isFurtherReturn().contains(true))
+                  if (fillingOutReturn.isFurtherReturn.contains(true))
                     furtherReturnsTaxableGainOrLossPage(
                       _,
                       _,
@@ -1336,7 +1336,7 @@ class YearToDateLiabilityController @Inject() (
                 nonCalculatedAnswers
               )(form = taxableGainOrLossForm)(
                 page =
-                  if (fillingOutReturn.isFurtherReturn().contains(true))
+                  if (fillingOutReturn.isFurtherReturn.contains(true))
                     furtherReturnsTaxableGainOrLossPage(
                       _,
                       _,
@@ -1626,7 +1626,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         (fillingOutReturn, answers) match {
-          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn().contains(true) =>
+          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn.contains(true) =>
             withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
               commonDisplayBehaviour(
                 nonCalculatedAnswers
@@ -1647,7 +1647,7 @@ class YearToDateLiabilityController @Inject() (
               )
             }
 
-          case _                                                                                        =>
+          case _                                                                                      =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
         }
@@ -1659,7 +1659,7 @@ class YearToDateLiabilityController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         (fillingOutReturn, answers) match {
-          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn().contains(true) =>
+          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn.contains(true) =>
             withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
               commonSubmitBehaviour(
                 fillingOutReturn,
@@ -1700,7 +1700,7 @@ class YearToDateLiabilityController @Inject() (
               }
             }
 
-          case _                                                                                        =>
+          case _                                                                                      =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
         }
       }
@@ -1906,7 +1906,7 @@ class YearToDateLiabilityController @Inject() (
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
       case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, None)
-          if fillingOutReturn.isFurtherReturn().contains(true) =>
+          if fillingOutReturn.isFurtherReturn.contains(true) =>
         logger.error(s"Got\n$fillingOutReturn\n\n")
         Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
 
@@ -1968,8 +1968,8 @@ class YearToDateLiabilityController @Inject() (
                   case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 fillingOutReturn.subscribedDetails.isATrust,
-                draftReturn.representativeType(),
-                fillingOutReturn.isFurtherReturn(),
+                draftReturn.representativeType,
+                fillingOutReturn.isFurtherReturn,
                 taxYear
               )
             )
@@ -1987,8 +1987,8 @@ class YearToDateLiabilityController @Inject() (
               case _: DraftSingleMixedUseDisposalReturn    => false
             },
             fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.representativeType(),
-            fillingOutReturn.isFurtherReturn(),
+            draftReturn.representativeType,
+            fillingOutReturn.isFurtherReturn,
             taxYear
           )
         )

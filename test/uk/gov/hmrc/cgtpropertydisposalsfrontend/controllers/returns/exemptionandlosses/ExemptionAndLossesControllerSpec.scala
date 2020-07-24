@@ -45,6 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -113,6 +114,25 @@ class ExemptionAndLossesControllerSpec
       case other                                                   => sys.error(s"User type '$other' not handled")
     }
 
+  def representeeAnswers(individualUserType: Option[IndividualUserType], isFurtherReturn: Boolean) =
+    individualUserType match {
+      case Some(PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin) =>
+        Some(
+          sample[CompleteRepresenteeAnswers].copy(
+            dateOfDeath = Some(sample[DateOfDeath]),
+            isFirstReturn = !isFurtherReturn
+          )
+        )
+      case Some(Capacitor)                                                      =>
+        Some(
+          sample[CompleteRepresenteeAnswers].copy(
+            dateOfDeath = None,
+            isFirstReturn = !isFurtherReturn
+          )
+        )
+      case _                                                                    => None
+    }
+
   private def sampleSingleDisposalTriageAnswers(
     disposalDate: Option[DisposalDate],
     individualUserType: Option[IndividualUserType]
@@ -138,15 +158,18 @@ class ExemptionAndLossesControllerSpec
     answers: Option[ExemptionAndLossesAnswers],
     disposalDate: Option[DisposalDate],
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isFurtherReturn: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
-    val draftReturn =
-      sample[DraftSingleDisposalReturn].copy(
-        triageAnswers = sampleSingleDisposalTriageAnswers(disposalDate, individualUserType),
-        exemptionAndLossesAnswers = answers
-      )
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(
+      triageAnswers = sampleSingleDisposalTriageAnswers(disposalDate, individualUserType),
+      exemptionAndLossesAnswers = answers,
+      representeeAnswers = representeeAnswers(individualUserType, isFurtherReturn)
+    )
 
-    val journey = sampleFillingOutReturn(draftReturn, userType)
+    val journey = sampleFillingOutReturn(draftReturn, userType).copy(
+      previousSentReturns = if (isFurtherReturn) Some(List(sample[ReturnSummary])) else None
+    )
 
     val sessionData = SessionData.empty.copy(
       journeyStatus = Some(journey),
@@ -173,25 +196,28 @@ class ExemptionAndLossesControllerSpec
     answers: Option[ExemptionAndLossesAnswers],
     disposalDate: Option[DisposalDate],
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isFurtherReturn: Boolean = false
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
 
-    val draftReturn =
-      sample[DraftMultipleDisposalsReturn].copy(
-        examplePropertyDetailsAnswers = Some(
-          sample[IncompleteExamplePropertyDetailsAnswers].copy(
-            disposalDate = disposalDate
-          )
-        ),
-        exemptionAndLossesAnswers = answers,
-        triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
-          countryOfResidence = Some(Country.uk),
-          wasAUKResident = Some(true),
-          individualUserType = individualUserType
+    val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+      examplePropertyDetailsAnswers = Some(
+        sample[IncompleteExamplePropertyDetailsAnswers].copy(
+          disposalDate = disposalDate
         )
-      )
+      ),
+      exemptionAndLossesAnswers = answers,
+      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(
+        countryOfResidence = Some(Country.uk),
+        wasAUKResident = Some(true),
+        individualUserType = individualUserType
+      ),
+      representeeAnswers = representeeAnswers(individualUserType, isFurtherReturn)
+    )
 
-    val journey = sampleFillingOutReturn(draftReturn, userType)
+    val journey = sampleFillingOutReturn(draftReturn, userType).copy(
+      previousSentReturns = if (isFurtherReturn) Some(List(sample[ReturnSummary])) else None
+    )
 
     val sessionData = SessionData.empty.copy(
       journeyStatus = Some(journey),
@@ -218,21 +244,23 @@ class ExemptionAndLossesControllerSpec
     answers: ExemptionAndLossesAnswers,
     disposalDate: DisposalDate,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isFurtherReturn: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
 
-    val draftReturn =
-      sample[DraftSingleIndirectDisposalReturn].copy(
-        exemptionAndLossesAnswers = Some(answers),
-        triageAnswers = sampleSingleDisposalTriageAnswers(Some(disposalDate), individualUserType)
-      )
+    val draftReturn = sample[DraftSingleIndirectDisposalReturn].copy(
+      exemptionAndLossesAnswers = Some(answers),
+      triageAnswers = sampleSingleDisposalTriageAnswers(Some(disposalDate), individualUserType),
+      representeeAnswers = representeeAnswers(individualUserType, isFurtherReturn)
+    )
 
     val subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType))
 
     val journey = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      agentReferenceNumber = setAgentReferenceNumber(userType)
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      previousSentReturns = if (isFurtherReturn) Some(List(sample[ReturnSummary])) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -247,21 +275,23 @@ class ExemptionAndLossesControllerSpec
     answers: ExemptionAndLossesAnswers,
     disposalDate: DisposalDate,
     userType: UserType,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    isFurtherReturn: Boolean = false
   ): (SessionData, FillingOutReturn, DraftSingleMixedUseDisposalReturn) = {
 
-    val draftReturn =
-      sample[DraftSingleMixedUseDisposalReturn].copy(
-        exemptionAndLossesAnswers = Some(answers),
-        triageAnswers = sampleSingleDisposalTriageAnswers(Some(disposalDate), individualUserType)
-      )
+    val draftReturn = sample[DraftSingleMixedUseDisposalReturn].copy(
+      exemptionAndLossesAnswers = Some(answers),
+      triageAnswers = sampleSingleDisposalTriageAnswers(Some(disposalDate), individualUserType),
+      representeeAnswers = representeeAnswers(individualUserType, isFurtherReturn)
+    )
 
     val subscribedDetails = sample[SubscribedDetails].copy(name = setNameForUserType(userType))
 
     val journey = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      agentReferenceNumber = setAgentReferenceNumber(userType)
+      agentReferenceNumber = setAgentReferenceNumber(userType),
+      previousSentReturns = if (isFurtherReturn) Some(List(sample[ReturnSummary])) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -2284,7 +2314,8 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     doc: Document,
     isATrust: Boolean,
     isAnAgent: Boolean,
-    individualUserType: IndividualUserType
+    individualUserType: IndividualUserType,
+    isFurtherReturn: Boolean = false
   ): Unit = {
 
     if (completeExemptionAndLossesAnswers.inYearLosses.isZero)
@@ -2309,7 +2340,11 @@ object ExemptionAndLossesControllerSpec extends Matchers {
       )
     }
 
-    if (individualUserType === IndividualUserType.PersonalRepresentative)
+    if (isFurtherReturn)
+      doc
+        .select("#annualExemptAmount-question")
+        .text() shouldBe ""
+    else if (individualUserType === IndividualUserType.PersonalRepresentative)
       doc
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of the person’s Capital Gains Tax Annual Exempt Amount do they want to use?"
@@ -2338,11 +2373,12 @@ object ExemptionAndLossesControllerSpec extends Matchers {
         .select("#annualExemptAmount-question")
         .text() shouldBe "How much of your Capital Gains Tax Annual Exempt Amount do you want to use?"
 
-    doc
-      .select("#annualExemptAmount-answer")
-      .text     shouldBe formatAmountOfMoneyWithPoundSign(
-      completeExemptionAndLossesAnswers.annualExemptAmount.inPounds()
-    )
+    if (!isFurtherReturn)
+      doc
+        .select("#annualExemptAmount-answer")
+        .text   shouldBe formatAmountOfMoneyWithPoundSign(
+        completeExemptionAndLossesAnswers.annualExemptAmount.inPounds()
+      )
   }
 
 }
