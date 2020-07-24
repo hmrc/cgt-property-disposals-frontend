@@ -19,8 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.Configuration
 import play.api.libs.json.Json
-import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{CGTPropertyDisposalsConnectorImpl, ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TelephoneNumber
@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPa
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -62,7 +62,7 @@ class CGTPropertyDisposalsConnectorImplSpec
   val connector =
     new CGTPropertyDisposalsConnectorImpl(
       mockHttp,
-      new ServicesConfig(config, new RunMode(config, Mode.Test))
+      new ServicesConfig(config)
     )
 
   "CGTPropertyDisposalsConnectorImpl" when {
@@ -121,7 +121,7 @@ class CGTPropertyDisposalsConnectorImplSpec
         "http://host:123/cgt-property-disposals/check-subscription-status"
 
       behave like connectorBehaviour(
-        mockGet(subscriptionStatusUrl, Map.empty)(_),
+        mockGet(subscriptionStatusUrl)(_),
         () => connector.getSubscriptionStatus()
       )
     }
@@ -171,8 +171,7 @@ class CGTPropertyDisposalsConnectorImplSpec
 
       behave like connectorBehaviour(
         mockGet(
-          s"http://host:123/cgt-property-disposals/subscription/${cgtReference.value}",
-          Map.empty
+          s"http://host:123/cgt-property-disposals/subscription/${cgtReference.value}"
         )(_),
         () => connector.getSubscribedDetails(cgtReference)
       )

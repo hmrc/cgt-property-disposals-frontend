@@ -20,16 +20,16 @@ import cats.data.EitherT
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.Configuration
 import play.api.libs.json.JsString
 import play.api.mvc.Call
 import play.api.test.Helpers._
-import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanInitiateRequest, UpscanUpload}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -66,8 +66,10 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
     new UpscanConnectorImpl(
       mockHttp,
       config,
-      new ServicesConfig(config, new RunMode(config, Mode.Test))
+      new ServicesConfig(config)
     )
+
+  private val emptyJsonBody = "{}"
 
   "UpscanConnectorImplSpec" when {
 
@@ -101,7 +103,7 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
     "getting the upscan upload" must {
       val expectedUrl = s"$baseUrl/upscan/upload-reference/${reference.value}"
       behave like upscanConnectorBehaviour(
-        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        mockGet[HttpResponse](expectedUrl),
         () => connector.getUpscanUpload(reference)
       )
     }
@@ -121,8 +123,8 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
   ) = {
     "do a get http call and return the result" in {
       List(
-        HttpResponse(200),
-        HttpResponse(200, Some(JsString("hi")))
+        HttpResponse(200, emptyJsonBody),
+        HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
       ).foreach { httpResponse =>
         withClue(s"For http response [${httpResponse.toString}]") {
           mockResponse(Some(httpResponse))
@@ -136,7 +138,7 @@ class UpscanConnectorImplSpec extends WordSpec with Matchers with MockFactory wi
 
       "Internal server error" in {
         List(
-          HttpResponse(500)
+          HttpResponse(500, emptyJsonBody)
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockResponse(Some(httpResponse))

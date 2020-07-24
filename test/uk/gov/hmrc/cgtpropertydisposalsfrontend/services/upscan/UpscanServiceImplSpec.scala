@@ -44,13 +44,15 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
   implicit val hc: HeaderCarrier   = HeaderCarrier()
   implicit val request: Request[_] = FakeRequest()
 
+  private val emptyJsonBody = "{}"
+
   "UpscanServiceImplSpec" when {
 
     "hangling requests for upscan" must {
 
       "getting upscan upload" when {
         "Response is OK" in {
-          val response = Right(HttpResponse(OK, Some(Json.toJson(upload))))
+          val response = Right(HttpResponse(OK, Json.toJson(upload), Map[String, Seq[String]]().empty))
           (mockConnector
             .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
             .expects(reference, *)
@@ -59,7 +61,7 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
         }
 
         "Malformed response" in {
-          val response = Right(HttpResponse(OK, Some(JsString("Nope"))))
+          val response = Right(HttpResponse(OK, JsString("Nope"), Map[String, Seq[String]]().empty))
           (mockConnector
             .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
             .expects(reference, *)
@@ -68,7 +70,7 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
         }
 
         "Internal server error" in {
-          val response = Right(HttpResponse(INTERNAL_SERVER_ERROR))
+          val response = Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
           (mockConnector
             .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
             .expects(reference, *)
@@ -84,9 +86,8 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
           val response    = Right(
             HttpResponse(
               OK,
-              Some(
-                Json.toJson(UpscanUploadMeta("metadata", sample[UploadRequest]))
-              )
+              Json.toJson(UpscanUploadMeta("metadata", sample[UploadRequest])),
+              Map[String, Seq[String]]().empty
             )
           )
           (mockConnector
@@ -96,7 +97,7 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with ScalaCheckDriven
           (mockConnector
             .saveUpscanUpload(_: UpscanUpload)(_: HeaderCarrier))
             .expects(*, *)
-            .returning(EitherT.fromEither[Future](Right(HttpResponse(OK))))
+            .returning(EitherT.fromEither[Future](Right(HttpResponse(OK, emptyJsonBody))))
           await(
             service
               .initiate(mockFailure, (_: UploadReference) => mockSuccess)

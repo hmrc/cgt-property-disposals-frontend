@@ -48,6 +48,8 @@ class TestOnlyDraftReturnsControllerSpec extends ControllerSpec {
 
   lazy val controller: TestOnlyDraftReturnsController = instanceOf[TestOnlyDraftReturnsController]
 
+  private val emptyJsonBody = "{}"
+
   def performAction(cgtReference: String): Future[Result] =
     controller.deleteDraftReturn(cgtReference).apply(FakeRequest())
 
@@ -55,7 +57,7 @@ class TestOnlyDraftReturnsControllerSpec extends ControllerSpec {
     "handling requests to delete a draft return" in {
       val cgtReference: String = "sampleCgtRef"
 
-      mockTestOnlyDraftReturnsConnector(cgtReference)(Right(HttpResponse(OK)))
+      mockTestOnlyDraftReturnsConnector(cgtReference)(Right(HttpResponse(OK, emptyJsonBody)))
       status(performAction(cgtReference)) shouldBe OK
     }
 

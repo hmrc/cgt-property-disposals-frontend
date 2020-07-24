@@ -18,16 +18,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.PaymentsConnectorImpl.StartPaymentJourneyRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -68,7 +67,7 @@ class PaymentsConnectorImpl @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT(
       http
-        .post(
+        .POST[JsValue, HttpResponse](
           startPaymentJourneyUrl,
           Json.toJson(
             StartPaymentJourneyRequest(

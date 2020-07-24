@@ -19,15 +19,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.Configuration
 import play.api.libs.json.Json
-import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -55,7 +55,7 @@ class PaymentsConnectorImplSpec extends WordSpec with Matchers with MockFactory 
 
   val connector = new PaymentsConnectorImpl(
     mockHttp,
-    new ServicesConfig(config, new RunMode(config, Mode.Test))
+    new ServicesConfig(config)
   )
 
   implicit val hc: HeaderCarrier = HeaderCarrier()

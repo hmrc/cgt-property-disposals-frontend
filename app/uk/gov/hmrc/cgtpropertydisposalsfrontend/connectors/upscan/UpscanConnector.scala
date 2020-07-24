@@ -24,14 +24,12 @@ import play.api.Configuration
 import play.api.http.HeaderNames.USER_AGENT
 import play.api.mvc.Call
 import play.mvc.Http.Status
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan => _, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[UpscanConnectorImpl])
@@ -110,10 +108,10 @@ class UpscanConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .post[UpscanInitiateRequest](
+        .POST[UpscanInitiateRequest, HttpResponse](
           upscanInitiateUrl,
           payload,
-          Map(USER_AGENT -> "cgt-property-disposals-frontend")
+          Seq(USER_AGENT -> "cgt-property-disposals-frontend")
         )
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {
@@ -140,7 +138,7 @@ class UpscanConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .get(url)
+        .GET[HttpResponse](url)
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {
             logger.warn(
@@ -162,7 +160,7 @@ class UpscanConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .post[UpscanUpload](url, upscanUpload)
+        .POST[UpscanUpload, HttpResponse](url, upscanUpload)
         .map { response =>
           response.status match {
             case Status.OK                                         => Right(response)

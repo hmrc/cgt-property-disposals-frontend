@@ -51,6 +51,9 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
   val service =
     new EmailVerificationServiceImpl(mockConnector, MockMetrics.metrics)
+
+  private val emptyJsonBody = "{}"
+
   "EmailVerificationServiceImpl" when {
 
     "verifying emails" must {
@@ -61,7 +64,7 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
       val continueCall               = Call("GET", "/")
 
       "indicate when the email verification request has been requested" in {
-        mockVerifyEmail(email, name, continueCall)(Right(HttpResponse(CREATED)))
+        mockVerifyEmail(email, name, continueCall)(Right(HttpResponse(CREATED, emptyJsonBody)))
 
         await(
           service.verifyEmail(email, name, continueCall).value
@@ -70,7 +73,7 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
       "indicate when the email address has already been verified" in {
         mockVerifyEmail(email, name, continueCall)(
-          Right(HttpResponse(CONFLICT))
+          Right(HttpResponse(CONFLICT, emptyJsonBody))
         )
 
         await(
@@ -81,7 +84,7 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
       "indicate when there is an error verifying the email address" in {
         List[Either[Error, HttpResponse]](
           Left(Error(new Exception("uh oh"))),
-          Right(HttpResponse(INTERNAL_SERVER_ERROR))
+          Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
         ).foreach { response =>
           mockVerifyEmail(email, name, continueCall)(response)
 

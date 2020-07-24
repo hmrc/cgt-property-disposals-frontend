@@ -39,6 +39,8 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val service = new IvServiceImpl(mockConnector, MockMetrics.metrics)
 
+  private val emptyJsonBody = "{}"
+
   def mockIvGetFailedJourneyStatus(
     journeyId: UUID
   )(result: Either[Error, HttpResponse]) =
@@ -65,7 +67,7 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
         }
 
         "there is no JSON body in the response" in {
-          mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(200)))
+          mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(200, emptyJsonBody)))
 
           await(
             service.getFailedJourneyStatus(journeyId).value
@@ -74,7 +76,7 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "the JSON in the response cannot be parsed" in {
           mockIvGetFailedJourneyStatus(journeyId)(
-            Right(HttpResponse(200, Some(JsString(""))))
+            Right(HttpResponse(200, JsString(emptyJsonBody), Map[String, Seq[String]]().empty))
           )
 
           await(
@@ -84,7 +86,7 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
         }
 
         "the response comes back with a status other than 200" in {
-          mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(500)))
+          mockIvGetFailedJourneyStatus(journeyId)(Right(HttpResponse(500, emptyJsonBody)))
 
           await(
             service.getFailedJourneyStatus(journeyId).value
@@ -111,13 +113,9 @@ class IvServiceImplSpec extends WordSpec with Matchers with MockFactory {
             case (statusString, status) =>
               mockIvGetFailedJourneyStatus(journeyId)(
                 Right(
-                  HttpResponse(
-                    200,
-                    Some(JsObject(Seq("result" -> JsString(statusString))))
-                  )
+                  HttpResponse(200, JsObject(Seq("result" -> JsString(statusString))), Map[String, Seq[String]]().empty)
                 )
               )
-
               await(
                 service.getFailedJourneyStatus(journeyId).value
               ) shouldBe Right(status)
