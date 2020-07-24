@@ -33,9 +33,9 @@ trait ConnectorSpec { this: Matchers with WordSpec =>
   ) = {
     "do a get http call and return the result" in {
       List(
-        HttpResponse(200),
-        HttpResponse(200, Some(JsString("hi"))),
-        HttpResponse(500)
+        HttpResponse(200, "{}"),
+        HttpResponse(200, JsString("hi"), Map.empty[String, Seq[String]]),
+        HttpResponse(500, "{}")
       ).foreach { httpResponse =>
         withClue(s"For http response [${httpResponse.toString}]") {
           mockResponse(Some(httpResponse))

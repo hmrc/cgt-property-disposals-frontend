@@ -22,9 +22,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor }
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
@@ -43,7 +42,7 @@
 @(
     form: Form[BigDecimal],
     backLink: Call,
-    disposalDate: DisposalDate,
+    taxYear: TaxYear,
     wasUkResident: Boolean,
     representativeType: Option[RepresentativeType]
 )(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -62,13 +61,13 @@
     }
 }
 
-@taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
-@taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
+@taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
+@taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 
 @title = @{messages(s"$key$userKey$nrKey.title", taxYearStartYear, taxYearEndYear)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 

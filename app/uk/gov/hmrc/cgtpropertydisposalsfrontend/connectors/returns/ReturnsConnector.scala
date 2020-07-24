@@ -24,14 +24,12 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -104,7 +102,7 @@ class ReturnsConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .post(storeDraftReturnUrl, draftReturn)
+        .POST[DraftReturn, HttpResponse](storeDraftReturnUrl, draftReturn)
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))
@@ -117,7 +115,7 @@ class ReturnsConnectorImpl @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .get(getDraftReturnsUrl(cgtReference))
+        .GET[HttpResponse](getDraftReturnsUrl(cgtReference))
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))
@@ -129,7 +127,7 @@ class ReturnsConnectorImpl @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .post(deleteDraftReturnsUrl, DeleteDraftReturnsRequest(draftReturnIds))
+        .POST[DeleteDraftReturnsRequest, HttpResponse](deleteDraftReturnsUrl, DeleteDraftReturnsRequest(draftReturnIds))
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))
@@ -141,7 +139,7 @@ class ReturnsConnectorImpl @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .post(submitReturnUrl, submitReturnRequest)
+        .POST[SubmitReturnRequest, HttpResponse](submitReturnUrl, submitReturnRequest)
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))
@@ -160,7 +158,7 @@ class ReturnsConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .get(url)
+        .GET[HttpResponse](url)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
@@ -173,7 +171,7 @@ class ReturnsConnectorImpl @Inject() (
 
     EitherT[Future, Error, HttpResponse](
       http
-        .get(url)
+        .GET[HttpResponse](url)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
@@ -184,7 +182,7 @@ class ReturnsConnectorImpl @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .post(calculateCgtTaxDueUrl, request)
+        .POST[CalculateCgtTaxDueRequest, HttpResponse](calculateCgtTaxDueUrl, request)
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))
@@ -196,7 +194,7 @@ class ReturnsConnectorImpl @Inject() (
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .get(s"$baseUrl/tax-year/${date.format(dateFormatter)}")
+        .GET[HttpResponse](s"$baseUrl/tax-year/${date.format(dateFormatter)}")
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )

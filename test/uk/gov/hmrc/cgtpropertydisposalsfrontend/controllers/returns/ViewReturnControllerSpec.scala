@@ -304,7 +304,7 @@ class ViewReturnControllerSpec
           val isAgent  = userType === UserType.Agent
           val isATrust = subscribedDetails.isATrust
 
-          val time    = extractDueDate(isATrust, viewingReturn)
+          val time    = extractDueDate(viewingReturn)
           val userKey = deriveUserKey(isAgent, isATrust)
           document.select("#warning").text()          shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
           if (viewingReturn.returnSummary.mainReturnChargeAmount.isPositive)
@@ -329,7 +329,8 @@ class ViewReturnControllerSpec
             rebasingUtil.isUk(completeSingleDisposalReturn),
             rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn),
             viewingReturn.subscribedDetails.isATrust,
-            completeSingleDisposalReturn.triageAnswers.assetType
+            completeSingleDisposalReturn.triageAnswers.assetType,
+            isFurtherReturn = false
           )
         }
 
@@ -377,7 +378,7 @@ class ViewReturnControllerSpec
           val isAgent  = userType === UserType.Agent
           val isATrust = subscribedDetails.isATrust
           val userKey  = deriveUserKey(isAgent, isATrust)
-          val time     = extractDueDate(isATrust, viewingReturn)
+          val time     = extractDueDate(viewingReturn)
 
           document.select("#warning").text()                shouldBe messageFromMessageKey(s"viewReturn$userKey.warning", time)
           document
@@ -442,7 +443,8 @@ class ViewReturnControllerSpec
             document,
             completeMultipleDisposalsReturn,
             Some(userType),
-            subscribedDetails.isATrust
+            subscribedDetails.isATrust,
+            isFurtherReturn = false
           )
         }
 
@@ -550,7 +552,8 @@ class ViewReturnControllerSpec
             document,
             completeMultipleIndirectDisposalsReturn,
             Some(userType),
-            subscribedDetails.isATrust
+            subscribedDetails.isATrust,
+            isFurtherReturn = false
           )
         }
 
@@ -661,15 +664,11 @@ class ViewReturnControllerSpec
       .mkString(", ")
 
   private def extractDueDate(
-    isATrust: Boolean,
     viewingReturn: ViewingReturn
   ) =
-    if (isATrust)
-      TimeUtils.govDisplayFormat(viewingReturn.returnSummary.completionDate.plusDays(30))
-    else
-      viewingReturn.returnSummary.charges
-        .filter(c => c.chargeType === ChargeType.UkResidentReturn || c.chargeType === ChargeType.NonUkResidentReturn)
-        .map(e => TimeUtils.govDisplayFormat(e.dueDate))
-        .headOption
-        .fold(sys.error("Error"))(_.toString)
+    viewingReturn.returnSummary.charges
+      .filter(c => c.chargeType === ChargeType.UkResidentReturn || c.chargeType === ChargeType.NonUkResidentReturn)
+      .map(e => TimeUtils.govDisplayFormat(e.dueDate))
+      .headOption
+      .fold(sys.error("Error"))(_.toString)
 }

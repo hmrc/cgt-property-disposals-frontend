@@ -51,7 +51,8 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
     )
   )
 
-  val connector = new EmailVerificationConnectorImpl(mockHttp, config)
+  val connector             = new EmailVerificationConnectorImpl(mockHttp, config)
+  private val emptyJsonBody = "{}"
 
   "EmailVerificationConnectorImpl" when {
 
@@ -83,9 +84,9 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
 
         "handling individuals" in {
           List(
-            HttpResponse(200, Some(JsString("hi"))),
-            HttpResponse(409),
-            HttpResponse(500)
+            HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
+            HttpResponse(409, emptyJsonBody),
+            HttpResponse(500, emptyJsonBody)
           ).foreach { response =>
             mockPost(expectedUrl, Map.empty[String, String], body(name))(
               Some(response)
@@ -98,7 +99,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
         }
 
         "handling trusts" in {
-          val response = HttpResponse(200, Some(JsString("hi")))
+          val response = HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty)
           mockPost(expectedUrl, Map.empty[String, String], body(trustName))(
             Some(response)
           )

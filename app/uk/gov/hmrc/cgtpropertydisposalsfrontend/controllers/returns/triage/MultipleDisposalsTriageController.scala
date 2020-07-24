@@ -53,7 +53,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 

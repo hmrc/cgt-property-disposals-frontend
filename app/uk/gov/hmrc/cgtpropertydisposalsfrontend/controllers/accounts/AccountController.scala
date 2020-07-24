@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 

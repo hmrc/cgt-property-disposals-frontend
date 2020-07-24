@@ -23,8 +23,8 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -51,6 +51,8 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val bprRequest                 = sample[BusinessPartnerRecordRequest]
   val bpr                        = sample[BusinessPartnerRecord]
+  private val emptyJsonBody      = "{}"
+  private val noJsonInBody       = ""
 
   "The BusinessPartnerRecordServiceImpl" when {
 
@@ -71,15 +73,17 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         }
 
         "the HttpResponse comes back with a status other than 200" in {
-          List(400, 401, 403, 404, 500, 501, 502).foreach(status => testError(Right(HttpResponse(status))))
+          List(400, 401, 403, 404, 500, 501, 502).foreach(status =>
+            testError(Right(HttpResponse(status, emptyJsonBody)))
+          )
         }
 
         "the json body in the http response cannot be parsed" in {
-          testError(Right(HttpResponse(200, Some(JsNumber(0)))))
+          testError(Right(HttpResponse(200, JsNumber(0), Map[String, Seq[String]]().empty)))
         }
 
         "there is no json body in the http response" in {
-          testError(Right(HttpResponse(200)))
+          testError(Right(HttpResponse(200, noJsonInBody)))
         }
 
       }
@@ -89,7 +93,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         val response = BusinessPartnerRecordResponse(Some(bpr), None)
 
         mockGetBPR(bprRequest)(
-          Right(HttpResponse(200, Some(Json.toJson(response))))
+          Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
         )
 
         await(
@@ -103,7 +107,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
           BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]))
 
         mockGetBPR(bprRequest)(
-          Right(HttpResponse(200, Some(Json.toJson(response))))
+          Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
         )
 
         await(

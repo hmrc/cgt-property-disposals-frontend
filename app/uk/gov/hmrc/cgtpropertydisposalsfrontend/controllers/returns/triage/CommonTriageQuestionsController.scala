@@ -47,7 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => triagePages}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -487,7 +487,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftSingleDisposalReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.representeeAnswers()
+                fillingOutReturn.draftReturn.representeeAnswers
               )
             )
         )
@@ -505,7 +505,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = DraftMultipleDisposalsReturn.newDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
-                fillingOutReturn.draftReturn.representeeAnswers()
+                fillingOutReturn.draftReturn.representeeAnswers
               )
             )
         )

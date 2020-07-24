@@ -179,7 +179,7 @@ class ReturnsServiceImpl @Inject() (
 
   private def isValid(draftReturn: DraftReturn, cgtReference: CgtReference): Boolean = {
     val dateOfDeath =
-      draftReturn.representeeAnswers().flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
+      draftReturn.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
 
     val disposalDate = {
       def fromTriageAnswers(s: SingleDisposalTriageAnswers) =

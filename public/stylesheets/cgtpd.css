@@ -34,9 +34,11 @@ ul+form legend>h2.heading-medium {
     font-size: 24px;
 }
 .govuk-box-highlight > h1,
-.account-header h1.heading-xlarge,
-.account-header .sub-heading {
+.account-header h1.heading-xlarge {
     margin-bottom: 0;
+}
+.account-header .sub-heading {
+    margin-bottom: 30px;
 }
 
 .pull-right {

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import play.api.mvc.{ActionBuilder, AnyContent}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 trait WithAuthAndSessionDataAction { this: FrontendController =>
 

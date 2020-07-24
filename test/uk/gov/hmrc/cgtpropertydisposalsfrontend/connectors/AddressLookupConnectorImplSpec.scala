@@ -19,12 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.Configuration
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
-import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -47,10 +47,12 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
     )
   )
 
-  val connector = new AddressLookupConnectorImpl(
+  val connector             = new AddressLookupConnectorImpl(
     mockHttp,
-    new ServicesConfig(config, new RunMode(config, Mode.Test))
+    new ServicesConfig(config)
   )
+  private val emptyJsonBody = "{}"
+
   "AddressLookupConnectorImpl" when {
 
     "handling request to lookup addresses" must {
@@ -60,15 +62,15 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
 
       "do a get http call and return the result" in {
         List(
-          HttpResponse(200),
-          HttpResponse(200, Some(JsString("hi"))),
-          HttpResponse(500)
+          HttpResponse(200, emptyJsonBody),
+          HttpResponse(200, JsString("hi"), Map[String, Seq[String]]().empty),
+          HttpResponse(500, emptyJsonBody)
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
-            mockGet(
+            mockGetWithQueryWithHeaders(
               s"http://host:123/v2/uk/addresses",
-              Map("postcode"   -> postcode.value),
-              Map("User-Agent" -> "agent")
+              Seq("postcode"   -> postcode.value),
+              Seq("User-Agent" -> "agent")
             )(Some(httpResponse))
 
             await(connector.lookupAddress(postcode, None).value) shouldBe Right(
@@ -80,11 +82,11 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
 
       "include the filter in the query parameters if one is passed in" in {
         val filter: String = "8"
-        val httpResponse   = HttpResponse(200)
-        mockGet(
+        val httpResponse   = HttpResponse(200, emptyJsonBody)
+        mockGetWithQueryWithHeaders(
           s"http://host:123/v2/uk/addresses",
-          Map("postcode"   -> postcode.value, "filter" -> filter),
-          Map("User-Agent" -> "agent")
+          Seq("postcode"   -> postcode.value, "filter" -> filter),
+          Seq("User-Agent" -> "agent")
         )(Some(httpResponse))
 
         await(
@@ -93,12 +95,12 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
       }
 
       "get rid of all spaces and turn all lower case letters to upper case letters" in {
-        val response = HttpResponse(200)
+        val response = HttpResponse(200, emptyJsonBody)
 
-        mockGet(
+        mockGetWithQueryWithHeaders(
           s"http://host:123/v2/uk/addresses",
-          Map("postcode"   -> "AB12CD"),
-          Map("User-Agent" -> "agent")
+          Seq(("postcode"   -> "AB12CD")),
+          Seq(("User-Agent" -> "agent"))
         )(Some(response))
 
         await(
@@ -109,10 +111,10 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
       "return an error" when {
 
         "the future fails" in {
-          mockGet(
+          mockGetWithQueryWithHeaders(
             s"http://host:123/v2/uk/addresses",
-            Map("postcode"   -> postcode.value),
-            Map("User-Agent" -> "agent")
+            Seq("postcode"   -> postcode.value),
+            Seq("User-Agent" -> "agent")
           )(None)
 
           await(

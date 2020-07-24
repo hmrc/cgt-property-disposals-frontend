@@ -46,7 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{reliefdetails => pages}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 

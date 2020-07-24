@@ -214,8 +214,7 @@ object JourneyStatus {
 
           individualUserType.flatMap {
             case _: RepresentativeType =>
-              f.draftReturn
-                .representeeAnswers()
+              f.draftReturn.representeeAnswers
                 .flatMap(
                   _.fold(_.isFirstReturn, complete => Some(complete.isFirstReturn))
                     .map(!_)

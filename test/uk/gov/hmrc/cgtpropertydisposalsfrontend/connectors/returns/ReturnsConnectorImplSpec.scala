@@ -22,14 +22,14 @@ import java.util.UUID
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.{Configuration, Mode}
+import play.api.Configuration
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -53,7 +53,7 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
 
   val connector = new ReturnsConnectorImpl(
     mockHttp,
-    new ServicesConfig(config, new RunMode(config, Mode.Test))
+    new ServicesConfig(config)
   )
 
   "ReturnsConnectorImpl" when {
@@ -89,7 +89,7 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       val expectedUrl  = s"http://host:123/draft-returns/${cgtReference.value}"
 
       behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        mockGet[HttpResponse](expectedUrl),
         () => connector.getDraftReturns(cgtReference)
       )
     }
@@ -114,7 +114,7 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
         s"http://host:123/returns/${cgtReference.value}/2020-01-02/2020-03-04"
 
       behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        mockGet[HttpResponse](expectedUrl),
         () => connector.listReturns(cgtReference, fromDate, toDate)
       )
     }
@@ -126,7 +126,7 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       val expectedUrl  = s"http://host:123/return/${cgtReference.value}/id"
 
       behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        mockGet[HttpResponse](expectedUrl),
         () => connector.displayReturn(cgtReference, submissionId)
       )
     }
@@ -147,7 +147,7 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       val expectedUrl = s"http://host:123/tax-year/2020-01-31"
 
       behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        mockGet[HttpResponse](expectedUrl),
         () => connector.taxYear(date)
       )
     }

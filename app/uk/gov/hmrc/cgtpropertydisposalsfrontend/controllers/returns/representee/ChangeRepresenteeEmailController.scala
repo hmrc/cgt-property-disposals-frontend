@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -96,7 +96,7 @@ class ChangeRepresenteeEmailController @Inject() (
       case Some((sessionData, f: FillingOutReturn))       =>
         Either.fromOption(
           extractAnswersAndContactDetails(
-            f.draftReturn.representeeAnswers()
+            f.draftReturn.representeeAnswers
           ).map {
             case (answers, contactDetails) =>
               sessionData -> ChangingRepresenteeEmail(

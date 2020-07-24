@@ -114,6 +114,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   implicit val hc: HeaderCarrier   = HeaderCarrier()
   implicit val request: Request[_] = FakeRequest()
+  private val emptyJsonBody        = "{}"
 
   "ReturnsServiceImpl" when {
 
@@ -134,7 +135,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "the http call came back with a status other than 200" in {
           mockStoreDraftReturn(draftReturn, cgtReference)(
-            Right(HttpResponse(INTERNAL_SERVER_ERROR))
+            Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
           )
 
           await(
@@ -148,7 +149,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "the http call came back with a 200" in {
           mockStoreDraftReturn(draftReturn, cgtReference)(
-            Right(HttpResponse(OK))
+            Right(HttpResponse(OK, emptyJsonBody))
           )
 
           await(
@@ -170,7 +171,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "the http response does not come back with status 200" in {
           mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(INTERNAL_SERVER_ERROR))
+            Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
           )
 
           await(
@@ -179,7 +180,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         }
 
         "the http response comes back with status 200 but the body cannot be parsed" in {
-          mockGetDraftReturns(cgtReference)(Left(Error("")))
+          mockGetDraftReturns(cgtReference)(Left(Error(emptyJsonBody)))
 
           await(
             service.getDraftReturns(cgtReference, sentReturns).value
@@ -201,7 +202,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             )
 
           mockGetDraftReturns(cgtReference)(
-            Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse))))
+            Right(HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty))
           )
 
           await(
@@ -238,11 +239,11 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
               inSequence {
                 mockGetDraftReturns(cgtReference)(
                   Right(
-                    HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))
+                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
                   )
                 )
                 mockDeleteDraftReturns(List(draftReturnId))(
-                  Right(HttpResponse(OK))
+                  Right(HttpResponse(OK, emptyJsonBody))
                 )
               }
 
@@ -255,7 +256,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
               inSequence {
                 mockGetDraftReturns(cgtReference)(
                   Right(
-                    HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))
+                    HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
                   )
                 )
                 mockDeleteDraftReturns(List(draftReturnId))(Left(Error("")))
@@ -279,11 +280,11 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             inSequence {
               mockGetDraftReturns(cgtReference)(
                 Right(
-                  HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))
+                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
                 )
               )
               mockDeleteDraftReturns(List(draftReturn.id))(
-                Right(HttpResponse(OK))
+                Right(HttpResponse(OK, emptyJsonBody))
               )
             }
 
@@ -450,7 +451,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             inSequence {
               mockGetDraftReturns(cgtReference)(
                 Right(
-                  HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))
+                  HttpResponse(OK, Json.toJson(draftReturnsResponse), Map[String, Seq[String]]().empty)
                 )
               )
             }
@@ -629,15 +630,15 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         }
 
         "the http call came back with a status other than 200" in {
-          test(Right(HttpResponse(INTERNAL_SERVER_ERROR)))
+          test(Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody)))
         }
 
         "the http call came back with status 200 but there is no JSON body" in {
-          test(Right(HttpResponse(OK)))
+          test(Right(HttpResponse(OK, emptyJsonBody)))
         }
 
         "the http call came back with status 200 and JSON body, but the JSON cannot be parsed" in {
-          test(Right(HttpResponse(OK, Some(JsNumber(1)))))
+          test(Right(HttpResponse(OK, JsNumber(1), Map[String, Seq[String]]().empty)))
         }
 
       }
@@ -662,7 +663,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             Right(
               HttpResponse(
                 OK,
-                Some(Json.parse("""
+                Json.parse("""
                 |{
                 |  "formBundleId": "bundleId",
                 |  "processingDate": "2000-01-01T01:01",
@@ -672,7 +673,8 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
                 |    "dueDate": "2000-01-01"
                 |  }
                 |}
-                |""".stripMargin))
+                |""".stripMargin),
+                Map[String, Seq[String]]().empty
               )
             )
           )
@@ -694,10 +696,11 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             Right(
               HttpResponse(
                 OK,
-                Some(Json.parse("""{
+                Json.parse("""{
                 |  "formBundleId": "bundleId",
                 |  "processingDate": "2000-01-01T01:01"
-                |}""".stripMargin))
+                |}""".stripMargin),
+                Map[String, Seq[String]]().empty
               )
             )
           )
@@ -730,7 +733,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "the http call returns with a status which is not 200" in {
           mockListReturn(cgtReference, fromDate, toDate)(
-            Right(HttpResponse(500))
+            Right(HttpResponse(500, emptyJsonBody))
           )
 
           await(service.listReturns(cgtReference).value).isLeft shouldBe true
@@ -738,7 +741,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "the response body cannot be parsed" in {
           mockListReturn(cgtReference, fromDate, toDate)(
-            Right(HttpResponse(200, Some(JsString("Hi!"))))
+            Right(HttpResponse(200, JsString("Hi!"), Map[String, Seq[String]]().empty))
           )
 
           await(service.listReturns(cgtReference).value).isLeft shouldBe true
@@ -753,7 +756,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           val response      = ListReturnsResponse(List(returnSummary))
 
           mockListReturn(cgtReference, fromDate, toDate)(
-            Right(HttpResponse(200, Some(Json.toJson(response))))
+            Right(HttpResponse(200, Json.toJson(response), Map[String, Seq[String]]().empty))
           )
 
           await(service.listReturns(cgtReference).value) shouldBe Right(
@@ -782,7 +785,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "the http call returns with a status which is not 200" in {
           mockDisplayReturn(cgtReference, submissionId)(
-            Right(HttpResponse(500))
+            Right(HttpResponse(500, emptyJsonBody))
           )
 
           await(
@@ -792,7 +795,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
         "there is no response body" in {
           mockDisplayReturn(cgtReference, submissionId)(
-            Right(HttpResponse(200))
+            Right(HttpResponse(200, emptyJsonBody))
           )
 
           await(
@@ -808,7 +811,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           val completeReturn: CompleteReturn =
             sample[CompleteSingleDisposalReturn]
           mockDisplayReturn(cgtReference, submissionId)(
-            Right(HttpResponse(200, Some(Json.toJson(completeReturn))))
+            Right(HttpResponse(200, Json.toJson(completeReturn), Map[String, Seq[String]]().empty))
           )
 
           await(

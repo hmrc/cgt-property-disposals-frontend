@@ -52,7 +52,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -125,8 +125,7 @@ class RepresenteeController @Inject() (
               _.fold(_.individualUserType, _.individualUserType),
               _.fold(_.individualUserType, _.individualUserType)
             )
-        val answers            = fillingOutReturn.draftReturn
-          .representeeAnswers()
+        val answers            = fillingOutReturn.draftReturn.representeeAnswers
           .getOrElse(IncompleteRepresenteeAnswers.empty)
         performAction(individualUserType, Right(fillingOutReturn), answers)
 
