@@ -198,7 +198,7 @@ object JourneyStatus {
 
   implicit class FillingOutReturnOps(private val f: FillingOutReturn) extends AnyVal {
 
-    def isFurtherReturn(): Option[Boolean] = {
+    def isFurtherReturn: Option[Boolean] = {
       lazy val hasPreviousSentReturns = f.previousSentReturns.exists(_.nonEmpty)
       f.subscribedDetails.name match {
         case Left(_)  =>
