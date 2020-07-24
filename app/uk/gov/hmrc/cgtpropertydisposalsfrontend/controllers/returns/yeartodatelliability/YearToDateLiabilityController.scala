@@ -1290,7 +1290,7 @@ class YearToDateLiabilityController @Inject() (
                 )
               )(
                 page =
-                  if (fillingOutReturn.isFurtherReturn().contains(true))
+                  if (fillingOutReturn.isFurtherReturn.contains(true))
                     furtherReturnsTaxableGainOrLossPage(
                       _,
                       _,
@@ -1336,7 +1336,7 @@ class YearToDateLiabilityController @Inject() (
                 nonCalculatedAnswers
               )(form = taxableGainOrLossForm)(
                 page =
-                  if (fillingOutReturn.isFurtherReturn().contains(true))
+                  if (fillingOutReturn.isFurtherReturn.contains(true))
                     furtherReturnsTaxableGainOrLossPage(
                       _,
                       _,
@@ -1906,7 +1906,7 @@ class YearToDateLiabilityController @Inject() (
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
       case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, None)
-          if fillingOutReturn.isFurtherReturn().contains(true) =>
+          if fillingOutReturn.isFurtherReturn.contains(true) =>
         logger.error(s"Got\n$fillingOutReturn\n\n")
         Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
 
@@ -1968,8 +1968,8 @@ class YearToDateLiabilityController @Inject() (
                   case _: DraftSingleMixedUseDisposalReturn    => false
                 },
                 fillingOutReturn.subscribedDetails.isATrust,
-                draftReturn.representativeType(),
-                fillingOutReturn.isFurtherReturn(),
+                draftReturn.representativeType,
+                fillingOutReturn.isFurtherReturn,
                 taxYear
               )
             )
@@ -1987,8 +1987,8 @@ class YearToDateLiabilityController @Inject() (
               case _: DraftSingleMixedUseDisposalReturn    => false
             },
             fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.representativeType(),
-            fillingOutReturn.isFurtherReturn(),
+            draftReturn.representativeType,
+            fillingOutReturn.isFurtherReturn,
             taxYear
           )
         )
