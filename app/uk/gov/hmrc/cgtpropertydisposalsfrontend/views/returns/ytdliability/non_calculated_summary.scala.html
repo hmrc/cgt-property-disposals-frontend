@@ -57,7 +57,8 @@
 }
 @userKeyWithSeparatePeriodOfAdmin = @{
     representativeType match {
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAgent => ".personalRepInPeriodOfAdmin"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent  => ".personalRepInPeriodOfAdmin.agent"
         case _ => userKey
     }
 }
