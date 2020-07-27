@@ -17,6 +17,7 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+@import java.time.LocalDate
 
 @this(
         draftListItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_item,
@@ -24,7 +25,7 @@
 )
 
 
-@(draftReturns: List[DraftReturn])(implicit messages:Messages)
+@(draftReturns: List[DraftReturn], sentPaymentDue: Option[LocalDate])(implicit messages:Messages)
 
 @draftReturnsHeader()
 

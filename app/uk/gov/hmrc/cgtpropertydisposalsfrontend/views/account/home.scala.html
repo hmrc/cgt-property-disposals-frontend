@@ -96,7 +96,7 @@
  </div>
 
   @if(subscribed.draftReturns.nonEmpty) {
-   @draftReturnsList(subscribed.draftReturns)
+   @draftReturnsList(subscribed.draftReturns, sentReturnsSorted.headOption._2)
   }
 
   @if(sentReturnsSorted.nonEmpty) {
