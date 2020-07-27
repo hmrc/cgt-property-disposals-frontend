@@ -734,7 +734,8 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 isATrust(fillingOutReturn),
-                fillingOutReturn.draftReturn.representativeType()
+                fillingOutReturn.draftReturn.representativeType(),
+                fillingOutReturn.isFurtherReturn
               )
             )(
               requiredPreviousAnswer = answers =>
@@ -790,7 +791,8 @@ class YearToDateLiabilityController @Inject() (
         _,
         _,
         isATrust(fillingOutReturn),
-        fillingOutReturn.draftReturn.representativeType()
+        fillingOutReturn.draftReturn.representativeType(),
+        fillingOutReturn.isFurtherReturn
       )
     )(
       requiredPreviousAnswer = { a =>
@@ -874,7 +876,8 @@ class YearToDateLiabilityController @Inject() (
         _,
         _,
         isATrust(fillingOutReturn),
-        draftReturn.representativeType()
+        draftReturn.representativeType(),
+        fillingOutReturn.isFurtherReturn
       )
     )(
       requiredPreviousAnswer = { a =>
@@ -922,7 +925,8 @@ class YearToDateLiabilityController @Inject() (
         _,
         _,
         isATrust(fillingOutReturn),
-        draftReturn.representativeType()
+        draftReturn.representativeType(),
+        fillingOutReturn.isFurtherReturn
       )
     )(
       requiredPreviousAnswer = answers => answers.fold(_.taxableGainOrLoss, c => Some(c.taxableGainOrLoss)),
@@ -1193,7 +1197,7 @@ class YearToDateLiabilityController @Inject() (
               logger.warn("Could not initiate upscan", e)
               errorHandler.errorResult()
             },
-            upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink))
+            upscanUpload => Ok(mandatoryEvidencePage(upscanUpload, backLink, fillingOutReturn.isFurtherReturn))
           )
         }
 
@@ -1468,7 +1472,7 @@ class YearToDateLiabilityController @Inject() (
 
   def mandatoryEvidenceExpired(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, _, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         answers match {
           case IncompleteNonCalculatedYTDAnswers(
                 _,
@@ -1479,7 +1483,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _
               ) =>
-            Ok(expiredMandatoryEvidencePage(expired))
+            Ok(expiredMandatoryEvidencePage(expired, fillingOutReturn.isFurtherReturn))
 
           case IncompleteCalculatedYTDAnswers(
                 _,
@@ -1491,7 +1495,7 @@ class YearToDateLiabilityController @Inject() (
                 Some(expired),
                 _
               ) =>
-            Ok(expiredMandatoryEvidencePage(expired))
+            Ok(expiredMandatoryEvidencePage(expired, fillingOutReturn.isFurtherReturn))
 
           case _ =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1541,7 +1545,7 @@ class YearToDateLiabilityController @Inject() (
           upscanCallBack: Option[UpscanCallBack]
         ): Result =
           upscanCallBack match {
-            case None                   => Ok(mandatoryEvidenceScanProgressPage())
+            case None                   => Ok(mandatoryEvidenceScanProgressPage(fillingOutReturn.isFurtherReturn))
             case Some(_: UpscanFailure) => Ok(mandatoryEvidenceScanFailedPage())
             case Some(_: UpscanSuccess) =>
               Redirect(
