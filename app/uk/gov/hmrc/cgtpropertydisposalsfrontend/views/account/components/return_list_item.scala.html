@@ -28,7 +28,7 @@
 
 @this()
 
-@(sentReturnWithDueDate: (ReturnSummary, Option[LocalDate]), index: Int, draftIsFirst: Boolean)(implicit messages: Messages)
+@(sentReturnWithDueDate: (ReturnSummary, Option[LocalDate]), index: Int, showButtonOnDraftReturn: Boolean)(implicit messages: Messages)
 @sentReturn = @{sentReturnWithDueDate._1}
 @paymentDueDate = @{sentReturnWithDueDate._2}
 @totalOutstanding = @{ sentReturn.totalOutstanding() }
@@ -77,7 +77,7 @@
     <div class="column-three-quarters">
       <a
         id="viewSentReturn-@sentReturn.submissionId"
-        @if(index === 0 && !draftIsFirst) {
+        @if(index === 0 && !showButtonOnDraftReturn && !totalOutstanding.isZero) {
           class="button"
           role="button"
         }

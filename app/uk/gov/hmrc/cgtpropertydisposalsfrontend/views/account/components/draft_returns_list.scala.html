@@ -24,10 +24,10 @@
 )
 
 
-@(draftReturns: List[DraftReturn], draftIsFirst: Boolean)(implicit messages:Messages)
+@(draftReturns: List[DraftReturn], showButtonOnDraftReturn: Boolean)(implicit messages:Messages)
 
 @draftReturnsHeader()
 
 <ul class="return-list drafts-list">
-  @draftReturns.map(draftListItem(_, draftIsFirst))
+  @draftReturns.map(draftListItem(_, showButtonOnDraftReturn))
 </ul>

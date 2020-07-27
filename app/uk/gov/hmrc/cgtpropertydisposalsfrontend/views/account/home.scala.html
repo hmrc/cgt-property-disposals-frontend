@@ -99,7 +99,7 @@
   case _ => None
  }
 }
-@draftIsFirst = @{
+@showButtonOnDraftReturn = @{
   draftReturnDueDate match {
    case Some(dueDate) => sentReturnsSorted.headOption match {
     case Some(sr) => sr._2 match {
@@ -108,7 +108,13 @@
     }
     case _ => true
    }
-   case _ => false
+   case _ => sentReturnsSorted.headOption match {
+    case Some(sr) => sr._2 match {
+     case Some(_) => false
+     case _ => draftReturn.nonEmpty
+    }
+    case _ => draftReturn.nonEmpty
+   }
   }
 }
 
@@ -142,11 +148,11 @@
  </div>
 
   @if(subscribed.draftReturns.nonEmpty) {
-   @draftReturnsList(subscribed.draftReturns, draftIsFirst)
+   @draftReturnsList(subscribed.draftReturns, showButtonOnDraftReturn)
   }
 
   @if(sentReturnsSorted.nonEmpty) {
-    @sentReturnsList(sentReturnsSorted, draftIsFirst)
+    @sentReturnsList(sentReturnsSorted, showButtonOnDraftReturn)
   }
 
 }

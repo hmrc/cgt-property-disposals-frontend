@@ -23,7 +23,7 @@
 
 @this()
 
-@(draftReturn: DraftReturn, draftIsFirst: Boolean)(implicit messages: Messages)
+@(draftReturn: DraftReturn, showButtonOnDraftReturn: Boolean)(implicit messages: Messages)
 
 @key = @{draftReturn.id}
 @completionDate =  @{draftReturn.fold(
@@ -107,7 +107,7 @@
     <div class="column-full with-top-margin">
       <a
         id="resumeDraftReturn-@key"
-        @if(draftIsFirst) {
+        @if(showButtonOnDraftReturn) {
           class="button"
           role="button"
         }

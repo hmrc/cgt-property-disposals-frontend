@@ -23,12 +23,12 @@ sentReturnItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.comp
 sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.returns_list_header
 )
 
-@(sentReturns: List[(ReturnSummary, Option[LocalDate])], draftIsFirst: Boolean)(implicit messages:Messages)
+@(sentReturns: List[(ReturnSummary, Option[LocalDate])], showButtonOnDraftReturn: Boolean)(implicit messages:Messages)
 
 @sentReturnsHeader()
 
 <ul class="return-list">
   @for((sentReturnWithDueDate, i) <- sentReturns.zipWithIndex) {
-    @sentReturnItem(sentReturnWithDueDate, i, draftIsFirst)
+    @sentReturnItem(sentReturnWithDueDate, i, showButtonOnDraftReturn)
   }
 </ul>
