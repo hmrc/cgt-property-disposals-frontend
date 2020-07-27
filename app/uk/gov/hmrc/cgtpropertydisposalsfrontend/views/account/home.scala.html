@@ -104,9 +104,9 @@
    case Some(dueDate) => sentReturnsSorted.headOption match {
     case Some(sr) => sr._2 match {
      case Some(srDueDate) => dueDate.isBefore(srDueDate)
-     case _ => false
+     case _ => true
     }
-    case _ => false
+    case _ => true
    }
    case _ => false
   }
