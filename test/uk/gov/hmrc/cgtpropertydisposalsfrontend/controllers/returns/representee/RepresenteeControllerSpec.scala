@@ -2296,7 +2296,7 @@ class RepresenteeControllerSpec
                       line3,
                       line4,
                       postcode,
-                      country.name
+                      messagesApi.translate(s"country.${country.code}", Seq.empty)
                     )
                 }
                 lines.collect { case Some(s) => s }
@@ -3462,7 +3462,7 @@ object RepresenteeControllerSpec extends Matchers {
           List(Some(line1), line2, town, county, Some(postcode.value))
         case Address
               .NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-          List(Some(line1), line2, line3, line4, postcode, country.name)
+          List(Some(line1), line2, line3, line4, postcode, messagesApi.translate(s"country.${country.code}", Seq.empty))
       }
 
       lines.collect { case Some(s) => s }

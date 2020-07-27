@@ -146,7 +146,7 @@
       )
 
       @countryCode(
-        countryCodeToCountryName = Country.countryCodeToCountryName,
+        Country.countryCodes,
         selected = form.data.get(countryCodeKey),
         label = messages(s"${countryCodeKey}.label"),
         hasErrors = form.error(countryCodeKey).nonEmpty,

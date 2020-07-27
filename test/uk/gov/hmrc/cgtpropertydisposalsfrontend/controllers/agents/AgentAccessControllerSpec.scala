@@ -91,12 +91,9 @@ class AgentAccessControllerSpec
 
   val validCgtReference = CgtReference("XYCGTP123456789")
 
-  val (nonUkCountryCode, nonUkCountryName) =
-    Country.countryCodeToCountryName.headOption
-      .getOrElse(sys.error("Could not find country"))
+  val nonUkCountryCode = "AL"
 
-  val nonUkAddress = sample[NonUkAddress]
-    .copy(country = Country(nonUkCountryCode, Some(nonUkCountryName)))
+  val nonUkAddress = sample[NonUkAddress].copy(country = Country(nonUkCountryCode))
 
   val ukAddress = sample[UkAddress].copy(postcode = Postcode("ZZ011ZZ"))
 
@@ -976,9 +973,9 @@ class AgentAccessControllerSpec
 
     "handling submitted countries" must {
 
-      val incorrectCountry = Country("HK", Some("Hong Kong"))
+      val incorrectCountry = Country("HK")
 
-      val otherIncorrectCountry = Country("FI", Some("Finland"))
+      val otherIncorrectCountry = Country("FI")
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCountrySubmit()(

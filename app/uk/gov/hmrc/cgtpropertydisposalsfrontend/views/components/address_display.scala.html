@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
@@ -24,7 +25,7 @@
 
 @this()
 
-@(address: Address, displayFormat: DisplayFormat)
+@(address: Address, displayFormat: DisplayFormat)(implicit messages: Messages)
 
  @(address, displayFormat) match {
    case (UkAddress(l1,l2,l3,l4,postcode), Block) => {
@@ -54,7 +55,7 @@
      @l3.map(l => Html(s"$l<br />"))
      @l4.map(l => Html(s"$l<br />"))
      @postcode.map(p => Html(s"$p<br />"))
-     @country.name
+     @messages.translate(s"country.${country.code}", Seq.empty)
     </div>
    }
    case (NonUkAddress(l1,l2,l3,l4,postcode,country), Line) => {
@@ -64,7 +65,7 @@
       @l3.map(l => s"$l, ")
       @l4.map(l => s"$l, ")
       @postcode.map(p => s"$p, ")
-      @country.name
+      @messages.translate(s"country.${country.code}", Seq.empty)
      </span>
     }
   }

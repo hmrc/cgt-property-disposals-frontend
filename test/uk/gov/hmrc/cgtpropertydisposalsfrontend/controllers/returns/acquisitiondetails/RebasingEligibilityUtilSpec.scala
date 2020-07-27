@@ -52,7 +52,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       )
     val triage       = sample[CompleteSingleDisposalTriageAnswers]
       .copy(
-        countryOfResidence = Country("US", Some("United States")),
+        countryOfResidence = Country("US"),
         assetType = NonResidential,
         individualUserType = None
       )
@@ -73,7 +73,7 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
       )
     val triage       = sample[CompleteSingleDisposalTriageAnswers]
       .copy(
-        countryOfResidence = Country("US", Some("United States")),
+        countryOfResidence = Country("US"),
         assetType = Residential,
         individualUserType = None
       )
