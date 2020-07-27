@@ -72,7 +72,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, JourneyStatus, SessionData, TimeUtils, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.CGTRegistrationService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
@@ -89,8 +89,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
-  val mockPaymentsService        = mock[PaymentsService]
-  val mockCGTRegistrationService = mock[CGTRegistrationService]
+  val mockPaymentsService = mock[PaymentsService]
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -98,7 +97,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       bind[SessionStore].toInstance(mockSessionStore),
       bind[ReturnsService].toInstance(mockReturnsService),
       bind[PaymentsService].toInstance(mockPaymentsService),
-      bind[CGTRegistrationService].toInstance(mockCGTRegistrationService)
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
   lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
@@ -164,17 +163,15 @@ class CheckAllAnswersAndSubmitControllerSpec
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val mockRepresenteeCgtReference = RepresenteeCgtReference(CgtReference("12345"))
-
-  def mockCgtRegistrationService() =
-    (mockCGTRegistrationService
-      .extractRepresenteeCgtReference(
+  def mockCgtRegistrationService(representeeCgtReference: RepresenteeCgtReference) =
+    (mockSubscriptionService
+      .registerWithoutIdAndSubscribe(
         _: CompleteRepresenteeAnswers
       )(
         _: HeaderCarrier
       ))
       .expects(*, *)
-      .returning(EitherT.rightT(mockRepresenteeCgtReference))
+      .returning(EitherT.rightT(representeeCgtReference))
 
   def userMessageKey(
     individualUserType: Option[IndividualUserType],
@@ -1142,35 +1139,11 @@ class CheckAllAnswersAndSubmitControllerSpec
           triageAnswers = completeReturn.triageAnswers.copy(individualUserType = Some(PersonalRepresentative))
         )
 
-      val completeDraftReturnRepresenteWithMockedReference =
-        completeDraftReturnRepresenteWithNoReference.copy(
-          representeeAnswers = Some(
-            completeDraftReturnNoRepresentee.representeeAnswers
-              .getOrElse(sample[CompleteRepresenteeAnswers].copy(id = mockRepresenteeCgtReference))
-          )
-        )
-
       val completeFillingOutReturnWithRepresenteeWithNoReference =
         sample[FillingOutReturn].copy(draftReturn = completeDraftReturnRepresenteWithNoReference)
 
-      val completeFillingOutReturnWithRepresenteeWithMockedReference =
-        completeFillingOutReturnWithRepresenteeWithNoReference.copy(draftReturn =
-          completeDraftReturnRepresenteWithMockedReference
-        )
-
       val completeFillingOutReturnNoRepresentee =
         completeFillingOutReturnWithRepresenteeWithNoReference.copy(draftReturn = completeDraftReturnNoRepresentee)
-
-      val mockedCompleteReturn = CompleteSingleDisposalReturn
-        .fromDraftReturn(
-          completeDraftReturnRepresenteWithNoReference
-            .copy(representeeAnswers =
-              completeDraftReturnRepresenteWithNoReference.representeeAnswers.map(e =>
-                e.fold(_.copy(id = Some(mockRepresenteeCgtReference)), _.copy(id = mockRepresenteeCgtReference))
-              )
-            )
-        )
-        .getOrElse(sample[CompleteSingleDisposalReturn])
 
       val submitReturnResponse = sample[SubmitReturnResponse]
 
@@ -1179,14 +1152,6 @@ class CheckAllAnswersAndSubmitControllerSpec
         completeFillingOutReturnNoRepresentee.ggCredId,
         completeFillingOutReturnNoRepresentee.agentReferenceNumber,
         completeReturn.copy(hasAttachments = hasAttachments),
-        submitReturnResponse
-      )
-
-      val justSubmittedReturnWithMockedRepresenteeId = JustSubmittedReturn(
-        completeFillingOutReturnWithRepresenteeWithMockedReference.subscribedDetails,
-        completeFillingOutReturnWithRepresenteeWithMockedReference.ggCredId,
-        completeFillingOutReturnWithRepresenteeWithMockedReference.agentReferenceNumber,
-        mockedCompleteReturn.copy(hasAttachments = hasAttachments),
         submitReturnResponse
       )
 
@@ -1223,7 +1188,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         )
       }
 
-      val submitReturnRequestForOverriddenReferenceId = {
+      def submitReturnRequestForOverriddenReferenceId(representeeCgtReference: RepresenteeCgtReference) = {
         val cyaPge                          = instanceOf[views.html.returns.check_all_answers]
         implicit val requestWithSessionData =
           RequestWithSessionData(
@@ -1234,6 +1199,15 @@ class CheckAllAnswersAndSubmitControllerSpec
           )
         implicit val config                 = viewConfig
         implicit val messages               = MessagesImpl(Lang.apply("en"), messagesApi)
+        val mockedCompleteReturn            = CompleteSingleDisposalReturn
+          .fromDraftReturn(
+            completeDraftReturnRepresenteWithNoReference
+              .copy(representeeAnswers =
+                completeDraftReturnRepresenteWithNoReference.representeeAnswers
+                  .map(e => e.fold(_.copy(id = Some(representeeCgtReference)), _.copy(id = representeeCgtReference)))
+              )
+          )
+          .getOrElse(sample[CompleteSingleDisposalReturn])
 
         val cyaPageHtml =
           cyaPge(
@@ -1249,7 +1223,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         SubmitReturnRequest(
           mockedCompleteReturn,
-          completeFillingOutReturnWithRepresenteeWithMockedReference.draftReturn.id,
+          completeFillingOutReturnWithRepresenteeWithNoReference.draftReturn.id,
           completeFillingOutReturnWithRepresenteeWithNoReference.subscribedDetails,
           completeFillingOutReturnWithRepresenteeWithNoReference.agentReferenceNumber,
           B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes())))
@@ -1322,14 +1296,32 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
 
         "representees are handled correctly" in {
+          val mockRepresenteeCgtReference = sample[RepresenteeCgtReference]
+          val mockedCompleteReturn        = CompleteSingleDisposalReturn
+            .fromDraftReturn(
+              completeDraftReturnRepresenteWithNoReference
+                .copy(representeeAnswers =
+                  completeDraftReturnRepresenteWithNoReference.representeeAnswers.map(e =>
+                    e.fold(_.copy(id = Some(mockRepresenteeCgtReference)), _.copy(id = mockRepresenteeCgtReference))
+                  )
+                )
+            )
+            .getOrElse(sample[CompleteSingleDisposalReturn])
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnWithRepresenteeWithNoReference))
-            mockCgtRegistrationService()
-            mockSubmitReturn(submitReturnRequestForOverriddenReferenceId)(
+            mockCgtRegistrationService(mockRepresenteeCgtReference)
+            mockSubmitReturn(submitReturnRequestForOverriddenReferenceId(mockRepresenteeCgtReference))(
               Right(submitReturnResponse)
             )
-            mockStoreSession(sessionWithJourney(justSubmittedReturnWithMockedRepresenteeId))(Right(()))
+            mockStoreSession(
+              sessionWithJourney(
+                justSubmittedReturn.copy(
+                  subscribedDetails = completeFillingOutReturnWithRepresenteeWithNoReference.subscribedDetails,
+                  completeReturn = mockedCompleteReturn
+                )
+              )
+            )(Right(()))
           }
 
           checkIsRedirect(

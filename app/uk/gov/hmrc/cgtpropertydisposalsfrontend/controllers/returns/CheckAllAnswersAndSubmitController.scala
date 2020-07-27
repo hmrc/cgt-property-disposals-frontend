@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.CGTRegistrationService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -59,7 +59,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
   confirmationOfSubmissionPage: pages.confirmation_of_submission,
   rebasingEligibilityUtil: RebasingEligibilityUtil,
   submitReturnFailedPage: pages.submit_return_error,
-  cgtRegistrationService: CGTRegistrationService
+  subscriptionService: SubscriptionService
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -259,8 +259,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
   )(f: CompleteReturn => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
     completeReturn.representeeAnswers match {
       case Some(a @ CompleteRepresenteeAnswers(_, NoReferenceId, _, _, _)) =>
-        cgtRegistrationService
-          .extractRepresenteeCgtReference(a)
+        subscriptionService
+          .registerWithoutIdAndSubscribe(a)
           .fold(
             _ => {
               logger.warn("Error registering user without id")

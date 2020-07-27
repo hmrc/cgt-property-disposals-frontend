@@ -97,31 +97,31 @@
  @pageHeading(title)
 
   @if(showSubmissionDetails) {
-      <h2 class="heading-medium">Submission Details</h2>
+      <h2 class="heading-medium">@messages("checkAllAnswers.submissionDetails.title") </h2>
       @cyaSection() {
           @if(!isAgent) {
               @cyaRow(
-                  messages("CGT reference number"),
+                  messages("checkAllAnswers.submissionDetails.cgtReferencenumber"),
                   Html(subscribedDetails.cgtReference.value),
                   None,
-                  "disposalMethod"
+                  "cgtReferenceNumber"
               )
           }
           @{
               agentReferenceNumber.map { agentRef =>
                   cyaRow(
-                      messages("Agent reference number"),
+                      messages("checkAllAnswers.submissionDetails.agentReferencenumber"),
                       Html(messages(agentRef.value)),
                       None,
-                      "disposalMethod"
+                      "agentReferenceNumber"
                   )
               }
           }
           @{
               representeeId match {
-                  case Some(a: RepresenteeNino) => cyaRow("NINO of person being represented", Html(a.value.value), None, "disposalMethod")
-                  case Some(a: RepresenteeSautr) => cyaRow("SA UTR of person being represented", Html(a.value.value), None, "disposalMethod")
-                  case Some(a: RepresenteeCgtReference) => cyaRow("CGT reference number of the person being represented", Html(a.value.value), None, "disposalMethod")
+                  case Some(RepresenteeNino(nino)) => cyaRow(messages("checkAllAnswers.submissionDetails.nino"), Html(nino.value), None, "disposalMethod")
+                  case Some(RepresenteeSautr(sautr)) => cyaRow(messages("checkAllAnswers.submissionDetails.sautr"), Html(sautr.value), None, "disposalMethod")
+                  case Some(RepresenteeCgtReference(cgt)) => cyaRow(messages("checkAllAnswers.submissionDetails.cgt"), Html(cgt.value), None, "disposalMethod")
                   case _ => ""
               }
           }

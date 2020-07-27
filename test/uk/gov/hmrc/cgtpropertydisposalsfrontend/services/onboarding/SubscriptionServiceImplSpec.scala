@@ -28,6 +28,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNum
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegisteredWithoutId, RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource.{ManuallyEntered => ManuallyEnteredAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource.{ManuallyEntered => ManuallyEnteredContactName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -340,6 +345,57 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         await(
           service.updateSubscribedDetails(subscribedDetails).value
         ) shouldBe Right(())
+      }
+
+    }
+
+    "handing request to register without id and subscribe" must {
+
+      val representeeAnswers  = sample[CompleteRepresenteeAnswers]
+      val sapNumber           = "sapNumber"
+      val cgtReferenceNumber  = "cgtReference"
+      val registrationDetails = RegistrationDetails(
+        representeeAnswers.name,
+        representeeAnswers.contactDetails.emailAddress,
+        representeeAnswers.contactDetails.address,
+        ManuallyEnteredEmail
+      )
+      val subscriptionDetails = SubscriptionDetails(
+        Right(representeeAnswers.name),
+        representeeAnswers.contactDetails.emailAddress,
+        representeeAnswers.contactDetails.address,
+        representeeAnswers.contactDetails.contactName,
+        SapNumber(sapNumber),
+        ManuallyEnteredEmail,
+        ManuallyEnteredAddress,
+        ManuallyEnteredContactName
+      )
+
+      "user is successfully registered and subscribed returning correct cgt reference" in {
+        val registrationResponse = Json.parse(
+          s"""
+             |{
+             |  "sapNumber" : "$sapNumber"
+             |}
+             |""".stripMargin
+        )
+
+        val subscriptionResponse = Json.parse(
+          s"""
+             |{
+             |  "cgtReferenceNumber" : "$cgtReferenceNumber"
+             |}
+             |""".stripMargin
+        )
+
+        mockRegisterWithoutId(registrationDetails)(
+          Right(HttpResponse(200, registrationResponse, Map[String, Seq[String]]().empty))
+        )
+        mockSubscribe(subscriptionDetails)(
+          Right(HttpResponse(200, subscriptionResponse, Map[String, Seq[String]]().empty))
+        )
+        await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
+          Right(RepresenteeCgtReference(CgtReference(cgtReferenceNumber)))
       }
 
     }
