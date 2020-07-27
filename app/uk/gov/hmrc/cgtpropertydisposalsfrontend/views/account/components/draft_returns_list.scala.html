@@ -17,7 +17,6 @@
 @import play.api.i18n.Messages
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
-@import java.time.LocalDate
 
 @this(
         draftListItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_list_item,
@@ -25,10 +24,10 @@
 )
 
 
-@(draftReturns: List[DraftReturn], sentPaymentDue: Option[LocalDate])(implicit messages:Messages)
+@(draftReturns: List[DraftReturn], draftIsFirst: Boolean)(implicit messages:Messages)
 
 @draftReturnsHeader()
 
 <ul class="return-list drafts-list">
-  @draftReturns.map(draftListItem(_))
+  @draftReturns.map(draftListItem(_, draftIsFirst))
 </ul>

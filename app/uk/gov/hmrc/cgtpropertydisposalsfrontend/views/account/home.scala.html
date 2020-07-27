@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 @import java.time.LocalDate
 
 @this(
@@ -65,6 +66,51 @@
     else r1.submissionDate.isAfter(r2.submissionDate)
    }
 }
+@draftReturn = @{
+ subscribed.draftReturns.headOption
+}
+@draftReturnDueDate = @{
+ draftReturn match {
+  case Some(draftReturn: DraftReturn) => {
+   val completionDate =  draftReturn.fold(
+    _.triageAnswers.fold(
+     _.completionDate.map(_.value),
+     c => Some(c.completionDate.value)
+    ),
+    _.triageAnswers.fold(
+     _.completionDate.map(_.value),
+     c => Some(c.completionDate.value)
+    ),
+    _.triageAnswers.fold(
+     _.disposalDate.map(_.value),
+     c => Some(c.disposalDate.value)
+    ),
+    _.triageAnswers.fold(
+     _.completionDate.map(_.value),
+     c => Some(c.completionDate.value)
+    ),
+    _.triageAnswers.fold(
+     _.completionDate.map(_.value),
+     c => Some(c.completionDate.value)
+    )
+   )
+   completionDate.map(d => d.plusDays(30L))
+  }
+  case _ => None
+ }
+}
+@draftIsFirst = @{
+  draftReturnDueDate match {
+   case Some(dueDate) => sentReturnsSorted.headOption match {
+    case Some(sr) => sr._2 match {
+     case Some(srDueDate) => dueDate.isBefore(srDueDate)
+     case _ => false
+    }
+    case _ => false
+   }
+   case _ => false
+  }
+}
 
 @mainTemplate(title = title, userType = request.userType, mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
 
@@ -96,11 +142,11 @@
  </div>
 
   @if(subscribed.draftReturns.nonEmpty) {
-   @draftReturnsList(subscribed.draftReturns, sentReturnsSorted.headOption._2)
+   @draftReturnsList(subscribed.draftReturns, draftIsFirst)
   }
 
   @if(sentReturnsSorted.nonEmpty) {
-    @sentReturnsList(sentReturnsSorted)
+    @sentReturnsList(sentReturnsSorted, draftIsFirst)
   }
 
 }

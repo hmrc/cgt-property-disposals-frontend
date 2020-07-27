@@ -15,7 +15,6 @@
  *@
 
 @import play.api.i18n.Messages
-
 @import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 
@@ -24,12 +23,12 @@ sentReturnItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.comp
 sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.returns_list_header
 )
 
-@(sentReturns: List[(ReturnSummary, Option[LocalDate])])(implicit messages:Messages)
+@(sentReturns: List[(ReturnSummary, Option[LocalDate])], draftIsFirst: Boolean)(implicit messages:Messages)
 
 @sentReturnsHeader()
 
 <ul class="return-list">
-  @sentReturns.map{ case (sentReturn, paymentDueDate) =>
-    @sentReturnItem(sentReturn, paymentDueDate)
+  @for((sentReturnWithDueDate, i) <- sentReturns.zipWithIndex) {
+    @sentReturnItem(sentReturnWithDueDate, i, draftIsFirst)
   }
 </ul>
