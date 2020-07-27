@@ -184,8 +184,6 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   val furtherReturnsEnabled: Boolean = servicesConfig.getBoolean("further-returns.enabled")
 
-  val furtherReturnWorkOutCGT: String = getString("external-url.further-return-work-out-cgt")
-
   logger.info {
     val flags = List(
       "periodOfAdminEnabled"     -> periodOfAdminEnabled,
