@@ -246,16 +246,19 @@ class HomePageControllerSpec
           doc =>
             doc
               .select(callToActionButton)
-              .text should include(
+              .text shouldBe
               messageFromMessageKey(
                 resumeDraftMessage
               )
-            )
         )
       }
 
       "display the resume draft link as a button when there is a draft and no outstanding amounts to pay in sent returns" in {
-        val sampleDraftReturn                   = sample[DraftSingleDisposalReturn]
+        val triageAnswers                       = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(ukResidentMainReturnChargeDueDate))
+        val sampleDraftReturn                   = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers
+        )
         val fullPaymentForPenaltyInterestCharge = sample[Payment].copy(
           amount = penaltyInterestChargeAmount,
           clearingDate = penaltyInterestChargeAmountDueDate
@@ -307,11 +310,74 @@ class HomePageControllerSpec
           doc =>
             doc
               .select(callToActionButton)
-              .text should include(
+              .text shouldBe
               messageFromMessageKey(
                 resumeDraftMessage
               )
+        )
+      }
+
+      "display the resume draft link as a button when there is a draft with no completion date and no outstanding amounts to pay in sent returns" in {
+        val triageAnswers                       = sample[IncompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = None)
+        val sampleDraftReturn                   = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers
+        )
+        val fullPaymentForPenaltyInterestCharge = sample[Payment].copy(
+          amount = penaltyInterestChargeAmount,
+          clearingDate = penaltyInterestChargeAmountDueDate
+        )
+
+        val penaltyInterestCharge = sample[Charge].copy(
+          chargeType = PenaltyInterest,
+          amount = penaltyInterestChargeAmount,
+          dueDate = penaltyInterestChargeAmountDueDate,
+          payments = List(fullPaymentForPenaltyInterestCharge)
+        )
+
+        val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
+          amount = ukResidentMainReturnChargeAmount,
+          clearingDate = ukResidentMainReturnChargeDueDate
+        )
+
+        val ukResidentReturnCharge = sample[Charge].copy(
+          chargeType = UkResidentReturn,
+          amount = ukResidentMainReturnChargeAmount,
+          dueDate = ukResidentMainReturnChargeDueDate,
+          payments = List(fullPaymentForUkResidentReturnCharge)
+        )
+        val charges                = List(ukResidentReturnCharge, penaltyInterestCharge)
+        val sampleSentReturn       = sample[ReturnSummary].copy(
+          charges = charges,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate
+        )
+        val subscribed             =
+          sample[Subscribed].copy(
+            draftReturns = List(sampleDraftReturn),
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
             )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(callToActionButton)
+              .text shouldBe
+              messageFromMessageKey(
+                resumeDraftMessage
+              )
         )
       }
 
@@ -351,11 +417,10 @@ class HomePageControllerSpec
           doc =>
             doc
               .select(callToActionButton)
-              .text should include(
+              .text shouldBe
               messageFromMessageKey(
                 resumeDraftMessage
               )
-            )
         )
       }
 
@@ -395,11 +460,10 @@ class HomePageControllerSpec
           doc =>
             doc
               .select(callToActionButton)
-              .text should include(
+              .text shouldBe
               messageFromMessageKey(
                 viewAndPayMessage
               )
-            )
         )
       }
 
@@ -431,11 +495,10 @@ class HomePageControllerSpec
           doc =>
             doc
               .select(callToActionButton)
-              .text should include(
+              .text shouldBe
               messageFromMessageKey(
                 viewAndPayMessage
               )
-            )
         )
       }
 
@@ -491,11 +554,10 @@ class HomePageControllerSpec
           doc =>
             doc
               .select(callToActionButton)
-              .text should include(
+              .text shouldBe
               messageFromMessageKey(
                 startNewReturnMessage
               )
-            )
         )
       }
 
