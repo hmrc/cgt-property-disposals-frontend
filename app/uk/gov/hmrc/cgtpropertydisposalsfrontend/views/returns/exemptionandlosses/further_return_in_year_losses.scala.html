@@ -127,7 +127,7 @@
             customErrorKey = Some(s"$key$userKey")
         )
 
-        <p>@Html(messages(s"$key$furtherReturnKey$userKey.link", appConfig.furtherReturnWorkOutCGT))</p>
+        <p>@Html(messages(s"$key$furtherReturnKey$userKey.link", "#"))</p>
 
         @submitButton(messages("button.saveAndContinue"))
     }
