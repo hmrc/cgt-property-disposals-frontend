@@ -21,6 +21,7 @@ import java.util.Base64
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
+import play.api.i18n.Lang
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
@@ -66,6 +67,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
     with SessionUpdates
     with Logging {
 
+  val explicitEnglishMessage = messagesApi.preferred(Seq(Lang("en")))
+
   def checkAllAnswers(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCompleteDraftReturn(request) { (_, fillingOutReturn, completeReturn) =>
@@ -101,7 +104,9 @@ class CheckAllAnswersAndSubmitController @Inject() (
                     fillingOutReturn.agentReferenceNumber,
                     fillingOutReturn.isFurtherReturn,
                     true
-                  ).toString().getBytes
+                  )(request, explicitEnglishMessage, viewConfig)
+                    .toString()
+                    .getBytes
                 )
               )
             )
