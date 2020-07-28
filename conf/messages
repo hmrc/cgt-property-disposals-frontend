@@ -545,8 +545,8 @@ weOnlySupportGG.signIn.p1=<a href="{0}">Sign in</a> with the same Government Gat
 #===================================================
 
 agent.enter-client-cgt-ref.title=What is your client’s Capital Gains Tax on UK property account number?
-agent.enter-client-cgt-ref.helpText=When your client created their account they got an email with this number. It is 15 characters. For example, XYCGTP123456789.
-agent.enter-client-cgt-ref.link=Find out how to manage your client’s account
+agent.enter-client-cgt-ref.helpText=Your client was emailed this number when they created their account. Before you can manage your client’s account they will need to authorise you to act on their behalf.<br/><br/>This number is 15 characters. For example, XY CGTP 123 456 789.
+agent.enter-client-cgt-ref.link=Find out how to get authorisation from your client
 
 cgtReference.error.required=Enter a Capital Gains Tax on UK property account number
 cgtReference.error.tooShort=Enter a Capital Gains Tax on UK property account number that is 15 characters
