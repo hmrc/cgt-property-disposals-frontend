@@ -3340,7 +3340,12 @@ class RepresenteeControllerSpec
   ): Unit = {
     val (session, journey, _) =
       sessionWithFillingOutReturn(
-        sample[IncompleteRepresenteeAnswers],
+        sample[IncompleteRepresenteeAnswers].copy(
+          name = Some(sample[IndividualName]),
+          id = Some(sample[RepresenteeReferenceId]),
+          isFirstReturn = Some(true),
+          dateOfDeath = Some(sample[DateOfDeath])
+        ),
         PersonalRepresentative
       )
     val ggCredId              = journey.ggCredId
