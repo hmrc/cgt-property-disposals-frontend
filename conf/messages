@@ -55,8 +55,6 @@ landingPage.ifAgent.h2=If you’re an agent
 landingPage.ifAgent.p1=Find out how to <a href="{0}">report your client’s Capital Gains Tax on UK property disposals</a>.
 landingPage.ifTrust.h2=If you’re representing a trust
 landingPage.ifTrust.p1=The trust must be  <a href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
-landingPage.reportingDisposals.h2=If you’re reporting indirect disposals or disposals of mixed use property
-landingPage.reportingDisposals.p1=Use the <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 landingPage.capacitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
 landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
 landingPage.capacitorOrPersonalRepresentative.p2=If the disposal was made by the deceased’s estate during the period of administration, you’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
@@ -1160,13 +1158,6 @@ multipleDisposalsCountryOfResidence.agent.helpText=It’s usually the day your c
 multipleDisposalsCountryOfResidence.trust.helpText=It’s usually the day the trust and the new owner swapped contracts and they paid a deposit.
 multipleDisposalsCountryOfResidence.capacitor.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
 multipleDisposalsCountryOfResidence.personalRep.helpText=It’s usually the day the person and the new owner swapped contracts and they paid a deposit.
-
-assetTypeNotYetImplemented.title=You cannot use this service
-assetTypeNotYetImplemented.p1=You cannot use this service to report Capital Gains Tax on:
-assetTypeNotYetImplemented.li1=disposals of mixed-use UK property
-assetTypeNotYetImplemented.li2=indirect disposals of UK land
-assetTypeNotYetImplemented.h2=What you’ll need to do next
-assetTypeNotYetImplemented.p2=You’ll need to complete a <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 
 multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
 multipleDisposalsTaxYear.link=What happens on the exchange date?
