@@ -25,6 +25,12 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeNino
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeSautr
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -37,6 +43,8 @@
     addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
     examplePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary,
     exampleCompanyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_indirect_disposals_summary,
+    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
     calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
     nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary,
     acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
@@ -54,13 +62,16 @@
 @(
     completeReturn: CompleteReturn,
     rebasingEligibilityUtil: RebasingEligibilityUtil,
-    isATrust: Boolean,
+    subscribedDetails: SubscribedDetails,
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
-    isFurtherReturn: Option[Boolean]
+    agentReferenceNumber: Option[AgentReferenceNumber],
+    isFurtherReturn: Option[Boolean],
+    showSubmissionDetails: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{ messages("checkAllAnswers.title") }
+@isATrust = @{ subscribedDetails.isATrust }
 
 @representeeSection(representeeAnswers: Option[CompleteRepresenteeAnswers]) = @{
     (representeeAnswers, representativeType) match {
@@ -75,6 +86,8 @@
         case _ => Html("")
     }
 }
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@representeeId = @{completeReturn.fold(_.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id), _.representeeAnswers.map(_.id))}
 
 
 @mainTemplate(title = title, userType = request.userType) {
@@ -82,6 +95,38 @@
  @backLinkComponent(routes.TaskListController.taskList())
 
  @pageHeading(title)
+
+  @if(showSubmissionDetails) {
+      <h2 class="heading-medium">@messages("checkAllAnswers.submissionDetails.title") </h2>
+      @cyaSection() {
+          @if(!isAgent) {
+              @cyaRow(
+                  messages("checkAllAnswers.submissionDetails.cgtReferencenumber"),
+                  Html(subscribedDetails.cgtReference.value),
+                  None,
+                  "cgtReferenceNumber"
+              )
+          }
+          @{
+              agentReferenceNumber.map { agentRef =>
+                  cyaRow(
+                      messages("checkAllAnswers.submissionDetails.agentReferencenumber"),
+                      Html(messages(agentRef.value)),
+                      None,
+                      "agentReferenceNumber"
+                  )
+              }
+          }
+          @{
+              representeeId match {
+                  case Some(RepresenteeNino(nino)) => cyaRow(messages("checkAllAnswers.submissionDetails.nino"), Html(nino.value), None, "representeeNino")
+                  case Some(RepresenteeSautr(sautr)) => cyaRow(messages("checkAllAnswers.submissionDetails.sautr"), Html(sautr.value), None, "representeeSautr")
+                  case Some(RepresenteeCgtReference(cgt)) => cyaRow(messages("checkAllAnswers.submissionDetails.cgt"), Html(cgt.value), None, "representeeCgt")
+                  case _ => ""
+              }
+          }
+      }
+  }
 
   @completeReturn match {
     case s: CompleteSingleDisposalReturn => {

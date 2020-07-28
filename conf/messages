@@ -89,6 +89,13 @@ subsequentReturnExit.title=You’ll need to contact HMRC
 subsequentReturnExit.p1=Only first returns for UK property sales or disposals in the tax year can be completed online.
 subsequentReturnExit.p2=You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper return to be posted to you.
 
+checkAllAnswers.submissionDetails.title=Submission Details
+checkAllAnswers.submissionDetails.cgtReferencenumber=CGT reference number
+checkAllAnswers.submissionDetails.agentReferencenumber=Agent reference number
+checkAllAnswers.submissionDetails.nino=NINO of person being represented
+checkAllAnswers.submissionDetails.sautr=SA UTR of person being represented
+checkAllAnswers.submissionDetails.cgt=CGT reference number of the person being represented
+
 #===================================================
 # TRANSLATION NOT REQUIRED = END
 #===================================================
