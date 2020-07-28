@@ -64,7 +64,6 @@ class CommonTriageQuestionsController @Inject() (
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
-  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented,
   periodOfAdminNotHandledPage: pages.period_of_admin_not_handled,
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
@@ -327,37 +326,6 @@ class CommonTriageQuestionsController @Inject() (
           _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
         )
         Ok(disposalDateTooEarlyNonUkResidents(backLink))
-      }
-    }
-
-  def assetTypeNotYetImplemented(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
-        val triageAnswers = triageAnswersFomState(state)
-        lazy val backLink = triageAnswers.fold(
-          _ =>
-            routes.MultipleDisposalsTriageController
-              .assetTypeForNonUkResidents(),
-          _ => routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
-        )
-
-        def hasSupportedAssetType(assetTypes: List[AssetType]): Boolean =
-          assetTypes === List(AssetType.Residential) || assetTypes === List(
-            AssetType.NonResidential
-          )
-
-        triageAnswers.fold[Option[List[AssetType]]](
-          _.fold(_.assetTypes, c => Some(c.assetTypes)),
-          _.fold(
-            i => i.assetType.map(a => List(a)),
-            c => Some(List(c.assetType))
-          )
-        ) match {
-          case Some(assetTypes) if !hasSupportedAssetType(assetTypes) =>
-            Ok(assetTypeNotYetImplementedPage(backLink))
-          case _                                                      =>
-            Redirect(redirectToCheckYourAnswers(state))
-        }
       }
     }
 
