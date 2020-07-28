@@ -366,12 +366,14 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       )
 
       "successfully register and subscribed returning correct cgt reference" in {
-        mockRegisterWithoutId(registrationDetails)(
-          Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
-        )
-        mockSubscribe(subscriptionDetails)(
-          Right(HttpResponse(200, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
-        )
+        inSequence {
+          mockRegisterWithoutId(registrationDetails)(
+            Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
+          )
+          mockSubscribe(subscriptionDetails)(
+            Right(HttpResponse(200, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
+          )
+        }
         await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
           Right(RepresenteeCgtReference(CgtReference(cgtReferenceNumber)))
       }
@@ -385,23 +387,27 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       }
 
       "fail when subscription fails" in {
-        mockRegisterWithoutId(registrationDetails)(
-          Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
-        )
-        mockSubscribe(subscriptionDetails)(
-          Right(HttpResponse(500, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
-        )
+        inSequence {
+          mockRegisterWithoutId(registrationDetails)(
+            Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
+          )
+          mockSubscribe(subscriptionDetails)(
+            Right(HttpResponse(500, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
+          )
+        }
         await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
           Left(Error("call to subscribe came back with status 500"))
       }
 
       "fail when subscription comes back with an 'already subscribed' response" in {
-        mockRegisterWithoutId(registrationDetails)(
-          Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
-        )
-        mockSubscribe(subscriptionDetails)(
-          Right(HttpResponse(409, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
-        )
+        inSequence {
+          mockRegisterWithoutId(registrationDetails)(
+            Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
+          )
+          mockSubscribe(subscriptionDetails)(
+            Right(HttpResponse(409, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
+          )
+        }
         await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
           Left(Error("User is already subscribed"))
       }
