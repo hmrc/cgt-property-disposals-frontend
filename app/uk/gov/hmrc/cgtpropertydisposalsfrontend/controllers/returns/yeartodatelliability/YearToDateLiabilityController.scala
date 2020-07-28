@@ -81,6 +81,7 @@ class YearToDateLiabilityController @Inject() (
   calculatedCheckYouAnswersPage: pages.calculated_check_your_answers,
   taxableGainOrLossPage: pages.taxable_gain_or_loss,
   nonCalculatedEnterTaxDuePage: pages.non_calculated_enter_tax_due,
+  furtherReturnNonCalculatedEnterTaxDuePage: pages.further_return_non_calculated_enter_tax_due,
   nonCalculatedCheckYourAnswersPage: pages.non_calculated_check_your_answers,
   expiredMandatoryEvidencePage: pages.expired_mandatory_evidence,
   mandatoryEvidenceScanProgressPage: pages.mandatory_evidence_scan_progress,
@@ -1394,7 +1395,7 @@ class YearToDateLiabilityController @Inject() (
 
   def nonCalculatedEnterTaxDue(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, _, answers) =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
         answers match {
           case _: CalculatedYTDAnswers                       =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1408,12 +1409,21 @@ class YearToDateLiabilityController @Inject() (
                 c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
               )
             )(
-              page = nonCalculatedEnterTaxDuePage(_, _)
+              page =
+                if (fillingOutReturn.isFurtherReturn.contains(true))
+                  furtherReturnNonCalculatedEnterTaxDuePage(
+                    _,
+                    _,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    fillingOutReturn.draftReturn.representativeType,
+                    fillingOutReturn.isFurtherReturn
+                  )
+                else
+                  nonCalculatedEnterTaxDuePage(_, _)
             )(
               requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
               redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
             )
-
         }
       }
     }
@@ -1431,7 +1441,17 @@ class YearToDateLiabilityController @Inject() (
               fillingOutReturn.draftReturn,
               nonCalculatedAnswers
             )(form = nonCalculatedTaxDueForm)(
-              page = nonCalculatedEnterTaxDuePage(_, _)
+              page =
+                if (fillingOutReturn.isFurtherReturn.contains(true))
+                  furtherReturnNonCalculatedEnterTaxDuePage(
+                    _,
+                    _,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    fillingOutReturn.draftReturn.representativeType,
+                    fillingOutReturn.isFurtherReturn
+                  )
+                else
+                  nonCalculatedEnterTaxDuePage(_, _)
             )(
               requiredPreviousAnswer = _.fold(
                 _.hasEstimatedDetails,

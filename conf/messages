@@ -3768,6 +3768,7 @@ calculator.total.taxOwed=Capital Gains Tax due for this return
 calculator.noTaxToPay=No tax is due for this return
 
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
+
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 nonCalculatedTaxDue.error.required=Enter the amount of Capital Gains Tax due for this return
 nonCalculatedTaxDue.error.tooSmall=The amount of Capital Gains Tax due must be 0 or more
@@ -3776,6 +3777,22 @@ nonCalculatedTaxDue.error.invalid=The amount of Capital Gains Tax due must be an
 nonCalculatedTaxDue.error.tooManyDecimals=The amount of Capital Gains Tax due must be an amount of money with pence as 2 decimal places or less, like 493 or 2,040.59
 
 nonCalculatedTaxDue.cyaChange=the amount of Capital Gains Tax due for this return
+
+
+nonCalculatedTaxDue.furtherReturn.title=Amount of Capital Gains Tax now due for this return
+nonCalculatedTaxDue.furtherReturn.agent.title=Amount of Capital Gains Tax now due for this return
+nonCalculatedTaxDue.furtherReturn.trust.title=Amount of Capital Gains Tax now due for this return
+nonCalculatedTaxDue.furtherReturn.capacitor.title=Enter the amount of Capital Gains Tax now due for this return
+nonCalculatedTaxDue.furtherReturn.personalRep.title=Enter the amount of Capital Gains Tax now due for this return
+nonCalculatedTaxDue.furtherReturn.personalRepInPeriodOfAdmin.title=Enter the amount of Capital Gains Tax now due for this return
+
+nonCalculatedTaxDue.furtherReturn.sub-title=Capital Gains Tax liability on UK residential property
+
+
+nonCalculatedTaxDue.furtherReturn.helpText.p1=To work out this amount, you’ll need to:
+nonCalculatedTaxDue.furtherReturn.helpText.li1=Start with the person’s previous overall Capital Gains Tax liability on their UK property-related disposals for the tax year 2020 to 2021. This is what their overall liability was before this return.
+nonCalculatedTaxDue.furtherReturn.helpText.li2=Subtract this amount from their new overall Capital Gains Tax liability on their UK property-related disposals for the tax year 2020 to 2021. This is what their new overall liability is and includes the disposal in this return.
+nonCalculatedTaxDue.furtherReturn.helpText.li3=Enter the amount - if the amount is less than zero enter zero.
 
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
