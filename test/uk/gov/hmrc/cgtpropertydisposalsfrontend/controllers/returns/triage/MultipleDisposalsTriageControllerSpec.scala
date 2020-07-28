@@ -2229,9 +2229,8 @@ class MultipleDisposalsTriageControllerSpec
           }
         )
 
-      val key                        = "countryCode"
-      val (countryCode, countryName) = "HK" -> "Hong Kong"
-      val country                    = Country(countryCode, Some(countryName))
+      val key     = "countryCode"
+      val country = Country("HK")
 
       "redirect to redirect to cya page" when {
 
@@ -2269,7 +2268,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> countryCode),
+              performAction(key -> country.code),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -2287,8 +2286,7 @@ class MultipleDisposalsTriageControllerSpec
             val (session, journey) =
               sessionDataWithStartingNewDraftReturn(answers)
 
-            val (newCountryCode, newCountryName) = "CH" -> "Switzerland"
-            val newCountry                       = Country(newCountryCode, Some(newCountryName))
+            val newCountry = Country("CH")
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -2309,7 +2307,7 @@ class MultipleDisposalsTriageControllerSpec
             }
 
             checkIsRedirect(
-              performAction(key -> newCountryCode),
+              performAction(key -> newCountry.code),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -2321,7 +2319,7 @@ class MultipleDisposalsTriageControllerSpec
           "have completed the section and they enter a figure which is " +
             "different than one they have already entered" in {
             forAll { c: CompleteMultipleDisposalsTriageAnswers =>
-              val answers = c.copy(countryOfResidence = Country("FI", None))
+              val answers = c.copy(countryOfResidence = Country("FI"))
 
               val (session, journey, draftReturn) =
                 sessionDataWithFillingOutReturn(answers)
@@ -2662,8 +2660,7 @@ class MultipleDisposalsTriageControllerSpec
           supportingEvidenceAnswers = None
         )
 
-      val (countryCode, countryName) = "HK" -> "Hong Kong"
-      val country                    = Country(countryCode, Some(countryName))
+      val country = Country("HK")
 
       val key = "multipleDisposalsAssetTypeForNonUkResidents"
 
@@ -3789,14 +3786,14 @@ class MultipleDisposalsTriageControllerSpec
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk
               .copy(individualUserType = Some(IndividualUserType.Capacitor)),
-            representee.routes.RepresenteeController.enterName()
+            representee.routes.RepresenteeController.checkYourAnswers()
           )
         }
 
         "an individual user type of personal representative is found" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
-            representee.routes.RepresenteeController.enterName()
+            representee.routes.RepresenteeController.checkYourAnswers()
           )
 
         }
@@ -3805,7 +3802,7 @@ class MultipleDisposalsTriageControllerSpec
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk
               .copy(individualUserType = Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)),
-            representee.routes.RepresenteeController.enterName()
+            representee.routes.RepresenteeController.checkYourAnswers()
           )
 
         }
@@ -4598,7 +4595,8 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
     else {
       doc
         .select("#countryOfResidence-answer")
-        .text() shouldBe answers.countryOfResidence.name
+        .text() shouldBe messages
+        .translate(s"country.${answers.countryOfResidence.code}", Seq.empty)
         .getOrElse(answers.countryOfResidence.code)
       doc
         .select("#assetTypeForNonUkResidents-answer")

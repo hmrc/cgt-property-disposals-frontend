@@ -585,8 +585,7 @@ class TaskListControllerSpec
 
           "the initial gain or loss section is not completed, " +
             " the property address, disposal details & acquisition details sections have been completed" in {
-            val (countryCode, countryName) = "HK" -> "Hong Kong"
-            val country                    = Country(countryCode, Some(countryName))
+            val country = Country("HK")
 
             test(
               sample[DraftSingleDisposalReturn].copy(
@@ -972,7 +971,7 @@ class TaskListControllerSpec
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                   .copy(
                     assetType = AssetType.Residential,
-                    countryOfResidence = Country("GB", Some("United Kingdom")),
+                    countryOfResidence = Country.uk,
                     individualUserType = Some(Self)
                   ),
                 reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers]),
@@ -992,7 +991,7 @@ class TaskListControllerSpec
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                   .copy(
                     assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR", Some("Turkey")),
+                    countryOfResidence = Country("TR"),
                     individualUserType = Some(Self)
                   ),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
@@ -1012,7 +1011,7 @@ class TaskListControllerSpec
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                   .copy(
                     assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR", Some("Turkey")),
+                    countryOfResidence = Country("TR"),
                     individualUserType = Some(Self)
                   ),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
@@ -1032,7 +1031,7 @@ class TaskListControllerSpec
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                   .copy(
                     assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR", Some("Turkey")),
+                    countryOfResidence = Country("TR"),
                     individualUserType = Some(Self)
                   ),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
@@ -1055,7 +1054,7 @@ class TaskListControllerSpec
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                   .copy(
                     assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR", Some("Turkey")),
+                    countryOfResidence = Country("TR"),
                     individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
                   ),
                 representeeAnswers =
@@ -1075,7 +1074,7 @@ class TaskListControllerSpec
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                   .copy(
                     assetType = AssetType.NonResidential,
-                    countryOfResidence = Country("TR", Some("Turkey")),
+                    countryOfResidence = Country("TR"),
                     individualUserType = Some(Self)
                   ),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
@@ -1093,7 +1092,7 @@ class TaskListControllerSpec
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                   .copy(
                     assetType = AssetType.Residential,
-                    countryOfResidence = Country("TR", Some("Turkey")),
+                    countryOfResidence = Country("TR"),
                     individualUserType = Some(Self)
                   ),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
@@ -2226,7 +2225,7 @@ class TaskListControllerSpec
 
         "display the page with the enter details of one company section status" when {
 
-          val country = Country("ZA", Some("South Africa"))
+          val country = Country("ZA")
 
           "the session data indicates that they are filling in a return and" +
             " the enter details of one company section is incomplete" in {

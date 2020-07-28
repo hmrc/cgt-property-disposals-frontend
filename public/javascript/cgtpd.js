@@ -7,7 +7,8 @@
   }
 
   var countryEl = document.querySelector("#countryCode");
-  if (countryEl) {
+  var lang = GOVUK.getCookie("PLAY_LANG")
+  if (countryEl && (!lang || lang === "en")) {
     openregisterLocationPicker({
       selectElement: countryEl,
       name: 'countryCode-name',

@@ -68,7 +68,8 @@ class GainOrLossAfterReliefsController @Inject() (
               routes.GainOrLossAfterReliefsController.checkYourAnswers()
             ),
             fillingOutReturn.subscribedDetails.isATrust,
-            draftReturn.representativeType()
+            draftReturn.representativeType(),
+            draftReturn.triageAnswers().isLeft
           )
         )
       }
@@ -89,7 +90,8 @@ class GainOrLossAfterReliefsController @Inject() (
                       routes.GainOrLossAfterReliefsController.checkYourAnswers()
                     ),
                     fillingOutReturn.subscribedDetails.isATrust,
-                    draftReturn.representativeType()
+                    draftReturn.representativeType(),
+                    draftReturn.triageAnswers().isLeft
                   )
                 ),
               value =>
@@ -150,7 +152,8 @@ class GainOrLossAfterReliefsController @Inject() (
               checkYourAnswersPage(
                 completeInitialGainOrLossAnswers,
                 journeyStatus.subscribedDetails.isATrust,
-                draftReturn.representativeType()
+                draftReturn.representativeType(),
+                draftReturn.triageAnswers().isLeft
               )
             )
 

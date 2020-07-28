@@ -29,14 +29,14 @@
     cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row
 )
 
-@(expired : MandatoryEvidence)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(expired : MandatoryEvidence, isFurtherReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{ "mandatoryEvidenceExpired" }
 @title = @{ messages(s"$key.title") }
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @caption(messages("ytdLiability.caption"))
+    @caption(messages(s"ytdLiability${if(isFurtherReturn.contains(true)) ".furtherReturn" else ""}.caption"))
 
     @pageHeading(title)
 

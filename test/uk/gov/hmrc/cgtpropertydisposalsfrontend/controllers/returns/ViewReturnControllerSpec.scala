@@ -345,7 +345,7 @@ class ViewReturnControllerSpec
 
           val completeMultipleDisposalsReturn = c.copy(
             triageAnswers = c.triageAnswers.copy(
-              countryOfResidence = Country("NZ", Some("New Zeland")),
+              countryOfResidence = Country("NZ"),
               assetTypes = List(AssetType.Residential),
               individualUserType = None
             ),

@@ -32,8 +32,12 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossa
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(answers: AmountInPence, isATrust: Boolean,
-        representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(
+        answers: AmountInPence,
+        isATrust: Boolean,
+        representativeType: Option[RepresentativeType],
+        isMultipleDisposal: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{
     messages("gainOrLossAfterReliefs.cya.title")
@@ -44,7 +48,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 
     @pageHeading(title, None)
 
-    @summary(answers, isATrust, representativeType)
+    @summary(answers, isATrust, representativeType, isMultipleDisposal)
 
     @formWrapper(routes.GainOrLossAfterReliefsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

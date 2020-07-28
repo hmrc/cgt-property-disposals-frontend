@@ -18,9 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import cats.Eq
 import julienrf.json.derived
-import play.api.data.Forms.{mapping => formMapping, nonEmptyText, number, of, optional, text}
+import play.api.data.Forms.{nonEmptyText, number, of, optional, text, mapping => formMapping}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.data.{Form, Mapping}
+import play.api.i18n.Messages
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 
@@ -109,10 +110,11 @@ object Address {
     )
 
   implicit class AddressOps(private val a: Address) extends AnyVal {
-    def getAddressLines: List[String] = {
+    def getAddressLines(implicit messages: Messages): List[String] = {
       val lines = a match {
         case u: UkAddress    => List(Some(u.line1), u.line2, u.town, u.county, Some(u.postcode.value))
-        case n: NonUkAddress => List(Some(n.line1), n.line2, n.line3, n.line4, n.country.name)
+        case n: NonUkAddress =>
+          List(Some(n.line1), n.line2, n.line3, n.line4, messages.translate(s"country.${n.country.code}", Seq.empty))
       }
       lines.collect { case Some(s) => s }
     }

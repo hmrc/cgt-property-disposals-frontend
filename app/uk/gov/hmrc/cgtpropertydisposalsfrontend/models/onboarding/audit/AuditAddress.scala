@@ -41,7 +41,7 @@ object AuditAddress {
           town,
           county,
           Some(postcode.value),
-          Country("GB", Some("United Kingdom"))
+          Country("GB")
         )
       case Address
             .NonUkAddress(line1, line2, line3, line4, postcode, country) =>
@@ -51,7 +51,7 @@ object AuditAddress {
           line3,
           line4,
           postcode,
-          Country(country.code, country.name)
+          country
         )
     }
 

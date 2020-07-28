@@ -119,7 +119,7 @@
     @if(!answers.countryOfResidence.isUk()){
         @cyaRow(
             countryOfResidentTitle,
-            Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
+            Html(messages.translate(s"country.${answers.countryOfResidence.code}", Seq.empty).getOrElse(answers.countryOfResidence.code)),
             Some(cyaChange(messages("countryOfResidence.cyaChange"), routes.SingleDisposalsTriageController.countryOfResidence().url)),
             "countryOfResidence"
         )
