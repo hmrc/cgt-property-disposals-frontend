@@ -1141,7 +1141,7 @@ class MultipleDisposalsTriageController @Inject() (
               )
               if assetTypes === List(
                 IndirectDisposal
-              ) && indirectDisposalsEnabled =>
+              ) =>
             Redirect(
               routes.MultipleDisposalsTriageController.disposalDateOfShares()
             )
