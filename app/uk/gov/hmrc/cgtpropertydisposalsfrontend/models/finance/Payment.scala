@@ -22,12 +22,11 @@ import play.api.libs.json.{Json, OFormat}
 
 final case class Payment(
   amount: AmountInPence,
-  method: PaymentMethod,
-  clearingDate: LocalDate
+  method: Option[PaymentMethod],
+  clearingDate: LocalDate,
+  clearingReason: Option[ClearingReason]
 )
 
 object Payment {
-
   implicit val format: OFormat[Payment] = Json.format
-
 }

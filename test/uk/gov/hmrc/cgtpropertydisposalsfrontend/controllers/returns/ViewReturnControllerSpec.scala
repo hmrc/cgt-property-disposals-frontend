@@ -159,7 +159,7 @@ class ViewReturnControllerSpec
 
       val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
         amount = ukResidentMainReturnChargeAmount,
-        method = DirectDebit,
+        method = Some(DirectDebit),
         clearingDate = fullPaymentForUkResidentMainReturnChargeDueDate
       )
 

@@ -92,7 +92,7 @@ class JourneyStatusController @Inject() (
                           )(t => Right(DisposalDate(date, t)))
                         )
                     )
-                    .sequence[EitherT[Future, Error, ?], DisposalDate]
+                    .sequence[EitherT[Future, Error, *], DisposalDate]
 
                 val result = for {
                   disposalDate <- getDisposalDate
