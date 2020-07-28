@@ -1203,7 +1203,7 @@ class SingleDisposalsTriageController @Inject() (
               ) if representeeAnswersIncomplete =>
             Redirect(
               representee.routes.RepresenteeController
-                .enterName()
+                .checkYourAnswers()
             )
 
           case IncompleteSingleDisposalTriageAnswers(

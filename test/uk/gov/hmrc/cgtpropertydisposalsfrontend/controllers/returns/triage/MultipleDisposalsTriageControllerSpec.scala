@@ -3789,14 +3789,14 @@ class MultipleDisposalsTriageControllerSpec
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk
               .copy(individualUserType = Some(IndividualUserType.Capacitor)),
-            representee.routes.RepresenteeController.enterName()
+            representee.routes.RepresenteeController.checkYourAnswers()
           )
         }
 
         "an individual user type of personal representative is found" in {
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
-            representee.routes.RepresenteeController.enterName()
+            representee.routes.RepresenteeController.checkYourAnswers()
           )
 
         }
@@ -3805,7 +3805,7 @@ class MultipleDisposalsTriageControllerSpec
           testRedirectWhenIncomplete(
             allQuestionsAnsweredUk
               .copy(individualUserType = Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)),
-            representee.routes.RepresenteeController.enterName()
+            representee.routes.RepresenteeController.checkYourAnswers()
           )
 
         }

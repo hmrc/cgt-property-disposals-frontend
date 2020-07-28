@@ -410,6 +410,8 @@ class RepresenteeControllerSpec
 
       behave like tooManyNameMatchAttemptsBehaviour(performAction)
 
+      behave like noIsFirstReturnAnswerBehaviour(performAction)
+
       "display the page" when {
 
         def test(
@@ -459,7 +461,7 @@ class RepresenteeControllerSpec
           "the user is a capacitor" in {
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
-                IncompleteRepresenteeAnswers.empty,
+                IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(true)),
                 Capacitor
               )
 
@@ -467,8 +469,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.capacitor.title",
-              returns.triage.routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresenting(),
+              routes.RepresenteeController.isFirstReturn(),
               expectReturnToSummaryLink = false,
               None
             )
@@ -478,7 +479,7 @@ class RepresenteeControllerSpec
             val name               = sample[IndividualName]
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
-                IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
+                IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(false)),
                 PersonalRepresentative
               )
 
@@ -486,8 +487,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.personalRep.title",
-              returns.triage.routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresenting(),
+              routes.RepresenteeController.isFirstReturn(),
               expectReturnToSummaryLink = false,
               Some(name)
             )
@@ -517,7 +517,7 @@ class RepresenteeControllerSpec
           "the user is a capacitor" in {
             val (session, journey, _) =
               sessionWithFillingOutReturn(
-                IncompleteRepresenteeAnswers.empty,
+                IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(true)),
                 Capacitor
               )
 
@@ -525,8 +525,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.capacitor.title",
-              returns.triage.routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresenting(),
+              routes.RepresenteeController.isFirstReturn(),
               expectReturnToSummaryLink = true,
               None
             )
@@ -537,7 +536,7 @@ class RepresenteeControllerSpec
             val name                  = sample[IndividualName]
             val (session, journey, _) =
               sessionWithFillingOutReturn(
-                IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
+                IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(false)),
                 PersonalRepresentative
               )
 
@@ -545,8 +544,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.personalRep.title",
-              returns.triage.routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresenting(),
+              routes.RepresenteeController.isFirstReturn(),
               expectReturnToSummaryLink = true,
               Some(name)
             )
@@ -596,10 +594,12 @@ class RepresenteeControllerSpec
 
       behave like tooManyNameMatchAttemptsBehaviour(() => performAction(Seq.empty))
 
+      behave like noIsFirstReturnAnswerBehaviour(() => performAction(Seq.empty))
+
       {
         val (session, journey, _) =
           sessionWithFillingOutReturn(
-            IncompleteRepresenteeAnswers.empty,
+            IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(true)),
             Capacitor
           )
 
@@ -619,9 +619,10 @@ class RepresenteeControllerSpec
       "show an error page" when {
 
         val newName                         = IndividualName("Max", "Cax")
+        val answers                         = sample[CompleteRepresenteeAnswers]
         val (session, journey, draftReturn) =
           sessionWithFillingOutReturn(
-            sample[CompleteRepresenteeAnswers],
+            answers,
             Capacitor
           )
 
@@ -632,7 +633,8 @@ class RepresenteeControllerSpec
               .copy(individualUserType = Some(Capacitor)),
             representeeAnswers = Some(
               IncompleteRepresenteeAnswers.empty.copy(
-                name = Some(newName)
+                name = Some(newName),
+                isFirstReturn = Some(answers.isFirstReturn)
               )
             )
           )
@@ -683,13 +685,14 @@ class RepresenteeControllerSpec
           "the section is incomplete" in {
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
-                IncompleteRepresenteeAnswers.empty,
+                IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(false)),
                 PersonalRepresentative
               )
             val newJourney         = journey.copy(
               representeeAnswers = Some(
                 IncompleteRepresenteeAnswers.empty.copy(
-                  name = Some(newName)
+                  name = Some(newName),
+                  isFirstReturn = Some(false)
                 )
               )
             )
@@ -710,15 +713,17 @@ class RepresenteeControllerSpec
           }
 
           "the section is complete" in {
+            val answers            = sample[CompleteRepresenteeAnswers]
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
-                sample[CompleteRepresenteeAnswers],
+                answers,
                 PersonalRepresentative
               )
             val newJourney         = journey.copy(
               representeeAnswers = Some(
                 IncompleteRepresenteeAnswers.empty.copy(
-                  name = Some(newName)
+                  name = Some(newName),
+                  isFirstReturn = Some(answers.isFirstReturn)
                 )
               )
             )
@@ -745,7 +750,7 @@ class RepresenteeControllerSpec
           "the section is incomplete" in {
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
-                IncompleteRepresenteeAnswers.empty,
+                IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(true)),
                 Capacitor
               )
 
@@ -756,7 +761,8 @@ class RepresenteeControllerSpec
                   .copy(individualUserType = Some(Capacitor)),
                 representeeAnswers = Some(
                   IncompleteRepresenteeAnswers.empty.copy(
-                    name = Some(newName)
+                    name = Some(newName),
+                    isFirstReturn = Some(true)
                   )
                 )
               )
@@ -784,9 +790,10 @@ class RepresenteeControllerSpec
           }
 
           "the section is complete" in {
+            val answers                         = sample[CompleteRepresenteeAnswers]
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
-                sample[CompleteRepresenteeAnswers],
+                answers,
                 Capacitor
               )
 
@@ -797,7 +804,8 @@ class RepresenteeControllerSpec
                   .copy(individualUserType = Some(Capacitor)),
                 representeeAnswers = Some(
                   IncompleteRepresenteeAnswers.empty.copy(
-                    name = Some(newName)
+                    name = Some(newName),
+                    isFirstReturn = Some(answers.isFirstReturn)
                   )
                 )
               )
@@ -839,6 +847,8 @@ class RepresenteeControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       behave like nonCapacitorOrPersonalRepBehaviour(performAction)
+
+      behave like noIsFirstReturnAnswerBehaviour(performAction)
 
       "display the page" when {
 
@@ -892,7 +902,7 @@ class RepresenteeControllerSpec
             test(
               sessionWithStartingNewDraftReturn(
                 IncompleteRepresenteeAnswers.empty
-                  .copy(dateOfDeath = Some(date)),
+                  .copy(dateOfDeath = Some(date), isFirstReturn = Some(true)),
                 PersonalRepresentative
               )._1,
               "dateOfDeath.title",
@@ -926,7 +936,7 @@ class RepresenteeControllerSpec
             test(
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty
-                  .copy(dateOfDeath = Some(date)),
+                  .copy(dateOfDeath = Some(date), isFirstReturn = Some(false)),
                 PersonalRepresentative
               )._1,
               "dateOfDeath.title",
@@ -955,7 +965,8 @@ class RepresenteeControllerSpec
       }
 
       "redirect to check your answers page" when {
-        "the representive type is capacitor" in {
+
+        "the representative type is capacitor" in {
           val answers = sample[CompleteRepresenteeAnswers]
           inSequence {
             mockAuthWithNoRetrievals()
@@ -970,6 +981,7 @@ class RepresenteeControllerSpec
           )
 
         }
+
       }
 
     }
@@ -996,6 +1008,8 @@ class RepresenteeControllerSpec
 
       behave like nonCapacitorOrPersonalRepBehaviour(() => performAction(Seq.empty))
 
+      behave like noIsFirstReturnAnswerBehaviour(() => performAction(Seq.empty))
+
       "show an error page" when {
 
         val oldAnswers                      = sample[CompleteRepresenteeAnswers]
@@ -1012,7 +1026,8 @@ class RepresenteeControllerSpec
             representeeAnswers = Some(
               IncompleteRepresenteeAnswers.empty.copy(
                 name = Some(oldAnswers.name),
-                dateOfDeath = Some(newDate)
+                dateOfDeath = Some(newDate),
+                isFirstReturn = Some(oldAnswers.isFirstReturn)
               )
             )
           )
@@ -1053,7 +1068,7 @@ class RepresenteeControllerSpec
 
           val session = sessionWithFillingOutReturn(
             IncompleteRepresenteeAnswers.empty
-              .copy(name = Some(sample[IndividualName])),
+              .copy(name = Some(sample[IndividualName]), isFirstReturn = Some(true)),
             PersonalRepresentative
           )._1
 
@@ -1094,14 +1109,15 @@ class RepresenteeControllerSpec
             val name               = sample[IndividualName]
             val (session, journey) =
               sessionWithStartingNewDraftReturn(
-                IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
+                IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(true)),
                 PersonalRepresentative
               )
             val newJourney         = journey.copy(
               representeeAnswers = Some(
                 IncompleteRepresenteeAnswers.empty.copy(
                   name = Some(name),
-                  dateOfDeath = Some(dateOfDeath)
+                  dateOfDeath = Some(dateOfDeath),
+                  isFirstReturn = Some(true)
                 )
               )
             )
@@ -1133,7 +1149,8 @@ class RepresenteeControllerSpec
               representeeAnswers = Some(
                 IncompleteRepresenteeAnswers.empty.copy(
                   name = Some(data.name),
-                  dateOfDeath = Some(newDate)
+                  dateOfDeath = Some(newDate),
+                  isFirstReturn = Some(data.isFirstReturn)
                 )
               )
             )
@@ -1160,7 +1177,7 @@ class RepresenteeControllerSpec
             val name                            = sample[IndividualName]
             val (session, journey, draftReturn) =
               sessionWithFillingOutReturn(
-                IncompleteRepresenteeAnswers.empty.copy(name = Some(name)),
+                IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(false)),
                 PersonalRepresentative
               )
 
@@ -1172,7 +1189,8 @@ class RepresenteeControllerSpec
                 representeeAnswers = Some(
                   IncompleteRepresenteeAnswers.empty.copy(
                     name = Some(name),
-                    dateOfDeath = Some(dateOfDeath)
+                    dateOfDeath = Some(dateOfDeath),
+                    isFirstReturn = Some(false)
                   )
                 )
               )
@@ -1211,7 +1229,8 @@ class RepresenteeControllerSpec
                 representeeAnswers = Some(
                   IncompleteRepresenteeAnswers.empty.copy(
                     name = Some(oldData.name),
-                    dateOfDeath = Some(dateOfDeath)
+                    dateOfDeath = Some(dateOfDeath),
+                    isFirstReturn = Some(oldData.isFirstReturn)
                   )
                 )
               )
@@ -1252,6 +1271,8 @@ class RepresenteeControllerSpec
       behave like nonCapacitorOrPersonalRepBehaviour(performAction)
 
       behave like tooManyNameMatchAttemptsBehaviour(performAction)
+
+      behave like noIsFirstReturnAnswerBehaviour(performAction)
 
       "display the page" when {
 
@@ -1310,7 +1331,7 @@ class RepresenteeControllerSpec
 
           val requiredPreviousAnswers =
             IncompleteRepresenteeAnswers.empty
-              .copy(name = Some(sample[IndividualName]))
+              .copy(name = Some(sample[IndividualName]), isFirstReturn = Some(true))
 
           "the user has not selected an option before" in {
             List(
@@ -1432,8 +1453,11 @@ class RepresenteeControllerSpec
             val (session, journey, _) =
               sessionWithFillingOutReturn(
                 IncompleteRepresenteeAnswers.empty
-                  .copy(name = Some(sample[IndividualName]))
-                  .copy(id = Some(cgtReference)),
+                  .copy(
+                    name = Some(sample[IndividualName]),
+                    id = Some(cgtReference),
+                    isFirstReturn = Some(false)
+                  ),
                 PersonalRepresentative
               )
 
@@ -1758,11 +1782,13 @@ class RepresenteeControllerSpec
 
       behave like nonCapacitorOrPersonalRepBehaviour(() => performAction(Seq.empty))
 
+      behave like noIsFirstReturnAnswerBehaviour(() => performAction(Seq.empty))
+
       "show a form error" when {
 
         val (session, journey, _) = sessionWithFillingOutReturn(
           IncompleteRepresenteeAnswers.empty
-            .copy(name = Some(sample[IndividualName])),
+            .copy(name = Some(sample[IndividualName]), isFirstReturn = Some(true)),
           Capacitor
         )
 
@@ -1848,7 +1874,7 @@ class RepresenteeControllerSpec
       "show an error page" when {
 
         val name    = sample[IndividualName]
-        val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
+        val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(false))
         val cgtRef  = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
         val (session, journey, draftReturn) =
@@ -1943,7 +1969,7 @@ class RepresenteeControllerSpec
 
           val name                  = IndividualName("First", "Last")
           val answers               =
-            IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
+            IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(true))
           val cgtRef                = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
           val nameMatchDetails      =
             IndividualRepresenteeNameMatchDetails(name, cgtRef)
@@ -1973,7 +1999,7 @@ class RepresenteeControllerSpec
       "redirect to the too many name match attempts page" when {
 
         val name    = sample[IndividualName]
-        val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
+        val answers = IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(true))
         val cgtRef  = RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
         val (session, journey, _) =
@@ -2034,7 +2060,7 @@ class RepresenteeControllerSpec
           "the user has submitted a valid cgt reference" in {
             val name    = sample[IndividualName]
             val answers =
-              IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
+              IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(false))
             val cgtRef  =
               RepresenteeCgtReference(CgtReference("XYCGTP123456789"))
 
@@ -2079,7 +2105,8 @@ class RepresenteeControllerSpec
             val name      = sample[IndividualName]
             val answers   = IncompleteRepresenteeAnswers.empty.copy(
               name = Some(name),
-              id = Some(sample[RepresenteeCgtReference])
+              id = Some(sample[RepresenteeCgtReference]),
+              isFirstReturn = Some(false)
             )
             val ninoValue = NINO("AB123456C")
             val nino      = RepresenteeNino(ninoValue)
@@ -2123,7 +2150,7 @@ class RepresenteeControllerSpec
           "the user has submitted a valid sa utr" in {
             val name               = sample[IndividualName]
             val answers            =
-              IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
+              IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(false))
             val sautrValue         = SAUTR("1234567890")
             val sautr              = RepresenteeSautr(sautrValue)
             val (session, journey) =
@@ -2155,7 +2182,7 @@ class RepresenteeControllerSpec
           "the user has submitted no reference" in {
             val name    = sample[IndividualName]
             val answers =
-              IncompleteRepresenteeAnswers.empty.copy(name = Some(name))
+              IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(false))
 
             val (session, journey) =
               sessionWithStartingNewDraftReturn(answers, Capacitor)
@@ -2619,6 +2646,26 @@ class RepresenteeControllerSpec
         Some(completeAnswers.isFirstReturn)
       )
 
+      "redirect to the is first return page" when {
+
+        "the user has not yet answered that question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithStartingNewDraftReturn(
+                allQuestionsAnswers.copy(isFirstReturn = None),
+                Capacitor
+              )._1
+            )
+          }
+          checkIsRedirect(
+            performAction(),
+            routes.RepresenteeController.isFirstReturn()
+          )
+        }
+
+      }
+
       "redirect to the enter name page" when {
 
         "that question hasn't been answered yet" in {
@@ -2694,26 +2741,6 @@ class RepresenteeControllerSpec
           checkIsRedirect(
             performAction(),
             routes.RepresenteeController.confirmPerson()
-          )
-        }
-
-      }
-
-      "redirect to the is first return page" when {
-
-        "the user has not yet answered that question" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithStartingNewDraftReturn(
-                allQuestionsAnswers.copy(isFirstReturn = None),
-                Capacitor
-              )._1
-            )
-          }
-          checkIsRedirect(
-            performAction(),
-            routes.RepresenteeController.isFirstReturn()
           )
         }
 
@@ -3011,32 +3038,6 @@ class RepresenteeControllerSpec
 
       behave like nonCapacitorOrPersonalRepBehaviour(performAction)
 
-      "redirect to the check your answers page" when {
-
-        "the user has not yet confirmed the person they are representing" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithStartingNewDraftReturn(
-                IncompleteRepresenteeAnswers(
-                  Some(sample[IndividualName]),
-                  Some(sample[RepresenteeReferenceId]),
-                  None,
-                  None,
-                  hasConfirmedPerson = false,
-                  hasConfirmedContactDetails = false,
-                  isFirstReturn = None
-                ),
-                Capacitor
-              )._1
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.RepresenteeController.checkYourAnswers())
-        }
-
-      }
-
       "display the page" when {
 
         def test(
@@ -3084,7 +3085,7 @@ class RepresenteeControllerSpec
             )._1
           )(
             "representeeIsFirstReturn.capacitor.title",
-            routes.RepresenteeController.confirmPerson(),
+            returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
             None
           )
         }
@@ -3105,7 +3106,7 @@ class RepresenteeControllerSpec
             )._1
           )(
             "representeeIsFirstReturn.personalRep.title",
-            routes.RepresenteeController.confirmPerson(),
+            returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
             Some(true)
           )
         }
@@ -3139,32 +3140,6 @@ class RepresenteeControllerSpec
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
       behave like nonCapacitorOrPersonalRepBehaviour(() => performAction(Seq.empty))
-
-      "redirect to the check your answers page" when {
-
-        "the user has not yet confirmed the person they are representing" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithStartingNewDraftReturn(
-                IncompleteRepresenteeAnswers(
-                  Some(sample[IndividualName]),
-                  Some(sample[RepresenteeReferenceId]),
-                  None,
-                  None,
-                  hasConfirmedPerson = false,
-                  hasConfirmedContactDetails = false,
-                  isFirstReturn = None
-                ),
-                Capacitor
-              )._1
-            )
-          }
-
-          checkIsRedirect(performAction(Seq.empty), routes.RepresenteeController.checkYourAnswers())
-        }
-
-      }
 
       "show a form error" when {
 
@@ -3446,6 +3421,35 @@ class RepresenteeControllerSpec
           returns.routes.TaskListController.taskList()
         )
       }
+    }
+
+  def noIsFirstReturnAnswerBehaviour(
+    performAction: () => Future[Result]
+  ) =
+    "redirect to the check your answers endpoint" when {
+
+      "there is no answer to the 'is first return?' question" in {
+        val answers = IncompleteRepresenteeAnswers(
+          Some(sample[IndividualName]),
+          Some(sample[RepresenteeReferenceId]),
+          Some(sample[DateOfDeath]),
+          Some(sample[RepresenteeContactDetails]),
+          hasConfirmedPerson = true,
+          hasConfirmedContactDetails = true,
+          None
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithStartingNewDraftReturn(Some(answers), Some(PersonalRepresentative), sample[SubscribedDetails])._1
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.RepresenteeController.checkYourAnswers())
+
+      }
+
     }
 
 }

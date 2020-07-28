@@ -53,6 +53,13 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
     )
 
     @cyaRow(
+        messages(s"representeeIsFirstReturn.$userKey.title"),
+        Html(messages(s"generic.${if(answers.isFirstReturn) "yes" else "no"}")),
+        Some(cyaChange(messages("representee.cyaChange.isFirstReturn"), routes.RepresenteeController.isFirstReturn().url)),
+        "isFirstReturn"
+    )
+
+    @cyaRow(
         messages("representee.cyaLabel.personRepresented"),
         Html(s"""${
             answers.name.makeSingleName()}<br>
@@ -63,13 +70,6 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         Some(cyaChange(messages("representee.cyaChange.personRepresented"), routes.RepresenteeController.enterName().url)),
         "personRepresented"
     )
-
-  @cyaRow(
-    messages(s"representeeIsFirstReturn.$userKey.title"),
-      Html(messages(s"generic.${if(answers.isFirstReturn) "yes" else "no"}")),
-      Some(cyaChange(messages("representee.cyaChange.isFirstReturn"), routes.RepresenteeController.isFirstReturn().url)),
-      "isFirstReturn"
-  )
 
     @answers.dateOfDeath.map(date => {
         cyaRow(

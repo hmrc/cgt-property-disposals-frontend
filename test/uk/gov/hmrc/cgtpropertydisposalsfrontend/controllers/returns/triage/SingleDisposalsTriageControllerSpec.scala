@@ -4759,13 +4759,13 @@ class SingleDisposalsTriageControllerSpec
             Scenario(
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.Capacitor)),
               Right(sample[IndividualName]),
-              representee.routes.RepresenteeController.enterName(),
+              representee.routes.RepresenteeController.checkYourAnswers(),
               None
             ),
             Scenario(
               allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
               Right(sample[IndividualName]),
-              representee.routes.RepresenteeController.enterName(),
+              representee.routes.RepresenteeController.checkYourAnswers(),
               None
             ),
             Scenario(
@@ -4773,7 +4773,7 @@ class SingleDisposalsTriageControllerSpec
                 Some(IndividualUserType.PersonalRepresentativeInPeriodOfAdmin)
               ),
               Right(sample[IndividualName]),
-              representee.routes.RepresenteeController.enterName(),
+              representee.routes.RepresenteeController.checkYourAnswers(),
               None
             )
           ).foreach {
