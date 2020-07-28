@@ -3534,13 +3534,13 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.error.required=
 
 taxableGain.furtherReturn.error.required=Enter the amount of net gain
 taxableGain.furtherReturn.error.invalid=Net gain must be a number and must have 2 decimal places or less, for example 4,820.54
-taxableGain.furtherReturn.error.tooSmall=Net gain must be a number more than 0. If you did not make on net gain or loss select no net gain or loss
+taxableGain.furtherReturn.error.tooSmall=Net gain amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 taxableGain.furtherReturn.error.tooLarge=Net gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.furtherReturn.error.tooManyDecimals=Net gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 netLoss.furtherReturn.error.required=Enter the amount of net loss
 netLoss.furtherReturn.error.invalid=Net loss must be a number and must have 2 decimal places or less, for example 33.33
-netLoss.furtherReturn.error.tooSmall=	Net loss must be a number more than 0. If you did not make on net gain or loss select no net gain or loss
+netLoss.furtherReturn.error.tooSmall=Net loss amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 netLoss.furtherReturn.error.tooLarge=Net loss must be an amount of money between 0 and 50,000,000,000
 netLoss.furtherReturn.error.tooManyDecimals=Net loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
