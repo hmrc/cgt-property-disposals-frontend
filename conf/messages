@@ -4543,6 +4543,14 @@ gainOrLossAfterReliefs.personalRep.title=Did the person make a gain on the dispo
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Did the estate make a gain on the disposal in this return after reliefs were subtracted?
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Did your client make a gain on the disposal in this return after reliefs were subtracted?
 
+gainOrLossAfterReliefs.multipleDisposals.title=Did you make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.agent.multipleDisposals.title=Did your client make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.trust.multipleDisposals.title=Did the trust make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Did the person make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Did the person make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Did the estate make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Did your client or the estate make an overall gain on the disposals in this return after reliefs were subtracted?
+
 gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
 gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss
 gainOrLossAfterReliefs.noLossOrGain.outerLabel=I made no gain or loss after reliefs

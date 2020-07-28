@@ -32,7 +32,12 @@ cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
 cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: AmountInPence, isATrust: Boolean, representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages)
+@(
+        answers: AmountInPence,
+        isATrust: Boolean,
+        representativeType: Option[RepresentativeType],
+        isMultipleDisposal: Boolean
+)(implicit request: RequestWithSessionData[_], messages: Messages)
 @isAgent = @{request.userType.contains(UserType.Agent)}
 
 @userKey = @{
@@ -53,6 +58,8 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
     else ".notSelf"
 }
 
+@multipleDisposalKey = @{ if(isMultipleDisposal) ".multipleDisposals" else "" }
+
 @gainOrLossAfterReliefsLabelWithAmount = @{
   Some(answers).map { answer =>
     if(answer > AmountInPence.zero)
@@ -70,7 +77,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
   @gainOrLossAfterReliefsLabelWithAmount.map{ labelsAndAmount =>
 
     @cyaRow(
-      messages(s"gainOrLossAfterReliefs$userKey.title"),
+      messages(s"gainOrLossAfterReliefs$userKey$multipleDisposalKey.title"),
       Html(messages(labelsAndAmount._1)),
       Some(cyaChange(messages("gainOrLossAfterReliefs.cyaChange"), routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefs().url)),
       "gainOrLossAfterReliefs"
