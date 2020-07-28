@@ -1300,23 +1300,23 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         "representees are handled correctly" in {
           val mockRepresenteeCgtReference = sample[RepresenteeCgtReference]
-          val mockedCompleteReturn        = CompleteSingleDisposalReturn
+
+          val representeeAnswersNoReferenceId: CompleteRepresenteeAnswers =
+            completeDraftReturnRepresenteWithNoReference.representeeAnswers
+              .map(e => e.fold(_ => sample[CompleteRepresenteeAnswers], _.copy(id = NoReferenceId)))
+              .getOrElse(sample[CompleteRepresenteeAnswers])
+
+          val mockedCompleteReturn = CompleteSingleDisposalReturn
             .fromDraftReturn(
               completeDraftReturnRepresenteWithNoReference
-                .copy(representeeAnswers =
-                  completeDraftReturnRepresenteWithNoReference.representeeAnswers.map(e =>
-                    e.fold(_.copy(id = Some(mockRepresenteeCgtReference)), _.copy(id = mockRepresenteeCgtReference))
-                  )
-                )
+                .copy(representeeAnswers = Some(representeeAnswersNoReferenceId.copy(id = mockRepresenteeCgtReference)))
             )
             .getOrElse(sample[CompleteSingleDisposalReturn])
-          val completeRepresenteeAnswers  = mockedCompleteReturn.representeeAnswers
-            .getOrElse(sample[CompleteRepresenteeAnswers])
-            .copy(id = NoReferenceId)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnWithRepresenteeWithNoReference))
-            mockCgtRegistrationService(Right(mockRepresenteeCgtReference), completeRepresenteeAnswers)
+            mockCgtRegistrationService(Right(mockRepresenteeCgtReference), representeeAnswersNoReferenceId)
             mockSubmitReturn(submitReturnRequestForOverriddenReferenceId(mockRepresenteeCgtReference))(
               Right(submitReturnResponse)
             )
@@ -1337,24 +1337,15 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
 
         "representees returns error" in {
-          val mockRepresenteeCgtReference = sample[RepresenteeCgtReference]
-          val mockedCompleteReturn        = CompleteSingleDisposalReturn
-            .fromDraftReturn(
-              completeDraftReturnRepresenteWithNoReference
-                .copy(representeeAnswers =
-                  completeDraftReturnRepresenteWithNoReference.representeeAnswers.map(e =>
-                    e.fold(_.copy(id = Some(mockRepresenteeCgtReference)), _.copy(id = mockRepresenteeCgtReference))
-                  )
-                )
-            )
-            .getOrElse(sample[CompleteSingleDisposalReturn])
-          val completeRepresenteeAnswers  = mockedCompleteReturn.representeeAnswers
-            .getOrElse(sample[CompleteRepresenteeAnswers])
-            .copy(id = NoReferenceId)
+          val representeeAnswersNoReferenceId: CompleteRepresenteeAnswers =
+            completeDraftReturnRepresenteWithNoReference.representeeAnswers
+              .map(e => e.fold(_ => sample[CompleteRepresenteeAnswers], _.copy(id = NoReferenceId)))
+              .getOrElse(sample[CompleteRepresenteeAnswers])
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnWithRepresenteeWithNoReference))
-            mockCgtRegistrationService(Left(Error("error thrown")), completeRepresenteeAnswers)
+            mockCgtRegistrationService(Left(Error("error thrown")), representeeAnswersNoReferenceId)
           }
 
           checkIsTechnicalErrorPage(
