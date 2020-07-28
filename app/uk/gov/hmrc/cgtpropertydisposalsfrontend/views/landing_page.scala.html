@@ -24,7 +24,7 @@
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
 )
 
-@(indirectDisposalsEnabled: Boolean, mixedUseEnabled: Boolean)(implicit messages: Messages, appConfig: ViewConfig)
+@()(implicit messages: Messages, appConfig: ViewConfig)
 
 @title = @{
     messages("landingPage.title")
@@ -113,12 +113,8 @@
     <ul class="list-bullet">
         <li>@messages("landingPage.howTo.list2.bullet1")</li>
         <li>@messages("landingPage.howTo.list2.bullet2")</li>
-        @if(mixedUseEnabled) {
-            <li>@messages("landingPage.howTo.list2.bullet3")</li>
-        }
-        @if(indirectDisposalsEnabled) {
-            <li>@messages("landingPage.howTo.list2.bullet4")</li>
-        }
+        <li>@messages("landingPage.howTo.list2.bullet3")</li>
+        <li>@messages("landingPage.howTo.list2.bullet4")</li>
     </ul>
     <p>@messages("landingPage.howTo.p4")</p>
 
@@ -154,10 +150,8 @@
     <h2 class="heading-medium" id="ifTrust">@messages("landingPage.ifTrust.h2")</h2>
 
     <p>@Html(messages("landingPage.ifTrust.p1", appConfig.trusteeResponsibilitiesUrl))</p>
-    @if(!indirectDisposalsEnabled | !mixedUseEnabled) {
-        <h2 class="heading-medium">@messages("landingPage.reportingDisposals.h2")</h2>
-        <p>@Html(messages("landingPage.reportingDisposals.p1", appConfig.nrcgtReturn))</p>
-    }
+    <h2 class="heading-medium">@messages("landingPage.reportingDisposals.h2")</h2>
+    <p>@Html(messages("landingPage.reportingDisposals.p1", appConfig.nrcgtReturn))</p>
     <h2 class="heading-medium" id="capacitorOrPersonalRepresentative">@messages("landingPage.capacitorOrPersonalRepresentative.h2")</h2>
 
     <p>@Html(messages("landingPage.capacitorOrPersonalRepresentative.p1", appConfig.personalRepresentativeUrl))</p>
