@@ -82,8 +82,24 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT(Future.successful(response)))
 
-  private val emptyJsonBody = "{}"
-  private val noJsonInBody  = ""
+  private val emptyJsonBody               = "{}"
+  private val noJsonInBody                = ""
+  private val cgtReferenceNumber          = "number"
+  private val successfulSubscribeResponse = Json.parse(
+    s"""
+       |{
+       |  "cgtReferenceNumber" : "$cgtReferenceNumber"
+       |}
+       |""".stripMargin
+  )
+  private val sapNumber                   = "number"
+  private val successfulRegisterResponse  = Json.parse(
+    s"""
+       |{
+       |  "sapNumber" : "$sapNumber"
+       |}
+       |""".stripMargin
+  )
 
   "SubscriptionServiceImpl" when {
 
@@ -114,7 +130,6 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
              |}
              |""".stripMargin
         )
-
         mockHasSubscription()(Right(HttpResponse(200, jsonBody, Map[String, Seq[String]]().empty)))
         await(service.hasFailedCgtEnrolment().value) shouldBe Right(
           Some(CgtReference(cgtReferenceNumber))
@@ -160,17 +175,8 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
       "return the subscription response if the call comes back with a " +
         "200 status and the JSON body can be parsed" in {
-        val cgtReferenceNumber = "number"
-        val jsonBody           = Json.parse(
-          s"""
-             |{
-             |  "cgtReferenceNumber" : "$cgtReferenceNumber"
-             |}
-             |""".stripMargin
-        )
-
         mockSubscribe(subscriptionDetails)(
-          Right(HttpResponse(200, jsonBody, Map[String, Seq[String]]().empty))
+          Right(HttpResponse(200, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
         )
         await(service.subscribe(subscriptionDetails).value) shouldBe Right(
           SubscriptionSuccessful(cgtReferenceNumber)
@@ -227,17 +233,8 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
       "return the response if the call comes back with a " +
         "200 status and the JSON body can be parsed" in {
-        val sapNumber = "number"
-        val jsonBody  = Json.parse(
-          s"""
-             |{
-             |  "sapNumber" : "$sapNumber"
-             |}
-             |""".stripMargin
-        )
-
         mockRegisterWithoutId(registrationDetails)(
-          Right(HttpResponse(200, jsonBody, Map[String, Seq[String]]().empty))
+          Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
         )
 
         await(
@@ -350,10 +347,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
     }
 
     "handing request to register without id and subscribe" must {
-
       val representeeAnswers  = sample[CompleteRepresenteeAnswers]
-      val sapNumber           = "sapNumber"
-      val cgtReferenceNumber  = "cgtReference"
       val registrationDetails = RegistrationDetails(
         representeeAnswers.name,
         representeeAnswers.contactDetails.emailAddress,
@@ -371,31 +365,45 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         ManuallyEnteredContactName
       )
 
-      "user is successfully registered and subscribed returning correct cgt reference" in {
-        val registrationResponse = Json.parse(
-          s"""
-             |{
-             |  "sapNumber" : "$sapNumber"
-             |}
-             |""".stripMargin
-        )
-
-        val subscriptionResponse = Json.parse(
-          s"""
-             |{
-             |  "cgtReferenceNumber" : "$cgtReferenceNumber"
-             |}
-             |""".stripMargin
-        )
-
+      "successfully register and subscribed returning correct cgt reference" in {
         mockRegisterWithoutId(registrationDetails)(
-          Right(HttpResponse(200, registrationResponse, Map[String, Seq[String]]().empty))
+          Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
         )
         mockSubscribe(subscriptionDetails)(
-          Right(HttpResponse(200, subscriptionResponse, Map[String, Seq[String]]().empty))
+          Right(HttpResponse(200, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
         )
         await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
           Right(RepresenteeCgtReference(CgtReference(cgtReferenceNumber)))
+      }
+
+      "fail when registration fails" in {
+        mockRegisterWithoutId(registrationDetails)(
+          Right(HttpResponse(500, successfulRegisterResponse, Map[String, Seq[String]]().empty))
+        )
+        await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
+          Left(Error("Call to register without id came back with status 500"))
+      }
+
+      "fail when subscription fails" in {
+        mockRegisterWithoutId(registrationDetails)(
+          Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
+        )
+        mockSubscribe(subscriptionDetails)(
+          Right(HttpResponse(500, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
+        )
+        await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
+          Left(Error("call to subscribe came back with status 500"))
+      }
+
+      "fail when subscription comes back with an 'already subscribed' response" in {
+        mockRegisterWithoutId(registrationDetails)(
+          Right(HttpResponse(200, successfulRegisterResponse, Map[String, Seq[String]]().empty))
+        )
+        mockSubscribe(subscriptionDetails)(
+          Right(HttpResponse(409, successfulSubscribeResponse, Map[String, Seq[String]]().empty))
+        )
+        await(service.registerWithoutIdAndSubscribe(representeeAnswers).value) shouldBe
+          Left(Error("User is already subscribed"))
       }
 
     }

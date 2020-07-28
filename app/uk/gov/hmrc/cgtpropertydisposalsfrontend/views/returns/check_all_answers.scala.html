@@ -119,9 +119,9 @@
           }
           @{
               representeeId match {
-                  case Some(RepresenteeNino(nino)) => cyaRow(messages("checkAllAnswers.submissionDetails.nino"), Html(nino.value), None, "disposalMethod")
-                  case Some(RepresenteeSautr(sautr)) => cyaRow(messages("checkAllAnswers.submissionDetails.sautr"), Html(sautr.value), None, "disposalMethod")
-                  case Some(RepresenteeCgtReference(cgt)) => cyaRow(messages("checkAllAnswers.submissionDetails.cgt"), Html(cgt.value), None, "disposalMethod")
+                  case Some(RepresenteeNino(nino)) => cyaRow(messages("checkAllAnswers.submissionDetails.nino"), Html(nino.value), None, "representeeNino")
+                  case Some(RepresenteeSautr(sautr)) => cyaRow(messages("checkAllAnswers.submissionDetails.sautr"), Html(sautr.value), None, "representeeSautr")
+                  case Some(RepresenteeCgtReference(cgt)) => cyaRow(messages("checkAllAnswers.submissionDetails.cgt"), Html(cgt.value), None, "representeeCgt")
                   case _ => ""
               }
           }

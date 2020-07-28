@@ -163,15 +163,18 @@ class CheckAllAnswersAndSubmitControllerSpec
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockCgtRegistrationService(representeeCgtReference: RepresenteeCgtReference) =
+  def mockCgtRegistrationService(
+    response: Either[Error, RepresenteeCgtReference],
+    completeRepresenteeAnswers: CompleteRepresenteeAnswers
+  ) =
     (mockSubscriptionService
       .registerWithoutIdAndSubscribe(
         _: CompleteRepresenteeAnswers
       )(
         _: HeaderCarrier
       ))
-      .expects(*, *)
-      .returning(EitherT.rightT(representeeCgtReference))
+      .expects(completeRepresenteeAnswers, *)
+      .returning(EitherT.fromEither(response))
 
   def userMessageKey(
     individualUserType: Option[IndividualUserType],
@@ -1310,7 +1313,12 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithJourney(completeFillingOutReturnWithRepresenteeWithNoReference))
-            mockCgtRegistrationService(mockRepresenteeCgtReference)
+            mockCgtRegistrationService(
+              Right(mockRepresenteeCgtReference),
+              mockedCompleteReturn.representeeAnswers
+                .getOrElse(sample[CompleteRepresenteeAnswers])
+                .copy(id = NoReferenceId)
+            )
             mockSubmitReturn(submitReturnRequestForOverriddenReferenceId(mockRepresenteeCgtReference))(
               Right(submitReturnResponse)
             )
@@ -1327,6 +1335,34 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkIsRedirect(
             performAction(),
             routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+          )
+        }
+
+        "representees returns error" in {
+          val mockRepresenteeCgtReference = sample[RepresenteeCgtReference]
+          val mockedCompleteReturn        = CompleteSingleDisposalReturn
+            .fromDraftReturn(
+              completeDraftReturnRepresenteWithNoReference
+                .copy(representeeAnswers =
+                  completeDraftReturnRepresenteWithNoReference.representeeAnswers.map(e =>
+                    e.fold(_.copy(id = Some(mockRepresenteeCgtReference)), _.copy(id = mockRepresenteeCgtReference))
+                  )
+                )
+            )
+            .getOrElse(sample[CompleteSingleDisposalReturn])
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithJourney(completeFillingOutReturnWithRepresenteeWithNoReference))
+            mockCgtRegistrationService(
+              Left(Error("error thrown")),
+              mockedCompleteReturn.representeeAnswers
+                .getOrElse(sample[CompleteRepresenteeAnswers])
+                .copy(id = NoReferenceId)
+            )
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction()
           )
         }
       }

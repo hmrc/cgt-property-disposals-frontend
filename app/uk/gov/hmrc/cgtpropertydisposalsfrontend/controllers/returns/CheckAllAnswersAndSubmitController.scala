@@ -312,7 +312,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
         CompleteSingleDisposalReturn
           .fromDraftReturn(draftReturn)
           .fold[Future[Result]](
-            Redirect((routes.TaskListController.taskList()))
+            Redirect(routes.TaskListController.taskList())
           )(f(s, r, _))
 
       case Some(
