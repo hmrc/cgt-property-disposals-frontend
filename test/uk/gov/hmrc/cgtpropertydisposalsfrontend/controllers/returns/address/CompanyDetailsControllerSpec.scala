@@ -21,7 +21,7 @@ import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -119,7 +119,7 @@ class CompanyDetailsControllerSpec
   def sessionWithDraftMultipleIndirectDisposals(
     companyAddress: Address = sample[Address]
   ): (SessionData, FillingOutReturn, DraftMultipleIndirectDisposalsReturn) = {
-    val country          = Country("HK", Some("Hong Kong"))
+    val country          = Country("HK")
     val draftReturn      = sample[DraftMultipleIndirectDisposalsReturn].copy(
       triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
         countryOfResidence = country,
@@ -145,7 +145,7 @@ class CompanyDetailsControllerSpec
     individualUserType: IndividualUserType
   ): (SessionData, FillingOutReturn, DraftMultipleIndirectDisposalsReturn) = {
     val companyAddress   = sample[Address]
-    val country          = Country("HK", Some("Hong Kong"))
+    val country          = Country("HK")
     val draftReturn      = sample[DraftMultipleIndirectDisposalsReturn].copy(
       triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
         countryOfResidence = country,
@@ -1811,7 +1811,7 @@ class CompanyDetailsControllerSpec
           None,
           None,
           None,
-          Country("HK", Some("Hong Kong"))
+          Country("HK")
         )
 
         val newDraftReturn = draftReturn.copy(companyAddress = Some(address))
@@ -1873,7 +1873,7 @@ class CompanyDetailsControllerSpec
             None,
             None,
             None,
-            Country("HK", Some("Hong Kong"))
+            Country("HK")
           )
 
           val newDraftReturn = draftReturn.copy(companyAddress = Some(address))
@@ -2866,14 +2866,14 @@ object CompanyDetailsControllerSpec extends Matchers {
   def validatePropertyAddressPage(
     address: Address,
     doc: Document
-  ): Unit = {
+  )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
     val addressLines: List[String] = {
       val lines = address match {
         case UkAddress(line1, line2, town, county, postcode) =>
           List(Some(line1), line2, town, county, Some(postcode.value))
         case Address
               .NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-          List(Some(line1), line2, line3, line4, postcode, country.name)
+          List(Some(line1), line2, line3, line4, postcode, messagesApi.translate(s"country.${country.code}", Seq.empty))
       }
 
       lines.collect { case Some(s) => s.trim }

@@ -922,7 +922,7 @@ class SingleDisposalsTriageControllerSpec
             "changed their answer from not in the uk to was in the uk" in {
             val answers = requiredPreviousAnswers.copy(
               wasAUKResident = Some(false),
-              countryOfResidence = Some(Country("AB", None)),
+              countryOfResidence = Some(Country("AB")),
               assetType = Some(AssetType.Residential),
               disposalMethod = Some(DisposalMethod.Sold)
             )
@@ -975,7 +975,7 @@ class SingleDisposalsTriageControllerSpec
             )
             testSuccessfulUpdateStartingNewDraft(
               performAction,
-              completeAnswers.copy(countryOfResidence = Country("AB", None)),
+              completeAnswers.copy(countryOfResidence = Country("AB")),
               List("wereYouAUKResident" -> "true"),
               IncompleteSingleDisposalTriageAnswers(
                 completeAnswers.individualUserType,
@@ -1043,7 +1043,7 @@ class SingleDisposalsTriageControllerSpec
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
                 completeAnswers.copy(
-                  countryOfResidence = Country("AB", None),
+                  countryOfResidence = Country("AB"),
                   disposalMethod = DisposalMethod.Sold
                 ),
                 List("wereYouAUKResident" -> "true"),
@@ -2938,8 +2938,7 @@ class SingleDisposalsTriageControllerSpec
           wasAUKResident = Some(false)
         )
 
-      val (countryCode, countryName) = "HK" -> "Hong Kong"
-      val country                    = Country(countryCode, Some(countryName))
+      val country = Country("HK")
 
       def performAction(): Future[Result] =
         controller.countryOfResidence()(FakeRequest())
@@ -3145,8 +3144,7 @@ class SingleDisposalsTriageControllerSpec
           wasAUKResident = Some(false)
         )
 
-      val (countryCode, countryName) = "HK" -> "Hong Kong"
-      val country                    = Country(countryCode, Some(countryName))
+      val country = Country("HK")
 
       behave like redirectToStartWhenInvalidJourney(
         () => performAction(),
@@ -3266,7 +3264,7 @@ class SingleDisposalsTriageControllerSpec
       behave like unsuccessfulUpdatesBehaviour(
         performAction,
         requiredPreviousAnswers,
-        List("countryCode" -> countryCode),
+        List("countryCode" -> country.code),
         requiredPreviousAnswers.copy(countryOfResidence = Some(country)),
         updateDraftReturn
       )
@@ -3279,7 +3277,7 @@ class SingleDisposalsTriageControllerSpec
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               requiredPreviousAnswers,
-              List("countryCode" -> countryCode),
+              List("countryCode" -> country.code),
               requiredPreviousAnswers.copy(countryOfResidence = Some(country)),
               checkIsRedirect(
                 _,
@@ -3290,13 +3288,13 @@ class SingleDisposalsTriageControllerSpec
 
           "the user has complete the section and has changed their answer and they choose asset type residential" in {
             val completeAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-              countryOfResidence = Country("CC", None),
+              countryOfResidence = Country("CC"),
               disposalMethod = DisposalMethod.Sold
             )
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               completeAnswers,
-              List("countryCode" -> countryCode),
+              List("countryCode" -> country.code),
               completeAnswers.copy(countryOfResidence = country),
               checkIsRedirect(
                 _,
@@ -3313,7 +3311,7 @@ class SingleDisposalsTriageControllerSpec
             testSuccessfulUpdateFillingOutReturn(
               performAction,
               requiredPreviousAnswers,
-              List("countryCode" -> countryCode),
+              List("countryCode" -> country.code),
               updateDraftReturn(
                 _,
                 requiredPreviousAnswers.copy(countryOfResidence = Some(country))
@@ -3328,13 +3326,13 @@ class SingleDisposalsTriageControllerSpec
           "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
             forAll { c: CompleteSingleDisposalTriageAnswers =>
               val completeAnswers = c.copy(
-                countryOfResidence = Country("CC", None),
+                countryOfResidence = Country("CC"),
                 disposalMethod = DisposalMethod.Sold
               )
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
                 completeAnswers,
-                List("countryCode" -> countryCode),
+                List("countryCode" -> country.code),
                 updateDraftReturn(
                   _,
                   completeAnswers.copy(countryOfResidence = country)
@@ -3365,7 +3363,7 @@ class SingleDisposalsTriageControllerSpec
             )
           }
 
-          val result = performAction("countryCode" -> countryCode)
+          val result = performAction("countryCode" -> country.code)
           checkIsRedirect(
             result,
             routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -4944,7 +4942,7 @@ class SingleDisposalsTriageControllerSpec
             completeTriageQuestions
               .copy(
                 assetType = AssetType.IndirectDisposal,
-                countryOfResidence = Country("TR", Some("Turkey"))
+                countryOfResidence = Country("TR")
               )
           inSequence {
             mockAuthWithNoRetrievals()
