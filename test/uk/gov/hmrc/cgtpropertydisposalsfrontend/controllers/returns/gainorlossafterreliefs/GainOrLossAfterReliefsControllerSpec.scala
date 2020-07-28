@@ -36,9 +36,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftSingleDisposalReturn, IndividualUserType, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, IndividualUserType, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -72,7 +73,7 @@ class GainOrLossAfterReliefsControllerSpec
   )
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
-  def sessionWithState(
+  def sessionWithSingleDisposalState(
     gainOrLossAfterReliefs: Option[AmountInPence],
     individualUserType: Option[IndividualUserType] = Some(Self),
     userType: UserType = Individual,
@@ -102,34 +103,88 @@ class GainOrLossAfterReliefsControllerSpec
     )
   }
 
-  def individualSesssion(gainOrLossAfterReliefs: Option[AmountInPence] = None) =
-    sessionWithState(gainOrLossAfterReliefs)._1
+  def sessionWithMultipleDisposalsState(
+    gainOrLossAfterReliefs: Option[AmountInPence],
+    individualUserType: Option[IndividualUserType] = Some(Self),
+    userType: UserType = Individual,
+    subscribedDetails: SubscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
+    val draftReturn = sample[DraftMultipleDisposalsReturn]
+      .copy(
+        gainOrLossAfterReliefs = gainOrLossAfterReliefs,
+        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          individualUserType = individualUserType
+        ),
+        representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
+      )
+    val journey     = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      subscribedDetails = subscribedDetails,
+      previousSentReturns = Some(List(sample[ReturnSummary]))
+    )
 
-  def agentSession(gainOrLossAfterReliefs: Option[AmountInPence] = None) =
-    sessionWithState(gainOrLossAfterReliefs, userType = Agent)._1
+    (
+      SessionData.empty.copy(
+        journeyStatus = Some(journey),
+        userType = Some(userType)
+      ),
+      journey,
+      draftReturn
+    )
+  }
 
-  def trustSession(gainOrLossAfterReliefs: Option[AmountInPence] = None) =
-    sessionWithState(
+  def session(
+    gainOrLossAfterReliefs: Option[AmountInPence],
+    individualUserType: Option[IndividualUserType] = Some(Self),
+    userType: UserType = Individual,
+    subscribedDetails: SubscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+    isMultipleDisposal: Boolean = false
+  ): SessionData =
+    if (isMultipleDisposal)
+      sessionWithMultipleDisposalsState(gainOrLossAfterReliefs, individualUserType, userType, subscribedDetails)._1
+    else sessionWithSingleDisposalState(gainOrLossAfterReliefs, individualUserType, userType, subscribedDetails)._1
+
+  def individualSesssion(gainOrLossAfterReliefs: Option[AmountInPence] = None, isMultipleDisposal: Boolean = false) =
+    session(gainOrLossAfterReliefs, isMultipleDisposal = isMultipleDisposal)
+
+  def agentSession(gainOrLossAfterReliefs: Option[AmountInPence] = None, isMultipleDisposal: Boolean = false) =
+    session(gainOrLossAfterReliefs, userType = Agent, isMultipleDisposal = isMultipleDisposal)
+
+  def trustSession(gainOrLossAfterReliefs: Option[AmountInPence] = None, isMultipleDisposal: Boolean = false) =
+    session(
       gainOrLossAfterReliefs,
       userType = Organisation,
-      subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
-    )._1
+      subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
+      isMultipleDisposal = isMultipleDisposal
+    )
 
-  def capacitorSession(gainOrLossAfterReliefs: Option[AmountInPence] = None) =
-    sessionWithState(gainOrLossAfterReliefs, individualUserType = Some(Capacitor))._1
+  def capacitorSession(gainOrLossAfterReliefs: Option[AmountInPence] = None, isMultipleDisposal: Boolean = false) =
+    session(gainOrLossAfterReliefs, individualUserType = Some(Capacitor), isMultipleDisposal = isMultipleDisposal)
 
-  def personalRepSession(gainOrLossAfterReliefs: Option[AmountInPence] = None) =
-    sessionWithState(gainOrLossAfterReliefs, individualUserType = Some(PersonalRepresentative))._1
+  def personalRepSession(gainOrLossAfterReliefs: Option[AmountInPence] = None, isMultipleDisposal: Boolean = false) =
+    session(
+      gainOrLossAfterReliefs,
+      individualUserType = Some(PersonalRepresentative),
+      isMultipleDisposal = isMultipleDisposal
+    )
 
-  def periodOfAdminSession(gainOrLossAfterReliefs: Option[AmountInPence] = None) =
-    sessionWithState(gainOrLossAfterReliefs, individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin))._1
+  def periodOfAdminSession(gainOrLossAfterReliefs: Option[AmountInPence] = None, isMultipleDisposal: Boolean = false) =
+    session(
+      gainOrLossAfterReliefs,
+      individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+      isMultipleDisposal = isMultipleDisposal
+    )
 
-  def agentOfPeriodOfAdminSession(gainOrLossAfterReliefs: Option[AmountInPence] = None) =
-    sessionWithState(
+  def agentOfPeriodOfAdminSession(
+    gainOrLossAfterReliefs: Option[AmountInPence] = None,
+    isMultipleDisposal: Boolean = false
+  ) =
+    session(
       gainOrLossAfterReliefs,
       userType = Agent,
-      individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
-    )._1
+      individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
+      isMultipleDisposal = isMultipleDisposal
+    )
 
   val testCasesWithUserKeys = List(
     individualSesssion()          -> "",
@@ -196,74 +251,150 @@ class GainOrLossAfterReliefsControllerSpec
           )
         }
 
-        "the user is an individual doing the return for themselves" in {
-          test(
-            individualSesssion(),
-            "gainOrLossAfterReliefs.title",
-            returns.routes.TaskListController.taskList(),
-            "",
-            "gainOrLossAfterReliefs.link"
-          )
+        "the user is on a single disposal journey and" when {
+
+          "the user is an individual doing the return for themselves" in {
+            test(
+              individualSesssion(),
+              "gainOrLossAfterReliefs.title",
+              returns.routes.TaskListController.taskList(),
+              "",
+              "gainOrLossAfterReliefs.link"
+            )
+          }
+
+          "the user is an agent for an individual" in {
+            test(
+              agentSession(),
+              "gainOrLossAfterReliefs.agent.title",
+              returns.routes.TaskListController.taskList(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.agent.link"
+            )
+          }
+
+          "the user is a trust" in {
+            test(
+              trustSession(Some(AmountInPence(1L))),
+              "gainOrLossAfterReliefs.trust.title",
+              routes.GainOrLossAfterReliefsController.checkYourAnswers(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.trust.link"
+            )
+          }
+
+          "the user is a capacitor" in {
+            test(
+              capacitorSession(),
+              "gainOrLossAfterReliefs.capacitor.title",
+              returns.routes.TaskListController.taskList(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.capacitor.link"
+            )
+          }
+
+          "the user is a personal rep" in {
+            test(
+              personalRepSession(),
+              "gainOrLossAfterReliefs.personalRep.title",
+              returns.routes.TaskListController.taskList(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.personalRep.link"
+            )
+          }
+
+          "the user is an estate in a period of admin" in {
+            test(
+              periodOfAdminSession(Some(AmountInPence(0L))),
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title",
+              routes.GainOrLossAfterReliefsController.checkYourAnswers(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link"
+            )
+          }
+
+          "the user is an agent of an estate in a period of admin" in {
+            test(
+              agentOfPeriodOfAdminSession(),
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title",
+              returns.routes.TaskListController.taskList(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link"
+            )
+          }
         }
 
-        "the user is an agent for an individual" in {
-          test(
-            agentSession(),
-            "gainOrLossAfterReliefs.agent.title",
-            returns.routes.TaskListController.taskList(),
-            ".notSelf",
-            "gainOrLossAfterReliefs.agent.link"
-          )
-        }
+        "the user is on a multiple disposals journey and" when {
 
-        "the user is a trust" in {
-          test(
-            trustSession(Some(AmountInPence(1L))),
-            "gainOrLossAfterReliefs.trust.title",
-            routes.GainOrLossAfterReliefsController.checkYourAnswers(),
-            ".notSelf",
-            "gainOrLossAfterReliefs.trust.link"
-          )
-        }
+          "the user is an individual doing the return for themselves" in {
+            test(
+              individualSesssion(isMultipleDisposal = true),
+              "gainOrLossAfterReliefs.multipleDisposals.title",
+              returns.routes.TaskListController.taskList(),
+              "",
+              "gainOrLossAfterReliefs.link"
+            )
+          }
 
-        "the user is a capacitor" in {
-          test(
-            capacitorSession(),
-            "gainOrLossAfterReliefs.capacitor.title",
-            returns.routes.TaskListController.taskList(),
-            ".notSelf",
-            "gainOrLossAfterReliefs.capacitor.link"
-          )
-        }
+          "the user is an agent for an individual" in {
+            test(
+              agentSession(isMultipleDisposal = true),
+              "gainOrLossAfterReliefs.agent.multipleDisposals.title",
+              returns.routes.TaskListController.taskList(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.agent.link"
+            )
+          }
 
-        "the user is a personal rep" in {
-          test(
-            personalRepSession(),
-            "gainOrLossAfterReliefs.personalRep.title",
-            returns.routes.TaskListController.taskList(),
-            ".notSelf",
-            "gainOrLossAfterReliefs.personalRep.link"
-          )
-        }
+          "the user is a trust" in {
+            test(
+              trustSession(Some(AmountInPence(1L)), isMultipleDisposal = true),
+              "gainOrLossAfterReliefs.trust.multipleDisposals.title",
+              routes.GainOrLossAfterReliefsController.checkYourAnswers(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.trust.link"
+            )
+          }
 
-        "the user is an estate in a period of admin" in {
-          test(
-            periodOfAdminSession(Some(AmountInPence(0L))),
-            "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title",
-            routes.GainOrLossAfterReliefsController.checkYourAnswers(),
-            ".notSelf",
-            "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link"
-          )
-        }
+          "the user is a capacitor" in {
+            test(
+              capacitorSession(isMultipleDisposal = true),
+              "gainOrLossAfterReliefs.capacitor.multipleDisposals.title",
+              returns.routes.TaskListController.taskList(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.capacitor.link"
+            )
+          }
 
-        "the user is an agent of an estate in a period of admin" in {
-          test(
-            agentOfPeriodOfAdminSession(),
-            "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title",
-            returns.routes.TaskListController.taskList(),
-            ".notSelf",
-            "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link"
-          )
+          "the user is a personal rep" in {
+            test(
+              personalRepSession(isMultipleDisposal = true),
+              "gainOrLossAfterReliefs.personalRep.multipleDisposals.title",
+              returns.routes.TaskListController.taskList(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.personalRep.link"
+            )
+          }
+
+          "the user is an estate in a period of admin" in {
+            test(
+              periodOfAdminSession(Some(AmountInPence(0L)), isMultipleDisposal = true),
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title",
+              routes.GainOrLossAfterReliefsController.checkYourAnswers(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link"
+            )
+          }
+
+          "the user is an agent of an estate in a period of admin" in {
+            test(
+              agentOfPeriodOfAdminSession(isMultipleDisposal = true),
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title",
+              returns.routes.TaskListController.taskList(),
+              ".notSelf",
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link"
+            )
+          }
         }
 
       }
@@ -396,7 +527,7 @@ class GainOrLossAfterReliefsControllerSpec
       "show a technical error page" when {
 
         "there is an error updating the draft return in return service " in {
-          val (session, journey, draftReturn) = sessionWithState(Some(AmountInPence(1L)))
+          val (session, journey, draftReturn) = sessionWithSingleDisposalState(Some(AmountInPence(1L)))
           val updatedDraftReturn              = updateDraftReturn(draftReturn, AmountInPence(0L))
 
           inSequence {
@@ -413,7 +544,7 @@ class GainOrLossAfterReliefsControllerSpec
         }
 
         "there is an error updating the session" in {
-          val (session, journey, draftReturn) = sessionWithState(None)
+          val (session, journey, draftReturn) = sessionWithSingleDisposalState(None)
           val updatedDraftReturn              =
             updateDraftReturn(draftReturn, AmountInPence(0L))
           val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
@@ -441,7 +572,7 @@ class GainOrLossAfterReliefsControllerSpec
           newGainOrLossAfterReliefs: AmountInPence,
           formData: (String, String)*
         ) = {
-          val (session, journey, draftReturn) = sessionWithState(None)
+          val (session, journey, draftReturn) = sessionWithSingleDisposalState(None)
           val newDraftReturn                  = updateDraftReturn(draftReturn, newGainOrLossAfterReliefs)
           val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
 
@@ -491,7 +622,7 @@ class GainOrLossAfterReliefsControllerSpec
       "not perform any updates" when {
 
         "the same amount of gainOrLossAfterReliefs as in the session draftReturn is entered" in {
-          val session = sessionWithState(Some(AmountInPence(600L)))._1
+          val session = sessionWithSingleDisposalState(Some(AmountInPence(600L)))._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -521,7 +652,7 @@ class GainOrLossAfterReliefsControllerSpec
         "the question has not been answered yet" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithState(None)._1)
+            mockGetSession(sessionWithSingleDisposalState(None)._1)
           }
 
           checkIsRedirect(
@@ -577,8 +708,8 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is an individual doing the return for themselves" in {
           test(
-            individualSesssion(Some(AmountInPence(600L))),
-            "gainOrLossAfterReliefs.title",
+            individualSesssion(Some(AmountInPence(600L)), isMultipleDisposal = true),
+            "gainOrLossAfterReliefs.multipleDisposals.title",
             "gainOrLossAfterReliefs.gain.outerLabel",
             Some("gainOrLossAfterReliefs.gain.innerLabel"),
             Some("£6")
@@ -617,8 +748,8 @@ class GainOrLossAfterReliefsControllerSpec
 
         "the user is a personal rep" in {
           test(
-            personalRepSession(Some(AmountInPence(0L))),
-            "gainOrLossAfterReliefs.personalRep.title",
+            personalRepSession(Some(AmountInPence(0L)), isMultipleDisposal = true),
+            "gainOrLossAfterReliefs.personalRep.multipleDisposals.title",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
             None
@@ -657,7 +788,7 @@ class GainOrLossAfterReliefsControllerSpec
       "redirect to taskList" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
+          mockGetSession(sessionWithSingleDisposalState(Some(AmountInPence(1L)))._1)
         }
         checkIsRedirect(
           performAction(),
