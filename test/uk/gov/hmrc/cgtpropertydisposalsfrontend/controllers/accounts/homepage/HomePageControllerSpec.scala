@@ -215,6 +215,352 @@ class HomePageControllerSpec
 
       def extractAmount(s: String): String = s.substring(s.indexOf('£'))
 
+      // the callToActionButton selector is designed to select the only
+      // button on the page for us to check which message it has
+      val callToActionButton    = "#content a.button"
+      val resumeDraftMessage    = "drafts.list.resume"
+      val viewAndPayMessage     = "returns.list.viewAndPay"
+      val startNewReturnMessage = "account.home.button.start-a-new-return"
+
+      "display the resume draft link as a button when there is a draft and no sent returns" in {
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn]
+        val subscribed        =
+          sample[Subscribed].copy(
+            draftReturns = List(sampleDraftReturn),
+            sentReturns = List.empty[ReturnSummary]
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(callToActionButton)
+              .text shouldBe
+              messageFromMessageKey(
+                resumeDraftMessage
+              )
+        )
+      }
+
+      "display the resume draft link as a button when there is a draft and no outstanding amounts to pay in sent returns" in {
+        val triageAnswers                       = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(ukResidentMainReturnChargeDueDate))
+        val sampleDraftReturn                   = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers
+        )
+        val fullPaymentForPenaltyInterestCharge = sample[Payment].copy(
+          amount = penaltyInterestChargeAmount,
+          clearingDate = penaltyInterestChargeAmountDueDate
+        )
+
+        val penaltyInterestCharge = sample[Charge].copy(
+          chargeType = PenaltyInterest,
+          amount = penaltyInterestChargeAmount,
+          dueDate = penaltyInterestChargeAmountDueDate,
+          payments = List(fullPaymentForPenaltyInterestCharge)
+        )
+
+        val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
+          amount = ukResidentMainReturnChargeAmount,
+          clearingDate = ukResidentMainReturnChargeDueDate
+        )
+
+        val ukResidentReturnCharge = sample[Charge].copy(
+          chargeType = UkResidentReturn,
+          amount = ukResidentMainReturnChargeAmount,
+          dueDate = ukResidentMainReturnChargeDueDate,
+          payments = List(fullPaymentForUkResidentReturnCharge)
+        )
+        val charges                = List(ukResidentReturnCharge, penaltyInterestCharge)
+        val sampleSentReturn       = sample[ReturnSummary].copy(
+          charges = charges,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate
+        )
+        val subscribed             =
+          sample[Subscribed].copy(
+            draftReturns = List(sampleDraftReturn),
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(callToActionButton)
+              .text shouldBe
+              messageFromMessageKey(
+                resumeDraftMessage
+              )
+        )
+      }
+
+      "display the resume draft link as a button when there is a draft with no completion date and no outstanding amounts to pay in sent returns" in {
+        val triageAnswers                       = sample[IncompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = None)
+        val sampleDraftReturn                   = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers
+        )
+        val fullPaymentForPenaltyInterestCharge = sample[Payment].copy(
+          amount = penaltyInterestChargeAmount,
+          clearingDate = penaltyInterestChargeAmountDueDate
+        )
+
+        val penaltyInterestCharge = sample[Charge].copy(
+          chargeType = PenaltyInterest,
+          amount = penaltyInterestChargeAmount,
+          dueDate = penaltyInterestChargeAmountDueDate,
+          payments = List(fullPaymentForPenaltyInterestCharge)
+        )
+
+        val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
+          amount = ukResidentMainReturnChargeAmount,
+          clearingDate = ukResidentMainReturnChargeDueDate
+        )
+
+        val ukResidentReturnCharge = sample[Charge].copy(
+          chargeType = UkResidentReturn,
+          amount = ukResidentMainReturnChargeAmount,
+          dueDate = ukResidentMainReturnChargeDueDate,
+          payments = List(fullPaymentForUkResidentReturnCharge)
+        )
+        val charges                = List(ukResidentReturnCharge, penaltyInterestCharge)
+        val sampleSentReturn       = sample[ReturnSummary].copy(
+          charges = charges,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate
+        )
+        val subscribed             =
+          sample[Subscribed].copy(
+            draftReturns = List(sampleDraftReturn),
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(callToActionButton)
+              .text shouldBe
+              messageFromMessageKey(
+                resumeDraftMessage
+              )
+        )
+      }
+
+      "display the resume draft link as a button when there is a draft with an expected due date before any sent return due dates" in {
+        val propertyAddress   = sample[UkAddress]
+        val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(ukResidentMainReturnChargeDueDate.minusDays(31)))
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val sampleSentReturn  = sample[ReturnSummary].copy(
+          charges = chargesWithChargeRaiseAndNoPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate
+        )
+        val subscribed        =
+          sample[Subscribed].copy(
+            draftReturns = List(sampleDraftReturn),
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(callToActionButton)
+              .text shouldBe
+              messageFromMessageKey(
+                resumeDraftMessage
+              )
+        )
+      }
+
+      "display the view and pay link as a button when there is a sent return due date before an expected draft return due date" in {
+        val propertyAddress   = sample[UkAddress]
+        val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(ukResidentMainReturnChargeDueDate.minusDays(10)))
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
+          triageAnswers = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val sampleSentReturn  = sample[ReturnSummary].copy(
+          charges = chargesWithChargeRaiseAndNoPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate
+        )
+        val subscribed        =
+          sample[Subscribed].copy(
+            draftReturns = List(sampleDraftReturn),
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(callToActionButton)
+              .text shouldBe
+              messageFromMessageKey(
+                viewAndPayMessage
+              )
+        )
+      }
+
+      "display the view and pay link as a button when there is a sent return due date and no draft return" in {
+        val sampleSentReturn = sample[ReturnSummary].copy(
+          charges = chargesWithChargeRaiseAndNoPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate
+        )
+        val subscribed       =
+          sample[Subscribed].copy(
+            draftReturns = List.empty[DraftReturn],
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(callToActionButton)
+              .text shouldBe
+              messageFromMessageKey(
+                viewAndPayMessage
+              )
+        )
+      }
+
+      "display the start new return link as a button when there is a sent return with no payment due and no draft return" in {
+        val fullPaymentForPenaltyInterestCharge = sample[Payment].copy(
+          amount = penaltyInterestChargeAmount,
+          clearingDate = penaltyInterestChargeAmountDueDate
+        )
+
+        val penaltyInterestCharge = sample[Charge].copy(
+          chargeType = PenaltyInterest,
+          amount = penaltyInterestChargeAmount,
+          dueDate = penaltyInterestChargeAmountDueDate,
+          payments = List(fullPaymentForPenaltyInterestCharge)
+        )
+
+        val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
+          amount = ukResidentMainReturnChargeAmount,
+          clearingDate = ukResidentMainReturnChargeDueDate
+        )
+
+        val ukResidentReturnCharge = sample[Charge].copy(
+          chargeType = UkResidentReturn,
+          amount = ukResidentMainReturnChargeAmount,
+          dueDate = ukResidentMainReturnChargeDueDate,
+          payments = List(fullPaymentForUkResidentReturnCharge)
+        )
+        val charges                = List(ukResidentReturnCharge, penaltyInterestCharge)
+        val sampleSentReturn       = sample[ReturnSummary].copy(
+          charges = charges,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate = ukResidentReturnSentDate
+        )
+        val subscribed             =
+          sample[Subscribed].copy(
+            draftReturns = List.empty[DraftReturn],
+            sentReturns = List(sampleSentReturn)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"),
+          doc =>
+            doc
+              .select(callToActionButton)
+              .text shouldBe
+              messageFromMessageKey(
+                startNewReturnMessage
+              )
+        )
+      }
+
       "display draft returns on the home page when there is no property address" in {
         val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
           .copy(completionDate = CompletionDate(LocalDate.now().minusMonths(1)))
@@ -681,7 +1027,15 @@ class HomePageControllerSpec
               { doc =>
                 if (subscribed.sentReturns.isEmpty && subscribed.draftReturns.isEmpty)
                   doc
-                    .select("#content > article > div > div > div > a")
+                    .select("#content > article > div > div > div > a.button")
+                    .text should include(
+                    messageFromMessageKey(
+                      "account.home.button.start-a-new-return"
+                    )
+                  )
+                else if (subscribed.totalLeftToPay().isZero && subscribed.draftReturns.isEmpty)
+                  doc
+                    .select("#content a.button")
                     .text should include(
                     messageFromMessageKey(
                       "account.home.button.start-a-new-return"

@@ -19,7 +19,6 @@
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -57,7 +56,7 @@
    autoComplete = AutoCompleteType.On
   )
 
-   <p><a href="@controllers.routes.LandingPageController.agentsLandingPage().url">@messages("agent.enter-client-cgt-ref.link")</a></p>
+   <p><a href="@appConfig.agentGetAuthorisationUrl">@messages("agent.enter-client-cgt-ref.link")</a></p>
 
   @submitButton(messages("button.continue"))
  }

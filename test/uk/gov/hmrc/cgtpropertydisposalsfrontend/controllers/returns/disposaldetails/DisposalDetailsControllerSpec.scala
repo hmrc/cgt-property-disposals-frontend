@@ -172,7 +172,7 @@ class DisposalDetailsControllerSpec
     individualUserType: Option[IndividualUserType]
   ): (FillingOutReturn, DraftSingleIndirectDisposalReturn) = {
 
-    val country = Country("NZ", Some("New Zealand"))
+    val country = Country("NZ")
 
     val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
       disposalMethod = disposalMethod,

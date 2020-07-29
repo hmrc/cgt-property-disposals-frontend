@@ -1040,7 +1040,7 @@ class MultipleDisposalsTriageController @Inject() (
               ) if representeeAnswersIncomplete =>
             Redirect(
               representee.routes.RepresenteeController
-                .enterName()
+                .checkYourAnswers()
             )
 
           case IncompleteMultipleDisposalsTriageAnswers(

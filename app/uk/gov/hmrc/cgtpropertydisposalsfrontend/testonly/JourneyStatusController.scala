@@ -130,7 +130,7 @@ class JourneyStatusController @Inject() (
       answers.disposalMethod,
       answers.wasAUkResident,
       answers.wasAUkResident
-        .map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
+        .map(if (_) Country.uk else Country("HK")),
       answers.disposedOfResidentialProperty
         .map(if (_) AssetType.Residential else AssetType.NonResidential),
       disposalDate,

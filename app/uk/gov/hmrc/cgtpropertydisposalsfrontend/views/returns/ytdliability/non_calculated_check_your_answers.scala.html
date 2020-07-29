@@ -45,7 +45,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliabilit
 
 @mainTemplate(title = title, userType = request.userType) {
 
- @pageHeading(title, Some(messages("ytdLiability.caption")))
+ @pageHeading(title, Some(messages(s"ytdLiability${if(isFurtherReturn.contains(true)) ".furtherReturn" else ""}.caption")))
 
  @summary(answers, showFiles = true, isMultiple, isATrust, representativeType, isFurtherReturn, taxYear)
 

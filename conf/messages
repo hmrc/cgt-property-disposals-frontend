@@ -89,6 +89,13 @@ subsequentReturnExit.title=You’ll need to contact HMRC
 subsequentReturnExit.p1=Only first returns for UK property sales or disposals in the tax year can be completed online.
 subsequentReturnExit.p2=You’ll need to <a href="{0}">contact HMRC</a> and ask for a paper return to be posted to you.
 
+checkAllAnswers.submissionDetails.title=Submission Details
+checkAllAnswers.submissionDetails.cgtReferencenumber=CGT reference number
+checkAllAnswers.submissionDetails.agentReferencenumber=Agent reference number
+checkAllAnswers.submissionDetails.nino=NINO of person being represented
+checkAllAnswers.submissionDetails.sautr=SA UTR of person being represented
+checkAllAnswers.submissionDetails.cgt=CGT reference number of the person being represented
+
 #===================================================
 # TRANSLATION NOT REQUIRED = END
 #===================================================
@@ -545,8 +552,8 @@ weOnlySupportGG.signIn.p1=<a href="{0}">Sign in</a> with the same Government Gat
 #===================================================
 
 agent.enter-client-cgt-ref.title=What is your client’s Capital Gains Tax on UK property account number?
-agent.enter-client-cgt-ref.helpText=When your client created their account they got an email with this number. It is 15 characters. For example, XYCGTP123456789.
-agent.enter-client-cgt-ref.link=Find out how to manage your client’s account
+agent.enter-client-cgt-ref.helpText=Your client was emailed this number when they created their account. Before you can manage your client’s account they will need to authorise you to act on their behalf.<br/><br/>This number is 15 characters. For example, XY CGTP 123 456 789.
+agent.enter-client-cgt-ref.link=Find out how to get authorisation from your client
 
 cgtReference.error.required=Enter a Capital Gains Tax on UK property account number
 cgtReference.error.tooShort=Enter a Capital Gains Tax on UK property account number that is 15 characters
@@ -3229,6 +3236,7 @@ exemptionsAndLosses.cya.title=Check your answers
 #===================================================
 
 ytdLiability.caption=Tax owed
+ytdLiability.furtherReturn.caption=Year to date position
 
 taxableGainOrLoss.title=Did you make an overall gain or loss on the property sale or disposal?
 taxableGainOrLoss.multiple.title=Did you make an overall gain or loss on the property sales or disposals in this return?
@@ -3242,6 +3250,8 @@ taxableGainOrLoss.personalRep.title=Was an overall gain or loss made on the prop
 taxableGainOrLoss.personalRep.multiple.title=Was an overall gain or loss made on the property sales or disposals in this return?
 taxableGainOrLoss.personalRepInPeriodOfAdmin.title=Did the estate make an overall gain or loss on the property sale or disposal?
 taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.title=Did the estate make an overall gain or loss on the property sales or disposals in this return?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.title=Did the estate make an overall gain or loss on the property sale or disposal?
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.title=Did the estate make an overall gain or loss on the property sales or disposals in this return?
 
 taxableGainOrLoss.helpText=To work out if you made an overall gain or loss, you’ll need to take your initial gain or loss and subtract any reliefs, losses, or other allowances you are entitled to.
 taxableGainOrLoss.agent.helpText=To work out if your client made an overall gain or loss, you’ll need to take your client’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
@@ -3249,6 +3259,7 @@ taxableGainOrLoss.trust.helpText=To work out if the trust made an overall gain o
 taxableGainOrLoss.capacitor.helpText=To work out if the person made an overall gain or loss, you’ll need to take the person’s initial gain or loss and subtract any reliefs, losses, or other allowances they are entitled to.
 taxableGainOrLoss.personalRep.helpText=To work out if there was an overall gain or loss, you’ll need to take the initial gain or loss and subtract any reliefs, losses, or other allowances the person was entitled to.
 taxableGainOrLoss.personalRepInPeriodOfAdmin.helpText=Take the gain or loss and subtract any reliefs, losses, or other allowances the estate is entitled to.
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.helpText=Take the gain or loss and subtract any reliefs, losses, or other allowances the estate is entitled to.
 
 taxableGainOrLoss.error.required=Select yes if you made an overall gain on the property sale or disposal
 taxableGainOrLoss.multiple.error.required=Select yes if you made an overall gain on the property sale or disposal
@@ -3262,6 +3273,8 @@ taxableGainOrLoss.personalRep.error.required=Select yes if the person made an ov
 taxableGainOrLoss.personalRep.multiple.error.required=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRepInPeriodOfAdmin.error.required=Select yes if the estate made an overall gain
 taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.error.required=Select yes if the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.error.required=Select yes if the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.error.required=Select yes if the estate made an overall gain
 
 
 taxableGainOrLoss.error.invalid=Select yes if you made an overall gain on the property sale or disposal
@@ -3276,6 +3289,8 @@ taxableGainOrLoss.personalRep.error.invalid=Select yes if the person made an ove
 taxableGainOrLoss.personalRep.multiple.error.invalid=Select yes if the person made an overall gain
 taxableGainOrLoss.personalRepInPeriodOfAdmin.error.invalid=Select yes if the estate made an overall gain
 taxableGainOrLoss.personalRepInPeriodOfAdmin.multiple.error.invalid=Select yes if the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.error.invalid=Select yes if the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.error.invalid=Select yes if the estate made an overall gain
 
 taxableGainOrLoss.cyaChange=if an overall gain or loss was made on the property sale or disposal
 
@@ -3285,6 +3300,7 @@ taxableGainOrLoss.trust.gain.label=Yes, the trust made an overall gain
 taxableGainOrLoss.capacitor.gain.label=Yes, the person made an overall gain
 taxableGainOrLoss.personalRep.gain.label=Yes, the person made an overall gain
 taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=Yes, the estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.gain.label=Yes, the estate made an overall gain
 
 taxableGain.label=Amount of overall gain
 taxableGain.error.required=Enter the amount of overall gain
@@ -3299,6 +3315,8 @@ taxableGain.personalRep.error.required=Enter the amount of overall gain
 taxableGain.personalRep.multiple.error.required=Enter the amount of overall gain
 taxableGain.personalRepInPeriodOfAdmin.error.required=Enter the amount of overall gain
 taxableGain.personalRepInPeriodOfAdmin.multiple.error.required=Enter the amount of overall gain
+taxableGain.personalRepInPeriodOfAdmin.agent.error.required=Enter the amount of overall gain
+taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.required=Enter the amount of overall gain
 
 taxableGain.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
@@ -3312,6 +3330,8 @@ taxableGain.personalRep.error.invalid=Overall gain must be an amount of money, l
 taxableGain.personalRep.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.personalRepInPeriodOfAdmin.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 taxableGain.personalRepInPeriodOfAdmin.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.agent.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.invalid=Overall gain must be an amount of money, like 4,820.54 or 539
 
 taxableGain.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
@@ -3325,6 +3345,8 @@ taxableGain.personalRep.error.tooSmall=Overall gain must be an amount of money b
 taxableGain.personalRep.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRepInPeriodOfAdmin.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.agent.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.tooSmall=Overall gain must be an amount of money between 0 and 50,000,000,000
 
 taxableGain.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
@@ -3338,6 +3360,8 @@ taxableGain.personalRep.error.tooLarge=Overall gain must be an amount of money b
 taxableGain.personalRep.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRepInPeriodOfAdmin.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.agent.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.tooLarge=Overall gain must be an amount of money between 0 and 50,000,000,000
 
 taxableGain.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
@@ -3351,6 +3375,8 @@ taxableGain.personalRep.error.tooManyDecimals=Overall gain must be an amount of 
 taxableGain.personalRep.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.personalRepInPeriodOfAdmin.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 taxableGain.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+taxableGain.personalRepInPeriodOfAdmin.agent.multiple.error.tooManyDecimals=Overall gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.loss.label=No, I made an overall loss
 taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
@@ -3358,6 +3384,7 @@ taxableGainOrLoss.trust.loss.label=No, the trust made an overall loss
 taxableGainOrLoss.capacitor.loss.label=No, the person made an overall loss
 taxableGainOrLoss.personalRep.loss.label=No, the person made an overall loss
 taxableGainOrLoss.personalRepInPeriodOfAdmin.loss.label=No, the estate made an overall loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.loss.label=No, the estate made an overall loss
 
 netLoss.label=Amount of overall loss
 
@@ -3373,6 +3400,8 @@ netLoss.personalRep.error.required=Enter the amount of overall loss
 netLoss.personalRep.multiple.error.required=Enter the amount of overall loss
 netLoss.personalRepInPeriodOfAdmin.error.required=Enter the amount of overall loss
 netLoss.personalRepInPeriodOfAdmin.multiple.error.required=Enter the amount of overall loss
+netLoss.personalRepInPeriodOfAdmin.agent.error.required=Enter the amount of overall loss
+netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.required=Enter the amount of overall loss
 
 netLoss.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
@@ -3386,6 +3415,8 @@ netLoss.personalRep.error.invalid=Overall loss must be must be an amount of mone
 netLoss.personalRep.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.personalRepInPeriodOfAdmin.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 netLoss.personalRepInPeriodOfAdmin.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.agent.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.invalid=Overall loss must be must be an amount of money, like 4,820.54 or 539
 
 netLoss.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
@@ -3399,6 +3430,8 @@ netLoss.personalRep.error.tooSmall=Overall loss must be an amount of money betwe
 netLoss.personalRep.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRepInPeriodOfAdmin.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRepInPeriodOfAdmin.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.agent.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.tooSmall=Overall loss must be an amount of money between 0 and 50,000,000,000
 
 netLoss.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
@@ -3412,6 +3445,8 @@ netLoss.personalRep.error.tooLarge=Overall loss must be an amount of money betwe
 netLoss.personalRep.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRepInPeriodOfAdmin.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.personalRepInPeriodOfAdmin.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.agent.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
+netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 
 netLoss.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
@@ -3425,6 +3460,8 @@ netLoss.personalRep.error.tooManyDecimals=Overall loss must be an amount of mone
 netLoss.personalRep.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.personalRepInPeriodOfAdmin.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 netLoss.personalRepInPeriodOfAdmin.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
+netLoss.personalRepInPeriodOfAdmin.agent.multiple.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
@@ -3503,14 +3540,14 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.error.required=Select
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.error.required=Select yes if your client made a net gain
 
 taxableGain.furtherReturn.error.required=Enter the amount of net gain
-taxableGain.furtherReturn.error.invalid=Net gain must be an amount of money, like 4,820.54 or 539
-taxableGain.furtherReturn.error.tooSmall=Net gain must be an amount of money between 0 and 50,000,000,000
+taxableGain.furtherReturn.error.invalid=Net gain must be a number and must have 2 decimal places or less, for example 4,820.54
+taxableGain.furtherReturn.error.tooSmall=Net gain amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 taxableGain.furtherReturn.error.tooLarge=Net gain must be an amount of money between 0 and 50,000,000,000
 taxableGain.furtherReturn.error.tooManyDecimals=Net gain must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
 netLoss.furtherReturn.error.required=Enter the amount of net loss
-netLoss.furtherReturn.error.invalid=Net loss must be must be an amount of money, like 4,820.54 or 539
-netLoss.furtherReturn.error.tooSmall=Net loss must be an amount of money between 0 and 50,000,000,000
+netLoss.furtherReturn.error.invalid=Net loss must be a number and must have 2 decimal places or less, for example 33.33
+netLoss.furtherReturn.error.tooSmall=Net loss amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 netLoss.furtherReturn.error.tooLarge=Net loss must be an amount of money between 0 and 50,000,000,000
 netLoss.furtherReturn.error.tooManyDecimals=Net loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
@@ -3635,13 +3672,13 @@ yearToDateLiability.personalRep.title=Tell us about the person’s overall liabi
 yearToDateLiability.personalRepInPeriodOfAdmin.title=Tell us about the estate’s overall liability in tax year 2020 to 2021
 yearToDateLiability.personalRepInPeriodOfAdmin.agent.title=Tell us about your client’s overall liability in tax year 2020 to 2021
 
-yearToDateLiability.p1=To work out this amount you’ll need to:
+yearToDateLiability.p1=To work out this amount, you’ll need to:
 yearToDateLiability.trust.p1=You’ll need to multiply the trust’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
 yearToDateLiability.personalRepInPeriodOfAdmin.p1=You’ll need to multiply the estate’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
 yearToDateLiability.personalRepInPeriodOfAdmin.agent.p1=You’ll need to multiply your client, or the estate’s net gain by the correct <a href="{0}" target="_blank">rate of tax (opens in a new window)</a> to get this amount.
 
-yearToDateLiability.li1=Multiply the amount of net gain to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new window)</a> for the UK property related disposal for that tax year.
-yearToDateLiability.li2=Multiply the amount to be taxed at the <a href="{0}" target="_blank">higher rate of tax (opens in a new window)</a> for property related disposals for that tax year.
+yearToDateLiability.li1=Multiply the amount of net gain to be taxed at the <a href="{0}" target="_blank">basic rate of tax (opens in a new window)</a> for the UK property-related disposal for that tax year.
+yearToDateLiability.li2=Multiply the amount to be taxed at the <a href="{0}" target="_blank">higher rate of tax (opens in a new window)</a> for property-related disposals for that tax year.
 
 yearToDateLiability.li3=Add these amounts together to get your overall Capital Gains Tax liability on your UK property-related disposals.
 yearToDateLiability.agent.li3=Add these amounts together to get your client’s overall Capital Gains Tax liability on their UK property-related disposals.
@@ -3654,7 +3691,7 @@ yearToDateLiability.trust.h2=What is the trust’s overall liability for its gai
 yearToDateLiability.capacitor.h2=What is the person’s overall liability for their gains made so far in tax year {0} to {1}?
 yearToDateLiability.personalRep.h2=What is the person’s overall liability for their gains made so far in tax year {0} to {1}?
 yearToDateLiability.personalRepInPeriodOfAdmin.h2=What is the estate’s overall liability for its gains made so far in tax year {0} to {1}?
-yearToDateLiability.personalRepInPeriodOfAdmin.agent.h2=What is your client’s overall liability their your gains made so far in tax year {0} to {1}?
+yearToDateLiability.personalRepInPeriodOfAdmin.agent.h2=What is your client’s overall liability their gains made so far in tax year {0} to {1}?
 
 yearToDateLiability.link=How to work out your overall Capital Gains Tax liability on UK property-related disposals
 yearToDateLiability.agent.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
@@ -3793,7 +3830,6 @@ mandatoryEvidenceExpired.label=Deleted
 mandatoryEvidenceExpired.button.text=Try Again
 
 mandatoryEvidence.scan-progress.title=Scan in progress
-mandatoryEvidence.scan-progress.caption=Tax Owed
 mandatoryEvidence.scan-progress.p1=You’ll need to wait a few seconds.
 mandatoryEvidence.scan-progress.p2=When we’ve finished scanning your document you can continue.
 
@@ -4522,6 +4558,14 @@ gainOrLossAfterReliefs.personalRep.title=Did the person make a gain on the dispo
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title=Did the estate make a gain on the disposal in this return after reliefs were subtracted?
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title=Did your client make a gain on the disposal in this return after reliefs were subtracted?
 
+gainOrLossAfterReliefs.multipleDisposals.title=Did you make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.agent.multipleDisposals.title=Did your client make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.trust.multipleDisposals.title=Did the trust make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.capacitor.multipleDisposals.title=Did the person make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRep.multipleDisposals.title=Did the person make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Did the estate make an overall gain on the disposals in this return after reliefs were subtracted?
+gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Did your client or the estate make an overall gain on the disposals in this return after reliefs were subtracted?
+
 gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
 gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss
 gainOrLossAfterReliefs.noLossOrGain.outerLabel=I made no gain or loss after reliefs
@@ -4575,6 +4619,267 @@ gainOrLossAfterReliefs.cyaChange=whether a gain, a loss, or no gain or loss was 
 #===================================================
 #  GAIN OR LOSS AFTER RELIEFS PAGES - END
 #===================================================
+
+
+
+#===================================================
+#  COUNTRIES - START
+#===================================================
+
+country.AD=Andorra
+country.AE=United Arab Emirates
+country.AF=Afghanistan
+country.AG=Antigua and Barbuda
+country.AI=Anguilla
+country.AL=Albania
+country.AM=Armenia
+country.AO=Angola
+country.AQ=Antarctica
+country.AR=Argentina
+country.AS=American Samoa
+country.AT=Austria
+country.AU=Australia
+country.AW=Aruba
+country.AX=Åland Islands
+country.AZ=Azerbaijan
+country.BA=Bosnia and Herzegovina
+country.BB=Barbados
+country.BD=Bangladesh
+country.BE=Belgium
+country.BF=Burkina Faso
+country.BG=Bulgaria
+country.BH=Bahrain
+country.BI=Burundi
+country.BJ=Benin
+country.BL=Saint Barthélemy
+country.BM=Bermuda
+country.BN=Brunei
+country.BO=Bolivia
+country.BQ=Bonaire, Sint Eustatius and Saba
+country.BR=Brazil
+country.BS=The Bahamas
+country.BT=Bhutan
+country.BV=Bouvet Island
+country.BW=Botswana
+country.BY=Belarus
+country.BZ=Belize
+country.CA=Canada
+country.CC=Cocos (Keeling) Islands
+country.CD=Congo (Democratic Republic)
+country.CF=Central African Republic
+country.CG=Congo
+country.CH=Switzerland
+country.CI=Ivory Coast
+country.CK=Cook Islands
+country.CL=Chile
+country.CM=Cameroon
+country.CN=China
+country.CO=Colombia
+country.CR=Costa Rica
+country.CS=Czechoslovakia
+country.CU=Cuba
+country.CV=Cape Verde
+country.CW=Curaçao
+country.CX=Christmas Island
+country.CY=Cyprus
+country.CZ=Czechia
+country.DE=Germany
+country.DJ=Djibouti
+country.DK=Denmark
+country.DM=Dominica
+country.DO=Dominican Republic
+country.DZ=Algeria
+country.EC=Ecuador
+country.EE=Estonia
+country.EG=Egypt
+country.EH=Western Sahara
+country.ER=Eritrea
+country.ES=Spain
+country.ET=Ethiopia
+country.FI=Finland
+country.FJ=Fiji
+country.FK=Falkland Islands
+country.FM=Micronesia
+country.FO=Faroe Islands
+country.FR=France
+country.GA=Gabon
+country.GD=Grenada
+country.GE=Georgia
+country.GF=French Guiana
+country.GG=Guernsey
+country.GH=Ghana
+country.GI=Gibraltar
+country.GL=Greenland
+country.GM=The Gambia
+country.GN=Guinea
+country.GP=Guadeloupe
+country.GQ=Equatorial Guinea
+country.GR=Greece
+country.GS=South Georgia and South Sandwich Islands
+country.GT=Guatemala
+country.GU=Guam
+country.GW=Guinea-Bissau
+country.GY=Guyana
+country.HK=Hong Kong
+country.HM=Heard Island and McDonald Islands
+country.HN=Honduras
+country.HR=Croatia
+country.HT=Haiti
+country.HU=Hungary
+country.ID=Indonesia
+country.IE=Ireland
+country.IL=Israel
+country.IM=Isle of Man
+country.IN=India
+country.IO=British Indian Ocean Territory
+country.IQ=Iraq
+country.IR=Iran
+country.IS=Iceland
+country.IT=Italy
+country.JE=Jersey
+country.JM=Jamaica
+country.JO=Jordan
+country.JP=Japan
+country.KE=Kenya
+country.KG=Kyrgyzstan
+country.KH=Cambodia
+country.KI=Kiribati
+country.KM=Comoros
+country.KN=St Kitts and Nevis
+country.KP=North Korea
+country.KR=South Korea
+country.KW=Kuwait
+country.KY=Cayman Islands
+country.KZ=Kazakhstan
+country.LA=Laos
+country.LB=Lebanon
+country.LC=St Lucia
+country.LI=Liechtenstein
+country.LK=Sri Lanka
+country.LR=Liberia
+country.LS=Lesotho
+country.LT=Lithuania
+country.LU=Luxembourg
+country.LV=Latvia
+country.LY=Libya
+country.MA=Morocco
+country.MC=Monaco
+country.MD=Moldova
+country.ME=Montenegro
+country.MF=Saint-Martin (French part)
+country.MG=Madagascar
+country.MH=Marshall Islands
+country.MK=North Macedonia
+country.ML=Mali
+country.MM=Myanmar (Burma)
+country.MN=Mongolia
+country.MO=Macao
+country.MP=Northern Mariana Islands
+country.MQ=Martinique
+country.MR=Mauritania
+country.MS=Montserrat
+country.MT=Malta
+country.MU=Mauritius
+country.MV=Maldives
+country.MW=Malawi
+country.MX=Mexico
+country.MY=Malaysia
+country.MZ=Mozambique
+country.NA=Namibia
+country.NC=New Caledonia
+country.NE=Niger
+country.NF=Norfolk Island
+country.NG=Nigeria
+country.NI=Nicaragua
+country.NL=Netherlands
+country.NO=Norway
+country.NP=Nepal
+country.NR=Nauru
+country.NU=Niue
+country.NZ=New Zealand
+country.OM=Oman
+country.PA=Panama
+country.PE=Peru
+country.PF=French Polynesia
+country.PG=Papua New Guinea
+country.PH=Philippines
+country.PK=Pakistan
+country.PL=Poland
+country.PM=Saint Pierre and Miquelon
+country.PN=Pitcairn, Henderson, Ducie and Oeno Islands
+country.PR=Puerto Rico
+country.PS=Occupied Palestinian Territories
+country.PT=Portugal
+country.PW=Palau
+country.PY=Paraguay
+country.QA=Qatar
+country.RE=Réunion
+country.RO=Romania
+country.RS=Serbia
+country.RU=Russia
+country.RW=Rwanda
+country.SA=Saudi Arabia
+country.SB=Solomon Islands
+country.SC=Seychelles
+country.SD=Sudan
+country.SE=Sweden
+country.SG=Singapore
+country.SH=Saint Helena, Ascension and Tristan da Cunha
+country.SI=Slovenia
+country.SJ=Svalbard and Jan Mayen
+country.SK=Slovakia
+country.SL=Sierra Leone
+country.SM=San Marino
+country.SN=Senegal
+country.SO=Somalia
+country.SR=Suriname
+country.SS=South Sudan
+country.ST=Sao Tome and Principe
+country.SV=El Salvador
+country.SX=Sint Maarten (Dutch part)
+country.SY=Syria
+country.SZ=Eswatini
+country.TC=Turks and Caicos Islands
+country.TD=Chad
+country.TF=French Southern Territories
+country.TG=Togo
+country.TH=Thailand
+country.TJ=Tajikistan
+country.TK=Tokelau
+country.TL=East Timor
+country.TM=Turkmenistan
+country.TN=Tunisia
+country.TO=Tonga
+country.TR=Turkey
+country.TT=Trinidad and Tobago
+country.TV=Tuvalu
+country.TW=Taiwan
+country.TZ=Tanzania
+country.UA=Ukraine
+country.UG=Uganda
+country.UM=United States - Minor Outlying Islands (the)
+country.US=United States
+country.UY=Uruguay
+country.UZ=Uzbekistan
+country.VA=Vatican City
+country.VC=St Vincent
+country.VE=Venezuela
+country.VG=British Virgin Islands
+country.VI=United States Virgin Islands
+country.VN=Vietnam
+country.VU=Vanuatu
+country.WF=Wallis and Futuna
+country.WS=Samoa
+country.YE=Yemen
+country.YT=Mayotte
+country.ZA=South Africa
+country.ZM=Zambia
+country.ZW=Zimbabwe
+
+#===================================================
+#  COUNTRIES - END
+#===================================================
+
 
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English

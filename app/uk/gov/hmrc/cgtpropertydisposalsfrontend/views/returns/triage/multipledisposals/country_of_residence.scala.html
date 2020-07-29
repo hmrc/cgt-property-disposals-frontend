@@ -92,7 +92,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     @formWrapper(triage.routes.MultipleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
 
         @countryCode(
-            countryCodeToCountryName = Country.countryCodeToCountryName,
+            Country.countryCodes,
             selected = form.data.get(key),
             label = title,
             hasErrors = form.error(key).nonEmpty,

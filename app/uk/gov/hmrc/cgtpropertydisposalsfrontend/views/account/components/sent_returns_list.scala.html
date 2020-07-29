@@ -15,55 +15,20 @@
  *@
 
 @import play.api.i18n.Messages
-
 @import java.time.LocalDate
-@import cats.syntax.order._
-
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 
 @this(
 sentReturnItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.return_list_item,
 sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.returns_list_header
 )
 
-@(sentReturns: List[ReturnSummary])(implicit messages:Messages)
-
-@optionalDateOrdering = @{ (date1: Option[LocalDate], date2: Option[LocalDate]) =>
-    (date1, date2) match {
-        case (None, None) => true
-        case (Some(_), None) => true
-        case (None, Some(_)) => false
-        case (Some(d1), Some(d2)) => d1.isBefore(d2)
-    }
-
-}
-
- @sentReturnsWithPaymentDueDate = @{
-  sentReturns.map(    r =>
-      r -> r.charges
-           .filter(_.totalOutstanding() > AmountInPence.zero)
-           .map(_.dueDate)
-           .sortWith(TimeUtils.localDateOrder.compare(_, _) < 0)
-           .headOption
-  )
- }
-
- @ordered = @{
-   sentReturnsWithPaymentDueDate.sortWith{ case ((r1, d1), (r2, d2)) =>
-       if(!d1.exists(d2.contains(_))) optionalDateOrdering(d1, d2)
-       else if(!r1.lastUpdatedDate.exists(r2.lastUpdatedDate.contains(_))) optionalDateOrdering(r1.lastUpdatedDate, r2.lastUpdatedDate)
-       else r1.submissionDate.isAfter(r2.submissionDate)
-
-   }
- }
-
+@(sentReturns: List[(ReturnSummary, Option[LocalDate])], showButtonOnDraftReturn: Boolean)(implicit messages:Messages)
 
 @sentReturnsHeader()
 
 <ul class="return-list">
-  @ordered.map{ case (sentReturn, paymentDueDate) =>
-    @sentReturnItem(sentReturn, paymentDueDate)
+  @for((sentReturnWithDueDate, i) <- sentReturns.zipWithIndex) {
+    @sentReturnItem(sentReturnWithDueDate, i, showButtonOnDraftReturn)
   }
 </ul>

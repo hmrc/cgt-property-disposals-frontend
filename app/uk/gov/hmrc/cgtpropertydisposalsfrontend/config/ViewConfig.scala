@@ -143,6 +143,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val powerOfAttorney: String             = getString("external-url.power-of-attorney")
   val cgtRatesUrl: String                 = getString("external-url.cgt-rates")
   val trustsAndCgtUrl: String             = getString("external-url.trusts-and-cgt")
+  val agentGetAuthorisationUrl: String    = getString("external-url.agent-get-authorisation")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"

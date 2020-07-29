@@ -714,7 +714,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             None,
             None,
             None,
-            Country("NZ", Some("New Zealand"))
+            Country("NZ")
           )
 
           inSequence {
@@ -736,7 +736,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
           None,
           None,
           None,
-          Country("NZ", Some("New Zealand"))
+          Country("NZ")
         )
         val updatedSession = sessionWithValidJourneyStatus.copy(
           journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
@@ -767,7 +767,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             Some("The Town"),
             None,
             None,
-            Country("NZ", Some("New Zealand"))
+            Country("NZ")
           )
 
         val updatedJourney = updateAddress(validJourneyStatus, newAddress)

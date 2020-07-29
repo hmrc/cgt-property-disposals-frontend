@@ -45,7 +45,8 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
     form: Form[BigDecimal],
     backLink: Call,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType]
+    representativeType: Option[RepresentativeType],
+    isMultipleDisposal: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{ "gainOrLossAfterReliefs" }
@@ -53,6 +54,7 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
 @lossKey = @{ "lossAfterReliefs" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @isAgent = @{request.userType.contains(UserType.Agent)}
+
 
 @userKey = @{
     representativeType match {
@@ -66,6 +68,8 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
             else ""
     }
 }
+
+@multipleDisposalKey = @{ if(isMultipleDisposal) ".multipleDisposals" else "" }
 
 @outerLabelUserKey = @{
   if(representativeType.isEmpty && !isAgent && !isATrust) ""
@@ -130,7 +134,7 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
 
 
 @title = @{
-    messages(s"$key$userKey.title")
+    messages(s"$key$userKey$multipleDisposalKey.title")
 }
 
 @mainTemplate(title = title, userType = request.userType) {

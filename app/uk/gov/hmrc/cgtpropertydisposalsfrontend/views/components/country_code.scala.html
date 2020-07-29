@@ -17,7 +17,7 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.{CountryCode, CountryName}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCode
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
@@ -25,7 +25,7 @@
 )
 
 @(
-  countryCodeToCountryName: Map[CountryCode,CountryName],
+  countryCodes: List[CountryCode],
   selected: Option[String],
   label: String,
   errorKey: Option[String],
@@ -79,8 +79,8 @@
    autocomplete="@{autoComplete.value}"
    @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <option value="">@messages("countryCode.placeholder")</option>
-      @for(country <- countryCodeToCountryName) {
-        <option value="@{country._1}" @{if(selected.contains(country._1))"selected"}>@{country._2}</option>
+      @for(countryCode <- countryCodes) {
+        <option value="@{countryCode}" @{if(selected.contains(countryCode))"selected"}>@messages(s"country.$countryCode")</option>
       }
  </select>
 </div>
