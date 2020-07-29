@@ -3818,6 +3818,9 @@ nonCalculatedTaxDue.furtherReturn.personalRepInPeriodOfAdmin.title=Enter the amo
 
 nonCalculatedTaxDue.furtherReturn.sub-title=Capital Gains Tax liability on UK residential property
 
+nonCalculatedTaxDue.furtherReturn.table.label1=Overall liability so far this tax year
+nonCalculatedTaxDue.furtherReturn.table.label2=Liability for previous returns
+nonCalculatedTaxDue.furtherReturn.table.label3=Capital Gains Tax now due
 
 nonCalculatedTaxDue.furtherReturn.helpText.p1=To work out this amount, you’ll need to:
 nonCalculatedTaxDue.furtherReturn.helpText.li1=Start with the person’s previous overall Capital Gains Tax liability on their UK property-related disposals for the tax year 2020 to 2021. This is what their overall liability was before this return.

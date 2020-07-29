@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
@@ -99,7 +99,12 @@ class HomePageController @Inject() (
                   subscribed.agentReferenceNumber,
                   Right(IncompleteSingleDisposalTriageAnswers.empty),
                   None,
-                  Some(subscribed.sentReturns)
+                  Some(
+                    PreviousReturnData(
+                      subscribed.sentReturns,
+                      subscribed.sentReturns.map(_.mainReturnChargeAmount).headOption
+                    )
+                  )
                 )
               )
             )
@@ -135,7 +140,12 @@ class HomePageController @Inject() (
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     draftReturn,
-                    Some(subscribed.sentReturns)
+                    Some(
+                      PreviousReturnData(
+                        subscribed.sentReturns,
+                        subscribed.sentReturns.map(_.mainReturnChargeAmount).headOption
+                      )
+                    )
                   )
                 )
               )

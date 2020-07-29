@@ -94,7 +94,7 @@ object JourneyStatus {
       SingleDisposalTriageAnswers
     ],
     representeeAnswers: Option[RepresenteeAnswers],
-    previousSentReturns: Option[List[ReturnSummary]]
+    previousSentReturns: Option[PreviousReturnData]
   ) extends JourneyStatus
 
   final case class FillingOutReturn(
@@ -102,7 +102,7 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     draftReturn: DraftReturn,
-    previousSentReturns: Option[List[ReturnSummary]]
+    previousSentReturns: Option[PreviousReturnData]
   ) extends JourneyStatus
 
   final case class JustSubmittedReturn(
@@ -192,6 +192,15 @@ object JourneyStatus {
 
   }
 
+  final case class PreviousReturnData(
+    summaries: List[ReturnSummary],
+    previousYearToDate: Option[AmountInPence]
+  )
+
+  object PreviousReturnData {
+    implicit val format: OFormat[PreviousReturnData] = Json.format
+  }
+
   final case object NonGovernmentGatewayJourney extends JourneyStatus
 
   final case object AgentWithoutAgentEnrolment extends JourneyStatus
@@ -199,7 +208,7 @@ object JourneyStatus {
   implicit class FillingOutReturnOps(private val f: FillingOutReturn) extends AnyVal {
 
     def isFurtherReturn: Option[Boolean] = {
-      lazy val hasPreviousSentReturns = f.previousSentReturns.exists(_.nonEmpty)
+      lazy val hasPreviousSentReturns = f.previousSentReturns.exists(_.summaries.nonEmpty)
       f.subscribedDetails.name match {
         case Left(_)  =>
           Some(hasPreviousSentReturns)

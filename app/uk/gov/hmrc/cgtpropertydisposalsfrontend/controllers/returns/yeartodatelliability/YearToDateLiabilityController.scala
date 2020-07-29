@@ -1418,6 +1418,7 @@ class YearToDateLiabilityController @Inject() (
                   furtherReturnNonCalculatedEnterTaxDuePage(
                     _,
                     _,
+                    nonCalculatedAnswers,
                     fillingOutReturn.subscribedDetails.isATrust,
                     fillingOutReturn.draftReturn.representativeType,
                     fillingOutReturn.isFurtherReturn
@@ -1450,6 +1451,7 @@ class YearToDateLiabilityController @Inject() (
                   furtherReturnNonCalculatedEnterTaxDuePage(
                     _,
                     _,
+                    nonCalculatedAnswers,
                     fillingOutReturn.subscribedDetails.isATrust,
                     fillingOutReturn.draftReturn.representativeType,
                     fillingOutReturn.isFurtherReturn
