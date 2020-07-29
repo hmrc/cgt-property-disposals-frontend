@@ -30,9 +30,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.RepresenteeCgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService.GetSubscriptionResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource.{ManuallyEntered => ManuallyEnteredAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource.{ManuallyEntered => ManuallyEnteredContactName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource.{ManuallyEntered => ManuallyEnteredEmail}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -57,6 +62,10 @@ trait SubscriptionService {
   def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
+
+  def registerWithoutIdAndSubscribe(completeRepresenteeAnswers: CompleteRepresenteeAnswers)(implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, RepresenteeCgtReference]
 
 }
 
@@ -150,6 +159,39 @@ class SubscriptionServiceImpl @Inject() (
           )
         )
     }
+
+  override def registerWithoutIdAndSubscribe(
+    representeeAnswers: CompleteRepresenteeAnswers
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, RepresenteeCgtReference] = {
+    val result = for {
+      sapNumber            <- registerWithoutId(
+                                RegistrationDetails(
+                                  representeeAnswers.name,
+                                  representeeAnswers.contactDetails.emailAddress,
+                                  representeeAnswers.contactDetails.address,
+                                  ManuallyEnteredEmail
+                                )
+                              )
+      subscriptionResponse <- subscribe(
+                                SubscriptionDetails(
+                                  Right(representeeAnswers.name),
+                                  representeeAnswers.contactDetails.emailAddress,
+                                  representeeAnswers.contactDetails.address,
+                                  representeeAnswers.contactDetails.contactName,
+                                  sapNumber.sapNumber,
+                                  ManuallyEnteredEmail,
+                                  ManuallyEnteredAddress,
+                                  ManuallyEnteredContactName
+                                )
+                              )
+    } yield subscriptionResponse
+
+    result.flatMap {
+      case SubscriptionResponse.SubscriptionSuccessful(cgtReferenceNumber) =>
+        EitherT.rightT(RepresenteeCgtReference(CgtReference(cgtReferenceNumber)))
+      case SubscriptionResponse.AlreadySubscribed                          => EitherT.leftT(Error("User is already subscribed"))
+    }
+  }
 
 }
 

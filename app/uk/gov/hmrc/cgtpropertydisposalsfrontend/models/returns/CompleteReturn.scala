@@ -38,7 +38,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 
-sealed trait CompleteReturn extends Product with Serializable
+sealed trait CompleteReturn extends Product with Serializable {
+  val representeeAnswers: Option[CompleteRepresenteeAnswers]
+}
 
 object CompleteReturn {
 
