@@ -384,71 +384,495 @@ weOnlySupportGG.signIn.p1=<a href="{0}">Mewngofnodwch</a> gyda’r un Dynodydd D
 #===================================================
 
 #===================================================
+# AGENTS - START
+#===================================================
+
+agent.enter-client-cgt-ref.title=Pa rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sydd gan eich cleient?
+agent.enter-client-cgt-ref.helpText=Pan greodd eich cleient ei gyfrif, cafodd e-bost gyda’r rhif hwn. Mae hwn yn 15 o gymeriadau. Er enghraifft, XYCGTP123456789.
+agent.enter-client-cgt-ref.link=Dysgwch sut i reoli cyfrif eich cleient
+cgtReference.error.required=Nodwch rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
+cgtReference.error.tooShort=Nodwch rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n 15 o gymeriadau
+cgtReference.error.tooLong=Nodwch rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n 15 o gymeriadau
+cgtReference.error.invalidCharacters=Mae’n rhaid i rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU gynnwys llythrennau a rhifau yn unig
+cgtReference.error.pattern=Nodwch rif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU go iawn
+cgtReference.error.notPermitted=Nodwch rif cyfrif cleient sydd wedi eich awdurdodi i reoli ei gyfrif
+agent.enter-client-postcode.title=Nodwch god post eich cleient
+agent.enter-client-postcode.extraContent=Mae’n rhaid i hwn gyd-fynd â chod post y cyfeiriad cyswllt a ddefnyddiodd eich cleient yn ei gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+agent.enter-client-postcode.helpText=Er enghraifft, AB2 9WQ
+agent.enter-client-country.title=Nodwch wlad eich cleient
+agent.enter-client-country.extraContent=Mae’n rhaid i hwn gyd-fynd â gwlad y cyfeiriad cyswllt a ddefnyddiodd eich cleient yn ei gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU.
+postcode.error.noMatch=Mae’n rhaid i’r cod-post gyd-fynd â’r cod post a ddefnyddiwyd yng nghyfeiriad cyswllt eich cleient
+countryCode.error.noMatch=Mae’n rhaid i’r wlad gyd-fynd â’r wlad a ddefnyddiwyd yng nghyfeiriad cyswllt eich cleient
+agent.too-many-attempts.title=Bydd angen i chi aros a rhoi cynnig arall arni
+agent.too-many-attempts.p1=Rydych wedi nodi manylion anghywir ar gyfer eich cleient ormod o weithiau.
+agent.too-many-attempts.p2=Bydd angen i chi aros am 2 awr a rhoi cynnig arall arni.
+agent.too-many-attempts.p3=Gallwch <a href=“{0}”>newid i gyfrif Treth Enillion Cyfalaf ar eiddo yn y DU sy''n perthyn i gleient</a>.
+agent.confirm-client.title=Gwirio a chadarnhau manylion eich cleient
+agent.confirm-client.name=Enw
+agent.confirm-client.cgt-reference=Rhif cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
+agent.confirm-client.change-client=Newid cleient
+agentNoEnrolment.title=Creu cyfrif gwasanaethau asiant i fynd at y gwasanaeth hwn
+agentNoEnrolment.p1=Bydd angen i chi fewngofnodi gan ddefnyddio Dynodydd Defnyddiwr (ID) a chyfrinair eich cyfrif gwasanaethau asiant. Os nad oes gennych un, bydd angen i chi <a href=“{0}”>greu cyfrif gwasanaethau asiant</a>.
+agentNoEnrolment.p2=Peidiwch â defnyddio manylion mewngofnodi ar gyfer cyfrif gwasanaethau ar-lein CThEM ar gyfer asiantau.
+agentNoEnrolment.button.tryAgain=Rhowch gynnig arall arni
+
+#===================================================
+# AGENTS - END
+#===================================================
+
+#===================================================
 # ACCOUNT PAGES - START
 #===================================================
 
-account.caption=Capital Gains Tax on UK property account
-
+account.caption=Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 account.menu.home=Hafan
-account.menu.manageYourDetails=Rheoli cyfrif
-account.menu.signOut=Cofrestrwch allan
+account.menu.manageYourDetails=Rheoli’r cyfrif
+account.menu.signOut=Allgofnodi
 account.menu.changeClient=Newid cleient
 account.agent.prefix=Cleient:
-account.home.title=Treth Enillion Cyfalaf ar gartref cyfrif eiddo'r DU
-
-account.home.subtitle=Account number: {0}
-account.home.left.title=Capital Gains Tax liability
-account.home.left.placeholder=Your total Capital Gains Tax liability for UK property disposals from 6 April 2020 to 5 April 2021.
-account.home.right.title=Total amount left to pay
-account.home.right.placeholder=The total amount due for all your Capital Gains Tax on UK property disposals made from 6 April 2020.
-account.home.private-beta.guide=How to report capital gains on disposals made from 6 April 2020
-account.home.private-beta.guide.content=You will be able to use this service from 6 April 2020, to report and pay Capital Gains Tax on UK property disposals made on or after 6 April 2020. Find out how to <a href="{0}">report a capital gain on UK property disposals made before 6 April 2020</a>.
-account.home.button.start-a-new-return=Dechreuwch Ffurflen Newydd
-
-account.totalLeftToPay=Total left to pay
-account.make.payment.link=Make a payment
-account.totalLeftToPay.penalties=Includes taxes, penalties and interest owed
-account.totalLeftToPay.payments=It takes 3 to 5 days for payments or charges to show in your account
-
-account.manageYourDetails.title=Manage account in Welsh
-account.manageYourDetails.subtitle=Account number  in Welsh
-account.manageYourDetails.accountName=Account name  in Welsh
-account.manageYourDetails.betaNotice=This service is in private beta until 6 April 2020. On that date you will be able to come back and send a CGT on UK property disposals return for disposals made on or after 6 April 2020.
-account.manageYourDetails.contactHeading=Contact person’s details
-account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
-account.manageYourDetails.individual.p2=If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
-account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
-account.manageYourDetails.yourName=Your name
-account.manageYourDetails.ContactName.changed=Contact name changed
-account.manageYourDetails.Email.changed=Contact email address changed
-account.manageYourDetails.Address.changed=Contact address changed
-account.manageYourDetails.changed.p=We’ll use this to contact you about your Capital Gains Tax on UK property sales or disposals.
-
-returns.list.title=Sent returns
-returns.list.ref=Return ref:
-returns.list.view=View return
-returns.list.viewAndPay=View and pay
-returns.list.paymentDue=Payment due
-returns.list.nextPaymentDue=Next payment due
-returns.list.noTaxDue=You did not owe any tax for this return
-returns.list.leftToPay=Total left to pay
-returns.list.taxOwed=Tax owed for return
-returns.list.sentDate=Sent to HMRC on {0}
-returns.list.disposalDetails=Disposal details
-returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
-
-drafts.list.title=Draft returns
-drafts.list.completionDate=Property completion date
-drafts.list.shareDisposalDate=Date of disposal
-drafts.list.disposalDetails=Disposal details
-drafts.list.lastUpdated=Draft last saved on {0}
-drafts.list.sendAndPayBy=Send and pay by
-drafts.list.resume=Complete return
+account.home.title=Hafan Cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
+account.home.subtitle=Rhif y cyfrif: {0}
+account.home.left.title=Rhwymedigaeth Treth Enillion Cyfalaf
+account.home.left.placeholder=Cyfanswm eich rhwymedigaeth Treth Enillion Cyfalaf am warediadau eiddo yn y DU rhwng 6 Ebrill 2020 a 5 Ebrill 2021.
+account.home.right.title=Y cyfanswm sy’n weddill i’w dalu
+account.home.right.placeholder=Y cyfanswm sy’n ddyledus am eich holl Dreth Enillion Cyfalaf ar warediadau eiddo yn y DU a wnaed o 6 Ebrill 2020.
+account.home.private-beta.guide=Sut i roi gwybod am enillion cyfalaf ar warediadau a wnaed o 6 Ebrill 2020
+account.home.private-beta.guide.content=Byddwch yn gallu defnyddio’r gwasanaeth hwn o 6 Ebrill 2020, i roi gwybod am a thalu Treth Enillion Cyfalaf ar warediadau eiddo yn y DU a wnaed ar neu ar ôl 6 Ebrill 2020. Dysgwch sut i <a href="{0}">roi gwybod am enillion cyfalaf ar warediadau eiddo yn y DU a wnaed cyn 6 Ebrill 2020</a>.
+account.home.button.start-a-new-return=Dechrau Ffurflen Dreth newydd
+account.totalLeftToPay=Y cyfanswm sy’n weddill i’w dalu
+account.make.payment.link=Gwneud taliad
+account.totalLeftToPay.penalties=Mae''n cynnwys trethi, cosbau a llog sy’n ddyledus
+account.totalLeftToPay.payments=Mae’n cymryd 3 i 5 diwrnod i daliadau neu gostau ddangos yn eich cyfrif
+account.manageYourDetails.title=Rheoli’r cyfrif
+account.manageYourDetails.subtitle=Rhif y cyfrif
+account.manageYourDetails.accountName=Enw’r cyfrif
+account.manageYourDetails.betaNotice=Mae’r gwasanaeth hwn mewn beta breifat tan 6 Ebrill 2020. Ar y dyddiad hwnnw byddwch yn gallu dod yn ôl ac anfon Treth Enillion Cyfalaf ar ffurflen gwarediadau eiddo yn y DU ar gyfer gwarediadau a wnaed ar neu ar ôl 6 Ebrill 2020.
+account.manageYourDetails.contactHeading=Manylion y person cyswllt
+account.manageYourDetails.p=Byddwn dim ond yn defnyddio’r manylion cyswllt hyn os oes angen i ni gysylltu â chi ynghylch y gwasanaeth hwn.
+account.manageYourDetails.individual.p2=Os oes angen i ‘Enw’r cyfrif’ newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor ffenestr newydd)</a>.
+account.manageYourDetails.organisation.p2=Os bydd enw neu gyfeiriad y prif ymddiriedolwr yn newid, bydd angen i chi <a href="{0}" target="_blank">roi gwybod i CThEM (yn agor ffenestr newydd)</a>.
+account.manageYourDetails.yourName=Eich enw
+account.manageYourDetails.ContactName.changed=Mae’r enw cyswllt wedi newid
+account.manageYourDetails.Email.changed=Mae’r cyfeiriad e-bost cyswllt wedi newid
+account.manageYourDetails.Address.changed=Mae’r cyfeiriad cyswllt wedi newid
+account.manageYourDetails.changed.p=Byddwn yn defnyddio hwn i gysylltu â chi ynghylch eich Treth Enillion Cyfalaf ar werthiannau neu warediadau o eiddo yn y DU.
+returns.list.title=Ffurflenni Treth a anfonwyd
+returns.list.ref=Cyfeirnod y Ffurflen Dreth:
+returns.list.view=Bwrw golwg dros y Ffurflen Dreth
+returns.list.viewAndPay=Bwrw golwg dros y Ffurflen Dreth a thalu
+returns.list.paymentDue=Taliad sy’n ddyledus
+returns.list.nextPaymentDue=Taliad nesaf yn ddyledus
+returns.list.noTaxDue=Nid oedd unrhyw dreth yn ddyledus gennych am y Ffurflen Dreth hon
+returns.list.leftToPay=Y cyfanswm sy’n weddill i’w dalu
+returns.list.taxOwed=Treth sy’n ddyledus ar gyfer y Ffurflen Dreth
+returns.list.sentDate=Anfonwyd i CThEM ar {0}
+returns.list.disposalDetails=Manylion y gwarediad
+returns.paymentTakes3Days=Gall taliadau gymryd hyd at 3 diwrnod gwaith i ddangos ar y dudalen hon
+drafts.list.title=Ffurflenni Treth drafft
+drafts.list.completionDate=Dyddiad cwblhau’r eiddo
+drafts.list.shareDisposalDate=Dyddiad gwaredu
+drafts.list.disposalDetails=Manylion y gwarediad
+drafts.list.lastUpdated=Drafft wedi’i gadw ddiwethaf ar {0}
+drafts.list.sendAndPayBy=Anfon a thalu erbyn
+drafts.list.resume=Llenwi Ffurflen Dreth
 
 #===================================================
 # ACCOUNT PAGES -  END
 #===================================================
 
+#===================================================
+# COMMON TRIAGE PAGES - START
+#===================================================
+
+triage.caption=Gwiriwch a allwch ddefnyddio’r gwasanaeth hwn
+who-are-you-reporting-for.title=Ar gyfer pwy rydych yn llenwi’r Ffurflen Dreth hon?
+individualUserType.periodOfAdminDisabled.Self=Chi’ch hun
+individualUserType.periodOfAdminDisabled.Capacitor=Rhywun arall
+individualUserType.periodOfAdminDisabled.PersonalRepresentative=Rhywun a fu farw
+individualUserType.periodOfAdminDisabled.agent.Self=Eich cleient
+individualUserType.periodOfAdminDisabled.agent.PersonalRepresentative=Rhywun a fu farw
+individualUserType.Self=Chi’ch hun
+individualUserType.Capacitor=Rhywun rydych yn ei helpu
+individualUserType.Capacitor.helpText=Rydych yn gynrychiolydd.
+individualUserType.PersonalRepresentative=Person a wnaeth y gwarediad <strong class="bold">cyn iddo farw</strong>
+individualUserType.PersonalRepresentative.helpText=Rydych yn gynrychiolydd personol.
+individualUserType.PersonalRepresentativeInPeriodOfAdmin=Gwerthwyd ystâd person a’r eiddo <strong class="bold">ar ôl iddo farw</strong>
+individualUserType.PersonalRepresentativeInPeriodOfAdmin.helpText=Rydych yn gynrychiolydd personol.
+individualUserType.agent.Self=Eich cleient
+individualUserType.agent.Self.helpText=Sydd ddim yn gynrychiolydd personol.
+individualUserType.agent.PersonalRepresentative=Person a wnaeth y gwarediad <strong class="bold">cyn iddo farw</strong>
+individualUserType.agent.PersonalRepresentative.helpText=Mae’ch cleient yn gynrychiolydd personol.
+individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin=Gwerthwyd ystâd person a’r eiddo <strong class="bold">ar ôl iddo farw</strong>
+individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin.helpText=Mae’ch cleient yn gynrychiolydd personol.
+individualUserType.error.required=Dewiswch ar gyfer pwy rydych yn rhoi gwybod am y dreth
+individualUserType.error.invalid=Dewiswch ar gyfer pwy rydych yn rhoi gwybod am y dreth
+individualUserType.cyaChange=ar gyfer pwy rydych yn rhoi gwybod am y dreth
+capacitorsPersonalRepresentativesNotHandled.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+capacitorsPersonalRepresentativesNotHandled.cannotUse=Ni allwch ddefnyddio’r gwasanaeth ar-lein hwn i roi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU ar gyfer:
+capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet1=rhywun arall
+capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet2=rhywun a fu farw
+capacitorsPersonalRepresentativesNotHandled.youNeedTo=Bydd yn rhaid i chi wneud y canlynol:
+capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet1=cysylltwch â CThEM a gofyn am i fersiwn bapur o’r Ffurflen Dreth gael ei phostio atoch
+capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet2=rhoi eich rhif Yswiriant Gwladol neu Gyfeirnod Unigryw y Trethdalwr ar gyfer Hunanasesiad, os oes gennych un
+capacitorsPersonalRepresentativesNotHandled.agent.youNeedTo.bullet2=rhoi rhif Yswiriant Gwladol neu Gyfeirnod Unigryw y Trethdalwr ar gyfer Hunanasesiad eich cleient, os oes ganddo un
+capacitorsPersonalRepresentativesNotHandled.phoneHeading=Ffôn
+capacitorsPersonalRepresentativesNotHandled.phoneHmrc=Ffôn:
+capacitorsPersonalRepresentativesNotHandled.phoneOutsideUk=Y tu allan i’r DU:
+capacitorsPersonalRepresentativesNotHandled.phoneAgent=Llinell Ymroddedig i Asiantau:
+capacitorsPersonalRepresentativesNotHandled.openingTimes=Oriau agor:
+capacitorsPersonalRepresentativesNotHandled.openingTimes.monToFri=Dydd Llun i Ddydd Gwener: 08:00 i 16:00
+capacitorsPersonalRepresentativesNotHandled.openingTimes.sunBankHols=Ar gau ar ddydd Sadwrn, dydd Sul ac ar wyliau banc
+capacitorsPersonalRepresentativesNotHandled.getHelp=Mynnwch help i <a href="{0}">ddelio â CThEM os oes gennych anghenion ychwanegol</a>.
+capacitorsPersonalRepresentativesNotHandled.callChargesLink=<a href="{0}">Dysgwch am gostau galwadau</a>
+numberOfProperties.main.title=Dywedwch wrthym faint o warediadau rydych yn eu cynnwys yn y Ffurflen Dreth hon
+numberOfProperties.helpText.p1.heading=Gwarediadau eiddo yn y DU
+numberOfProperties.helpText.p1.text=Gallwch gynnwys mwy nag un gwarediad yn y Ffurflen Dreth hon os oedd gan yr holl eiddo yr un dyddiad cwblhau.
+numberOfProperties.helpText.p2.heading=Gwarediadau eiddo defnydd cymysg
+numberOfProperties.helpText.p2.text=Mae eiddo defnydd cymysg yn rhannol breswyl ac yn rhannol fasnachol. Ar gyfer y Ffurflen Dreth hon, hyd yn oed pe bai gan eiddo ran fasnachol a rhan breswyl, byddai’n dal i gael ei ystyried yn ‘un’ eiddo.
+numberOfProperties.helpText.p3.heading=Gwarediadau anuniongyrchol
+numberOfProperties.helpText.p3.text=Dyma le mae’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU. Gallwch gynnwys mwy nag un gwarediad anuniongyrchol yn y Ffurflen Dreth hon cyhyd â bod y canlynol yn berthnasol:
+numberOfProperties.helpText.p3.li1=roeddech yn ddibreswyl ar y dyddiad gwaredu
+numberOfProperties.helpText.p3.li2=roedd gan yr holl gyfranddaliadau yr un dyddiad gwerthu neu waredu
+numberOfProperties.helpText.agent.p3.heading=Gwarediadau anuniongyrchol
+numberOfProperties.helpText.agent.p3.text=Dyma le mae’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU. Gallwch gynnwys mwy nag un gwarediad anuniongyrchol yn y Ffurflen Dreth hon cyhyd â bod y canlynol yn berthnasol:
+numberOfProperties.helpText.agent.p3.li1=roedd eich cleient yn ddibreswyl ar y dyddiad gwaredu
+numberOfProperties.helpText.agent.p3.li2=roedd gan yr holl gyfranddaliadau yr un dyddiad gwerthu neu waredu
+numberOfProperties.helpText.trust.p3.heading=Gwarediadau anuniongyrchol
+numberOfProperties.helpText.trust.p3.text=Dyma le mae’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU. Gallwch gynnwys mwy nag un gwarediad anuniongyrchol yn y Ffurflen Dreth hon cyhyd â bod y canlynol yn berthnasol:
+numberOfProperties.helpText.trust.p3.li1=roedd yr ymddiriedolaeth yn ddibreswyl ar y dyddiad gwaredu
+numberOfProperties.helpText.trust.p3.li2=roedd gan yr holl gyfranddaliadau yr un dyddiad gwerthu neu waredu
+numberOfProperties.helpText.capacitor.p3.heading=Gwarediadau anuniongyrchol
+numberOfProperties.helpText.capacitor.p3.text=Dyma le mae’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU. Gallwch gynnwys mwy nag un gwarediad anuniongyrchol yn y Ffurflen Dreth hon cyhyd â bod y canlynol yn berthnasol:
+numberOfProperties.helpText.capacitor.p3.li1=roedd y person yn ddibreswyl ar y dyddiad gwaredu
+numberOfProperties.helpText.capacitor.p3.li2=roedd gan yr holl gyfranddaliadau yr un dyddiad gwerthu neu waredu
+numberOfProperties.helpText.personalRep.p3.heading=Gwarediadau anuniongyrchol
+numberOfProperties.helpText.personalRep.p3.text=Dyma le mae’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU. Gallwch gynnwys mwy nag un gwarediad anuniongyrchol yn y Ffurflen Dreth hon cyhyd â bod y canlynol yn berthnasol:
+numberOfProperties.helpText.personalRep.p3.li1=roedd y person yn ddibreswyl ar y dyddiad gwaredu
+numberOfProperties.helpText.personalRep.p3.li2=roedd gan yr holl gyfranddaliadau yr un dyddiad gwerthu neu waredu
+numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.heading=Gwarediadau anuniongyrchol
+numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.text=Dyma le mae’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU. Gallwch gynnwys mwy nag un gwarediad anuniongyrchol yn y Ffurflen Dreth hon cyhyd â bod y canlynol yn berthnasol:
+numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li1=roedd y person yn ddibreswyl ar y dyddiad y bu farw
+numberOfProperties.helpText.personalRepInPeriodOfAdmin.p3.li2=roedd gan yr holl gyfranddaliadau yr un dyddiad gwerthu neu waredu
+numberOfProperties.title=Faint o warediadau rydych yn eu cynnwys yn y Ffurflen Dreth hon?
+numberOfProperties.details.summary=Beth sy’n digwydd ar y dyddiad cwblhau?
+numberOfProperties.details.p1=Fel arfer, y dyddiad cwblhau yw’r diwrnod y gwnaethoch waredu’r eiddo a chael yr arian o’r gwerthiant neu’r gwarediad. Mae hyn fel arfer pan fydd y perchennog newydd yn cael yr allweddi.
+numberOfProperties.agent.details.p1=Fel arfer, y dyddiad cwblhau yw’r diwrnod gwnaeth eich cleient waredu’r eiddo a chael yr arian o’r gwerthiant neu’r gwarediad. Mae hyn fel arfer pan fydd y perchennog newydd yn cael yr allweddi.
+numberOfProperties.trust.details.p1=Fel arfer, y dyddiad cwblhau yw’r diwrnod gwnaeth yr ymddiriedolaeth waredu’r eiddo a chael yr arian o’r gwerthiant neu’r gwarediad. Mae hyn fel arfer pan fydd y perchennog newydd yn cael yr allweddi.
+numberOfProperties.capacitor.details.p1=Fel arfer, y dyddiad cwblhau yw’r diwrnod gwnaeth y person waredu’r eiddo a chael yr arian o’r gwerthiant neu’r gwarediad. Mae hyn fel arfer pan fydd y perchennog newydd yn cael yr allweddi.
+numberOfProperties.personalRep.details.p1=Fel arfer, y dyddiad cwblhau yw’r diwrnod gwnaeth y person waredu’r eiddo a chael yr arian o’r gwerthiant neu’r gwarediad. Mae hyn fel arfer pan fydd y perchennog newydd yn cael yr allweddi.
+numberOfProperties.personalRepInPeriodOfAdmin.details.p1=Fel arfer, y dyddiad cwblhau yw’r diwrnod gwnaeth y cynrychiolydd personol gael yr arian o’r gwerthiant neu’r gwarediad, ac fe gafodd y perchennog newydd yr allweddi.
+numberOfProperties.One=Un
+numberOfProperties.MoreThanOne=2 neu fwy
+numberOfProperties.error.invalid=Dewiswch faint o eiddo yn y DU rydych yn eu cynnwys yn y Ffurflen Dreth hon
+numberOfProperties.error.required=Dewiswch faint o eiddo yn y DU rydych yn eu cynnwys yn y Ffurflen Dreth hon
+numberOfProperties.cyaChange=faint o eiddo rydych am eu cynnwys yn y Ffurflen Dreth hon
+previousReturnExistsWithSameCompletionDate.title=Ni allwch lenwi’r Ffurflen Dreth hon ar-lein
+previousReturnExistsWithSameCompletionDate.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod iddynt fod angen i chi newid un o’ch Ffurflenni Treth blaenorol.
+previousReturnExistsWithSameCompletionDate.trust.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod iddynt fod angen i chi newid un o Ffurflenni Treth blaenorol eich ymddiriedolaeth.
+previousReturnExistsWithSameCompletionDate.agent.p1=Mae’n rhaid i chi <a href="{0}">gysylltu â CThEM</a>. Rhowch wybod iddynt fod angen i chi newid un o Ffurflenni Treth blaenorol eich cleient.
+previousReturnExistsWithSameCompletionDate.propertyDisposals.title=Gwarediadau eiddo
+previousReturnExistsWithSameCompletionDate.propertyDisposals.p1=Bydd angen i chi newid y Ffurflen Dreth gyda’r eiddo a oedd gan y canlynol:
+previousReturnExistsWithSameCompletionDate.propertyDisposals.li1=yr un dyddiad cwblhau â’r un rydych am roi gwybod amdano nawr
+previousReturnExistsWithSameCompletionDate.propertyDisposals.li2=dyddiad cyfnewid contract yn yr un flwyddyn dreth â’r un rydych am roi gwybod amdano nawr
+previousReturnExistsWithSameCompletionDate.indirectDisposals.title=Gwarediadau anuniongyrchol
+previousReturnExistsWithSameCompletionDate.indirectDisposals.p1=Bydd angen i chi newid y Ffurflen Dreth a oedd â chyfranddaliadau gyda’r un dyddiad gwerthu gwarediad â’r gwarediad rydych am roi gwybod amdano nawr.
+
+#===================================================
+# COMMON TRIAGE PAGES - END
+#===================================================
+
+#===================================================
+# SINGLE DISPOSAL TRIAGE PAGES - START
+#===================================================
+
+disposalMethod.title=Sut y gwnaethoch werthu neu waredu’r eiddo yn y DU?
+disposalMethod.agent.title=Sut y gwnaeth eich cleient werthu neu waredu’r eiddo yn y DU?
+disposalMethod.trust.title=Sut y gwnaeth yr ymddiriedolaeth werthu neu waredu’r eiddo yn y DU?
+disposalMethod.capacitor.title=Sut y cafodd yr eiddo yn y DU ei werthu neu ei waredu?
+disposalMethod.personalRep.title=Sut y cafodd yr eiddo yn y DU ei werthu neu ei waredu?
+disposalMethod.Sold=Wedi’i werthu
+disposalMethod.Gifted=Wedi’i roi i ffwrdd
+disposalMethod.Other=Arall
+disposalMethod.error.required=Dewiswch os gwnaethoch ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.agent.error.required=Dewiswch os gwnaeth eich cleient ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.trust.error.required=Dewiswch os gwnaeth yr ymddiriedolaeth ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.capacitor.error.required=Dewiswch os gwnaeth y person ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.personalRep.error.required=Dewiswch os gwnaeth y person ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.error.invalid=Dewiswch os gwnaethoch ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.agent.error.invalid=Dewiswch os gwnaeth eich cleient ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.trust.error.invalid=Dewiswch os gwnaeth yr ymddiriedolaeth ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.capacitor.error.invalid=Dewiswch os gwnaeth y person ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.personalRep.error.invalid=Dewiswch os gwnaeth y person ei werthu, ei roi i ffwrdd neu arall
+disposalMethod.cyaChange=sut y cafodd yr eiddo ei werthu neu ei waredu
+wereYouAUKResident.main.title=Rhowch wybod i ni am eich statws preswylio ar y dyddiad gwaredu
+wereYouAUKResident.capacitor.main.title=Rhowch wybod i ni am statws preswylio’r person ar y dyddiad gwaredu
+wereYouAUKResident.trust.main.title=Rhowch wybod i ni am statws preswylio’r ymddiriedolaeth ar y dyddiad gwaredu
+wereYouAUKResident.personalRep.main.title=Rhowch wybod i ni am statws preswylio’r person ar y dyddiad gwaredu
+wereYouAUKResident.agent.main.title=Rhowch wybod i ni am statws preswylio’ch cleient ar y dyddiad gwaredu
+wereYouAUKResident.personalRepInPeriodOfAdmin.main.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
+wereYouAUKResident.title=A oeddech yn breswylydd yn y DU ar y dyddiad gwaredu?
+wereYouAUKResident.capacitor.title=A oedd y person yn breswylydd yn y DU ar y dyddiad gwaredu?
+wereYouAUKResident.trust.title=A oedd yr ymddiriedolaeth yn breswylydd yn y DU ar y dyddiad gwaredu?
+wereYouAUKResident.personalRep.title=A oedd y person yn breswylydd yn y DU ar y dyddiad gwaredu?
+wereYouAUKResident.agent.title=A oedd eich cleient yn breswylydd yn y DU ar y dyddiad gwaredu?
+wereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
+wereYouAUKResident.helpText.p1=Y dyddiad gwaredu ar gyfer eiddo yn y DU yw’r dyddiad cyfnewid contractau. Mae cyfnewid contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd a phan fydd y prynwr yn talu blaendal.
+wereYouAUKResident.helpText.p2=Os oeddech yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
+wereYouAUKResident.capacitor.helpText.p2=Os oedd y person yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
+wereYouAUKResident.trust.helpText.p2=Os oedd yr ymddiriedolaeth yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
+wereYouAUKResident.personalRep.helpText.p2=Os oedd y person yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
+wereYouAUKResident.agent.helpText.p2=Os oedd eich cleient yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
+wereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.agent.link=<a href=“{0}” target=”_blank”> Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.trust.link=<a href=“{{0}” target=”_blank”> Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.capacitor.link=<a href=“{{0}” target=“{_blank”> Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.personalRep.link=<a href=“{{0}” target=“{_blank”> Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href=“{{0}” target=“{_blank”> Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.error.required=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU pan wnaethoch gyfnewid contractau
+wereYouAUKResident.error.boolean=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU pan wnaethoch gyfnewid contractau
+wereYouAUKResident.agent.error.required=Dewiswch ‘Iawn’ os oedd eich cleient yn breswylydd yn y DU pan wnaeth gyfnewid contractau
+wereYouAUKResident.agent.error.boolean=Dewiswch ‘Iawn’ os oedd eich cleient yn breswylydd yn y DU pan wnaeth gyfnewid contractau
+wereYouAUKResident.trust.error.required=Dewiswch p’un a oedd yr ymddiriedolaeth yn preswylio yn y DU ar y diwrnod y cyfnewidiwyd contractau
+wereYouAUKResident.trust.error.boolean=Dewiswch p’un a oedd yr ymddiriedolaeth yn preswylio yn y DU ar y diwrnod y cyfnewidiwyd contractau
+wereYouAUKResident.capacitor.error.required=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU ar y diwrnod y cyfnewidiwyd contractau
+wereYouAUKResident.capacitor.error.boolean=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU ar y diwrnod y cyfnewidiwyd contractau
+wereYouAUKResident.personalRep.error.required=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU ar y dyddiad cyfnewid contractau
+wereYouAUKResident.personalRep.error.boolean=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU ar y dyddiad cyfnewid contractau
+wereYouAUKResident.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi
+wereYouAUKResident.personalRepInPeriodOfAdmin.error.boolean=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi
+wereYouAUKResident.cyaChange=Statws preswylio yn y DU
+triage.enterCountry.title=Beth oedd eich gwlad breswyl ar y diwrnod y gwnaethoch ‘gyfnewid’ contractau?
+triage.enterCountry.agent.title=Ym mha wlad roedd eich cleient yn preswylio ynddi pan wnaeth gyfnewid contractau?
+triage.enterCountry.trust.title=Ym mha wlad roedd yr ymddiriedolaeth yn preswylio ynddi pan wnaeth gyfnewid contractau?
+triage.enterCountry.capacitor.title=Ym mha wlad roedd y person yn preswylio ynddi pan wnaeth gyfnewid contractau?
+triage.enterCountry.personalRep.title=Ym mha wlad roedd y person yn preswylio ynddi ar y diwrnod pan wnaeth gyfnewid contractau?
+triage.enterCountry.personalRepInPeriodOfAdmin.title=Ym mha wlad roedd y person yn preswylio ynddi ym mlwyddyn dreth {0} i {1}?
+triage.enterCountry.helpText=Fel arfer, dyma’r diwrnod y gwnaethoch chi a’r perchennog newydd roi contract i’ch gilydd a’r diwrnod y gwnaeth dalu blaendal. Os gwnaethoch warediad anuniongyrchol, dyna’r diwrnod y gwnaethoch werthu’r cyfranddaliadau.
+triage.enterCountry.agent.helpText=Fel arfer, dyma’r diwrnod y gwnaeth eich cleient a’r perchennog newydd roi contract i’ch gilydd a’r diwrnod y gwnaeth dalu blaendal.
+triage.enterCountry.trust.helpText=Fel arfer, dyma’r diwrnod y gwnaeth yr ymddiriedolaeth a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
+triage.enterCountry.capacitor.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
+triage.enterCountry.personalRep.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
+triage.enterCountry.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor ffenestr newydd)</a>.
+triage.enterCountry.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+triage.enterCountry.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+assetTypeForNonUkResidents.title=Pa fath o eiddo neu ased y gwnaethoch ei werthu neu ei waredu?
+assetTypeForNonUkResidents.agent.title=Pa fath o eiddo, tir neu ased y gwnaeth eich cleient ei werthu neu ei waredu?
+assetTypeForNonUkResidents.trust.title=Pa fath o eiddo, tir neu ased y gwnaeth yr ymddiriedolaeth ei werthu neu ei waredu?
+assetTypeForNonUkResidents.capacitor.title=Pa fathau o eiddo neu asedion a waredwyd?
+assetTypeForNonUkResidents.personalRep.title=Pa fathau o eiddo neu asedion a waredwyd?
+assetTypeForNonUkResidents.personalRepInPeriodOfAdmin.title=Pa fath o eiddo neu asedion a waredwyd?
+assetTypeForNonUkResidents.Residential=Preswyl
+assetTypeForNonUkResidents.Residential.helpText=Mae eiddo preswyl yn cynnwys tai, fflatiau, neu anheddau eraill, gan gynnwys eu gerddi neu eu tiroedd.
+assetTypeForNonUkResidents.NonResidential=Dibreswyl
+assetTypeForNonUkResidents.MixedUse=Defnydd cymysg
+assetTypeForNonUkResidents.MixedUse.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl tra roeddech yn berchen arno.
+assetTypeForNonUkResidents.agent.MixedUse.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl tra roedd eich cleient yn berchen arno.
+assetTypeForNonUkResidents.trust.MixedUse.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl tra roedd yr ymddiriedolaeth yn berchen arno.
+assetTypeForNonUkResidents.capacitor.MixedUse.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl.
+assetTypeForNonUkResidents.personalRep.MixedUse.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl.
+assetTypeForNonUkResidents.personalRepInPeriodOfAdmin.MixedUse.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl.
+assetTypeForNonUkResidents.IndirectDisposal=Cyfranddaliadau cwmni - gwnaethoch warediad anuniongyrchol
+assetTypeForNonUkResidents.agent.IndirectDisposal=Cyfranddaliadau cwmni yn nhir y DU - gwnaeth eich cleient warediad anuniongyrchol
+assetTypeForNonUkResidents.trust.IndirectDisposal=Cyfranddaliadau cwmni yn nhir y DU - gwnaeth yr ymddiriedolaeth warediad anuniongyrchol
+assetTypeForNonUkResidents.capacitor.IndirectDisposal=Cyfranddaliadau cwmni - gwnaeth y person warediad anuniongyrchol
+assetTypeForNonUkResidents.personalRep.IndirectDisposal=Cyfranddaliadau cwmni - gwnaeth y person warediad anuniongyrchol
+assetTypeForNonUkResidents.personalRepInPeriodOfAdmin.IndirectDisposal=Cyfranddaliadau cwmni drwy warediad anuniongyrchol
+assetTypeForNonUkResidents.IndirectDisposal.helpText=Gwarediad anuniongyrchol yw pan fo’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU.
+assetTypeForNonUkResidents.agent.IndirectDisposal.helpText=Gwarediad anuniongyrchol yw pan fo’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU.
+assetTypeForNonUkResidents.trust.IndirectDisposal.helpText=Gwarediad anuniongyrchol yw pan fo’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU.
+assetTypeForNonUkResidents.capacitor.IndirectDisposal.helpText=Gwarediad anuniongyrchol yw pan fo’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU.
+assetTypeForNonUkResidents.personalRep.IndirectDisposal.helpText=Gwarediad anuniongyrchol yw pan fo’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU.
+assetTypeForNonUkResidents.personalRepInPeriodOfAdmin.IndirectDisposal.helpText=Gwarediad anuniongyrchol yw pan fo’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU.
+assetTypeForNonUkResidents.error.required=Dewiswch y math o eiddo neu ased y gwnaethoch ei werthu neu ei waredu
+assetTypeForNonUkResidents.agent.error.required=Dewiswch y math o eiddo neu ased y gwnaeth eich cleient ei werthu neu ei waredu
+assetTypeForNonUkResidents.trust.error.required=Dewiswch y math o eiddo neu ased y gwnaeth yr ymddiriedolaeth ei werthu neu ei waredu
+assetTypeForNonUkResidents.capacitor.error.required=Dewiswch y math o eiddo neu ased y gwnaeth y person ei werthu neu ei waredu
+assetTypeForNonUkResidents.personalRep.error.required=Dewiswch y math o eiddo neu ased y gwnaeth y person ei werthu neu ei waredu
+assetTypeForNonUkResidents.personalRepInPeriodOfAdmin.error.required=Dewiswch y math o eiddo neu ased a waredwyd
+assetTypeForNonUkResidents.error.invalid=Dewiswch y math o eiddo neu ased y gwnaethoch ei werthu neu ei waredu
+assetTypeForNonUkResidents.agent.error.invalid=Dewiswch y math o eiddo neu ased y gwnaeth eich cleient ei werthu neu ei waredu
+assetTypeForNonUkResidents.trust.error.invalid=Dewiswch y math o eiddo neu ased y gwnaeth yr ymddiriedolaeth ei werthu neu ei waredu
+assetTypeForNonUkResidents.capacitor.error.invalid=Dewiswch y math o eiddo neu ased y gwnaeth y person ei werthu neu ei waredu
+assetTypeForNonUkResidents.personalRep.error.invalid=Dewiswch y math o eiddo neu ased y gwnaeth y person ei werthu neu ei waredu
+assetTypeForNonUkResidents.cyaChange=y math o eiddo neu ased a waredwyd
+sharesDisposalDate.title=Beth oedd dyddiad gwaredu’r cyfranddaliadau?
+sharesDisposalDate.helpText=Er enghraifft, 25 4 2020.
+sharesDisposalDate.error.required=Nodwch y dyddiad gwaredu
+sharesDisposalDate-day.error.required=Mae’n rhaid i’r dyddiad gwaredu gynnwys diwrnod
+sharesDisposalDate-month.error.required=Mae’n rhaid i’r dyddiad gwaredu gynnwys mis
+sharesDisposalDate-year.error.required=Mae’n rhaid i’r dyddiad gwaredu gynnwys blwyddyn
+sharesDisposalDate.error.invalid=Nodwch ddyddiad gwaredu go iawn
+sharesDisposalDate-day.error.invalid=Nodwch ddyddiad gwaredu go iawn
+sharesDisposalDate-month.error.invalid=Nodwch ddyddiad gwaredu go iawn
+sharesDisposalDate-year.error.invalid=Nodwch ddyddiad gwaredu go iawn
+sharesDisposalDate-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad gwaredu gynnwys mis a blwyddyn
+sharesDisposalDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad gwaredu gynnwys diwrnod a blwyddyn
+sharesDisposalDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad gwaredu gynnwys diwrnod a mis
+sharesDisposalDate.error.tooFarInFuture=Ni all y dyddiad y gwnaethoch waredu’r cyfranddaliadau fod yn y dyfodol
+sharesDisposalDate.error.before1900=Mae’n rhaid i’r dyddiad y gwnaethoch waredu’r cyfranddaliadau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEM os yw’r dyddiad cyn hyn
+sharesDisposalDate.cyaChange=pryd y gwerthwyd y cyfranddaliadau
+didYouDisposeOfResidentialProperty.title=A wnaethoch werthu neu waredu eiddo preswyl yn y DU?
+didYouDisposeOfResidentialProperty.agent.title=A wnaeth eich cleient waredu eiddo preswyl yn y DU?
+didYouDisposeOfResidentialProperty.trust.title=A ydych yn rhoi gwybod am warediad eiddo preswyl yn y DU?
+didYouDisposeOfResidentialProperty.capacitor.title=A ydych yn rhoi gwybod am warediad eiddo preswyl yn y DU?
+didYouDisposeOfResidentialProperty.personalRep.title=A ydych yn rhoi gwybod am warediad eiddo preswyl yn y DU?
+didYouDisposeOfResidentialProperty.personalRepInPeriodOfAdmin.title=A oedd yr eiddo yn eiddo preswyl yn y DU?
+didYouDisposeOfResidentialProperty.helpText=Mae eiddo preswyl yn cynnwys tai, fflatiau, neu anheddau eraill, gan gynnwys eu gerddi neu eu tiroedd.
+didYouDisposeOfResidentialProperty.personalRepInPeriodOfAdmin.helpText=Mae’n cynnwys tai, fflatiau, neu anheddau eraill, gan gynnwys eu gerddi neu eu tiroedd.
+didYouDisposeOfResidentialProperty.Residential=Iawn
+didYouDisposeOfResidentialProperty.NonResidential=Na
+didYouDisposeOfResidentialProperty.details.summary=Beth mae eiddo preswyl yn ei gynnwys
+didYouDisposeOfResidentialProperty.details.p1=Mae eiddo preswyl yn cynnwys:
+didYouDisposeOfResidentialProperty.details.l1=adeilad lle mae rhywun yn byw neu lle gallai fyw, fel tŷ, fflat neu fath arall o annedd
+didYouDisposeOfResidentialProperty.details.l2=adeilad sy’n cael ei adeiladu neu ei newid fel y gellir ei ddefnyddio fel man lle gallai rhywun fyw
+didYouDisposeOfResidentialProperty.details.l3=tir sy’n rhan o ardd neu dir adeilad sy’n cael ei ddefnyddio fel man lle mae rhywun yn byw, neu lle gallai fyw
+didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Darllenwch ddiffiniad o eiddo preswyl (yn agor ffenestr newydd)</a>.
+didYouDisposeOfResidentialProperty.error.required=Dewiswch ‘Iawn’ os gwnaethoch werthu neu waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.error.boolean=Dewiswch ‘Iawn’ os gwnaethoch werthu neu waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.agent.error.required=Dewiswch ‘Iawn’ os gwnaeth eich cleient waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.agent.error.boolean=Dewiswch ‘Iawn’ os gwnaeth eich cleient waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.trust.error.required=Dewiswch ‘Iawn’ os ydych yn rhoi gwybod am warediad eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.trust.error.boolean=Dewiswch ‘Iawn’ os ydych yn rhoi gwybod am warediad eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.capacitor.error.required=Dewiswch ‘Iawn’ os gwnaeth y person waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.capacitor.error.boolean=Dewiswch ‘Iawn’ os gwnaeth y person waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.personalRep.error.required=Dewiswch ‘Iawn’ os gwnaeth y person waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.personalRep.error.boolean=Dewiswch ‘Iawn’ os gwnaeth y person waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os gwnaeth y person waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.personalRepInPeriodOfAdmin.error.boolean=Dewiswch ‘Iawn’ os gwnaeth y person waredu eiddo preswyl yn y DU
+didYouDisposeOfResidentialProperty.cyaChange=p’un a gafodd eiddo preswyl yn y DU ei waredu
+ukResidentCanOnlyReportResidential.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+ukResidentCanOnlyReportResidential.p1=Gwnaethoch ddweud wrthym eich bod yn breswylydd yn y DU ar y diwrnod y gwnaethoch werthu neu waredu eiddo yn y DU. Dim ond i roi gwybod am eiddo preswyl yn y DU y gallwch ddefnyddio’r gwasanaeth hwn.
+ukResidentCanOnlyReportResidential.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a href="{0}">werthiannau neu warediadau eiddo dibreswyl yn y DU</a>.
+disposalDate.title=Ar ba ddyddiad y gwnaethoch gyfnewid contractau wrth waredu’r eiddo?
+disposalDate.agent.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+disposalDate.trust.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+disposalDate.capacitor.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+disposalDate.personalRep.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+disposalDate.personalRepInPeriodOfAdmin.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+disposalDate.indirectDisposal.title=Ar ba ddyddiad y gwnaethoch werthu’r cyfranddaliadau?
+disposalDate.helpText=Mae hyn fel arfer pan wnaethoch chi a’r prynwr neu’r perchennog newydd roi contract i’ch gilydd ac fe dalodd y prynwr blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+disposalDate.agent.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+disposalDate.trust.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’ch gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+disposalDate.capacitor.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+disposalDate.personalRep.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+disposalDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae''r prynwr yn talu blaendal. Gelwir hyn hefyd yn ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+disposalDate.link=<a href=“{{0}” target=“{_blank”>Dysgwch beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
+disposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
+disposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
+disposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod heddiw neu yn y gorffennol
+disposalDate.error.before1900=Mae’n rhaid i’r dyddiad cyfnewid contractau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
+disposalDate-day.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod
+disposalDate-month.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys mis
+disposalDate-year.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys blwyddyn
+disposalDate-day.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
+disposalDate-month.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
+disposalDate-year.error.invalid=Nodwch ddyddiad cyfnewid contract go iawn
+disposalDate-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys mis a blwyddyn
+disposalDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod a blwyddyn
+disposalDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod a mis
+disposalDate.cyaChange=y dyddiad cyfnewid contract
+completionDate.title=Beth oedd y dyddiad cwblhau pan wnaethoch werthu neu waredu’r eiddo?
+completionDate.agent.title=Pan waredwyd yr eiddo beth oedd y dyddiad cwblhau?
+completionDate.trust.title=Pan waredwyd yr eiddo beth oedd y dyddiad cwblhau?
+completionDate.capacitor.title=Pan waredwyd yr eiddo beth oedd y dyddiad cwblhau?
+completionDate.personalRep.title=Pan waredwyd yr eiddo beth oedd y dyddiad cwblhau?
+completionDate.personalRepInPeriodOfAdmin.title=Pan waredwyd yr eiddo beth oedd y dyddiad cwblhau?
+completionDate.helpText=Mae hyn fel arfer pan gawsoch yr arian o’r gwerthiant neu’r trosglwyddiad eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
+completionDate.agent.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
+completionDate.trust.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
+completionDate.capacitor.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
+completionDate.personalRep.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
+completionDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan drosglwyddwyd yr arian o’r gwerthiant eiddo a bod y perchennog newydd yn cael yr allweddi. Er enghraifft, 25 4 2020.
+completionDate.link=<a href="{0}" target="_blank">Dysgwch beth sy’n digwydd ar y dyddiad cwblhau (yn agor ffenestr newydd)</a>
+completionDate.error.required=Nodwch ddyddiad cwblhau
+completionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
+completionDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad cwblhau fod yr un fath â’r dyddiad cyfnewid contractau neu ar ôl hynny
+completionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
+completionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900. Cysylltwch â CThEM os yw’r dyddiad cyn hyn
+completionDate-day.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod
+completionDate-month.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys mis
+completionDate-year.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys blwyddyn
+completionDate-day.error.invalid=Nodwch ddyddiad cwblhau go iawn
+completionDate-month.error.invalid=Nodwch ddyddiad cwblhau go iawn
+completionDate-year.error.invalid=Nodwch ddyddiad cwblhau go iawn
+completionDate-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys mis a blwyddyn
+completionDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a blwyddyn
+completionDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a mis
+completionDate.cyaChange=y dyddiad cwblhau
+disposalDateTooEarly.non-uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+disposalDateTooEarly.non-uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
+disposalDateTooEarly.non-uk.p2=Os cafodd gwarediad anuniongyrchol ei wneud, mae hynny oherwydd bod y cyfranddaliadau wedi cael eu gwerthu cyn 6 Ebrill 2020.
+disposalDateTooEarly.non-uk.h2=Yr hyn y bydd angen i chi ei wneud nesaf
+disposalDateTooEarly.non-uk.p3=Bydd angen i chi lenwi <a href="{0}">dibreswyl: ffurflen rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU</a>.
+disposalDateTooEarly.uk.title=Ni allwch ddefnyddio’r gwasanaeth hwn
+disposalDateTooEarly.uk.p1=Mae hyn oherwydd pan gafodd yr eiddo ei werthu neu ei waredu, cyfnewidiwyd contractau cyn 6 Ebrill 2020.
+disposalDateTooEarly.uk.p2=Dysgwch sut i roi gwybod am a thalu Treth Enillion Cyfalaf ar <a href="{0}">werthiannau neu warediadau eiddo yn y DU cyn 6 Ebrill 2020</a>.
+triage.check-your-answers.title=Gwirio’ch atebion
+triage.cyaChange.countryOfResidence=eich gwlad breswyl ar y diwrnod y gwnaethoch ‘gyfnewid’ contractau
+triage.cyaChange.assetTypeForNonUkResidents=y math o eiddo neu ased y gwnaethoch ei werthu
+triage.cyaChange.propertyType=p''un a wnaethoch werthu neu waredu eiddo preswyl
+triage.cyaChange.disposalDate=y dyddiad y gwnaethoch gyfnewid contractau wrth werthu’r eiddo
+triage.cyaChange.completionDate=y dyddiad cwblhau pan wnaethoch werthu’r eiddo
+
+#===================================================
+# SINGLE DISPOSAL TRIAGE PAGES - END
+#===================================================
+
+#===================================================
+#  SUPPORTING EVIDENCE PAGES - START
+#===================================================
+
+supporting-evidence.do-you-want-to-upload.title=A ydych eisiau uwchlwytho unrhyw dystiolaeth ategol?
+supporting-evidence.do-you-want-to-upload.error.required=Dewiswch ‘Iawn’ os ydych eisiau uwchlwytho tystiolaeth ategol
+supporting-evidence.do-you-want-to-upload.error.boolean=Dewiswch ‘Iawn’ os ydych eisiau uwchlwytho tystiolaeth ategol
+supporting-evidence.do-you-want-to-upload.caption=Tystiolaeth ategol
+supporting-evidence.do-you-want-to-upload.help-text=Gallwch uwchlwytho hyd at 2 ddogfen. Er enghraifft, taenlenni gyda chyfrifiadau, anfonebau, derbynebau neu brisiadau.
+supporting-evidence.check-your-answers.title=Gwiriwch eich atebion
+supporting-evidence.check-your-answers.caption=Tystiolaeth ategol
+supporting-evidence.check-your-answers.file-label=Dogfen {0}
+supporting-evidence.check-your-answers.do-you-want-to-upload-evidence=A ydych eisiau uwchlwytho unrhyw dystiolaeth ategol?
+supporting-evidence.check-your-answers.cya-change=Newid
+supporting-evidence.check-your-answers.assistive=y ffeil dan yr enw {0}
+supporting-evidence.check-your-answers.cya-delete=Dileu
+supporting-evidence.check-your-answers.add-another-file=Ychwanegu ffeil arall
+supporting-evidence.upload.title=Uwchlwytho dogfen gyda’ch tystiolaeth ategol
+supporting-evidence.upload.caption=Tystiolaeth ategol
+supporting-evidence.upload.error.required=Uwchlwytho ffeil gyda’ch tystiolaeth ategol
+supporting-evidence.upload.help-text=Gall y ffeil fod hyd at 3MB. Rydym yn derbyn ffeiliau XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG.
+file.error.required=Dewiswch ffeil sy''n cynnwys eich tystiolaeth ategol
+supporting-evidence.expired.title=Er eich diogelwch, gwnaethom ddileu’r dogfennau hyn
+supporting-evidence.expired.p1=Rydym yn cadw dogfennau am 5 diwrnod.
+supporting-evidence.expired.p2=Os ydych eisiau ychwanegu’r dogfennau hyn at eich Ffurflen Dreth, bydd angen i chi geisio eu huwchlwytho eto.
+supporting-evidence.expired.caption=Tystiolaeth ategol
+supporting-evidence.expired.file-label=Dogfen {0}
+supporting-evidence.expired.deleted=Wedi’i dileu
+supporting-evidence.expired.button.tryAgain=Rhowch gynnig arall arni
+supporting-evidence.scan-progress.title=Sgan ar y gweill
+supporting-evidence.scan-progress.caption=Tystiolaeth ategol
+supporting-evidence.scan-progress.p1=Bydd angen i chi aros ychydig eiliadau
+supporting-evidence.scan-progress.p2=Pan fyddwn wedi gorffen sganio’ch dogfen gallwch fynd yn eich blaen
+supporting-evidence.upload-failed.title=Mae’n ddrwg gennym, mae problem wedi codi
+supporting-evidence.upload-failed.p1=Nid oeddem yn gallu sganio’ch dogfen.
+supporting-evidence.upload-failed.p2=Gallai hyn fod oherwydd y canlynol:
+supporting-evidence.upload-failed.bullet1=mae gan y gwasanaeth broblem dechnegol
+supporting-evidence.upload-failed.bullet2=roedd eich dogfen yn fwy na 3MB
+supporting-evidence.upload-failed.p3=Bydd angen i chi roi cynnig arall arni.
+supporting-evidence.upload-failed.button.tryAgain=Rhowch gynnig arall arni
+supporting-evidence.scan-failed.title=Mae problem gyda’ch dogfen
+supporting-evidence.scan-failed.p1=Gallai’r broblem fod yn un o’r canlynol:
+supporting-evidence.scan-failed.bullet1=roedd gan y ddogfen feirws neu roedd yn llygredig
+supporting-evidence.scan-failed.bullet2=ni wnaethoch ddewis dogfen i’w huwchlwytho
+supporting-evidence.scan-failed.bullet3=gwnaethoch uwchlwytho’r fath anghywir o ddogfen
+supporting-evidence.scan-failed.p2=Rydym yn derbyn y dogfennau hyn yn unig XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, a JPG
+supporting-evidence.scan-failed.p3=Bydd angen i chi roi cynnig arall arni.
+supporting-evidence.scan-failed.button.tryAgain=Rhowch gynnig arall arni
+
+#===================================================
+#  SUPPORTING EVIDENCE PAGES - END
+#===================================================
 
 #===================================================
 #  COUNTRIES - START
