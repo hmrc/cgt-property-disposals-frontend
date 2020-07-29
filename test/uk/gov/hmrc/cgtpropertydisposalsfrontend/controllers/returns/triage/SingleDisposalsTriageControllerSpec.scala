@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Singl
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, representee, routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -101,7 +101,7 @@ class SingleDisposalsTriageControllerSpec
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
       newReturnTriageAnswers = Right(singleDisposalTriageAnswers),
       representeeAnswers = representeeAnswers,
-      previousSentReturns = previousSentReturns
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
     )
 
     val sessionData = SessionData.empty.copy(
@@ -124,7 +124,7 @@ class SingleDisposalsTriageControllerSpec
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name),
-      previousSentReturns = previousSentReturns
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
     )
 
     val sessionData = SessionData.empty.copy(

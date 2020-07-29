@@ -31,8 +31,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
@@ -90,32 +93,39 @@ class HomePageController @Inject() (
                   .whoIsIndividualRepresenting()
             )
 
-          updateSession(sessionStore, request)(
-            _.copy(
-              journeyStatus = Some(
-                StartingNewDraftReturn(
-                  subscribed.subscribedDetails,
-                  subscribed.ggCredId,
-                  subscribed.agentReferenceNumber,
-                  Right(IncompleteSingleDisposalTriageAnswers.empty),
-                  None,
-                  Some(
-                    PreviousReturnData(
-                      subscribed.sentReturns,
-                      subscribed.sentReturns.map(_.mainReturnChargeAmount).headOption
-                    )
-                  )
-                )
-              )
-            )
-          ).map {
-            case Left(e)  =>
+          val result = for {
+            previousYtdLiability <-
+              getPreviousYearToDateLiability(subscribed.sentReturns, subscribed.subscribedDetails.cgtReference)
+            _                    <- EitherT(
+                                      updateSession(sessionStore, request)(
+                                        _.copy(
+                                          journeyStatus = Some(
+                                            StartingNewDraftReturn(
+                                              subscribed.subscribedDetails,
+                                              subscribed.ggCredId,
+                                              subscribed.agentReferenceNumber,
+                                              Right(IncompleteSingleDisposalTriageAnswers.empty),
+                                              None,
+                                              Some(
+                                                PreviousReturnData(
+                                                  subscribed.sentReturns,
+                                                  previousYtdLiability
+                                                )
+                                              )
+                                            )
+                                          )
+                                        )
+                                      )
+                                    )
+          } yield ()
+
+          result.fold(
+            { e =>
               logger.warn("Could not update session", e)
               errorHandler.errorResult()
-
-            case Right(_) =>
-              Redirect(redirectTo)
-          }
+            },
+            _ => Redirect(redirectTo)
+          )
         }
       }(withUplift = false)
     }
@@ -132,31 +142,38 @@ class HomePageController @Inject() (
             )
             errorHandler.errorResult()
           } { draftReturn =>
-            updateSession(sessionStore, request)(
-              _.copy(
-                journeyStatus = Some(
-                  FillingOutReturn(
-                    subscribed.subscribedDetails,
-                    subscribed.ggCredId,
-                    subscribed.agentReferenceNumber,
-                    draftReturn,
-                    Some(
-                      PreviousReturnData(
-                        subscribed.sentReturns,
-                        subscribed.sentReturns.map(_.mainReturnChargeAmount).headOption
-                      )
-                    )
-                  )
-                )
-              )
-            ).map {
-              case Left(e)  =>
+            val result = for {
+              previousYtdLiability <-
+                getPreviousYearToDateLiability(subscribed.sentReturns, subscribed.subscribedDetails.cgtReference)
+              _                    <- EitherT(
+                                        updateSession(sessionStore, request)(
+                                          _.copy(
+                                            journeyStatus = Some(
+                                              FillingOutReturn(
+                                                subscribed.subscribedDetails,
+                                                subscribed.ggCredId,
+                                                subscribed.agentReferenceNumber,
+                                                draftReturn,
+                                                Some(
+                                                  PreviousReturnData(
+                                                    subscribed.sentReturns,
+                                                    previousYtdLiability
+                                                  )
+                                                )
+                                              )
+                                            )
+                                          )
+                                        )
+                                      )
+            } yield ()
+            result.fold(
+              { e =>
                 logger.warn("Could not update session", e)
                 errorHandler.errorResult()
+              },
+              _ => Redirect(returns.routes.TaskListController.taskList())
+            )
 
-              case Right(_) =>
-                Redirect(returns.routes.TaskListController.taskList())
-            }
           }
       }(withUplift = false)
     }
@@ -249,6 +266,42 @@ class HomePageController @Inject() (
       }
       Ok(subsequentReturnExitPage(backLink))
     }
+
+  private def getPreviousYearToDateLiability(
+    previousSentReturns: List[ReturnSummary],
+    cgtReference: CgtReference
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[AmountInPence]] = {
+    def fromNonCalculatedYtdAnswers(a: CompleteNonCalculatedYTDAnswers): AmountInPence =
+      a.yearToDateLiability.getOrElse(a.taxDue)
+
+    val previousSentReturnsWithDates = previousSentReturns.map(r => r -> r.lastUpdatedDate.getOrElse(r.submissionDate))
+    val latestReturnWithData         =
+      previousSentReturnsWithDates.sortBy(_._2)(localDateOrder.toOrdering).lastOption
+
+    latestReturnWithData match {
+      case None                             => EitherT.pure(None)
+      case Some((latestReturn, latestDate)) =>
+        val moreThanOneReturnOnLatestDate =
+          previousSentReturns
+            .filter(r => r.lastUpdatedDate.contains(latestDate) || localDateOrder.eqv(r.submissionDate, latestDate))
+            .size > 1
+
+        if (moreThanOneReturnOnLatestDate)
+          EitherT.pure(None)
+        else
+          returnsService.displayReturn(cgtReference, latestReturn.submissionId).map { completeReturn =>
+            val yearToDate = completeReturn.fold(
+              multiple => fromNonCalculatedYtdAnswers(multiple.yearToDateLiabilityAnswers),
+              single => single.yearToDateLiabilityAnswers.fold(fromNonCalculatedYtdAnswers, _.taxDue),
+              singleIndirect => fromNonCalculatedYtdAnswers(singleIndirect.yearToDateLiabilityAnswers),
+              multipleIndirect => fromNonCalculatedYtdAnswers(multipleIndirect.yearToDateLiabilityAnswers),
+              singleMixedUse => fromNonCalculatedYtdAnswers(singleMixedUse.yearToDateLiabilityAnswers)
+            )
+            Some(yearToDate)
+          }
+    }
+
+  }
 
   private def withSubscribedUser(
     f: (SessionData, Subscribed) => Future[Result]
