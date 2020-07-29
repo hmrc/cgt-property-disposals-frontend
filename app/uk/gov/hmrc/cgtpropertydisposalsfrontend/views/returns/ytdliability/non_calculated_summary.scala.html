@@ -123,6 +123,19 @@
         Some(cyaChange(messages(s"nonCalculatedTaxDue$furtherReturnKey.cyaChange"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
         "nonCalculatedTaxDue-value"
     )
+
+    @if(isFurtherReturn.contains(true)) {
+        @answers.checkForRepayment.map { checkForRepayment =>
+            @cyaRow(
+                messages(s"repayment$userKeyWithSeparatePeriodOfAdmin.title"),
+                Html(messages(if(checkForRepayment) "generic.yes" else "generic.no")),
+                Some(cyaChange(messages("repayment.cyaChange"), routes.YearToDateLiabilityController.repayment().url)),
+                "repayment"
+            )
+
+        }
+    }
+
   @if(showFiles) {
     @cyaRow(
       messages("mandatoryEvidence.title"),

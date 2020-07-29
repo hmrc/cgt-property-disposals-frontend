@@ -382,7 +382,7 @@ class YearToDateLiabilityControllerSpec
       isFurtherReturn = isFurtherReturn
     )
 
-  def singleDispsaslDraftReturnWithCompleteJourneys(
+  def singleDisposalDraftReturnWithCompleteJourneys(
     yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: DisposalDate,
     reliefDetailsAnswers: ReliefDetailsAnswers,
@@ -1836,7 +1836,8 @@ class YearToDateLiabilityControllerSpec
                 None,
                 None,
                 None,
-                answers.yearToDateLiability
+                answers.yearToDateLiability,
+                answers.checkForRepayment
               )
 
               val (session, journey, draftReturn) =
@@ -2001,7 +2002,7 @@ class YearToDateLiabilityControllerSpec
                   sample[FillingOutReturn].copy(
                     subscribedDetails = sample[SubscribedDetails]
                       .copy(name = Right(sample[IndividualName])),
-                    draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
+                    draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
                       Some(
                         IncompleteCalculatedYTDAnswers.empty.copy(
                           estimatedIncome = Some(AmountInPence(1L)),
@@ -2363,7 +2364,7 @@ class YearToDateLiabilityControllerSpec
           expiredEvidence = None,
           pendingUpscanUpload = None
         )
-        val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
+        val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
           Some(oldAnswers),
           sample[DisposalDate],
           completeReliefDetailsAnswersWithNoOtherReliefs
@@ -2440,7 +2441,7 @@ class YearToDateLiabilityControllerSpec
             mandatoryEvidence = None,
             expiredEvidence = None
           )
-          val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
+          val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
             Some(answers),
             sample[DisposalDate],
             completeReliefDetailsAnswersWithNoOtherReliefs
@@ -2465,7 +2466,7 @@ class YearToDateLiabilityControllerSpec
 
       "show a form error" when {
         val draftReturn =
-          singleDispsaslDraftReturnWithCompleteJourneys(
+          singleDisposalDraftReturnWithCompleteJourneys(
             Some(sample[CompleteCalculatedYTDAnswers]),
             sample[DisposalDate],
             completeReliefDetailsAnswersWithNoOtherReliefs
@@ -2514,7 +2515,7 @@ class YearToDateLiabilityControllerSpec
               None,
               None
             )
-            val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
+            val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
               Some(answers),
               disposalDate,
               completeReliefDetailsAnswersWithNoOtherReliefs
@@ -2547,7 +2548,7 @@ class YearToDateLiabilityControllerSpec
               AmountInPence(1L),
               Some(sample[MandatoryEvidence])
             )
-            val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
+            val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
               Some(answers),
               disposalDate,
               completeReliefDetailsAnswersWithNoOtherReliefs
@@ -2969,6 +2970,7 @@ class YearToDateLiabilityControllerSpec
           true,
           AmountInPence(2L),
           sample[MandatoryEvidence],
+          None,
           None
         )
 
@@ -2977,6 +2979,7 @@ class YearToDateLiabilityControllerSpec
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue),
           Some(completeAnswers.mandatoryEvidence),
+          None,
           None,
           None,
           None
@@ -3154,9 +3157,24 @@ class YearToDateLiabilityControllerSpec
           "the return is a further return and that question hasn't been answered yet" in {
             testRedirectWhenIncompleteAnswers(
               allQuestionAnswered.copy(
-                expiredEvidence = Some(sample[MandatoryEvidence])
+                yearToDateLiability = None
               ),
-              routes.YearToDateLiabilityController.mandatoryEvidenceExpired(),
+              routes.YearToDateLiabilityController.yearToDateLiability(),
+              isFurtherReturn = true
+            )
+
+          }
+
+        }
+
+        "redirect to the repayment page" when {
+
+          "the return is a further return and that question hasn't been answered yet" in {
+            testRedirectWhenIncompleteAnswers(
+              allQuestionAnswered.copy(
+                yearToDateLiability = Some(sample[AmountInPence])
+              ),
+              routes.YearToDateLiabilityController.repayment(),
               isFurtherReturn = true
             )
 
@@ -3253,14 +3271,22 @@ class YearToDateLiabilityControllerSpec
           "the user has just answered all the questions for a further return in the section and all updates are successful" in {
             val yearToDateLiability             = sample[AmountInPence]
             val (session, journey, draftReturn) = sessionWithMultipleDisposalsState(
-              allQuestionAnswered.copy(yearToDateLiability = Some(yearToDateLiability)),
+              allQuestionAnswered.copy(
+                yearToDateLiability = Some(yearToDateLiability),
+                checkForRepayment = Some(true)
+              ),
               UserType.Individual,
               wasUkResident = true,
               isFurtherReturn = true
             )
             val updatedDraftReturn              =
               draftReturn.copy(yearToDateLiabilityAnswers =
-                Some(completeAnswers.copy(yearToDateLiability = Some(yearToDateLiability)))
+                Some(
+                  completeAnswers.copy(
+                    yearToDateLiability = Some(yearToDateLiability),
+                    checkForRepayment = Some(true)
+                  )
+                )
               )
             val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
             val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
@@ -3309,6 +3335,7 @@ class YearToDateLiabilityControllerSpec
           Some(sample[AmountInPence]),
           Some(sample[Boolean]),
           Some(sample[AmountInPence]),
+          None,
           None,
           None,
           None,
@@ -3393,7 +3420,7 @@ class YearToDateLiabilityControllerSpec
           answers: YearToDateLiabilityAnswers,
           backLink: Call
         ): Unit = {
-          val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
+          val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
             Some(answers),
             sample[DisposalDate],
             completeReliefDetailsAnswersWithNoOtherReliefs
@@ -3491,6 +3518,7 @@ class YearToDateLiabilityControllerSpec
                 Some(AmountInPence.zero),
                 Some(true),
                 Some(AmountInPence(200L)),
+                None,
                 None,
                 None,
                 None,
@@ -4160,7 +4188,8 @@ class YearToDateLiabilityControllerSpec
               None,
               None,
               None,
-              answers.yearToDateLiability
+              answers.yearToDateLiability,
+              answers.checkForRepayment
             )
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
@@ -4621,7 +4650,8 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             None,
-            answers.yearToDateLiability
+            answers.yearToDateLiability,
+            answers.checkForRepayment
           )
           val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
@@ -4677,7 +4707,8 @@ class YearToDateLiabilityControllerSpec
             None,
             None,
             None,
-            answers.yearToDateLiability
+            answers.yearToDateLiability,
+            answers.checkForRepayment
           )
           val draftReturn         = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
@@ -4757,7 +4788,8 @@ class YearToDateLiabilityControllerSpec
               None,
               None,
               None,
-              answers.yearToDateLiability
+              answers.yearToDateLiability,
+              answers.checkForRepayment
             )
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
@@ -4820,6 +4852,7 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(upscanUpload),
+          None,
           None
         )
         val (session, journey, draftReturn) =
@@ -4963,6 +4996,7 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(upscanUpload),
+          None,
           None
         )
         val (session, journey, draftReturn) =
@@ -5021,6 +5055,7 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           Some(upscanUpload),
+          None,
           None
         )
 
@@ -5524,6 +5559,7 @@ class YearToDateLiabilityControllerSpec
           None,
           None,
           None,
+          None,
           None
         )
 
@@ -5901,6 +5937,396 @@ class YearToDateLiabilityControllerSpec
 
     }
 
+    "handling requests to display the repayment page" must {
+
+      def performAction(): Future[Result] = controller.repayment()(FakeRequest())
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      "redirect to the check your answers page" when {
+
+        "the return is not a first return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithMultipleDisposalsState(
+                sample[CompleteNonCalculatedYTDAnswers],
+                UserType.Individual,
+                wasUkResident = true,
+                isFurtherReturn = false
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
+        }
+
+      }
+
+      "display the page" when {
+
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectedTitleKey: String,
+          expectedHelpTextKey: String
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(expectedTitleKey),
+            { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+
+              doc.select("#repayment-form-hint").text shouldBe messageFromMessageKey(expectedHelpTextKey)
+
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.YearToDateLiabilityController
+                .repaymentSubmit()
+                .url
+            }
+          )
+        }
+
+        val requiredPreviousAnswers = IncompleteNonCalculatedYTDAnswers(
+          Some(sample[AmountInPence]),
+          Some(true),
+          Some(sample[AmountInPence]),
+          None,
+          None,
+          None,
+          Some(sample[AmountInPence]),
+          None
+        )
+
+        "they are completing the return for themselves" in {
+          test(
+            sessionWithSingleDisposalState(
+              Some(requiredPreviousAnswers),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              Some(
+                sample[CompleteReliefDetailsAnswers].copy(
+                  otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+                )
+              ),
+              isFurtherReturn = true,
+              individualUserType = Some(Self)
+            )._1,
+            routes.YearToDateLiabilityController.taxDue(),
+            "repayment.title",
+            "repayment.helpText"
+          )
+        }
+
+        "they are an agent" in {
+          test(
+            sessionWithMultipleDisposalsState(
+              Some(requiredPreviousAnswers),
+              UserType.Agent,
+              wasUkResident = true,
+              Some(Self),
+              isFurtherReturn = true
+            )._1,
+            routes.YearToDateLiabilityController.taxDue(),
+            "repayment.agent.title",
+            "repayment.agent.helpText"
+          )
+        }
+
+        "they are a trust" in {
+          test(
+            sessionWithSingleIndirectDisposalState(
+              Some(requiredPreviousAnswers),
+              Some(sample[DisposalDate]),
+              UserType.Organisation,
+              wasUkResident = true,
+              isFurtherReturn = true,
+              individualUserType = None
+            )._1,
+            routes.YearToDateLiabilityController.taxDue(),
+            "repayment.trust.title",
+            "repayment.trust.helpText"
+          )
+        }
+
+        "they are a capacitor" in {
+          test(
+            sessionWithSingleDisposalState(
+              Some(requiredPreviousAnswers),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              Some(
+                sample[CompleteReliefDetailsAnswers].copy(
+                  otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+                )
+              ),
+              isFurtherReturn = true,
+              individualUserType = Some(Capacitor)
+            )._1,
+            routes.YearToDateLiabilityController.taxDue(),
+            "repayment.capacitor.title",
+            "repayment.capacitor.helpText"
+          )
+        }
+
+        "they are a personal rep" in {
+          test(
+            sessionWithSingleDisposalState(
+              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              Some(
+                sample[CompleteReliefDetailsAnswers].copy(
+                  otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+                )
+              ),
+              isFurtherReturn = true,
+              individualUserType = Some(PersonalRepresentative)
+            )._1,
+            routes.YearToDateLiabilityController.checkYourAnswers(),
+            "repayment.personalRep.title",
+            "repayment.personalRep.helpText"
+          )
+        }
+
+        "they are a personal rep in a period of admin" in {
+          test(
+            sessionWithSingleDisposalState(
+              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              Some(sample[DisposalDate]),
+              UserType.Individual,
+              wasUkResident = true,
+              Some(
+                sample[CompleteReliefDetailsAnswers].copy(
+                  otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+                )
+              ),
+              isFurtherReturn = true,
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            )._1,
+            routes.YearToDateLiabilityController.checkYourAnswers(),
+            "repayment.personalRepInPeriodOfAdmin.title",
+            "repayment.personalRepInPeriodOfAdmin.helpText"
+          )
+        }
+
+        "they are an agent of a personal rep in a period of admin" in {
+          test(
+            sessionWithSingleDisposalState(
+              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              Some(sample[DisposalDate]),
+              UserType.Agent,
+              wasUkResident = true,
+              Some(
+                sample[CompleteReliefDetailsAnswers].copy(
+                  otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)
+                )
+              ),
+              isFurtherReturn = true,
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
+            )._1,
+            routes.YearToDateLiabilityController.checkYourAnswers(),
+            "repayment.personalRepInPeriodOfAdmin.agent.title",
+            "repayment.personalRepInPeriodOfAdmin.agent.helpText"
+          )
+        }
+
+      }
+
+    }
+
+    "handling submits on the repayment page" ignore {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      {
+        val answers = IncompleteNonCalculatedYTDAnswers.empty.copy(
+          taxDue = Some(sample[AmountInPence])
+        )
+
+        val (_, journey, draftReturn) = sessionWithMultipleDisposalsState(
+          Some(answers),
+          UserType.Individual,
+          wasUkResident = true,
+          isFurtherReturn = true
+        )
+
+        behave like unsuccessfulUpdateBehaviour(
+          journey,
+          journey.copy(draftReturn =
+            draftReturn.copy(yearToDateLiabilityAnswers =
+              Some(
+                answers.copy(
+                  checkForRepayment = Some(true)
+                )
+              )
+            )
+          ),
+          () => performAction("repayment" -> "true")
+        )
+      }
+
+      "redirect to the check your answers page" must {
+
+        "the return is not a first return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithMultipleDisposalsState(
+                sample[CompleteNonCalculatedYTDAnswers],
+                UserType.Individual,
+                wasUkResident = true,
+                isFurtherReturn = false
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.YearToDateLiabilityController.checkYourAnswers())
+        }
+
+      }
+
+      "show a form error" when {
+
+        def test(
+          sessionData: SessionData
+        )(
+          data: (String, String)*
+        )(expectedTitleKey: String, expectedErrorKey: String): Unit =
+          testFormError(data: _*)(
+            expectedErrorKey
+          )(expectedTitleKey)(performAction, sessionData)
+
+        val testCases = {
+          def session(userType: UserType, individualUserType: Option[IndividualUserType]) =
+            sessionWithMultipleDisposalsState(
+              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              userType,
+              wasUkResident = true,
+              individualUserType,
+              isFurtherReturn = true
+            )._1
+
+          List(
+            ""                                  -> session(UserType.Individual, Some(Self)),
+            ".agent"                            -> session(UserType.Agent, Some(Self)),
+            ".trust"                            -> session(UserType.Organisation, None),
+            ".capacitor"                        -> session(UserType.Individual, Some(Capacitor)),
+            ".personalRep"                      -> session(UserType.Individual, Some(PersonalRepresentative)),
+            ".personalRepInPeriodOfAdmin"       -> session(
+              UserType.Individual,
+              Some(PersonalRepresentativeInPeriodOfAdmin)
+            ),
+            ".personalRepInPeriodOfAdmin.agent" -> session(
+              UserType.Agent,
+              Some(PersonalRepresentativeInPeriodOfAdmin)
+            )
+          )
+        }
+
+        "nothing is submitted" in {
+          testCases.foreach {
+            case (userKey, session) =>
+              withClue(s"For user key '$userKey': ") {
+                test(session)()(
+                  s"repayment$userKey.title",
+                  s"repayment$userKey.error.required"
+                )
+              }
+          }
+        }
+
+        "the value submitted is invalid" in {
+          testCases.foreach {
+            case (userKey, session) =>
+              withClue(s"For user key '$userKey': ") {
+                test(session)("repayment" -> "123")(
+                  s"repayment$userKey.title",
+                  s"repayment$userKey.error.boolean"
+                )
+              }
+          }
+        }
+
+      }
+
+      "redirect to the cya endpoint" when {
+
+        "all updates are successful" in {
+          val answers    = sample[CompleteNonCalculatedYTDAnswers].copy(
+            checkForRepayment = Some(false)
+          )
+          val newAnswers = IncompleteNonCalculatedYTDAnswers
+            .fromCompleteAnswers(answers)
+            .copy(checkForRepayment = Some(true))
+
+          val (session, journey, draftReturn) = sessionWithSingleDisposalState(
+            Some(answers),
+            userType = UserType.Individual,
+            wasUkResident = true,
+            isFurtherReturn = true
+          )
+
+          val newDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
+            mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("repayment" -> "true"),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+
+        }
+
+      }
+
+      "not do any updates" when {
+
+        "the answer submitted is the same as the one held in session" in {
+          val answers = sample[CompleteNonCalculatedYTDAnswers].copy(
+            checkForRepayment = Some(false)
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(
+            Some(answers),
+            userType = UserType.Individual,
+            wasUkResident = true,
+            isFurtherReturn = true
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction("repayment" -> "false"),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+
+      }
+
+    }
   }
 
   def noPendingUploadbBehaviour(performAction: () => Future[Result]): Unit =
@@ -6035,7 +6461,7 @@ class YearToDateLiabilityControllerSpec
   def incompleteOtherJourneysBehaviour(
     performAction: () => Future[Result]
   ): Unit = {
-    val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
+    val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
       Some(
         sample[CompleteCalculatedYTDAnswers]
           .copy(estimatedIncome = AmountInPence.zero, personalAllowance = None)
@@ -6447,7 +6873,7 @@ class YearToDateLiabilityControllerSpec
     individualUserType: Option[IndividualUserType],
     previousSentReturnData: Option[PreviousReturnData]
   ): Unit = {
-    val draftReturn      = singleDispsaslDraftReturnWithCompleteJourneys(
+    val draftReturn      = singleDisposalDraftReturnWithCompleteJourneys(
       oldAnswers,
       disposalDate,
       reliefDetailsAnswers,
@@ -6676,15 +7102,18 @@ object YearToDateLiabilityControllerSpec extends Matchers {
         s"taxableGainOrLoss$furtherReturnKey.noLossOrGain.label"
       )
 
-    if (answers.hasEstimatedDetails)
-      doc.select("#hasEstimatedDetails-value-answer").text() shouldBe "Yes"
-    else
-      doc.select("#hasEstimatedDetails-value-answer").text() shouldBe "No"
+    doc.select("#hasEstimatedDetails-value-answer").text() shouldBe (if (answers.hasEstimatedDetails) "Yes" else "No")
 
-    if (isFurtherReturn)
+    if (isFurtherReturn) {
       answers.yearToDateLiability.foreach { y =>
         doc.select("#yearToDateLiability-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(y.inPounds())
       }
+
+      answers.checkForRepayment.foreach { checkForRepayment =>
+        doc.select("#repayment-answer").text() shouldBe (if (checkForRepayment) "Yes" else "No")
+      }
+
+    }
 
     doc
       .select("#nonCalculatedTaxDue-value-answer")
