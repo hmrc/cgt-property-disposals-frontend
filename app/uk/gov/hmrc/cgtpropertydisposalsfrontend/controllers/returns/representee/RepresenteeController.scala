@@ -163,7 +163,7 @@ class RepresenteeController @Inject() (
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             val backLink = answers.fold(
-              _ => routes.RepresenteeController.isFirstReturn(),
+              _ => triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               _ => routes.RepresenteeController.checkYourAnswers()
             )
 
@@ -792,6 +792,9 @@ class RepresenteeController @Inject() (
 
           case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None)                                             =>
             Redirect(routes.RepresenteeController.isFirstReturn())
+
+          case IncompleteRepresenteeAnswers(None, None, None, None, false, false, Some(false))                  =>
+            Redirect(triageRoutes.CommonTriageQuestionsController.furtherReturnHelp())
 
           case IncompleteRepresenteeAnswers(_, _, _, _, _, _, Some(false)) if !viewConfig.furtherReturnsEnabled =>
             Redirect(controllers.accounts.homepage.routes.HomePageController.exitForSubsequentReturn())

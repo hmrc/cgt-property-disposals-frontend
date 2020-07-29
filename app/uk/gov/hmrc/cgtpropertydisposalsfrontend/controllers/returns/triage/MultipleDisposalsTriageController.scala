@@ -52,6 +52,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -1025,6 +1026,22 @@ class MultipleDisposalsTriageController @Inject() (
             Redirect(
               routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
+            )
+
+          case IncompleteMultipleDisposalsTriageAnswers(
+                Some(Self),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+              ) if isIndividual =>
+            Redirect(
+              routes.CommonTriageQuestionsController
+                .furtherReturnHelp()
             )
 
           case IncompleteMultipleDisposalsTriageAnswers(

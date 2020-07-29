@@ -391,6 +391,28 @@ address-select.returns.trust.invalid=Select the contact address or enter it manu
 address-select.returns.capacitor.invalid=Select the contact address or enter it manually if it is not shown
 address-select.returns.personalRep.invalid=Select the contact address or enter it manually if it is not shown
 
+further-returns.help.title=You will need to calculate the amounts in this return
+further-returns.help.warning=We do not calculate the amounts you will need to enter. You will need to work them out yourself.
+further-returns.help.listHeading=You will need to:
+
+further-returns.help.l1=calculate your Capital Gains Tax liability on your UK property-related disposals for the tax year so far
+further-returns.help.l2=upload a document showing how you worked out this amount and the amount of the Capital Gains Tax due
+further-returns.agent.help.l1=calculate your client's Capital Gains Tax liability on your UK property-related disposals for the tax year so far
+further-returns.agent.help.l2=upload a document showing how you worked out this amount and the amount of the Capital Gains Tax due
+further-returns.trust.help.l1=calculate the trust's Capital Gains Tax liability on your UK property-related disposals for the tax year so far
+further-returns.trust.help.l2=upload a document showing how you worked out this amount and the amount of the Capital Gains Tax due
+further-returns.capacitor.help.l1=calculate the person's Capital Gains Tax liability on your UK property-related disposals for the tax year so far
+further-returns.capacitor.help.l2=upload a document showing how you worked out this amount and the amount of the Capital Gains Tax due
+further-returns.personalRep.help.l1=calculate the person's Capital Gains Tax liability on your UK property-related disposals for the tax year so far
+further-returns.personalRep.help.l2=upload a document showing how you worked out this amount and the amount of the Capital Gains Tax due
+further-returns.personalRepInPeriodOfAdmin.help.l1=calculate the estate's Capital Gains Tax liability on your UK property-related disposals for the tax year so far
+further-returns.personalRepInPeriodOfAdmin.help.l2=upload a document showing how you worked out this amount and the amount of the Capital Gains Tax due
+
+
+further-returns.help.link=<a href="{0}">How to calculate the amount needed in this return</a>
+further-returns.help.prompt=If you need help
+further-returns.help.contact=<a href="{0}"> Contact HMRC </a>
+
 subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
 subscribed.organisation.p1=You’ve created a Capital Gains Tax on UK property account for your trust or estate.

@@ -1191,6 +1191,22 @@ class SingleDisposalsTriageController @Inject() (
             )
 
           case IncompleteSingleDisposalTriageAnswers(
+                Some(Self),
+                false,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+              ) if isIndividual =>
+            Redirect(
+              routes.CommonTriageQuestionsController
+                .furtherReturnHelp()
+            )
+
+          case IncompleteSingleDisposalTriageAnswers(
                 Some(_: RepresentativeType),
                 _,
                 _,

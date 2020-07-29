@@ -56,6 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -469,7 +470,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.capacitor.title",
-              routes.RepresenteeController.isFirstReturn(),
+              triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               expectReturnToSummaryLink = false,
               None
             )
@@ -487,7 +488,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.personalRep.title",
-              routes.RepresenteeController.isFirstReturn(),
+              triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               expectReturnToSummaryLink = false,
               Some(name)
             )
@@ -525,7 +526,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.capacitor.title",
-              routes.RepresenteeController.isFirstReturn(),
+              triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               expectReturnToSummaryLink = true,
               None
             )
@@ -544,7 +545,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.personalRep.title",
-              routes.RepresenteeController.isFirstReturn(),
+              triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               expectReturnToSummaryLink = true,
               Some(name)
             )

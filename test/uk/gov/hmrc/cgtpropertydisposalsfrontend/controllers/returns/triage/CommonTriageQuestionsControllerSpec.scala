@@ -42,7 +42,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, Se
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, NonResidential, Residential}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 
 import scala.concurrent.Future
 
@@ -756,6 +759,242 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
+    "handing request to display the further returns help page" must {
+
+      def performAction(): Future[Result] =
+        controller.furtherReturnHelp()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      "display the page" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has not answered any triage questions yet" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(IncompleteSingleDisposalTriageAnswers.empty),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("further-returns.help.title"),
+              { doc =>
+                doc
+                  .select("#content > article > form")
+                  .attr(
+                    "action"
+                  ) shouldBe routes.CommonTriageQuestionsController
+                  .furtherReturnHelpSubmit()
+                  .url
+
+                doc
+                  .select("#warning")
+                  .text() shouldBe messageFromMessageKey(
+                  "further-returns.help.warning"
+                )
+                doc
+                  .select("#content > article > p:nth-child(4)")
+                  .html() shouldBe messageFromMessageKey(
+                  "further-returns.help.listHeading"
+                )
+                doc
+                  .select("#content > article > ul > li:nth-child(1)")
+                  .html() shouldBe messageFromMessageKey(
+                  s"further-returns.help.l1"
+                )
+                doc
+                  .select("#content > article > ul > li:nth-child(2)")
+                  .html() shouldBe messageFromMessageKey(
+                  s"further-returns.help.l2"
+                )
+              }
+            )
+          }
+
+          "the user is on the multiple disposals journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(
+                    IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+                      individualUserType = Some(IndividualUserType.Capacitor)
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("further-returns.help.title"),
+              { doc =>
+                doc
+                  .select("#content > article > form")
+                  .attr(
+                    "action"
+                  ) shouldBe routes.CommonTriageQuestionsController
+                  .furtherReturnHelpSubmit()
+                  .url
+
+                doc
+                  .select("#warning")
+                  .text() shouldBe messageFromMessageKey(
+                  "further-returns.help.warning"
+                )
+                doc
+                  .select("#content > article > p:nth-child(4)")
+                  .html() shouldBe messageFromMessageKey(
+                  "further-returns.help.listHeading"
+                )
+                doc
+                  .select("#content > article > ul > li:nth-child(1)")
+                  .html() shouldBe messageFromMessageKey(
+                  s"further-returns.capacitor.help.l1"
+                )
+                doc
+                  .select("#content > article > ul > li:nth-child(2)")
+                  .html() shouldBe messageFromMessageKey(
+                  s"further-returns.capacitor.help.l2"
+                )
+              }
+            )
+          }
+
+          "the user is an agent representing an individual" in {
+            List(
+              (IndividualUserType.Self, "agent"),
+              (IndividualUserType.PersonalRepresentative, "personalRep")
+            ).zipWithIndex.foreach {
+              case (value, _) =>
+                val (session, journey) =
+                  sessionDataWithStartingNewDraftReturn(
+                    Right(
+                      IncompleteSingleDisposalTriageAnswers.empty
+                    ),
+                    Right(sample[IndividualName])
+                  )
+
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    session.copy(
+                      userType = Some(UserType.Agent),
+                      journeyStatus = Some(
+                        journey.copy(
+                          agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                          newReturnTriageAnswers = Right(
+                            IncompleteSingleDisposalTriageAnswers.empty.copy(
+                              individualUserType = Some(value._1)
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                }
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey("further-returns.help.title"),
+                  { doc =>
+                    doc
+                      .select("#content > article > form")
+                      .attr(
+                        "action"
+                      ) shouldBe routes.CommonTriageQuestionsController
+                      .furtherReturnHelpSubmit()
+                      .url
+
+                    doc
+                      .select("#warning")
+                      .text() shouldBe messageFromMessageKey(
+                      "further-returns.help.warning"
+                    )
+                    doc
+                      .select("#content > article > p:nth-child(4)")
+                      .html() shouldBe messageFromMessageKey(
+                      "further-returns.help.listHeading"
+                    )
+                    doc
+                      .select("#content > article > ul > li:nth-child(1)")
+                      .html() shouldBe messageFromMessageKey(
+                      s"further-returns.${value._2}.help.l1"
+                    )
+                    doc
+                      .select("#content > article > ul > li:nth-child(2)")
+                      .html() shouldBe messageFromMessageKey(
+                      s"further-returns.${value._2}.help.l2"
+                    )
+                  }
+                )
+            }
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling submit to further returns help page" must {
+      def performAction(): Future[Result] =
+        controller.furtherReturnHelpSubmit()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        isValidJourney
+      )
+
+      "an individual representing themselves gets redirected to how many properties" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithStartingNewDraftReturn(
+              Right(IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(Self))),
+              Right(sample[IndividualName]),
+              Individual
+            )._1
+          )
+        }
+
+        checkIsRedirect(
+          performAction(),
+          routes.CommonTriageQuestionsController.howManyProperties()
+        )
+      }
+
+      "a representenative gets redirected to enter representee name page" in {
+        List(PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Capacitor).foreach { representativeType =>
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(representativeType))),
+                Left(sample[TrustName])
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            representeeRoutes.RepresenteeController.enterName()
+          )
+
+        }
+      }
+    }
+
     "handling requests to display the number of properties page" must {
 
       def performAction(): Future[Result] =
@@ -815,7 +1054,7 @@ class CommonTriageQuestionsControllerSpec
               doc
                 .select("#back")
                 .attr("href")    shouldBe routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresenting()
+                .furtherReturnHelp()
                 .url
               doc
                 .select("#content > article > form")
