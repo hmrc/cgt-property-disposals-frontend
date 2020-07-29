@@ -20,7 +20,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Charge
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Payment
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ClearingReason._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
@@ -43,20 +42,9 @@
         (payment.method, payment.clearingReason) match {
             case (Some(paymentMethod), _) =>
                     makePaymentDetailsHtml("paymentMethod", paymentMethod.toString, payment.amount.inPounds(), payment.clearingDate)
-            case (None, Some(clearingReason)) => clearingReason match {
-                case IncomingPayment | OutgoingPayment | WriteOff | Reversal | MassWriteOff | AutomaticClearing =>
+            case (None, Some(clearingReason)) =>
                     makePaymentDetailsHtml("clearingReason", clearingReason.toString, payment.amount.inPounds(), payment.clearingDate)
-                case SomeOtherClearingReason if (payment.method.isDefined) =>
-                    makePaymentDetailsHtml("paymentMethod", payment.method.fold("")(_.toString), payment.amount.inPounds(), payment.clearingDate)
-                case SomeOtherClearingReason if (!payment.method.isDefined) =>
-                    <li>
-                        {messages(s"viewReturn.charge.display-error")}
-                    </li>
-            }
-            case (_,_) =>
-                <li>
-                    {messages(s"viewReturn.charge.display-error")}
-                </li>
+            case (_,_) => <li>{messages(s"viewReturn.charge.display-error")}</li>
         }
     }
 
