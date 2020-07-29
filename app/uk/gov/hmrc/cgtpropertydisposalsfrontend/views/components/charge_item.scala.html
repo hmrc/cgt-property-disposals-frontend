@@ -44,11 +44,11 @@
             case (Some(paymentMethod), _) =>
                     makePaymentDetailsHtml("paymentMethod", paymentMethod.toString, payment.amount.inPounds(), payment.clearingDate)
             case (None, Some(clearingReason)) => clearingReason match {
-                case IncomingPayment | OutgoingPayment | WriteOff | Reversal | MassWriteOff | AutomaticClearing | SomeOtherClearingReason =>
+                case IncomingPayment | OutgoingPayment | WriteOff | Reversal | MassWriteOff | AutomaticClearing =>
                     makePaymentDetailsHtml("clearingReason", clearingReason.toString, payment.amount.inPounds(), payment.clearingDate)
-                case InvalidClearingReason if (payment.method.isDefined) =>
+                case SomeOtherClearingReason if (payment.method.isDefined) =>
                     makePaymentDetailsHtml("paymentMethod", payment.method.fold("")(_.toString), payment.amount.inPounds(), payment.clearingDate)
-                case InvalidClearingReason if (!payment.method.isDefined) =>
+                case SomeOtherClearingReason if (!payment.method.isDefined) =>
                     <li>
                         {messages(s"viewReturn.charge.display-error")}
                     </li>

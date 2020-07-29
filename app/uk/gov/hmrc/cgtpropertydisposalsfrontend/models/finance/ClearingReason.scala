@@ -30,7 +30,6 @@ object ClearingReason {
   case object MassWriteOff extends ClearingReason
   case object AutomaticClearing extends ClearingReason
   case object SomeOtherClearingReason extends ClearingReason
-  case object InvalidClearingReason extends ClearingReason
 
   implicit val eq: Eq[ClearingReason]          = Eq.fromUniversalEquals
   implicit val format: OFormat[ClearingReason] = derived.oformat()
