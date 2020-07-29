@@ -81,7 +81,8 @@ class YearToDateLiabilityController @Inject() (
   calculatedCheckYouAnswersPage: pages.calculated_check_your_answers,
   taxableGainOrLossPage: pages.taxable_gain_or_loss,
   nonCalculatedEnterTaxDuePage: pages.non_calculated_enter_tax_due,
-  furtherReturnNonCalculatedEnterTaxDuePage: pages.further_return_non_calculated_enter_tax_due,
+  furtherReturnNonCapPREnterTaxDuePage: pages.further_return_non_cap_pr_enter_tax_due,
+  furtherReturnCapPREnterTaxDuePage: pages.further_return_cap_pr_enter_tax_due,
   nonCalculatedCheckYourAnswersPage: pages.non_calculated_check_your_answers,
   expiredMandatoryEvidencePage: pages.expired_mandatory_evidence,
   mandatoryEvidenceScanProgressPage: pages.mandatory_evidence_scan_progress,
@@ -1414,8 +1415,12 @@ class YearToDateLiabilityController @Inject() (
               )
             )(
               page =
-                if (fillingOutReturn.isFurtherReturn.contains(true))
-                  furtherReturnNonCalculatedEnterTaxDuePage(
+                (
+                fillingOutReturn.isFurtherReturn.contains(true),
+                fillingOutReturn.draftReturn.representativeType.isEmpty
+              ) match {
+                case (true, true)  =>
+                  furtherReturnNonCapPREnterTaxDuePage(
                     _,
                     _,
                     nonCalculatedAnswers,
@@ -1423,8 +1428,17 @@ class YearToDateLiabilityController @Inject() (
                     fillingOutReturn.draftReturn.representativeType,
                     fillingOutReturn.isFurtherReturn
                   )
-                else
+                case (true, false) =>
+                  furtherReturnCapPREnterTaxDuePage(
+                    _,
+                    _,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    fillingOutReturn.draftReturn.representativeType,
+                    fillingOutReturn.isFurtherReturn
+                  )
+                case _        =>
                   nonCalculatedEnterTaxDuePage(_, _)
+              }
             )(
               requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
               redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
@@ -1446,9 +1460,12 @@ class YearToDateLiabilityController @Inject() (
               fillingOutReturn.draftReturn,
               nonCalculatedAnswers
             )(form = nonCalculatedTaxDueForm)(
-              page =
-                if (fillingOutReturn.isFurtherReturn.contains(true))
-                  furtherReturnNonCalculatedEnterTaxDuePage(
+              page = (
+                fillingOutReturn.isFurtherReturn.contains(true),
+                fillingOutReturn.draftReturn.representativeType.isEmpty
+              ) match {
+                case (true, true)   =>
+                  furtherReturnNonCapPREnterTaxDuePage(
                     _,
                     _,
                     nonCalculatedAnswers,
@@ -1456,8 +1473,17 @@ class YearToDateLiabilityController @Inject() (
                     fillingOutReturn.draftReturn.representativeType,
                     fillingOutReturn.isFurtherReturn
                   )
-                else
+                case (true, false)  =>
+                  furtherReturnCapPREnterTaxDuePage(
+                    _,
+                    _,
+                    fillingOutReturn.subscribedDetails.isATrust,
+                    fillingOutReturn.draftReturn.representativeType,
+                    fillingOutReturn.isFurtherReturn
+                  )
+                case _ =>
                   nonCalculatedEnterTaxDuePage(_, _)
+              }
             )(
               requiredPreviousAnswer = _.fold(
                 _.hasEstimatedDetails,
