@@ -4282,7 +4282,7 @@ class YearToDateLiabilityControllerSpec
         "the user has answered this question before" in {
           test(
             sessionWithSingleDisposalState(
-              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              Some(sample[CompleteNonCalculatedYTDAnswers].copy(yearToDateLiability = Some(sample[AmountInPence]))),
               Some(sample[DisposalDate]),
               UserType.Individual,
               wasUkResident = true,
@@ -4297,7 +4297,7 @@ class YearToDateLiabilityControllerSpec
         "the user has answered this question before for single indirect disposal" in {
           test(
             sessionWithSingleIndirectDisposalState(
-              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              Some(sample[CompleteNonCalculatedYTDAnswers].copy(yearToDateLiability = Some(sample[AmountInPence]))),
               Some(sample[DisposalDate]),
               UserType.Individual,
               wasUkResident = true
@@ -4309,13 +4309,114 @@ class YearToDateLiabilityControllerSpec
         "the user has answered this question before for single mixed use disposal" in {
           test(
             sessionWithSingleMixedUseDisposalState(
-              Some(sample[CompleteNonCalculatedYTDAnswers]),
+              Some(sample[CompleteNonCalculatedYTDAnswers].copy(yearToDateLiability = Some(sample[AmountInPence]))),
               Some(sample[DisposalDate]),
               UserType.Individual,
               wasUkResident = true
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
+        }
+
+        "the return is a further return where the previous year to date is present" when {
+
+          def testCheckTaxDuePage(
+            yearToDateLiability: AmountInPence,
+            previousYearToDateLiability: AmountInPence,
+            taxDue: AmountInPence,
+            userType: UserType,
+            expectedP1Key: String
+          ): Unit = {
+            val sessionData = SessionData.empty.copy(
+              userType = Some(userType),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+                    yearToDateLiabilityAnswers = Some(
+                      sample[CompleteNonCalculatedYTDAnswers].copy(
+                        yearToDateLiability = Some(yearToDateLiability)
+                      )
+                    )
+                  ),
+                  agentReferenceNumber = if (userType == UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
+                  previousSentReturns = Some(
+                    sample[PreviousReturnData].copy(
+                      summaries = List(sample[ReturnSummary]),
+                      previousYearToDate = Some(previousYearToDateLiability)
+                    )
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name =
+                      if (userType == UserType.Organisation) Left(sample[TrustName])
+                      else Right(sample[IndividualName])
+                  )
+                )
+              )
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionData)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("nonCalculatedTaxDue.furtherReturn.checkTaxDue.title"),
+              { doc =>
+                val formattedTaxDue = MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
+
+                doc.select("#content > article > dl > div:nth-child(1) > dd").text() shouldBe MoneyUtils
+                  .formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
+
+                doc.select("#content > article > dl > div:nth-child(2) > dd").text() shouldBe s"- ${MoneyUtils
+                  .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
+
+                doc.select("#content > article > dl > div.sum-total > dd").text() shouldBe s"= $formattedTaxDue"
+
+                doc.select("#content > article > p:nth-child(6)").text() shouldBe messageFromMessageKey(
+                  expectedP1Key,
+                  formattedTaxDue
+                )
+
+                doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
+                  .nonCalculatedEnterTaxDueSubmit()
+                  .url
+              }
+            )
+          }
+
+          "the user is an individual" in {
+            testCheckTaxDuePage(
+              AmountInPence(1000L),
+              AmountInPence(3000L),
+              AmountInPence.zero,
+              UserType.Individual,
+              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.p1"
+            )
+
+          }
+
+          "the user is an agent" in {
+            testCheckTaxDuePage(
+              AmountInPence(3000L),
+              AmountInPence(1000L),
+              AmountInPence(2000L),
+              UserType.Agent,
+              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.agent.p1"
+            )
+          }
+
+          "the user is a trust" in {
+            testCheckTaxDuePage(
+              AmountInPence(1000L),
+              AmountInPence(1000L),
+              AmountInPence.zero,
+              UserType.Organisation,
+              "nonCalculatedTaxDue.furtherReturn.checkTaxDue.trust.p1"
+            )
+          }
+
         }
 
       }
@@ -4369,7 +4470,7 @@ class YearToDateLiabilityControllerSpec
       "show a form error" when {
 
         val currentSession = sessionWithMultipleDisposalsState(
-          sample[CompleteNonCalculatedYTDAnswers],
+          sample[CompleteNonCalculatedYTDAnswers].copy(yearToDateLiability = Some(sample[AmountInPence])),
           UserType.Individual,
           wasUkResident = true,
           isFurtherReturn = false
@@ -4394,6 +4495,59 @@ class YearToDateLiabilityControllerSpec
 
       "redirect to the check your answers page" when {
 
+        "the user is on a further return journey where a previous year to date value is available" in {
+          val yearToDateLiability         = AmountInPence(10L)
+          val previousYearToDateLiability = AmountInPence(9L)
+          val taxDue                      = AmountInPence(1L)
+          val answers                     = sample[CompleteNonCalculatedYTDAnswers].copy(
+            yearToDateLiability = Some(yearToDateLiability)
+          )
+          val newAnswers                  = IncompleteNonCalculatedYTDAnswers(
+            Some(answers.taxableGainOrLoss),
+            Some(answers.hasEstimatedDetails),
+            Some(taxDue),
+            None,
+            None,
+            None,
+            answers.yearToDateLiability
+          )
+          val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(Self)),
+            yearToDateLiabilityAnswers = Some(answers)
+          )
+          val journey                     = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            previousSentReturns = Some(
+              sample[PreviousReturnData].copy(
+                summaries = List(sample[ReturnSummary]),
+                previousYearToDate = Some(previousYearToDateLiability)
+              )
+            ),
+            subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+          )
+          val newJourney                  = journey.copy(draftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers)))
+
+          val sessionData = SessionData.empty.copy(journeyStatus = Some(journey))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+            mockStoreDraftReturn(
+              newJourney.draftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(
+              sessionData.copy(journeyStatus = Some(newJourney))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+
         "all updates are successful and" when {
 
           "the section had been started but not completed" in {
@@ -4417,7 +4571,10 @@ class YearToDateLiabilityControllerSpec
             val newAmount  = AmountInPence(0L)
             val answers    =
               sample[CompleteNonCalculatedYTDAnswers]
-                .copy(taxDue = AmountInPence(1L))
+                .copy(
+                  taxDue = AmountInPence(1L),
+                  yearToDateLiability = Some(sample[AmountInPence])
+                )
             val newAnswers = IncompleteNonCalculatedYTDAnswers(
               Some(answers.taxableGainOrLoss),
               Some(answers.hasEstimatedDetails),
