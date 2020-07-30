@@ -24,21 +24,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary
 )
 
 @(
-        answers: CompleteNonCalculatedYTDAnswers,
-        isMultiple: Boolean,
-        isATrust: Boolean,
-        representativeType: Option[RepresentativeType],
-        isFurtherReturn: Option[Boolean],
-        taxYear: TaxYear
+    answers: CompleteNonCalculatedYTDAnswers,
+    isMultiple: Boolean,
+    isATrust: Boolean,
+    representativeType: Option[RepresentativeType],
+    isFurtherReturn: Option[Boolean],
+    taxYear: TaxYear
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{messages("ytdLiability.cya.title")}

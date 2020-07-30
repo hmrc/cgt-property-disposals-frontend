@@ -3834,6 +3834,9 @@ nonCalculatedTaxDue.furtherReturn.helpText.li1=Start with the person’s previou
 nonCalculatedTaxDue.furtherReturn.helpText.li2=Subtract this amount from their new overall Capital Gains Tax liability on their UK property-related disposals for the tax year 2020 to 2021. This is what their new overall liability is and includes the disposal in this return.
 nonCalculatedTaxDue.furtherReturn.helpText.li3=Enter the amount - if the amount is less than zero enter zero.
 
+nonCalculatedTaxDue.furtherReturn.title=Amount of Capital Gains Tax now due for this return
+nonCalculatedTaxDue.furtherReturn.cyaChange=Amount of Capital Gains Tax now due for this return
+
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
 hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents

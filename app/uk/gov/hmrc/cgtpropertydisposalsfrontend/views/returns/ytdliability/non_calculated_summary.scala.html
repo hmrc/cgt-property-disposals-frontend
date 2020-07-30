@@ -85,9 +85,9 @@
             messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin.furtherReturn.h2", taxYearStart, taxYearEnd)
         else
             messages(s"taxableGainOrLoss$userKeyWithSeparatePeriodOfAdmin$multipleKey.title"),
-    Html(messages(taxableGainOrLossLabelWithAmount._1)),
-    Some(cyaChange(messages(s"taxableGainOrLoss$furtherReturnKey.cyaChange"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
-    "taxableGainOrLossAnswer"
+        Html(messages(taxableGainOrLossLabelWithAmount._1)),
+        Some(cyaChange(messages(s"taxableGainOrLoss$furtherReturnKey.cyaChange"), routes.YearToDateLiabilityController.taxableGainOrLoss().url)),
+        "taxableGainOrLossAnswer"
     )
 
     @taxableGainOrLossLabelWithAmount._2.map{ case (label, amount) =>
@@ -118,9 +118,9 @@
     }
 
     @cyaRow(
-        messages("nonCalculatedTaxDue.title"),
+        messages(s"nonCalculatedTaxDue$furtherReturnKey.title"),
         Html( MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
-        Some(cyaChange(messages("nonCalculatedTaxDue.cyaChange"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
+        Some(cyaChange(messages(s"nonCalculatedTaxDue$furtherReturnKey.cyaChange"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
         "nonCalculatedTaxDue-value"
     )
   @if(showFiles) {
