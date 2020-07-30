@@ -771,6 +771,7 @@ class YearToDateLiabilityControllerSpec
               .copy(estimatedIncome = Some(AmountInPence(100L))),
             completeReliefDetailsAnswersWithNoOtherReliefs,
             sample[DisposalDate],
+            None,
             None
           )
         }
@@ -4208,6 +4209,8 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectWhenNotNonCalculatedJourneyBehaviour(performAction)
 
+      behave like noYearToDateLiabilityBehaviour(performAction)
+
       "redirect to the has estimated details page" when {
 
         "the question has not been answered yet" in {
@@ -4215,7 +4218,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithMultipleDisposalsState(
-                IncompleteNonCalculatedYTDAnswers.empty,
+                IncompleteNonCalculatedYTDAnswers.empty.copy(yearToDateLiability = Some(sample[AmountInPence])),
                 UserType.Individual,
                 wasUkResident = true,
                 isFurtherReturn = false
@@ -4264,7 +4267,10 @@ class YearToDateLiabilityControllerSpec
           test(
             sessionWithMultipleDisposalsState(
               IncompleteNonCalculatedYTDAnswers.empty
-                .copy(hasEstimatedDetails = Some(true)),
+                .copy(
+                  yearToDateLiability = Some(sample[AmountInPence]),
+                  hasEstimatedDetails = Some(true)
+                ),
               UserType.Individual,
               wasUkResident = true,
               isFurtherReturn = false
@@ -4327,9 +4333,12 @@ class YearToDateLiabilityControllerSpec
 
       behave like redirectWhenNotNonCalculatedJourneyBehaviour(() => performAction())
 
+      behave like noYearToDateLiabilityBehaviour(() => performAction())
+
       {
         val answers =
           IncompleteNonCalculatedYTDAnswers.empty.copy(
+            yearToDateLiability = Some(sample[AmountInPence]),
             taxableGainOrLoss = Some(AmountInPence.zero),
             hasEstimatedDetails = Some(true)
           )
@@ -4390,6 +4399,7 @@ class YearToDateLiabilityControllerSpec
           "the section had been started but not completed" in {
             val newAmount = AmountInPence(101L)
             val answers   = IncompleteNonCalculatedYTDAnswers.empty.copy(
+              yearToDateLiability = Some(sample[AmountInPence]),
               taxableGainOrLoss = Some(AmountInPence(2L)),
               hasEstimatedDetails = Some(true)
             )
@@ -5662,6 +5672,31 @@ class YearToDateLiabilityControllerSpec
 
     }
 
+  def noYearToDateLiabilityBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the check your answers page" when {
+      "no year to date liability can be found" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithSingleDisposalState(
+              IncompleteNonCalculatedYTDAnswers
+                .fromCompleteAnswers(sample[CompleteNonCalculatedYTDAnswers])
+                .copy(yearToDateLiability = None),
+              sample[DisposalDate],
+              UserType.Individual,
+              wasUkResident = true
+            )._1
+          )
+        }
+
+        checkIsRedirect(
+          performAction(),
+          routes.YearToDateLiabilityController.checkYourAnswers()
+        )
+      }
+
+    }
+
   def incompleteOtherJourneysBehaviour(
     performAction: () => Future[Result]
   ): Unit = {
@@ -6022,21 +6057,35 @@ class YearToDateLiabilityControllerSpec
 
   def testSuccessfulUpdatesAfterSubmit(
     result: => Future[Result],
-    oldDraftReturn: DraftReturn,
-    updatedDraftReturn: DraftReturn
+    oldDraftReuturn: DraftReturn,
+    newDraftReturn: DraftReturn
   ): Unit = {
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn = oldDraftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
-    )
+    val fillingOutReturn =
+      sample[FillingOutReturn].copy(
+        draftReturn = oldDraftReuturn,
+        subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+        previousSentReturns = None
+      )
 
+    testSuccessfulUpdatesAfterSubmit(
+      result,
+      fillingOutReturn,
+      fillingOutReturn.copy(draftReturn = newDraftReturn)
+    )
+  }
+
+  def testSuccessfulUpdatesAfterSubmit(
+    result: => Future[Result],
+    journey: FillingOutReturn,
+    updatedJourney: FillingOutReturn
+  ): Unit = {
     val session = SessionData.empty.copy(journeyStatus = Some(journey))
 
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
       mockStoreDraftReturn(
-        updatedDraftReturn,
+        updatedJourney.draftReturn,
         journey.subscribedDetails.cgtReference,
         journey.agentReferenceNumber
       )(
@@ -6044,7 +6093,7 @@ class YearToDateLiabilityControllerSpec
       )
       mockStoreSession(
         session
-          .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+          .copy(journeyStatus = Some(journey.copy(draftReturn = updatedJourney.draftReturn)))
       )(Right(()))
     }
 
@@ -6060,19 +6109,27 @@ class YearToDateLiabilityControllerSpec
     newAnswers: YearToDateLiabilityAnswers,
     reliefDetailsAnswers: ReliefDetailsAnswers,
     disposalDate: DisposalDate,
-    individualUserType: Option[IndividualUserType]
+    individualUserType: Option[IndividualUserType],
+    previousSentReturnData: Option[PreviousReturnData]
   ): Unit = {
-    val draftReturn    = singleDispsaslDraftReturnWithCompleteJourneys(
+    val draftReturn      = singleDispsaslDraftReturnWithCompleteJourneys(
       oldAnswers,
       disposalDate,
       reliefDetailsAnswers,
       individualUserType
     )
+    val fillingOutReturn =
+      sample[FillingOutReturn].copy(
+        draftReturn = draftReturn,
+        subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+        previousSentReturns = previousSentReturnData
+      )
+
     val newDraftReturn = draftReturn.copy(
       yearToDateLiabilityAnswers = Some(newAnswers),
       reliefDetailsAnswers = Some(reliefDetailsAnswers)
     )
-    testSuccessfulUpdatesAfterSubmit(result, draftReturn, newDraftReturn)
+    testSuccessfulUpdatesAfterSubmit(result, fillingOutReturn, fillingOutReturn.copy(draftReturn = newDraftReturn))
   }
 
   def testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
@@ -6080,14 +6137,20 @@ class YearToDateLiabilityControllerSpec
     oldAnswers: Option[YearToDateLiabilityAnswers],
     newAnswers: YearToDateLiabilityAnswers
   ): Unit = {
-    val draftReturn    = sessionWithMultipleDisposalsState(
+    val draftReturn      = sessionWithMultipleDisposalsState(
       oldAnswers,
       UserType.Individual,
       wasUkResident = true
     )._3
-    val newDraftReturn =
+    val fillingOutReturn =
+      sample[FillingOutReturn].copy(
+        draftReturn = draftReturn,
+        subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+        previousSentReturns = None
+      )
+    val newDraftReturn   =
       draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-    testSuccessfulUpdatesAfterSubmit(result, draftReturn, newDraftReturn)
+    testSuccessfulUpdatesAfterSubmit(result, fillingOutReturn, fillingOutReturn.copy(draftReturn = newDraftReturn))
   }
 
   def testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
@@ -6113,7 +6176,8 @@ class YearToDateLiabilityControllerSpec
     newAnswers: YearToDateLiabilityAnswers,
     reliefDetailsAnswers: ReliefDetailsAnswers = sample[CompleteReliefDetailsAnswers],
     disposalDate: DisposalDate = sample[DisposalDate],
-    individualUserType: Option[IndividualUserType] = None
+    individualUserType: Option[IndividualUserType] = None,
+    previousReturnData: Option[PreviousReturnData] = None
   ): Unit =
     testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
       result,
@@ -6121,7 +6185,8 @@ class YearToDateLiabilityControllerSpec
       newAnswers,
       reliefDetailsAnswers,
       disposalDate,
-      individualUserType
+      individualUserType,
+      previousReturnData
     )
 
   def commonUploadMandatoryEvidenceBehaviour(
