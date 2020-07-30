@@ -40,10 +40,10 @@ trait Repo {
       cacheRepository
         .findById(Id(id))
         .map { maybeCache =>
-          val response: OptionT[Either[Error, ?], A] = for {
-            cache ← OptionT.fromOption[Either[Error, ?]](maybeCache)
-            data ← OptionT.fromOption[Either[Error, ?]](cache.data)
-            result ← OptionT.liftF[Either[Error, ?], A](
+          val response: OptionT[Either[Error, *], A] = for {
+            cache ← OptionT.fromOption[Either[Error, *]](maybeCache)
+            data ← OptionT.fromOption[Either[Error, *]](cache.data)
+            result ← OptionT.liftF[Either[Error, *], A](
                        (data \ sessionKey)
                          .validate[A]
                          .asEither

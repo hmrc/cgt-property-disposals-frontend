@@ -265,7 +265,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
           s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
         )
       }
-      .sequence[Either[String, ?], AgentReferenceNumber]
+      .sequence[Either[String, *], AgentReferenceNumber]
 
     maybeArn.fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]](
       { e =>

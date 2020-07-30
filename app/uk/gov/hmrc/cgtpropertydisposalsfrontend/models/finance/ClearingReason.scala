@@ -16,17 +16,21 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
-import java.time.LocalDate
+import cats.Eq
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 
-import play.api.libs.json.{Json, OFormat}
+sealed trait ClearingReason
 
-final case class Payment(
-  amount: AmountInPence,
-  method: Option[PaymentMethod],
-  clearingDate: LocalDate,
-  clearingReason: Option[ClearingReason]
-)
+object ClearingReason {
+  case object IncomingPayment extends ClearingReason
+  case object OutgoingPayment extends ClearingReason
+  case object WriteOff extends ClearingReason
+  case object Reversal extends ClearingReason
+  case object MassWriteOff extends ClearingReason
+  case object AutomaticClearing extends ClearingReason
+  case object SomeOtherClearingReason extends ClearingReason
 
-object Payment {
-  implicit val format: OFormat[Payment] = Json.format
+  implicit val eq: Eq[ClearingReason]          = Eq.fromUniversalEquals
+  implicit val format: OFormat[ClearingReason] = derived.oformat()
 }
