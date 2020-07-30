@@ -16,15 +16,37 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-
+@import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Charge
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Payment
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this()
 
 @(charge: Charge)(implicit messages: Messages)
+
+    @makePaymentDetailsHtml(paymentItemSubKey : String, paymentItemValue: String, amount:BigDecimal, clearingDate: LocalDate) = {
+        <li>
+            <strong class="bold">
+                @{MoneyUtils.formatAmountOfMoneyWithPoundSign(amount)}
+            </strong>
+            @{messages(s"viewReturn.charge.$paymentItemSubKey.$paymentItemValue")}
+            @{messages("generic.on")}
+            @{TimeUtils.govShortDisplayFormat(clearingDate)}
+        </li>
+    }
+
+    @displayPaymentDetails(payment : Payment) = @{
+        (payment.method, payment.clearingReason) match {
+            case (Some(paymentMethod), _) =>
+                    makePaymentDetailsHtml("paymentMethod", paymentMethod.toString, payment.amount.inPounds(), payment.clearingDate)
+            case (None, Some(clearingReason)) =>
+                    makePaymentDetailsHtml("clearingReason", clearingReason.toString, payment.amount.inPounds(), payment.clearingDate)
+            case (_,_) => <li>{messages(s"viewReturn.charge.display-error")}</li>
+        }
+    }
 
   <tr class="no-border charge">
     <td>
@@ -62,15 +84,8 @@
       <div class="panel panel-border-wide payments-list-container">
         <ul class="payments-list">
           @{charge.payments.map { payment =>
-            <li>
-              <strong class="bold">
-                {MoneyUtils.formatAmountOfMoneyWithPoundSign(payment.amount.inPounds())}
-              </strong>
-              {messages(s"viewReturn.charge.paymentMethod.${payment.method.toString}")}
-              {messages("generic.on")}
-              {TimeUtils.govShortDisplayFormat(payment.clearingDate)}
-            </li>
-          }}
+            displayPaymentDetails(payment)
+            }}
         </ul>
       </div>
     </td>

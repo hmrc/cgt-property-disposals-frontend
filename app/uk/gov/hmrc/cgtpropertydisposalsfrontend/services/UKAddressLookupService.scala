@@ -113,7 +113,7 @@ class UKAddressLookupServiceImpl @Inject() (
 
     r.addresses
       .map(toAddress)
-      .sequence[Either[String, ?], UkAddress]
+      .sequence[Either[String, *], UkAddress]
       .map(addresses =>
         AddressLookupResult(
           postcode,
