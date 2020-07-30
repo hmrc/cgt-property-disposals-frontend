@@ -4419,6 +4419,101 @@ class YearToDateLiabilityControllerSpec
 
         }
 
+        "the return is a further return where the previous year to date is not present" when {
+
+          def testEnterTaxDuePage(
+            yearToDateLiability: AmountInPence,
+            userType: UserType,
+            individualUserType: IndividualUserType,
+            expectedP1Key: String
+          ): Unit = {
+            val sessionData = SessionData.empty.copy(
+              userType = Some(userType),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                      individualUserType = Some(individualUserType)
+                    ),
+                    yearToDateLiabilityAnswers = Some(
+                      sample[CompleteNonCalculatedYTDAnswers].copy(
+                        yearToDateLiability = Some(yearToDateLiability)
+                      )
+                    )
+                  ),
+                  agentReferenceNumber = if (userType == UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
+                  previousSentReturns = Some(
+                    sample[PreviousReturnData].copy(
+                      summaries = List(sample[ReturnSummary]),
+                      previousYearToDate = None
+                    )
+                  ),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name =
+                      if (userType == UserType.Organisation) Left(sample[TrustName])
+                      else Right(sample[IndividualName])
+                  )
+                )
+              )
+            )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionData)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("nonCalculatedTaxDue.furtherReturn.enterTaxDue.title"),
+              { doc =>
+                doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
+                doc.select("#content > article > form").attr("action") shouldBe routes.YearToDateLiabilityController
+                  .nonCalculatedEnterTaxDueSubmit()
+                  .url
+              }
+            )
+          }
+
+          "the user is an individual" in {
+            testEnterTaxDuePage(
+              AmountInPence(1000L),
+              UserType.Individual,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1"
+            )
+
+          }
+
+          "the user is a capacitor" in {
+            testEnterTaxDuePage(
+              AmountInPence(1000L),
+              UserType.Individual,
+              IndividualUserType.Capacitor,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.capacitor.helpText.p1"
+            )
+
+          }
+
+          "the user is a personal rep" in {
+            testEnterTaxDuePage(
+              AmountInPence(3000L),
+              UserType.Individual,
+              IndividualUserType.PersonalRepresentative,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRep.helpText.p1"
+            )
+          }
+
+          "the user is a personal rep in period of admin" in {
+            testEnterTaxDuePage(
+              AmountInPence(1000L),
+              UserType.Individual,
+              IndividualUserType.PersonalRepresentativeInPeriodOfAdmin,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.personalRepInPeriodOfAdmin.helpText.p1"
+            )
+          }
+
+        }
+
       }
 
     }
