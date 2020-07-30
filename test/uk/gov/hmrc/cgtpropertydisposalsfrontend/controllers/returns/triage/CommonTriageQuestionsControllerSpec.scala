@@ -36,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.IncompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
@@ -104,13 +105,15 @@ class CommonTriageQuestionsControllerSpec
       SingleDisposalTriageAnswers
     ],
     name: Either[TrustName, IndividualName],
-    userType: UserType = UserType.Individual
+    userType: UserType = UserType.Individual,
+    representeeAnswers: Option[IncompleteRepresenteeAnswers] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn =
       sample[StartingNewDraftReturn].copy(
         subscribedDetails = sample[SubscribedDetails].copy(name = name),
         newReturnTriageAnswers = triageAnswers,
-        agentReferenceNumber = setAgentReferenceNumber(userType)
+        agentReferenceNumber = setAgentReferenceNumber(userType),
+        representeeAnswers = representeeAnswers
       )
 
     val sessionData = SessionData.empty.copy(
@@ -1035,17 +1038,22 @@ class CommonTriageQuestionsControllerSpec
 
         "the user is on the single disposal journey, selected 'self' individual user type and" +
           "has already answered the question" in {
+          val sessionData      = sessionDataWithFillingOutReturn(
+            IncompleteSingleDisposalTriageAnswers.empty.copy(
+              individualUserType = Some(IndividualUserType.Self),
+              hasConfirmedSingleDisposal = true
+            )
+          )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionDataWithFillingOutReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.Self),
-                  hasConfirmedSingleDisposal = true
-                )
-              )._1
+              sessionData._1
             )
           }
+          val expectedBacklink =
+            if (sessionData._2.isFurtherReturn.contains(true))
+              routes.CommonTriageQuestionsController.furtherReturnHelp().url
+            else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url
 
           checkPageIsDisplayed(
             performAction(),
@@ -1053,9 +1061,7 @@ class CommonTriageQuestionsControllerSpec
             { doc =>
               doc
                 .select("#back")
-                .attr("href")    shouldBe routes.CommonTriageQuestionsController
-                .furtherReturnHelp()
-                .url
+                .attr("href")    shouldBe expectedBacklink
               doc
                 .select("#content > article > form")
                 .attr("action")  shouldBe routes.CommonTriageQuestionsController
@@ -1070,17 +1076,22 @@ class CommonTriageQuestionsControllerSpec
 
         "the user is on the single disposal journey, selected 'capacitor' individual user type and" +
           "has already answered the question" in {
+          val sessionData      = sessionDataWithFillingOutReturn(
+            IncompleteSingleDisposalTriageAnswers.empty.copy(
+              individualUserType = Some(IndividualUserType.Capacitor),
+              hasConfirmedSingleDisposal = true
+            )
+          )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionDataWithFillingOutReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.Capacitor),
-                  hasConfirmedSingleDisposal = true
-                )
-              )._1
+              sessionData._1
             )
           }
+          val isFurtherReturn  = sessionData._2.asInstanceOf[FillingOutReturn].isFurtherReturn
+          val expectedBacklink =
+            if (isFurtherReturn.contains(true)) routes.CommonTriageQuestionsController.furtherReturnHelp()
+            else representeeRoutes.RepresenteeController.checkYourAnswers()
 
           checkPageIsDisplayed(
             performAction(),
@@ -1090,9 +1101,7 @@ class CommonTriageQuestionsControllerSpec
                 .select("#back")
                 .attr(
                   "href"
-                )                shouldBe returns.representee.routes.RepresenteeController
-                .checkYourAnswers()
-                .url
+                )                shouldBe expectedBacklink.url
               doc
                 .select("#content > article > form")
                 .attr("action")  shouldBe routes.CommonTriageQuestionsController
@@ -1107,17 +1116,22 @@ class CommonTriageQuestionsControllerSpec
 
         "the user is on the single disposal journey, selected 'personal representative' individual user type and" +
           "has already answered the question" in {
+          val sessionData      = sessionDataWithFillingOutReturn(
+            IncompleteSingleDisposalTriageAnswers.empty.copy(
+              individualUserType = Some(IndividualUserType.PersonalRepresentative),
+              hasConfirmedSingleDisposal = true
+            )
+          )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionDataWithFillingOutReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.PersonalRepresentative),
-                  hasConfirmedSingleDisposal = true
-                )
-              )._1
+              sessionData._1
             )
           }
+          val expectedBacklink =
+            if (sessionData._2.isFurtherReturn.contains(true))
+              routes.CommonTriageQuestionsController.furtherReturnHelp()
+            else returns.representee.routes.RepresenteeController.checkYourAnswers()
 
           checkPageIsDisplayed(
             performAction(),
@@ -1127,9 +1141,7 @@ class CommonTriageQuestionsControllerSpec
                 .select("#back")
                 .attr(
                   "href"
-                )                shouldBe returns.representee.routes.RepresenteeController
-                .checkYourAnswers()
-                .url
+                )                shouldBe expectedBacklink.url
               doc
                 .select("#content > article > form")
                 .attr("action")  shouldBe routes.CommonTriageQuestionsController

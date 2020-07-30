@@ -470,6 +470,13 @@ class CommonTriageQuestionsController @Inject() (
   private def howManyPropertiesBackLink(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Option[Call] = {
+
+    val isFurtherReturn = state
+      .fold(
+        _.representeeAnswers.map(_.fold(_.isFirstReturn.contains(false), _.isFirstReturn)).contains(false),
+        _.isFurtherReturn.contains(true)
+      )
+
     val triageAnswers  = triageAnswersFomState(state)
     val isSelfUserType = isIndividualASelfUserType(triageAnswers)
 
@@ -480,17 +487,23 @@ class CommonTriageQuestionsController @Inject() (
         triageAnswers.fold(
           _.fold(
             _ =>
-              if (isSelfUserType)
+              if (isFurtherReturn)
                 routes.CommonTriageQuestionsController
                   .furtherReturnHelp()
+              else if (isSelfUserType)
+                routes.CommonTriageQuestionsController
+                  .whoIsIndividualRepresenting()
               else representee.routes.RepresenteeController.checkYourAnswers(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           ),
           _.fold(
             _ =>
-              if (isSelfUserType)
+              if (isFurtherReturn)
                 routes.CommonTriageQuestionsController
                   .furtherReturnHelp()
+              else if (isSelfUserType)
+                routes.CommonTriageQuestionsController
+                  .whoIsIndividualRepresenting()
               else representee.routes.RepresenteeController.checkYourAnswers(),
             _ => routes.SingleDisposalsTriageController.checkYourAnswers()
           )

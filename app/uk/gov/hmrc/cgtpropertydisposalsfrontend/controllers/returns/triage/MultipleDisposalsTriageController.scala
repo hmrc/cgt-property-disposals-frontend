@@ -1007,6 +1007,12 @@ class MultipleDisposalsTriageController @Inject() (
             fb => fb._2.fold(_.representeeAnswers, _.representeeAnswers)
           )
 
+        val isFurtherReturn = state
+          .fold(
+            _.representeeAnswers.map(_.fold(_.isFirstReturn.contains(false), _.isFirstReturn)).contains(false),
+            _._1.isFurtherReturn.contains(true)
+          )
+
         val representeeAnswersIncomplete = !representeeAnswers
           .map(_.fold(_ => false, _ => true))
           .getOrElse(false)
@@ -1038,7 +1044,7 @@ class MultipleDisposalsTriageController @Inject() (
                 None,
                 None,
                 None
-              ) if isIndividual =>
+              ) if isFurtherReturn =>
             Redirect(
               routes.CommonTriageQuestionsController
                 .furtherReturnHelp()

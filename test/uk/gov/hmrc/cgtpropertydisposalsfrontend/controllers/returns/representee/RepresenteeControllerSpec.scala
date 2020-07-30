@@ -470,7 +470,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.capacitor.title",
-              triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
+              routes.RepresenteeController.isFirstReturn(),
               expectReturnToSummaryLink = false,
               None
             )
@@ -526,7 +526,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.capacitor.title",
-              triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
+              routes.RepresenteeController.isFirstReturn(),
               expectReturnToSummaryLink = true,
               None
             )

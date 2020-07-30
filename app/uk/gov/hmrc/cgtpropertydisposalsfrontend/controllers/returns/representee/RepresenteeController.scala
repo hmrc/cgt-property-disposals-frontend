@@ -158,12 +158,16 @@ class RepresenteeController @Inject() (
   def enterName(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
-        withIsFirstReturn(answers) { _ =>
+        withIsFirstReturn(answers) { isFirstReturn =>
           withNotTooManyUnsuccessfulNameMatchAttempts(
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             val backLink = answers.fold(
-              _ => triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
+              _ =>
+                if (isFirstReturn)
+                  routes.RepresenteeController.isFirstReturn()
+                else
+                  triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               _ => routes.RepresenteeController.checkYourAnswers()
             )
 
