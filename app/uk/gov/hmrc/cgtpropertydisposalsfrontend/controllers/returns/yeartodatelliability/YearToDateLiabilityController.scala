@@ -1414,11 +1414,8 @@ class YearToDateLiabilityController @Inject() (
                 c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
               )
             )(
-              page =
-                (
-                fillingOutReturn.isFurtherReturn.contains(true),
-                fillingOutReturn.draftReturn.representativeType.isEmpty
-              ) match {
+              page = fillingOutReturn.isFurtherReturn
+                .contains(true) -> fillingOutReturn.draftReturn.representativeType.isEmpty match {
                 case (true, true)  =>
                   furtherReturnNonCapPREnterTaxDuePage(
                     _,
@@ -1436,7 +1433,7 @@ class YearToDateLiabilityController @Inject() (
                     fillingOutReturn.draftReturn.representativeType,
                     fillingOutReturn.isFurtherReturn
                   )
-                case _        =>
+                case _             =>
                   nonCalculatedEnterTaxDuePage(_, _)
               }
             )(
@@ -1460,11 +1457,9 @@ class YearToDateLiabilityController @Inject() (
               fillingOutReturn.draftReturn,
               nonCalculatedAnswers
             )(form = nonCalculatedTaxDueForm)(
-              page = (
-                fillingOutReturn.isFurtherReturn.contains(true),
-                fillingOutReturn.draftReturn.representativeType.isEmpty
-              ) match {
-                case (true, true)   =>
+              page = fillingOutReturn.isFurtherReturn
+                .contains(true) -> fillingOutReturn.draftReturn.representativeType.isEmpty match {
+                case (true, true)  =>
                   furtherReturnNonCapPREnterTaxDuePage(
                     _,
                     _,
@@ -1473,7 +1468,7 @@ class YearToDateLiabilityController @Inject() (
                     fillingOutReturn.draftReturn.representativeType,
                     fillingOutReturn.isFurtherReturn
                   )
-                case (true, false)  =>
+                case (true, false) =>
                   furtherReturnCapPREnterTaxDuePage(
                     _,
                     _,
@@ -1481,7 +1476,7 @@ class YearToDateLiabilityController @Inject() (
                     fillingOutReturn.draftReturn.representativeType,
                     fillingOutReturn.isFurtherReturn
                   )
-                case _ =>
+                case _             =>
                   nonCalculatedEnterTaxDuePage(_, _)
               }
             )(
