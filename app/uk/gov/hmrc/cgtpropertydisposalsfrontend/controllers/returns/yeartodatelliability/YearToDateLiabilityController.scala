@@ -1405,12 +1405,13 @@ class YearToDateLiabilityController @Inject() (
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
-            nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
-              case None => Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+            (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
+              case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
+                nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
+                  case None                      =>
+                    Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
-              case Some(yearToDateLiability) =>
-                (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
-                  case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
+                  case Some(yearToDateLiability) =>
                     if (nonCalculatedAnswers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)).isEmpty)
                       Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
                     else
@@ -1422,36 +1423,34 @@ class YearToDateLiabilityController @Inject() (
                           fillingOutReturn.subscribedDetails.isATrust
                         )
                       )
-
-                  case _                                                      =>
-                    withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
-                      commonDisplayBehaviour(
-                        nonCalculatedAnswers
-                      )(form =
-                        _.fold(
-                          _.taxDue.fold(nonCalculatedTaxDueForm)(a => nonCalculatedTaxDueForm.fill(a.inPounds())),
-                          c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
-                        )
-                      )(
-                        page =
-                          if (fillingOutReturn.isFurtherReturn.contains(true))
-                            furtherReturnEnterTaxDuePage(
-                              _,
-                              _,
-                              taxYear,
-                              fillingOutReturn.subscribedDetails.isATrust,
-                              fillingOutReturn.draftReturn.representativeType
-                            )
-                          else
-                            nonCalculatedEnterTaxDuePage(_, _)
-                      )(
-                        requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
-                        redirectToIfNoRequiredPreviousAnswer =
-                          routes.YearToDateLiabilityController.hasEstimatedDetails()
-                      )
-                    }
                 }
 
+              case _                                                      =>
+                withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
+                  commonDisplayBehaviour(
+                    nonCalculatedAnswers
+                  )(form =
+                    _.fold(
+                      _.taxDue.fold(nonCalculatedTaxDueForm)(a => nonCalculatedTaxDueForm.fill(a.inPounds())),
+                      c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
+                    )
+                  )(
+                    page =
+                      if (fillingOutReturn.isFurtherReturn.contains(true))
+                        furtherReturnEnterTaxDuePage(
+                          _,
+                          _,
+                          taxYear,
+                          fillingOutReturn.subscribedDetails.isATrust,
+                          fillingOutReturn.draftReturn.representativeType
+                        )
+                      else
+                        nonCalculatedEnterTaxDuePage(_, _)
+                  )(
+                    requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
+                    redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
+                  )
+                }
             }
 
         }
@@ -1466,70 +1465,69 @@ class YearToDateLiabilityController @Inject() (
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
           case nonCalculatedAnswers: NonCalculatedYTDAnswers =>
-            nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
-              case None                      =>
-                Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+            (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
+              case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
+                nonCalculatedAnswers.fold(_.yearToDateLiability, _.yearToDateLiability) match {
+                  case None                      =>
+                    Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
 
-              case Some(yearToDateLiability) =>
-                (fillingOutReturn.previousSentReturns, fillingOutReturn.draftReturn.representativeType()) match {
-                  case (Some(PreviousReturnData(_, Some(previousYtd))), None) =>
+                  case Some(yearToDateLiability) =>
                     handledConfirmFurtherReturnTaxDue(
                       nonCalculatedAnswers,
                       previousYtd,
                       yearToDateLiability,
                       fillingOutReturn
                     )
+                }
 
-                  case _                                                      =>
-                    withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
-                      commonSubmitBehaviour(
-                        fillingOutReturn,
-                        fillingOutReturn.draftReturn,
-                        nonCalculatedAnswers
-                      )(form = nonCalculatedTaxDueForm)(
-                        page =
-                          if (fillingOutReturn.isFurtherReturn.contains(true))
-                            furtherReturnEnterTaxDuePage(
-                              _,
-                              _,
-                              taxYear,
-                              fillingOutReturn.subscribedDetails.isATrust,
-                              fillingOutReturn.draftReturn.representativeType
-                            )
-                          else
-                            nonCalculatedEnterTaxDuePage(_, _)
-                      )(
-                        requiredPreviousAnswer = _.fold(
-                          _.hasEstimatedDetails,
-                          c => Some(c.hasEstimatedDetails)
-                        ),
-                        redirectToIfNoRequiredPreviousAnswer =
-                          routes.YearToDateLiabilityController.hasEstimatedDetails()
-                      ) { (amount, draftReturn) =>
-                        val taxDue = AmountInPence.fromPounds(amount)
-
-                        if (
-                          nonCalculatedAnswers
-                            .fold(_.taxDue, c => Some(c.taxDue))
-                            .contains(taxDue)
+              case _                                                      =>
+                withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
+                  commonSubmitBehaviour(
+                    fillingOutReturn,
+                    fillingOutReturn.draftReturn,
+                    nonCalculatedAnswers
+                  )(form = nonCalculatedTaxDueForm)(
+                    page =
+                      if (fillingOutReturn.isFurtherReturn.contains(true))
+                        furtherReturnEnterTaxDuePage(
+                          _,
+                          _,
+                          taxYear,
+                          fillingOutReturn.subscribedDetails.isATrust,
+                          fillingOutReturn.draftReturn.representativeType
                         )
-                          draftReturn
-                        else {
-                          val newAnswers = nonCalculatedAnswers
-                            .unset(_.mandatoryEvidence)
-                            .unset(_.expiredEvidence)
-                            .unset(_.pendingUpscanUpload)
-                            .copy(taxDue = Some(taxDue))
-                          draftReturn.fold(
-                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-                          )
-                        }
-                      }
+                      else
+                        nonCalculatedEnterTaxDuePage(_, _)
+                  )(
+                    requiredPreviousAnswer = _.fold(
+                      _.hasEstimatedDetails,
+                      c => Some(c.hasEstimatedDetails)
+                    ),
+                    redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
+                  ) { (amount, draftReturn) =>
+                    val taxDue = AmountInPence.fromPounds(amount)
+
+                    if (
+                      nonCalculatedAnswers
+                        .fold(_.taxDue, c => Some(c.taxDue))
+                        .contains(taxDue)
+                    )
+                      draftReturn
+                    else {
+                      val newAnswers = nonCalculatedAnswers
+                        .unset(_.mandatoryEvidence)
+                        .unset(_.expiredEvidence)
+                        .unset(_.pendingUpscanUpload)
+                        .copy(taxDue = Some(taxDue))
+                      draftReturn.fold(
+                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                      )
                     }
+                  }
                 }
             }
         }
