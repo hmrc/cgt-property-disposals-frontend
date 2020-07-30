@@ -311,20 +311,19 @@ class YearToDateLiabilityController @Inject() (
 
   private def withTaxYear(
     draftReturn: DraftReturn
-  )(f: TaxYear => Future[Result]): Future[Result] = {
-    val taxYear =
-      draftReturn
-        .triageAnswers()
-        .fold(
-          _.fold(_.taxYear, c => Some(c.taxYear)),
-          _.fold(_.disposalDate.map(_.taxYear), c => Some(c.disposalDate.taxYear))
-        )
-
-    taxYear
+  )(f: TaxYear => Future[Result]): Future[Result] =
+    taxYear(draftReturn)
       .fold[Future[Result]](
         Redirect(controllers.returns.routes.TaskListController.taskList())
       )(f)
-  }
+
+  private def taxYear(draftReturn: DraftReturn): Option[TaxYear] =
+    draftReturn
+      .triageAnswers()
+      .fold(
+        _.fold(_.taxYear, c => Some(c.taxYear)),
+        _.fold(_.disposalDate.map(_.taxYear), c => Some(c.disposalDate.taxYear))
+      )
 
   private def withEstimatedIncome(
     answers: CalculatedYTDAnswers
@@ -1425,29 +1424,32 @@ class YearToDateLiabilityController @Inject() (
                       )
 
                   case _                                                      =>
-                    commonDisplayBehaviour(
-                      nonCalculatedAnswers
-                    )(form =
-                      _.fold(
-                        _.taxDue.fold(nonCalculatedTaxDueForm)(a => nonCalculatedTaxDueForm.fill(a.inPounds())),
-                        c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
+                    withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
+                      commonDisplayBehaviour(
+                        nonCalculatedAnswers
+                      )(form =
+                        _.fold(
+                          _.taxDue.fold(nonCalculatedTaxDueForm)(a => nonCalculatedTaxDueForm.fill(a.inPounds())),
+                          c => nonCalculatedTaxDueForm.fill(c.taxDue.inPounds())
+                        )
+                      )(
+                        page =
+                          if (fillingOutReturn.isFurtherReturn.contains(true))
+                            furtherReturnEnterTaxDuePage(
+                              _,
+                              _,
+                              taxYear,
+                              fillingOutReturn.subscribedDetails.isATrust,
+                              fillingOutReturn.draftReturn.representativeType
+                            )
+                          else
+                            nonCalculatedEnterTaxDuePage(_, _)
+                      )(
+                        requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
+                        redirectToIfNoRequiredPreviousAnswer =
+                          routes.YearToDateLiabilityController.hasEstimatedDetails()
                       )
-                    )(
-                      page =
-                        if (fillingOutReturn.isFurtherReturn.contains(true))
-                          furtherReturnEnterTaxDuePage(
-                            _,
-                            _,
-                            fillingOutReturn.subscribedDetails.isATrust,
-                            fillingOutReturn.draftReturn.representativeType,
-                            fillingOutReturn.isFurtherReturn
-                          )
-                        else
-                          nonCalculatedEnterTaxDuePage(_, _)
-                    )(
-                      requiredPreviousAnswer = _.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails)),
-                      redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
-                    )
+                    }
                 }
 
             }
@@ -1479,50 +1481,53 @@ class YearToDateLiabilityController @Inject() (
                     )
 
                   case _                                                      =>
-                    commonSubmitBehaviour(
-                      fillingOutReturn,
-                      fillingOutReturn.draftReturn,
-                      nonCalculatedAnswers
-                    )(form = nonCalculatedTaxDueForm)(
-                      page =
-                        if (fillingOutReturn.isFurtherReturn.contains(true))
-                          furtherReturnEnterTaxDuePage(
-                            _,
-                            _,
-                            fillingOutReturn.subscribedDetails.isATrust,
-                            fillingOutReturn.draftReturn.representativeType,
-                            fillingOutReturn.isFurtherReturn
-                          )
-                        else
-                          nonCalculatedEnterTaxDuePage(_, _)
-                    )(
-                      requiredPreviousAnswer = _.fold(
-                        _.hasEstimatedDetails,
-                        c => Some(c.hasEstimatedDetails)
-                      ),
-                      redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.hasEstimatedDetails()
-                    ) { (amount, draftReturn) =>
-                      val taxDue = AmountInPence.fromPounds(amount)
-
-                      if (
+                    withTaxYear(fillingOutReturn.draftReturn) { taxYear =>
+                      commonSubmitBehaviour(
+                        fillingOutReturn,
+                        fillingOutReturn.draftReturn,
                         nonCalculatedAnswers
-                          .fold(_.taxDue, c => Some(c.taxDue))
-                          .contains(taxDue)
-                      )
-                        draftReturn
-                      else {
-                        val newAnswers = nonCalculatedAnswers
-                          .unset(_.mandatoryEvidence)
-                          .unset(_.expiredEvidence)
-                          .unset(_.pendingUpscanUpload)
-                          .copy(taxDue = Some(taxDue))
-                        draftReturn.fold(
-                          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                          _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                      )(form = nonCalculatedTaxDueForm)(
+                        page =
+                          if (fillingOutReturn.isFurtherReturn.contains(true))
+                            furtherReturnEnterTaxDuePage(
+                              _,
+                              _,
+                              taxYear,
+                              fillingOutReturn.subscribedDetails.isATrust,
+                              fillingOutReturn.draftReturn.representativeType
+                            )
+                          else
+                            nonCalculatedEnterTaxDuePage(_, _)
+                      )(
+                        requiredPreviousAnswer = _.fold(
+                          _.hasEstimatedDetails,
+                          c => Some(c.hasEstimatedDetails)
+                        ),
+                        redirectToIfNoRequiredPreviousAnswer =
+                          routes.YearToDateLiabilityController.hasEstimatedDetails()
+                      ) { (amount, draftReturn) =>
+                        val taxDue = AmountInPence.fromPounds(amount)
+
+                        if (
+                          nonCalculatedAnswers
+                            .fold(_.taxDue, c => Some(c.taxDue))
+                            .contains(taxDue)
                         )
+                          draftReturn
+                        else {
+                          val newAnswers = nonCalculatedAnswers
+                            .unset(_.mandatoryEvidence)
+                            .unset(_.expiredEvidence)
+                            .unset(_.pendingUpscanUpload)
+                            .copy(taxDue = Some(taxDue))
+                          draftReturn.fold(
+                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+                            _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
+                          )
+                        }
                       }
                     }
                 }

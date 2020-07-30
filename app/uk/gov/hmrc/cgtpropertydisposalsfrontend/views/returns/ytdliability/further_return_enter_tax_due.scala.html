@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
@@ -41,14 +41,12 @@
 @(
     form: Form[BigDecimal],
     backLink: Call,
+    taxYear: TaxYear,
     isATrust: Boolean,
-    representativeType: Option[RepresentativeType],
-    isFurtherReturn: Option[Boolean]
+    representativeType: Option[RepresentativeType]
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "nonCalculatedTaxDue" }
-
-@furtherReturnKey = @{ if(isFurtherReturn.contains(true)) ".furtherReturn" else "" }
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
@@ -63,16 +61,19 @@
     }
 }
 
-@title = @{messages(s"$key$furtherReturnKey$userKey.title")}
+@title = @{messages(s"$key.furtherReturn.enterTaxDue.title")}
+
+@taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
+@taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
 
 @helpText = @{
     Some(Html(s"""
-        ${messages("nonCalculatedTaxDue.furtherReturn.helpText.p1")}<br/>
-        <ul class="list-bullet">
-            <li>${messages("nonCalculatedTaxDue.furtherReturn.helpText.li1")}</li>
-            <li>${messages("nonCalculatedTaxDue.furtherReturn.helpText.li2")}</li>
-            <li>${messages("nonCalculatedTaxDue.furtherReturn.helpText.li3")}</li>
-        </ul>
+        ${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.p1")}<br/>
+        <ol class="list list-number">
+            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li1", taxYearStartYear, taxYearEndYear)}</li>
+            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li2", taxYearStartYear, taxYearEndYear)}</li>
+            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li3")}</li>
+        </ol>
     """))
 }
 
