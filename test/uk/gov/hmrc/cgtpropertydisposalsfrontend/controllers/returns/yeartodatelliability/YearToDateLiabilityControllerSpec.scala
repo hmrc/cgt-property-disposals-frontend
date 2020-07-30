@@ -4439,7 +4439,8 @@ class YearToDateLiabilityControllerSpec
                       sample[CompleteNonCalculatedYTDAnswers].copy(
                         yearToDateLiability = Some(yearToDateLiability)
                       )
-                    )
+                    ),
+                    representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
                   ),
                   agentReferenceNumber = if (userType == UserType.Agent) Some(sample[AgentReferenceNumber]) else None,
                   previousSentReturns = Some(
@@ -4481,7 +4482,24 @@ class YearToDateLiabilityControllerSpec
               IndividualUserType.Self,
               "nonCalculatedTaxDue.furtherReturn.enterTaxDue.helpText.p1"
             )
+          }
 
+          "the user is an agent" in {
+            testEnterTaxDuePage(
+              AmountInPence(1000L),
+              UserType.Agent,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.agent.helpText.p1"
+            )
+          }
+
+          "the user is a trust" in {
+            testEnterTaxDuePage(
+              AmountInPence(1000L),
+              UserType.Organisation,
+              IndividualUserType.Self,
+              "nonCalculatedTaxDue.furtherReturn.enterTaxDue.trust.helpText.p1"
+            )
           }
 
           "the user is a capacitor" in {
@@ -4491,7 +4509,6 @@ class YearToDateLiabilityControllerSpec
               IndividualUserType.Capacitor,
               "nonCalculatedTaxDue.furtherReturn.enterTaxDue.capacitor.helpText.p1"
             )
-
           }
 
           "the user is a personal rep" in {
