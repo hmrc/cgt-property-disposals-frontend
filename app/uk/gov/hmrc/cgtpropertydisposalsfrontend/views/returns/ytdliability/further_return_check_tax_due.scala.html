@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import play.api.data.Form
 @import play.api.i18n.Messages
 @import play.api.mvc.Call
 
@@ -22,17 +21,13 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
     submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
     formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
@@ -42,72 +37,67 @@
 )
 
 @(
-    form: Form[BigDecimal],
     backLink: Call,
-    answers: NonCalculatedYTDAnswers,
-    isATrust: Boolean,
-    representativeType: Option[RepresentativeType],
-    isFurtherReturn: Option[Boolean]
+    yearToDateLiability: AmountInPence,
+    previousYearToDateLiability: AmountInPence,
+    isATrust: Boolean
 )(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@key = @{ "nonCalculatedTaxDue" }
-
-@furtherReturnKey = @{ if(isFurtherReturn.contains(true)) ".furtherReturn" else "" }
+@key = @{ "nonCalculatedTaxDue.furtherReturn.checkTaxDue" }
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
-    representativeType match {
-        case Some(PersonalRepresentative) => ".personalRep"
-        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
-        case Some(Capacitor) => ".capacitor"
-        case None =>
         if (isAgent) ".agent"
         else if (isATrust) ".trust"
         else ""
-    }
 }
 
-@title = @{messages(s"$key$furtherReturnKey$userKey.title")}
+@title = @{messages(s"$key.title")}
 
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@formattedTaxDue = @{
+    val taxDue = (yearToDateLiability -- previousYearToDateLiability).withFloorZero
+    MoneyUtils.formatAmountOfMoneyWithPoundSign(taxDue.inPounds())
+}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
-
     @caption(messages("ytdLiability.furtherReturn.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit(), 'novalidate -> "novalidate") {
-        @pageHeading(messages(s"$key$furtherReturnKey$userKey.title"))
-        <h2 class="heading-medium">@messages("nonCalculatedTaxDue.furtherReturn.sub-title")</h2>
+    @pageHeading(title)
 
-        @calcSum(
-            List(
-                SumPartDisplay(
-                    label = messages("nonCalculatedTaxDue.furtherReturn.table.label1"),
-                    operator = None,
-                    amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.fold(_.taxDue, c => Some(c.taxDue)).getOrElse(AmountInPence.zero).inPounds())
-                ),
-                 SumPartDisplay(
-                    label = messages("nonCalculatedTaxDue.furtherReturn.table.label2"),
-                    operator = Some("-"),
-                    amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(AmountInPence(1000).inPounds())
-                )
+    <h2 class="heading-medium">@messages(s"$key.h2")</h2>
+
+    @calcSum(
+        List(
+            SumPartDisplay(
+                label = messages(s"$key.table.label1"),
+                operator = None,
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
             ),
             SumPartDisplay(
-                label = messages("nonCalculatedTaxDue.furtherReturn.table.label3"),
-                operator = Some("="),
-                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(AmountInPence(1000).inPounds()),
-                total = true
+                label = messages(s"$key.table.label2"),
+                operator = Some("-"),
+                amount = MoneyUtils.formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())
             )
+            ),
+        SumPartDisplay(
+            label = messages(s"$key.table.label3"),
+            operator = Some("="),
+            amount = formattedTaxDue,
+            total = true
         )
+    )
 
-       @submitButton(messages("button.confirmAndContinue"))
+    <p>@messages(s"$key$userKey.p1", formattedTaxDue)</p>
+
+    <p>@messages(s"$key.p2")</p>
+
+    @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()) {
+        @submitButton(messages("button.confirmAndContinue"))
     }
+
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 
