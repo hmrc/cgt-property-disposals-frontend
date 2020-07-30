@@ -759,7 +759,7 @@ class HomePageControllerSpec
             )
             doc
               .select(s"#viewSentReturn-${sentReturn.submissionId}")
-              .text shouldBe "View and pay"
+              .text shouldBe messageFromMessageKey("returns.list.viewAndPay")
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
               .text shouldBe messages(
@@ -811,7 +811,7 @@ class HomePageControllerSpec
             )
             doc
               .select(s"#viewSentReturn-${sentReturn.submissionId}")
-              .text shouldBe "View and pay"
+              .text shouldBe messageFromMessageKey("returns.list.viewAndPay")
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
               .text shouldBe messages(
@@ -865,7 +865,7 @@ class HomePageControllerSpec
             )
             doc
               .select(s"#viewSentReturn-${sentReturn.submissionId}")
-              .text shouldBe "View and pay"
+              .text shouldBe messageFromMessageKey("returns.list.viewAndPay")
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
               .text shouldBe messages(
@@ -919,7 +919,7 @@ class HomePageControllerSpec
             )
             doc
               .select(s"#viewSentReturn-${sentReturn.submissionId}")
-              .text shouldBe "View and pay"
+              .text shouldBe messageFromMessageKey("returns.list.viewAndPay")
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
               .text shouldBe messages(
