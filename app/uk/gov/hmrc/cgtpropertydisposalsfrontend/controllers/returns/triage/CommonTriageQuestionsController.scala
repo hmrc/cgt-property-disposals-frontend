@@ -486,13 +486,9 @@ class CommonTriageQuestionsController @Inject() (
         triageAnswers.fold(
           _.fold(
             _ =>
-              if (isFurtherReturn)
-                routes.CommonTriageQuestionsController
-                  .furtherReturnHelp()
-              else if (isSelfUserType)
-                routes.CommonTriageQuestionsController
-                  .whoIsIndividualRepresenting()
-              else representee.routes.RepresenteeController.checkYourAnswers(),
+              if (!isSelfUserType) representee.routes.RepresenteeController.checkYourAnswers()
+              else if (isFurtherReturn) routes.CommonTriageQuestionsController.furtherReturnHelp()
+              else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           ),
           _.fold(
