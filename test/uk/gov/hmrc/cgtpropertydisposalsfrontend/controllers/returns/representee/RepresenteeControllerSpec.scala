@@ -2667,6 +2667,25 @@ class RepresenteeControllerSpec
 
       }
 
+      "redirect to further return help page" when {
+        "the user has not yet answered that question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(
+                IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(false)),
+                Capacitor
+              )._1
+            )
+          }
+          checkIsRedirect(
+            performAction(),
+            triageRoutes.CommonTriageQuestionsController.furtherReturnHelp()
+          )
+        }
+
+      }
+
       "redirect to the enter name page" when {
 
         "that question hasn't been answered yet" in {

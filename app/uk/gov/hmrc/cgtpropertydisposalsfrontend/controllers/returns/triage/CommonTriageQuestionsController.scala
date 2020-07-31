@@ -471,11 +471,10 @@ class CommonTriageQuestionsController @Inject() (
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Option[Call] = {
 
-    val isFurtherReturn = state
-      .fold(
-        _.representeeAnswers.map(_.fold(_.isFirstReturn.contains(false), _.isFirstReturn)).contains(false),
-        _.isFurtherReturn.contains(true)
-      )
+    val isFurtherReturn = state.fold(
+      _.isFurtherReturn.contains(true),
+      _.isFurtherReturn.contains(true)
+    )
 
     val triageAnswers  = triageAnswersFomState(state)
     val isSelfUserType = isIndividualASelfUserType(triageAnswers)

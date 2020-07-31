@@ -863,12 +863,12 @@ class CommonTriageQuestionsControllerSpec
                 doc
                   .select("#content > article > ul > li:nth-child(1)")
                   .html() shouldBe messageFromMessageKey(
-                  s"further-returns.capacitor.help.l1"
+                  "further-returns.capacitor.help.l1"
                 )
                 doc
                   .select("#content > article > ul > li:nth-child(2)")
                   .html() shouldBe messageFromMessageKey(
-                  s"further-returns.capacitor.help.l2"
+                  "further-returns.help.l2"
                 )
               }
             )
@@ -937,7 +937,7 @@ class CommonTriageQuestionsControllerSpec
                     doc
                       .select("#content > article > ul > li:nth-child(2)")
                       .html() shouldBe messageFromMessageKey(
-                      s"further-returns.${value._2}.help.l2"
+                      "further-returns.help.l2"
                     )
                   }
                 )

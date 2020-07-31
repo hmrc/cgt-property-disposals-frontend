@@ -205,6 +205,35 @@ object JourneyStatus {
 
   final case object AgentWithoutAgentEnrolment extends JourneyStatus
 
+  implicit class StartingNewDraftReturnOps(private val s: StartingNewDraftReturn) extends AnyVal {
+    def isFurtherReturn: Option[Boolean] = {
+      lazy val hasPreviousSentReturns = s.previousSentReturns.exists(_.nonEmpty)
+      s.subscribedDetails.name match {
+        case Left(_)  =>
+          Some(hasPreviousSentReturns)
+
+        case Right(_) =>
+          val individualUserType = s.newReturnTriageAnswers
+            .fold(
+              _.fold(_.individualUserType, _.individualUserType),
+              _.fold(_.individualUserType, _.individualUserType)
+            )
+
+          individualUserType.flatMap {
+            case _: RepresentativeType =>
+              s.representeeAnswers
+                .flatMap(
+                  _.fold(_.isFirstReturn, complete => Some(complete.isFirstReturn))
+                    .map(!_)
+                )
+            case _                     =>
+              Some(hasPreviousSentReturns)
+          }
+      }
+
+    }
+  }
+
   implicit class FillingOutReturnOps(private val f: FillingOutReturn) extends AnyVal {
 
     def isFurtherReturn: Option[Boolean] = {
