@@ -4665,13 +4665,12 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the user is on a further return journey where a previous year to date value is not available" in {
-          val previousYearToDateLiability = AmountInPence(9L)
-          val yearToDateLiability         = AmountInPence(10L)
-          val taxDue                      = AmountInPence(1L)
-          val answers                     = sample[CompleteNonCalculatedYTDAnswers].copy(
+          val yearToDateLiability = AmountInPence(10L)
+          val taxDue              = AmountInPence(1050L)
+          val answers             = sample[CompleteNonCalculatedYTDAnswers].copy(
             yearToDateLiability = Some(yearToDateLiability)
           )
-          val newAnswers                  = IncompleteNonCalculatedYTDAnswers(
+          val newAnswers          = IncompleteNonCalculatedYTDAnswers(
             Some(answers.taxableGainOrLoss),
             Some(answers.hasEstimatedDetails),
             Some(taxDue),
@@ -4680,24 +4679,24 @@ class YearToDateLiabilityControllerSpec
             None,
             answers.yearToDateLiability
           )
-          val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
+          val draftReturn         = sample[DraftSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-              individualUserType = Some(Self)
+              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)
             ),
             yearToDateLiabilityAnswers = Some(answers),
             representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
           )
-          val journey                     = sample[FillingOutReturn].copy(
+          val journey             = sample[FillingOutReturn].copy(
             draftReturn = draftReturn,
             previousSentReturns = Some(
               sample[PreviousReturnData].copy(
                 summaries = List(sample[ReturnSummary]),
-                previousYearToDate = Some(previousYearToDateLiability)
+                previousYearToDate = None
               )
             ),
             subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
           )
-          val newJourney                  = journey.copy(
+          val newJourney          = journey.copy(
             draftReturn = draftReturn.copy(
               yearToDateLiabilityAnswers = Some(newAnswers)
             )
@@ -4719,7 +4718,9 @@ class YearToDateLiabilityControllerSpec
           }
 
           checkIsRedirect(
-            performAction(),
+            performAction(
+              "nonCalculatedTaxDue" -> "10.50"
+            ),
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
         }
