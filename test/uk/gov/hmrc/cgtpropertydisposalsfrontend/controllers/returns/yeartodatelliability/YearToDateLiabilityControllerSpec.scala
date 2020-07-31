@@ -4637,7 +4637,71 @@ class YearToDateLiabilityControllerSpec
             ),
             subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
           )
-          val newJourney                  = journey.copy(draftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers)))
+          val newJourney                  = journey.copy(
+            draftReturn = draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(newAnswers)
+            )
+          )
+
+          val sessionData = SessionData.empty.copy(journeyStatus = Some(journey))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+            mockStoreDraftReturn(
+              newJourney.draftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(
+              sessionData.copy(journeyStatus = Some(newJourney))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+
+        "the user is on a further return journey where a previous year to date value is not available" in {
+          val previousYearToDateLiability = AmountInPence(9L)
+          val yearToDateLiability         = AmountInPence(10L)
+          val taxDue                      = AmountInPence(1L)
+          val answers                     = sample[CompleteNonCalculatedYTDAnswers].copy(
+            yearToDateLiability = Some(yearToDateLiability)
+          )
+          val newAnswers                  = IncompleteNonCalculatedYTDAnswers(
+            Some(answers.taxableGainOrLoss),
+            Some(answers.hasEstimatedDetails),
+            Some(taxDue),
+            None,
+            None,
+            None,
+            answers.yearToDateLiability
+          )
+          val draftReturn                 = sample[DraftSingleDisposalReturn].copy(
+            triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self)
+            ),
+            yearToDateLiabilityAnswers = Some(answers),
+            representeeAnswers = Some(sample[CompleteRepresenteeAnswers].copy(isFirstReturn = false))
+          )
+          val journey                     = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            previousSentReturns = Some(
+              sample[PreviousReturnData].copy(
+                summaries = List(sample[ReturnSummary]),
+                previousYearToDate = Some(previousYearToDateLiability)
+              )
+            ),
+            subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+          )
+          val newJourney                  = journey.copy(
+            draftReturn = draftReturn.copy(
+              yearToDateLiabilityAnswers = Some(newAnswers)
+            )
+          )
 
           val sessionData = SessionData.empty.copy(journeyStatus = Some(journey))
 
