@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.govShortDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
@@ -43,10 +43,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -95,7 +97,7 @@ class HomePageControllerSpec
       .returning(EitherT.fromEither[Future](response))
 
   def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(
-    response: Either[Error, CompleteSingleDisposalReturn]
+    response: Either[Error, CompleteReturn]
   ) =
     (mockReturnsService
       .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
@@ -1137,7 +1139,7 @@ class HomePageControllerSpec
           subscribed.agentReferenceNumber,
           Right(sample[IncompleteSingleDisposalTriageAnswers]),
           None,
-          Some(subscribed.sentReturns)
+          Some(PreviousReturnData(subscribed.sentReturns, None))
         )
 
         val fillingOurReturn    = FillingOutReturn(
@@ -1145,7 +1147,7 @@ class HomePageControllerSpec
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
           sample[DraftSingleDisposalReturn],
-          Some(subscribed.sentReturns)
+          Some(PreviousReturnData(subscribed.sentReturns, None))
         )
         val justSubmittedReturn = JustSubmittedReturn(
           subscribed.subscribedDetails,
@@ -1304,6 +1306,22 @@ class HomePageControllerSpec
 
       "show an error page" when {
 
+        "there is an error while calling the display return API" in {
+          val returnSummary = sample[ReturnSummary]
+          val subscribed    = sample[Subscribed].copy(
+            draftReturns = List.empty,
+            sentReturns = List(returnSummary)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithSubscribed(subscribed))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, returnSummary.submissionId)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
         "there is an error updating the session" in {
           val subscribed = sample[Subscribed].copy(
             draftReturns = List.empty,
@@ -1322,7 +1340,7 @@ class HomePageControllerSpec
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
                     None,
-                    Some(subscribed.sentReturns)
+                    Some(PreviousReturnData(List.empty, None))
                   )
                 )
               )
@@ -1356,7 +1374,7 @@ class HomePageControllerSpec
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
                     None,
-                    Some(subscribed.sentReturns)
+                    Some(PreviousReturnData(List.empty, None))
                   )
                 )
               )
@@ -1393,7 +1411,7 @@ class HomePageControllerSpec
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
                     None,
-                    Some(subscribed.sentReturns)
+                    Some(PreviousReturnData(List.empty, None))
                   )
                 )
               )
@@ -1449,6 +1467,27 @@ class HomePageControllerSpec
         }
 
       }
+
+      behave like commonPreviousYearToDateBehaviour(
+        performAction,
+        List.empty,
+        (previousYearToDate, subscribed) =>
+          StartingNewDraftReturn(
+            subscribed.subscribedDetails,
+            subscribed.ggCredId,
+            subscribed.agentReferenceNumber,
+            Right(IncompleteSingleDisposalTriageAnswers.empty),
+            None,
+            Some(
+              PreviousReturnData(
+                subscribed.sentReturns,
+                previousYearToDate
+              )
+            )
+          ),
+        controllers.returns.triage.routes.CommonTriageQuestionsController
+          .whoIsIndividualRepresenting()
+      )
 
     }
 
@@ -1520,7 +1559,7 @@ class HomePageControllerSpec
 
       val draftReturn = sample[DraftSingleDisposalReturn]
 
-      val subscribed = sample[Subscribed].copy(draftReturns = List(draftReturn))
+      val subscribed = sample[Subscribed].copy(draftReturns = List(draftReturn), sentReturns = List.empty)
 
       val sessionWithSubscribed =
         SessionData.empty.copy(journeyStatus = Some(subscribed))
@@ -1530,7 +1569,7 @@ class HomePageControllerSpec
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
         draftReturn,
-        Some(subscribed.sentReturns)
+        Some(PreviousReturnData(List.empty, None))
       )
 
       "show an error page" when {
@@ -1555,6 +1594,7 @@ class HomePageControllerSpec
 
           checkIsTechnicalErrorPage(performAction(draftReturn.id))
         }
+
       }
 
       "redirect to the task list page" when {
@@ -1575,6 +1615,20 @@ class HomePageControllerSpec
         }
 
       }
+
+      behave like commonPreviousYearToDateBehaviour(
+        () => performAction(draftReturn.id),
+        List(draftReturn),
+        (previousYearToDate, subscribed) =>
+          FillingOutReturn(
+            subscribed.subscribedDetails,
+            subscribed.ggCredId,
+            subscribed.agentReferenceNumber,
+            draftReturn,
+            Some(PreviousReturnData(subscribed.sentReturns, previousYearToDate))
+          ),
+        controllers.returns.routes.TaskListController.taskList()
+      )
 
     }
 
@@ -1757,6 +1811,182 @@ class HomePageControllerSpec
           checkIsRedirect(performAction(), paymentsJourney.nextUrl)
         }
 
+      }
+
+    }
+
+  }
+
+  def commonPreviousYearToDateBehaviour(
+    performAction: () => Future[Result],
+    draftReturns: List[DraftReturn],
+    toJourneyStatus: (Option[AmountInPence], Subscribed) => JourneyStatus,
+    expectedRedirectLocation: Call
+  ): Unit = {
+    val previousYearToDate = sample[AmountInPence]
+    val latestDate         = LocalDate.of(2020, 1, 1)
+
+    "populate the previous year to date value correctly" in {
+      val testCases = List(
+        "single disposal, non calculated, yearToDateLiability exists"         -> sample[CompleteSingleDisposalReturn].copy(
+          yearToDateLiabilityAnswers = Left(
+            sample[CompleteNonCalculatedYTDAnswers].copy(
+              yearToDateLiability = Some(previousYearToDate)
+            )
+          )
+        ),
+        "single disposal, non calculated, yearToDateLiability does not exist" -> sample[CompleteSingleDisposalReturn]
+          .copy(
+            yearToDateLiabilityAnswers = Left(
+              sample[CompleteNonCalculatedYTDAnswers].copy(
+                yearToDateLiability = None,
+                taxDue = previousYearToDate
+              )
+            )
+          ),
+        "single disposal, calculated"                                         -> sample[CompleteSingleDisposalReturn].copy(
+          yearToDateLiabilityAnswers = Right(
+            sample[CompleteCalculatedYTDAnswers].copy(
+              taxDue = previousYearToDate
+            )
+          )
+        ),
+        "multiple disposal"                                                   -> sample[CompleteMultipleDisposalsReturn].copy(
+          yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+            yearToDateLiability = Some(previousYearToDate)
+          )
+        ),
+        "single indirect"                                                     -> sample[CompleteSingleIndirectDisposalReturn].copy(
+          yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+            yearToDateLiability = Some(previousYearToDate)
+          )
+        ),
+        "multiple indirect"                                                   -> sample[CompleteMultipleIndirectDisposalReturn].copy(
+          yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+            yearToDateLiability = None,
+            taxDue = previousYearToDate
+          )
+        ),
+        "single mixed use"                                                    -> sample[CompleteSingleMixedUseDisposalReturn].copy(
+          yearToDateLiabilityAnswers = sample[CompleteNonCalculatedYTDAnswers].copy(
+            yearToDateLiability = Some(previousYearToDate)
+          )
+        )
+      )
+
+      testCases.foreach {
+        case (description, completeReturn) =>
+          withClue(s"For $description: ") {
+
+            val latestReturnSummary = sample[ReturnSummary].copy(
+              lastUpdatedDate = Some(latestDate)
+            )
+            val otherReturnSummary  =
+              sample[ReturnSummary].copy(
+                submissionDate = latestDate.minusDays(1L),
+                lastUpdatedDate = None
+              )
+
+            val subscribed = sample[Subscribed]
+              .copy(
+                subscribedDetails = sample[SubscribedDetails]
+                  .copy(name = Right(sample[IndividualName])),
+                draftReturns = draftReturns,
+                sentReturns = List(latestReturnSummary, otherReturnSummary)
+              )
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionDataWithSubscribed(subscribed))
+              mockDisplayReturn(subscribed.subscribedDetails.cgtReference, latestReturnSummary.submissionId)(
+                Right(completeReturn)
+              )
+              mockStoreSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(toJourneyStatus(Some(previousYearToDate), subscribed))
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(),
+              expectedRedirectLocation
+            )
+          }
+      }
+
+    }
+
+    "not return a previous year to date value" when {
+
+      "there is more than one return which has been submitted on the latest date" in {
+        val latestReturnSummary = sample[ReturnSummary].copy(
+          submissionDate = latestDate,
+          lastUpdatedDate = None
+        )
+        val otherReturnSummary  =
+          sample[ReturnSummary].copy(
+            submissionDate = latestDate,
+            lastUpdatedDate = None
+          )
+
+        val subscribed = sample[Subscribed]
+          .copy(
+            subscribedDetails = sample[SubscribedDetails]
+              .copy(name = Right(sample[IndividualName])),
+            draftReturns = draftReturns,
+            sentReturns = List(latestReturnSummary, otherReturnSummary)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithSubscribed(subscribed))
+          mockStoreSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(toJourneyStatus(None, subscribed))
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction(),
+          expectedRedirectLocation
+        )
+      }
+
+      "there is a return which has been amended on the date that the latest return has been submitted" in {
+        val latestReturnSummary = sample[ReturnSummary].copy(
+          submissionDate = latestDate,
+          lastUpdatedDate = None
+        )
+        val otherReturnSummary  =
+          sample[ReturnSummary].copy(
+            submissionDate = latestDate.minusDays(1L),
+            lastUpdatedDate = Some(latestDate)
+          )
+
+        val subscribed = sample[Subscribed]
+          .copy(
+            subscribedDetails = sample[SubscribedDetails]
+              .copy(name = Right(sample[IndividualName])),
+            draftReturns = draftReturns,
+            sentReturns = List(latestReturnSummary, otherReturnSummary)
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithSubscribed(subscribed))
+          mockStoreSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(toJourneyStatus(None, subscribed))
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction(),
+          expectedRedirectLocation
+        )
       }
 
     }

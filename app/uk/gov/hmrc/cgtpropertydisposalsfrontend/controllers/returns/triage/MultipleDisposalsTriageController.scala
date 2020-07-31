@@ -1478,7 +1478,11 @@ class MultipleDisposalsTriageController @Inject() (
       case Some(_: RepresentativeType) => false
       case _                           =>
         val previousSentCompletionDates =
-          state.fold(_.previousSentReturns, _._1.previousSentReturns).getOrElse(List.empty).map(_.completionDate)
+          state
+            .fold(_.previousSentReturns, _._1.previousSentReturns)
+            .map(_.summaries)
+            .getOrElse(List.empty)
+            .map(_.completionDate)
         previousSentCompletionDates.contains(completionDate.value)
     }
 

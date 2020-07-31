@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
@@ -168,7 +168,7 @@ class ExemptionAndLossesControllerSpec
     )
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
-      previousSentReturns = if (isFurtherReturn) Some(List(sample[ReturnSummary])) else None
+      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -216,7 +216,7 @@ class ExemptionAndLossesControllerSpec
     )
 
     val journey = sampleFillingOutReturn(draftReturn, userType).copy(
-      previousSentReturns = if (isFurtherReturn) Some(List(sample[ReturnSummary])) else None
+      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -260,7 +260,7 @@ class ExemptionAndLossesControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      previousSentReturns = if (isFurtherReturn) Some(List(sample[ReturnSummary])) else None
+      previousSentReturns = if (isFurtherReturn) Some(sample[PreviousReturnData]) else None
     )
 
     val sessionData = SessionData.empty.copy(
@@ -291,7 +291,7 @@ class ExemptionAndLossesControllerSpec
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
       agentReferenceNumber = setAgentReferenceNumber(userType),
-      previousSentReturns = if (isFurtherReturn) Some(List(sample[ReturnSummary])) else None
+      previousSentReturns = if (isFurtherReturn) Some(PreviousReturnData(List(sample[ReturnSummary]), None)) else None
     )
 
     val sessionData = SessionData.empty.copy(

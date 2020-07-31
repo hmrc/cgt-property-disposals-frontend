@@ -45,7 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Singl
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
@@ -336,7 +336,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
               draftReturn = completeDraftReturn,
-              previousSentReturns = Some(List(sample[ReturnSummary]))
+              previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), Some(sample[AmountInPence])))
             )
 
             test(
