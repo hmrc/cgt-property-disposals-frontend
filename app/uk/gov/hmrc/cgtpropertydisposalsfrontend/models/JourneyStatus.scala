@@ -207,7 +207,7 @@ object JourneyStatus {
 
   implicit class StartingNewDraftReturnOps(private val s: StartingNewDraftReturn) extends AnyVal {
     def isFurtherReturn: Option[Boolean] = {
-      lazy val hasPreviousSentReturns = s.previousSentReturns.exists(_.nonEmpty)
+      lazy val hasPreviousSentReturns = s.previousSentReturns.exists(_.summaries.nonEmpty)
       s.subscribedDetails.name match {
         case Left(_)  =>
           Some(hasPreviousSentReturns)

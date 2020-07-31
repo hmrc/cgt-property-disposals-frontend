@@ -1151,7 +1151,7 @@ class SingleDisposalsTriageController @Inject() (
 
         val isFurtherReturn = state
           .fold(
-            _.representeeAnswers.map(_.fold(_.isFirstReturn.contains(false), e => e.isFirstReturn)).contains(false),
+            _.isFurtherReturn.contains(true),
             _._2.isFurtherReturn.contains(true)
           )
 
