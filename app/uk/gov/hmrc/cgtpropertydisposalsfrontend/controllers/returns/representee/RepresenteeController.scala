@@ -191,7 +191,11 @@ class RepresenteeController @Inject() (
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             lazy val backLink = answers.fold(
-              _ => routes.RepresenteeController.isFirstReturn(),
+              _ =>
+                if (isFirstReturn)
+                  routes.RepresenteeController.isFirstReturn()
+                else
+                  triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               _ => routes.RepresenteeController.checkYourAnswers()
             )
 
