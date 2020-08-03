@@ -7,7 +7,7 @@ landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if 
 landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
 
 landingPage.warning=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
-landingPage.covid.p1=Due to coronavirus (COVID-19), you will not get a late filing penalty for any transactions completed on or after 6 April 2020 to 1 July 2020 and reported up to 31 July 2020.
+landingPage.covid.p1=Due to coronavirus (Covid-19) HMRC did not issue late penalties to any transactions completed between 6 April and 30 June 2020, provided the gain was reported and any tax due paid by 31 July 2020. Anyone who completes the sale of a property from 1 July 2020 onwards has 30 calendar days to report and pay the tax due.
 landingPage.covid.p2=Transactions completed from 1 July 2020 will receive a late filing penalty if they are not reported within 30 calendar days.
 landingPage.covid.p3=Interest will be charged if the tax remains unpaid after 30 days for all transactions from 6 April 2020.
 
@@ -59,17 +59,16 @@ landingPage.reportingDisposals.h2=If you’re reporting indirect disposals or di
 landingPage.reportingDisposals.p1=Use the <a href="{0}">non-resident: report and pay Capital Gains Tax on UK property or land form</a>.
 landingPage.capacitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
 landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. <a href="{0}">A personal representative</a> is someone responsible for settling the affairs of someone who has died.
-landingPage.capacitorOrPersonalRepresentative.p2=If the disposal was made by the deceased’s estate during the period of administration, you’ll need to <a href="{0}">contact HMRC</a> and ask for a paper version of the return to be posted to you.
-landingPage.capacitorOrPersonalRepresentative.p3=To use this service for another person, where the the disposal was not made within a period of administration, you’ll need to:
-landingPage.capacitorOrPersonalRepresentative.p4=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
-landingPage.capacitorOrPersonalRepresentative.p5=The details you provide must match the details we hold about the person.
-landingPage.capacitorOrPersonalRepresentative.p6=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
-landingPage.capacitorOrPersonalRepresentative.p7=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
-landingPage.capacitorOrPersonalRepresentative.p8=You can only use this service to send the person’s or the estate’s first return for the tax year. <a href="{0}">Contact HMRC</a> to send additional returns or amend a return.
+landingPage.capacitorOrPersonalRepresentative.p2=To use this service for another person, you’ll need to:
+landingPage.capacitorOrPersonalRepresentative.p3=You’ll need to enter one of these reference numbers for the person you have the authority to act for, if you have one:
+landingPage.capacitorOrPersonalRepresentative.p4=The details you provide must match the details we hold about the person.
+landingPage.capacitorOrPersonalRepresentative.p5=If you’re a personal representative, you’ll also need to provide the date the person you’re representing died.
+landingPage.capacitorOrPersonalRepresentative.p6=You should download or print a copy of the return for your records. This is because once the return has been sent to HMRC it will not be available online to view or amend online.
+landingPage.capacitorOrPersonalRepresentative.p7=You can only use this service to send the person’s or the estate’s first return for the tax year. <a href="{0}">Contact HMRC</a> to send additional returns or amend a return.
 landingPage.capacitorOrPersonalRepresentative.example.title=<strong class="bold">Example</strong>
-landingPage.capacitorOrPersonalRepresentative.p9=Mr Andrews died on 20 April 2020. Mr Smith is the personal representative for Mr Andrews’ estate. Before he died Mr Andrews had agreed to sell his UK residential investment property.
-landingPage.capacitorOrPersonalRepresentative.p10=Mr Andrews exchanged contracts on 15 April 2020 before he died. After he died Mr Smith completed the property sale. Capital Gains Tax was due.
-landingPage.capacitorOrPersonalRepresentative.p11=To report and pay the tax, Mr Smith signed into his own Capital Gains Tax on UK property account. Mr Smith started a new return and selected he was completing the return for someone who had died. Mr Smith entered the details, checked and sent the return, and paid the Capital Gains Tax due.
+landingPage.capacitorOrPersonalRepresentative.p8=Mr Andrews died on 20 April 2020. Mr Smith is the personal representative for Mr Andrews’ estate. Before he died Mr Andrews had agreed to sell his UK residential investment property.
+landingPage.capacitorOrPersonalRepresentative.p9=Mr Andrews exchanged contracts on 15 April 2020 before he died. After he died Mr Smith completed the property sale. Capital Gains Tax was due.
+landingPage.capacitorOrPersonalRepresentative.p10=To report and pay the tax, Mr Smith signed into his own Capital Gains Tax on UK property account. Mr Smith started a new return and selected he was completing the return for someone who had died. Mr Smith entered the details, checked and sent the return, and paid the Capital Gains Tax due.
 landingPage.capacitorOrPersonalRepresentative.list1.bullet1=sign in to your own Capital Gains Tax on UK property account or create one if you do not have one
 landingPage.capacitorOrPersonalRepresentative.list1.bullet2=start a new return from your account
 landingPage.capacitorOrPersonalRepresentative.list1.bullet3=select that you’re completing the return for someone else or someone who has died
