@@ -38,11 +38,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiond
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.MultipleDisposalsPropertyDetailsControllerSpec.validateExamplePropertyDetailsSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.GainOrLossAfterReliefsControllerSpec.validateGainOrLossOrReliefsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec.{validateCalculatedYearToDateLiabilityPage, validateNonCalculatedYearToDateLiabilityPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, SubmitReturnFailed, Subscribed}
@@ -206,7 +207,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           val complete = sample[CompleteSingleDisposalReturn].copy(
             triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
               .copy(individualUserType = Some(PersonalRepresentative)),
-            representeeAnswers = Some(representeeAnswers)
+            representeeAnswers = Some(representeeAnswers),
+            gainOrLossAfterReliefs = None
           )
           complete.copy(hasAttachments =
             complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.isLeft
@@ -302,7 +304,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           }
 
           "the user is on a further return journey" in {
-            val representeeAnswers = sample[CompleteRepresenteeAnswers].copy(
+            val gainOrLossAfterReliefs = sample[AmountInPence]
+            val representeeAnswers     = sample[CompleteRepresenteeAnswers].copy(
               isFirstReturn = false
             )
 
@@ -311,7 +314,8 @@ class CheckAllAnswersAndSubmitControllerSpec
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                   individualUserType = Some(PersonalRepresentative)
                 ),
-                representeeAnswers = Some(representeeAnswers)
+                representeeAnswers = Some(representeeAnswers),
+                gainOrLossAfterReliefs = Some(gainOrLossAfterReliefs)
               )
               complete.copy(hasAttachments =
                 complete.supportingDocumentAnswers.evidences.nonEmpty || complete.yearToDateLiabilityAnswers.isLeft
@@ -330,7 +334,7 @@ class CheckAllAnswersAndSubmitControllerSpec
               completeReturn.initialGainOrLoss,
               Some(completeReturn.supportingDocumentAnswers),
               completeReturn.representeeAnswers,
-              None,
+              completeReturn.gainOrLossAfterReliefs,
               TimeUtils.today()
             )
 
@@ -1132,7 +1136,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         completeReturn.initialGainOrLoss,
         Some(completeReturn.supportingDocumentAnswers),
         None,
-        None,
+        completeReturn.gainOrLossAfterReliefs,
         TimeUtils.today()
       )
 
@@ -2445,6 +2449,17 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.reliefDetails,
       doc
     )
+
+    completeReturn.gainOrLossAfterReliefs.foreach { gainOrLossAfterReliefs =>
+      validateGainOrLossOrReliefsCheckYourAnswersPage(
+        gainOrLossAfterReliefs,
+        doc,
+        isATrust,
+        userType.contains(UserType.Agent),
+        completeReturn.triageAnswers.individualUserType,
+        isMultipleDisposal = false
+      )
+    }
 
     completeReturn.triageAnswers.individualUserType.foreach { individualUserType =>
       validateExemptionAndLossesCheckYourAnswersPage(

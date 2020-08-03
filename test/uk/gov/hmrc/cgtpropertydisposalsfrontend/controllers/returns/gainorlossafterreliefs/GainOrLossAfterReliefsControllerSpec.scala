@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs
 
+import cats.syntax.order._
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -32,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
@@ -756,7 +759,7 @@ class GainOrLossAfterReliefsControllerSpec
           )
         }
 
-        "the user is a personal rep in periof of admin" in {
+        "the user is a personal rep in period of admin" in {
           test(
             periodOfAdminSession(Some(AmountInPence(0L))),
             "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title",
@@ -797,6 +800,66 @@ class GainOrLossAfterReliefsControllerSpec
       }
     }
 
+  }
+
+}
+
+object GainOrLossAfterReliefsControllerSpec extends Matchers {
+
+  def validateGainOrLossOrReliefsCheckYourAnswersPage(
+    gainOrLossAfterReliefs: AmountInPence,
+    doc: Document,
+    isATrust: Boolean,
+    isAnAgent: Boolean,
+    individualUserType: Option[IndividualUserType],
+    isMultipleDisposal: Boolean
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    val expectedQuestionKey = {
+      val userTypeKey          = individualUserType match {
+        case Some(PersonalRepresentative)                              => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if isAnAgent  => ".personalRepInPeriodOfAdmin.agent"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) if !isAnAgent => ".personalRepInPeriodOfAdmin"
+        case Some(Capacitor)                                           => ".capacitor"
+        case _                                                         =>
+          if (isAnAgent) ".agent"
+          else if (isATrust) ".trust"
+          else ""
+      }
+      val multipleDisposalKeys = if (isMultipleDisposal) ".multipleDisposals" else ""
+      s"gainOrLossAfterReliefs$userTypeKey$multipleDisposalKeys.title"
+    }
+
+    val (expectedQuestionValueKey, expectedAmountKey, expectedAmountValue) = {
+      val userKey = individualUserType match {
+        case Some(Self) if !isATrust && !isAnAgent => ""
+        case _                                     => ".notSelf"
+      }
+
+      if (gainOrLossAfterReliefs > AmountInPence.zero)
+        (
+          s"gainOrLossAfterReliefs.gain$userKey.outerLabel",
+          Some("gainOrLossAfterReliefs.gain.innerLabel"),
+          Some(MoneyUtils.formatAmountOfMoneyWithPoundSign(gainOrLossAfterReliefs.inPounds()))
+        )
+      else if (gainOrLossAfterReliefs < AmountInPence.zero)
+        (
+          s"gainOrLossAfterReliefs.loss$userKey.outerLabel",
+          Some("gainOrLossAfterReliefs.loss.innerLabel"),
+          Some(MoneyUtils.formatAmountOfMoneyWithPoundSign(gainOrLossAfterReliefs.inPounds().abs))
+        )
+      else
+        (s"gainOrLossAfterReliefs.noGainOrLoss$userKey.outerLabel", None, None)
+    }
+
+    doc.select("#gainOrLossAfterReliefs-question").text() shouldBe messages(expectedQuestionKey)
+    doc.select("#gainOrLossAfterReliefs-answer").text()   shouldBe messages(expectedQuestionValueKey)
+
+    doc.select("#gainOrLossAfterReliefsValue-question").text() shouldBe expectedAmountKey
+      .map(messages(_))
+      .getOrElse("")
+
+    doc.select("#gainOrLossAfterReliefsValue-answer").text() shouldBe expectedAmountValue
+      .getOrElse("")
   }
 
 }

@@ -247,7 +247,8 @@ class ViewReturnControllerSpec
           val completeSingleDisposalReturn = c.copy(
             triageAnswers = c.triageAnswers.copy(individualUserType = None),
             propertyAddress = address,
-            representeeAnswers = None
+            representeeAnswers = None,
+            gainOrLossAfterReliefs = None
           )
 
           val sampleViewingReturn = sample[ViewingReturn]
