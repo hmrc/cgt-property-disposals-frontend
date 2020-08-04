@@ -52,6 +52,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.sharesDisposalDateForm
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.IncompleteNonCalculatedYTDAnswers
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -738,9 +740,24 @@ class MultipleDisposalsTriageController @Inject() (
                       else
                         Right(
                           draftReturn.copy(
-                            triageAnswers = newAnswers,
+                            triageAnswers =
+                              if (state.fold(_.isFurtherReturn, _._1.isFurtherReturn).contains(true))
+                                newAnswers.unset(_.completionDate)
+                              else newAnswers,
                             examplePropertyDetailsAnswers = None,
-                            yearToDateLiabilityAnswers = None,
+                            yearToDateLiabilityAnswers =
+                              if (state.fold(_.isFurtherReturn, _._1.isFurtherReturn).contains(true))
+                                draftReturn.yearToDateLiabilityAnswers.map {
+                                  case answers: CalculatedYTDAnswers    =>
+                                    IncompleteCalculatedYTDAnswers.empty.copy(hasEstimatedDetails =
+                                      answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
+                                    )
+                                  case answers: NonCalculatedYTDAnswers =>
+                                    IncompleteNonCalculatedYTDAnswers.empty.copy(hasEstimatedDetails =
+                                      answers.fold(_.hasEstimatedDetails, c => Some(c.hasEstimatedDetails))
+                                    )
+                                }
+                              else None,
                             supportingEvidenceAnswers = None
                           )
                         )

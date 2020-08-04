@@ -832,7 +832,8 @@ class YearToDateLiabilityController @Inject() (
                 draftReturn: DraftSingleDisposalReturn
               ) =>
             handleNonCalculatedEstimatedDetailsSubmit(
-              calculatedAnswers,
+              if (fillingOutReturn.isFurtherReturn.contains(true)) calculatedAnswers.unset(_.hasEstimatedDetails)
+              else calculatedAnswers,
               draftReturn,
               fillingOutReturn
             )
@@ -1779,9 +1780,17 @@ class YearToDateLiabilityController @Inject() (
                 )
                   draftReturn
                 else {
-                  val newAnswers = nonCalculatedAnswers
-                    .unset(_.yearToDateLiability)
-                    .copy(yearToDateLiability = Some(yearToDateLiability))
+                  val newAnswers =
+                    if (fillingOutReturn.isFurtherReturn.contains(true))
+                      nonCalculatedAnswers
+                        .unset(_.yearToDateLiability)
+                        .unset(_.mandatoryEvidence)
+                        .unset(_.taxDue)
+                        .copy(yearToDateLiability = Some(yearToDateLiability))
+                    else
+                      nonCalculatedAnswers
+                        .unset(_.yearToDateLiability)
+                        .copy(yearToDateLiability = Some(yearToDateLiability))
 
                   updateDraftReturn(newAnswers, draftReturn)
                 }

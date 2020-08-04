@@ -215,7 +215,7 @@ class RepresenteeController @Inject() (
                   val newAnswers =
                     IncompleteRepresenteeAnswers.empty.copy(name = Some(name), isFirstReturn = Some(isFirstReturn))
 
-                  updateDraftReturnAndSession(newAnswers, journey).fold(
+                  updateDraftReturnAndSession(newAnswers, journey, clearDraftReturn = !isFirstReturn).fold(
                     { e =>
                       logger.warn("Could not update draft return", e)
                       errorHandler.errorResult()
@@ -260,57 +260,58 @@ class RepresenteeController @Inject() (
   def confirmPersonSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
-        answers match {
-          case incompleteRepresenteeAnswers @ IncompleteRepresenteeAnswers(
-                Some(name),
-                Some(id),
-                _,
-                _,
-                _,
-                _,
-                _
-              ) =>
-            confirmPersonForm
-              .bindFromRequest()
-              .fold(
-                formWithErrors =>
-                  BadRequest(
-                    confirmPersonPage(
-                      id,
-                      name,
-                      journey.isRight,
-                      formWithErrors,
-                      routes.RepresenteeController.enterId()
-                    )
-                  ),
-                { isYes =>
-                  val newAnswers =
-                    if (isYes)
-                      incompleteRepresenteeAnswers.copy(
-                        hasConfirmedPerson = true,
-                        hasConfirmedContactDetails = false,
-                        contactDetails = None
+        withIsFirstReturn(answers) { isFirstReturn =>
+          answers match {
+            case incompleteRepresenteeAnswers @ IncompleteRepresenteeAnswers(
+                  Some(name),
+                  Some(id),
+                  _,
+                  _,
+                  _,
+                  _,
+                  _
+                ) =>
+              confirmPersonForm
+                .bindFromRequest()
+                .fold(
+                  formWithErrors =>
+                    BadRequest(
+                      confirmPersonPage(
+                        id,
+                        name,
+                        journey.isRight,
+                        formWithErrors,
+                        routes.RepresenteeController.enterId()
                       )
-                    else IncompleteRepresenteeAnswers.empty
-
-                  updateDraftReturnAndSession(newAnswers, journey)
-                    .fold(
-                      { e =>
-                        logger.warn("Could not update draft return", e)
-                        errorHandler.errorResult()
-                      },
-                      _ =>
-                        Redirect(
-                          routes.RepresenteeController.checkYourAnswers()
+                    ),
+                  { isYes =>
+                    val newAnswers =
+                      if (isYes)
+                        incompleteRepresenteeAnswers.copy(
+                          hasConfirmedPerson = true,
+                          hasConfirmedContactDetails = false,
+                          contactDetails = None
                         )
-                    )
-                }
-              )
+                      else IncompleteRepresenteeAnswers.empty
 
-          case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+                    updateDraftReturnAndSession(newAnswers, journey, clearDraftReturn = !isFirstReturn)
+                      .fold(
+                        { e =>
+                          logger.warn("Could not update draft return", e)
+                          errorHandler.errorResult()
+                        },
+                        _ =>
+                          Redirect(
+                            routes.RepresenteeController.checkYourAnswers()
+                          )
+                      )
+                  }
+                )
 
+            case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+
+          }
         }
-
       }
     }
 
@@ -365,26 +366,11 @@ class RepresenteeController @Inject() (
               if (answers.fold(_.isFirstReturn, c => Some(c.isFirstReturn)).contains(isFirstReturn))
                 Redirect(routes.RepresenteeController.checkYourAnswers())
               else {
-                val newAnswers = answers.fold(
-                  _.copy(
-                    isFirstReturn = Some(isFirstReturn)
-                  ),
-                  complete =>
-                    IncompleteRepresenteeAnswers(
-                      Some(complete.name),
-                      Some(complete.id),
-                      complete.dateOfDeath,
-                      Some(complete.contactDetails),
-                      hasConfirmedPerson = true,
-                      hasConfirmedContactDetails = true,
-                      isFirstReturn = Some(isFirstReturn)
-                    )
-                )
+                val newAnswers = IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(isFirstReturn))
 
                 updateDraftReturnAndSession(
                   newAnswers,
-                  journey,
-                  clearDraftReturn = false
+                  journey
                 ).fold(
                   { e =>
                     logger.warn("Could not update session or draft return", e)
@@ -471,7 +457,8 @@ class RepresenteeController @Inject() (
                                    id = Some(matchedId),
                                    isFirstReturn = Some(isFirstReturn)
                                  ),
-                                 journey
+                                 journey,
+                                 clearDraftReturn = !isFirstReturn
                                ).leftMap[NameMatchError](e => ServiceError(NameMatchServiceError.BackendError(e)))
                 } yield ()
 

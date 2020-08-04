@@ -156,11 +156,18 @@ class SingleDisposalsTriageController @Inject() (
             )
               state.map(_._2)
             else {
-              val newAnswers =
-                answers.fold(
-                  _.copy(disposalMethod = Some(disposalMethod)),
-                  _.copy(disposalMethod = disposalMethod)
-                )
+              val furtherReturn = state.fold(_.isFurtherReturn, _._2.isFurtherReturn).contains(true)
+              val newAnswers    =
+                if (furtherReturn)
+                  answers.fold(
+                    _.copy(disposalMethod = Some(disposalMethod)),
+                    _.copy(disposalMethod = disposalMethod)
+                  )
+                else
+                  answers.fold(
+                    _.copy(disposalMethod = Some(disposalMethod)),
+                    _.copy(disposalMethod = disposalMethod)
+                  )
 
               state.bimap(
                 _.copy(newReturnTriageAnswers = Right(newAnswers)),
@@ -486,14 +493,15 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     ),
                   { date =>
-                    val result = triageAnswers
+                    val furtherReturn = state.fold(_.isFurtherReturn, _._2.isFurtherReturn).contains(true)
+                    val result        = triageAnswers
                       .fold(_.disposalDate, c => Some(c.disposalDate)) match {
                       case Some(existingDisposalDate) if existingDisposalDate.value === date =>
                         EitherT.pure(Some(existingDisposalDate.taxYear))
                       case _                                                                 =>
                         for {
                           taxYear       <- taxYearService.taxYear(date)
-                          updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
+                          updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers, furtherReturn)
                           newState       = state.bimap(
                                              _.copy(newReturnTriageAnswers = Right(updatedAnswers)),
                                              {
@@ -592,7 +600,8 @@ class SingleDisposalsTriageController @Inject() (
   private def updateDisposalDate(
     d: LocalDate,
     taxYear: Option[TaxYear],
-    answers: SingleDisposalTriageAnswers
+    answers: SingleDisposalTriageAnswers,
+    furtnerReturn: Boolean
   ): IncompleteSingleDisposalTriageAnswers = {
     def updateCompleteAnswers(
       c: CompleteSingleDisposalTriageAnswers,
@@ -618,7 +627,7 @@ class SingleDisposalsTriageController @Inject() (
     } { taxYear =>
       answers.fold(
         _.copy(
-          disposalDate = Some(DisposalDate(d, taxYear)),
+          disposalDate = if (furtnerReturn) None else Some(DisposalDate(d, taxYear)),
           tooEarlyDisposalDate = None,
           completionDate = None
         ),
@@ -1070,16 +1079,18 @@ class SingleDisposalsTriageController @Inject() (
                       )
                     ),
                   { date =>
-                    val result = triageAnswers
+                    val furtherReturn = state.fold(_.isFurtherReturn, _._2.isFurtherReturn).contains(true)
+                    val result        = triageAnswers
                       .fold(_.disposalDate, c => Some(c.disposalDate)) match {
                       case Some(existingDisposalDate) if existingDisposalDate.value === date.value =>
                         EitherT.pure(Some(existingDisposalDate.taxYear))
                       case _                                                                       =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)
-                          updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers)
-                          updatedDisposalAndCompletionDate = updatedDisposalDate
-                                                               .copy(completionDate = Some(CompletionDate(date.value)))
+                          updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers, furtherReturn)
+                          updatedDisposalAndCompletionDate =
+                            updatedDisposalDate
+                              .copy(completionDate = if (furtherReturn) None else Some(CompletionDate(date.value)))
                           newState                         = state.bimap(
                                                                _.copy(newReturnTriageAnswers = Right(updatedDisposalAndCompletionDate)),
                                                                {

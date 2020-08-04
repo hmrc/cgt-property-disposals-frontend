@@ -36,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils, SessionData}
@@ -290,7 +291,15 @@ class DisposalDetailsController @Inject() (
                     i.copy(
                       disposalDetailsAnswers = Some(newAnswers),
                       acquisitionDetailsAnswers =
-                        i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
+                        if (fillingOutReturn.isFurtherReturn.contains(true))
+                          Some(
+                            IncompleteAcquisitionDetailsAnswers.empty.copy(shouldUseRebase =
+                              i.acquisitionDetailsAnswers
+                                .flatMap(_.fold(_.shouldUseRebase, c => Some(c.shouldUseRebase)))
+                            )
+                          )
+                        else
+                          i.acquisitionDetailsAnswers.map(_.unsetAllButAcquisitionMethod(i.triageAnswers)),
                       yearToDateLiabilityAnswers = i.yearToDateLiabilityAnswers
                         .flatMap(_.unsetAllButIncomeDetails())
                     ),
