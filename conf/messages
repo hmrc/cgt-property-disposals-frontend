@@ -3910,6 +3910,40 @@ mandatoryEvidence.scan-failed.p2=We only accept these documents types XLS, XLSX,
 mandatoryEvidence.scan-failed.p3=You’ll need to try again.
 mandatoryEvidence.scan-failed.button.tryAgain=Try again
 
+repayment.title=Based on the details in this return, are you due a repayment?
+repayment.agent.title=Based on the details in this return, is your client due a repayment?
+repayment.trust.title=Based on the details in this return, is the trust due a repayment?
+repayment.capacitor.title=Based on the details in this return, is the person due a repayment?
+repayment.personalRep.title=Based on the details in this return, is the personal representative due a repayment?
+repayment.personalRepInPeriodOfAdmin.title=Based on the details in this return, is the estate due a repayment?
+repayment.personalRepInPeriodOfAdmin.agent.title=Based on the details in this return, is the estate due a repayment?
+
+repayment.helpText=If you select ‘yes’ and are due a repayment of Capital Gains Tax, HMRC will repay you the money within 30 days. If you are not due a repayment you will not be contacted.
+repayment.agent.helpText=If you select ‘yes’ and your client is due a repayment of Capital Gains Tax, HMRC will repay them the money within 30 days. If they are not due a repayment they will not be contacted.
+repayment.trust.helpText=If you select ‘yes’ and the trust is due a repayment of Capital Gains Tax, HMRC will repay the money within 30 days. If it is not due a repayment you will not be contacted.
+repayment.capacitor.helpText=If you select ‘yes’ and the person is due a repayment of Capital Gains Tax, HMRC will repay them the money within 30 days. If they are not due a repayment they will not be contacted.
+repayment.personalRep.helpText=If you select ‘yes’ and the personal representative is due a repayment of Capital Gains Tax, HMRC will repay them the money within 30 days. If they are not due a repayment they will not be contacted.
+repayment.personalRepInPeriodOfAdmin.helpText=If you select ‘yes’ and the estate is due a repayment of Capital Gains Tax, HMRC will repay the money within 30 days. If the estate is not due a repayment you will not be contacted.
+repayment.personalRepInPeriodOfAdmin.agent.helpText=If you select ‘yes’ and the estate is due a repayment of Capital Gains Tax, HMRC will repay the money within 30 days. If the estate is not due a repayment you will not be contacted.
+
+repayment.error.required=Select yes if based on the details in this return you are due a repayment
+repayment.error.agent.required=Select yes if based on the details in this return your client is due a repayment
+repayment.error.trust.required=Select yes if based on the details in this return the trust is due a repayment
+repayment.error.capacitor.required=Select yes if based on the details in this return the person is due a repayment
+repayment.error.personalRep.required=Select yes if based on the details in this return the personal representative is due a repayment
+repayment.error.personalRepInPeriodOfAdmin.required=Select yes if based on the details in this return the estate is due a repayment
+repayment.error.personalRepInPeriodOfAdmin.agent.required=Select yes if based on the details in this return the estate is due a repayment
+
+repayment.error.boolean=Select yes if based on the details in this return you are due a repayment
+repayment.error.agent.boolean=Select yes if based on the details in this return your client is due a repayment
+repayment.error.trust.boolean=Select yes if based on the details in this return the trust is due a repayment
+repayment.error.capacitor.boolean=Select yes if based on the details in this return the person is due a repayment
+repayment.error.personalRep.boolean=Select yes if based on the details in this return the person is due a repayment
+repayment.error.personalRepInPeriodOfAdmin.boolean=Select yes if based on the details in this return the estate is due a repayment
+repayment.error.personalRepInPeriodOfAdmin.agent.boolean=Select yes if based on the details in this return the estate is due a repayment
+
+repayment.cyaChange=whether a repayment is due
+
 ytdLiability.cyaChange.annualExemptAmount=your annual exempt amount
 ytdLiability.cyaChange.taxableGainOrLoss=your taxable gain or net loss
 ytdLiability.cyaChange.nonCalculatedTaxDue=your tax due
