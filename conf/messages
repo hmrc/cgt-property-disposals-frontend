@@ -665,12 +665,6 @@ triage.caption=Check if you can use this service
 
 who-are-you-reporting-for.title=Who are you completing this return for?
 
-individualUserType.periodOfAdminDisabled.Self=Yourself
-individualUserType.periodOfAdminDisabled.Capacitor=Someone else
-individualUserType.periodOfAdminDisabled.PersonalRepresentative=Someone who has died
-individualUserType.periodOfAdminDisabled.agent.Self=Your client
-individualUserType.periodOfAdminDisabled.agent.PersonalRepresentative=Someone who has died
-
 individualUserType.Self=Yourself
 individualUserType.Capacitor=Someone you’re helping
 individualUserType.Capacitor.helpText=You’re a capacitor.
@@ -4518,10 +4512,6 @@ representeeTooManyNameMatchFailures.title=You’ll need to wait and try again
 representeeTooManyNameMatchFailures.p1=You have entered the wrong details too many times.
 representeeTooManyNameMatchFailures.p2=The reference number you entered does not match the name of the person.
 representeeTooManyNameMatchFailures.p3=You’ll need to wait 2 hours and try again.
-
-periodOfAdminNotHandled.title=You cannot use this service
-periodOfAdminNotHandled.p1=This is because the disposal was made within a period of administration.
-periodOfAdminNotHandled.p2=Find out how to report and pay Capital Gains Tax on UK property <a href="{0}">during a period of administration</a>.
 
 tmpCustomError.title=Sorry, we are experiencing technical difficulties - 500
 tmpCustomError.heading=Sorry, we’re experiencing technical difficulties

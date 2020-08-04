@@ -486,11 +486,6 @@ drafts.list.resume=Llenwi Ffurflen Dreth
 
 triage.caption=Gwiriwch a allwch ddefnyddio’r gwasanaeth hwn
 who-are-you-reporting-for.title=Ar gyfer pwy rydych yn llenwi’r Ffurflen Dreth hon?
-individualUserType.periodOfAdminDisabled.Self=Chi’ch hun
-individualUserType.periodOfAdminDisabled.Capacitor=Rhywun arall
-individualUserType.periodOfAdminDisabled.PersonalRepresentative=Rhywun a fu farw
-individualUserType.periodOfAdminDisabled.agent.Self=Eich cleient
-individualUserType.periodOfAdminDisabled.agent.PersonalRepresentative=Rhywun a fu farw
 individualUserType.Self=Chi’ch hun
 individualUserType.Capacitor=Rhywun rydych yn ei helpu
 individualUserType.Capacitor.helpText=Rydych yn gynrychiolydd.

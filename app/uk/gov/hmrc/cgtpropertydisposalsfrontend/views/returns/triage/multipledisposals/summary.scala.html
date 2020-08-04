@@ -19,7 +19,6 @@
 
 @import cats.instances.list._
 @import cats.syntax.eq._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -39,7 +38,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
     answers: CompleteMultipleDisposalsTriageAnswers,
     isATrust: Boolean,
         representeeAnswers: Option[RepresenteeAnswers]
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[_], messages:Messages)
 
 @representativeType = @{answers.representativeType()}
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -76,14 +75,13 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
 }
 
 @cyaSection() {
-      @answers.individualUserType.filter(i => !viewConfig.periodOfAdminEnabled || i === Self).map { individualUserType =>
+      @answers.individualUserType.filter(i => i === Self).map { individualUserType =>
       @cyaRow(
           messages("who-are-you-reporting-for.title"),
           Html({
-              val periodOfAdminDisabledKey = if(viewConfig.periodOfAdminEnabled) "" else ".periodOfAdminDisabled"
               messages(
-                  if(isAgent) s"individualUserType$periodOfAdminDisabledKey.agent.${individualUserType.toString}"
-                  else s"individualUserType$periodOfAdminDisabledKey.${individualUserType.toString}"
+                  if(isAgent) s"individualUserType.agent.${individualUserType.toString}"
+                  else s"individualUserType.${individualUserType.toString}"
               )
           }),
           Some(cyaChange(messages("individualUserType.cyaChange"), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
