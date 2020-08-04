@@ -29,12 +29,10 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
@@ -45,7 +43,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => triagePages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
@@ -65,7 +62,6 @@ class CommonTriageQuestionsController @Inject() (
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
-  periodOfAdminNotHandledPage: pages.period_of_admin_not_handled,
   previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
   furtherReturnsHelpPage: triagePages.further_retuns_help
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
@@ -91,8 +87,7 @@ class CommonTriageQuestionsController @Inject() (
         else {
           val form = {
             val f = whoAreYouReportingForForm(
-              request.userType.contains(UserType.Agent),
-              viewConfig.periodOfAdminEnabled
+              request.userType.contains(UserType.Agent)
             )
             getIndividualUserType(state).fold(f)(f.fill)
           }
@@ -114,7 +109,7 @@ class CommonTriageQuestionsController @Inject() (
         if (!isIndividual(state))
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
         else
-          whoAreYouReportingForForm(request.userType.contains(UserType.Agent), viewConfig.periodOfAdminEnabled)
+          whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
             .bindFromRequest()
             .fold(
               formWithErrors =>
@@ -357,36 +352,6 @@ class CommonTriageQuestionsController @Inject() (
           _ => routes.SingleDisposalsTriageController.disposalDateOfShares()
         )
         Ok(disposalDateTooEarlyNonUkResidents(backLink))
-      }
-    }
-
-  def periodOfAdministrationNotHandled(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
-        val triageAnswers      = triageAnswersFomState(state)
-        val isIndirectDisposal = triageAnswers
-          .fold(
-            _.fold(_.assetTypes, c => Some(c.assetTypes)),
-            _.fold(_.assetType.map(List(_)), c => Some(List(c.assetType)))
-          )
-          .exists {
-            case List(IndirectDisposal) => true
-            case _                      => false
-          }
-
-        val isMultipleDisposal = triageAnswers.isLeft
-
-        val backLink =
-          if (isIndirectDisposal && isMultipleDisposal)
-            routes.MultipleDisposalsTriageController.disposalDateOfShares()
-          else if (isIndirectDisposal && !isMultipleDisposal)
-            routes.SingleDisposalsTriageController.disposalDateOfShares()
-          else if (isMultipleDisposal)
-            controllers.returns.address.routes.PropertyDetailsController
-              .disposalDate()
-          else routes.SingleDisposalsTriageController.whenWasDisposalDate()
-
-        Ok(periodOfAdminNotHandledPage(backLink))
       }
     }
 
@@ -681,16 +646,16 @@ class CommonTriageQuestionsController @Inject() (
 }
 object CommonTriageQuestionsController {
 
-  def whoAreYouReportingForForm(isAgent: Boolean, periodOfAdminEnabled: Boolean): Form[IndividualUserType] = {
+  def whoAreYouReportingForForm(isAgent: Boolean): Form[IndividualUserType] = {
     val options =
-      if (isAgent) List(Self, PersonalRepresentative)
-      else List(Self, Capacitor, PersonalRepresentative)
+      if (isAgent) List(Self, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
+      else List(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
 
     Form(
       mapping(
         "individualUserType" -> of(
           FormUtils.radioFormFormatter(
-            if (periodOfAdminEnabled) options :+ PersonalRepresentativeInPeriodOfAdmin else options
+            options
           )
         )
       )(identity)(Some(_))
@@ -707,8 +672,7 @@ object CommonTriageQuestionsController {
   )
 
   def sharesDisposalDateForm(
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
-    periodOfAdminEnabled: Boolean
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
   ): Form[ShareDisposalDate] = {
     val key = "sharesDisposalDate"
     Form(
@@ -721,10 +685,7 @@ object CommonTriageQuestionsController {
             s"$key-month",
             s"$key-year",
             key,
-            if (periodOfAdminEnabled)
-              List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
-            else
-              List.empty
+            List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, key))
           )
         )
       )(ShareDisposalDate(_))(d => Some(d.value))

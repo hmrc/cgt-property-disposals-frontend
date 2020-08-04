@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -25,7 +24,6 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
@@ -45,7 +43,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 
 import scala.concurrent.Future
@@ -1992,97 +1989,6 @@ class CommonTriageQuestionsControllerSpec
 
     }
 
-    "handling requests to display the period of admin not handled page" must {
-
-      def performAction(): Future[Result] =
-        controller.periodOfAdministrationNotHandled()(FakeRequest())
-
-      "display the page" when {
-
-        def checkPage(result: Future[Result], expectedBackLink: Call): Unit =
-          checkPageIsDisplayed(
-            result,
-            messageFromMessageKey("periodOfAdminNotHandled.title"),
-            doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
-          )
-
-        "the user is on a single disposal journey" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                Right(
-                  sample[CompleteSingleDisposalTriageAnswers]
-                    .copy(assetType = Residential)
-                ),
-                Right(sample[IndividualName])
-              )._1
-            )
-
-            checkPage(
-              performAction(),
-              routes.SingleDisposalsTriageController.whenWasDisposalDate()
-            )
-          }
-        }
-
-        "the user is on a multiple disposal journey" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithFillingOutReturn(
-                sample[IncompleteMultipleDisposalsTriageAnswers]
-                  .copy(assetTypes = Some(List(NonResidential)))
-              )._1
-            )
-
-            checkPage(
-              performAction(),
-              controllers.returns.address.routes.PropertyDetailsController
-                .disposalDate()
-            )
-          }
-
-        }
-
-        "the user is on a single indirect disposal journey" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithFillingOutReturn(
-                sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(assetType = IndirectDisposal),
-                Right(sample[IndividualName])
-              )._1
-            )
-
-            checkPage(
-              performAction(),
-              routes.SingleDisposalsTriageController.disposalDateOfShares()
-            )
-          }
-        }
-
-        "the user is on a multiple indirect disposals journey" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithFillingOutReturn(
-                sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(IndirectDisposal))
-              )._1
-            )
-
-            checkPage(
-              performAction(),
-              routes.MultipleDisposalsTriageController.disposalDateOfShares()
-            )
-          }
-        }
-
-      }
-
-    }
-
     "handling requests to display the previous return has same completion date exit page" must {
 
       def performAction(): Future[Result] =
@@ -2266,144 +2172,6 @@ class CommonTriageQuestionsControllerSpec
     }
 
     checkIsRedirect(performAction, expectedRedirect)
-  }
-
-}
-
-class PeriodOfAdminDisabledCommonTriageQuestionsControllerSpec
-    extends ControllerSpec
-    with AuthSupport
-    with SessionSupport
-    with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour
-    with ReturnsServiceSupport {
-
-  override val overrideBindings =
-    List[GuiceableModule](
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
-    )
-
-  override lazy val additionalConfig: Configuration = Configuration(
-    "period-of-admin.enabled" -> false
-  )
-
-  lazy val controller = instanceOf[CommonTriageQuestionsController]
-
-  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
-
-  "CommonTriageQuestionsController" when {
-
-    "displaying the 'who are you reporting for?' page" when {
-
-      def performAction(): Future[Result] =
-        controller.whoIsIndividualRepresenting()(FakeRequest())
-
-      "period of admin is disabled" must {
-
-        "show the correct options for an individual" in {
-          val startingNewDraftReturn =
-            sample[StartingNewDraftReturn].copy(
-              subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-              newReturnTriageAnswers = Right(IncompleteSingleDisposalTriageAnswers.empty),
-              agentReferenceNumber = None
-            )
-
-          val sessionData = SessionData.empty.copy(
-            journeyStatus = Some(startingNewDraftReturn),
-            userType = Some(UserType.Individual)
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionData)
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("who-are-you-reporting-for.title"),
-            { doc =>
-              doc
-                .select("#content > article > form")
-                .attr(
-                  "action"
-                ) shouldBe routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresentingSubmit()
-                .url
-
-              doc
-                .select("#individualUserType > div:nth-child(2) > label")
-                .text() shouldBe messageFromMessageKey(
-                s"individualUserType.periodOfAdminDisabled.${IndividualUserType.Self}"
-              )
-              doc
-                .select("#individualUserType > div:nth-child(3) > label")
-                .html() shouldBe messageFromMessageKey(
-                s"individualUserType.periodOfAdminDisabled.${IndividualUserType.Capacitor}"
-              )
-              doc
-                .select("#individualUserType > div:nth-child(4) > label")
-                .html() shouldBe messageFromMessageKey(
-                s"individualUserType.periodOfAdminDisabled.${IndividualUserType.PersonalRepresentative}"
-              )
-            }
-          )
-
-        }
-
-        "show the correct options for an agent" in {
-          val startingNewDraftReturn =
-            sample[StartingNewDraftReturn].copy(
-              subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
-              newReturnTriageAnswers = Right(IncompleteSingleDisposalTriageAnswers.empty),
-              agentReferenceNumber = Some(sample[AgentReferenceNumber])
-            )
-
-          val sessionData = SessionData.empty.copy(
-            journeyStatus = Some(startingNewDraftReturn),
-            userType = Some(UserType.Agent)
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionData)
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("who-are-you-reporting-for.title"),
-            { doc =>
-              doc
-                .select("#content > article > form")
-                .attr(
-                  "action"
-                ) shouldBe routes.CommonTriageQuestionsController
-                .whoIsIndividualRepresentingSubmit()
-                .url
-
-              doc
-                .select("#individualUserType > div:nth-child(2) > label")
-                .text() shouldBe messageFromMessageKey(
-                s"individualUserType.periodOfAdminDisabled.agent.${IndividualUserType.Self}"
-              )
-              doc
-                .select("#individualUserType > div:nth-child(3) > label")
-                .html() shouldBe messageFromMessageKey(
-                s"individualUserType.periodOfAdminDisabled.agent.${IndividualUserType.PersonalRepresentative}"
-              )
-              doc.body().text() shouldNot include(
-                messageFromMessageKey(
-                  s"individualUserTypeperiodOfAdminDisabled.${IndividualUserType.Capacitor}"
-                )
-              )
-            }
-          )
-        }
-
-      }
-
-    }
   }
 
 }

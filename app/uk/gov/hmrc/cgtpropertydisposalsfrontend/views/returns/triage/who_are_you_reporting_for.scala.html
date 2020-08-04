@@ -55,7 +55,6 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 }
 
 @options = @{
-  if(appConfig.periodOfAdminEnabled){
     if(isAgent){
       List(
           RadioOption(
@@ -98,40 +97,6 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
             )
         )
     }
-  } else {
-    if(isAgent){
-        List(
-            RadioOption(
-                label = messages(s"$key.periodOfAdminDisabled.agent.Self"),
-                content = None,
-                optionHelpText = None
-            ),
-            RadioOption(
-                label = messages(s"$key.periodOfAdminDisabled.agent.PersonalRepresentative"),
-                content = None,
-                optionHelpText = None
-            )
-        )
-    } else {
-        List(
-            RadioOption(
-                label = messages(s"$key.periodOfAdminDisabled.Self"),
-                content = None,
-                optionHelpText = None
-            ),
-            RadioOption(
-                label = messages(s"$key.periodOfAdminDisabled.Capacitor"),
-                content = None,
-                optionHelpText = None
-            ),
-            RadioOption(
-                label = messages(s"$key.periodOfAdminDisabled.PersonalRepresentative"),
-                content = None,
-                optionHelpText = None
-            ),
-        )
-    }
-  }
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {

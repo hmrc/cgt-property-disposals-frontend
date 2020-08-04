@@ -179,15 +179,12 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val userRecruitmentBannerEnabled: Boolean = servicesConfig.getBoolean("user-recruitment-banner.enabled")
   val userRecruitmentUrl: String            = getString("user-recruitment-banner.url")
 
-  val periodOfAdminEnabled: Boolean = servicesConfig.getBoolean("period-of-admin.enabled")
-
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enable-language-switching")
 
   val furtherReturnsEnabled: Boolean = servicesConfig.getBoolean("further-returns.enabled")
 
   logger.info {
     val flags = List(
-      "periodOfAdminEnabled"     -> periodOfAdminEnabled,
       "languageSwitchingEnabled" -> enableLanguageSwitching,
       "furtherReturnsEnabled"    -> furtherReturnsEnabled
     )

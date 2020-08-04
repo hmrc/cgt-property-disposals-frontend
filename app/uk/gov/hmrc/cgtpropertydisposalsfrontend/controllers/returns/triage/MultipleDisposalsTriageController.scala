@@ -873,7 +873,7 @@ class MultipleDisposalsTriageController @Inject() (
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
           val form = {
-            val blankForm = sharesDisposalDateForm(personalRepDetails, viewConfig.periodOfAdminEnabled)
+            val blankForm = sharesDisposalDateForm(personalRepDetails)
             answers
               .fold(_.completionDate, e => Some(e.completionDate))
               .fold(blankForm)(c => blankForm.fill(ShareDisposalDate(c.value)))
@@ -895,7 +895,7 @@ class MultipleDisposalsTriageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withMultipleDisposalTriageAnswers(request) { (_, state, answers) =>
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
-          sharesDisposalDateForm(personalRepDetails, viewConfig.periodOfAdminEnabled)
+          sharesDisposalDateForm(personalRepDetails)
             .bindFromRequest()
             .fold(
               { formWithErrors =>

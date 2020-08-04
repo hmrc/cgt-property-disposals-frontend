@@ -24,7 +24,6 @@ import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -5792,73 +5791,4 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
         )
     }
   }
-}
-
-class DisabledPeriodOfAdminSingleDisposalsTriageControllerSpec
-    extends ControllerSpec
-    with AuthSupport
-    with SessionSupport {
-
-  override val overrideBindings =
-    List[GuiceableModule](
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
-    )
-
-  override lazy val additionalConfig = Configuration(
-    "period-of-admin.enabled" -> false
-  )
-
-  lazy val controller = instanceOf[SingleDisposalsTriageController]
-
-  "SingleDisposalsTriageController" when {
-
-    "period of admin is disabled" when {
-
-      "handling requests to display the cya page" must {
-
-        "redirect to the exit page when the disposal date is after the date of death" in {
-          val dateOfDeath = sample[DateOfDeath]
-
-          val representeeAnswers =
-            sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(dateOfDeath))
-          val triageAnswers      =
-            IncompleteSingleDisposalTriageAnswers(
-              hasConfirmedSingleDisposal = true,
-              individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin),
-              disposalMethod = Some(sample[DisposalMethod]),
-              wasAUKResident = Some(false),
-              countryOfResidence = Some(sample[Country]),
-              assetType = Some(AssetType.Residential),
-              completionDate = None,
-              disposalDate = Some(DisposalDate(dateOfDeath.value.plusDays(1L), sample[TaxYear])),
-              tooEarlyDisposalDate = None
-            )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  sample[StartingNewDraftReturn].copy(
-                    newReturnTriageAnswers = Right(triageAnswers),
-                    representeeAnswers = Some(representeeAnswers)
-                  )
-                )
-              )
-            )
-          }
-
-          checkIsRedirect(
-            controller.checkYourAnswers()(FakeRequest()),
-            routes.CommonTriageQuestionsController.periodOfAdministrationNotHandled()
-          )
-        }
-
-      }
-
-    }
-
-  }
-
 }
