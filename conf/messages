@@ -3994,7 +3994,8 @@ submitReturnError.p2=You’ll need to:
 submitReturnError.li1=Go to your Capital Gains Tax on UK property account home.
 submitReturnError.li2=If your return is in ‘Sent returns’ it has been received by HMRC. You do not need to send it again.
 submitReturnError.li3=If it is ‘Draft returns’ it has not been received by HMRC. You’ll need to try and send it again.
-submitReturnError.p3=You may be charged interest on late payments.
+submitReturnError.p3=For UK property disposals made from 6 April 2020, you have 30 days after the property’s completion date to report and pay any Capital Gains Tax due on your UK property disposals.
+submitReturnError.p4=For disposals that completed on or after 1 July 2020, you may receive a late filing penalty for returns that are late. You may be charged interest on late payments.
 submitReturnError.button=Go to account home
 
 confirmationOfSubmission.title=Return sent
@@ -4025,11 +4026,14 @@ confirmationOfSubmission.capacitor.whatNext=What happens next
 confirmationOfSubmission.personalRepInPeriodOfAdmin.whatNext=What happens next
 confirmationOfSubmission.personalRepInPeriodOfAdmin.agent.whatNext=What happens next
 
-
 confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
+confirmationOfSubmission.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
 confirmationOfSubmission.agent.warning=Your client must pay their Capital Gains Tax on UK property by {0}. Your client may be charged interest on late payments.
+confirmationOfSubmission.agent.penalty.warning=Your client may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
 confirmationOfSubmission.trust.warning=You must pay your Capital Gains Tax on UK property by {0}. You may be charged interest on late payments.
+confirmationOfSubmission.trust.penalty.warning=You may receive a late filing penalty. This is because you did not report the tax within 30 days of the property’s completion date.
 confirmationOfSubmission.capacitor.warning=The person must pay their Capital Gains Tax on UK property by {0}. The person may be charged interest on late payments.
+confirmationOfSubmission.capacitor.penalty.warning=The person may receive a late filing penalty. This is because the tax was not reported within 30 days of the property’s completion date.
 
 confirmationOfSubmission.howToPay.heading=How to pay
 confirmationOfSubmission.agent.howToPay.heading.p1=Find out how your client can <a href="{0}"><strong class="bold">pay their tax bill</strong></a>.
