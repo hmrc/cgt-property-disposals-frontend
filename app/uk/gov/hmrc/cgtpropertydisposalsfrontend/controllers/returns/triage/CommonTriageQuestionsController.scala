@@ -641,14 +641,14 @@ object CommonTriageQuestionsController {
 
   def whoAreYouReportingForForm(isAgent: Boolean): Form[IndividualUserType] = {
     val options =
-      if (isAgent) List(Self, PersonalRepresentative)
-      else List(Self, Capacitor, PersonalRepresentative)
+      if (isAgent) List(Self, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
+      else List(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
 
     Form(
       mapping(
         "individualUserType" -> of(
           FormUtils.radioFormFormatter(
-            options :+ PersonalRepresentativeInPeriodOfAdmin
+            options
           )
         )
       )(identity)(Some(_))
