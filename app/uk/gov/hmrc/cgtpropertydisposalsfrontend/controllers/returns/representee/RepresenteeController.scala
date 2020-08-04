@@ -158,12 +158,16 @@ class RepresenteeController @Inject() (
   def enterName(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
-        withIsFirstReturn(answers) { _ =>
+        withIsFirstReturn(answers) { isFirstReturn =>
           withNotTooManyUnsuccessfulNameMatchAttempts(
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             val backLink = answers.fold(
-              _ => routes.RepresenteeController.isFirstReturn(),
+              _ =>
+                if (isFirstReturn)
+                  routes.RepresenteeController.isFirstReturn()
+                else
+                  triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               _ => routes.RepresenteeController.checkYourAnswers()
             )
 
@@ -187,7 +191,11 @@ class RepresenteeController @Inject() (
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             lazy val backLink = answers.fold(
-              _ => routes.RepresenteeController.isFirstReturn(),
+              _ =>
+                if (isFirstReturn)
+                  routes.RepresenteeController.isFirstReturn()
+                else
+                  triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               _ => routes.RepresenteeController.checkYourAnswers()
             )
 
@@ -792,6 +800,9 @@ class RepresenteeController @Inject() (
 
           case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None)                                             =>
             Redirect(routes.RepresenteeController.isFirstReturn())
+
+          case IncompleteRepresenteeAnswers(None, None, None, None, false, false, Some(false))                  =>
+            Redirect(triageRoutes.CommonTriageQuestionsController.furtherReturnHelp())
 
           case IncompleteRepresenteeAnswers(_, _, _, _, _, _, Some(false)) if !viewConfig.furtherReturnsEnabled =>
             Redirect(controllers.accounts.homepage.routes.HomePageController.exitForSubsequentReturn())

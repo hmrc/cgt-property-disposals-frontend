@@ -70,3 +70,6 @@ POST /check-your-answers                                    uk.gov.hmrc.cgtprope
 
 GET /exit/cannot-use-service                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.periodOfAdministrationNotHandled()
 GET /exit/same-completion-date                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate()
+
+GET /further-return/help                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelp()
+POST /further-return/help                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelpSubmit()
