@@ -31,7 +31,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TimeUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
@@ -141,7 +141,7 @@ class TaskListControllerSpec
         withClue(s"For draft return $draftReturn: ") {
           val fillingOutReturn = sample[FillingOutReturn].copy(
             draftReturn = removeEvidence(draftReturn),
-            previousSentReturns = previousSentReturns
+            previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence])))
           )
 
           inSequence {
@@ -193,7 +193,7 @@ class TaskListControllerSpec
       ): Unit = {
         val fillingOutReturn = sample[FillingOutReturn].copy(
           draftReturn = removeEvidence(draftReturn),
-          previousSentReturns = previousSentReturns
+          previousSentReturns = previousSentReturns.map(PreviousReturnData(_, Some(sample[AmountInPence])))
         )
 
         inSequence {

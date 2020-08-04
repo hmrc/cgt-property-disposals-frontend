@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -90,7 +90,7 @@ class GainOrLossAfterReliefsControllerSpec
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      previousSentReturns = Some(List(sample[ReturnSummary]))
+      previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None))
     )
 
     (
@@ -120,7 +120,7 @@ class GainOrLossAfterReliefsControllerSpec
     val journey     = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
       subscribedDetails = subscribedDetails,
-      previousSentReturns = Some(List(sample[ReturnSummary]))
+      previousSentReturns = Some(PreviousReturnData(List(sample[ReturnSummary]), None))
     )
 
     (

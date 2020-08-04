@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -38,7 +38,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
 
         def fillingOutReturn(
           name: Either[TrustName, IndividualName],
-          previousSentReturns: Option[List[ReturnSummary]],
+          previousSentReturns: Option[PreviousReturnData],
           draftReturn: DraftReturn
         ): FillingOutReturn =
           FillingOutReturn(
@@ -60,7 +60,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
 
             fillingOutReturn(
               Left(sample[TrustName]),
-              Some(List.empty),
+              Some(PreviousReturnData(List.empty, None)),
               sample[DraftReturn]
             ).isFurtherReturn shouldBe Some(false)
           }
@@ -68,7 +68,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
           "the user has previously sent returns" in {
             fillingOutReturn(
               Left(sample[TrustName]),
-              Some(List(sample[ReturnSummary])),
+              Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
               sample[DraftReturn]
             ).isFurtherReturn shouldBe Some(true)
           }
@@ -80,7 +80,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
           "the user has not said who they are completing the return for" in {
             fillingOutReturn(
               Right(sample[IndividualName]),
-              Some(List(sample[ReturnSummary])),
+              Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
               sample[DraftSingleDisposalReturn].copy(
                 triageAnswers = IncompleteSingleDisposalTriageAnswers.empty
               )
@@ -105,7 +105,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
 
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(List.empty),
+                Some(PreviousReturnData(List.empty, None)),
                 draftReturn
               ).isFurtherReturn shouldBe Some(false)
             }
@@ -113,7 +113,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has previously sent returns" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(List(sample[ReturnSummary])),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
                 draftReturn
               ).isFurtherReturn shouldBe Some(true)
             }
@@ -132,7 +132,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has not said if this is the first return for the person yet" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(List(sample[ReturnSummary])),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
                 draftReturn.copy(
                   representeeAnswers = None
                 )
@@ -140,7 +140,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
 
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(List(sample[ReturnSummary])),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
                 draftReturn.copy(
                   representeeAnswers = Some(
                     sample[IncompleteRepresenteeAnswers].copy(
@@ -154,7 +154,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has said this is the first return for the person" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(List(sample[ReturnSummary])),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
                 draftReturn.copy(
                   representeeAnswers = Some(
                     sample[IncompleteRepresenteeAnswers].copy(
@@ -168,7 +168,7 @@ class JourneyStatusSpec extends WordSpec with Matchers {
             "the user has said this is not the first return for the person" in {
               fillingOutReturn(
                 Right(sample[IndividualName]),
-                Some(List(sample[ReturnSummary])),
+                Some(PreviousReturnData(List(sample[ReturnSummary]), None)),
                 draftReturn.copy(
                   representeeAnswers = Some(
                     sample[CompleteRepresenteeAnswers].copy(

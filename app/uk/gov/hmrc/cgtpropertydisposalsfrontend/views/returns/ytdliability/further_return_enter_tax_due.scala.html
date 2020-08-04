@@ -23,6 +23,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -35,11 +38,45 @@
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[BigDecimal], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(
+    form: Form[BigDecimal],
+    backLink: Call,
+    taxYear: TaxYear,
+    isATrust: Boolean,
+    representativeType: Option[RepresentativeType]
+)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{ "nonCalculatedTaxDue" }
 
-@title = @{messages(s"$key.title")}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{
+    representativeType match {
+        case Some(PersonalRepresentative) => ".personalRep"
+        case Some(PersonalRepresentativeInPeriodOfAdmin) => ".personalRepInPeriodOfAdmin"
+        case Some(Capacitor) => ".capacitor"
+        case None =>
+        if (isAgent) ".agent"
+        else if (isATrust) ".trust"
+        else ""
+    }
+}
+
+@title = @{messages(s"$key.furtherReturn.enterTaxDue.title")}
+
+@taxYearStartYear = @{taxYear.startDateInclusive.getYear.toString}
+@taxYearEndYear = @{taxYear.endDateExclusive.getYear.toString}
+
+@helpText = @{
+    Some(Html(s"""
+        ${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.p1")}<br/>
+        <ol class="list list-number">
+            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li1", taxYearStartYear, taxYearEndYear)}</li>
+            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li2", taxYearStartYear, taxYearEndYear)}</li>
+            <li>${messages(s"$key.furtherReturn.enterTaxDue$userKey.helpText.li3")}</li>
+        </ol>
+    """))
+}
+
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
@@ -50,7 +87,7 @@
         @errorSummary(form)
     }
 
-    @caption(messages("ytdLiability.caption"))
+    @caption(messages("ytdLiability.furtherReturn.caption"))
 
     @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
@@ -60,14 +97,13 @@
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText"))),
+            helpText = helpText,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds")
         )
-
         @submitButton(messages("button.saveAndContinue"))
     }
 

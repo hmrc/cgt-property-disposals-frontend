@@ -618,11 +618,11 @@ wereYouAUKResident.trust.helpText.p2=Os oedd yr ymddiriedolaeth yn ddibreswyl ac
 wereYouAUKResident.personalRep.helpText.p2=Os oedd y person yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
 wereYouAUKResident.agent.helpText.p2=Os oedd eich cleient yn ddibreswyl ac wedi gwaredu cyfranddaliadau yn anuniongyrchol, y dyddiad gwaredu yw’r diwrnod y cafodd y cyfranddaliadau eu gwerthu neu eu rhoi i ffwrdd.
 wereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.agent.link=<a href=“{0}” target=”_blank”> Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.trust.link=<a href=“{{0}” target=”_blank”> Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.capacitor.link=<a href=“{{0}” target=“{_blank”> Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.personalRep.link=<a href=“{{0}” target=“{_blank”> Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
-wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href=“{{0}” target=“{_blank”> Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
+wereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>
 wereYouAUKResident.error.required=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU pan wnaethoch gyfnewid contractau
 wereYouAUKResident.error.boolean=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU pan wnaethoch gyfnewid contractau
 wereYouAUKResident.agent.error.required=Dewiswch ‘Iawn’ os oedd eich cleient yn breswylydd yn y DU pan wnaeth gyfnewid contractau

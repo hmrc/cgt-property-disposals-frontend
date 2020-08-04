@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Multi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, representee, triage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -157,7 +157,7 @@ class MultipleDisposalsTriageControllerSpec
           Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = None))
         else None
       },
-      previousSentReturns = previousSentReturns
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
     )
     SessionData.empty.copy(
       journeyStatus = Some(startingNewDraftReturn),
@@ -195,7 +195,7 @@ class MultipleDisposalsTriageControllerSpec
       agentReferenceNumber =
         if (userType === UserType.Agent) Some(sample[AgentReferenceNumber])
         else None,
-      previousSentReturns = previousSentReturns
+      previousSentReturns = previousSentReturns.map(PreviousReturnData(_, None))
     )
     val session            = SessionData.empty.copy(
       userType = Some(userType),
