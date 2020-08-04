@@ -50,28 +50,14 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
 
-@completionDate =  @{justSubmittedReturn.completeReturn.fold(
-                        _.triageAnswers.fold(
-                        _.completionDate.map(_.value),
-                        c => Some(c.completionDate.value)
-                        ) -> "completionDate",
-                        _.triageAnswers.fold(
-                        _.completionDate.map(_.value),
-                        c => Some(c.completionDate.value)
-                        ) -> "completionDate",
-                        _.triageAnswers.fold(
-                        _.disposalDate.map(_.value),
-                        c => Some(c.disposalDate.value)
-                        ) -> "shareDisposalDate",
-                        _.triageAnswers.fold(
-                        _.completionDate.map(_.value),
-                        c => Some(c.completionDate.value)
-                        ) -> "completionDate",
-                        _.triageAnswers.fold(
-                        _.completionDate.map(_.value),
-                        c => Some(c.completionDate.value)
-                        ) -> "completionDate"
-)}
+@completionDate = @{justSubmittedReturn.completeReturn match {
+    case CompleteMultipleDisposalsReturn(triageAnswers, _, _, _, _, _, _) => triageAnswers.completionDate
+    case CompleteSingleDisposalReturn(triageAnswers, _, _, _, _, _, _, _, _, _, _) =>triageAnswers.completionDate
+    case CompleteSingleIndirectDisposalReturn(triageAnswers, _, _, _, _, _, _, _,_) =>triageAnswers.completionDate
+    case CompleteMultipleIndirectDisposalReturn(triageAnswers, _, _, _, _, _, _) =>triageAnswers.completionDate
+    case CompleteSingleMixedUseDisposalReturn(triageAnswers, _, _, _, _, _, _) =>triageAnswers.completionDate
+    }
+}
 
 @representativeType = @{ justSubmittedReturn.completeReturn.representativeType() }
 
@@ -126,13 +112,7 @@
   case _ => s"$key$userKey.printPage"
   }}
 
-@isLateReturn = @{
-    if(completionDate._1.map(d => d.plusDays(30L).isAfter(TimeUtils.today)).getOrElse(false)){
-        true
-    }else{
-        false
-    }
-}
+@isLateReturn = @{completionDate.value.plusDays(30L).isAfter(TimeUtils.today)}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -228,7 +208,7 @@
               @warning(messages(s"$key.capacitor.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
 
                 @if(isLateReturn){
-                    @warning(messages(s"$key$userKey.penalty.warning"))
+                    <p>messages(s"$key$userKey.penalty.warning"))</p>
                 }
 
 
@@ -254,15 +234,15 @@
 
               @if(isAgent){
                 @if(isLateReturn){
-                  @warning(messages(s"$key.agent.penalty.warning"))
+                  <p>@messages(s"$key.agent.penalty.warning"))</p>
                 }
               }else if (isATrust) {
                 @if(isLateReturn){
-                  @warning(messages(s"$key.trust.penalty.warning"))
+                    <p>@messages(s"$key.trust.penalty.warning"))</p>
                 }
               }else{
                 @if(isLateReturn){
-                  @warning(messages(s"$key$userKey.penalty.warning"))
+                    <p>@messages(s"$key$userKey.penalty.warning"))</p>
                 }
               }
 
