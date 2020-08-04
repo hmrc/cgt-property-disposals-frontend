@@ -50,6 +50,29 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
 
+@completionDate =  @{justSubmittedReturn.completeReturn.fold(
+                        _.triageAnswers.fold(
+                        _.completionDate.map(_.value),
+                        c => Some(c.completionDate.value)
+                        ) -> "completionDate",
+                        _.triageAnswers.fold(
+                        _.completionDate.map(_.value),
+                        c => Some(c.completionDate.value)
+                        ) -> "completionDate",
+                        _.triageAnswers.fold(
+                        _.disposalDate.map(_.value),
+                        c => Some(c.disposalDate.value)
+                        ) -> "shareDisposalDate",
+                        _.triageAnswers.fold(
+                        _.completionDate.map(_.value),
+                        c => Some(c.completionDate.value)
+                        ) -> "completionDate",
+                        _.triageAnswers.fold(
+                        _.completionDate.map(_.value),
+                        c => Some(c.completionDate.value)
+                        ) -> "completionDate"
+)}
+
 @representativeType = @{ justSubmittedReturn.completeReturn.representativeType() }
 
 @representeeAnswers = @{
@@ -102,6 +125,14 @@
   case (Some(Capacitor), Some(NoReferenceId)) => s"$key$userKey.noId.printPage"
   case _ => s"$key$userKey.printPage"
   }}
+
+@isLateReturn = @{
+    if(completionDate._1.map(d => d.plusDays(30L).isAfter(TimeUtils.today)).getOrElse(false)){
+        true
+    }else{
+        false
+    }
+}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -196,6 +227,11 @@
 
               @warning(messages(s"$key.capacitor.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
 
+                @if(isLateReturn){
+                    @warning(messages(s"$key$userKey.penalty.warning"))
+                }
+
+
               <h3 class="heading-medium">@messages(s"$key.howToPay.heading")</h3>
 
               <p id="howToPay">@Html(messages(s"$key.capacitor.howToPay.p1", charge.chargeReference))</p>
@@ -215,6 +251,20 @@
               <h2 class="heading-medium">@messages(s"$key$userKey.whatNext")</h2>
 
               @warning(messages(s"$key$userKey.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
+
+              @if(isAgent){
+                @if(isLateReturn){
+                  @warning(messages(s"$key.agent.penalty.warning"))
+                }
+              }else if (isATrust) {
+                @if(isLateReturn){
+                  @warning(messages(s"$key.trust.penalty.warning"))
+                }
+              }else{
+                @if(isLateReturn){
+                  @warning(messages(s"$key$userKey.penalty.warning"))
+                }
+              }
 
               @{
                 if (isAgent)
