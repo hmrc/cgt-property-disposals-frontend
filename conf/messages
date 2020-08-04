@@ -3889,9 +3889,9 @@ mandatoryEvidenceExpired.p2=You’ll need to try again and upload a document sho
 mandatoryEvidenceExpired.label=Deleted
 mandatoryEvidenceExpired.button.text=Try Again
 
-mandatoryEvidence.scan-progress.title=Scan in progress
-mandatoryEvidence.scan-progress.p1=You’ll need to wait a few seconds.
-mandatoryEvidence.scan-progress.p2=When we’ve finished scanning your document you can continue.
+mandatoryEvidence.scan-progress.title=Wait a few seconds and then select 'continue'
+mandatoryEvidence.scan-progress.p1=We are checking your document.
+mandatoryEvidence.scan-progress.p2=You’ll need to keep selecting 'continue' every few seconds until the check is complete to go to the next page.
 
 mandatoryEvidence.scan-progress.in-progress.help-text=There is a delay in scanning your file. You can check the progress by clicking the button below.
 mandatoryEvidence.scan-progress.in-progress=Scan in progress
@@ -3995,10 +3995,10 @@ supporting-evidence.expired.file-label=Document {0}
 supporting-evidence.expired.deleted=Deleted
 supporting-evidence.expired.button.tryAgain=Try again
 
-supporting-evidence.scan-progress.title=Scan in progress
+supporting-evidence.scan-progress.title=Wait a few seconds and then select 'continue'
 supporting-evidence.scan-progress.caption=Supporting evidence
-supporting-evidence.scan-progress.p1=You’ll need to wait a few seconds
-supporting-evidence.scan-progress.p2=When we’ve finished scanning your document you can continue
+supporting-evidence.scan-progress.p1=We are checking your document.
+supporting-evidence.scan-progress.p2=You’ll need to keep selecting 'continue' every few seconds until the check is complete to go to the next page.
 
 supporting-evidence.upload-failed.title=Sorry, there is a problem
 supporting-evidence.upload-failed.p1=We could not scan your document.
