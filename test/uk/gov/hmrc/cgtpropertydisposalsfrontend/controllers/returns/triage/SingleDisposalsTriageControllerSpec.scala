@@ -24,7 +24,6 @@ import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -5792,100 +5791,4 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
         )
     }
   }
-}
-
-class DisabledIndirectDisposalSingleDisposalsTriageControllerSpec
-    extends ControllerSpec
-    with AuthSupport
-    with SessionSupport {
-
-  override val overrideBindings =
-    List[GuiceableModule](
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
-    )
-
-  override lazy val additionalConfig = Configuration(
-    "indirect-disposals.enabled" -> false,
-    "mixed-use.enabled"          -> false
-  )
-
-  lazy val controller = instanceOf[SingleDisposalsTriageController]
-
-  "SingleDisposalsTriageController" when {
-
-    "indirect disposals are disabled" must {
-
-      "redirect to the exit page when a non-uk resident user selects indirect disposals" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(
-                sample[StartingNewDraftReturn].copy(
-                  newReturnTriageAnswers = Right(
-                    IncompleteSingleDisposalTriageAnswers(
-                      hasConfirmedSingleDisposal = true,
-                      individualUserType = Some(Self),
-                      disposalMethod = Some(sample[DisposalMethod]),
-                      wasAUKResident = Some(false),
-                      countryOfResidence = Some(sample[Country]),
-                      assetType = Some(AssetType.IndirectDisposal),
-                      completionDate = None,
-                      disposalDate = None,
-                      tooEarlyDisposalDate = None
-                    )
-                  )
-                )
-              )
-            )
-          )
-        }
-
-        checkIsRedirect(
-          controller.checkYourAnswers()(FakeRequest()),
-          routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
-        )
-      }
-
-    }
-
-    "mixed use disposals are disabled" must {
-
-      "redirect to the exit page when a non-uk resident user selects mixed use" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(
-                sample[StartingNewDraftReturn].copy(
-                  newReturnTriageAnswers = Right(
-                    IncompleteSingleDisposalTriageAnswers(
-                      hasConfirmedSingleDisposal = true,
-                      individualUserType = Some(Self),
-                      disposalMethod = Some(sample[DisposalMethod]),
-                      wasAUKResident = Some(false),
-                      countryOfResidence = Some(sample[Country]),
-                      assetType = Some(AssetType.MixedUse),
-                      completionDate = None,
-                      disposalDate = None,
-                      tooEarlyDisposalDate = None
-                    )
-                  )
-                )
-              )
-            )
-          )
-        }
-
-        checkIsRedirect(
-          controller.checkYourAnswers()(FakeRequest()),
-          routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
-        )
-      }
-
-    }
-
-  }
-
 }

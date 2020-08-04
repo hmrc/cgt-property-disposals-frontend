@@ -24,7 +24,6 @@ GET  /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtprope
 POST /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasDisposalDateSubmit()
 
 GET  /exit/disposal-date-before-6-April-2020                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.disposalDateTooEarly()
-GET  /exit/indirect-mixed-use-cannot-use-service            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.assetTypeNotYetImplemented()
 GET  /exit/uk-resident-can-only-report-residential          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential()
 GET /exit/share-date-too-early                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.disposalsOfSharesTooEarly
 
@@ -69,3 +68,6 @@ GET  /check-your-answers                                    uk.gov.hmrc.cgtprope
 POST /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswersSubmit()
 
 GET /exit/same-completion-date                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate()
+
+GET /further-return/help                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelp()
+POST /further-return/help                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelpSubmit()

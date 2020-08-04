@@ -56,6 +56,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -487,7 +488,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.personalRep.title",
-              routes.RepresenteeController.isFirstReturn(),
+              triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               expectReturnToSummaryLink = false,
               Some(name)
             )
@@ -544,7 +545,7 @@ class RepresenteeControllerSpec
               session,
               journey.ggCredId,
               "representee.enterName.personalRep.title",
-              routes.RepresenteeController.isFirstReturn(),
+              triageRoutes.CommonTriageQuestionsController.furtherReturnHelp(),
               expectReturnToSummaryLink = true,
               Some(name)
             )
@@ -2661,6 +2662,25 @@ class RepresenteeControllerSpec
           checkIsRedirect(
             performAction(),
             routes.RepresenteeController.isFirstReturn()
+          )
+        }
+
+      }
+
+      "redirect to further return help page" when {
+        "the user has not yet answered that question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithFillingOutReturn(
+                IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(false)),
+                Capacitor
+              )._1
+            )
+          }
+          checkIsRedirect(
+            performAction(),
+            triageRoutes.CommonTriageQuestionsController.furtherReturnHelp()
           )
         }
 

@@ -95,12 +95,6 @@ class SingleDisposalsTriageController @Inject() (
     )
   ]
 
-  private val indirectDisposalsEnabled: Boolean =
-    config.underlying.getBoolean("indirect-disposals.enabled")
-
-  private val mixedUseEnabled: Boolean =
-    config.underlying.getBoolean("mixed-use.enabled")
-
   def howDidYouDisposeOfProperty(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
@@ -1149,6 +1143,12 @@ class SingleDisposalsTriageController @Inject() (
           .userType()
           .isRight
 
+        val isFurtherReturn = state
+          .fold(
+            _.isFurtherReturn.contains(true),
+            _._2.isFurtherReturn.contains(true)
+          )
+
         val representeeAnswers           = state
           .fold(
             _.representeeAnswers,
@@ -1188,6 +1188,22 @@ class SingleDisposalsTriageController @Inject() (
             Redirect(
               routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
+            )
+
+          case IncompleteSingleDisposalTriageAnswers(
+                Some(Self),
+                false,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+              ) if isIndividual && isFurtherReturn =>
+            Redirect(
+              routes.CommonTriageQuestionsController
+                .furtherReturnHelp()
             )
 
           case IncompleteSingleDisposalTriageAnswers(
@@ -1319,22 +1335,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 Some(AssetType.IndirectDisposal),
-                _,
-                _,
-                _
-              ) if !indirectDisposalsEnabled =>
-            Redirect(
-              routes.CommonTriageQuestionsController
-                .assetTypeNotYetImplemented()
-            )
-
-          case IncompleteSingleDisposalTriageAnswers(
-                _,
-                _,
-                _,
-                _,
-                _,
-                Some(AssetType.IndirectDisposal),
                 None,
                 None,
                 _
@@ -1356,22 +1356,6 @@ class SingleDisposalsTriageController @Inject() (
               ) if hasPreviousReturnWithSameCompletionDate(shareDisposalDate.value, individualUserType, state) =>
             Redirect(
               routes.CommonTriageQuestionsController.previousReturnExistsWithSameCompletionDate()
-            )
-
-          case IncompleteSingleDisposalTriageAnswers(
-                _,
-                _,
-                _,
-                _,
-                _,
-                Some(AssetType.MixedUse),
-                _,
-                _,
-                _
-              ) if !mixedUseEnabled =>
-            Redirect(
-              routes.CommonTriageQuestionsController
-                .assetTypeNotYetImplemented()
             )
 
           case IncompleteSingleDisposalTriageAnswers(

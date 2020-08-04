@@ -38,7 +38,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
           Some(completeAnswers.mandatoryEvidence),
           None,
           None,
-          completeAnswers.yearToDateLiability
+          completeAnswers.yearToDateLiability,
+          completeAnswers.checkForRepayment
         )
       }
 
@@ -56,7 +57,8 @@ class YearToDateLiabilityAnswersSpec extends WordSpec with Matchers with ScalaCh
         Some(completeAnswers.mandatoryEvidence),
         None,
         None,
-        completeAnswers.yearToDateLiability
+        completeAnswers.yearToDateLiability,
+        completeAnswers.checkForRepayment
       )
 
     "have a method which unsets fields" when {

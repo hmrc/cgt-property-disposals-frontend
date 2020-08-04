@@ -45,6 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => triagePages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -61,8 +62,8 @@ class CommonTriageQuestionsController @Inject() (
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
-  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented,
-  previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date
+  previousReturnExistsWithSameCompletionDatePage: triagePages.previous_return_exists_with_same_completion_date,
+  furtherReturnsHelpPage: triagePages.further_retuns_help
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -164,6 +165,35 @@ class CommonTriageQuestionsController @Inject() (
               }
             )
       }
+    }
+
+  def furtherReturnHelp(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        val individualUserType = getIndividualUserType(state)
+        val backLink           = individualUserType match {
+          case Some(_: RepresentativeType) => representeeRoutes.RepresenteeController.isFirstReturn()
+          case _                           => routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+        }
+        Ok(
+          furtherReturnsHelpPage(
+            backLink,
+            state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust),
+            individualUserType
+          )
+        )
+      }
+    }
+
+  def furtherReturnHelpSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withState(request) { (_, state) =>
+        getIndividualUserType(state) match {
+          case Some(_: RepresentativeType) => Redirect(representeeRoutes.RepresenteeController.enterName())
+          case _                           => Redirect(routes.CommonTriageQuestionsController.howManyProperties())
+        }
+      }
+
     }
 
   def howManyProperties(): Action[AnyContent] =
@@ -325,37 +355,6 @@ class CommonTriageQuestionsController @Inject() (
       }
     }
 
-  def assetTypeNotYetImplemented(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
-        val triageAnswers = triageAnswersFomState(state)
-        lazy val backLink = triageAnswers.fold(
-          _ =>
-            routes.MultipleDisposalsTriageController
-              .assetTypeForNonUkResidents(),
-          _ => routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
-        )
-
-        def hasSupportedAssetType(assetTypes: List[AssetType]): Boolean =
-          assetTypes === List(AssetType.Residential) || assetTypes === List(
-            AssetType.NonResidential
-          )
-
-        triageAnswers.fold[Option[List[AssetType]]](
-          _.fold(_.assetTypes, c => Some(c.assetTypes)),
-          _.fold(
-            i => i.assetType.map(a => List(a)),
-            c => Some(List(c.assetType))
-          )
-        ) match {
-          case Some(assetTypes) if !hasSupportedAssetType(assetTypes) =>
-            Ok(assetTypeNotYetImplementedPage(backLink))
-          case _                                                      =>
-            Redirect(redirectToCheckYourAnswers(state))
-        }
-      }
-    }
-
   def previousReturnExistsWithSameCompletionDate(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState(request) { (_, state) =>
@@ -404,6 +403,12 @@ class CommonTriageQuestionsController @Inject() (
   private def howManyPropertiesBackLink(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Option[Call] = {
+
+    val isFurtherReturn = state.fold(
+      _.isFurtherReturn.contains(true),
+      _.isFurtherReturn.contains(true)
+    )
+
     val triageAnswers  = triageAnswersFomState(state)
     val isSelfUserType = isIndividualASelfUserType(triageAnswers)
 
@@ -414,15 +419,17 @@ class CommonTriageQuestionsController @Inject() (
         triageAnswers.fold(
           _.fold(
             _ =>
-              if (isSelfUserType)
-                routes.CommonTriageQuestionsController
-                  .whoIsIndividualRepresenting()
-              else representee.routes.RepresenteeController.checkYourAnswers(),
+              if (!isSelfUserType) representee.routes.RepresenteeController.checkYourAnswers()
+              else if (isFurtherReturn) routes.CommonTriageQuestionsController.furtherReturnHelp()
+              else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           ),
           _.fold(
             _ =>
-              if (isSelfUserType)
+              if (isFurtherReturn)
+                routes.CommonTriageQuestionsController
+                  .furtherReturnHelp()
+              else if (isSelfUserType)
                 routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresenting()
               else representee.routes.RepresenteeController.checkYourAnswers(),

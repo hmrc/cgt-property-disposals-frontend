@@ -31,14 +31,8 @@ class LandingPageController @Inject() (
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc) {
 
-  private val indirectDisposalsEnabled: Boolean =
-    config.underlying.getBoolean("indirect-disposals.enabled")
-
-  private val mixedUseEnabled: Boolean =
-    config.underlying.getBoolean("mixed-use.enabled")
-
   def landingPage(): Action[AnyContent] =
-    Action(implicit request => Ok(landing_page(indirectDisposalsEnabled, mixedUseEnabled)))
+    Action(implicit request => Ok(landing_page()))
 
   def agentsLandingPage(): Action[AnyContent] =
     Action(
