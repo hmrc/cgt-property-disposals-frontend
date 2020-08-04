@@ -698,25 +698,6 @@ individualUserType.error.invalid=Select who are you reporting the tax for
 
 individualUserType.cyaChange=who you are reporting the tax for
 
-capacitorsPersonalRepresentativesNotHandled.title=You cannot use this service
-capacitorsPersonalRepresentativesNotHandled.cannotUse=You cannot use this online service to report Capital Gains Tax on UK property for:
-capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet1=someone else
-capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet2=someone who has died
-capacitorsPersonalRepresentativesNotHandled.youNeedTo=You’ll need to:
-capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet1=contact HMRC and ask for a paper version of the return to be posted to you
-capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet2=provide your National Insurance number or Self Assessment Unique Taxpayer Reference if you have one
-capacitorsPersonalRepresentativesNotHandled.agent.youNeedTo.bullet2=provide your client’s National Insurance number or Self Assessment Unique Taxpayer Reference if they have one
-capacitorsPersonalRepresentativesNotHandled.phoneHeading=Phone
-capacitorsPersonalRepresentativesNotHandled.phoneHmrc=Telephone:
-capacitorsPersonalRepresentativesNotHandled.phoneOutsideUk=Outside UK:
-capacitorsPersonalRepresentativesNotHandled.phoneAgent=Agent Dedicated Line:
-capacitorsPersonalRepresentativesNotHandled.openingTimes=Opening times:
-capacitorsPersonalRepresentativesNotHandled.openingTimes.monToFri=Monday to Friday: 8am to 4pm
-capacitorsPersonalRepresentativesNotHandled.openingTimes.saturday=8am to 4pm, Saturday
-capacitorsPersonalRepresentativesNotHandled.openingTimes.sunBankHols=Closed Sundays and bank holidays
-capacitorsPersonalRepresentativesNotHandled.getHelp=Get help <a href="{0}">dealing with HMRC if you have additional needs</a>.
-capacitorsPersonalRepresentativesNotHandled.callChargesLink=<a href="{0}">Find out about call charges</a>
-
 numberOfProperties.main.title=Tell us how many disposals you are including in this return
 numberOfProperties.helpText.p1.heading=UK property disposals
 numberOfProperties.helpText.p1.text=You can include more than one disposal in this return if all the properties had the same completion date.
