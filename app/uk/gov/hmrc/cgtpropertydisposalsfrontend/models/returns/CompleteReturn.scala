@@ -51,6 +51,7 @@ object CompleteReturn {
     yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
+    gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
   ) extends CompleteReturn
 
@@ -68,7 +69,7 @@ object CompleteReturn {
               Some(y: CompleteNonCalculatedYTDAnswers),
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
-              _,
+              gainOrLossAfterReliefs,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -79,6 +80,7 @@ object CompleteReturn {
               y,
               u,
               maybeCompleteRepresenteeAnswers,
+              gainOrLossAfterReliefs,
               hasAttachments = true
             )
           )
@@ -104,6 +106,7 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     initialGainOrLoss: Option[AmountInPence],
     representeeAnswers: Option[CompleteRepresenteeAnswers],
+    gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
   ) extends CompleteReturn
 
@@ -125,7 +128,7 @@ object CompleteReturn {
               i,
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
-              _,
+              g,
               _
             ) =>
           val hasAttachments =
@@ -142,6 +145,7 @@ object CompleteReturn {
               u,
               i,
               maybeCompleteRepresenteeAnswers,
+              g,
               hasAttachments
             )
           )
@@ -158,7 +162,7 @@ object CompleteReturn {
               i,
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
-              _,
+              g,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -173,6 +177,7 @@ object CompleteReturn {
               u,
               i,
               maybeCompleteRepresenteeAnswers,
+              g,
               hasAttachments = true
             )
           )
@@ -201,6 +206,7 @@ object CompleteReturn {
     yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
+    gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
   ) extends CompleteReturn
 
@@ -220,7 +226,7 @@ object CompleteReturn {
               Some(y: CompleteNonCalculatedYTDAnswers),
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
-              _,
+              g,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -233,6 +239,7 @@ object CompleteReturn {
               y,
               u,
               maybeCompleteRepresenteeAnswers,
+              g,
               hasAttachments = true
             )
           )
@@ -250,6 +257,7 @@ object CompleteReturn {
     yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
+    gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
   ) extends CompleteReturn
 
@@ -267,7 +275,7 @@ object CompleteReturn {
               Some(y: CompleteNonCalculatedYTDAnswers),
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
-              _,
+              g,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -278,6 +286,7 @@ object CompleteReturn {
               y,
               u,
               maybeCompleteRepresenteeAnswers,
+              g,
               hasAttachments = true
             )
           )
@@ -295,6 +304,7 @@ object CompleteReturn {
     yearToDateLiabilityAnswers: CompleteNonCalculatedYTDAnswers,
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
+    gainOrLossAfterReliefs: Option[AmountInPence],
     hasAttachments: Boolean
   ) extends CompleteReturn
 
@@ -312,7 +322,7 @@ object CompleteReturn {
               Some(y: CompleteNonCalculatedYTDAnswers),
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
-              _,
+              g,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -323,6 +333,7 @@ object CompleteReturn {
               y,
               u,
               maybeCompleteRepresenteeAnswers,
+              g,
               hasAttachments = true
             )
           )

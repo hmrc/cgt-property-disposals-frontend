@@ -51,11 +51,11 @@
 @isATrust = @{ justSubmittedReturn.subscribedDetails.isATrust }
 
 @completionDate = @{justSubmittedReturn.completeReturn match {
-    case CompleteMultipleDisposalsReturn(triageAnswers, _, _, _, _, _, _) => triageAnswers.completionDate
-    case CompleteSingleDisposalReturn(triageAnswers, _, _, _, _, _, _, _, _, _, _) =>triageAnswers.completionDate
-    case CompleteSingleIndirectDisposalReturn(triageAnswers, _, _, _, _, _, _, _,_) =>triageAnswers.completionDate
-    case CompleteMultipleIndirectDisposalReturn(triageAnswers, _, _, _, _, _, _) =>triageAnswers.completionDate
-    case CompleteSingleMixedUseDisposalReturn(triageAnswers, _, _, _, _, _, _) =>triageAnswers.completionDate
+    case CompleteMultipleDisposalsReturn(triageAnswers, _, _, _, _, _, _, _) => triageAnswers.completionDate
+    case CompleteSingleDisposalReturn(triageAnswers, _, _, _, _, _, _, _, _, _, _, _) =>triageAnswers.completionDate
+    case CompleteSingleIndirectDisposalReturn(triageAnswers, _, _, _, _, _, _, _,_, _) =>triageAnswers.completionDate
+    case CompleteMultipleIndirectDisposalReturn(triageAnswers, _, _, _, _, _, _, _) =>triageAnswers.completionDate
+    case CompleteSingleMixedUseDisposalReturn(triageAnswers, _, _, _, _, _, _, _) =>triageAnswers.completionDate
     }
 }
 

@@ -56,6 +56,7 @@
     representeeSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.representee.summary,
     singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
     singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
+    gainOrLossAfterReliefsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
     printLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.print_link_with_js
 )
 
@@ -159,6 +160,11 @@
      @initialGainOrLossSummary(initialGainOrLoss, isATrust, representativeType)
      }
 
+     @s.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
+            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+        @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = false)
+     }
+
      <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
      @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust, representativeType, isFurtherReturn)
 
@@ -184,6 +190,11 @@
 
        <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
        @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, isATrust, representativeType, isFurtherReturn)
+
+        @m.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
+            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+        @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = true)
+        }
 
        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
        @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = true, isMultiple = true, isATrust, representativeType, isFurtherReturn, m.triageAnswers.taxYear)
@@ -214,6 +225,11 @@
             s.triageAnswers.assetType
         )
 
+        @s.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
+            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+        @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = false)
+        }
+
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, isATrust, representativeType, isFurtherReturn)
 
@@ -234,6 +250,10 @@
         <h2 class="heading-medium">Example company details</h2>
         @exampleCompanyDetailsSummary(multipleIndirect.exampleCompanyDetailsAnswers)
 
+        @multipleIndirect.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
+            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+        @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = true)
+        }
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(
@@ -259,6 +279,11 @@
 
         <h2 class="heading-medium">@messages("task-list.enter-property-details-single-mixed-use.link")</h2>
         @singleMixedUsePropertyDetailsSummary(singleMixedUse.propertyDetailsAnswers, representativeType, singleMixedUse.representeeAnswers.flatMap(_.fold(_.dateOfDeath, _.dateOfDeath)))
+
+        @singleMixedUse.gainOrLossAfterReliefs.map{ gainOrLossAfterReliefs =>
+            <h2 class="heading-medium">@messages("task-list.gainOrLossAfterReliefs.link")</h2>
+        @gainOrLossAfterReliefsSummary(gainOrLossAfterReliefs, isATrust, representativeType, isMultipleDisposal = false)
+        }
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, isATrust, representativeType, isFurtherReturn)
