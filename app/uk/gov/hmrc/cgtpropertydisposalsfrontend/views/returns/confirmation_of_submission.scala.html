@@ -112,7 +112,7 @@
   case _ => s"$key$userKey.printPage"
   }}
 
-@isLateReturn = @{completionDate.value.plusDays(30L).isAfter(TimeUtils.today)}
+@isLateReturn = @{completionDate.value.plusDays(30L).isBefore(TimeUtils.today)}
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -208,9 +208,8 @@
               @warning(messages(s"$key.capacitor.warning", TimeUtils.govDisplayFormat(charge.dueDate)))
 
                 @if(isLateReturn){
-                    <p>messages(s"$key$userKey.penalty.warning"))</p>
+                    <p>@messages(s"$key$userKey.penalty.warning")</p>
                 }
-
 
               <h3 class="heading-medium">@messages(s"$key.howToPay.heading")</h3>
 
@@ -234,15 +233,15 @@
 
               @if(isAgent){
                 @if(isLateReturn){
-                  <p>@messages(s"$key.agent.penalty.warning"))</p>
+                  <p>@messages(s"$key.agent.penalty.warning")</p>
                 }
               }else if (isATrust) {
                 @if(isLateReturn){
-                    <p>@messages(s"$key.trust.penalty.warning"))</p>
+                    <p>@messages(s"$key.trust.penalty.warning")</p>
                 }
               }else{
                 @if(isLateReturn){
-                    <p>@messages(s"$key$userKey.penalty.warning"))</p>
+                    <p>@messages(s"$key$userKey.penalty.warning")</p>
                 }
               }
 
