@@ -87,7 +87,8 @@ class YearToDateLiabilityController @Inject() (
   expiredMandatoryEvidencePage: pages.expired_mandatory_evidence,
   mandatoryEvidenceScanProgressPage: pages.mandatory_evidence_scan_progress,
   furtherReturnsTaxableGainOrLossPage: pages.further_return_taxable_gain_or_loss,
-  yearToDateLiabilityPage: pages.year_to_date_liability
+  yearToDateLiabilityPage: pages.year_to_date_liability,
+  repaymentPage: pages.repayment
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -947,13 +948,7 @@ class YearToDateLiabilityController @Inject() (
           .unset(_.pendingUpscanUpload)
           .copy(hasEstimatedDetails = Some(hasEstimated))
 
-        draftReturn.fold(
-          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-          _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-          _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-        )
+        updateDraftReturn(newAnswers, draftReturn)
       }
     }
 
@@ -1255,13 +1250,7 @@ class YearToDateLiabilityController @Inject() (
           .copy(pendingUpscanUpload = Some(upscanUpload))
     }
 
-    val newDraftReturn = currentJourney.draftReturn.fold(
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-    )
+    val newDraftReturn = updateDraftReturn(newAnswers, currentJourney.draftReturn)
 
     for {
       _ <- returnsService.storeDraftReturn(
@@ -1383,13 +1372,7 @@ class YearToDateLiabilityController @Inject() (
                     .unset(_.pendingUpscanUpload)
                     .copy(taxableGainOrLoss = Some(taxableGainOrLoss))
 
-                  draftReturn.fold(
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-                  )
+                  updateDraftReturn(newAnswers, draftReturn)
                 }
               }
             }
@@ -1519,13 +1502,8 @@ class YearToDateLiabilityController @Inject() (
                         .unset(_.expiredEvidence)
                         .unset(_.pendingUpscanUpload)
                         .copy(taxDue = Some(taxDue))
-                      draftReturn.fold(
-                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                        _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-                      )
+
+                      updateDraftReturn(newAnswers, draftReturn)
                     }
                   }
                 }
@@ -1553,7 +1531,7 @@ class YearToDateLiabilityController @Inject() (
           .unset(_.pendingUpscanUpload)
           .copy(taxDue = Some(taxDue))
 
-        val newDraftReturn = updateAnswers(newAnswers, fillingOutReturn.draftReturn)
+        val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
         val result         = for {
           _ <- returnsService.storeDraftReturn(
                  newDraftReturn,
@@ -1588,6 +1566,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 Some(expired),
+                _,
                 _,
                 _
               ) =>
@@ -1669,6 +1648,7 @@ class YearToDateLiabilityController @Inject() (
                 _,
                 _,
                 Some(pendingUpscanUpload),
+                _,
                 _
               ) =>
             if (pendingUpscanUpload.upscanCallBack.nonEmpty)
@@ -1801,14 +1781,79 @@ class YearToDateLiabilityController @Inject() (
                     .unset(_.yearToDateLiability)
                     .copy(yearToDateLiability = Some(yearToDateLiability))
 
-                  draftReturn.fold(
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-                    _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-                  )
+                  updateDraftReturn(newAnswers, draftReturn)
                 }
+              }
+            }
+
+          case _                                                                                      =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+        }
+      }
+    }
+
+  def repayment(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (fillingOutReturn, answers) match {
+          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn.contains(true) =>
+            commonDisplayBehaviour(
+              nonCalculatedAnswers
+            )(form =
+              _.fold(_.checkForRepayment, _.checkForRepayment)
+                .fold(repaymentForm)(repaymentForm.fill)
+            )(
+              page = repaymentPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                fillingOutReturn.draftReturn.representativeType()
+              )
+            )(
+              requiredPreviousAnswer = _.fold(_.taxDue, c => Some(c.taxDue)),
+              redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxDue()
+            )
+
+          case _                                                                                      =>
+            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+
+        }
+      }
+
+    }
+
+  def repaymentSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+        (fillingOutReturn, answers) match {
+          case (f, nonCalculatedAnswers: NonCalculatedYTDAnswers) if f.isFurtherReturn.contains(true) =>
+            commonSubmitBehaviour(
+              fillingOutReturn,
+              fillingOutReturn.draftReturn,
+              nonCalculatedAnswers
+            )(form = repaymentForm)(
+              page = repaymentPage(
+                _,
+                _,
+                fillingOutReturn.subscribedDetails.isATrust,
+                fillingOutReturn.draftReturn.representativeType()
+              )
+            )(
+              requiredPreviousAnswer = _.fold(_.taxDue, c => Some(c.taxDue)),
+              redirectToIfNoRequiredPreviousAnswer = routes.YearToDateLiabilityController.taxDue()
+            ) { (checkForRepayment, draftReturn) =>
+              if (
+                nonCalculatedAnswers
+                  .fold(_.checkForRepayment, _.checkForRepayment)
+                  .contains(checkForRepayment)
+              )
+                draftReturn
+              else {
+                val newAnswers = nonCalculatedAnswers
+                  .unset(_.checkForRepayment)
+                  .copy(checkForRepayment = Some(checkForRepayment))
+
+                updateDraftReturn(newAnswers, draftReturn)
               }
             }
 
@@ -1831,13 +1876,7 @@ class YearToDateLiabilityController @Inject() (
       _.copy(pendingUpscanUpload = None),
       _.copy(pendingUpscanUpload = None)
     )
-    val newDraftReturn = fillingOutReturn.draftReturn.fold(
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-    )
+    val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
 
     for {
       _ <- returnsService.storeDraftReturn(
@@ -1891,13 +1930,7 @@ class YearToDateLiabilityController @Inject() (
 
       }
 
-    val newDraftReturn = fillingOutReturn.draftReturn.fold(
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
-      _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
-    )
+    val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
 
     for {
       _ <- returnsService.storeDraftReturn(
@@ -1985,6 +2018,7 @@ class YearToDateLiabilityController @Inject() (
             _,
             Some(_),
             _,
+            _,
             _
           ) =>
         Redirect(
@@ -1998,6 +2032,7 @@ class YearToDateLiabilityController @Inject() (
             _,
             _,
             Some(_),
+            _,
             _
           ) =>
         removePendingUpscanUpload(Left(n), fillingOutReturn).fold(
@@ -2011,23 +2046,28 @@ class YearToDateLiabilityController @Inject() (
             )
         )
 
-      case IncompleteNonCalculatedYTDAnswers(None, _, _, _, _, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(None, _, _, _, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.taxableGainOrLoss())
 
-      case IncompleteNonCalculatedYTDAnswers(_, None, _, _, _, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, None, _, _, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.hasEstimatedDetails())
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, None)
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, None, _)
           if fillingOutReturn.isFurtherReturn.contains(true) =>
-        logger.error(s"Got\n$fillingOutReturn\n\n")
         Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, None, _, _, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, None, _, _, _, _, _) =>
         Redirect(
           routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
         )
 
-      case IncompleteNonCalculatedYTDAnswers(_, _, _, None, _, _, _) =>
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, _, _, _, _, None)
+          if fillingOutReturn.isFurtherReturn.contains(true) =>
+        Redirect(
+          routes.YearToDateLiabilityController.repayment()
+        )
+
+      case IncompleteNonCalculatedYTDAnswers(_, _, _, None, _, _, _, _) =>
         Redirect(routes.YearToDateLiabilityController.uploadMandatoryEvidence())
 
       case IncompleteNonCalculatedYTDAnswers(
@@ -2037,9 +2077,10 @@ class YearToDateLiabilityController @Inject() (
             Some(m),
             _,
             _,
-            y
+            y,
+            r
           ) =>
-        val completeAnswers    = CompleteNonCalculatedYTDAnswers(t, e, d, m, y)
+        val completeAnswers    = CompleteNonCalculatedYTDAnswers(t, e, d, m, y, r)
         val updatedDraftReturn = draftReturn.fold(
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
           _.copy(yearToDateLiabilityAnswers = Some(completeAnswers)),
@@ -2087,7 +2128,7 @@ class YearToDateLiabilityController @Inject() (
             )
         )
 
-      case c: CompleteNonCalculatedYTDAnswers                        =>
+      case c: CompleteNonCalculatedYTDAnswers                           =>
         Ok(
           nonCalculatedCheckYourAnswersPage(
             c,
@@ -2297,13 +2338,13 @@ class YearToDateLiabilityController @Inject() (
       }
     }
 
-  private def updateAnswers(answers: YearToDateLiabilityAnswers, draftReturn: DraftReturn): DraftReturn =
+  private def updateDraftReturn(newAnswers: YearToDateLiabilityAnswers, draftReturn: DraftReturn): DraftReturn =
     draftReturn.fold(
-      _.copy(yearToDateLiabilityAnswers = Some(answers)),
-      _.copy(yearToDateLiabilityAnswers = Some(answers)),
-      _.copy(yearToDateLiabilityAnswers = Some(answers)),
-      _.copy(yearToDateLiabilityAnswers = Some(answers)),
-      _.copy(yearToDateLiabilityAnswers = Some(answers))
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers)),
+      _.copy(yearToDateLiabilityAnswers = Some(newAnswers))
     )
 
 }
@@ -2430,6 +2471,13 @@ object YearToDateLiabilityController {
             )
           )
         )
+      )(identity)(Some(_))
+    )
+
+  val repaymentForm: Form[Boolean] =
+    Form(
+      mapping(
+        "repayment" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 

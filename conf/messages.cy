@@ -486,11 +486,6 @@ drafts.list.resume=Llenwi Ffurflen Dreth
 
 triage.caption=Gwiriwch a allwch ddefnyddio’r gwasanaeth hwn
 who-are-you-reporting-for.title=Ar gyfer pwy rydych yn llenwi’r Ffurflen Dreth hon?
-individualUserType.periodOfAdminDisabled.Self=Chi’ch hun
-individualUserType.periodOfAdminDisabled.Capacitor=Rhywun arall
-individualUserType.periodOfAdminDisabled.PersonalRepresentative=Rhywun a fu farw
-individualUserType.periodOfAdminDisabled.agent.Self=Eich cleient
-individualUserType.periodOfAdminDisabled.agent.PersonalRepresentative=Rhywun a fu farw
 individualUserType.Self=Chi’ch hun
 individualUserType.Capacitor=Rhywun rydych yn ei helpu
 individualUserType.Capacitor.helpText=Rydych yn gynrychiolydd.
@@ -507,23 +502,6 @@ individualUserType.agent.PersonalRepresentativeInPeriodOfAdmin.helpText=Mae’ch
 individualUserType.error.required=Dewiswch ar gyfer pwy rydych yn rhoi gwybod am y dreth
 individualUserType.error.invalid=Dewiswch ar gyfer pwy rydych yn rhoi gwybod am y dreth
 individualUserType.cyaChange=ar gyfer pwy rydych yn rhoi gwybod am y dreth
-capacitorsPersonalRepresentativesNotHandled.title=Ni allwch ddefnyddio’r gwasanaeth hwn
-capacitorsPersonalRepresentativesNotHandled.cannotUse=Ni allwch ddefnyddio’r gwasanaeth ar-lein hwn i roi gwybod am Dreth Enillion Cyfalaf ar eiddo yn y DU ar gyfer:
-capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet1=rhywun arall
-capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet2=rhywun a fu farw
-capacitorsPersonalRepresentativesNotHandled.youNeedTo=Bydd yn rhaid i chi wneud y canlynol:
-capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet1=cysylltwch â CThEM a gofyn am i fersiwn bapur o’r Ffurflen Dreth gael ei phostio atoch
-capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet2=rhoi eich rhif Yswiriant Gwladol neu Gyfeirnod Unigryw y Trethdalwr ar gyfer Hunanasesiad, os oes gennych un
-capacitorsPersonalRepresentativesNotHandled.agent.youNeedTo.bullet2=rhoi rhif Yswiriant Gwladol neu Gyfeirnod Unigryw y Trethdalwr ar gyfer Hunanasesiad eich cleient, os oes ganddo un
-capacitorsPersonalRepresentativesNotHandled.phoneHeading=Ffôn
-capacitorsPersonalRepresentativesNotHandled.phoneHmrc=Ffôn:
-capacitorsPersonalRepresentativesNotHandled.phoneOutsideUk=Y tu allan i’r DU:
-capacitorsPersonalRepresentativesNotHandled.phoneAgent=Llinell Ymroddedig i Asiantau:
-capacitorsPersonalRepresentativesNotHandled.openingTimes=Oriau agor:
-capacitorsPersonalRepresentativesNotHandled.openingTimes.monToFri=Dydd Llun i Ddydd Gwener: 08:00 i 16:00
-capacitorsPersonalRepresentativesNotHandled.openingTimes.sunBankHols=Ar gau ar ddydd Sadwrn, dydd Sul ac ar wyliau banc
-capacitorsPersonalRepresentativesNotHandled.getHelp=Mynnwch help i <a href="{0}">ddelio â CThEM os oes gennych anghenion ychwanegol</a>.
-capacitorsPersonalRepresentativesNotHandled.callChargesLink=<a href="{0}">Dysgwch am gostau galwadau</a>
 numberOfProperties.main.title=Dywedwch wrthym faint o warediadau rydych yn eu cynnwys yn y Ffurflen Dreth hon
 numberOfProperties.helpText.p1.heading=Gwarediadau eiddo yn y DU
 numberOfProperties.helpText.p1.text=Gallwch gynnwys mwy nag un gwarediad yn y Ffurflen Dreth hon os oedd gan yr holl eiddo yr un dyddiad cwblhau.

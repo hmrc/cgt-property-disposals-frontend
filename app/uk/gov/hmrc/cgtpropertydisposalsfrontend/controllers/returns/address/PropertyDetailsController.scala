@@ -29,10 +29,8 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => addressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
@@ -784,9 +782,6 @@ class PropertyDetailsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) { (_, r) =>
         withAssetTypes(r) { assetTypes =>
-          lazy val representeeAnswers =
-            r.draftReturn.fold(_.representeeAnswers, _.representeeAnswers)
-
           r.draftReturn match {
             case Left(m: DraftMultipleDisposalsReturn) =>
               m.examplePropertyDetailsAnswers.fold[Future[Result]](
@@ -801,20 +796,6 @@ class PropertyDetailsController @Inject() (
 
                 case IncompleteExamplePropertyDetailsAnswers(_, None, _, _) =>
                   Redirect(routes.PropertyDetailsController.disposalDate())
-
-                case IncompleteExamplePropertyDetailsAnswers(
-                      _,
-                      Some(disposalDate),
-                      _,
-                      _
-                    )
-                    if !viewConfig.periodOfAdminEnabled && representeeAnswers
-                      .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
-                      .exists(_.value <= disposalDate.value) =>
-                  Redirect(
-                    triageRoutes.CommonTriageQuestionsController
-                      .periodOfAdministrationNotHandled()
-                  )
 
                 case IncompleteExamplePropertyDetailsAnswers(_, _, None, _) =>
                   Redirect(routes.PropertyDetailsController.disposalPrice())
@@ -921,8 +902,7 @@ class PropertyDetailsController @Inject() (
     disposalDateForm(
       maximumDateInclusive,
       startDateOfTaxYear,
-      personalRepresentativeDetails,
-      viewConfig.periodOfAdminEnabled
+      personalRepresentativeDetails
     )
   }
 
@@ -1017,11 +997,9 @@ object PropertyDetailsController {
   def disposalDateForm(
     maximumDateInclusive: LocalDate,
     minimumDateInclusive: LocalDate,
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
-    periodOfAdminEnabled: Boolean
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
   ): Form[LocalDate] = {
     val key = "multipleDisposalsDisposalDate"
-
     Form(
       mapping(
         "" -> of(
@@ -1032,13 +1010,12 @@ object PropertyDetailsController {
             s"$key-month",
             s"$key-year",
             key,
-            if (periodOfAdminEnabled)
-              List(
-                TimeUtils
-                  .personalRepresentativeDateValidation(personalRepresentativeDetails, key)
+            List(
+              TimeUtils.personalRepresentativeDateValidation(
+                personalRepresentativeDetails,
+                key
               )
-            else
-              List.empty
+            )
           )
         )
       )(identity)(Some(_))

@@ -42,12 +42,13 @@ object YearToDateLiabilityAnswers {
       mandatoryEvidence: Option[MandatoryEvidence],
       expiredEvidence: Option[MandatoryEvidence],
       pendingUpscanUpload: Option[UpscanUpload],
-      yearToDateLiability: Option[AmountInPence]
+      yearToDateLiability: Option[AmountInPence],
+      checkForRepayment: Option[Boolean]
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
       val empty: IncompleteNonCalculatedYTDAnswers =
-        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None, None, None)
+        IncompleteNonCalculatedYTDAnswers(None, None, None, None, None, None, None, None)
 
       def fromCompleteAnswers(
         c: CompleteNonCalculatedYTDAnswers
@@ -59,7 +60,8 @@ object YearToDateLiabilityAnswers {
           Some(c.mandatoryEvidence),
           None,
           None,
-          c.yearToDateLiability
+          c.yearToDateLiability,
+          c.checkForRepayment
         )
     }
 
@@ -68,7 +70,8 @@ object YearToDateLiabilityAnswers {
       hasEstimatedDetails: Boolean,
       taxDue: AmountInPence,
       mandatoryEvidence: MandatoryEvidence,
-      yearToDateLiability: Option[AmountInPence]
+      yearToDateLiability: Option[AmountInPence],
+      checkForRepayment: Option[Boolean]
     ) extends NonCalculatedYTDAnswers
 
     implicit class NonCalculatedYTDLiabilityAnswersOps(

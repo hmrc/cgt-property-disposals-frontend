@@ -24,7 +24,6 @@ import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -4616,98 +4615,4 @@ object MultipleDisposalsTriageControllerSpec extends Matchers {
       .govDisplayFormat(answers.completionDate.value)
   }
 
-}
-
-class DisabledIndirectDisposalMultipleDisposalsTriageControllerSpec
-    extends ControllerSpec
-    with AuthSupport
-    with SessionSupport
-    with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour
-    with ReturnsServiceSupport {
-
-  val mockTaxYearService = mock[TaxYearService]
-
-  val mockUUIDGenerator = mock[UUIDGenerator]
-
-  override val overrideBindings =
-    List[GuiceableModule](
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore),
-      bind[TaxYearService].toInstance(mockTaxYearService),
-      bind[UUIDGenerator].toInstance(mockUUIDGenerator),
-      bind[ReturnsService].toInstance(mockReturnsService)
-    )
-
-  lazy val controller = instanceOf[MultipleDisposalsTriageController]
-
-  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
-
-  override lazy val additionalConfig = Configuration(
-    "indirect-disposals.enabled" -> false,
-    "mixed-use.enabled"          -> false
-  )
-
-  def performAction(): Future[Result] =
-    controller.checkYourAnswers()(FakeRequest())
-
-  val completeAnswersNonUk = CompleteMultipleDisposalsTriageAnswers(
-    Some(IndividualUserType.Self),
-    2,
-    sample[Country],
-    List(AssetType.Residential),
-    sample[TaxYear],
-    sample[CompletionDate]
-  )
-
-  val allQuestionsAnsweredNonUk = IncompleteMultipleDisposalsTriageAnswers(
-    completeAnswersNonUk.individualUserType,
-    Some(completeAnswersNonUk.numberOfProperties),
-    Some(false),
-    Some(completeAnswersNonUk.countryOfResidence),
-    None,
-    Some(completeAnswersNonUk.assetTypes),
-    Some(true),
-    Some(completeAnswersNonUk.taxYear),
-    Some(completeAnswersNonUk.completionDate)
-  )
-
-  "redirect to the asset types not implemented page" when {
-    "the user was not a non uk resident and they have selected asset types that are not supported" in {
-      List(
-        List(AssetType.IndirectDisposal, AssetType.MixedUse),
-        List(AssetType.MixedUse, AssetType.IndirectDisposal)
-      ).foreach { assetTypes =>
-        testRedirectWhenIncomplete(
-          allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)),
-          routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
-        )
-      }
-    }
-
-  }
-
-  def testRedirectWhenIncomplete(
-    answers: IncompleteMultipleDisposalsTriageAnswers,
-    expectedRedirect: Call
-  ): Unit = {
-    inSequence {
-      mockAuthWithNoRetrievals()
-      mockGetSession(
-        sessionDataWithStartingNewDraftReturn(answers)._1
-      )
-    }
-
-    checkIsRedirect(performAction(), expectedRedirect)
-
-  }
-
-  def sessionDataWithStartingNewDraftReturn(
-    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers
-  ): (SessionData, StartingNewDraftReturn) = {
-    val startingNewDraftReturn =
-      sample[StartingNewDraftReturn].copy(newReturnTriageAnswers = Left(multipleDisposalsAnswers))
-
-    SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
-  }
 }

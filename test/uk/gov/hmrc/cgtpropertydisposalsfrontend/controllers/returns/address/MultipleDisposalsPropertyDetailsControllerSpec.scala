@@ -22,22 +22,18 @@ import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.Configuration
-import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
@@ -54,7 +50,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, TimeUtils, UserType}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
@@ -3220,92 +3215,4 @@ object MultipleDisposalsPropertyDetailsControllerSpec extends Matchers {
       ).collect { case Some(s) => s.trim }
         .mkString(" ")
   }
-}
-
-class DisabledPeriodOfAdminMultipleDisposalsPropertyDetailsControllerSpec
-    extends ControllerSpec
-    with AuthSupport
-    with SessionSupport {
-
-  override def overrideBindings: List[GuiceableModule] =
-    List[GuiceableModule](
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
-    ) ::: super.overrideBindings
-
-  override lazy val additionalConfig = Configuration(
-    "period-of-admin.enabled" -> false
-  )
-
-  lazy val controller = instanceOf[PropertyDetailsController]
-
-  "MultipleDisposalsPropertyDetailsController" when {
-
-    "period of admin is disabled" when {
-
-      "handling requests to display the cya page" must {
-
-        "redirect to the period of admin not handled page" when {
-
-          val disposalDate = sample[DisposalDate]
-
-          val draftReturn =
-            sample[DraftMultipleDisposalsReturn].copy(
-              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                .copy(assetTypes = List(AssetType.Residential)),
-              examplePropertyDetailsAnswers = Some(
-                IncompleteExamplePropertyDetailsAnswers(
-                  Some(sample[UkAddress]),
-                  Some(disposalDate),
-                  None,
-                  None
-                )
-              ),
-              representeeAnswers = None
-            )
-
-          def test(dateOfDeath: DateOfDeath): Unit = {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                SessionData.empty.copy(journeyStatus =
-                  Some(
-                    sample[FillingOutReturn].copy(
-                      draftReturn = draftReturn.copy(
-                        representeeAnswers = Some(
-                          sample[CompleteRepresenteeAnswers]
-                            .copy(dateOfDeath = Some(dateOfDeath))
-                        )
-                      ),
-                      subscribedDetails = sample[SubscribedDetails].copy(
-                        name = Right(sample[IndividualName])
-                      )
-                    )
-                  )
-                )
-              )
-            }
-
-            checkIsRedirect(
-              controller.checkYourAnswers()(FakeRequest()),
-              triageRoutes.CommonTriageQuestionsController
-                .periodOfAdministrationNotHandled()
-            )
-          }
-
-          "the disposal date is on a given date of death" in {
-            test(DateOfDeath(disposalDate.value))
-          }
-
-          "the disposal date is before a given date of death" in {
-            test(DateOfDeath(disposalDate.value.minusDays(1L)))
-          }
-
-        }
-
-      }
-
-    }
-  }
-
 }

@@ -95,12 +95,6 @@ class SingleDisposalsTriageController @Inject() (
     )
   ]
 
-  private val indirectDisposalsEnabled: Boolean =
-    config.underlying.getBoolean("indirect-disposals.enabled")
-
-  private val mixedUseEnabled: Boolean =
-    config.underlying.getBoolean("mixed-use.enabled")
-
   def howDidYouDisposeOfProperty(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSingleDisposalTriageAnswers(request) { (_, state, triageAnswers) =>
@@ -442,7 +436,7 @@ class SingleDisposalsTriageController @Inject() (
           displayTriagePage(state, triageAnswers)(
             _.fold(_.assetType, c => Some(c.assetType)),
             answers => disposalDateBackLink(answers)
-          )(_ => disposalDateForm(TimeUtils.today(), personalRepDetails, viewConfig.periodOfAdminEnabled))(
+          )(_ => disposalDateForm(TimeUtils.today(), personalRepDetails))(
             extractField = _.fold(
               i => i.disposalDate.map(_.value).orElse(i.tooEarlyDisposalDate),
               c => Some(c.disposalDate.value)
@@ -478,7 +472,7 @@ class SingleDisposalsTriageController @Inject() (
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case None    => Redirect(disposalDateBackLink(triageAnswers))
             case Some(_) =>
-              disposalDateForm(TimeUtils.today(), personalRepDetails, viewConfig.periodOfAdminEnabled)
+              disposalDateForm(TimeUtils.today(), personalRepDetails)
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
@@ -1031,7 +1025,7 @@ class SingleDisposalsTriageController @Inject() (
               c => Some(c.assetType).filter(e => e === IndirectDisposal)
             ),
             _ => routes.SingleDisposalsTriageController.countryOfResidence()
-          )(_ => sharesDisposalDateForm(personalRepDetails, viewConfig.periodOfAdminEnabled))(
+          )(_ => sharesDisposalDateForm(personalRepDetails))(
             _.fold(
               _.disposalDate.map(d => ShareDisposalDate(d.value)),
               e => Some(ShareDisposalDate(e.disposalDate.value))
@@ -1058,7 +1052,7 @@ class SingleDisposalsTriageController @Inject() (
         withPersonalRepresentativeDetails(state) { personalRepDetails =>
           triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
             case Some(assetType) if assetType === AssetType.IndirectDisposal =>
-              sharesDisposalDateForm(personalRepDetails, viewConfig.periodOfAdminEnabled)
+              sharesDisposalDateForm(personalRepDetails)
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
@@ -1149,6 +1143,12 @@ class SingleDisposalsTriageController @Inject() (
           .userType()
           .isRight
 
+        val isFurtherReturn = state
+          .fold(
+            _.isFurtherReturn.contains(true),
+            _._2.isFurtherReturn.contains(true)
+          )
+
         val representeeAnswers           = state
           .fold(
             _.representeeAnswers,
@@ -1188,6 +1188,22 @@ class SingleDisposalsTriageController @Inject() (
             Redirect(
               routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
+            )
+
+          case IncompleteSingleDisposalTriageAnswers(
+                Some(Self),
+                false,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+              ) if isIndividual && isFurtherReturn =>
+            Redirect(
+              routes.CommonTriageQuestionsController
+                .furtherReturnHelp()
             )
 
           case IncompleteSingleDisposalTriageAnswers(
@@ -1319,22 +1335,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 Some(AssetType.IndirectDisposal),
-                _,
-                _,
-                _
-              ) if !indirectDisposalsEnabled =>
-            Redirect(
-              routes.CommonTriageQuestionsController
-                .assetTypeNotYetImplemented()
-            )
-
-          case IncompleteSingleDisposalTriageAnswers(
-                _,
-                _,
-                _,
-                _,
-                _,
-                Some(AssetType.IndirectDisposal),
                 None,
                 None,
                 _
@@ -1364,22 +1364,6 @@ class SingleDisposalsTriageController @Inject() (
                 _,
                 _,
                 _,
-                Some(AssetType.MixedUse),
-                _,
-                _,
-                _
-              ) if !mixedUseEnabled =>
-            Redirect(
-              routes.CommonTriageQuestionsController
-                .assetTypeNotYetImplemented()
-            )
-
-          case IncompleteSingleDisposalTriageAnswers(
-                _,
-                _,
-                _,
-                _,
-                _,
                 _,
                 None,
                 _,
@@ -1387,25 +1371,6 @@ class SingleDisposalsTriageController @Inject() (
               ) =>
             Redirect(
               routes.SingleDisposalsTriageController.whenWasDisposalDate()
-            )
-
-          case IncompleteSingleDisposalTriageAnswers(
-                _,
-                _,
-                _,
-                _,
-                _,
-                _,
-                Some(disposalDate),
-                _,
-                None
-              )
-              if !viewConfig.periodOfAdminEnabled && representeeAnswers
-                .flatMap(_.fold(_.dateOfDeath, _.dateOfDeath))
-                .exists(_.value <= disposalDate.value) =>
-            Redirect(
-              routes.CommonTriageQuestionsController
-                .periodOfAdministrationNotHandled()
             )
 
           case IncompleteSingleDisposalTriageAnswers(
@@ -1867,8 +1832,7 @@ object SingleDisposalsTriageController {
 
   def disposalDateForm(
     maximumDateInclusive: LocalDate,
-    personalRepresentativeDetails: Option[PersonalRepresentativeDetails],
-    periodOfAdminEnabled: Boolean
+    personalRepresentativeDetails: Option[PersonalRepresentativeDetails]
   ): Form[LocalDate] =
     Form(
       mapping(
@@ -1880,10 +1844,12 @@ object SingleDisposalsTriageController {
             "disposalDate-month",
             "disposalDate-year",
             "disposalDate",
-            if (periodOfAdminEnabled)
-              List(TimeUtils.personalRepresentativeDateValidation(personalRepresentativeDetails, "disposalDate"))
-            else
-              List.empty
+            List(
+              TimeUtils.personalRepresentativeDateValidation(
+                personalRepresentativeDetails,
+                "disposalDate"
+              )
+            )
           )
         )
       )(identity)(Some(_))
