@@ -1430,10 +1430,14 @@ class HomePageControllerSpec
       "redirect to the further return help page" when {
 
         "the subscribed user type is trust and the sent returns is non empty" in {
+          val sentReturns = List(
+              sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now())),
+              sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now()))
+            )
           val subscribed = sample[Subscribed].copy(
             subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
             draftReturns = List.empty,
-            sentReturns = List.fill(10)(sample[ReturnSummary])
+            sentReturns = sentReturns
           )
 
           inSequence {
@@ -1448,7 +1452,7 @@ class HomePageControllerSpec
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty),
                     None,
-                    Some(PreviousReturnData(List.empty, None))
+                    Some(PreviousReturnData(sentReturns, None))
                   )
                 )
               )
