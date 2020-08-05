@@ -1392,7 +1392,7 @@ class HomePageControllerSpec
 
       "redirect to the number of disposals page" when {
 
-        "the subscribed user type is trust" in {
+        "the subscribed user type is trust and the sent returns is empty" in {
           val subscribed = sample[Subscribed].copy(
             subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
             draftReturns = List.empty,
@@ -1422,6 +1422,43 @@ class HomePageControllerSpec
             performAction(),
             controllers.returns.triage.routes.CommonTriageQuestionsController
               .howManyProperties()
+          )
+        }
+
+      }
+
+      "redirect to the further return help page" when {
+
+        "the subscribed user type is trust and the sent returns is non empty" in {
+          val subscribed = sample[Subscribed].copy(
+            subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
+            draftReturns = List.empty,
+            sentReturns = List.fill(10)(sample[ReturnSummary])
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithSubscribed(subscribed))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  StartingNewDraftReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    Right(IncompleteSingleDisposalTriageAnswers.empty),
+                    None,
+                    Some(PreviousReturnData(List.empty, None))
+                  )
+                )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            controllers.returns.triage.routes.CommonTriageQuestionsController
+              .furtherReturnHelp()
           )
         }
 
