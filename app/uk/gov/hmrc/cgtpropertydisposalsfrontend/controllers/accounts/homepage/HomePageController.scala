@@ -85,13 +85,11 @@ class HomePageController @Inject() (
           val redirectTo = subscribed.subscribedDetails
             .userType()
             .fold(
-              _ => {
-                if(subscribed.sentReturns.nonEmpty)
+              _ =>
+                if (subscribed.sentReturns.nonEmpty)
                   triage.routes.CommonTriageQuestionsController.furtherReturnHelp()
                 else
-                  triage.routes.CommonTriageQuestionsController.howManyProperties()
-              }
-                ,
+                  triage.routes.CommonTriageQuestionsController.howManyProperties(),
               _ =>
                 triage.routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresenting()
