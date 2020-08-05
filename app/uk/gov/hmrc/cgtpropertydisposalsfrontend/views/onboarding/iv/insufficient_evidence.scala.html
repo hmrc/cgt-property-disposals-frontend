@@ -15,6 +15,7 @@
  *@
 
 @import play.api.i18n.Messages
+@import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
@@ -48,8 +49,8 @@
       <span class="bold">@messages("iv.insufficientEvidence.outside-uk-telephone.number")</span>
   </p>
 
-  <p>@messages("iv.insufficientEvidence.openingTimes")</p>
-  <p>@messages("iv.insufficientEvidence.openingTimes.p1")<br />@messages("iv.insufficientEvidence.openingTimes.p2")</p>
+  @Html(messages("iv.insufficientEvidence.openingTimes"))
+
   <p>@messages("iv.insufficientEvidence.openingTimes.p3")</p>
 
   <p><a href="@viewConfig.callChargesUrl">@messages("iv.insufficientEvidence.helpWithCallCharges")</a></p>
