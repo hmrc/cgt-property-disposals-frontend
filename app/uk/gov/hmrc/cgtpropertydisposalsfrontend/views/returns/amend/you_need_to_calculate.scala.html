@@ -25,7 +25,8 @@
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
+        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
 )
 
 @(backLink: Call)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
@@ -52,5 +53,14 @@
 
   <h2 class="heading-medium">@messages(s"$key.h2")</h2>
 
-    <p>@Html(messages(s"$key.link2", appConfig.contactHmrc))</p>
+  <p>@Html(messages(s"$key.link2", appConfig.contactHmrc))</p>
+
+  @cancelOrContinue(
+    messages("button.cancel"),
+    "#",
+    Some(messages("button.continue")),
+    Some("#")
+  )
+
+
 }

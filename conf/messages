@@ -123,6 +123,7 @@ button.acceptAndSend=Accept and send
 button.payNow=Pay now
 button.accountHome=Account home
 button.clients.accountHome=Client’s account home
+button.cancel=Cancel
 
 generic.warning=Warning
 generic.day=Day
