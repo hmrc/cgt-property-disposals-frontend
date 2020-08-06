@@ -87,9 +87,9 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     else messages(s"$key.propertyAddress")
 }
 
-@changeReturnLink = @{
+@changeReturnLink(id: String) = @{
     if(viewConfig.amendReturnsEnabled)
-        Some(Html(s"""<p><a href="${routes.ViewReturnController.startAmendingReturn().url}">${messages(s"$key.changeReturn")}</a></p>"""))
+        Some(Html(s"""<p><a href="${routes.ViewReturnController.startAmendingReturn().url}" id="$id">${messages(s"$key.changeReturn")}</a></p>"""))
     else
         None
 }
@@ -145,7 +145,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         @messages(s"$key.summaryHeading")
     </h2>
 
-    @changeReturnLink
+    @changeReturnLink("amend-link-1")
 
     <div class="return-summary">
 
@@ -300,6 +300,6 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
   </div>
 
-  @changeReturnLink
+  @changeReturnLink("amend-link-2")
 
 }

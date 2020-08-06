@@ -24,6 +24,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.Configuration
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -315,7 +316,12 @@ class ViewReturnControllerSpec
                 .inPounds()
             )
 
+          document.select("#amend-link-1").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
+          document.select("#amend-link-2").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
           validatePaymentsSection(document, viewingReturn)
+
           validateSingleDisposalCheckAllYourAnswersSections(
             document,
             completeSingleDisposalReturn,
@@ -431,6 +437,10 @@ class ViewReturnControllerSpec
                 .inPounds()
             )
 
+          document.select("#amend-link-1").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
+          document.select("#amend-link-2").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
           validatePaymentsSection(document, viewingReturn)
 
           validateMultipleDisposalsCheckAllYourAnswersSections(
@@ -539,6 +549,10 @@ class ViewReturnControllerSpec
               viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero
                 .inPounds()
             )
+
+          document.select("#amend-link-1").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
+          document.select("#amend-link-2").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
 
           validatePaymentsSection(document, viewingReturn)
 
@@ -696,4 +710,85 @@ class ViewReturnControllerSpec
       .map(e => TimeUtils.govDisplayFormat(e.dueDate))
       .headOption
       .getOrElse(sys.error("Error"))
+}
+
+class AmendReturnDisabledViewReturnControllerSpec
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with ScalaCheckDrivenPropertyChecks
+    with RedirectToStartBehaviour {
+
+  override lazy val additionalConfig = Configuration(
+    "amend-returns.enabled" -> false
+  )
+
+  override val overrideBindings =
+    List[GuiceableModule](
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SessionStore].toInstance(mockSessionStore)
+    )
+
+  lazy val controller = instanceOf[ViewReturnController]
+
+  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
+  "ViewReturnController" when {
+
+    "amend returns are disabled and" when {
+
+      "handling requests to display the view return page" must {
+
+        "not display amend return links" in {
+
+          val viewingReturn = sample[ViewingReturn]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(viewingReturn)
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            controller.displayReturn()(FakeRequest()),
+            messageFromMessageKey("viewReturn.title"),
+            { doc =>
+              doc.select("#amend-link-1").isEmpty shouldBe true
+              doc.select("#amend-link-2").isEmpty shouldBe true
+            }
+          )
+
+        }
+
+      }
+
+      "handling requests to start amending a return" must {
+
+        "redirect to the display return page" in {
+          val viewingReturn = sample[ViewingReturn]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(viewingReturn)
+              )
+            )
+          }
+
+          checkIsRedirect(
+            controller.startAmendingReturn()(FakeRequest()),
+            routes.ViewReturnController.displayReturn()
+          )
+        }
+
+      }
+
+    }
+
+  }
+
 }
