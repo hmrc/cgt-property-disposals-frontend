@@ -1431,10 +1431,10 @@ class HomePageControllerSpec
 
         "the subscribed user type is trust and the sent returns is non empty" in {
           val sentReturns = List(
-              sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now())),
-              sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now()))
-            )
-          val subscribed = sample[Subscribed].copy(
+            sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now())),
+            sample[ReturnSummary].copy(lastUpdatedDate = Some(LocalDate.now()))
+          )
+          val subscribed  = sample[Subscribed].copy(
             subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
             draftReturns = List.empty,
             sentReturns = sentReturns

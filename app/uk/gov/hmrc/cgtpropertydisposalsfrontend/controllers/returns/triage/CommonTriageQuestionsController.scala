@@ -46,6 +46,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{triage => triagePages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homePageRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Organisation
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -107,7 +109,10 @@ class CommonTriageQuestionsController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withState(request) { (_, state) =>
         if (!isIndividual(state))
-          Redirect(routes.CommonTriageQuestionsController.howManyProperties())
+          if (state.fold(_.isFurtherReturn, _.isFurtherReturn).contains(true))
+            Redirect(routes.CommonTriageQuestionsController.furtherReturnHelp())
+          else
+            Redirect(routes.CommonTriageQuestionsController.howManyProperties())
         else
           whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
             .bindFromRequest()
@@ -121,21 +126,30 @@ class CommonTriageQuestionsController @Inject() (
                   )
                 ),
               { individualUserType =>
-                val answers    = triageAnswersFomState(state)
-                val redirectTo = redirectToCheckYourAnswers(state)
+                val answers = triageAnswersFomState(state)
 
                 val oldIndividualUserType = answers.fold(
                   _.fold(_.individualUserType, c => c.individualUserType),
                   _.fold(_.individualUserType, c => c.individualUserType)
                 )
 
+                val updatedState =
+                  updateIndividualUserType(state, individualUserType)
+
+                val redirectTo =
+                  if (
+                    updatedState
+                      .fold(_.isFurtherReturn, _.isFurtherReturn)
+                      .contains(true)
+                  )
+                    routes.CommonTriageQuestionsController.furtherReturnHelp()
+                  else redirectToCheckYourAnswers(state)
+
                 if (oldIndividualUserType.contains(individualUserType))
                   Redirect(redirectTo)
                 else {
 
-                  val updatedState =
-                    updateIndividualUserType(state, individualUserType)
-                  val result       =
+                  val result =
                     for {
                       _ <- updatedState.fold(
                              _ => EitherT.pure[Future, Error](()),
@@ -172,14 +186,16 @@ class CommonTriageQuestionsController @Inject() (
       withState(request) { (_, state) =>
         val individualUserType = getIndividualUserType(state)
         val backLink           = individualUserType match {
-          case Some(_: RepresentativeType) => representeeRoutes.RepresenteeController.isFirstReturn()
-          case _                           => routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+          case _ if request.userType.contains(Organisation) => homePageRoutes.HomePageController.homepage()
+          case Some(_: RepresentativeType)                  => representeeRoutes.RepresenteeController.isFirstReturn()
+          case _                                            => routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
         }
         Ok(
           furtherReturnsHelpPage(
             backLink,
             state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust),
-            individualUserType
+            individualUserType,
+            state.isRight
           )
         )
       }
@@ -193,7 +209,6 @@ class CommonTriageQuestionsController @Inject() (
           case _                           => Redirect(routes.CommonTriageQuestionsController.howManyProperties())
         }
       }
-
     }
 
   def howManyProperties(): Action[AnyContent] =
@@ -412,7 +427,9 @@ class CommonTriageQuestionsController @Inject() (
     val triageAnswers  = triageAnswersFomState(state)
     val isSelfUserType = isIndividualASelfUserType(triageAnswers)
 
-    if (!isIndividual(state))
+    if (isFurtherReturn)
+      Some(routes.CommonTriageQuestionsController.furtherReturnHelp())
+    else if (!isIndividual(state))
       None
     else
       Some(
@@ -420,16 +437,12 @@ class CommonTriageQuestionsController @Inject() (
           _.fold(
             _ =>
               if (!isSelfUserType) representee.routes.RepresenteeController.checkYourAnswers()
-              else if (isFurtherReturn) routes.CommonTriageQuestionsController.furtherReturnHelp()
               else routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           ),
           _.fold(
             _ =>
-              if (isFurtherReturn)
-                routes.CommonTriageQuestionsController
-                  .furtherReturnHelp()
-              else if (isSelfUserType)
+              if (isSelfUserType)
                 routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresenting()
               else representee.routes.RepresenteeController.checkYourAnswers(),

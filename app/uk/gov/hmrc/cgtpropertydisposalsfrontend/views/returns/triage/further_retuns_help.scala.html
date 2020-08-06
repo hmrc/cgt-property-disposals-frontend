@@ -40,7 +40,8 @@ warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 @(
   backLink: Call,
   isATrust: Boolean,
-  representativeType: Option[IndividualUserType]
+  representativeType: Option[IndividualUserType],
+  displayReturnToSummaryLink: Boolean
 )(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -87,7 +88,6 @@ warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
         @submitButton(messages("button.continue"))
     }
 
-  @returnToSummaryLink(displayReturnToSummaryLink = true)
-
+    @returnToSummaryLink(displayReturnToSummaryLink)
 
 }
