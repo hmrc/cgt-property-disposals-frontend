@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -191,26 +191,32 @@ class HomePageController @Inject() (
               NotFound
             } { returnSummary =>
               val result = for {
-                sentReturn <- returnsService
-                                .displayReturn(
-                                  subscribed.subscribedDetails.cgtReference,
-                                  returnSummary.submissionId
-                                )
-                _          <- EitherT(
-                                updateSession(sessionStore, request)(
-                                  _.copy(
-                                    journeyStatus = Some(
-                                      ViewingReturn(
-                                        subscribed.subscribedDetails,
-                                        subscribed.ggCredId,
-                                        subscribed.agentReferenceNumber,
-                                        sentReturn,
-                                        returnSummary
-                                      )
-                                    )
-                                  )
-                                )
-                              )
+                sentReturn           <- returnsService
+                                          .displayReturn(
+                                            subscribed.subscribedDetails.cgtReference,
+                                            returnSummary.submissionId
+                                          )
+                previousYtdLiability <- getPreviousYearToDateLiability(
+                                          subscribed.sentReturns,
+                                          subscribed.subscribedDetails.cgtReference,
+                                          Some(CompleteReturnWithSummary(sentReturn, returnSummary))
+                                        )
+                _                    <- EitherT(
+                                          updateSession(sessionStore, request)(
+                                            _.copy(
+                                              journeyStatus = Some(
+                                                ViewingReturn(
+                                                  subscribed.subscribedDetails,
+                                                  subscribed.ggCredId,
+                                                  subscribed.agentReferenceNumber,
+                                                  sentReturn,
+                                                  returnSummary,
+                                                  Some(PreviousReturnData(subscribed.sentReturns, previousYtdLiability))
+                                                )
+                                              )
+                                            )
+                                          )
+                                        )
               } yield ()
 
               result.fold(
@@ -269,10 +275,20 @@ class HomePageController @Inject() (
 
   private def getPreviousYearToDateLiability(
     previousSentReturns: List[ReturnSummary],
-    cgtReference: CgtReference
+    cgtReference: CgtReference,
+    returnData: Option[CompleteReturnWithSummary] = None
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[AmountInPence]] = {
     def fromNonCalculatedYtdAnswers(a: CompleteNonCalculatedYTDAnswers): AmountInPence =
       a.yearToDateLiability.getOrElse(a.taxDue)
+
+    def fromCompleteReturn(c: CompleteReturn): AmountInPence =
+      c.fold(
+        multiple => fromNonCalculatedYtdAnswers(multiple.yearToDateLiabilityAnswers),
+        single => single.yearToDateLiabilityAnswers.fold(fromNonCalculatedYtdAnswers, _.taxDue),
+        singleIndirect => fromNonCalculatedYtdAnswers(singleIndirect.yearToDateLiabilityAnswers),
+        multipleIndirect => fromNonCalculatedYtdAnswers(multipleIndirect.yearToDateLiabilityAnswers),
+        singleMixedUse => fromNonCalculatedYtdAnswers(singleMixedUse.yearToDateLiabilityAnswers)
+      )
 
     val previousSentReturnsWithDates = previousSentReturns.map(r => r -> r.lastUpdatedDate.getOrElse(r.submissionDate))
     val latestReturnWithData         =
@@ -283,22 +299,22 @@ class HomePageController @Inject() (
       case Some((latestReturn, latestDate)) =>
         val moreThanOneReturnOnLatestDate =
           previousSentReturns
-            .filter(r => r.lastUpdatedDate.contains(latestDate) || localDateOrder.eqv(r.submissionDate, latestDate))
-            .size > 1
+            .count(r => r.lastUpdatedDate.contains(latestDate) || localDateOrder.eqv(r.submissionDate, latestDate)) > 1
 
         if (moreThanOneReturnOnLatestDate)
           EitherT.pure(None)
         else
-          returnsService.displayReturn(cgtReference, latestReturn.submissionId).map { completeReturn =>
-            val yearToDate = completeReturn.fold(
-              multiple => fromNonCalculatedYtdAnswers(multiple.yearToDateLiabilityAnswers),
-              single => single.yearToDateLiabilityAnswers.fold(fromNonCalculatedYtdAnswers, _.taxDue),
-              singleIndirect => fromNonCalculatedYtdAnswers(singleIndirect.yearToDateLiabilityAnswers),
-              multipleIndirect => fromNonCalculatedYtdAnswers(multipleIndirect.yearToDateLiabilityAnswers),
-              singleMixedUse => fromNonCalculatedYtdAnswers(singleMixedUse.yearToDateLiabilityAnswers)
-            )
-            Some(yearToDate)
+          returnData match {
+            case Some(CompleteReturnWithSummary(completeReturn, summary))
+                if summary.submissionId === latestReturn.submissionId =>
+              EitherT.pure(Some(fromCompleteReturn(completeReturn)))
+
+            case _ =>
+              returnsService.displayReturn(cgtReference, latestReturn.submissionId).map { completeReturn =>
+                Some(fromCompleteReturn(completeReturn))
+              }
           }
+
     }
 
   }

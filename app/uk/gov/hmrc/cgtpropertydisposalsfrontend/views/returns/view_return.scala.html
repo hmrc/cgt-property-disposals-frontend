@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompleteReturn, ReturnSummary}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.IndirectDisposal
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
@@ -86,6 +87,13 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     else messages(s"$key.propertyAddress")
 }
 
+@changeReturnLink = @{
+    if(viewConfig.amendReturnsEnabled)
+        Some(Html(s"""<p><a href="${routes.ViewReturnController.startAmendingReturn().url}">${messages(s"$key.changeReturn")}</a></p>"""))
+    else
+        None
+}
+
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
   @returnHeading(title, returnSummary, subscribedDetails, request.userType)
@@ -136,6 +144,8 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     <h2 class="heading-large">
         @messages(s"$key.summaryHeading")
     </h2>
+
+    @changeReturnLink
 
     <div class="return-summary">
 
@@ -289,5 +299,7 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
     }
 
   </div>
+
+  @changeReturnLink
 
 }

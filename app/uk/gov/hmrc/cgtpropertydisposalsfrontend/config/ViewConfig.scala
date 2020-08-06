@@ -183,10 +183,13 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   val furtherReturnsEnabled: Boolean = servicesConfig.getBoolean("further-returns.enabled")
 
+  val amendReturnsEnabled: Boolean = servicesConfig.getBoolean("amend-returns.enabled")
+
   logger.info {
     val flags = List(
       "languageSwitchingEnabled" -> enableLanguageSwitching,
-      "furtherReturnsEnabled"    -> furtherReturnsEnabled
+      "furtherReturnsEnabled"    -> furtherReturnsEnabled,
+      "amendReturnsEnabled"      -> amendReturnsEnabled
     )
     s"Application started with feature flags: [${flags.mkString("; ")}"
   }

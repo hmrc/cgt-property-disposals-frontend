@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingToAmendReturn, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.govShortDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
@@ -190,20 +190,18 @@ class ViewReturnControllerSpec
           .eachText()
           .asScala
 
-        paymentDetails.headOption.fold(sys.error("Error"))(
-          _.toString
-        )                   should startWith("Tax payment")
-        paymentDetails(1) shouldBe govShortDisplayFormat(
+        paymentDetails.headOption.getOrElse(sys.error("Error")) should startWith("Tax payment")
+        paymentDetails(1)                                     shouldBe govShortDisplayFormat(
           ukResidentMainReturnChargeDueDate
         )
-        paymentDetails(2) shouldBe formatAmountOfMoneyWithPoundSign(
+        paymentDetails(2)                                     shouldBe formatAmountOfMoneyWithPoundSign(
           ukResidentMainReturnChargeAmount.inPounds()
         )
-        paymentDetails(3) shouldBe formatAmountOfMoneyWithPoundSign(
+        paymentDetails(3)                                     shouldBe formatAmountOfMoneyWithPoundSign(
           ukResidentMainReturnChargeAmount
             .inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
         )
-        paymentDetails(4) shouldBe "Paid"
+        paymentDetails(4)                                     shouldBe "Paid"
 
         paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
           fullPaymentForUkResidentReturnCharge.amount.inPounds()
@@ -222,13 +220,8 @@ class ViewReturnControllerSpec
         paymentDetails(10) shouldBe "Pay now"
       }
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        {
-          case _: ViewingReturn => true
-          case _                => false
-        }
-      )
+      behave like journeyStatusBehaviour(performAction)
+
       val address = sample[UkAddress].copy(
         line1 = "123 fake street",
         line2 = None,
@@ -573,13 +566,7 @@ class ViewReturnControllerSpec
         returnSummary = sample[ReturnSummary].copy(charges = List(charge))
       )
 
-      behave like redirectToStartWhenInvalidJourney(
-        () => performAction(""),
-        {
-          case _: ViewingReturn => true
-          case _                => false
-        }
-      )
+      behave like journeyStatusBehaviour(() => performAction(""))
 
       "return a not found response" when {
 
@@ -652,6 +639,43 @@ class ViewReturnControllerSpec
 
   }
 
+  def journeyStatusBehaviour(performAction: () => Future[Result]): Unit = {
+
+    behave like redirectToStartWhenInvalidJourney(
+      performAction,
+      {
+        case _: ViewingReturn | _: StartingToAmendReturn => true
+        case _                                           => false
+      }
+    )
+
+    "show an error page" when {
+
+      "there is a problem updating the session when converting from StartingToAmendReturn" in {
+        val journey       = sample[StartingToAmendReturn]
+        val viewingReturn =
+          ViewingReturn(
+            journey.subscribedDetails,
+            journey.ggCredId,
+            journey.agentReferenceNumber,
+            journey.originalReturn.completeReturn,
+            journey.originalReturn.summary,
+            journey.previousSentReturns
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(SessionData.empty.copy(journeyStatus = Some(journey)))
+          mockStoreSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn)))(Left(Error("")))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+
+    }
+
+  }
+
   private def generateAddressLineForMultipleDisposals(
     completeMultipleDisposalsReturn: CompleteMultipleDisposalsReturn
   ): String =
@@ -671,5 +695,5 @@ class ViewReturnControllerSpec
       .filter(c => c.chargeType === ChargeType.UkResidentReturn || c.chargeType === ChargeType.NonUkResidentReturn)
       .map(e => TimeUtils.govDisplayFormat(e.dueDate))
       .headOption
-      .fold(sys.error("Error"))(_.toString)
+      .getOrElse(sys.error("Error"))
 }

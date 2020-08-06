@@ -1162,7 +1162,8 @@ class HomePageControllerSpec
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
           sample[CompleteSingleDisposalReturn],
-          sample[ReturnSummary]
+          sample[ReturnSummary],
+          Some(PreviousReturnData(subscribed.sentReturns, None))
         )
 
         val submitReturnFailed = SubmitReturnFailed(
@@ -1638,9 +1639,11 @@ class HomePageControllerSpec
         controller.viewSentReturn(submissionId)(FakeRequest())
 
       val returnSummary = sample[ReturnSummary]
-      val subscribed    =
+
+      val subscribed =
         sample[Subscribed].copy(sentReturns = List(returnSummary))
-      val sessionData   = SessionData.empty.copy(journeyStatus = Some(subscribed))
+
+      val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
 
       redirectToStartWhenInvalidJourney(
         () => performAction(""),
@@ -1667,7 +1670,7 @@ class HomePageControllerSpec
 
       "show an error page" when {
 
-        "there is an error getting the return" in {
+        "there is an error getting the return requested" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
@@ -1680,8 +1683,46 @@ class HomePageControllerSpec
           checkIsTechnicalErrorPage(performAction(returnSummary.submissionId))
         }
 
-        "there is an error updating the session" in {
+        "there is an error getting the most latest return for the previous ytd figure" in {
+          val returnSummary1 =
+            sample[ReturnSummary].copy(submissionDate = LocalDate.of(2020, 5, 5), lastUpdatedDate = None)
+          val returnSummary2 =
+            sample[ReturnSummary].copy(submissionDate = LocalDate.of(2020, 5, 6), lastUpdatedDate = None)
+
+          val subscribed =
+            sample[Subscribed].copy(sentReturns = List(returnSummary1, returnSummary2))
+
+          val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
+
           val completeReturn = sample[CompleteSingleDisposalReturn]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+            mockDisplayReturn(
+              subscribed.subscribedDetails.cgtReference,
+              returnSummary1.submissionId
+            )(
+              Right(completeReturn)
+            )
+            mockDisplayReturn(
+              subscribed.subscribedDetails.cgtReference,
+              returnSummary2.submissionId
+            )(
+              Left(Error(""))
+            )
+
+            checkIsTechnicalErrorPage(performAction(returnSummary1.submissionId))
+
+          }
+
+        }
+
+        "there is an error updating the session" in {
+          val taxDue         = sample[AmountInPence]
+          val completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1700,7 +1741,8 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     completeReturn,
-                    returnSummary
+                    returnSummary,
+                    Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue)))
                   )
                 )
               )
@@ -1715,7 +1757,10 @@ class HomePageControllerSpec
       "redirect to the view return screen" when {
 
         "the return is successfully retrieved and the session is updated" in {
-          val completeReturn = sample[CompleteSingleDisposalReturn]
+          val taxDue         = sample[AmountInPence]
+          val completeReturn = sample[CompleteSingleDisposalReturn].copy(
+            yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1734,7 +1779,8 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     completeReturn,
-                    returnSummary
+                    returnSummary,
+                    Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue)))
                   )
                 )
               )

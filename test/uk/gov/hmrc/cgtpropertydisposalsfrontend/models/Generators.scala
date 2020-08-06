@@ -23,7 +23,7 @@ import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
@@ -216,6 +216,9 @@ trait JourneyStatusLowerPriorityGen { this: GenUtils =>
   implicit val submitReturnFailedGen: Gen[SubmitReturnFailed] =
     gen[SubmitReturnFailed]
 
+  implicit val startingToAmendReturnGen: Gen[StartingToAmendReturn] =
+    gen[StartingToAmendReturn]
+
 }
 
 trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
@@ -350,6 +353,8 @@ trait ReturnGen extends LowerPriorityReturnGen { this: GenUtils =>
     gen[CalculateCgtTaxDueRequest]
 
   implicit val previousReturnDataGen: Gen[PreviousReturnData] = gen[PreviousReturnData]
+
+  implicit val completeReturnWithSummaryGen: Gen[CompleteReturnWithSummary] = gen[CompleteReturnWithSummary]
 
 }
 

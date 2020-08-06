@@ -4178,6 +4178,8 @@ viewReturn.warning.subtext=It takes 3 to 5 days for payments or charges to show 
 viewReturn.agent.warning.subtext=It takes 3 to 5 days for payments or charges to show in your client’s account.
 viewReturn.trust.warning.subtext=It takes 3 to 5 days for payments or charges to show in the trust’s account.
 
+viewReturn.changeReturn=Change return
+
 #===================================================
 #  VIEW RETURN PAGES - END
 #===================================================
@@ -4949,6 +4951,24 @@ country.ZW=Zimbabwe
 #  COUNTRIES - END
 #===================================================
 
+#===================================================
+#  AMEND RETURNS - START
+#===================================================
+
+youNeedToCalculate.title=You will need to calculate the amounts in this return
+youNeedToCalculate.warning=We do not calculate the amounts you will need to enter. Once you have started you will need to send any changes to HMRC. You will not be able to save and come back later.
+youNeedToCalculate.p1=You will need to:
+youNeedToCalculate.li1=calculate your Capital Gains Tax liability on your UK property-related disposals for the tax year so far
+youNeedToCalculate.li2=upload a document showing how you worked out this amount and the amount of the Capital Gains Tax due
+youNeedToCalculate.link1=How to calculate the amounts needed for this return
+youNeedToCalculate.h2=If you need help
+youNeedToCalculate.link2=<a href="{0}">Contact HMRC</a>.
+
+
+
+#===================================================
+#  AMEND RETURNS - END
+#===================================================
 
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English
