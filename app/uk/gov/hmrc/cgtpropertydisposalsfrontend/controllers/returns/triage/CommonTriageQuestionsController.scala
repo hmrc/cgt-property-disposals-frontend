@@ -126,24 +126,30 @@ class CommonTriageQuestionsController @Inject() (
                   )
                 ),
               { individualUserType =>
-                val answers    = triageAnswersFomState(state)
-                val redirectTo =
-                  if (state.fold(_.isFurtherReturn, _.isFurtherReturn).contains(true))
-                    routes.CommonTriageQuestionsController.furtherReturnHelp()
-                  else redirectToCheckYourAnswers(state)
+                val answers = triageAnswersFomState(state)
 
                 val oldIndividualUserType = answers.fold(
                   _.fold(_.individualUserType, c => c.individualUserType),
                   _.fold(_.individualUserType, c => c.individualUserType)
                 )
 
+                val updatedState =
+                  updateIndividualUserType(state, individualUserType)
+
+                val redirectTo =
+                  if (
+                    updatedState
+                      .fold(_.isFurtherReturn, _.isFurtherReturn)
+                      .contains(true)
+                  )
+                    routes.CommonTriageQuestionsController.furtherReturnHelp()
+                  else redirectToCheckYourAnswers(state)
+
                 if (oldIndividualUserType.contains(individualUserType))
                   Redirect(redirectTo)
                 else {
 
-                  val updatedState =
-                    updateIndividualUserType(state, individualUserType)
-                  val result       =
+                  val result =
                     for {
                       _ <- updatedState.fold(
                              _ => EitherT.pure[Future, Error](()),

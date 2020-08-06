@@ -126,14 +126,16 @@ class CommonTriageQuestionsControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
-    userType: UserType = UserType.Individual
+    userType: UserType = UserType.Individual,
+    previousReturns: Option[PreviousReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn      = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(name = name)
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      previousSentReturns = previousReturns
     )
 
     (
@@ -653,7 +655,7 @@ class CommonTriageQuestionsControllerSpec
                   initialGainOrLoss = None,
                   supportingEvidenceAnswers = None
                 ),
-              routes.CommonTriageQuestionsController.furtherReturnHelp()
+              routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
 
@@ -691,7 +693,7 @@ class CommonTriageQuestionsControllerSpec
                   initialGainOrLoss = None,
                   supportingEvidenceAnswers = None
                 ),
-              routes.CommonTriageQuestionsController.furtherReturnHelp()
+              routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
 
@@ -726,7 +728,7 @@ class CommonTriageQuestionsControllerSpec
                   yearToDateLiabilityAnswers = None,
                   supportingEvidenceAnswers = None
                 ),
-              routes.CommonTriageQuestionsController.furtherReturnHelp()
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
           }
 
