@@ -1191,6 +1191,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeFillingOutReturnNoRepresentee.draftReturn.id,
           completeFillingOutReturnNoRepresentee.subscribedDetails,
           completeFillingOutReturnNoRepresentee.agentReferenceNumber,
+          completeFillingOutReturnNoRepresentee.isFurtherReturn.contains(true),
           B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes())))
         )
       }
@@ -1233,6 +1234,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           completeFillingOutReturnWithRepresenteeWithNoReference.draftReturn.id,
           completeFillingOutReturnWithRepresenteeWithNoReference.subscribedDetails,
           completeFillingOutReturnWithRepresenteeWithNoReference.agentReferenceNumber,
+          completeFillingOutReturnWithRepresenteeWithNoReference.isFurtherReturn.contains(true),
           B64Html(new String(Base64.getEncoder.encode(cyaPageHtml.getBytes())))
         )
       }
