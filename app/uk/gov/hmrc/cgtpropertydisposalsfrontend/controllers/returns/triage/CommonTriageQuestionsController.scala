@@ -142,7 +142,16 @@ class CommonTriageQuestionsController @Inject() (
                       .fold(_.isFurtherReturn, _.isFurtherReturn)
                       .contains(true)
                   )
-                    routes.CommonTriageQuestionsController.furtherReturnHelp()
+                    answers.fold(
+                      _.fold(
+                        _ => routes.CommonTriageQuestionsController.furtherReturnHelp(),
+                        _ => redirectToCheckYourAnswers(state)
+                      ),
+                      _.fold(
+                        _ => routes.CommonTriageQuestionsController.furtherReturnHelp(),
+                        _ => redirectToCheckYourAnswers(state)
+                      )
+                    )
                   else redirectToCheckYourAnswers(state)
 
                 if (oldIndividualUserType.contains(individualUserType))
@@ -428,7 +437,18 @@ class CommonTriageQuestionsController @Inject() (
     val isSelfUserType = isIndividualASelfUserType(triageAnswers)
 
     if (isFurtherReturn)
-      Some(routes.CommonTriageQuestionsController.furtherReturnHelp())
+      Some(
+        triageAnswers.fold(
+          _.fold(
+            _ => routes.CommonTriageQuestionsController.furtherReturnHelp(),
+            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+          ),
+          _.fold(
+            _ => routes.CommonTriageQuestionsController.furtherReturnHelp(),
+            _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+          )
+        )
+      )
     else if (!isIndividual(state))
       None
     else
