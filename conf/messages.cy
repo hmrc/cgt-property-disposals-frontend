@@ -798,6 +798,75 @@ triage.cyaChange.completionDate=y dyddiad cwblhau pan wnaethoch werthu’r eiddo
 #===================================================
 
 #===================================================
+#  PROPERTY DETAILS PAGES - START
+#===================================================
+
+returns.property-address.singleDisposal.caption=Cyfeiriad yr eiddo
+returns.property-details.multipleDisposals.caption=Manylion un gwarediad eiddo
+returns.company-details.multipleIndirectDisposals.caption=Manylion un cwmni
+property-details.multiple-disposals.guidance.title=Bydd angen i chi nodi manylion ar gyfer un o’r gwarediadau eiddo
+property-details.multiple-disposals.guidance.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i chi. Os oedd yr eiddo’n un defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
+property-details.multiple-disposals.guidance.agent.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’ch cleient. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
+property-details.multiple-disposals.guidance.trust.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r ymddiriedolaeth. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
+property-details.multiple-disposals.guidance.capacitor.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r person. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
+property-details.multiple-disposals.guidance.personalRep.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r person. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r ystâd. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p1=Dylech nodi manylion yr eiddo a roddodd yr enillion mwyaf neu’r golled leiaf i’r ystâd. Os oedd yr eiddo’n eiddo defnydd cymysg, dylech ystyried rhannau masnachol a rhannau preswyl yr eiddo fel un eiddo.
+property-details.multiple-disposals.guidance.p2=Ar gyfer yr un eiddo hwnnw, bydd angen i chi nodi:
+property-details.multiple-disposals.guidance.li1=cyfeiriad yr eiddo yn y DU
+property-details.multiple-disposals.guidance.li2=dyddiad cyfnewid contractau
+property-details.multiple-disposals.guidance.li3=swm y gwarediad, llai costau gwaredu ar gyfer yr holl eiddo
+property-details.multiple-disposals.guidance.li4=swm y caffaeliad, plws costau gwella a chostau caffael ar gyfer yr holl eiddo
+property-details.multiple-disposals.guidance.agent.li4=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd eich cleient a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.trust.li4=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd yr ymddiriedolaeth a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.personalRep.li4=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd y person a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.capacitor.li4=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd y person a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.li4=gwerth marchnadol plws costau caffael ar gyfer yr holl eiddo
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.li4=gwerth marchnadol plws costau caffael ar gyfer yr holl eiddo
+property-details.multiple-disposals.guidance.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fyddwch chi a’r prynwr neu’r perchennog newydd yn rhoi contract i’ch gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.agent.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd eich cleient a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.trust.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd yr ymddiriedolaeth a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.personalRep.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd y person a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.capacitor.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd y person a’r prynwr neu’r perchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd y person sy’n gwerthu a phrynwr neu berchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.personalRepInPeriodOfAdmin.agent.p3=Fel arfer, mae cyfnewid contractau’n digwydd pan fydd gwerthwr a phrynwr neu berchennog newydd yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+property-details.multiple-disposals.guidance.p4=Hefyd, bydd angen i chi uwchlwytho dogfen yn ddiweddarach gan roi manylion yr eiddo eraill rydych yn eu cynnwys yn y datganiad hwn.
+enterPostcode.returns.singleDisposal.title=Dewch o hyd i gyfeiriad yr eiddo yn y DU y gwnaethoch ei waredu
+enterPostcode.returns.agent.singleDisposal.title=Dewch o hyd i gyfeiriad yr eiddo yn y DU y gwnaeth eich cleient ei waredu
+enterPostcode.returns.personalRepInPeriodOfAdmin.agent.singleDisposal.title=Dewch o hyd i gyfeiriad yr eiddo yn y DU y gwnaeth y person ei waredu
+enterPostcode.returns.trust.singleDisposal.title=Dewch o hyd i gyfeiriad yr eiddo yn y DU y gwnaeth yr ymddiriedolaeth ei waredu
+enterPostcode.returns.capacitor.singleDisposal.title=Dewch o hyd i gyfeiriad yr eiddo yn y DU a gafodd ei waredu
+enterPostcode.returns.personalRep.singleDisposal.title=Dewch o hyd i gyfeiriad yr eiddo yn y DU a gafodd ei waredu
+address-select.returns.singleDisposal.title=Dewiswch gyfeiriad yr eiddo yn y DU y gwnaethoch ei waredu
+address-select.returns.agent.singleDisposal.title=Dewiswch gyfeiriad yr eiddo yn y DU y gwnaeth eich cleient ei waredu
+address-select.returns.personalRepInPeriodOfAdmin.agent.singleDisposal.title=Dewiswch gyfeiriad yr eiddo yn y DU y gwnaeth y person ei waredu
+address-select.returns.trust.singleDisposal.title=Dewiswch gyfeiriad yr eiddo yn y DU y gwnaeth yr ymddiriedolaeth ei waredu
+address-select.returns.personalRep.singleDisposal.title=Dewiswch gyfeiriad yr eiddo yn y DU a gafodd ei waredu
+address-select.returns.capacitor.singleDisposal.title=Dewiswch gyfeiriad yr eiddo yn y DU a gafodd ei waredu
+address.uk.returns.singleDisposal.title=Nodwch gyfeiriad yr eiddo yn y DU y gwnaethoch ei waredu
+address.uk.returns.agent.singleDisposal.title=Nodwch gyfeiriad yr eiddo yn y DU y gwnaeth eich cleient ei waredu
+address.uk.returns.personalRepInPeriodOfAdmin.agent.singleDisposal.title=Nodwch gyfeiriad yr eiddo yn y DU y gwnaeth y person ei waredu
+address.uk.returns.trust.singleDisposal.title=Nodwch gyfeiriad yr eiddo yn y DU y gwnaeth yr ymddiriedolaeth ei waredu
+address.uk.returns.personalRep.singleDisposal.title=Nodwch gyfeiriad yr eiddo yn y DU a gafodd ei waredu
+address.uk.returns.capacitor.singleDisposal.title=Nodwch gyfeiriad yr eiddo yn y DU a gafodd ei waredu
+enterPostcode.returns.multipleDisposals.title=Dewch o hyd i gyfeiriad un o’r gwarediadau eiddo yn y DU
+address-select.returns.multipleDisposals.title=Dewiswch gyfeiriad yr eiddo
+address.uk.returns.multipleDisposals.title=Nodwch gyfeiriad un eiddo yn y DU a gafodd ei waredu
+returns.property-address.cya.title=Gwiriwch eich atebion
+returns.property-details.multiple-disposals.cya.guidanceLink=Help wrth lenwi’r adran hon
+returns.property-address.cyaLabel.property-address=Cyfeiriad yr eiddo
+returns.property-address.cyaLabel.disposal-date=Pa ddyddiad y gwnaethoch gyfnewid contractau wrth waredu’r eiddo?
+returns.property-address.cyaLabel.disposal-price=Faint oedd swm y gwarediad?
+returns.property-address.personalRepInPeriodOfAdmin.cyaLabel.disposal-price=Beth oedd elw’r gwarediad?
+returns.property-address.cyaLabel.acquisition-price=Faint oedd swm y caffaeliad?
+returns.property-address.personalRepInPeriodOfAdmin.cyaLabel.acquisition-price=Beth oedd gwerth marchnadol yr eiddo ar {0}?
+returns.property-address.cyaChange.property-address=cyfeiriad yr eiddo
+
+#===================================================
+#  PROPERTY DETAILS PAGES - END
+#===================================================
+
+#===================================================
 #  SUPPORTING EVIDENCE PAGES - START
 #===================================================
 
