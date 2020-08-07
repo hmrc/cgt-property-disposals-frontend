@@ -4253,7 +4253,7 @@ multipleDisposalsAcquisitionPrice.capacitor.title=What was the acquisition value
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=What was the market value of the property on {0}?
 multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=What was the market value of the property on {0}?
 
-multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
+multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.agent.helpText=This is the amount your client paid when they bought the property or its market value if your client inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.trust.helpText=This is the amount the trust paid when they bought the property or its market value if the trust inherited it or got it as a gift. You should add on any improvement or acquisition costs.
 multipleDisposalsAcquisitionPrice.capacitor.helpText=This is the amount the person paid when they bought the property or its market value if the person inherited it or got it as a gift. You should add on any improvement or acquisition costs.
@@ -4334,7 +4334,7 @@ multipleDisposalsDisposalDate-year.error.invalid=Enter a real contract exchange 
 multipleDisposalsDisposalDate-month.error.monthAndYearRequired=Contract exchange date must include a month and a year
 multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
-multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=The contact exchange date cannot be on or before the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
+multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=The contract exchange date cannot be on or before the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=The contract exchange date cannot be after the date of death. Go ‘back’ and check your answer to the question ‘Who are you completing this return for?’
 
 multipleDisposalsDisposalDate.cyaChange=the contract exchange date
