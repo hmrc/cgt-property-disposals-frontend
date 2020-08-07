@@ -798,6 +798,159 @@ triage.cyaChange.completionDate=y dyddiad cwblhau pan wnaethoch werthu’r eiddo
 #===================================================
 
 #===================================================
+#  MULTIPLE DISPOSALS TRIAGE PAGES - START
+#===================================================
+
+multiple-disposals.guidance.title=Gwnaethoch werthu neu waredu 2 eiddo neu fwy
+multiple-disposals.guidance.agent.title=Gwnaeth eich cleient werthu neu waredu 2 eiddo neu fwy
+multiple-disposals.guidance.trust.title=Gwnaeth yr ymddiriedolaeth werthu neu waredu 2 eiddo neu fwy
+multiple-disposals.guidance.capacitor.title=Gwerthwyd neu gwaredwyd dau eiddo neu fwy
+multiple-disposals.guidance.personalRep.title=Gwerthwyd neu gwaredwyd dau eiddo neu fwy
+multiple-disposals.guidance.p1=Gallwch roi gwybod am bob gwerthiant eiddo (neu ‘warediadau’) yn yr un Ffurflen Dreth. Gallwch ond gwneud hyn os oedd gan bob un ohonynt y canlynol:
+multiple-disposals.guidance.li1=yr un dyddiad ‘cwblhau’
+multiple-disposals.guidance.li2=dyddiadau ‘cyfnewid’ contractau ar neu ar ôl 6 Ebrill 2020
+multiple-disposals.guidance.li3=dyddiadau cyfnewid contractau a oedd yn yr un flwyddyn dreth
+multiple-disposals.guidance.p2=Gall dyddiadau cyfnewid contractau fod mewn blwyddyn dreth wahanol i’r dyddiad cwblhau.
+multiple-disposals.guidance.p3=Mae’n rhaid i chi anfon Ffurflenni Treth ar wahân os oedd y dyddiadau cyfnewid contract mewn gwahanol flynyddoedd treth.
+multiple-disposals.guidance.details.summary=Beth sy’n digwydd ar ddyddiadau ‘cyfnewid’ a ‘chwblhau’?
+multiple-disposals.guidance.details.p1=Fel arfer, y dyddiad ‘cwblhau’ yw’r diwrnod y bydd y perchennog newydd yn cael allwedd i’r eiddo.
+multiple-disposals.guidance.details.p2=Fel arfer, mae ‘cyfnewid’ contract yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
+multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Darllenwch am ‘gyfnewid a ‘chwblhau’ (yn agor ffenestr newydd)</a>.
+multipleDisposalsNumberOfProperties.title=Faint o warediadau ydych yn eu cynnwys yn y Ffurflen Dreth hon?
+multipleDisposalsNumberOfProperties.p1=Mae’n rhaid i’r holl warediadau eiddo fod â’r un dyddiad ‘cwblhau’. Mae’n rhaid i’r holl ddyddiadau ‘cyfnewid’ contract fod yn yr un flwyddyn dreth.
+multipleDisposalsNumberOfProperties.p2=Os ydych yn rhoi gwybod am werthiant cyfranddaliadau, nodwch nifer y cwmnïau yr oedd y cyfranddaliadau’n cael eu cadw ynddynt. Mae’n rhaid i’r holl gyfranddaliadau fod wedi’u gwerthu ar yr un dyddiad.
+multipleDisposalsNumberOfProperties.details.summary=Beth sy’n digwydd ar ddyddiadau ‘cyfnewid’ a ‘chwblhau’?
+multipleDisposalsNumberOfProperties.details.p1=Fel arfer, y dyddiad ‘cwblhau’ yw’r diwrnod y mae’r perchennog newydd yn cael yr allwedd i’r eiddo,
+multipleDisposalsNumberOfProperties.details.p2=Fel arfer, mae ‘cyfnewid’ contract yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
+multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Darllenwch am ‘gyfnewid a ‘chwblhau’ (yn agor ffenestr newydd)</a>.
+multipleDisposalsNumberOfProperties.error.invalid=Mae’n rhaid i nifer y gwarediadau fod yn rhif
+multipleDisposalsNumberOfProperties.error.required=Nodwch nifer y gwarediadau rydych yn eu cynnwys yn y Ffurflen Dreth hon
+multipleDisposalsNumberOfProperties.error.tooSmall=Mae’n rhaid i nifer y gwarediadau fod yn 2 neu fwy
+multipleDisposalsNumberOfProperties.error.tooLong=Mae’n rhaid i nifer y gwarediadau fod yn 999 neu lai
+multipleDisposalsNumberOfProperties.cyaChange=faint o warediadau
+multipleDisposalsWereYouAUKResident.title=A oeddech yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau?
+multipleDisposalsWereYouAUKResident.agent.title=A oedd eich cleient yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau?
+multipleDisposalsWereYouAUKResident.trust.title=A oedd yr ymddiriedolaeth yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau?
+multipleDisposalsWereYouAUKResident.capacitor.title=A oedd y person yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau?
+multipleDisposalsWereYouAUKResident.personalRep.title=A oedd y person yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau?
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.title=A oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi?
+multipleDisposalsWereYouAUKResident.helpText=Mae ‘cyfnewid’ contractau fel arfer yn digwydd pan fydd prynwr a gwerthwr yn rhoi contract i’w gilydd ac mae’r prynwr yn talu blaendal.
+multipleDisposalsWereYouAUKResident.link=<a href="{0}" target="_blank">Gweithiwch allan eich statws preswylio am flwyddyn dreth (yn agor ffenestr newydd)</a>
+multipleDisposalsWereYouAUKResident.agent.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’ch cleient (yn agor ffenestr newydd)</a>
+multipleDisposalsWereYouAUKResident.trust.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r ymddiriedolaeth (yn agor ffenestr newydd)</a>
+multipleDisposalsWereYouAUKResident.capacitor.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor ffenestr newydd)</a>
+multipleDisposalsWereYouAUKResident.personalRep.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person (yn agor ffenestr newydd)</a>
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.link=<a href="{0}" target="_blank">Gweithiwch allan statws preswylio’r person am flwyddyn dreth (yn agor ffenestr newydd)</a>.
+multipleDisposalsWereYouAUKResident.error.required=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau
+multipleDisposalsWereYouAUKResident.error.boolean=Dewiswch ‘Iawn’ os oeddech yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau
+multipleDisposalsWereYouAUKResident.agent.error.required=Dewiswch ‘Iawn’ os oedd eich cleient yn breswylydd yn y DU ar yr holl ddyddiadau cyfnewid contractau
+multipleDisposalsWereYouAUKResident.agent.error.boolean=Dewiswch ‘Iawn’ os oedd eich cleient yn breswylydd yn y DU ar yr holl ddyddiadau cyfnewid contractau
+multipleDisposalsWereYouAUKResident.trust.error.required=Dewiswch ‘Iawn’ os oedd yr ymddiriedolaeth yn breswylydd yn y DU ar yr holl ddyddiadau cyfnewid contractau
+multipleDisposalsWereYouAUKResident.trust.error.boolean=Dewiswch ‘Iawn’ os oedd yr ymddiriedolaeth yn breswylydd yn y DU ar yr holl ddyddiadau cyfnewid contractau
+multipleDisposalsWereYouAUKResident.capacitor.error.required=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau
+multipleDisposalsWereYouAUKResident.capacitor.error.boolean=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau
+multipleDisposalsWereYouAUKResident.personalRep.error.required=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau
+multipleDisposalsWereYouAUKResident.personalRep.error.boolean=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU ar yr holl ddyddiadau ‘cyfnewid’ contractau
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.error.required=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi
+multipleDisposalsWereYouAUKResident.personalRepInPeriodOfAdmin.error.boolean=Dewiswch ‘Iawn’ os oedd y person yn breswylydd yn y DU am y flwyddyn dreth y bu farw ynddi
+multipleDisposalsWereYouAUKResident.cyaChange=Statws preswylio’r DU ar yr holl ddyddiadau cyfnewid contractau
+multipleDisposalsWereAllPropertiesResidential.title=A oedd pob un o’r eiddo yn eiddo preswyl?
+multipleDisposalsWereAllPropertiesResidential.helpText=Mae eiddo preswyl yn cynnwys tai, fflatiau, neu anheddau eraill, gan gynnwys eu gerddi neu eu tiroedd.
+multipleDisposalsWereAllPropertiesResidential.link=Beth mae eiddo preswyl yn ei gynnwys
+multipleDisposalsWereAllPropertiesResidential.details.p1=Mae eiddo preswyl yn cynnwys:
+multipleDisposalsWereAllPropertiesResidential.details.li1=adeilad lle mae rhywun yn byw neu lle gallai fyw, fel tŷ, fflat neu fath arall o annedd
+multipleDisposalsWereAllPropertiesResidential.details.li2=adeilad sy’n cael ei adeiladu neu ei newid fel y gellir ei ddefnyddio fel man lle gallai rhywun fyw
+multipleDisposalsWereAllPropertiesResidential.details.li3=tir sy’n rhan o ardd neu dir adeilad sy’n cael ei ddefnyddio fel man lle mae rhywun yn byw, neu a allai fyw
+multipleDisposalsWereAllPropertiesResidential.error.required=Dewiswch ‘Iawn’ os oedd yr holl eiddo yn eiddo preswyl
+multipleDisposalsWereAllPropertiesResidential.cyaChange=p’un a oedd yr holl eiddo yn eiddo preswyl
+multipleDisposalsCountryOfResidence.title=Beth oedd eich gwlad breswyl ar y diwrnod y gwnaethoch ‘gyfnewid’ contractau?
+multipleDisposalsCountryOfResidence.agent.title=Ym mha wlad yr oedd eich cleient yn breswylydd pan wnaeth gyfnewid contractau?
+multipleDisposalsCountryOfResidence.trust.title=Ym mha wlad yr oedd yr ymddiriedolaeth yn breswylydd pan wnaeth gyfnewid contractau?
+multipleDisposalsCountryOfResidence.capacitor.title=Ym mha wlad yr oedd y person yn breswylydd pan wnaeth y gwarediadau?
+multipleDisposalsCountryOfResidence.personalRep.title=Ym mha wlad yr oedd y person yn breswylydd pan wnaeth y gwarediadau?
+multipleDisposalsCountryOfResidence.personalRepInPeriodOfAdmin.title=Ym mha wlad yr oedd y person yn breswylydd ym mlwyddyn dreth {0} i {1}?
+multipleDisposalsCountryOfResidence.helpText=Fel arfer, dyma’r diwrnod y gwnaethoch chi a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal. Os gwnaethoch warediad anuniongyrchol, dyna’r diwrnod y gwnaethoch werthu’r cyfranddaliadau.
+multipleDisposalsCountryOfResidence.agent.helpText=Fel arfer, dyma’r diwrnod y gwnaeth eich cleient a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
+multipleDisposalsCountryOfResidence.trust.helpText=Fel arfer, dyma’r diwrnod y gwnaeth yr ymddiriedolaeth a’r perchennog newydd roi contractau i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
+multipleDisposalsCountryOfResidence.capacitor.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd ac y gwnaeth dalu blaendal.
+multipleDisposalsCountryOfResidence.personalRep.helpText=Fel arfer, dyma’r diwrnod y gwnaeth y person a’r perchennog newydd roi contract i’w gilydd a’r diwrnod y gwnaeth dalu blaendal.
+assetTypeNotYetImplemented.title=Ni allwch ddefnyddio’r gwasanaeth hwn.
+assetTypeNotYetImplemented.p1=Ni allwch ddefnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar y canlynol:
+assetTypeNotYetImplemented.li1=gwarediadau o eiddo defnydd cymysg yn y DU
+assetTypeNotYetImplemented.li2=gwarediadau anuniongyrchol o dir yn y DU
+assetTypeNotYetImplemented.h2=Yr hyn y bydd angen i chi ei wneud nesaf
+assetTypeNotYetImplemented.p2=Bydd angen i chi lenwi <a href="{0}">dibreswyl: rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo neu dir yn y DU </a>.
+multipleDisposalsTaxYear.title=Pryd y cyfnewidiwyd contractau ar yr holl eiddo?
+multipleDisposalsTaxYear.link=Beth sy’n digwydd ar y dyddiad cyfnewid?
+multipleDisposalsTaxYear.before=Cyn 6 Ebrill 2020
+multipleDisposalsTaxYear.after=Ar ôl 6 Ebrill 2020
+multipleDisposalsTaxYear.details.p1=Fel arfer, mae cyfnewid <a href=“{0}” target=”_blank”>contractau (yn agor ffenestr newydd)</a> yn digwydd pan fydd y prynwr a’r gwerthwr yn cyfnewid contractau. Mae hyn fel arfer pan fydd y perchennog newydd yn talu blaendal.
+multipleDisposalsTaxYear.error.required=Dewiswch bryd y cyfnewidiwyd y contractau ar yr holl eiddo
+multipleDisposalsTaxYear.cyaChange=pryd y cyfnewidiwyd y contractau ar yr holl eiddo
+multipleDisposalsAssetTypeForNonUkResidents.title=Pa fathau o eiddo neu asedion a waredwyd gennych?
+multipleDisposalsAssetTypeForNonUkResidents.agent.title=Pa fathau o eiddo neu asedion a waredwyd gan eich cleient?
+multipleDisposalsAssetTypeForNonUkResidents.trust.title=Pa fathau o eiddo neu asedion a waredwyd gan yr ymddiriedolaeth?
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.title=Pa fathau o eiddo neu asedion a waredwyd gan y person?
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.title=Pa fathau o eiddo neu asedion a waredwyd gan y person?
+multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.title=Pa fathau o eiddo neu asedion a waredwyd gennych?
+multipleDisposalsAssetTypeForNonUkResidents.helpText=Dewiswch bob un sy’n berthnasol.
+multipleDisposalsAssetTypeForNonUkResidents.Residential=Preswyl
+multipleDisposalsAssetTypeForNonUkResidents.Residential.helpText=Yn cynnwys tai, fflatiau, neu anheddau eraill, gan gynnwys eu gerddi neu eu tiroedd.
+multipleDisposalsAssetTypeForNonUkResidents.NonResidential=Dibreswyl
+multipleDisposalsAssetTypeForNonUkResidents.NonResidential.helpText=Yn cynnwys tir amaethyddol, coedwigoedd ac eiddo masnachol, fel siopau neu swyddfeydd.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse=Defnydd cymysg
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.helpText=Roedd rhan o’r eiddo yn breswyl tra roeddech yn berchen arno.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.agent.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl tra bod eich cleient yn berchen arno.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.trust.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl tra bod yr ymddiriedolaeth yn berchen arno.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.capacitor.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl tra bod y person yn berchen arno.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.personalRep.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl tra bod y person yn berchen arno.
+multipleDisposalsAssetTypeForNonUkResidents.MixedUse.personalRepInPeriodOfAdmin.helpText=Roedd rhan o’r eiddo yn breswyl ac roedd rhan yn ddibreswyl.
+multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Cyfranddaliadau cwmni - gwnaethoch warediad anuniongyrchol
+multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=Gwarediad anuniongyrchol yw pan fo’r gwarediad yn cynnwys hawliau i asedion sy’n deillio o leiaf 75% o’u gwerth o dir yn y DU.
+multipleDisposalsAssetTypeForNonUkResidents.agent.IndirectDisposal=Cyfranddaliadau cwmni - gwnaeth eich cleient warediad anuniongyrchol.
+multipleDisposalsAssetTypeForNonUkResidents.trust.IndirectDisposal=Cyfranddaliadau cwmni - gwnaeth yr ymddiriedolaeth warediad anuniongyrchol.
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.IndirectDisposal=Cyfranddaliadau cwmni - gwnaeth y person warediad anuniongyrchol
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.IndirectDisposal=Cyfranddaliadau cwmni - gwnaeth y person warediad anuniongyrchol
+multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.IndirectDisposal=Cyfranddaliadau cwmni drwy warediad anuniongyrchol.
+multipleDisposalsAssetTypeForNonUkResidents.error.required=Dewiswch pa fathau o eiddo neu asedion a waredwyd gennych
+multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Dewiswch pa fathau o eiddo neu asedion a waredwyd gennych
+multipleDisposalsAssetTypeForNonUkResidents.agent.error.required=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan eich cleient
+multipleDisposalsAssetTypeForNonUkResidents.trust.error.required=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan yr ymddiriedolaeth
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.error.required=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan y person
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.error.required=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan y person
+multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.error.required=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan y person
+multipleDisposalsAssetTypeForNonUkResidents.agent.error.invalid=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan eich cleient
+multipleDisposalsAssetTypeForNonUkResidents.trust.error.invalid=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan yr ymddiriedolaeth
+multipleDisposalsAssetTypeForNonUkResidents.capacitor.error.invalid=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan y person
+multipleDisposalsAssetTypeForNonUkResidents.personalRep.error.invalid=Dewiswch pa fathau o eiddo neu asedion a waredwyd gan y person
+multipleDisposalsAssetTypeForNonUkResidents.personalRepInPeriodOfAdmin.error.invalid=Dewiswch pa fathau o eiddo neu asedion a waredwyd gennych
+multipleDisposalsAssetTypeForNonUkResidents.cyaChange=y mathau o eiddo neu asedion a gynhwysir yn y Ffurflen Dreth hon
+multipleDisposalsCompletionDate.title=Beth oedd y dyddiad ‘cwblhau’ ar gyfer yr holl eiddo?
+multipleDisposalsCompletionDate.helpText=Er enghraifft 25, 4, 2020.
+multipleDisposalsCompletionDate.details.summary=Beth sy’n digwydd ar y dyddiad ‘cwblhau’?
+multipleDisposalsCompletionDate.details.p1=Fel arfer, <a href="{0}" target=_blank>y dyddiad ‘cwblhau’ (yn agor ffenestr newydd)</a> yw’r diwrnod y mae’r perchennog newydd yn cael yr allweddi i’r eiddo.
+multipleDisposalsCompletionDate.error.required=Nodwch ddyddiad cwblhau
+multipleDisposalsCompletionDate.error.invalid=Nodwch ddyddiad cwblhau go iawn
+multipleDisposalsCompletionDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cwblhau fod heddiw neu yn y gorffennol
+multipleDisposalsCompletionDate.error.before1900=Mae’n rhaid i’r dyddiad cwblhau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEM os yw’r dyddiad cyn hyn
+multipleDisposalsCompletionDate-day.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod
+multipleDisposalsCompletionDate-month.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys mis
+multipleDisposalsCompletionDate-year.error.required=Mae’n rhaid i’r dyddiad cwblhau gynnwys blwyddyn
+multipleDisposalsCompletionDate-day.error.invalid=Nodwch ddyddiad cwblhau go iawn
+multipleDisposalsCompletionDate-month.error.invalid=Nodwch ddyddiad cwblhau go iawn
+multipleDisposalsCompletionDate-year.error.invalid=Nodwch ddyddiad cwblhau go iawn
+multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys mis a blwyddyn
+multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a blwyddyn
+multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cwblhau gynnwys diwrnod a mis
+multipleDisposalsCompletionDate.cyaChange=y dyddiad cwblhau ar gyfer yr holl eiddo
+multipleDisposals.triage.cya.title=Gwiriwch eich atebion
+multipleDisposals.triage.cya.guidanceLink=Help i lenwi’r adran hon
+
+#===================================================
+#  MULTIPLE DISPOSALS TRIAGE PAGES - END
+#===================================================
+
+#===================================================
 #  PROPERTY DETAILS PAGES - START
 #===================================================
 
@@ -917,6 +1070,164 @@ supporting-evidence.scan-failed.button.tryAgain=Rhowch gynnig arall arni
 
 #===================================================
 #  SUPPORTING EVIDENCE PAGES - END
+#===================================================
+
+#===================================================
+# MULTIPLE DISPOSALS EXAMPLE PROPERTY PAGES - START
+#===================================================
+
+multipleDisposalsDisposalPrice.title=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.personalRep.title=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.capacitor.title=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.agent.title=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.trust.title=Beth oedd gwerth gwaredu’r eiddo?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.title=Beth oedd elw’r gwarediad?
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.title=Beth oedd elw’r gwarediad?
+multipleDisposalsDisposalPrice.helpText=Dyma’r swm a gawsoch pan werthwyd yr eiddo neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech dynnu unrhyw gostau gwerthu neu waredu.
+multipleDisposalsDisposalPrice.agent.helpText=Dyma’r swm a gafodd eich cleient pan werthwyd yr eiddo neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech dynnu unrhyw gostau gwerthu neu waredu.
+multipleDisposalsDisposalPrice.trust.helpText=Dyma’r swm a gafodd yr ymddiriedolaeth pan werthwyd yr eiddo neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech dynnu unrhyw gostau gwerthu neu waredu.
+multipleDisposalsDisposalPrice.capacitor.helpText=Dyma’r swm a gafodd y person pan werthwyd yr eiddo neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech dynnu unrhyw gostau gwerthu neu waredu.
+multipleDisposalsDisposalPrice.personalRep.helpText=Dyma’r swm a gafodd y person pan werthwyd yr eiddo neu ei werth marchnadol os cafodd ei waredu mewn ffordd arall. Dylech dynnu unrhyw gostau gwerthu neu waredu.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.helpText=Dyma’r swm a gafodd yr ystâd pan werthwyd yr eiddo. Dylech dynnu unrhyw gostau gwerthu neu waredu.
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.helpText=Dyma’r swm a gafodd yr ystâd pan werthwyd yr eiddo. Dylech dynnu unrhyw gostau gwerthu neu waredu.
+multipleDisposalsDisposalPrice.link=Beth yw costau waredu?
+multipleDisposalsDisposalPrice.details.p1=Mae costau gwaredu neu werthu yn cynnwys ffioedd gwerthwyr tai neu ffioedd cyfreithwyr.
+multipleDisposalsDisposalPrice.error.required=Nodwch werth gwaredu’r eiddo, er enghraifft, 20,520.86
+multipleDisposalsDisposalPrice.capacitor.error.required=Nodwch werth gwaredu’r eiddo, er enghraifft, 20,520.86
+multipleDisposalsDisposalPrice.personalRep.error.required=Nodwch werth gwaredu’r eiddo, er enghraifft, 20,520.86
+multipleDisposalsDisposalPrice.trust.error.required=Nodwch werth gwaredu’r eiddo, er enghraifft, 20,520.86
+multipleDisposalsDisposalPrice.agent.error.required=Nodwch werth gwaredu’r eiddo, er enghraifft, 20,520.86
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.required=Nodwch elw’r gwarediad
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.required=Nodwch elw’r gwarediad
+multipleDisposalsDisposalPrice.error.invalid=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.capacitor.error.invalid=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.personalRep.error.invalid=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.trust.error.invalid=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.agent.error.invalid=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.invalid=Mae’n rhaid i elw’r gwarediad fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.invalid=Mae’n rhaid i elw’r gwarediad fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.error.tooLarge=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.capacitor.error.tooLarge=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.personalRep.error.tooLarge=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.trust.error.tooLarge=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.agent.error.tooLarge=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooLarge=Mae’n rhaid i elw’r gwarediad fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=Mae’n rhaid i elw’r gwarediad fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleDisposalsDisposalPrice.error.tooSmall=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.capacitor.error.tooSmall=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.personalRep.error.tooSmall=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.trust.error.tooSmall=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.agent.error.tooSmall=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooSmall=Mae’n rhaid i elw’r gwarediad fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=Mae’n rhaid i elw’r gwarediad fod yn swm o arian rhwng 1 a 50,000,000,000
+multipleDisposalsDisposalPrice.error.tooManyDecimals=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.capacitor.error.tooManyDecimals=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.personalRep.error.tooManyDecimals=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.trust.error.tooManyDecimals=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.agent.error.tooManyDecimals=Mae’n rhaid i’r gwerth gwaredu fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=Mae’n rhaid i elw’r gwarediad fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Mae’n rhaid i elw’r gwarediad fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsDisposalPrice.cyaChange=gwerth gwaredu’r eiddo
+multipleDisposalsAcquisitionPrice.title=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.agent.title=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.trust.title=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.personalRep.title=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.capacitor.title=Beth oedd gwerth caffael yr eiddo?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.title=Beth oedd gwerth marchnadol yr eiddo ar {0}?
+multipleDisposalsAcquisitionPrice.helpText=Dyma’r swm y gwnaethoch ei dalu pan wnaethoch brynu’r eiddo neu ei werth marchnadol os gwnaethoch ei etifeddu neu ei gael fel rhodd. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
+multipleDisposalsAcquisitionPrice.agent.helpText=Dyma’r swm y gwnaeth eich cleient ei dalu pan wnaeth brynu’r eiddo neu ei werth marchnadol os gwnaeth eich cleient ei etifeddu neu ei gael fel rhodd. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
+multipleDisposalsAcquisitionPrice.trust.helpText=Dyma’r swm y gwnaeth yr ymddiriedolaeth ei dalu pan wnaeth brynu’r eiddo neu ei werth marchnadol os gwnaeth yr ymddiriedolaeth ei etifeddu neu ei gael fel rhodd. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
+multipleDisposalsAcquisitionPrice.capacitor.helpText=Dyma’r swm y gwnaeth y person ei dalu pan wnaeth brynu’r eiddo neu ei werth marchnadol os gwnaeth y person ei etifeddu neu ei gael fel rhodd. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
+multipleDisposalsAcquisitionPrice.personalRep.helpText=Dyma’r swm y gwnaeth y person ei dalu pan wnaeth brynu’r eiddo neu ei werth marchnadol os gwnaeth y person ei etifeddu neu ei gael fel rhodd. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.helpText=Gallwch ddarparu prisiad gan syrfëwr neu amcangyfrif realistig. Os rhannwyd yr eiddo, nodwch werth marchnadol cyfran yr ystâd yn unig. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.helpText=Gallwch ddarparu prisiad gan syrfëwr neu amcangyfrif realistig. Os rhannwyd yr eiddo, nodwch werth marchnadol cyfran yr ystâd yn unig. Dylech ychwanegu unrhyw gostau gwella neu gaffael.
+multipleDisposalsAcquisitionPrice.link=Beth yw costau gwella neu gaffael?
+multipleDisposalsAcquisitionPrice.details.p1=Gallwch gynnwys cost gwelliannau a oedd yn ychwanegu gwerth at yr eiddo. Er enghraifft, os gwnaethoch adeiladu estyniad neu newid cegin sylfaenol am un moethus. Ni allwch hawlio am log morgais, addurno na chynnal a chadw.
+multipleDisposalsAcquisitionPrice.agent.details.p1=Gall eich cleient gynnwys cost gwelliannau a oedd yn ychwanegu gwerth at yr eiddo. Er enghraifft, os gwnaeth adeiladu estyniad neu newid cegin sylfaenol am un moethus. Ni all hawlio am log morgais, addurno na chynnal a chadw.
+multipleDisposalsAcquisitionPrice.trust.details.p1=Gall yr ymddiriedolaeth gynnwys cost gwelliannau a oedd yn ychwanegu gwerth at yr eiddo. Er enghraifft, os gwnaeth yr ymddiriedolaeth adeiladu estyniad neu newid cegin sylfaenol am un moethus. Ni all yr ymddiriedolaeth hawlio am log morgais, addurno na chynnal a chadw.
+multipleDisposalsAcquisitionPrice.capacitor.details.p1=Gall y person gynnwys cost gwelliannau a oedd yn ychwanegu gwerth at yr eiddo. Er enghraifft, os gwnaeth y person adeiladu estyniad neu newid cegin sylfaenol am un moethus. Ni all hawlio am log morgais, addurno na chynnal a chadw.
+multipleDisposalsAcquisitionPrice.personalRep.details.p1=Gall cost gwelliannau a oedd yn ychwanegu gwerth at yr eiddo gael ei chynnwys. Er enghraifft, os gwnaeth y person adeiladu estyniad neu newid cegin sylfaenol am un moethus. Ni allwch gynnwys cost am log morgais, addurno na chynnal a chadw.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p1=Gall cost gwelliannau a oedd yn ychwanegu gwerth at yr eiddo gael ei chynnwys. Er enghraifft, os gwnaeth yr ystâd adeiladu estyniad neu newid cegin sylfaenol am un moethus. Ni allwch gynnwys cost am log morgais, addurno na chynnal a chadw.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p1=Gall cost gwelliannau a oedd yn ychwanegu gwerth at yr eiddo gael ei chynnwys. Er enghraifft, os gwnaeth yr ystâd adeiladu estyniad neu newid cegin sylfaenol am un moethus. Ni all eich cleient gynnwys cost am log morgais, addurno na chynnal a chadw.
+multipleDisposalsAcquisitionPrice.details.p2=Mae costau caffael neu brynu yn cynnwys ffioedd am syrfewyr neu gyfreithwyr.
+multipleDisposalsAcquisitionPrice.details.p3=Os gwnaethoch rannu unrhyw un o’r costau, dim ond eich cyfran chi y gallwch ei hawlio.
+multipleDisposalsAcquisitionPrice.agent.details.p3=Os oedd eich cleient yn rhannu unrhyw un o’r costau, dim ond ei gyfran ef y gall ei hawlio.
+multipleDisposalsAcquisitionPrice.trust.details.p3=Os oedd yr ymddiriedolaeth yn rhannu unrhyw un o’r costau, dim ond ei chyfran hi y gall ei hawlio.
+multipleDisposalsAcquisitionPrice.capacitor.details.p3=Os oedd y person yn rhannu unrhyw un o’r costau, dim ond ei gyfran ef y gall ei hawlio.
+multipleDisposalsAcquisitionPrice.personalRep.details.p3=Os oedd y person yn rhannu unrhyw un o’r costau, dim ond cyfran y person y gallwch ei chynnwys.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.details.p3=Os oedd yr ystâd yn rhannu unrhyw un o’r costau, dim ond cyfran yr ystâd y gallwch ei chynnwys.
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.details.p3=Os oedd yr ystâd yn rhannu unrhyw un o’r costau, dim ond cyfran yr ystâd y gall eich cleient ei chynnwys.
+multipleDisposalsAcquisitionPrice.error.invalid=Mae’n rhaid i’r gwerth caffael fod yn swm o arian
+multipleDisposalsAcquisitionPrice.error.required=Nodwch werth caffael yr eiddo, er enghraifft 20,520.86
+multipleDisposalsAcquisitionPrice.error.tooLarge=Mae’n rhaid i’r gwerth caffael fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsAcquisitionPrice.error.tooSmall=Mae’n rhaid i’r gwerth caffael fod yn swm o arian rhwng 0 a 50,000,000,000
+multipleDisposalsAcquisitionPrice.error.tooManyDecimals=Mae’n rhaid i’r gwerth caffael fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.invalid=Mae’n rhaid i’r gwerth marchnadol fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.required=Nodwch werth marchnadol yr eiddo
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooLarge=Mae’n rhaid i’r gwerth marchnadol fod yn swm o arian rhwng 0 neu 50,000,000,000
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooSmall=Mae’n rhaid i’r gwerth marchnadol fod yn swm o arian rhwng 0 neu 50,000,000,000
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.error.tooManyDecimals=Mae’n rhaid i’r gwerth marchnadol fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.invalid=Mae’n rhaid i’r gwerth marchnadol fod yn swm o arian, megis 160,000 neu 23,040.50
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.required=Nodwch werth marchnadol yr eiddo
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooLarge=Mae’n rhaid i’r gwerth marchnadol fod yn swm o arian rhwng 0 neu 50,000,000,000
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooSmall=Mae’n rhaid i’r gwerth marchnadol fod yn swm o arian rhwng 0 neu 50,000,000,000
+multipleDisposalsAcquisitionPrice.personalRepInPeriodOfAdmin.agent.error.tooManyDecimals=Mae’n rhaid i’r gwerth marchnadol fod yn swm o arian gyda cheiniogau fel 2 le degol neu lai, fel 160,000 neu 23,040.50
+multipleDisposalsAcquisitionPrice.cyaChange=gwerth caffael yr eiddo
+multipleDisposalsDisposalDate.title=Ar ba ddyddiad y gwnaethoch gyfnewid contractau wrth waredu’r eiddo?
+multipleDisposalsDisposalDate.agent.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+multipleDisposalsDisposalDate.trust.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+multipleDisposalsDisposalDate.capacitor.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+multipleDisposalsDisposalDate.personalRep.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.agent.title=Pan waredwyd yr eiddo, ar ba ddyddiad y cyfnewidiwyd contractau?
+multipleDisposalsDisposalDate.helpText=Mae hyn fel arfer pan wnaethoch chi a''r prynwr neu’r perchennog roi contractau i''ch gilydd ac fe dalodd y prynwr flaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020
+multipleDisposalsDisposalDate.agent.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+multipleDisposalsDisposalDate.trust.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+multipleDisposalsDisposalDate.capacitor.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+multipleDisposalsDisposalDate.personalRep.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.helpText=Mae hyn fel arfer pan fydd prynwr a gwerthwr yn rhoi contractau i''w gilydd ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+multipleDisposalsDisposalDate.personalRepInPeriodOfAdmin.agent.helpText=Fel arfer, dyna pan mae prynwr a gwerthwr yn cyfnewid contractau ac mae’r prynwr yn talu blaendal. Mae hyn hefyd yn cael ei alw’n ddyddiad ‘gwaredu’. Er enghraifft, 25 4 2020.
+multipleDisposalsDisposalDate.link=<a href=”{0}” target=”_blank”>Dysgwch beth sy’n digwydd ar y dyddiad cyfnewid (yn agor ffenestr newydd)</a>.
+multipleDisposalsDisposalDate.error.required=Nodwch ddyddiad cyfnewid contractau
+multipleDisposalsDisposalDate.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
+multipleDisposalsDisposalDate.error.tooFarInFuture=Mae’n rhaid i’r dyddiad cyfnewid contractau fod yr un fath neu cyn y dyddiad cwblhau
+multipleDisposalsDisposalDate.error.before1900=Mae’n rhaid i’r dyddiad cyfnewid contractau fod ar neu ar ôl 01 01 1900, cysylltwch â CThEM os yw’r dyddiad cyn hyn
+multipleDisposalsDisposalDate.error.tooFarInPast=Mae’n rhaid i’r dyddiad fod ym mlwyddyn dreth {0} i {1}
+multipleDisposalsDisposalDate-day.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod
+multipleDisposalsDisposalDate-month.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys mis
+multipleDisposalsDisposalDate-year.error.required=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys blwyddyn
+multipleDisposalsDisposalDate-day.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
+multipleDisposalsDisposalDate-month.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
+multipleDisposalsDisposalDate-year.error.invalid=Nodwch ddyddiad cyfnewid contractau go iawn
+multipleDisposalsDisposalDate-month.error.monthAndYearRequired=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys mis a blwyddyn
+multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod a blwyddyn
+multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Mae’n rhaid i’r dyddiad cyfnewid contractau gynnwys diwrnod a mis
+multipleDisposalsDisposalDate.error.periodOfAdminDeathNotAfterDate=Ni all y dyddiad cyfnewid contractau fod ar neu cyn dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r ffurflen hon?’
+multipleDisposalsDisposalDate.error.nonPeriodOfAdminDeathAfterDate=Ni all y dyddiad cyfnewid contractau fod ar ôl dyddiad y farwolaeth. Ewch ‘yn ôl’ a gwiriwch eich ateb i’r cwestiwn ‘Ar gyfer pwy ydych yn llenwi’r ffurflen hon?’
+multipleDisposalsDisposalDate.cyaChange=dyddiad cyfnewid contractau
+hasValidPostcode.singleDisposal.title=A oes gan yr eiddo god post yn y DU?
+hasValidPostcode.singleDisposal.error.boolean=Dewiswch p’un a oes gan yr eiddo god post yn y DU
+hasValidPostcode.singleDisposal.error.required=Dewiswch p’un a oes gan yr eiddo god post yn y DU
+hasValidPostcode.multipleDisposals.title=Oes gan unrhyw un o’r eiddo god post yn y DU?
+hasValidPostcode.multipleDisposals.error.boolean=Dewiswch p’un a oes gan unrhyw un o’r eiddo god post yn y DU
+hasValidPostcode.multipleDisposals.error.required=Dewiswch p’un a oes gan unrhyw un o’r eiddo god post yn y DU
+enterUPRN.singleDisposal.title=Nodwch Gyfeirnod Unigryw Eiddo (UPRN) ar gyfer yr eiddo yn y DU
+enterUPRN.multipleDisposals.title=Nodwch Gyfeirnod Unigryw Eiddo (UPRN) ar gyfer un o’r gwarediadau eiddo yn y DU
+enterUPRN.p1=Mae UPRN yn gyfeirnod sy’n cael ei ddefnyddio i ddynodi pob darn o dir ac eiddo ym Mhrydain Fawr.
+enterUPRN.line1.label=UPRN neu linell gyntaf y cyfeiriad
+enterUPRN.line1.helpText=Mae UPRN yn 12 rhif neu lai.
+enterUPRN.line2.label=Ardal (dewisol)
+enterUPRN.line3.label=Tref neu ddinas (dewisol)
+enterUPRN.line4.label=Sir (dewisol)
+enterUPRN.postcode.label=Cod post
+enterUPRN.postcode.helpText=Os nad oes gan yr eiddo god post, nodwch god post yr eiddo agosaf. Er enghraifft, AB2 9WQ.
+enterUPRN-line1.error.required=Nodwch UPRN
+enterUPRN-line1.error.tooLong=Mae’n rhaid i UPRN fod yn 12 rhif neu lai
+enterUPRN-line1.error.invalid=Mae’n rhaid i UPRN gynnwys rhifau yn unig
+
+#===================================================
+# MULTIPLE DISPOSALS EXAMPLE PROPERTY PAGES - END
 #===================================================
 
 #===================================================
