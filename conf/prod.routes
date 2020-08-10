@@ -5,6 +5,7 @@
 ->   /capital-gains-tax-uk-property                                         agents.Routes
 ->   /capital-gains-tax-uk-property                                         returns.Routes
 ->   /capital-gains-tax-uk-property                                         capacitorsandpersonalrepresentatives.Routes
+->   /capital-gains-tax-uk-property                                         amend.Routes
 
 ->   /                                                                      health.Routes
 ->   /template                                                              template.Routes
