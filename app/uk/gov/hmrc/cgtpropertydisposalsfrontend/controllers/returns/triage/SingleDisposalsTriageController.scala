@@ -1143,12 +1143,6 @@ class SingleDisposalsTriageController @Inject() (
           .userType()
           .isRight
 
-        val isFurtherReturn = state
-          .fold(
-            _.isFurtherReturn.contains(true),
-            _._2.isFurtherReturn.contains(true)
-          )
-
         val representeeAnswers           = state
           .fold(
             _.representeeAnswers,
@@ -1188,22 +1182,6 @@ class SingleDisposalsTriageController @Inject() (
             Redirect(
               routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
-            )
-
-          case IncompleteSingleDisposalTriageAnswers(
-                Some(Self),
-                false,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None
-              ) if isIndividual && isFurtherReturn =>
-            Redirect(
-              routes.CommonTriageQuestionsController
-                .furtherReturnHelp()
             )
 
           case IncompleteSingleDisposalTriageAnswers(

@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -103,14 +103,16 @@ class CommonTriageQuestionsControllerSpec
     ],
     name: Either[TrustName, IndividualName],
     userType: UserType = UserType.Individual,
-    representeeAnswers: Option[IncompleteRepresenteeAnswers] = None
+    representeeAnswers: Option[IncompleteRepresenteeAnswers] = None,
+    previousSentReturns: Option[PreviousReturnData] = None
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn =
       sample[StartingNewDraftReturn].copy(
         subscribedDetails = sample[SubscribedDetails].copy(name = name),
         newReturnTriageAnswers = triageAnswers,
         agentReferenceNumber = setAgentReferenceNumber(userType),
-        representeeAnswers = representeeAnswers
+        representeeAnswers = representeeAnswers,
+        previousSentReturns = previousSentReturns
       )
 
     val sessionData = SessionData.empty.copy(
@@ -124,14 +126,16 @@ class CommonTriageQuestionsControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
-    userType: UserType = UserType.Individual
+    userType: UserType = UserType.Individual,
+    previousReturns: Option[PreviousReturnData] = None
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn      = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = draftReturn,
-      subscribedDetails = sample[SubscribedDetails].copy(name = name)
+      subscribedDetails = sample[SubscribedDetails].copy(name = name),
+      previousSentReturns = previousReturns
     )
 
     (

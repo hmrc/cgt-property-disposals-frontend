@@ -124,7 +124,16 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     completeReturn: CompleteReturn,
-    returnSummary: ReturnSummary
+    returnSummary: ReturnSummary,
+    previousSentReturns: Option[PreviousReturnData]
+  ) extends JourneyStatus
+
+  final case class StartingToAmendReturn(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    agentReferenceNumber: Option[AgentReferenceNumber],
+    originalReturn: CompleteReturnWithSummary,
+    previousSentReturns: Option[PreviousReturnData]
   ) extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(

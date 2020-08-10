@@ -207,6 +207,11 @@ class StartController @Inject() (
           controllers.returns.routes.CheckAllAnswersAndSubmitController
             .confirmationOfSubmission()
         )
+
+      case _: StartingToAmendReturn                                                                   =>
+        Redirect(
+          controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
+        )
     }
 
   private def handleRetrievedUserType(

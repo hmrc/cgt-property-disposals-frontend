@@ -24,6 +24,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.Configuration
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -37,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingToAmendReturn, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.govShortDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
@@ -190,20 +191,18 @@ class ViewReturnControllerSpec
           .eachText()
           .asScala
 
-        paymentDetails.headOption.fold(sys.error("Error"))(
-          _.toString
-        )                   should startWith("Tax payment")
-        paymentDetails(1) shouldBe govShortDisplayFormat(
+        paymentDetails.headOption.getOrElse(sys.error("Error")) should startWith("Tax payment")
+        paymentDetails(1)                                     shouldBe govShortDisplayFormat(
           ukResidentMainReturnChargeDueDate
         )
-        paymentDetails(2) shouldBe formatAmountOfMoneyWithPoundSign(
+        paymentDetails(2)                                     shouldBe formatAmountOfMoneyWithPoundSign(
           ukResidentMainReturnChargeAmount.inPounds()
         )
-        paymentDetails(3) shouldBe formatAmountOfMoneyWithPoundSign(
+        paymentDetails(3)                                     shouldBe formatAmountOfMoneyWithPoundSign(
           ukResidentMainReturnChargeAmount
             .inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
         )
-        paymentDetails(4) shouldBe "Paid"
+        paymentDetails(4)                                     shouldBe "Paid"
 
         paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
           fullPaymentForUkResidentReturnCharge.amount.inPounds()
@@ -222,13 +221,8 @@ class ViewReturnControllerSpec
         paymentDetails(10) shouldBe "Pay now"
       }
 
-      behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        {
-          case _: ViewingReturn => true
-          case _                => false
-        }
-      )
+      behave like journeyStatusBehaviour(performAction)
+
       val address = sample[UkAddress].copy(
         line1 = "123 fake street",
         line2 = None,
@@ -322,7 +316,12 @@ class ViewReturnControllerSpec
                 .inPounds()
             )
 
+          document.select("#amend-link-1").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
+          document.select("#amend-link-2").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
           validatePaymentsSection(document, viewingReturn)
+
           validateSingleDisposalCheckAllYourAnswersSections(
             document,
             completeSingleDisposalReturn,
@@ -438,6 +437,10 @@ class ViewReturnControllerSpec
                 .inPounds()
             )
 
+          document.select("#amend-link-1").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
+          document.select("#amend-link-2").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
           validatePaymentsSection(document, viewingReturn)
 
           validateMultipleDisposalsCheckAllYourAnswersSections(
@@ -547,6 +550,10 @@ class ViewReturnControllerSpec
                 .inPounds()
             )
 
+          document.select("#amend-link-1").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
+          document.select("#amend-link-2").attr("href") shouldBe routes.ViewReturnController.startAmendingReturn().url
+
           validatePaymentsSection(document, viewingReturn)
 
           validateMultipleIndirectDisposalsCheckAllYourAnswersSections(
@@ -573,13 +580,7 @@ class ViewReturnControllerSpec
         returnSummary = sample[ReturnSummary].copy(charges = List(charge))
       )
 
-      behave like redirectToStartWhenInvalidJourney(
-        () => performAction(""),
-        {
-          case _: ViewingReturn => true
-          case _                => false
-        }
-      )
+      behave like journeyStatusBehaviour(() => performAction(""))
 
       "return a not found response" when {
 
@@ -652,6 +653,43 @@ class ViewReturnControllerSpec
 
   }
 
+  def journeyStatusBehaviour(performAction: () => Future[Result]): Unit = {
+
+    behave like redirectToStartWhenInvalidJourney(
+      performAction,
+      {
+        case _: ViewingReturn | _: StartingToAmendReturn => true
+        case _                                           => false
+      }
+    )
+
+    "show an error page" when {
+
+      "there is a problem updating the session when converting from StartingToAmendReturn" in {
+        val journey       = sample[StartingToAmendReturn]
+        val viewingReturn =
+          ViewingReturn(
+            journey.subscribedDetails,
+            journey.ggCredId,
+            journey.agentReferenceNumber,
+            journey.originalReturn.completeReturn,
+            journey.originalReturn.summary,
+            journey.previousSentReturns
+          )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(SessionData.empty.copy(journeyStatus = Some(journey)))
+          mockStoreSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn)))(Left(Error("")))
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+
+    }
+
+  }
+
   private def generateAddressLineForMultipleDisposals(
     completeMultipleDisposalsReturn: CompleteMultipleDisposalsReturn
   ): String =
@@ -671,5 +709,86 @@ class ViewReturnControllerSpec
       .filter(c => c.chargeType === ChargeType.UkResidentReturn || c.chargeType === ChargeType.NonUkResidentReturn)
       .map(e => TimeUtils.govDisplayFormat(e.dueDate))
       .headOption
-      .fold(sys.error("Error"))(_.toString)
+      .getOrElse(sys.error("Error"))
+}
+
+class AmendReturnDisabledViewReturnControllerSpec
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with ScalaCheckDrivenPropertyChecks
+    with RedirectToStartBehaviour {
+
+  override lazy val additionalConfig = Configuration(
+    "amend-returns.enabled" -> false
+  )
+
+  override val overrideBindings =
+    List[GuiceableModule](
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SessionStore].toInstance(mockSessionStore)
+    )
+
+  lazy val controller = instanceOf[ViewReturnController]
+
+  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+
+  "ViewReturnController" when {
+
+    "amend returns are disabled and" when {
+
+      "handling requests to display the view return page" must {
+
+        "not display amend return links" in {
+
+          val viewingReturn = sample[ViewingReturn]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(viewingReturn)
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            controller.displayReturn()(FakeRequest()),
+            messageFromMessageKey("viewReturn.title"),
+            { doc =>
+              doc.select("#amend-link-1").isEmpty shouldBe true
+              doc.select("#amend-link-2").isEmpty shouldBe true
+            }
+          )
+
+        }
+
+      }
+
+      "handling requests to start amending a return" must {
+
+        "redirect to the display return page" in {
+          val viewingReturn = sample[ViewingReturn]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(viewingReturn)
+              )
+            )
+          }
+
+          checkIsRedirect(
+            controller.startAmendingReturn()(FakeRequest()),
+            routes.ViewReturnController.displayReturn()
+          )
+        }
+
+      }
+
+    }
+
+  }
+
 }
