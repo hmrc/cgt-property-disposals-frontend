@@ -3418,14 +3418,20 @@ class YearToDateLiabilityControllerSpec
 
         def test(
           answers: YearToDateLiabilityAnswers,
-          backLink: Call
+          backLink: Call,
+          isFurtherReturn: Boolean
         ): Unit = {
           val draftReturn = singleDisposalDraftReturnWithCompleteJourneys(
             Some(answers),
             sample[DisposalDate],
-            completeReliefDetailsAnswersWithNoOtherReliefs
+            completeReliefDetailsAnswersWithNoOtherReliefs,
+            Some(Self)
           )
-          val journey     = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+          val journey     = sample[FillingOutReturn].copy(
+            draftReturn = draftReturn,
+            previousSentReturns =
+              Some(PreviousReturnData(if (isFurtherReturn) List(sample[ReturnSummary]) else List.empty, None))
+          )
 
           val session = SessionData.empty.copy(journeyStatus = Some(journey))
 
@@ -3495,7 +3501,8 @@ class YearToDateLiabilityControllerSpec
                 None,
                 None
               ),
-              routes.YearToDateLiabilityController.taxDue()
+              routes.YearToDateLiabilityController.taxDue(),
+              isFurtherReturn = false
             )
           }
 
@@ -3505,7 +3512,8 @@ class YearToDateLiabilityControllerSpec
                 calculatedTaxDue = calculatedTaxDue,
                 taxDue = AmountInPence(200L)
               ),
-              routes.YearToDateLiabilityController.checkYourAnswers()
+              routes.YearToDateLiabilityController.checkYourAnswers(),
+              isFurtherReturn = false
             )
           }
         }
@@ -3524,14 +3532,33 @@ class YearToDateLiabilityControllerSpec
                 None,
                 None
               ),
-              routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
+              routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
+              isFurtherReturn = false
+            )
+          }
+
+          "the section is incomplete and it is a further return" in {
+            test(
+              IncompleteNonCalculatedYTDAnswers(
+                Some(sample[AmountInPence]),
+                Some(true),
+                Some(sample[AmountInPence]),
+                None,
+                None,
+                None,
+                Some(sample[AmountInPence]),
+                Some(true)
+              ),
+              routes.YearToDateLiabilityController.repayment(),
+              isFurtherReturn = true
             )
           }
 
           "the section is complete" in {
             test(
               sample[CompleteNonCalculatedYTDAnswers],
-              routes.YearToDateLiabilityController.checkYourAnswers()
+              routes.YearToDateLiabilityController.checkYourAnswers(),
+              isFurtherReturn = false
             )
           }
         }

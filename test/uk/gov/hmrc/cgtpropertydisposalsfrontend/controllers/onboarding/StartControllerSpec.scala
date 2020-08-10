@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, SubscriptionStatus, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AgentWithoutAgentEnrolment, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, StartingToAmendReturn, SubmitReturnFailed, Subscribed, SubscriptionStatus, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -2803,7 +2803,8 @@ class StartControllerSpec
                     sample[GGCredId],
                     None,
                     sample[CompleteSingleDisposalReturn],
-                    sample[ReturnSummary]
+                    sample[ReturnSummary],
+                    None
                   )
                 )
               )
@@ -2812,6 +2813,42 @@ class StartControllerSpec
             checkIsRedirect(
               performAction(),
               controllers.accounts.homepage.routes.HomePageController.homepage()
+            )
+          }
+
+        }
+      }
+
+      "the session data indicates the user has started to amend a return" must {
+
+        "redirect to you must calculate page" in {
+          inSequence {
+            mockAuthWithAllRetrievals(
+              ConfidenceLevel.L200,
+              Some(AffinityGroup.Individual),
+              None,
+              None,
+              None,
+              Set(cgtEnrolment),
+              Some(retrievedGGCredId)
+            )
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  StartingToAmendReturn(
+                    sample[SubscribedDetails],
+                    sample[GGCredId],
+                    None,
+                    sample[CompleteReturnWithSummary],
+                    None
+                  )
+                )
+              )
+            )
+
+            checkIsRedirect(
+              performAction(),
+              controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
             )
           }
 

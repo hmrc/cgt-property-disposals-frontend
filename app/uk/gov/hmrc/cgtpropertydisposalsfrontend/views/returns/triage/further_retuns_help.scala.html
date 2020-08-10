@@ -40,7 +40,8 @@ warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 @(
   backLink: Call,
   isATrust: Boolean,
-  representativeType: Option[IndividualUserType]
+  representativeType: Option[IndividualUserType],
+  displayReturnToSummaryLink: Boolean
 )(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -76,17 +77,17 @@ warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
     @Html(messages("further-returns.help.link", triage.routes.FurtherReturnGuidanceController.guidance()))
     </p>
 
-    <p>
-    @messages("further-returns.help.prompt")
-    </p>
+  <p>
+    <strong class="bold">@messages("further-returns.help.prompt")</strong>
+  </p>
+  <p>
     @Html(messages("further-returns.help.contact", appConfig.contactHmrc))
-
+  </p>
 
     @formWrapper(triage.routes.CommonTriageQuestionsController.furtherReturnHelpSubmit()) {
         @submitButton(messages("button.continue"))
     }
 
-  @returnToSummaryLink(displayReturnToSummaryLink = true)
-
+    @returnToSummaryLink(displayReturnToSummaryLink)
 
 }

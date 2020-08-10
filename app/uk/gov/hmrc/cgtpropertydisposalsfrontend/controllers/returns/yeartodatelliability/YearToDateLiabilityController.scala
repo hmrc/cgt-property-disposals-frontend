@@ -1219,8 +1219,10 @@ class YearToDateLiabilityController @Inject() (
           case (nonCalculatedYTDAnswers: NonCalculatedYTDAnswers, _) =>
             val backLink = nonCalculatedYTDAnswers.fold(
               _ =>
-                routes.YearToDateLiabilityController
-                  .nonCalculatedEnterTaxDue(),
+                if (fillingOutReturn.isFurtherReturn.contains(true))
+                  routes.YearToDateLiabilityController.repayment()
+                else
+                  routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue(),
               _ => routes.YearToDateLiabilityController.checkYourAnswers()
             )
             commonDisposalMandatoryEvidence(backLink)
