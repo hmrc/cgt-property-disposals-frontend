@@ -109,7 +109,8 @@ object CompleteReturn {
     initialGainOrLoss: Option[AmountInPence],
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean
+    hasAttachments: Boolean,
+    isFirstReturn: Boolean
   ) extends CompleteReturn
 
   object CompleteSingleDisposalReturn {
@@ -148,7 +149,8 @@ object CompleteReturn {
               i,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments
+              hasAttachments,
+              isFirstReturn = true
             )
           )
 
@@ -180,7 +182,8 @@ object CompleteReturn {
               i,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true
+              hasAttachments = true,
+              isFirstReturn = true
             )
           )
 
@@ -209,7 +212,8 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean
+    hasAttachments: Boolean,
+    isFirstReturn: Boolean
   ) extends CompleteReturn
 
   object CompleteSingleIndirectDisposalReturn {
@@ -242,7 +246,8 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true
+              hasAttachments = true,
+              isFirstReturn = true
             )
           )
 
@@ -260,7 +265,8 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean
+    hasAttachments: Boolean,
+    isFirstReturn: Boolean
   ) extends CompleteReturn
 
   object CompleteMultipleIndirectDisposalReturn {
@@ -289,7 +295,8 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true
+              hasAttachments = true,
+              isFirstReturn = true
             )
           )
 
@@ -307,7 +314,8 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean
+    hasAttachments: Boolean,
+    isFirstReturn: Boolean
   ) extends CompleteReturn
 
   object CompleteSingleMixedUseDisposalReturn {
@@ -336,7 +344,8 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true
+              hasAttachments = true,
+              isFirstReturn = true
             )
           )
 
@@ -380,6 +389,16 @@ object CompleteReturn {
         _.triageAnswers.representativeType()
       )
 
+    def isFirstReturn: Option[Boolean] =
+      Some(
+        c.fold[Boolean](
+          completeMultipleDisposalsReturn => completeMultipleDisposalsReturn.isFirstReturn,
+          completeSingleDisposalReturn => completeSingleDisposalReturn.isFirstReturn,
+          completeSingleIndirectDisposalReturn => completeSingleIndirectDisposalReturn.isFirstReturn,
+          completeMultipleIndirectDisposalReturn => completeMultipleIndirectDisposalReturn.isFirstReturn,
+          completeSingleMixedUseDisposalReturn => completeSingleMixedUseDisposalReturn.isFirstReturn
+        )
+      )
   }
 
   private def validRepresenteeAnswers(
@@ -418,6 +437,7 @@ object CompleteReturn {
       Json.format
     implicit val exampleCompanyDetailsAnswersFormat: OFormat[CompleteExampleCompanyDetailsAnswers]     = Json.format
     implicit val mixedUsePropertyDetailsAnswersFormat: OFormat[CompleteMixedUsePropertyDetailsAnswers] = Json.format
+
     derived.oformat()
   }
 
