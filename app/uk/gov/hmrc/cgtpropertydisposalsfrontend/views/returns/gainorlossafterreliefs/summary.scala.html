@@ -77,7 +77,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
   @gainOrLossAfterReliefsLabelWithAmount.map{ labelsAndAmount =>
 
     @cyaRow(
-      messages(s"gainOrLossAfterReliefs$userKey$multipleDisposalKey.title"),
+      messages(s"gainOrLossAfterReliefs$userKey$multipleDisposalKey.h2"),
       Html(messages(labelsAndAmount._1)),
       Some(cyaChange(messages("gainOrLossAfterReliefs.cyaChange"), routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefs().url)),
       "gainOrLossAfterReliefs"
