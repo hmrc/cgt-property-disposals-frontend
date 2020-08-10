@@ -5281,6 +5281,7 @@ furtherReturnGuidance.stage-b.step-b1.li1=Start with your expected taxable gross
 furtherReturnGuidance.agent.stage-b.step-b1.li1=Start with your client’s expected taxable gross annual income (excluding any capital gains).
 furtherReturnGuidance.capacitor.stage-b.step-b1.li1=Start with the person’s expected taxable gross annual income (excluding any capital gains).
 furtherReturnGuidance.personalRep.stage-b.step-b1.li1=Start with the person’s expected taxable gross annual income (excluding any capital gains).
+
 furtherReturnGuidance.stage-b.step-b1.li2=Subtract your income tax Personal Allowance, to get your taxable income.
 furtherReturnGuidance.agent.stage-b.step-b1.li2=Subtract your client’s income tax Personal Allowance, to get their taxable income.
 furtherReturnGuidance.capacitor.stage-b.step-b1.li2=Subtract the person’s income tax Personal Allowance, to get their taxable income.
@@ -5322,7 +5323,6 @@ furtherReturnGuidance.capacitor.stage-b.step-b3.li1=Multiply the amount of net g
 furtherReturnGuidance.personalRep.stage-b.step-b3.li1=Multiply the amount of net gain to be taxed at the basic rate of tax (opens in a window) for the UK property-related disposals for that tax year.
 
 furtherReturnGuidance.stage-b.step-b3.li2=Multiply the amount to be taxed at the higher rate of tax (opens in a new window) for property-related disposals for that tax year.
-
 
 furtherReturnGuidance.stage-b.step-b3.li3=Add these amounts together to get your overall Capital Gains Tax liability on your UK property-related disposals.
 furtherReturnGuidance.agent.stage-b.step-b3.li3=Add these amounts together to get your client’s overall Capital Gains Tax liability on their UK property-related disposals.

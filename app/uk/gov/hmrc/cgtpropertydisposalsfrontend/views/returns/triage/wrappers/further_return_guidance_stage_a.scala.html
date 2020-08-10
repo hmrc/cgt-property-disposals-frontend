@@ -30,8 +30,28 @@
     @caption(messages(s"$key.stage-a"))
     <h2 class="heading-medium">@messages(s"$key$userKey.stage-a.headingText")</h2>
     <ol class="list list-number">
-        <li><p>@messages(s"$key.stage-a.step-a1")</p></li>
-        <li><p>@messages(s"$key.stage-a.step-a2")</p></li>
+        <li><p>@messages(s"$key$userKey.stage-a.step-a1")</p></li>
+        <div>
+            <p>@messages(s"$key.stage-a.step-a1.p1")</p>
+            <ol class="list list-number">
+                <li><p>@messages(s"$key.stage-a.step-a1.li1")</p></li>
+                <li><p>@messages(s"$key.stage-a.step-a1.li2")</p></li>
+                <li><p>@messages(s"$key.stage-a.step-a1.li3")</p></li>
+                <li><p>@messages(s"$key$userKey.stage-a.step-a1.li4")</p></li>
+                <li><p>@messages(s"$key$userKey.stage-a.step-a1.li5")</p></li>
+            </ol>
+        </div>
+        <li><p>@messages(s"$key$userKey.stage-a.step-a2")</p></li>
+        <div>
+            <p>@messages(s"$key.stage-a.step-a2.p1")</p>
+            <ol class="list list-number">
+                <li><p>@messages(s"$key.stage-a.step-a2.li1")</p></li>
+                <li><p>@messages(s"$key.stage-a.step-a2.li2")</p></li>
+                <li><p>@messages(s"$key.stage-a.step-a2.li3")</p></li>
+                <li><p>@messages(s"$key$userKey.stage-a.step-a2.li4")</p></li>
+                <li><p>@messages(s"$key$userKey.stage-a.step-a2.li5")</p></li>
+            </ol>
+        </div>
     </ol>
     <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
     @details(

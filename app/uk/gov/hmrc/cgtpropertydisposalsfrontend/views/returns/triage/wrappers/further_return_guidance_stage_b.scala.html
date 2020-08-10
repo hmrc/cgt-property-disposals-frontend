@@ -23,16 +23,39 @@
     stageBExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example2
 )
 
-@()(implicit messages:Messages)
+@(userKey: String)(implicit messages:Messages)
 
     @key = @{ "furtherReturnGuidance" }
 
     @caption(messages(s"$key.stage-b"))
-    <h2 class="heading-medium">@messages(s"$key.stage-b.headingText")</h2>
+    <h2 class="heading-medium">@messages(s"$key$userKey.stage-b.headingText")</h2>
     <ol class="list list-number">
-    <li><p>@messages(s"$key.stage-b.step-b1")</p></li>
+    <li><p>@messages(s"$key$userKey.stage-b.step-b1")</p></li>
+        <div>
+            <p>@messages(s"$key$userKey.stage-b.step-b1.p1")</p>
+            <ol class="list list-number">
+                <li><p>@messages(s"$key$userKey.stage-b.step-b1.li1")</p></li>
+                <li><p>@messages(s"$key$userKey.stage-b.step-b1.li2")</p></li>
+            </ol>
+        </div>
     <li><p>@messages(s"$key.stage-b.step-b2")</p></li>
-    <li><p>@messages(s"$key.stage-b.step-b3")</p></li>
+        <div>
+            <p>@messages(s"$key$userKey.stage-b.step-b2.p1")</p>
+            <ol class="list list-number">
+                <li><p>@messages(s"$key$userKey.stage-b.step-b2.li1")</p></li>
+                <li><p>@messages(s"$key$userKey.stage-b.step-b2.li2")</p></li>
+                <li><p>@messages(s"$key.stage-b.step-b2.li3")</p></li>
+            </ol>
+        </div>
+    <li><p>@messages(s"$key$userKey.stage-b.step-b3")</p></li>
+        <div>
+            <p>@messages(s"$key$userKey.stage-b.step-b3.p1")</p>
+            <ol class="list list-number">
+                <li><p>@messages(s"$key$userKey.stage-b.step-b3.li1")</p></li>
+                <li><p>@messages(s"$key.stage-b.step-b3.li2")</p></li>
+                <li><p>@messages(s"$key$userKey.stage-b.step-b3.li3")</p></li>
+            </ol>
+        </div>
     </ol>
     <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
     @details(
