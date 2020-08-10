@@ -52,7 +52,8 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean
+    hasAttachments: Boolean,
+    isFirstReturn: Boolean
   ) extends CompleteReturn
 
   object CompleteMultipleDisposalsReturn {
@@ -81,7 +82,8 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               gainOrLossAfterReliefs,
-              hasAttachments = true
+              hasAttachments = true,
+              isFirstReturn = true
             )
           )
 
