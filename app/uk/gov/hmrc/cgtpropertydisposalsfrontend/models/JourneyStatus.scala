@@ -124,6 +124,7 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     completeReturn: CompleteReturn,
+    isFirstReturn: Boolean,
     returnSummary: ReturnSummary,
     previousSentReturns: Option[PreviousReturnData]
   ) extends JourneyStatus

@@ -52,8 +52,7 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean,
-    isFirstReturn: Boolean
+    hasAttachments: Boolean
   ) extends CompleteReturn
 
   object CompleteMultipleDisposalsReturn {
@@ -82,8 +81,7 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               gainOrLossAfterReliefs,
-              hasAttachments = true,
-              isFirstReturn = true
+              hasAttachments = true
             )
           )
 
@@ -109,8 +107,7 @@ object CompleteReturn {
     initialGainOrLoss: Option[AmountInPence],
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean,
-    isFirstReturn: Boolean
+    hasAttachments: Boolean
   ) extends CompleteReturn
 
   object CompleteSingleDisposalReturn {
@@ -149,8 +146,7 @@ object CompleteReturn {
               i,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments,
-              isFirstReturn = true
+              hasAttachments
             )
           )
 
@@ -182,8 +178,7 @@ object CompleteReturn {
               i,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true,
-              isFirstReturn = true
+              hasAttachments = true
             )
           )
 
@@ -212,8 +207,7 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean,
-    isFirstReturn: Boolean
+    hasAttachments: Boolean
   ) extends CompleteReturn
 
   object CompleteSingleIndirectDisposalReturn {
@@ -246,8 +240,7 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true,
-              isFirstReturn = true
+              hasAttachments = true
             )
           )
 
@@ -265,8 +258,7 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean,
-    isFirstReturn: Boolean
+    hasAttachments: Boolean
   ) extends CompleteReturn
 
   object CompleteMultipleIndirectDisposalReturn {
@@ -295,8 +287,7 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true,
-              isFirstReturn = true
+              hasAttachments = true
             )
           )
 
@@ -314,8 +305,7 @@ object CompleteReturn {
     supportingDocumentAnswers: CompleteSupportingEvidenceAnswers,
     representeeAnswers: Option[CompleteRepresenteeAnswers],
     gainOrLossAfterReliefs: Option[AmountInPence],
-    hasAttachments: Boolean,
-    isFirstReturn: Boolean
+    hasAttachments: Boolean
   ) extends CompleteReturn
 
   object CompleteSingleMixedUseDisposalReturn {
@@ -344,8 +334,7 @@ object CompleteReturn {
               u,
               maybeCompleteRepresenteeAnswers,
               g,
-              hasAttachments = true,
-              isFirstReturn = true
+              hasAttachments = true
             )
           )
 
@@ -387,17 +376,6 @@ object CompleteReturn {
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType()
-      )
-
-    def isFirstReturn: Option[Boolean] =
-      Some(
-        c.fold[Boolean](
-          completeMultipleDisposalsReturn => completeMultipleDisposalsReturn.isFirstReturn,
-          completeSingleDisposalReturn => completeSingleDisposalReturn.isFirstReturn,
-          completeSingleIndirectDisposalReturn => completeSingleIndirectDisposalReturn.isFirstReturn,
-          completeMultipleIndirectDisposalReturn => completeMultipleIndirectDisposalReturn.isFirstReturn,
-          completeSingleMixedUseDisposalReturn => completeSingleMixedUseDisposalReturn.isFirstReturn
-        )
       )
   }
 

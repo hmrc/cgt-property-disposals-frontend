@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary}
 
-final case class CompleteReturnWithSummary(
+final case class DisplayReturn(
   completeReturn: CompleteReturn,
-  summary: ReturnSummary,
   isFirstReturn: Boolean
 )
 
-object CompleteReturnWithSummary {
-
-  implicit val format: OFormat[CompleteReturnWithSummary] = Json.format
-
+object DisplayReturn {
+  implicit val format: OFormat[DisplayReturn] = Json.format[DisplayReturn]
 }

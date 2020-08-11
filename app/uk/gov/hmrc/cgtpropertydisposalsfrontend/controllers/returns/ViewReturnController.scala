@@ -62,6 +62,7 @@ class ViewReturnController @Inject() (
               _,
               _,
               sentReturn,
+              isFirstReturn,
               returnSummary,
               _
             ) =>
@@ -73,7 +74,7 @@ class ViewReturnController @Inject() (
               subscribedDetails,
               sentReturn.representativeType,
               sentReturn.isIndirectDisposal,
-              sentReturn.isFirstReturn
+              Some(isFirstReturn)
             )
           )
       }
@@ -89,7 +90,11 @@ class ViewReturnController @Inject() (
             viewingReturn.subscribedDetails,
             viewingReturn.ggCredId,
             viewingReturn.agentReferenceNumber,
-            CompleteReturnWithSummary(viewingReturn.completeReturn, viewingReturn.returnSummary),
+            CompleteReturnWithSummary(
+              viewingReturn.completeReturn,
+              viewingReturn.returnSummary,
+              viewingReturn.isFirstReturn
+            ),
             viewingReturn.previousSentReturns
           )
 
@@ -108,7 +113,7 @@ class ViewReturnController @Inject() (
   def payCharge(chargeReference: String): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withViewingReturn() {
-        case ViewingReturn(subscribedDetails, _, _, _, returnSummary, _) =>
+        case ViewingReturn(subscribedDetails, _, _, _, _, returnSummary, _) =>
           val cgtReference = subscribedDetails.cgtReference
           val details      =
             s"(chargeReference, cgtReference, submissionId) = ($chargeReference, $cgtReference, ${returnSummary.submissionId})"
@@ -159,6 +164,7 @@ class ViewReturnController @Inject() (
           s.ggCredId,
           s.agentReferenceNumber,
           s.originalReturn.completeReturn,
+          s.originalReturn.isFirstReturn,
           s.originalReturn.summary,
           s.previousSentReturns
         )

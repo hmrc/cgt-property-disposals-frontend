@@ -28,6 +28,7 @@ import play.api.http.Status.OK
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.CountryCode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
@@ -36,7 +37,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
@@ -75,7 +75,7 @@ trait ReturnsService {
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, CompleteReturn]
+  ): EitherT[Future, Error, DisplayReturn]
 
 }
 
@@ -323,10 +323,10 @@ class ReturnsServiceImpl @Inject() (
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(implicit
     hc: HeaderCarrier
-  ): EitherT[Future, Error, CompleteReturn] =
+  ): EitherT[Future, Error, DisplayReturn] =
     connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
       if (response.status === OK)
-        response.parseJSON[CompleteReturn]().leftMap(Error(_))
+        response.parseJSON[DisplayReturn]().leftMap(Error(_))
       else
         Left(
           Error(
