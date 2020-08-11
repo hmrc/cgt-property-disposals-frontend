@@ -55,12 +55,12 @@
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
   representativeType match {
-    case Some(PersonalRepresentative) => ".personalRep"
-    case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent" else ".personalRep"
-    case Some(Capacitor) => ".capacitor"
+    case Some(PersonalRepresentative) => ".personalRep."
+    case Some(PersonalRepresentativeInPeriodOfAdmin) => if(isAgent) ".agent." else ".personalRep."
+    case Some(Capacitor) => ".capacitor."
     case None =>
-       if (isAgent) ".agent"
-       else if (isATrust) ".trust"
+       if (isAgent) ".agent."
+       else if (isATrust) ".trust."
        else ""
   }
 }
@@ -68,7 +68,7 @@
 @titleUserMessageKey = @{
     representativeType match {
         case Some(PersonalRepresentativeInPeriodOfAdmin) if isAgent => ".personalRepInPeriodOfAdmin.agent"
-        case _ => userKey
+        case _ => userKey.stripSuffix(".")
     }
 }
 
