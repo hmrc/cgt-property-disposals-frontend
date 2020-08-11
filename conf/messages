@@ -968,6 +968,13 @@ didYouDisposeOfResidentialProperty.cyaChange=whether UK residential property was
 
 ukResidentCanOnlyReportResidential.title=You cannot use this service
 ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.agent.p1=You told us your client was a UK resident on the day they sold or disposed of the UK property. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.trust.p1=You told us the trust was a UK resident on the day it sold or disposed of the UK property. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.capacitor.p1=You told us the person was a UK resident on the day they sold or disposed of the UK property. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.personalRep.p1=You told us the person was a UK resident on the day they sold or disposed of the UK property. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.p1=You told us the person was a UK resident for the tax year in which they died. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.agent.p1=You told us your client was a UK resident for the tax year in which they died. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
 ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
 
 disposalDate.title=What date did you exchange contracts when disposing of the property?
