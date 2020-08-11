@@ -23,6 +23,7 @@
 @import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TaxYear, UserType}
@@ -116,7 +117,11 @@
             customErrorKey = customErrorKey
         )
 
-        <p id="link"><a href="#">@Html(messages(s"$key$userKey.link", viewConfig.personalAllowanceUrl))</a></p>
+        <p id="link">
+            <a href="triage.routes.FurtherReturnGuidanceController.guidance()">
+                @Html(messages(s"$key$userKey.link", viewConfig.personalAllowanceUrl))
+            </a>
+        </p>
 
         @submitButton(messages("button.saveAndContinue"))
     }
