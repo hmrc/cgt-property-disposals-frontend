@@ -5185,7 +5185,6 @@ furtherReturnGuidance.stage-a.step2.example2.table1.total.value=£99,400 gain
 furtherReturnGuidance.stage-a.step2.example2.p2=Because Kavita has only ever been a UK resident this means her total net gain for the year so far is £99,400.
 
 
-
 furtherReturnGuidance.trust.stage-a.example3.p1=Bianca is a trustee of Square Trust, a trust resident in the UK. She sold 2 of Square Trust’s UK residential properties in May and June 2020.
 
 furtherReturnGuidance.trust.stage-a.step1.example3.headingText=Step A1 - Bianca works out the gain or loss after reliefs for each of the disposals made so far in tax year 2020 to 2021.
@@ -5230,20 +5229,20 @@ furtherReturnGuidance.trust.stage-a.step1.example3.table2.total.value=£33,630 g
 furtherReturnGuidance.trust.stage-a.step2.example3.headingText=Step A2 - Bianca works out the trust’s net gain for the year.
 furtherReturnGuidance.trust.stage-a.step2.example3.p1=She adds together all the gains or losses after reliefs
 
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row1.key=She starts with property 1 gain or loss after reliefs
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row1.value=£43,070 gain
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row2.key=She adds property 2 gain or loss after reliefs
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row2.value=£33,630
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row3.key=Total gain or loss after reliefs on residential property
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row3.value=£79,700 gain
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row4.key=She subtracts allowable in-year Capital Gains Tax losses
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row4.value=£0
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row5.key=She subtracts allowable previous years Capital Gains Tax losses
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row5.value=£0
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row6.key=She subtracts the portion of Annual Exempt Amount to use on residential property gains
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.row6.value=£6,150
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.total.key=Taxable gain on residential property
-furtherReturnGuidance.trust.stage-a.step2.example3.table2.total.value=£70,550 gain
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row1.key=She starts with property 1 gain or loss after reliefs
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row1.value=£43,070 gain
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row2.key=She adds property 2 gain or loss after reliefs
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row2.value=£33,630
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row3.key=Total gain or loss after reliefs on residential property
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row3.value=£79,700 gain
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row4.key=She subtracts allowable in-year Capital Gains Tax losses
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row4.value=£0
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row5.key=She subtracts allowable previous years Capital Gains Tax losses
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row5.value=£0
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.key=She subtracts the portion of Annual Exempt Amount to use on residential property gains
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.row6.value=£6,150
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.total.key=Taxable gain on residential property
+furtherReturnGuidance.trust.stage-a.step2.example3.table1.total.value=£70,550 gain
 
 
 furtherReturnGuidance.trust.stage-a.step2.example3.p2=Because Square Trust has only ever been UK resident this means its total net gain for the year so far is £64,400
@@ -5437,7 +5436,7 @@ furtherReturnGuidance.stage-b.step3.example2.table2.p2=Kavita’s new overall Ca
 
 
 
-furtherReturnGuidance.trust.stage-b.example3.p1=Bianca works out Square Trust’s overall Capital Gains Tax liability for residential property in tax year 2020 to 2021.
+furtherReturnGuidance.trust.stage-b.example3.headingText=Bianca works out Square Trust’s overall Capital Gains Tax liability for residential property in tax year 2020 to 2021.
 
 furtherReturnGuidance.trust.stage-b.example3.table1.row1.key=She starts with the amount of net gain to be taxed
 furtherReturnGuidance.trust.stage-b.example3.table1.row1.value=£70,550
@@ -5451,13 +5450,13 @@ furtherReturnGuidance.trust.stage-b.example3.table1.total.value=£19,754
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.p1=Multiply the estate’s net gain for the year by the relevant rate of tax for the tax year for the estate (opens in a new window) to work out its overall Capital Gains Tax liability on its UK property-related disposals.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.link=Personal representative Akash sold 2 properties for Taylor family estate
 
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example1.headingText=Akash works out Taylor family estate's overall Capital Gains Tax liability for residential property in tax year 2020 to 2021.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example1.table1.row1.key=He starts with the amount of net gain to be taxed
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example1.table1.row1.value=£67,400
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example1.table1.row2.key=He multiplies the estate’s net gain on residential gains for the year by the rate of tax for the 2020 to 2021 tax year
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example1.table1.row2.value=28%
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example1.table1.total.key=Taylor family estate’s new overall Capital Gains Tax liability for UK residential property
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example1.table1.total.value=£18,872
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.headingText=Akash works out Taylor family estate's overall Capital Gains Tax liability for residential property in tax year 2020 to 2021.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row1.key=He starts with the amount of net gain to be taxed
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row1.value=£67,400
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.key=He multiplies the estate’s net gain on residential gains for the year by the rate of tax for the 2020 to 2021 tax year
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.row2.value=28%
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.key=Taylor family estate’s new overall Capital Gains Tax liability for UK residential property
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.example4.table1.total.value=£18,872
 
 
 #===================================================

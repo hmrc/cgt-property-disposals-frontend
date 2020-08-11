@@ -21,6 +21,7 @@
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
     stageAExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example1,
     stageAExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example2,
+    stageAExample3: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example3,
     stageAExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example4
 )
 
@@ -59,6 +60,11 @@
         @details(
             messages(s"$key.stage-a.example4.link"),
             stageAExample4()
+        )
+    } else if(userKey.contains(".trust")){
+        @details(
+            messages(s"$key$userKey.stage-a.example3.link"),
+            stageAExample3(userKey)
         )
     } else {
         @details(
