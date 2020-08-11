@@ -20,7 +20,8 @@
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
     stageAExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example1,
-    stageAExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example2
+    stageAExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example2,
+    stageAExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_a_example4
 )
 
 @(userKey: String)(implicit messages:Messages)
@@ -54,12 +55,21 @@
         </div>
     </ol>
     <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
-    @details(
-        messages(s"$key.stage-a.example1.link"),
-        stageAExample1()
-    )
-    @details(
-        messages(s"$key.stage-a.example2.link"),
-        stageAExample2()
-    )
+    @if(userKey.contains(".personalRepInPeriodOfAdmin")){
+        @details(
+            messages(s"$key.stage-a.example4.link"),
+            stageAExample4()
+        )
+    } else {
+        @details(
+            messages(s"$key.stage-a.example1.link"),
+            stageAExample1()
+        )
+        @details(
+            messages(s"$key.stage-a.example2.link"),
+            stageAExample2()
+        )
+    }
+
+
 

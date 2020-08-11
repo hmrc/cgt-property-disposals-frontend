@@ -58,7 +58,7 @@
     }
 }
 
-@title = @{messages(s"$key.title")}
+@title = @{messages(s"$key$userKey.title")}
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
