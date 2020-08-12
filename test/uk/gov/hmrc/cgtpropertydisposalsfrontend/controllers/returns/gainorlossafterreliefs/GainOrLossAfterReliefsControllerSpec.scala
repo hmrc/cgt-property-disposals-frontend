@@ -216,7 +216,8 @@ class GainOrLossAfterReliefsControllerSpec
           expectedBackLink: Call,
           expectedOuterLabelUserKey: String,
           expectedLinkTextKey: String,
-          expectedH2Key: String
+          expectedH2Key: String,
+          expectedLi1Key: String
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -248,6 +249,10 @@ class GainOrLossAfterReliefsControllerSpec
 
               doc.select("#subheading").text() shouldBe messageFromMessageKey(expectedH2Key)
 
+              doc.select("#content > article > ol > li:nth-child(1)").text() shouldBe messageFromMessageKey(
+                expectedLi1Key
+              )
+
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.GainOrLossAfterReliefsController
@@ -266,7 +271,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               "",
               "gainOrLossAfterReliefs.link",
-              "gainOrLossAfterReliefs.h2"
+              "gainOrLossAfterReliefs.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -277,7 +283,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               ".notSelf",
               "gainOrLossAfterReliefs.agent.link",
-              "gainOrLossAfterReliefs.agent.h2"
+              "gainOrLossAfterReliefs.agent.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -288,7 +295,8 @@ class GainOrLossAfterReliefsControllerSpec
               routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               ".notSelf",
               "gainOrLossAfterReliefs.trust.link",
-              "gainOrLossAfterReliefs.trust.h2"
+              "gainOrLossAfterReliefs.trust.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -299,7 +307,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               ".notSelf",
               "gainOrLossAfterReliefs.capacitor.link",
-              "gainOrLossAfterReliefs.capacitor.h2"
+              "gainOrLossAfterReliefs.capacitor.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -310,7 +319,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               ".notSelf",
               "gainOrLossAfterReliefs.personalRep.link",
-              "gainOrLossAfterReliefs.personalRep.h2"
+              "gainOrLossAfterReliefs.personalRep.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -321,7 +331,8 @@ class GainOrLossAfterReliefsControllerSpec
               routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               ".notSelf",
               "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link",
-              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.h2"
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -332,7 +343,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               ".notSelf",
               "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link",
-              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.h2"
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
         }
@@ -346,7 +358,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               "",
               "gainOrLossAfterReliefs.link",
-              "gainOrLossAfterReliefs.multipleDisposals.h2"
+              "gainOrLossAfterReliefs.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -357,7 +370,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               ".notSelf",
               "gainOrLossAfterReliefs.agent.link",
-              "gainOrLossAfterReliefs.agent.multipleDisposals.h2"
+              "gainOrLossAfterReliefs.agent.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -368,7 +382,8 @@ class GainOrLossAfterReliefsControllerSpec
               routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               ".notSelf",
               "gainOrLossAfterReliefs.trust.link",
-              "gainOrLossAfterReliefs.trust.multipleDisposals.h2"
+              "gainOrLossAfterReliefs.trust.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -379,7 +394,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               ".notSelf",
               "gainOrLossAfterReliefs.capacitor.link",
-              "gainOrLossAfterReliefs.capacitor.multipleDisposals.h2"
+              "gainOrLossAfterReliefs.capacitor.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -390,7 +406,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               ".notSelf",
               "gainOrLossAfterReliefs.personalRep.link",
-              "gainOrLossAfterReliefs.personalRep.multipleDisposals.h2"
+              "gainOrLossAfterReliefs.personalRep.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -401,7 +418,8 @@ class GainOrLossAfterReliefsControllerSpec
               routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               ".notSelf",
               "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link",
-              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.h2"
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -412,7 +430,8 @@ class GainOrLossAfterReliefsControllerSpec
               returns.routes.TaskListController.taskList(),
               ".notSelf",
               "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link",
-              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.h2"
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
         }

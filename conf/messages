@@ -4637,11 +4637,15 @@ gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title=Tell u
 gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title=Tell us if your client, or the estate made a gain on the disposals in this return after reliefs were subtracted
 
 gainOrLossAfterReliefs.p1=To do this, you’ll need to:
+
 gainOrLossAfterReliefs.li1=Start with the proceeds of the disposal.
 gainOrLossAfterReliefs.li2=Subtract the selling or disposal costs.
 gainOrLossAfterReliefs.li3=Subtract any improvement costs.
 gainOrLossAfterReliefs.li4=Subtract any acquisition costs to give your gain or loss for this disposal.
 gainOrLossAfterReliefs.li5=Subtract any reliefs (but not Annual Exempt Amount) from this gain or loss to give your gain or loss after reliefs.
+
+gainOrLossAfterReliefs.multipleDisposals.li1=Start with the proceeds of all the disposals in this return.
+gainOrLossAfterReliefs.multipleDisposals.li4=Subtract any acquisition costs to give your gain or loss for all the disposals in this return.
 
 gainOrLossAfterReliefs.h2=Did you make a gain on the disposal in this return after reliefs were subtracted?
 gainOrLossAfterReliefs.agent.h2=Did your client make a gain on the disposal in this return after reliefs were subtracted?
