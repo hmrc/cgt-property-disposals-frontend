@@ -74,7 +74,7 @@ class ViewReturnController @Inject() (
               subscribedDetails,
               sentReturn.representativeType,
               sentReturn.isIndirectDisposal,
-              Some(isFirstReturn)
+              Some(!isFirstReturn)
             )
           )
       }
