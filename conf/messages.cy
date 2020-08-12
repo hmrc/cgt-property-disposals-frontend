@@ -1,7 +1,7 @@
 #===================================================
 # SERVICE WIDE AND GENERIC - START
 #===================================================
-
+lang=cy
 service.title=Rhoi gwybod am a thalu Treth Enillion Cyfalaf ar eiddo yn y DU
 service.signOut=Allgofnodi
 hmrc_branding=Cyllid a Thollau EM

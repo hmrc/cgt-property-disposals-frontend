@@ -2,6 +2,8 @@
 # TRANSLATION NOT REQUIRED = START
 #===================================================
 
+lang=en
+
 landingPage.title=Report and pay Capital Gains Tax on UK property
 landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
 landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
