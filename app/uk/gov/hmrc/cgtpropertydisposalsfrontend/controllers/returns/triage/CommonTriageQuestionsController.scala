@@ -338,7 +338,13 @@ class CommonTriageQuestionsController @Inject() (
 
         wasUkResident match {
           case Some(true) if isAssetTypeNonResidential =>
-            Ok(ukResidentCanOnlyDisposeResidentialPage(backLink))
+            Ok(
+              ukResidentCanOnlyDisposeResidentialPage(
+                backLink,
+                state.fold(_.subscribedDetails, _.subscribedDetails).isATrust,
+                triageAnswers.fold(_.representativeType(), _.representativeType())
+              )
+            )
           case _                                       => Redirect(redirectToCheckYourAnswers(state))
         }
       }

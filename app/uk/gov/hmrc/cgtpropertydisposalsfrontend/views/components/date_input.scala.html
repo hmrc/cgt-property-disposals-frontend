@@ -55,7 +55,7 @@
       @errorInline(id, messages(key))
     }
     <div class="form-date">
-      <div class="form-group form-group-day">
+      <div class="form-group form-group-day lang-@messages("lang")">
         <label class="form-label" for="@{fieldId}-day">@messages("generic.day")</label>
         <input class="@inputClasses" id="@{fieldId}-day" name="@{fieldId}-day" type="text" pattern="[0-9]*" inputmode="numeric" @dayValue.map{d => value="@d"}>
       </div>

@@ -1924,34 +1924,144 @@ class CommonTriageQuestionsControllerSpec
 
         "the user was a uk resident and they disposed of a non-residential property and" when {
 
+          def test(expectedBackLink: Call, expectedP1Key: String): Unit =
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"),
+              { doc =>
+                doc.select("#back").attr("href")                         shouldBe expectedBackLink.url
+                doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(expectedP1Key)
+              }
+            )
+
+          def singleDisposalTriageAnswers(individualUserType: Option[IndividualUserType]) =
+            IncompleteSingleDisposalTriageAnswers.empty.copy(
+              individualUserType = individualUserType,
+              hasConfirmedSingleDisposal = true,
+              disposalMethod = Some(DisposalMethod.Sold),
+              wasAUKResident = Some(true),
+              assetType = Some(AssetType.NonResidential)
+            )
+
           "the user is on a single disposal journey" in {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  Right(
-                    IncompleteSingleDisposalTriageAnswers.empty.copy(
-                      individualUserType = Some(IndividualUserType.Self),
-                      hasConfirmedSingleDisposal = true,
-                      disposalMethod = Some(DisposalMethod.Sold),
-                      wasAUKResident = Some(true),
-                      assetType = Some(AssetType.NonResidential)
-                    )
-                  ),
+                  Right(singleDisposalTriageAnswers(Some(Self))),
                   Right(sample[IndividualName])
                 )._1
               )
             }
 
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"),
-              doc =>
-                doc
-                  .select("#back")
-                  .attr("href") shouldBe routes.SingleDisposalsTriageController
-                  .didYouDisposeOfAResidentialProperty()
-                  .url
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "ukResidentCanOnlyReportResidential.p1"
+            )
+          }
+
+          "the user is an agent" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(singleDisposalTriageAnswers(Some(Self))),
+                  Right(sample[IndividualName]),
+                  UserType.Agent
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "ukResidentCanOnlyReportResidential.agent.p1"
+            )
+          }
+
+          "the user is a trust" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(singleDisposalTriageAnswers(None)),
+                  Left(sample[TrustName]),
+                  UserType.Organisation
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "ukResidentCanOnlyReportResidential.trust.p1"
+            )
+          }
+
+          "the user is a capacitor" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(singleDisposalTriageAnswers(Some(Capacitor))),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "ukResidentCanOnlyReportResidential.capacitor.p1"
+            )
+          }
+
+          "the user is a personal representative" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(singleDisposalTriageAnswers(Some(PersonalRepresentative))),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "ukResidentCanOnlyReportResidential.personalRep.p1"
+            )
+          }
+
+          "the user is a personal representative in a period of admin" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(singleDisposalTriageAnswers(Some(PersonalRepresentativeInPeriodOfAdmin))),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.p1"
+            )
+          }
+
+          "the user is an agent of a personal representative in a period of admin" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(singleDisposalTriageAnswers(Some(PersonalRepresentativeInPeriodOfAdmin))),
+                  Right(sample[IndividualName]),
+                  UserType.Agent
+                )._1
+              )
+            }
+
+            test(
+              routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty(),
+              "ukResidentCanOnlyReportResidential.personalRepInPeriodOfAdmin.agent.p1"
             )
           }
 
@@ -1974,19 +2084,12 @@ class CommonTriageQuestionsControllerSpec
               )
             }
 
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"),
-              doc =>
-                doc
-                  .select("#back")
-                  .attr(
-                    "href"
-                  ) shouldBe routes.MultipleDisposalsTriageController
-                  .wereAllPropertiesResidential()
-                  .url
+            test(
+              routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
+              "ukResidentCanOnlyReportResidential.p1"
             )
           }
+
         }
 
       }
