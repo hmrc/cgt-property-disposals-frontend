@@ -110,6 +110,7 @@ label.beta=Beta
 
 button.startNow=Start now
 button.continue=Continue
+button.back=Back
 button.saveAndContinue=Save and continue
 button.confirmAndContinue=Confirm and continue
 button.createAccount=Create account

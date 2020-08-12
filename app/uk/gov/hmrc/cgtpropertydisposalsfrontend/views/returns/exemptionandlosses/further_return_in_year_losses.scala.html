@@ -21,7 +21,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
@@ -128,7 +128,7 @@
             customErrorKey = Some(s"$key$userKey")
         )
 
-        <p>@Html(messages(s"$key$furtherReturnKey$userKey.link", triage.routes.FurtherReturnGuidanceController.guidance()))</p>
+        <p>@Html(messages(s"$key$furtherReturnKey$userKey.link", triageRoutes.FurtherReturnGuidanceController.guidance()))</p>
 
         @submitButton(messages("button.saveAndContinue"))
     }

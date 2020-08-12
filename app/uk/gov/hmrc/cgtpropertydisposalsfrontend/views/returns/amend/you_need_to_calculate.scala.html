@@ -22,11 +22,11 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-        cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
+    cancelOrContinue: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cancel_or_continue_links
 )
 
 @(backLink: Call)(implicit messages:Messages, appConfig: ViewConfig, request: RequestWithSessionData[_])
@@ -49,7 +49,7 @@
       <li>@messages(s"$key.li2")</li>
   </ul>
 
-  <p><a href="#">@messages(s"$key.link1")</a></p>
+  <p><a href="routes.FurtherReturnGuidanceController.guidance()">@messages(s"$key.link1")</a></p>
 
   <h2 class="heading-medium">@messages(s"$key.h2")</h2>
 
@@ -61,6 +61,5 @@
     Some(messages("button.continue")),
     Some("#")
   )
-
 
 }

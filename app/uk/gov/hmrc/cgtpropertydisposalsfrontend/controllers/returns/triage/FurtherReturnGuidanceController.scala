@@ -28,7 +28,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-//import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.{Future}
 
 class FurtherReturnGuidanceController @Inject() (
@@ -36,7 +35,7 @@ class FurtherReturnGuidanceController @Inject() (
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
   guidancePage: views.html.returns.triage.further_return_guidance
-)(implicit viewConfig: ViewConfig) //, ec: ExecutionContext)
+)(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
