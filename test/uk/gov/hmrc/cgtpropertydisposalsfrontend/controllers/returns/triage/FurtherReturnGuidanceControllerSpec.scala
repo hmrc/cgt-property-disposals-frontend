@@ -26,10 +26,10 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.BackLinkLocations
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData, UserType}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -37,7 +37,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DateOfDeath, MultipleDisposalsTriageAnswers, RepresenteeAnswers, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 
@@ -48,14 +47,12 @@ class FurtherReturnGuidanceControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour
-    with ReturnsServiceSupport {
+    with RedirectToStartBehaviour {
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[SessionStore].toInstance(mockSessionStore)
     )
 
   lazy val controller = instanceOf[FurtherReturnGuidanceController]
@@ -64,8 +61,8 @@ class FurtherReturnGuidanceControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean =
     journeyStatus match {
-      case _: StartingNewDraftReturn | _: FillingOutReturn => true
-      case _                                               => false
+      case _: StartingNewDraftReturn | _: FillingOutReturn | _: StartingToAmendReturn => true
+      case _                                                                          => false
     }
 
   def sessionDataWithStartingNewDraftReturn(
@@ -108,48 +105,93 @@ class FurtherReturnGuidanceControllerSpec
 
     "handling requests to display the further return guidance page" must {
 
-      def performAction(): Future[Result] =
-        controller.guidance()(FakeRequest())
+      def performAction(back: String): Future[Result] =
+        controller.guidance(back)(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
+        () => performAction(FurtherReturnGuidanceController.BackLinkLocations.overallLiability),
         isValidJourney
       )
+
+      "show an error page" when {
+
+        "the back link parameter is not understood" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty,
+                name = Right(sample[IndividualName])
+              )._1
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction("abc"))
+        }
+
+      }
 
       "display the page" when {
 
         def test(
-          session: SessionData,
+          back: String,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(session)
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteMultipleDisposalsTriageAnswers.empty,
+                name = Right(sample[IndividualName])
+              )._1
+            )
           }
           checkPageIsDisplayed(
-            performAction(),
+            performAction(back),
             messageFromMessageKey("furtherReturnGuidance.title"),
             doc => doc.select("#back").attr("href") shouldBe expectedBackLink.url
           )
         }
 
-        "the user has not started a draft return yet and" when {
-          "the section is incomplete" in {
-            test(
-              sessionDataWithStartingNewDraftReturn(
-                IncompleteMultipleDisposalsTriageAnswers.empty,
-                name = Right(sample[IndividualName])
-              )._1,
-              controllers.routes.StartController.start()
-            )
-          }
+        "the user came from the further returns start page" in {
+          test(
+            BackLinkLocations.furtherReturnStart,
+            routes.CommonTriageQuestionsController.furtherReturnHelp()
+          )
+        }
+
+        "the user came from the gain or loss after reliefs page" in {
+          test(
+            BackLinkLocations.gainOrLossAfterReliefs,
+            controllers.returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController
+              .enterGainOrLossAfterReliefs()
+          )
+        }
+
+        "the user came from the in year losses page" in {
+          test(
+            BackLinkLocations.inYearLosses,
+            controllers.returns.exemptionandlosses.routes.ExemptionAndLossesController.inYearLosses()
+          )
+        }
+
+        "the user came from the taxable gain or loss page" in {
+          test(
+            BackLinkLocations.netGainOrLoss,
+            controllers.returns.yeartodatelliability.routes.YearToDateLiabilityController.taxableGainOrLoss()
+          )
+        }
+
+        "the user came from the year to date liability page" in {
+          test(
+            BackLinkLocations.overallLiability,
+            controllers.returns.yeartodatelliability.routes.YearToDateLiabilityController.yearToDateLiability()
+          )
         }
 
       }
 
     }
-
-    "handling submitted answers to the further return guidance page" must {}
 
   }
 

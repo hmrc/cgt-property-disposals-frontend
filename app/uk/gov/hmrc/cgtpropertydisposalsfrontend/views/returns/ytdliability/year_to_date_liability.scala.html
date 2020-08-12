@@ -22,6 +22,8 @@
 @import cats.instances.string._
 @import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
@@ -117,7 +119,7 @@
         )
 
         <p id="link">
-            <a href="triage.routes.FurtherReturnGuidanceController.guidance()">
+            <a href="@{triageRoutes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.overallLiability)}">
                 @Html(messages(s"$key$userKey.link", viewConfig.personalAllowanceUrl))
             </a>
         </p>
