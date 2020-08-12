@@ -2413,7 +2413,7 @@ acquisitionFees.trust.indirect.rebased.helpText=For example, the cost of paying 
 acquisitionFees.capacitor.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
 acquisitionFees.personalRep.indirect.rebased.helpText=For example, the cost of paying a stock broker to tell you what the value of the shares was on {0}
 
-acquisitionFees.allowableCostsLinkText=	<a href="{0}" target="_blank">Find out about additional allowable costs (opens in a new window)</a>
+acquisitionFees.allowableCostsLinkText=<a href="{0}" target="_blank">Find out about additional allowable costs (opens in a new window)</a>
 acquisitionFees.details.header=What is rebasing?
 
 acquisitionFees.details.p1=You owned the property on or before {0}.
@@ -5025,19 +5025,19 @@ furtherReturnGuidance.stage-a.step-a1.li1=Start with the proceeds of the disposa
 furtherReturnGuidance.stage-a.step-a1.li2=Subtract selling or disposal costs.
 furtherReturnGuidance.stage-a.step-a1.li3=Subtract improvement costs.
 
-furtherReturnGuidance.stage-a.step-a1.li4=Subtract acquisition costs to give your gain or loss for this disposal.
-furtherReturnGuidance.agent.stage-a.step-a1.li4=Subtract acquisition costs to give the gain or loss for this disposal.
-furtherReturnGuidance.capacitor.stage-a.step-a1.li4=Subtract acquisition costs to give the gain or loss for this disposal.
-furtherReturnGuidance.trust.stage-a.step-a1.li4=Subtract acquisition costs to give the gain or loss for this disposal.
-furtherReturnGuidance.personalRep.stage-a.step-a1.li4=Subtract acquisition costs to give the gain or loss for this disposal.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li4=Subtract acquisition costs to give the gain or loss for this disposal.
+furtherReturnGuidance.stage-a.step-a1.li4=Subtract acquisition costs to give your <strong class="bold">gain or loss for this disposal</strong>.
+furtherReturnGuidance.agent.stage-a.step-a1.li4=Subtract acquisition costs to give the <strong class="bold">gain or loss for this disposal</strong>.
+furtherReturnGuidance.capacitor.stage-a.step-a1.li4=Subtract acquisition costs to give the <strong class="bold">gain or loss for this disposal</strong>.
+furtherReturnGuidance.trust.stage-a.step-a1.li4=Subtract acquisition costs to give the <strong class="bold">gain or loss for this disposal</strong>.
+furtherReturnGuidance.personalRep.stage-a.step-a1.li4=Subtract acquisition costs to give the <strong class="bold">gain or loss for this disposal</strong>.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li4=Subtract acquisition costs to give the <strong class="bold">gain or loss for this disposal</strong>.
 
-furtherReturnGuidance.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this gain or loss to give your gain or loss after reliefs.
-furtherReturnGuidance.agent.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this gain or loss to give the gain or loss after reliefs.
-furtherReturnGuidance.capacitor.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this gain or loss to give the gain or loss after reliefs.
-furtherReturnGuidance.trust.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this gain or loss to give the gain or loss after reliefs.
-furtherReturnGuidance.personalRep.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this gain or loss to give the gain or loss after reliefs.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this gain or loss to give the estate’s gain or loss after reliefs.
+furtherReturnGuidance.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong class="bold">gain or loss</strong> to give your <strong class="bold">gain or loss after reliefs</strong>.
+furtherReturnGuidance.agent.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong class="bold">gain or loss</strong> to give the <strong class="bold">gain or loss after reliefs</strong>.
+furtherReturnGuidance.capacitor.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong class="bold">gain or loss</strong> to give the <strong class="bold">gain or loss after reliefs</strong>.
+furtherReturnGuidance.trust.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong class="bold">gain or loss</strong> to give the <strong class="bold">gain or loss after reliefs</strong>.
+furtherReturnGuidance.personalRep.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong class="bold">gain or loss</strong> to give the <strong class="bold">gain or loss after reliefs</strong>.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong class="bold">gain or loss</strong> to give the estate’s <strong class="bold">gain or loss after reliefs</strong>.
 
 
 furtherReturnGuidance.stage-a.step-a2=Step A2 Work out your net gain on UK property-related disposals
@@ -5055,16 +5055,16 @@ furtherReturnGuidance.trust.stage-a.step-a2.p1=Do this to work out the net gain 
 furtherReturnGuidance.personalRep.stage-a.step-a2.p1=Do this to work out the person’s net gain on UK property-related disposals for the tax year so far.
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.p1=Do this to work out the net gain on UK property-related disposals for the tax year so far.
 
-furtherReturnGuidance.stage-a.step-a2.li1=Add together all the gains after reliefs from UK property-related disposals.
+furtherReturnGuidance.stage-a.step-a2.li1=Add together all the <strong class="bold">gains after reliefs</strong> from UK property-related disposals.
 furtherReturnGuidance.stage-a.step-a2.li2=Subtract any in-year Capital Gains Tax losses that can be deducted.
 furtherReturnGuidance.stage-a.step-a2.li3=Subtract any allowable previous tax years' Capital Gains Tax losses.
 
-furtherReturnGuidance.stage-a.step-a2.li4=Subtract your Annual Exempt Amount (opens in a new window) you want to use on residential property gains to get your net gain.
-furtherReturnGuidance.agent.stage-a.step-a2.li4=Subtract your client’s Annual Exempt Amount (opens in a new window) to be used on residential property gains to get the net gain.
-furtherReturnGuidance.capacitor.stage-a.step-a2.li4=Subtract the person’s Annual Exempt Amount (opens in a new window) to be used on residential property gains to get the net gain.
-furtherReturnGuidance.trust.stage-a.step-a2.li4=Subtract the Annual Exempt Amount (opens in a new window) to be used on residential property gains to get the net gain.
-furtherReturnGuidance.personalRep.stage-a.step-a2.li4=Subtract the person’s Annual Exempt Amount (opens in a new window) to be used on residential property gains to get the net gain.
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.li4=Subtract the Annual Exempt Amount (opens in a new window) to be used on the residential property gains to get the net gain.
+furtherReturnGuidance.stage-a.step-a2.li4=Subtract your <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> you want to use on residential property gains to get your <strong class="bold">net gain</strong>.
+furtherReturnGuidance.agent.stage-a.step-a2.li4=Subtract your client’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.capacitor.stage-a.step-a2.li4=Subtract the person’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.trust.stage-a.step-a2.li4=Subtract the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.personalRep.stage-a.step-a2.li4=Subtract the person’s <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on residential property gains to get the <strong class="bold">net gain</strong>.
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2.li4=Subtract the <a href="{0}" target="_blank">Annual Exempt Amount (opens in a new window)</a> to be used on the residential property gains to get the <strong class="bold">net gain</strong>.
 
 furtherReturnGuidance.stage-a.step-a2.li5=This result is what the Capital Gains Tax you should be paying now is based on.
 furtherReturnGuidance.agent.stage-a.step-a2.li5=This result is what the Capital Gains Tax that should be paid now is based on.
@@ -5134,9 +5134,6 @@ furtherReturnGuidance.stage-a.step2.example1.table1.row6.value=£12,300
 furtherReturnGuidance.stage-a.step2.example1.table1.total.key=Net gain on UK property related disposals
 furtherReturnGuidance.stage-a.step2.example1.table1.total.value=£67,400 gain
 
-furtherReturnGuidance.stage-a.step2.example1.p2=Because Richard has only ever been a UK resident this means his total net gain for the year so far is £67,400
-
-
 furtherReturnGuidance.stage-a.step1.example2.p1=Kavita sold 2 UK residential properties that both had a contract exchange date in this tax year. She wants to use the loss from a second disposal to reduce net gain on the first.
 furtherReturnGuidance.stage-a.step1.example2.headingText=Step 1 - Kavita works out the gain or loss after reliefs for each disposal she has made so far this tax year.
 furtherReturnGuidance.stage-a.step1.example2.p2=She includes the disposals she is including in this return.
@@ -5151,11 +5148,11 @@ furtherReturnGuidance.stage-a.step1.example2.table1.row3.value=£12,000
 furtherReturnGuidance.stage-a.step1.example2.table1.row4.key=She subtracts property acquisition costs
 furtherReturnGuidance.stage-a.step1.example2.table1.row4.value=£153,200
 furtherReturnGuidance.stage-a.step1.example2.table1.row5.key=Gain or loss for property 1
-furtherReturnGuidance.stage-a.step1.example2.table1.row5.value=£169,500 gain
+furtherReturnGuidance.stage-a.step1.example2.table1.row5.value=£159,100 gain
 furtherReturnGuidance.stage-a.step1.example2.table1.row6.key=She subtracts allowable Capital Gains Tax reliefs
 furtherReturnGuidance.stage-a.step1.example2.table1.row6.value=£1,200
 furtherReturnGuidance.stage-a.step1.example2.table1.total.key=Gain after reliefs for property 1
-furtherReturnGuidance.stage-a.step1.example2.table1.total.value=£168,300
+furtherReturnGuidance.stage-a.step1.example2.table1.total.value=£157,900
 
 furtherReturnGuidance.stage-a.step1.example2.p4=Property 2 - UK residential property disposal in June 2020
 
@@ -5168,20 +5165,20 @@ furtherReturnGuidance.stage-a.step1.example2.table2.row3.value=£300
 furtherReturnGuidance.stage-a.step1.example2.table2.row4.key=She subtracts property acquisition costs
 furtherReturnGuidance.stage-a.step1.example2.table2.row4.value=£200,000
 furtherReturnGuidance.stage-a.step1.example2.table2.row5.key=Gain or loss for property 2
-furtherReturnGuidance.stage-a.step1.example2.table2.row5.value=£52,600 loss
+furtherReturnGuidance.stage-a.step1.example2.table2.row5.value=£51,900 loss
 furtherReturnGuidance.stage-a.step1.example2.table2.row6.key=Subtract allowable Capital Gains Tax reliefs
 furtherReturnGuidance.stage-a.step1.example2.table2.row6.value=£0
 furtherReturnGuidance.stage-a.step1.example2.table2.total.key=Loss after reliefs for property 2
-furtherReturnGuidance.stage-a.step1.example2.table2.total.value=£52,600 loss
+furtherReturnGuidance.stage-a.step1.example2.table2.total.value=£51,900 loss
 
 furtherReturnGuidance.stage-a.step2.example2.headingText=Step 2 - Kavita works out her net gain for the year.
 furtherReturnGuidance.stage-a.step2.example2.p1=She adds together all the UK property related gains or losses after reliefs
 furtherReturnGuidance.stage-a.step2.example2.table1.row1.key=She starts with property 1 gain after reliefs
-furtherReturnGuidance.stage-a.step2.example2.table1.row1.value=£168,300 gain
+furtherReturnGuidance.stage-a.step2.example2.table1.row1.value=£157,900 gain
 furtherReturnGuidance.stage-a.step2.example2.table1.row2.key=She adds property 2 loss after reliefs
-furtherReturnGuidance.stage-a.step2.example2.table1.row2.value=-£52,600 loss
+furtherReturnGuidance.stage-a.step2.example2.table1.row2.value=-£51,900 loss
 furtherReturnGuidance.stage-a.step2.example2.table1.row3.key=Total gains or losses after reliefs on all UK property related disposals
-furtherReturnGuidance.stage-a.step2.example2.table1.row3.value=£115,700 gain
+furtherReturnGuidance.stage-a.step2.example2.table1.row3.value=£106,000 gain
 furtherReturnGuidance.stage-a.step2.example2.table1.row4.key=She subtracts allowable in-year Capital Gains Tax losses from shares that can be deducted
 furtherReturnGuidance.stage-a.step2.example2.table1.row4.value=£4000
 furtherReturnGuidance.stage-a.step2.example2.table1.row5.key=She subtracts allowable previous years Capital Gains Tax losses
@@ -5189,9 +5186,7 @@ furtherReturnGuidance.stage-a.step2.example2.table1.row5.value=£0
 furtherReturnGuidance.stage-a.step2.example2.table1.row6.key=She subtracts the portion of Annual Exempt Amount she wishes to use
 furtherReturnGuidance.stage-a.step2.example2.table1.row6.value=£12,300
 furtherReturnGuidance.stage-a.step2.example2.table1.total.key=Net gain on UK property related disposals
-furtherReturnGuidance.stage-a.step2.example2.table1.total.value=£99,400 gain
-
-furtherReturnGuidance.stage-a.step2.example2.p2=Because Kavita has only ever been a UK resident this means her total net gain for the year so far is £99,400.
+furtherReturnGuidance.stage-a.step2.example2.table1.total.value=£89,700 gain
 
 
 furtherReturnGuidance.trust.stage-a.example3.p1=Bianca is a trustee of Square Trust, a trust resident in the UK. She sold 2 of Square Trust’s UK residential properties in May and June 2020.
@@ -5278,30 +5273,30 @@ furtherReturnGuidance.agent.stage-b.step-b1=Step B1 Work out your client’s tax
 furtherReturnGuidance.capacitor.stage-b.step-b1=Step B1 Work out the person’s taxable income
 furtherReturnGuidance.personalRep.stage-b.step-b1=Step B1 Work out the person’s taxable income
 
-furtherReturnGuidance.stage-b.step-b1.p1=Do this to help work out your taxable income to find out how much of your net gain (if any) should be charged at the basic rate (opens in a new window).
-furtherReturnGuidance.agent.stage-b.step-b1.p1=Do this to help work out your client’s taxable income to find out how much of their net gain (if any) should be charged at the basic rate (opens in a new window).
-furtherReturnGuidance.capacitor.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the basic rate (opens in a new window).
-furtherReturnGuidance.personalRep.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the basic rate (opens in a new window).
+furtherReturnGuidance.stage-b.step-b1.p1=Do this to help work out your taxable income to find out how much of your net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
+furtherReturnGuidance.agent.stage-b.step-b1.p1=Do this to help work out your client’s taxable income to find out how much of their net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
+furtherReturnGuidance.capacitor.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
+furtherReturnGuidance.personalRep.stage-b.step-b1.p1=Do this to help work out the person’s taxable income to find out how much of the net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
 furtherReturnGuidance.trust.stage-b.step-b1.p1=Multiply the trust's net gain for the year by the relevant rate of tax for the tax year for the type of trust (opens in a new window) to work out the trust's overall Capital Gains Tax liability on its UK property-related disposals.
 
 
-furtherReturnGuidance.stage-b.step-b1.li1=Start with your expected taxable gross annual income (excluding any capital gains).
-furtherReturnGuidance.agent.stage-b.step-b1.li1=Start with your client’s expected taxable gross annual income (excluding any capital gains).
-furtherReturnGuidance.capacitor.stage-b.step-b1.li1=Start with the person’s expected taxable gross annual income (excluding any capital gains).
-furtherReturnGuidance.personalRep.stage-b.step-b1.li1=Start with the person’s expected taxable gross annual income (excluding any capital gains).
+furtherReturnGuidance.stage-b.step-b1.li1=Start with your expected taxable <strong class="bold">gross annual income (excluding any capital gains)</strong>.
+furtherReturnGuidance.agent.stage-b.step-b1.li1=Start with your client’s expected taxable <strong class="bold">gross annual income (excluding any capital gains)</strong>.
+furtherReturnGuidance.capacitor.stage-b.step-b1.li1=Start with the person’s expected taxable <strong class="bold">gross annual income (excluding any capital gains)</strong>.
+furtherReturnGuidance.personalRep.stage-b.step-b1.li1=Start with the person’s expected taxable <strong class="bold">gross annual income (excluding any capital gains)</strong>.
 
-furtherReturnGuidance.stage-b.step-b1.li2=Subtract your income tax Personal Allowance, to get your taxable income.
-furtherReturnGuidance.agent.stage-b.step-b1.li2=Subtract your client’s income tax Personal Allowance, to get their taxable income.
-furtherReturnGuidance.capacitor.stage-b.step-b1.li2=Subtract the person’s income tax Personal Allowance, to get their taxable income.
-furtherReturnGuidance.personalRep.stage-b.step-b1.li2=Subtract the person’s income tax Personal Allowance, to get their taxable income.
+furtherReturnGuidance.stage-b.step-b1.li2=Subtract your income tax <strong class="bold">Personal Allowance</strong>, to get your <strong class="bold">taxable income</strong>.
+furtherReturnGuidance.agent.stage-b.step-b1.li2=Subtract your client’s income tax <strong class="bold">Personal Allowance</strong>, to get their <strong class="bold">taxable income</strong>.
+furtherReturnGuidance.capacitor.stage-b.step-b1.li2=Subtract the person’s income tax <strong class="bold">Personal Allowance</strong>, to get their <strong class="bold">taxable income</strong>.
+furtherReturnGuidance.personalRep.stage-b.step-b1.li2=Subtract the person’s income tax <strong class="bold">Personal Allowance</strong>, to get their <strong class="bold">taxable income</strong>.
 
 
 furtherReturnGuidance.stage-b.step-b2=Step B2 Work out what basic rate band can be used against the net gain
 
-furtherReturnGuidance.stage-b.step-b2.p1=Do this to see how much of your net gain should be charged at the basic rate (opens in a new window). If your taxable income is higher than the basic rate band threshold then none of your net gain will be taxed at the basic rate.
-furtherReturnGuidance.agent.stage-b.step-b2.p1=Do this to see how much of your client’s net gain should be charged at the basic rate (opens in a new window). If their taxable income is higher than the basic rate band threshold then none of the net gain will be taxed at the basic rate.
-furtherReturnGuidance.capacitor.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the basic rate (opens in a new window). If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
-furtherReturnGuidance.personalRep.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the basic rate (opens in a new window). If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
+furtherReturnGuidance.stage-b.step-b2.p1=Do this to see how much of your net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If your taxable income is higher than the basic rate band threshold then none of your net gain will be taxed at the basic rate.
+furtherReturnGuidance.agent.stage-b.step-b2.p1=Do this to see how much of your client’s net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If their taxable income is higher than the basic rate band threshold then none of the net gain will be taxed at the basic rate.
+furtherReturnGuidance.capacitor.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
+furtherReturnGuidance.personalRep.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
 
 furtherReturnGuidance.stage-b.step-b2.li1=Start with your taxable income.
 furtherReturnGuidance.agent.stage-b.step-b2.li1=Start with your client’s taxable income.
