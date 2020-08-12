@@ -28,6 +28,7 @@ final case class SubmitReturnRequest(
   id: UUID,
   subscribedDetails: SubscribedDetails,
   agentReferenceNumber: Option[AgentReferenceNumber],
+  isFurtherReturn: Boolean,
   checkYourAnswerPageHtml: B64Html
 )
 

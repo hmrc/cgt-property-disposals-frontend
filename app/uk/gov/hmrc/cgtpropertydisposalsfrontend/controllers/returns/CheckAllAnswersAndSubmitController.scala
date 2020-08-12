@@ -181,6 +181,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
           fillingOutReturn.draftReturn.id,
           fillingOutReturn.subscribedDetails,
           fillingOutReturn.agentReferenceNumber,
+          fillingOutReturn.isFurtherReturn.contains(true),
           cyaPageB64Html
         )
       )
