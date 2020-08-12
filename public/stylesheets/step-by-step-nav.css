@@ -183,6 +183,10 @@ button.app-step-nav__button--title {
         line-height: 1.31579;
     }
 
+    .app-step-nav--large .app-step-nav__step {
+        padding-left: 60px;
+    }
+
     .app-step-nav--large .app-step-nav__step:after {
         left: 0;
         margin-left: 16px;
@@ -219,16 +223,24 @@ button.app-step-nav__button--title {
         font-size: 16px;
         line-height: 1.2;
     }
+
+    .app-step-nav--large .app-step-nav__step:last-child:before {
+        margin-left: 8.75px;
+        width: 17.5px;
+        border-width: 3px;
+    }
+
+    .app-step-nav--large .app-step-nav__step:last-child:after {
+        height: calc(100% - 30px);
+    }
 }
 
-.app-step-nav__circle-inner {
-    float: right;
-    min-width: 100%;
-}
-
-.app-step-nav--large .app-step-nav__circle--number {
-    font-family: "nta", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
+.app-step-nav__step--active .app-step-nav__circle--number,
+.app-step-nav__step--active .app-step-nav__help:after,
+.app-step-nav__step--active .app-step-nav__substep:after,
+.app-step-nav__step--active:after,
+.app-step-nav__step--active:last-child:before {
+    border-color: #0b0c0c;
 }
 
 .app-step-nav__circle {
@@ -247,13 +259,64 @@ button.app-step-nav__button--title {
     text-align: center;
 }
 
-.app-step-nav--large .app-step-nav__circle--number {
-    font-family: "nta", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-weight: 700;
-    font-size: 14px;
+@media (min-width: 40.0625em) {
+    .app-step-nav--large .app-step-nav__circle {
+        top: 30px;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+.app-step-nav__circle--number {
+    font-size: 16px;
+    font-weight: bold;
     line-height: 23px;
+    border: solid 2px var(--govuk-border-colour);
+}
+
+@media (min-width: 40.0625em) {
+    .app-step-nav__circle--number {
+        font-size: 16px;
+        line-height: 23px;
+    }
+}
+
+.app-step-nav--large .app-step-nav__circle--number {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 23px;
+}
+
+@media (min-width: 40.0625em) {
+    .app-step-nav--large .app-step-nav__circle--number {
+        font-size: 19px;
+        line-height: 30px;
+    }
+
+    .app-step-nav--large .app-step-nav__circle--number {
+        border-width: 3px;
+    }
+}
+
+.app-step-nav__circle--logic {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 28px;
+}
+@media (min-width: 40.0625em) {
+    .app-step-nav--large .app-step-nav__circle--logic {
+        font-size: 19px;
+        line-height: 34px;
+    }
+}
+
+.app-step-nav__circle-inner {
+    float: right;
+    min-width: 100%;
+}
+
+.app-step-nav__circle-background {
+    text-shadow: 0 -0.1em 0 #fff, 0.1em 0 0 #fff, 0 0.1em 0 #fff, -0.1em 0 0 #fff;
 }
 
 .app-step-nav__controls {

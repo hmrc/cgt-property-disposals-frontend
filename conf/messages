@@ -5013,12 +5013,12 @@ furtherReturnGuidance.trust.stage-a.headingText=Work out the net gain or loss
 furtherReturnGuidance.personalRep.stage-a.headingText=Work out the net gain or loss
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.headingText=Work out the net gain or loss
 
-furtherReturnGuidance.stage-a.step-a1=Step A1 Work out your gain or loss after reliefs
-furtherReturnGuidance.agent.stage-a.step-a1=Step A1 Work out the gain or loss after reliefs
-furtherReturnGuidance.capacitor.stage-a.step-a1=Step A1 Work out the gain or loss after reliefs
-furtherReturnGuidance.trust.stage-a.step-a1=Step A1 Work out the gain or loss after reliefs
-furtherReturnGuidance.personalRep.stage-a.step-a1=Step A1 Work out the gain or loss after reliefs
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1=Step A1 Work out the gain or loss after reliefs
+furtherReturnGuidance.stage-a.step-a1=Step A1 - Work out your gain or loss after reliefs
+furtherReturnGuidance.agent.stage-a.step-a1=Step A1 - Work out the gain or loss after reliefs
+furtherReturnGuidance.capacitor.stage-a.step-a1=Step A1 - Work out the gain or loss after reliefs
+furtherReturnGuidance.trust.stage-a.step-a1=Step A1 - Work out the gain or loss after reliefs
+furtherReturnGuidance.personalRep.stage-a.step-a1=Step A1 - Work out the gain or loss after reliefs
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1=Step A1 - Work out the gain or loss after reliefs
 
 furtherReturnGuidance.stage-a.step-a1.p1=Do this for each UK property-related disposal so far this tax year including the disposal in this return.
 furtherReturnGuidance.stage-a.step-a1.li1=Start with the proceeds of the disposal.
@@ -5040,12 +5040,12 @@ furtherReturnGuidance.personalRep.stage-a.step-a1.li5=Subtract any reliefs (but 
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a1.li5=Subtract any reliefs (but not Annual Exempt Amount) from this <strong class="bold">gain or loss</strong> to give the estate’s <strong class="bold">gain or loss after reliefs</strong>.
 
 
-furtherReturnGuidance.stage-a.step-a2=Step A2 Work out your net gain on UK property-related disposals
-furtherReturnGuidance.agent.stage-a.step-a2=Step A2 Work out the net gain on UK property-related disposals
-furtherReturnGuidance.capacitor.stage-a.step-a2=Step A2 Work out the net gain on UK property-related disposals
-furtherReturnGuidance.trust.stage-a.step-a2=Step A2 Work out the net gain on UK property-related disposals
-furtherReturnGuidance.personalRep.stage-a.step-a2=Step A2 Work out the net gain on UK property-related disposals
-furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2=Step A2 Work out the net gain on UK property-related disposals
+furtherReturnGuidance.stage-a.step-a2=Step A2 - Work out your net gain on UK property-related disposals
+furtherReturnGuidance.agent.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
+furtherReturnGuidance.capacitor.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
+furtherReturnGuidance.trust.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
+furtherReturnGuidance.personalRep.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
+furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-a.step-a2=Step A2 - Work out the net gain on UK property-related disposals
 
 
 furtherReturnGuidance.stage-a.step-a2.p1=Do this to work out your net gain on UK property-related disposals for the tax year so far.
@@ -5268,10 +5268,10 @@ furtherReturnGuidance.personalRep.stage-b.headingText=Work out the tax rates tha
 furtherReturnGuidance.trust.stage-b.headingText=Work out the overall Capital Gains Tax liability
 furtherReturnGuidance.personalRepInPeriodOfAdmin.stage-b.headingText=Work out the overall Capital Gains Tax liability
 
-furtherReturnGuidance.stage-b.step-b1=Step B1 Work out your taxable income
-furtherReturnGuidance.agent.stage-b.step-b1=Step B1 Work out your client’s taxable income
-furtherReturnGuidance.capacitor.stage-b.step-b1=Step B1 Work out the person’s taxable income
-furtherReturnGuidance.personalRep.stage-b.step-b1=Step B1 Work out the person’s taxable income
+furtherReturnGuidance.stage-b.step-b1=Step B1 - Work out your taxable income
+furtherReturnGuidance.agent.stage-b.step-b1=Step B1 - Work out your client’s taxable income
+furtherReturnGuidance.capacitor.stage-b.step-b1=Step B1 - Work out the person’s taxable income
+furtherReturnGuidance.personalRep.stage-b.step-b1=Step B1 - Work out the person’s taxable income
 
 furtherReturnGuidance.stage-b.step-b1.p1=Do this to help work out your taxable income to find out how much of your net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
 furtherReturnGuidance.agent.stage-b.step-b1.p1=Do this to help work out your client’s taxable income to find out how much of their net gain (if any) should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>.
@@ -5291,7 +5291,7 @@ furtherReturnGuidance.capacitor.stage-b.step-b1.li2=Subtract the person’s inco
 furtherReturnGuidance.personalRep.stage-b.step-b1.li2=Subtract the person’s income tax <strong class="bold">Personal Allowance</strong>, to get their <strong class="bold">taxable income</strong>.
 
 
-furtherReturnGuidance.stage-b.step-b2=Step B2 Work out what basic rate band can be used against the net gain
+furtherReturnGuidance.stage-b.step-b2=Step B2 - Work out what basic rate band can be used against the net gain
 
 furtherReturnGuidance.stage-b.step-b2.p1=Do this to see how much of your net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If your taxable income is higher than the basic rate band threshold then none of your net gain will be taxed at the basic rate.
 furtherReturnGuidance.agent.stage-b.step-b2.p1=Do this to see how much of your client’s net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If their taxable income is higher than the basic rate band threshold then none of the net gain will be taxed at the basic rate.
