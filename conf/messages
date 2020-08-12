@@ -101,6 +101,7 @@ checkAllAnswers.submissionDetails.cgt=CGT reference number of the person being r
 # SERVICE WIDE AND GENERIC - START
 #===================================================
 
+lang=en
 service.title=Report and pay Capital Gains Tax on UK property
 service.signOut=Sign out
 hmrc_branding=HM Revenue & Customs
