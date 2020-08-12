@@ -61,18 +61,18 @@
             <div>
                 <p>@Html(messages(s"$key$userKey.stage-b.step-b2.p1"))</p>
                 <ol class="list list-number">
-                    <li>@messages(s"$key$userKey.stage-b.step-b2.li1")</li>
-                    <li>@messages(s"$key$userKey.stage-b.step-b2.li2")</li>
-                    <li>@messages(s"$key.stage-b.step-b2.li3")</li>
+                    <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li1"))</li>
+                    <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li2"))</li>
+                    <li>@Html(messages(s"$key.stage-b.step-b2.li3"))</li>
                 </ol>
             </div>
         <li>@messages(s"$key$userKey.stage-b.step-b3")</li>
             <div>
                 <p>@messages(s"$key$userKey.stage-b.step-b3.p1")</p>
                 <ol class="list list-number">
-                    <li>@messages(s"$key$userKey.stage-b.step-b3.li1")</li>
-                    <li>@messages(s"$key.stage-b.step-b3.li2")</li>
-                    <li>@messages(s"$key$userKey.stage-b.step-b3.li3")</li>
+                    <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li1", appConfig.cgtRatesUrl))</li>
+                    <li>@Html(messages(s"$key.stage-b.step-b3.li2", appConfig.cgtRatesUrl))</li>
+                    <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li3"))</li>
                 </ol>
             </div>
         </ol>

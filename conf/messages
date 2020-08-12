@@ -5298,17 +5298,17 @@ furtherReturnGuidance.agent.stage-b.step-b2.p1=Do this to see how much of your c
 furtherReturnGuidance.capacitor.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
 furtherReturnGuidance.personalRep.stage-b.step-b2.p1=Do this to see how much of the net gain should be charged at the <a href="{0}" target="_blank">basic rate (opens in a new window)</a>. If the person’s taxable income is higher than the basic rate band threshold then none of their net gain will be taxed at the basic rate.
 
-furtherReturnGuidance.stage-b.step-b2.li1=Start with your taxable income.
-furtherReturnGuidance.agent.stage-b.step-b2.li1=Start with your client’s taxable income.
-furtherReturnGuidance.capacitor.stage-b.step-b2.li1=Start with the person’s taxable income.
-furtherReturnGuidance.personalRep.stage-b.step-b2.li1=Start with the person’s taxable income.
+furtherReturnGuidance.stage-b.step-b2.li1=Start with your <strong class="bold">taxable income</strong>.
+furtherReturnGuidance.agent.stage-b.step-b2.li1=Start with your client’s <strong class="bold">taxable income</strong>.
+furtherReturnGuidance.capacitor.stage-b.step-b2.li1=Start with the person’s <strong class="bold">taxable income</strong>.
+furtherReturnGuidance.personalRep.stage-b.step-b2.li1=Start with the person’s <strong class="bold">taxable income</strong>.
 
-furtherReturnGuidance.stage-b.step-b2.li2=Subtract your taxable income from the basic band rate threshold to get the amount of net gain to be charged at the basic rate.
-furtherReturnGuidance.agent.stage-b.step-b2.li2=Subtract your client’s taxable income from the basic band rate threshold to get the amount of net gain to be charged at the basic rate.
-furtherReturnGuidance.capacitor.stage-b.step-b2.li2=Subtract their taxable income from the basic band rate threshold to get the amount of net gain to be charged at the basic rate.
-furtherReturnGuidance.personalRep.stage-b.step-b2.li2=Subtract their taxable income from the basic band rate threshold to get the amount of net gain to be charged at the basic rate.
+furtherReturnGuidance.stage-b.step-b2.li2=Subtract your <strong class="bold">taxable income</strong> from the <strong class="bold">basic band rate threshold</strong> to get the amount of <strong class="bold">net gain to be charged at the basic rate</strong>.
+furtherReturnGuidance.agent.stage-b.step-b2.li2=Subtract your client’s <strong class="bold">taxable income</strong> from the <strong class="bold">basic band rate threshold</strong> to get the amount of <strong class="bold">net gain to be charged at the basic rate</strong>.
+furtherReturnGuidance.capacitor.stage-b.step-b2.li2=Subtract their <strong class="bold">taxable income</strong> from the <strong class="bold">basic band rate threshold</strong> to get the amount of <strong class="bold">net gain to be charged at the basic rate</strong>.
+furtherReturnGuidance.personalRep.stage-b.step-b2.li2=Subtract their <strong class="bold">taxable income</strong> from the <strong class="bold">basic band rate threshold</strong> to get the amount of <strong class="bold">net gain to be charged at the basic rate</strong>.
 
-furtherReturnGuidance.stage-b.step-b2.li3=Subtract the amount of net gain to be charged at the basic rate from the net gain to get the amount of net gain to be taxed at the higher rate.
+furtherReturnGuidance.stage-b.step-b2.li3=Subtract the <strong class="bold">amount of net gain to be charged at the basic rate</strong> from the <strong class="bold">net gain</strong> to get the <strong class="bold">amount of net gain to be taxed at the higher rate</strong>.
 
 furtherReturnGuidance.stage-b.step-b3=Step B3 Work out your overall Capital Gains Tax liability on your UK property-related disposals
 furtherReturnGuidance.agent.stage-b.step-b3=Step B3 Work out the overall Capital Gains Tax liability on your client’s UK property-related disposals
@@ -5320,17 +5320,17 @@ furtherReturnGuidance.agent.stage-b.step-b3.p1=Do this to get your client’s la
 furtherReturnGuidance.capacitor.stage-b.step-b3.p1=Do this to get the person’s latest overall Capital Gains Tax liability on their UK property-related disposals. This calculation will take into account the disposals in this return.
 furtherReturnGuidance.personalRep.stage-b.step-b3.p1=Do this to get the person’s latest overall Capital Gains Tax liability on their UK property-related disposals. This calculation will take into account the disposals in this return.
 
-furtherReturnGuidance.stage-b.step-b3.li1=Multiply the amount of net gain to be taxed at the basic rate of tax (opens in a new window) for the UK property-related disposal for that tax year.
-furtherReturnGuidance.agent.stage-b.step-b3.li1=Multiply the amount of net gain to be taxed at the basic rate of tax (opens in a new window) for the UK property-related disposal for that tax year.
-furtherReturnGuidance.capacitor.stage-b.step-b3.li1=Multiply the amount of net gain to be taxed at the basic rate of tax (opens in a window) for the UK property-related disposals for that tax year.
-furtherReturnGuidance.personalRep.stage-b.step-b3.li1=Multiply the amount of net gain to be taxed at the basic rate of tax (opens in a window) for the UK property-related disposals for that tax year.
+furtherReturnGuidance.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <strong class="bold"><a href="{0}" target="_blank">basic rate of tax (opens in a new window)</a></strong> for the UK property-related disposal for that tax year.
+furtherReturnGuidance.agent.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <strong class="bold"><a href="{0}" target="_blank">basic rate of tax (opens in a new window)</a></strong> for the UK property-related disposal for that tax year.
+furtherReturnGuidance.capacitor.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <strong class="bold"><a href="{0}" target="_blank">basic rate of tax (opens in a window)</a></strong> for the UK property-related disposals for that tax year.
+furtherReturnGuidance.personalRep.stage-b.step-b3.li1=Multiply the amount of <strong class="bold">net gain</strong> to be taxed at the <strong class="bold"><a href="{0}" target="_blank">basic rate of tax (opens in a window)</a></strong> for the UK property-related disposals for that tax year.
 
-furtherReturnGuidance.stage-b.step-b3.li2=Multiply the amount to be taxed at the higher rate of tax (opens in a new window) for property-related disposals for that tax year.
+furtherReturnGuidance.stage-b.step-b3.li2=Multiply the <strong class="bold">amount to be taxed at the <a href="{0}" target="_blank">higher rate of tax (opens in a new window)</a> for property-related disposals</strong> for that tax year.
 
-furtherReturnGuidance.stage-b.step-b3.li3=Add these amounts together to get your overall Capital Gains Tax liability on your UK property-related disposals.
-furtherReturnGuidance.agent.stage-b.step-b3.li3=Add these amounts together to get your client’s overall Capital Gains Tax liability on their UK property-related disposals.
-furtherReturnGuidance.capacitor.stage-b.step-b3.li3=Add these amounts together to get the overall Capital Gains Tax liability on the person’s UK property-related disposals.
-furtherReturnGuidance.personalRep.stage-b.step-b3.li3=Add these amounts together to get the overall Capital Gains Tax liability on the person’s UK property-related disposals.
+furtherReturnGuidance.stage-b.step-b3.li3=Add these amounts together to get your <strong class="bold">overall Capital Gains Tax liability on your UK property-related disposals</strong>.
+furtherReturnGuidance.agent.stage-b.step-b3.li3=Add these amounts together to get your client’s <strong class="bold">overall Capital Gains Tax liability on their UK property-related disposals</strong>.
+furtherReturnGuidance.capacitor.stage-b.step-b3.li3=Add these amounts together to get the <strong class="bold">overall Capital Gains Tax liability on the person’s UK property-related disposals</strong>.
+furtherReturnGuidance.personalRep.stage-b.step-b3.li3=Add these amounts together to get the <strong class="bold">overall Capital Gains Tax liability on the person’s UK property-related disposals</strong>.
 
 
 furtherReturnGuidance.stage-b.example1.link=UK resident Richard sells 2 UK residential properties
@@ -5421,20 +5421,20 @@ furtherReturnGuidance.stage-b.step2.example2.table1.total.value=£0
 furtherReturnGuidance.stage-b.step3.example2.headingText=Step B3 - Kavita works out her overall Capital Gains Tax liability on her UK property-related disposals for the tax year so far
 
 furtherReturnGuidance.stage-b.step3.example2.table1.row1.key=She starts with her net gain
-furtherReturnGuidance.stage-b.step3.example2.table1.row1.value=£99,400
+furtherReturnGuidance.stage-b.step3.example2.table1.row1.value=£89,700
 furtherReturnGuidance.stage-b.step3.example2.table1.row2.key=She subtracts the amount of income to be charged at the basic rate (not available as all has been used up by taxable income as per above)
 furtherReturnGuidance.stage-b.step3.example2.table1.row2.value=£0
 furtherReturnGuidance.stage-b.step3.example2.table1.total.key=Amount of net gain to be taxed at the higher rate
-furtherReturnGuidance.stage-b.step3.example2.table1.total.value=£99,400
+furtherReturnGuidance.stage-b.step3.example2.table1.total.value=£89,700
 
 furtherReturnGuidance.stage-b.step3.example2.table2.p1=She takes the amount of net gain to be taxed at the basic rate of tax
 
 furtherReturnGuidance.stage-b.step3.example2.table2.row1.key=She takes the amount of net gain to be taxed at the higher rate
-furtherReturnGuidance.stage-b.step3.example2.table2.row1.value=£99,400
+furtherReturnGuidance.stage-b.step3.example2.table2.row1.value=£89,700
 furtherReturnGuidance.stage-b.step3.example2.table2.row2.key=She multiplies the amount to the taxed at the higher rate by the rate of tax
 furtherReturnGuidance.stage-b.step3.example2.table2.row2.value=28%
 furtherReturnGuidance.stage-b.step3.example2.table2.total.key=Amount of tax to pay at the higher rate
-furtherReturnGuidance.stage-b.step3.example2.table2.total.value=£27,832
+furtherReturnGuidance.stage-b.step3.example2.table2.total.value=£25,116
 
 furtherReturnGuidance.stage-b.step3.example2.table2.p2=Kavita’s new overall Capital Gains Tax liability on her UK property-related disposals for the tax year so far
 
