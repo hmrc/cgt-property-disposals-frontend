@@ -19,7 +19,6 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
@@ -28,12 +27,8 @@
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
     pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    guidanceStageAWrappter: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.wrappers.further_return_guidance_stage_a,
-    guidanceStageBWrappter: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.wrappers.further_return_guidance_stage_b
+    guidanceStageAWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.wrappers.further_return_guidance_stage_a,
+    guidanceStageBWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.wrappers.further_return_guidance_stage_b
 )
 
 @(
@@ -62,17 +57,13 @@
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
-    @caption(messages("triage.caption"))
+
     @pageHeading(title)
 
-    @guidanceStageAWrappter(userKey)
+    @guidanceStageAWrapper(userKey)
 
-    @guidanceStageBWrappter(userKey)
+    @guidanceStageBWrapper(userKey)
 
-    @formWrapper(triage.routes.FurtherReturnGuidanceController.guidanceSubmit()) {
-        @submitButton(messages("button.back"))
-    }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+   <a class="button" role="button" href="@{backLink.url}">@messages("button.back")</a>
 
 }

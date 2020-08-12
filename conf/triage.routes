@@ -72,5 +72,4 @@ GET /exit/same-completion-date                              uk.gov.hmrc.cgtprope
 GET  /further-return/help                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelp()
 POST /further-return/help                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.furtherReturnHelpSubmit()
 
-GET  /further-return/guidance                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.guidance()
-POST /further-return/guidance                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.guidanceSubmit()
+GET  /further-return/guidance                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController.guidance(back: String)

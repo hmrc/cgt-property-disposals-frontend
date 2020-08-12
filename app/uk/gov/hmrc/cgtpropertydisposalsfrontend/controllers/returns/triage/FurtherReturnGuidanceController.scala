@@ -18,19 +18,21 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresentativeType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import scala.concurrent.{Future}
+import scala.concurrent.Future
 
 class FurtherReturnGuidanceController @Inject() (
+  errorHandler: ErrorHandler,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
@@ -41,43 +43,46 @@ class FurtherReturnGuidanceController @Inject() (
     with SessionUpdates
     with Logging {
 
-  def guidance(): Action[AnyContent] =
+  import FurtherReturnGuidanceController._
+
+  def guidance(back: String): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withState(request) { (_, state) =>
-        Ok(
-          guidancePage(
-            backLink,
-            state.fold(
-              _.subscribedDetails.isATrust,
-              _.subscribedDetails.isATrust
-            ),
-            getRepresentativeType(state)
-          )
-        )
+        backLinkMappings.get(back) match {
+          case None           =>
+            logger.warn(s"Could not find back link location for '$back'")
+            errorHandler.errorResult()
+
+          case Some(backLink) =>
+            Ok(
+              guidancePage(
+                backLink,
+                state.fold(
+                  _.fold(
+                    _.subscribedDetails.isATrust,
+                    _.subscribedDetails.isATrust
+                  ),
+                  _.subscribedDetails.isATrust
+                ),
+                getRepresentativeType(state)
+              )
+            )
+        }
+
       }
     }
-
-  def guidanceSubmit(): Action[AnyContent] =
-    authenticatedActionWithSessionData.async { implicit request =>
-      withState(request) { (_, state) =>
-        Ok(
-          guidancePage(backLink, true, getRepresentativeType(state))
-        )
-      }
-    }
-
-  private def backLink(): Call =
-    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController
-      .start()
 
   def getRepresentativeType(
-    state: Either[StartingNewDraftReturn, FillingOutReturn]
+    state: Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
   ): Option[RepresentativeType] =
     state
       .fold(
-        _.newReturnTriageAnswers.fold(
-          _.representativeType(),
-          _.representativeType()
+        _.fold(
+          _ => None,
+          _.newReturnTriageAnswers.fold(
+            _.representativeType(),
+            _.representativeType()
+          )
         ),
         _.draftReturn.representativeType()
       )
@@ -85,12 +90,15 @@ class FurtherReturnGuidanceController @Inject() (
   private def withState(request: RequestWithSessionData[_])(
     f: (
       SessionData,
-      Either[StartingNewDraftReturn, FillingOutReturn]
+      Either[Either[StartingToAmendReturn, StartingNewDraftReturn], FillingOutReturn]
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((session, s: StartingToAmendReturn))  =>
+        f(session, Left(Left(s)))
+
       case Some((session, s: StartingNewDraftReturn)) =>
-        f(session, Left(s))
+        f(session, Left(Right(s)))
 
       case Some((session, r: FillingOutReturn))       =>
         f(session, Right(r))
@@ -101,5 +109,32 @@ class FurtherReturnGuidanceController @Inject() (
             .start()
         )
     }
+
+}
+
+object FurtherReturnGuidanceController {
+
+  object BackLinkLocations {
+
+    val furtherReturnStart: String     = "furtherReturnStart"
+    val gainOrLossAfterReliefs: String = "GLAR"
+    val inYearLosses: String           = "inYearLosses"
+    val netGainOrLoss: String          = "netGainOrLoss"
+    val overallLiability: String       = "overallLiability"
+
+  }
+
+  val backLinkMappings: Map[String, Call] =
+    Map(
+      BackLinkLocations.furtherReturnStart     -> returns.triage.routes.CommonTriageQuestionsController.furtherReturnHelp(),
+      BackLinkLocations.gainOrLossAfterReliefs -> returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController
+        .enterGainOrLossAfterReliefs(),
+      BackLinkLocations.inYearLosses           -> returns.exemptionandlosses.routes.ExemptionAndLossesController
+        .inYearLosses(),
+      BackLinkLocations.netGainOrLoss          -> returns.yeartodatelliability.routes.YearToDateLiabilityController
+        .taxableGainOrLoss(),
+      BackLinkLocations.overallLiability       -> returns.yeartodatelliability.routes.YearToDateLiabilityController
+        .yearToDateLiability()
+    )
 
 }

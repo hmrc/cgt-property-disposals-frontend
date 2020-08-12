@@ -22,6 +22,8 @@
 @import cats.syntax.eq._
 @import cats.instances.string._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
@@ -167,7 +169,7 @@
         )
 
         <p id="link">
-            <a href="triage.routes.FurtherReturnGuidanceController.guidance()">@messages(s"$key$userKey.furtherReturn.link")</a>
+            <a href="@{triageRoutes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.netGainOrLoss)}">@messages(s"$key$userKey.furtherReturn.link")</a>
         </p>
 
         @submitButton(messages("button.saveAndContinue"))
