@@ -97,7 +97,7 @@ class HomePageControllerSpec
       .returning(EitherT.fromEither[Future](response))
 
   def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(
-    response: Either[Error, CompleteReturn]
+    response: Either[Error, DisplayReturn]
   ) =
     (mockReturnsService
       .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
@@ -1162,6 +1162,7 @@ class HomePageControllerSpec
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
           sample[CompleteSingleDisposalReturn],
+          false,
           sample[ReturnSummary],
           Some(PreviousReturnData(subscribed.sentReturns, None))
         )
@@ -1737,6 +1738,8 @@ class HomePageControllerSpec
 
           val completeReturn = sample[CompleteSingleDisposalReturn]
 
+          val displayReturn = DisplayReturn(completeReturn, false)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
@@ -1744,7 +1747,7 @@ class HomePageControllerSpec
               subscribed.subscribedDetails.cgtReference,
               returnSummary1.submissionId
             )(
-              Right(completeReturn)
+              Right(displayReturn)
             )
             mockDisplayReturn(
               subscribed.subscribedDetails.cgtReference,
@@ -1764,6 +1767,7 @@ class HomePageControllerSpec
           val completeReturn = sample[CompleteSingleDisposalReturn].copy(
             yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
           )
+          val displayReturn  = DisplayReturn(completeReturn, false)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1772,7 +1776,7 @@ class HomePageControllerSpec
               subscribed.subscribedDetails.cgtReference,
               returnSummary.submissionId
             )(
-              Right(completeReturn)
+              Right(displayReturn)
             )
             mockStoreSession(
               SessionData.empty.copy(
@@ -1782,6 +1786,7 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     completeReturn,
+                    false,
                     returnSummary,
                     Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue)))
                   )
@@ -1802,6 +1807,7 @@ class HomePageControllerSpec
           val completeReturn = sample[CompleteSingleDisposalReturn].copy(
             yearToDateLiabilityAnswers = Right(sample[CompleteCalculatedYTDAnswers].copy(taxDue = taxDue))
           )
+          val displayReturn  = DisplayReturn(completeReturn, false)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1810,7 +1816,7 @@ class HomePageControllerSpec
               subscribed.subscribedDetails.cgtReference,
               returnSummary.submissionId
             )(
-              Right(completeReturn)
+              Right(displayReturn)
             )
             mockStoreSession(
               SessionData.empty.copy(
@@ -1820,6 +1826,7 @@ class HomePageControllerSpec
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
                     completeReturn,
+                    false,
                     returnSummary,
                     Some(PreviousReturnData(subscribed.sentReturns, Some(taxDue)))
                   )
@@ -1964,7 +1971,7 @@ class HomePageControllerSpec
       testCases.foreach {
         case (description, completeReturn) =>
           withClue(s"For $description: ") {
-
+            val displayReturn       = DisplayReturn(completeReturn, false)
             val latestReturnSummary = sample[ReturnSummary].copy(
               lastUpdatedDate = Some(latestDate)
             )
@@ -1986,7 +1993,7 @@ class HomePageControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(sessionDataWithSubscribed(subscribed))
               mockDisplayReturn(subscribed.subscribedDetails.cgtReference, latestReturnSummary.submissionId)(
-                Right(completeReturn)
+                Right(displayReturn)
               )
               mockStoreSession(
                 SessionData.empty.copy(

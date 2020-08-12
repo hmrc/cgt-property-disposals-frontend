@@ -95,6 +95,7 @@ class ViewReturnController @Inject() (
               viewingReturn.returnSummary,
               viewingReturn.isFirstReturn
             ),
+            viewingReturn.isFirstReturn,
             viewingReturn.previousSentReturns
           )
 
