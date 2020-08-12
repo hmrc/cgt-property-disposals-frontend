@@ -16,7 +16,8 @@
 
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
@@ -51,6 +52,7 @@
     acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
     disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
     reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
+    glarSummary : uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.gainorlossafterreliefs.summary,
     lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
     singleIndirectDisposalAddressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary,
     singleMixedUsePropertyDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_mixed_use_summary,
@@ -70,6 +72,67 @@
 
 @title = @{messages("viewReturn.title")}
 @amountOwed = @{returnSummary.mainReturnChargeAmount}
+
+@glarAmount = @{
+    completeReturn match {
+        case CompleteMultipleDisposalsReturn(
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            gainOrLossAfterReliefs,
+            _
+        ) => gainOrLossAfterReliefs
+        case CompleteSingleDisposalReturn(
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            gainOrLossAfterReliefs,
+            _
+        ) => gainOrLossAfterReliefs
+        case CompleteSingleIndirectDisposalReturn(
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            gainOrLossAfterReliefs,
+            _
+        ) => gainOrLossAfterReliefs
+        case CompleteMultipleIndirectDisposalReturn(
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            gainOrLossAfterReliefs,
+            _
+        ) => gainOrLossAfterReliefs
+        case CompleteSingleMixedUseDisposalReturn(
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            gainOrLossAfterReliefs,
+            _
+        ) => gainOrLossAfterReliefs
+    }
+}
 
 @key= @{ "viewReturn" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -179,6 +242,11 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
           <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
           @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust, representativeType)
 
+          @if(glarAmount.isDefined && isFurtherReturn.contains(true)){
+              <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+              @glarSummary(glarAmount.getOrElse(AmountInPence.zero), subscribedDetails.isATrust, representativeType, false)
+          }
+
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
           @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
@@ -204,7 +272,12 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
           @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
-          <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+          @if(glarAmount.isDefined && isFurtherReturn.contains(true)){
+              <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+              @glarSummary(glarAmount.getOrElse(AmountInPence.zero), subscribedDetails.isATrust, representativeType, true)
+          }
+
+        <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
           @nonCalculatedYearToDateLiabilitySummary(m.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType, None, m.triageAnswers.taxYear)
 
           @if(m.hasAttachments) {
@@ -268,6 +341,11 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
             isFurtherReturn
         )
 
+        @if(glarAmount.isDefined && isFurtherReturn.contains(true)){
+            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+            @glarSummary(glarAmount.getOrElse(AmountInPence.zero), subscribedDetails.isATrust, representativeType, true)
+        }
+
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(multipleIndirect.yearToDateLiabilityAnswers, showFiles = false, isMultiple = true, subscribedDetails.isATrust, representativeType, None, multipleIndirect.triageAnswers.taxYear)
 
@@ -286,6 +364,11 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
 
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
+
+        @if(glarAmount.isDefined && isFurtherReturn.contains(true)){
+            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+            @glarSummary(glarAmount.getOrElse(AmountInPence.zero), subscribedDetails.isATrust, representativeType, false)
+        }
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(singleMixedUse.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType, None, singleMixedUse.triageAnswers.disposalDate.taxYear)
