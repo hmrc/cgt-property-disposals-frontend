@@ -17,7 +17,6 @@
 @import play.api.i18n.Messages
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
@@ -72,67 +71,6 @@
 
 @title = @{messages("viewReturn.title")}
 @amountOwed = @{returnSummary.mainReturnChargeAmount}
-
-@glarAmount = @{
-    completeReturn match {
-        case CompleteMultipleDisposalsReturn(
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            gainOrLossAfterReliefs,
-            _
-        ) => gainOrLossAfterReliefs
-        case CompleteSingleDisposalReturn(
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            gainOrLossAfterReliefs,
-            _
-        ) => gainOrLossAfterReliefs
-        case CompleteSingleIndirectDisposalReturn(
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            gainOrLossAfterReliefs,
-            _
-        ) => gainOrLossAfterReliefs
-        case CompleteMultipleIndirectDisposalReturn(
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            gainOrLossAfterReliefs,
-            _
-        ) => gainOrLossAfterReliefs
-        case CompleteSingleMixedUseDisposalReturn(
-            _,
-            _,
-            _,
-            _,
-            _,
-            _,
-            gainOrLossAfterReliefs,
-            _
-        ) => gainOrLossAfterReliefs
-    }
-}
 
 @key= @{ "viewReturn" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -242,9 +180,11 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
           <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
           @reliefDetailsSummary(s.reliefDetails, subscribedDetails.isATrust, representativeType)
 
-          @if(glarAmount.isDefined && isFurtherReturn.contains(true)){
-              <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-              @glarSummary(glarAmount.getOrElse(AmountInPence.zero), subscribedDetails.isATrust, representativeType, false)
+          @s.gainOrLossAfterReliefs.map{ glar =>
+              if(isFurtherReturn.contains(true){
+                  <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                  @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
+              }
           }
 
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
@@ -272,9 +212,11 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
           <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
           @lossesSummary(m.exemptionAndLossesAnswers, m.examplePropertyDetailsAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
-          @if(glarAmount.isDefined && isFurtherReturn.contains(true)){
-              <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-              @glarSummary(glarAmount.getOrElse(AmountInPence.zero), subscribedDetails.isATrust, representativeType, true)
+          @m.gainOrLossAfterReliefs.map{ glar =>
+            if(isFurtherReturn.contains(true){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
+             }
           }
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
@@ -315,6 +257,13 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(s.exemptionsAndLossesDetails, s.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
+        @s.gainOrLossAfterReliefs.map{ glar =>
+            if(isFurtherReturn.contains(true){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
+            }
+        }
+
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
         @nonCalculatedYearToDateLiabilitySummary(s.yearToDateLiabilityAnswers, showFiles = false, isMultiple = false, subscribedDetails.isATrust, representativeType, None, s.triageAnswers.disposalDate.taxYear)
 
@@ -341,9 +290,11 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
             isFurtherReturn
         )
 
-        @if(glarAmount.isDefined && isFurtherReturn.contains(true)){
-            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-            @glarSummary(glarAmount.getOrElse(AmountInPence.zero), subscribedDetails.isATrust, representativeType, true)
+        @multipleIndirect.gainOrLossAfterReliefs.map{ glar =>
+            if(isFurtherReturn.contains(true){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, true)
+            }
         }
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
@@ -365,9 +316,11 @@ if(completeReturn.isIndirectDisposal) messages(s"$key.companyAddress")
         <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
         @lossesSummary(singleMixedUse.exemptionsAndLossesDetails, singleMixedUse.triageAnswers.disposalDate, subscribedDetails.isATrust, representativeType, isFurtherReturn)
 
-        @if(glarAmount.isDefined && isFurtherReturn.contains(true)){
-            <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
-            @glarSummary(glarAmount.getOrElse(AmountInPence.zero), subscribedDetails.isATrust, representativeType, false)
+        @singleMixedUse.gainOrLossAfterReliefs.map{ glar =>
+            if(isFurtherReturn.contains(true){
+                <h2 class="heading-medium">@messages("task-list.gain-or-loss-after-reliefs.link")</h2>
+                @glarSummary(glar, subscribedDetails.isATrust, representativeType, false)
+            }
         }
 
         <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
