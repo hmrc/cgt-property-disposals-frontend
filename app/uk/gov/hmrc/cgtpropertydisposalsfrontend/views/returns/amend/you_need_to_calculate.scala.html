@@ -21,6 +21,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -50,7 +52,11 @@
       <li>@messages(s"$key.li2")</li>
   </ul>
 
-  <p><a href="routes.FurtherReturnGuidanceController.guidance()">@messages(s"$key.link1")</a></p>
+  <p>
+      <a href="@{triage.routes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.calculateAmounts)}">
+          @messages(s"$key.link1")
+      </a>
+  </p>
 
   <h2 class="heading-medium">@messages(s"$key.h2")</h2>
 

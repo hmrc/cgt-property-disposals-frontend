@@ -117,24 +117,18 @@ object FurtherReturnGuidanceController {
   object BackLinkLocations {
 
     val furtherReturnStart: String     = "furtherReturnStart"
-    val gainOrLossAfterReliefs: String = "GLAR"
     val inYearLosses: String           = "inYearLosses"
-    val netGainOrLoss: String          = "netGainOrLoss"
-    val overallLiability: String       = "overallLiability"
+    val calculateAmounts: String       = "calculateAmounts"
 
   }
 
   val backLinkMappings: Map[String, Call] =
     Map(
       BackLinkLocations.furtherReturnStart     -> returns.triage.routes.CommonTriageQuestionsController.furtherReturnHelp(),
-      BackLinkLocations.gainOrLossAfterReliefs -> returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController
-        .enterGainOrLossAfterReliefs(),
       BackLinkLocations.inYearLosses           -> returns.exemptionandlosses.routes.ExemptionAndLossesController
         .inYearLosses(),
-      BackLinkLocations.netGainOrLoss          -> returns.yeartodatelliability.routes.YearToDateLiabilityController
-        .taxableGainOrLoss(),
-      BackLinkLocations.overallLiability       -> returns.yeartodatelliability.routes.YearToDateLiabilityController
-        .yearToDateLiability()
+      BackLinkLocations.calculateAmounts       -> returns.amend.routes.AmendReturnController
+        .youNeedToCalculate()
     )
 
 }
