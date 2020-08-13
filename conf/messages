@@ -4710,14 +4710,6 @@ lossAfterReliefs.error.tooLarge=The loss amount must be 50,000,000,000.00 or les
 lossAfterReliefs.error.tooManyDecimals=The loss amount must have 2 decimal places or less, like 2,908 or 740.50
 lossAfterReliefs.error.tooSmall=The loss amount must be more than 0
 
-gainOrLossAfterReliefs.link=How to work out the overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
-gainOrLossAfterReliefs.agent.link=How to work out your client’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
-gainOrLossAfterReliefs.trust.link=How to work out the trust’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
-gainOrLossAfterReliefs.capacitor.link=How to work out the person’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
-gainOrLossAfterReliefs.personalRep.link=How to work out the person’s <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link=How to work out the estate’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
-gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link=How to work out your client’s overall <a href="{0}">Capital Gains Tax liability on UK property-related disposals</a>
-
 gainOrLossAfterReliefs.cya.title=Check your answers
 gainOrLossAfterReliefs.cyaChange=whether a gain, a loss, or no gain or loss was made after reliefs
 
