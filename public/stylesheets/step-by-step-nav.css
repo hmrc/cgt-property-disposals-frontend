@@ -1,0 +1,359 @@
+:root {
+    --govuk-border-colour: #dee0e2;
+}
+
+.app-step-nav {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.25;
+    margin-bottom: 30px;
+}
+
+.app-step-nav__controls {
+    padding: 3px 3px 0 0;
+    text-align: right;
+}
+
+button.app-step-nav__button {
+    -webkit-writing-mode: horizontal-tb !important;
+    text-rendering: auto;
+    color: #005ea5;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0;
+    text-shadow: none;
+    box-shadow: none;
+    background-color: transparent;
+    box-sizing: border-box;
+    margin: 0em;
+    padding: 1px 6px;
+    border-width: 0;
+    border-style: outset;
+    border-color: var(--govuk-border-colour);
+    border-image: initial;
+}
+
+.app-step-nav__button {
+    color: #005ea5;
+    cursor: pointer;
+    background: none;
+    border: 0;
+    margin: 0;
+}
+
+.app-step-nav__button::-moz-focus-inner {
+    border: 0;
+}
+
+button.app-step-nav__button--title {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.25;
+    display: inline-block;
+    padding: 0;
+    text-align: left;
+    color: #0b0c0c;
+}
+
+.app-step-nav__button--controls {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 1.25;
+    position: relative;
+    z-index: 1;
+    padding: 0.5em 0;
+    text-decoration: underline;
+}
+
+.app-step-nav__button--controls:hover {
+    color: #005ea5;
+}
+
+.app-step-nav--large .app-step-nav__button--controls {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.14286;
+}
+
+.app-step-nav__steps {
+    padding: 0;
+    margin: 0;
+}
+
+.app-step-nav__step {
+    position: relative;
+    padding-left: 45px;
+    list-style: none;
+}
+
+.app-step-nav__step:after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    width: 0;
+    height: 100%;
+    border-left: solid 2px var(--govuk-border-colour);
+    background: #fff;
+    left: 0;
+    margin-left: 12px;
+    top: 15px;
+}
+
+.app-step-nav__header {
+    padding: 15px 0;
+    border-top: solid 2px #dee0e2;
+}
+
+.app-step-nav__header h3 {
+    margin-top: 0;
+}
+
+.app-step-nav--active .app-step-nav__header {
+    cursor: pointer;
+}
+
+.app-step-nav--large .app-step-nav__header {
+    padding: 30px 0;
+}
+
+.app-step-nav__circle--number {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 23px;
+    border: solid 2px #bfc1c3;
+}
+
+.app-step-nav__toggle-link {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.2;
+    display: block;
+    color: #005ea5;
+}
+
+.app-step-nav__step:last-child:before {
+    content: "";
+    position: absolute;
+    z-index: 6;
+    bottom: 0;
+    left: 0;
+    margin-left: 6.5px;
+    width: 13px;
+    height: 0;
+    border-bottom: solid 2px var(--govuk-border-colour);
+}
+
+.app-step-nav__step:last-child:after {
+    height: -webkit-calc(100% - 15px);
+    height: calc(100% - 15px);
+}
+
+.app-step-nav__step:last-child .app-step-nav__help:after {
+    height: 100%;
+}
+
+@media (min-width: 40.0625em) {
+
+    .app-step-nav--large .app-step-nav__button--controls {
+        font-size: 16px;
+        line-height: 1.25;
+    }
+
+    .app-step-nav {
+        font-size: 19px;
+        line-height: 1.31579;
+    }
+
+    .app-step-nav--large .app-step-nav__step {
+        padding-left: 60px;
+    }
+
+    .app-step-nav--large .app-step-nav__step:after {
+        left: 0;
+        margin-left: 16px;
+        border-width: 3px;
+        top: 30px;
+    }
+
+
+    .app-step-nav.app-step-nav--large {
+        margin-bottom: 60px;
+    }
+
+    .app-step-nav--large .app-step-nav__circle {
+        top: 30px;
+        width: 35px;
+        height: 35px;
+    }
+
+    .app-step-nav--large .app-step-nav__circle--number {
+        font-size: 19px;
+        line-height: 30px;
+    }
+
+    .app-step-nav--large .app-step-nav__circle--number {
+        border-width: 3px;
+    }
+
+    .app-step-nav--large .app-step-nav__circle--number {
+        font-size: 19px;
+        line-height: 30px;
+    }
+
+    .app-step-nav--large .app-step-nav__toggle-link {
+        font-size: 16px;
+        line-height: 1.2;
+    }
+
+    .app-step-nav--large .app-step-nav__step:last-child:before {
+        margin-left: 8.75px;
+        width: 17.5px;
+        border-width: 3px;
+    }
+
+    .app-step-nav--large .app-step-nav__step:last-child:after {
+        height: calc(100% - 30px);
+    }
+}
+
+.app-step-nav__step--active .app-step-nav__circle--number,
+.app-step-nav__step--active .app-step-nav__help:after,
+.app-step-nav__step--active .app-step-nav__substep:after,
+.app-step-nav__step--active:after,
+.app-step-nav__step--active:last-child:before {
+    border-color: #0b0c0c;
+}
+
+.app-step-nav__circle {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    position: absolute;
+    z-index: 5;
+    top: 15px;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    color: #0b0c0c;
+    background: #fff;
+    border-radius: 100px;
+    text-align: center;
+}
+
+@media (min-width: 40.0625em) {
+    .app-step-nav--large .app-step-nav__circle {
+        top: 30px;
+        width: 35px;
+        height: 35px;
+    }
+}
+
+.app-step-nav__circle--number {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 23px;
+    border: solid 2px var(--govuk-border-colour);
+}
+
+@media (min-width: 40.0625em) {
+    .app-step-nav__circle--number {
+        font-size: 16px;
+        line-height: 23px;
+    }
+}
+
+.app-step-nav--large .app-step-nav__circle--number {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 23px;
+}
+
+@media (min-width: 40.0625em) {
+    .app-step-nav--large .app-step-nav__circle--number {
+        font-size: 19px;
+        line-height: 30px;
+    }
+
+    .app-step-nav--large .app-step-nav__circle--number {
+        border-width: 3px;
+    }
+}
+
+.app-step-nav__circle--logic {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 28px;
+}
+@media (min-width: 40.0625em) {
+    .app-step-nav--large .app-step-nav__circle--logic {
+        font-size: 19px;
+        line-height: 34px;
+    }
+}
+
+.app-step-nav__circle-inner {
+    float: right;
+    min-width: 100%;
+}
+
+.app-step-nav__circle-background {
+    text-shadow: 0 -0.1em 0 #fff, 0.1em 0 0 #fff, 0 0.1em 0 #fff, -0.1em 0 0 #fff;
+}
+
+.app-step-nav__controls {
+    padding: 3px 3px 0 0;
+    text-align: right;
+}
+
+.nav__steps {
+    padding: 0;
+    margin: 0;
+}
+
+.app-step-nav__step {
+    position: relative;
+    padding-left: 45px;
+    list-style: none;
+}
+
+.app-step-nav--large .app-step-nav__step {
+    padding-left: 60px;
+}
+
+.app-step-nav--large .app-step-nav__header {
+    padding: 30px 0;
+}
+
+.app-step-nav--large .app-step-nav__title {
+    font-size: 24px;
+    line-height: 1.4;
+}
+
+.app-step-nav--large .app-step-nav__button--title {
+    font-size: 24px;
+    line-height: 1.25;
+}
+
+.app-step-nav--large .app-step-nav__button--title {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}

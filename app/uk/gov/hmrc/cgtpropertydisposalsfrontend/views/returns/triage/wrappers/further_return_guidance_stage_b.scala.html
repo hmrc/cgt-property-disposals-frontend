@@ -24,7 +24,8 @@
     stageBExample1: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example1,
     stageBExample2: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example2,
     stageBExample3: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example3,
-    stageBExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example4
+    stageBExample4: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.partials.further_return_guidance_stage_b_example4,
+        stepHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.step_header
 )
 
 @(userKey: String)(implicit messages:Messages, appConfig: ViewConfig)
@@ -32,7 +33,7 @@
     @key = @{ "furtherReturnGuidance" }
 
     @caption(messages(s"$key.stage-b"))
-    <h2 class="heading-medium">@messages(s"$key$userKey.stage-b.headingText")</h2>
+    <h2 class="heading-large">@messages(s"$key$userKey.stage-b.headingText")</h2>
     @if(userKey.contains(".personalRepInPeriodOfAdmin")){
         <p>@messages(s"$key$userKey.stage-b.p1")</p>
         <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
@@ -48,41 +49,50 @@
             stageBExample3(userKey)
         )
     } else{
-        <ol class="list list-number">
-        <li>@messages(s"$key$userKey.stage-b.step-b1")</li>
-            <div>
-                <p>@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.cgtRatesUrl))</p>
-                <ol class="list list-number">
-                    <li>@Html(messages(s"$key$userKey.stage-b.step-b1.li1"))</li>
-                    <li>@Html(messages(s"$key$userKey.stage-b.step-b1.li2"))</li>
-                </ol>
+      <div id="step-by-step-navigation" class="app-step-nav app-step-nav--large app-step-nav--active" data-show-text="Show" data-hide-text="Hide" data-show-all-text="Show all" data-hide-all-text="Hide all">
+        <ol class="app-step-nav__steps">
+          <li class="app-step-nav__step js-step" id="step-b1">
+            @stepHeader(1, messages(s"$key$userKey.stage-b.step-b1"))
+            <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-b1">
+              <p>@Html(messages(s"$key$userKey.stage-b.step-b1.p1", appConfig.cgtRatesUrl))</p>
+              <ol class="list list-number">
+                  <li>@Html(messages(s"$key$userKey.stage-b.step-b1.li1"))</li>
+                  <li>@Html(messages(s"$key$userKey.stage-b.step-b1.li2"))</li>
+              </ol>
             </div>
-        <li>@messages(s"$key.stage-b.step-b2")</li>
-            <div>
-                <p>@Html(messages(s"$key$userKey.stage-b.step-b2.p1"))</p>
-                <ol class="list list-number">
-                    <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li1"))</li>
-                    <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li2"))</li>
-                    <li>@Html(messages(s"$key.stage-b.step-b2.li3"))</li>
-                </ol>
+          </li>
+          <li class="app-step-nav__step js-step" id="step-b2">
+            @stepHeader(2, messages(s"$key.stage-b.step-b2"))
+            <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-b2">
+              <p>@Html(messages(s"$key$userKey.stage-b.step-b2.p1"))</p>
+              <ol class="list list-number">
+                <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li1"))</li>
+                <li>@Html(messages(s"$key$userKey.stage-b.step-b2.li2"))</li>
+                <li>@Html(messages(s"$key.stage-b.step-b2.li3"))</li>
+              </ol>
             </div>
-        <li>@messages(s"$key$userKey.stage-b.step-b3")</li>
-            <div>
-                <p>@messages(s"$key$userKey.stage-b.step-b3.p1")</p>
-                <ol class="list list-number">
-                    <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li1", appConfig.cgtRatesUrl))</li>
-                    <li>@Html(messages(s"$key.stage-b.step-b3.li2", appConfig.cgtRatesUrl))</li>
-                    <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li3"))</li>
-                </ol>
+          </li>
+          <li class="app-step-nav__step js-step" id="step-b3">
+            @stepHeader(3, messages(s"$key$userKey.stage-b.step-b3"))
+            <div class="app-step-nav__panel js-panel js-hidden" id="step-panel-b3">
+              <p>@messages(s"$key$userKey.stage-b.step-b3.p1")</p>
+              <ol class="list list-number">
+                  <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li1", appConfig.cgtRatesUrl))</li>
+                  <li>@Html(messages(s"$key.stage-b.step-b3.li2", appConfig.cgtRatesUrl))</li>
+                  <li>@Html(messages(s"$key$userKey.stage-b.step-b3.li3"))</li>
+              </ol>
             </div>
+          </li>
         </ol>
-        <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
-        @details(
-            messages(s"$key.stage-b.example1.link"),
-            stageBExample1()
-        )
-        @details(
-            messages(s"$key.stage-b.example2.link"),
-            stageBExample2()
-        )
-    }
+      </div>
+
+  <h2 class="heading-medium">@messages(s"$key.examplesText")</h2>
+  @details(
+      messages(s"$key.stage-b.example1.link"),
+      stageBExample1()
+  )
+  @details(
+      messages(s"$key.stage-b.example2.link"),
+      stageBExample2()
+  )
+}

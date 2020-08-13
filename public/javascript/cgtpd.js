@@ -1,9 +1,17 @@
-;(function(window, document, GOVUK) {
+;(function(window, document, GOVUK, $) {
   GOVUK.details.init();
 
   var errorSummary = document.querySelector('.error-summary');
   if (errorSummary) {
     errorSummary.focus();
+  }
+
+  var stepByStepNavigation = new window.GOVUK.Modules.StepByStepNavigation()
+  const stepBySteps = document.querySelectorAll('.app-step-nav')
+  if (stepBySteps.length) {
+    stepBySteps.forEach(function (s) {
+      stepByStepNavigation.start($(s))
+    })
   }
 
   var countryEl = document.querySelector("#countryCode");
@@ -76,4 +84,4 @@
     })
   }
 
-})(window, document, GOVUK);
+})(window, document, GOVUK, window.jQuery);
