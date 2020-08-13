@@ -320,7 +320,8 @@ class MultipleDisposalsTriageController @Inject() (
                               .unset(_.acquisitionPrice)
                           ),
                           yearToDateLiabilityAnswers = None,
-                          supportingEvidenceAnswers = None
+                          supportingEvidenceAnswers = None,
+                          gainOrLossAfterReliefs = None
                         ),
                       multiple =>
                         multiple.copy(
@@ -330,7 +331,8 @@ class MultipleDisposalsTriageController @Inject() (
                               .unset(_.acquisitionPrice)
                           ),
                           yearToDateLiabilityAnswers = None,
-                          supportingEvidenceAnswers = None
+                          supportingEvidenceAnswers = None,
+                          gainOrLossAfterReliefs = None
                         )
                     )
                 )

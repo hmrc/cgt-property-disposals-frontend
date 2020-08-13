@@ -598,10 +598,10 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def updateDisposalDate(
-    d: LocalDate,
-    taxYear: Option[TaxYear],
-    answers: SingleDisposalTriageAnswers,
-    furtnerReturn: Boolean
+                                  d: LocalDate,
+                                  taxYear: Option[TaxYear],
+                                  answers: SingleDisposalTriageAnswers,
+                                  furtherReturn: Boolean
   ): IncompleteSingleDisposalTriageAnswers = {
     def updateCompleteAnswers(
       c: CompleteSingleDisposalTriageAnswers,
@@ -627,7 +627,7 @@ class SingleDisposalsTriageController @Inject() (
     } { taxYear =>
       answers.fold(
         _.copy(
-          disposalDate = if (furtnerReturn) None else Some(DisposalDate(d, taxYear)),
+          disposalDate = if (furtherReturn) None else Some(DisposalDate(d, taxYear)),
           tooEarlyDisposalDate = None,
           completionDate = None
         ),
