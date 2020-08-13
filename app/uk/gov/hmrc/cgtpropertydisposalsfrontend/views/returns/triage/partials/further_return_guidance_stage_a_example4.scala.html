@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import play.twirl.api.Html
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 
@@ -29,7 +30,7 @@
 <h4 class="govuk-heading-m">@messages(s"$key.personalRepInPeriodOfAdmin.stage-a.step1.example4.headingText")</h4>
 
 <p>@messages(s"$key.stage-a.step1.example2.p2")</p>
-<h5 class="govuk-heading-s">@messages(s"$key.stage-a.step1.example2.p3")</h5>
+<h5 class="govuk-heading-s">@Html(messages(s"$key.stage-a.step1.example2.p3"))</h5>
 @calcSum(
     List(
         SumPartDisplay(
@@ -71,7 +72,7 @@
     )
 )
 
-<h5 class="govuk-heading-s">@messages(s"$key.stage-a.step1.example2.p4")</h5>
+<h5 class="govuk-heading-s">@Html(messages(s"$key.stage-a.step1.example2.p4"))</h5>
 @calcSum(
     List(
         SumPartDisplay(
