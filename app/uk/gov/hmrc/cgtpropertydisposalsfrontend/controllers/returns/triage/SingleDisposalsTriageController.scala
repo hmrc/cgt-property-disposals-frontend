@@ -977,7 +977,8 @@ class SingleDisposalsTriageController @Inject() (
                             .map(_.unsetPrrAndLettingRelief(newAnswers.isPeriodOfAdmin)),
                           yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers
                             .flatMap(_.unsetAllButIncomeDetails()),
-                          supportingEvidenceAnswers = None
+                          supportingEvidenceAnswers = None,
+                          gainOrLossAfterReliefs = None
                         )
                       )
 
