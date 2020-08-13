@@ -5339,10 +5339,10 @@ furtherReturnGuidance.personalRep.stage-b.step-b2.li2=Subtract their <strong cla
 
 furtherReturnGuidance.stage-b.step-b2.li3=Subtract the <strong class="bold">amount of net gain to be charged at the basic rate</strong> from the <strong class="bold">net gain</strong> to get the <strong class="bold">amount of net gain to be taxed at the higher rate</strong>.
 
-furtherReturnGuidance.stage-b.step-b3=Step B3 Work out your overall Capital Gains Tax liability on your UK property-related disposals
-furtherReturnGuidance.agent.stage-b.step-b3=Step B3 Work out the overall Capital Gains Tax liability on your client’s UK property-related disposals
-furtherReturnGuidance.capacitor.stage-b.step-b3=Step B3 Work out the overall Capital Gains Tax liability on the person’s UK property-related disposals
-furtherReturnGuidance.personalRep.stage-b.step-b3=Step B3 Work out the overall Capital Gains Tax liability on the person’s UK property-related disposals
+furtherReturnGuidance.stage-b.step-b3=Step B3 - Work out your overall Capital Gains Tax liability on your UK property-related disposals
+furtherReturnGuidance.agent.stage-b.step-b3=Step B3 - Work out the overall Capital Gains Tax liability on your client’s UK property-related disposals
+furtherReturnGuidance.capacitor.stage-b.step-b3=Step B3 - Work out the overall Capital Gains Tax liability on the person’s UK property-related disposals
+furtherReturnGuidance.personalRep.stage-b.step-b3=Step B3 - Work out the overall Capital Gains Tax liability on the person’s UK property-related disposals
 
 furtherReturnGuidance.stage-b.step-b3.p1=Do this to get your latest overall Capital Gains Tax liability on your UK property-related disposals. This calculation will take into account the disposals in this return.
 furtherReturnGuidance.agent.stage-b.step-b3.p1=Do this to get your client’s latest overall Capital Gains Tax liability on their UK property-related disposals. This calculation will take into account the disposals in this return.
