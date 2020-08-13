@@ -118,12 +118,6 @@
             customErrorKey = customErrorKey
         )
 
-        <p id="link">
-            <a href="@{triageRoutes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.overallLiability)}">
-                @Html(messages(s"$key$userKey.link", viewConfig.personalAllowanceUrl))
-            </a>
-        </p>
-
         @submitButton(messages("button.saveAndContinue"))
     }
 
