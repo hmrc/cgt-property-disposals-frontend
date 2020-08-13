@@ -26,6 +26,7 @@
 .annual-summaries--group .statement__summary--parent[aria-expanded=true],
 .payments .table-label.selected,
 .payments .table-label:hover,
+.app-step-nav__button:focus,
 html {
     background-color: #f3f2f1;
 }
@@ -163,7 +164,8 @@ select:focus::-ms-value {
 .button:focus,
 details summary:focus,
 .error-summary:focus,
-.timeout-dialog:focus {
+.timeout-dialog:focus,
+.app-step-nav__button:focus {
     outline-color: #ffdd00;
 }
 
@@ -278,7 +280,8 @@ input.form-control-error[type="password"],
 
 a:focus,
 .error-summary .error-summary-list a:focus,
-details summary:focus {
+details summary:focus,
+.app-step-nav__button:focus {
     outline: 3px solid transparent;
     color: #0b0c0c;
     background-color: #fd0;
