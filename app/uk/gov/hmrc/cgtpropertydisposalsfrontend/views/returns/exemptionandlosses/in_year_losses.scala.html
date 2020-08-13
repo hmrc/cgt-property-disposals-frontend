@@ -20,6 +20,8 @@
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
@@ -142,6 +144,14 @@
 
 
         <p>@Html(details)</p>
+
+        <p>
+          @Html(
+            messages(
+              "further-returns.help.link",
+              triage.routes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.inYearLosses)
+            ))
+        </p>
 
         @submitButton(messages("button.saveAndContinue"))
     }

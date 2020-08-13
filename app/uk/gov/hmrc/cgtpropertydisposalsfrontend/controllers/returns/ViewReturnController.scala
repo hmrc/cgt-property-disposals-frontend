@@ -17,24 +17,24 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.instances.future._
+import cats.instances.string._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.{routes => amendRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.{routes => amendRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.CompleteReturnWithSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingToAmendReturn, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import cats.syntax.eq._
-import cats.instances.string._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.CompleteReturnWithSummary
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,6 +62,7 @@ class ViewReturnController @Inject() (
               _,
               _,
               sentReturn,
+              isFirstReturn,
               returnSummary,
               _
             ) =>
@@ -73,7 +74,7 @@ class ViewReturnController @Inject() (
               subscribedDetails,
               sentReturn.representativeType,
               sentReturn.isIndirectDisposal,
-              None
+              Some(!isFirstReturn)
             )
           )
       }
@@ -89,7 +90,12 @@ class ViewReturnController @Inject() (
             viewingReturn.subscribedDetails,
             viewingReturn.ggCredId,
             viewingReturn.agentReferenceNumber,
-            CompleteReturnWithSummary(viewingReturn.completeReturn, viewingReturn.returnSummary),
+            CompleteReturnWithSummary(
+              viewingReturn.completeReturn,
+              viewingReturn.returnSummary,
+              viewingReturn.isFirstReturn
+            ),
+            viewingReturn.isFirstReturn,
             viewingReturn.previousSentReturns
           )
 
@@ -108,7 +114,7 @@ class ViewReturnController @Inject() (
   def payCharge(chargeReference: String): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withViewingReturn() {
-        case ViewingReturn(subscribedDetails, _, _, _, returnSummary, _) =>
+        case ViewingReturn(subscribedDetails, _, _, _, _, returnSummary, _) =>
           val cgtReference = subscribedDetails.cgtReference
           val details      =
             s"(chargeReference, cgtReference, submissionId) = ($chargeReference, $cgtReference, ${returnSummary.submissionId})"
@@ -159,6 +165,7 @@ class ViewReturnController @Inject() (
           s.ggCredId,
           s.agentReferenceNumber,
           s.originalReturn.completeReturn,
+          s.originalReturn.isFirstReturn,
           s.originalReturn.summary,
           s.previousSentReturns
         )

@@ -1,1 +1,4 @@
 GET  /change-return/calculate-amounts      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.youNeedToCalculate()
+
+GET  /change-return/cancel                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancel()
+POST /change-return/cancel                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancelSubmit()

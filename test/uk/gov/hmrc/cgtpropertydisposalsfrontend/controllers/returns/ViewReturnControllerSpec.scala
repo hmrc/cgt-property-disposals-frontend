@@ -673,6 +673,7 @@ class ViewReturnControllerSpec
             journey.ggCredId,
             journey.agentReferenceNumber,
             journey.originalReturn.completeReturn,
+            journey.originalReturn.isFirstReturn,
             journey.originalReturn.summary,
             journey.previousSentReturns
           )

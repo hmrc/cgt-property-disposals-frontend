@@ -22,8 +22,6 @@
 @import cats.instances.string._
 @import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.FurtherReturnGuidanceController
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.gainorlossafterreliefs.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
@@ -143,16 +141,29 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
 
     @backLinkComponent(backLink)
 
-    @caption(messages("gainOrLossAfterReliefs.caption"))
-
     @if(hasErrors) {
         @errorSummary(form, customErrorKey)
     }
 
+    @caption(messages("gainOrLossAfterReliefs.caption"))
+
+    @pageHeading(title)
+
+
+    <p>@messages(s"$key.p1")</p>
+
+  <ol class="list list-number">
+      <li>@messages(s"$key$multipleDisposalKey.li1")</li>
+      <li>@messages(s"$key.li2")</li>
+      <li>@messages(s"$key.li3")</li>
+      <li>@messages(s"$key$multipleDisposalKey.li4")</li>
+      <li>@messages(s"$key.li5")</li>
+  </ol>
+
     @formWrapper(routes.GainOrLossAfterReliefsController.enterGainOrLossAfterReliefsSubmit(), 'novalidate -> "novalidate") {
       @radioGroupConditional(
         fieldId = key,
-        label = pageHeading(title),
+        label = Html(s"""<h2 class="heading-medium" id="subheading">${messages(s"$key$userKey$multipleDisposalKey.h2")}</h2>"""),
         selected = selectedIndex,
         error = form.error(key),
         options = options,
@@ -160,11 +171,6 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
         helpText = None
       )
 
-      <p id="howToWorkOut">@Html(
-          messages(
-              s"$key$userKey.link",
-              triageRoutes.FurtherReturnGuidanceController.guidance(FurtherReturnGuidanceController.BackLinkLocations.gainOrLossAfterReliefs)
-          ))</p>
     @submitButton(messages("button.saveAndContinue"))
     }
 

@@ -20,6 +20,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -57,7 +58,7 @@
 
   @cancelOrContinue(
     messages("button.cancel"),
-    "#",
+    routes.AmendReturnController.confirmCancel().url,
     Some(messages("button.continue")),
     Some("#")
   )

@@ -215,7 +215,9 @@ class GainOrLossAfterReliefsControllerSpec
           expectedTitleKey: String,
           expectedBackLink: Call,
           expectedOuterLabelUserKey: String,
-          expectedLinkTextKey: String
+          expectedLinkTextKey: String,
+          expectedH2Key: String,
+          expectedLi1Key: String
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -245,6 +247,12 @@ class GainOrLossAfterReliefsControllerSpec
 
               doc.select("#howToWorkOut").html() shouldBe messageFromMessageKey(expectedLinkTextKey, "#")
 
+              doc.select("#subheading").text() shouldBe messageFromMessageKey(expectedH2Key)
+
+              doc.select("#content > article > ol > li:nth-child(1)").text() shouldBe messageFromMessageKey(
+                expectedLi1Key
+              )
+
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.GainOrLossAfterReliefsController
@@ -262,7 +270,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.title",
               returns.routes.TaskListController.taskList(),
               "",
-              "gainOrLossAfterReliefs.link"
+              "gainOrLossAfterReliefs.link",
+              "gainOrLossAfterReliefs.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -272,7 +282,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.agent.title",
               returns.routes.TaskListController.taskList(),
               ".notSelf",
-              "gainOrLossAfterReliefs.agent.link"
+              "gainOrLossAfterReliefs.agent.link",
+              "gainOrLossAfterReliefs.agent.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -282,7 +294,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.trust.title",
               routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               ".notSelf",
-              "gainOrLossAfterReliefs.trust.link"
+              "gainOrLossAfterReliefs.trust.link",
+              "gainOrLossAfterReliefs.trust.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -292,7 +306,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.capacitor.title",
               returns.routes.TaskListController.taskList(),
               ".notSelf",
-              "gainOrLossAfterReliefs.capacitor.link"
+              "gainOrLossAfterReliefs.capacitor.link",
+              "gainOrLossAfterReliefs.capacitor.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -302,7 +318,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.personalRep.title",
               returns.routes.TaskListController.taskList(),
               ".notSelf",
-              "gainOrLossAfterReliefs.personalRep.link"
+              "gainOrLossAfterReliefs.personalRep.link",
+              "gainOrLossAfterReliefs.personalRep.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -312,7 +330,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title",
               routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               ".notSelf",
-              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link"
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link",
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
 
@@ -322,7 +342,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title",
               returns.routes.TaskListController.taskList(),
               ".notSelf",
-              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link"
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link",
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.h2",
+              "gainOrLossAfterReliefs.li1"
             )
           }
         }
@@ -335,7 +357,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.multipleDisposals.title",
               returns.routes.TaskListController.taskList(),
               "",
-              "gainOrLossAfterReliefs.link"
+              "gainOrLossAfterReliefs.link",
+              "gainOrLossAfterReliefs.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -345,7 +369,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.agent.multipleDisposals.title",
               returns.routes.TaskListController.taskList(),
               ".notSelf",
-              "gainOrLossAfterReliefs.agent.link"
+              "gainOrLossAfterReliefs.agent.link",
+              "gainOrLossAfterReliefs.agent.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -355,7 +381,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.trust.multipleDisposals.title",
               routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               ".notSelf",
-              "gainOrLossAfterReliefs.trust.link"
+              "gainOrLossAfterReliefs.trust.link",
+              "gainOrLossAfterReliefs.trust.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -365,7 +393,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.capacitor.multipleDisposals.title",
               returns.routes.TaskListController.taskList(),
               ".notSelf",
-              "gainOrLossAfterReliefs.capacitor.link"
+              "gainOrLossAfterReliefs.capacitor.link",
+              "gainOrLossAfterReliefs.capacitor.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -375,7 +405,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.personalRep.multipleDisposals.title",
               returns.routes.TaskListController.taskList(),
               ".notSelf",
-              "gainOrLossAfterReliefs.personalRep.link"
+              "gainOrLossAfterReliefs.personalRep.link",
+              "gainOrLossAfterReliefs.personalRep.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -385,7 +417,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.title",
               routes.GainOrLossAfterReliefsController.checkYourAnswers(),
               ".notSelf",
-              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link"
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.link",
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
 
@@ -395,7 +429,9 @@ class GainOrLossAfterReliefsControllerSpec
               "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.title",
               returns.routes.TaskListController.taskList(),
               ".notSelf",
-              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link"
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.link",
+              "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.multipleDisposals.h2",
+              "gainOrLossAfterReliefs.multipleDisposals.li1"
             )
           }
         }
@@ -712,7 +748,7 @@ class GainOrLossAfterReliefsControllerSpec
         "the user is an individual doing the return for themselves" in {
           test(
             individualSesssion(Some(AmountInPence(600L)), isMultipleDisposal = true),
-            "gainOrLossAfterReliefs.multipleDisposals.title",
+            "gainOrLossAfterReliefs.multipleDisposals.h2",
             "gainOrLossAfterReliefs.gain.outerLabel",
             Some("gainOrLossAfterReliefs.gain.innerLabel"),
             Some("£6")
@@ -722,7 +758,7 @@ class GainOrLossAfterReliefsControllerSpec
         "the user is an agent of an individual" in {
           test(
             agentSession(Some(AmountInPence(-600L))),
-            "gainOrLossAfterReliefs.agent.title",
+            "gainOrLossAfterReliefs.agent.h2",
             "gainOrLossAfterReliefs.loss.notSelf.outerLabel",
             Some("gainOrLossAfterReliefs.loss.innerLabel"),
             Some("£6")
@@ -732,7 +768,7 @@ class GainOrLossAfterReliefsControllerSpec
         "the user is a trust" in {
           test(
             trustSession(Some(AmountInPence(0L))),
-            "gainOrLossAfterReliefs.trust.title",
+            "gainOrLossAfterReliefs.trust.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
             None
@@ -742,7 +778,7 @@ class GainOrLossAfterReliefsControllerSpec
         "the user is a capacitor" in {
           test(
             capacitorSession(Some(AmountInPence(0L))),
-            "gainOrLossAfterReliefs.capacitor.title",
+            "gainOrLossAfterReliefs.capacitor.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
             None
@@ -752,7 +788,7 @@ class GainOrLossAfterReliefsControllerSpec
         "the user is a personal rep" in {
           test(
             personalRepSession(Some(AmountInPence(0L)), isMultipleDisposal = true),
-            "gainOrLossAfterReliefs.personalRep.multipleDisposals.title",
+            "gainOrLossAfterReliefs.personalRep.multipleDisposals.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
             None
@@ -762,17 +798,17 @@ class GainOrLossAfterReliefsControllerSpec
         "the user is a personal rep in period of admin" in {
           test(
             periodOfAdminSession(Some(AmountInPence(0L))),
-            "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.title",
+            "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
             None
           )
         }
 
-        "the user is a agent of a personal rep in periof of admin" in {
+        "the user is a agent of a personal rep in period of admin" in {
           test(
             agentOfPeriodOfAdminSession(Some(AmountInPence(0L))),
-            "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.title",
+            "gainOrLossAfterReliefs.personalRepInPeriodOfAdmin.agent.h2",
             "gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel",
             None,
             None
@@ -826,7 +862,7 @@ object GainOrLossAfterReliefsControllerSpec extends Matchers {
           else ""
       }
       val multipleDisposalKeys = if (isMultipleDisposal) ".multipleDisposals" else ""
-      s"gainOrLossAfterReliefs$userTypeKey$multipleDisposalKeys.title"
+      s"gainOrLossAfterReliefs$userTypeKey$multipleDisposalKeys.h2"
     }
 
     val (expectedQuestionValueKey, expectedAmountKey, expectedAmountValue) = {
