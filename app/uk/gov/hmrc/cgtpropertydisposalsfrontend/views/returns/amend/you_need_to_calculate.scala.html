@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -58,10 +59,9 @@
 
   @cancelOrContinue(
     messages("button.cancel"),
-    routes.AmendReturnController.confirmCancel().url,
+    routes.AmendReturnController.confirmCancel(AmendReturnController.ConfirmCancelBackLocations.calculateAmounts).url,
     Some(messages("button.continue")),
-    Some("#")
+    Some(routes.AmendReturnController.checkYourAnswers().url)
   )
-
 
 }

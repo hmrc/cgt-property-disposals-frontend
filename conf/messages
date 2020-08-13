@@ -5002,6 +5002,11 @@ confirmCancelAmendReturn.helpText=If you cancel and you made some changed they w
 confirmCancelAmendReturn.error.required=Select yes if you want to cancel
 confirmCancelAmendReturn.error.boolean=Select yes if you want to cancel
 
+amendCya.title=Change your return
+amendCya.agent.title=Change your client’s return
+amendCya.p1=Once all questions have been answered you will be able to submit your return.
+amendCya.printLink=Print or save this page as a PDF
+
 #===================================================
 #  AMEND RETURNS - END
 #===================================================

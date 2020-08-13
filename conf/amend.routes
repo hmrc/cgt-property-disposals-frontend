@@ -1,4 +1,6 @@
 GET  /change-return/calculate-amounts      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.youNeedToCalculate()
 
-GET  /change-return/cancel                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancel()
-POST /change-return/cancel                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancelSubmit()
+GET  /change-return/cancel                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancel(back: String)
+POST /change-return/cancel                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.confirmCancelSubmit(back: String)
+
+GET  /change-return/check-answers          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController.checkYourAnswers()
