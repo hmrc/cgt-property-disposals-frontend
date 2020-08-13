@@ -109,7 +109,7 @@ class FurtherReturnGuidanceControllerSpec
         controller.guidance(back)(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(FurtherReturnGuidanceController.BackLinkLocations.overallLiability),
+        () => performAction(FurtherReturnGuidanceController.BackLinkLocations.furtherReturnStart),
         isValidJourney
       )
 
@@ -160,14 +160,6 @@ class FurtherReturnGuidanceControllerSpec
           )
         }
 
-        "the user came from the gain or loss after reliefs page" in {
-          test(
-            BackLinkLocations.gainOrLossAfterReliefs,
-            controllers.returns.gainorlossafterreliefs.routes.GainOrLossAfterReliefsController
-              .enterGainOrLossAfterReliefs()
-          )
-        }
-
         "the user came from the in year losses page" in {
           test(
             BackLinkLocations.inYearLosses,
@@ -175,17 +167,10 @@ class FurtherReturnGuidanceControllerSpec
           )
         }
 
-        "the user came from the taxable gain or loss page" in {
+        "the user came from the amend start page" in {
           test(
-            BackLinkLocations.netGainOrLoss,
-            controllers.returns.yeartodatelliability.routes.YearToDateLiabilityController.taxableGainOrLoss()
-          )
-        }
-
-        "the user came from the year to date liability page" in {
-          test(
-            BackLinkLocations.overallLiability,
-            controllers.returns.yeartodatelliability.routes.YearToDateLiabilityController.yearToDateLiability()
+            BackLinkLocations.calculateAmounts,
+            controllers.returns.amend.routes.AmendReturnController.youNeedToCalculate()
           )
         }
 

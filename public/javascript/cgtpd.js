@@ -6,7 +6,7 @@
     errorSummary.focus();
   }
 
-  var stepByStepNavigation = new window.GOVUK.Modules.StepByStepNavigation()
+  var stepByStepNavigation = new GOVUK.Modules.StepByStepNavigation()
   const stepBySteps = document.querySelectorAll('.app-step-nav')
   if (stepBySteps.length) {
     stepBySteps.forEach(function (s) {
