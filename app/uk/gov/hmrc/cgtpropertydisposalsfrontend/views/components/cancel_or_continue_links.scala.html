@@ -22,7 +22,7 @@
 
 <div class="form-group">
   @continueLabel.map(l =>
-   Html(s"""<a class="button" role="button" href="${continueUrl.getOrElse("")}" id="cancelOrContinue-cancel">$l</a>""")
+   Html(s"""<a class="button" role="button" href="${continueUrl.getOrElse("")}" id="cancelOrContinue-continue">$l</a>""")
   )
-  <a class="button--secondary" role="button" href="@{cancelUrl}" id="cancelOrContinue-continue">@cancelLabel</a>
+  <a class="button--secondary" role="button" href="@{cancelUrl}" id="cancelOrContinue-cancel">@cancelLabel</a>
 </div>

@@ -377,7 +377,6 @@ object CompleteReturn {
         _.triageAnswers.representativeType(),
         _.triageAnswers.representativeType()
       )
-
   }
 
   private def validRepresenteeAnswers(
@@ -416,6 +415,7 @@ object CompleteReturn {
       Json.format
     implicit val exampleCompanyDetailsAnswersFormat: OFormat[CompleteExampleCompanyDetailsAnswers]     = Json.format
     implicit val mixedUsePropertyDetailsAnswersFormat: OFormat[CompleteMixedUsePropertyDetailsAnswers] = Json.format
+
     derived.oformat()
   }
 

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -77,12 +78,113 @@ class AmendReturnControllerSpec
             doc.select("#back").attr("href")                      shouldBe controllers.returns.routes.ViewReturnController
               .displayReturn()
               .url
-            doc.select("#cancelOrContinue-cancel").attr("href")   shouldBe "#"
+            doc.select("#cancelOrContinue-cancel").attr("href")   shouldBe routes.AmendReturnController
+              .confirmCancel()
+              .url
             doc.select("#cancelOrContinue-continue").attr("href") shouldBe "#"
           }
         )
 
       }
+    }
+
+    "handling requests to display the confirm cancellation page" must {
+
+      def performAction(): Future[Result] =
+        controller.confirmCancel()(FakeRequest())
+
+      "display the page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(SessionData.empty)
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("confirmCancelAmendReturn.title"),
+          { doc =>
+            doc.select("#back").attr("href") shouldBe routes.AmendReturnController.youNeedToCalculate().url
+
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.AmendReturnController.confirmCancelSubmit().url
+          }
+        )
+
+      }
+    }
+
+    "handling submits on the confirm cancellation page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.confirmCancelSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      "display a form error" when {
+
+        def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
+          checkPageIsDisplayed(
+            performAction(data: _*),
+            messageFromMessageKey("confirmCancelAmendReturn.title"),
+            { doc =>
+              doc
+                .select("#error-summary-display > ul > li > a")
+                .text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              )
+
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
+          )
+
+        "nothing is submitted" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty)
+          }
+
+          test()("confirmCancelAmendReturn.error.required")
+        }
+
+        "the value submitted is not understood" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty)
+          }
+
+          test("confirmCancelAmendReturn" -> "123")("confirmCancelAmendReturn.error.required")
+        }
+
+      }
+
+      "redirect to the correct page" when {
+
+        "the user confirms they want to cancel" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty)
+          }
+
+          checkIsRedirect(
+            performAction("confirmCancelAmendReturn" -> "true"),
+            controllers.returns.routes.ViewReturnController.displayReturn()
+          )
+        }
+
+        "the user doesn't want to cancel" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty)
+          }
+
+          checkIsRedirect(
+            performAction("confirmCancelAmendReturn" -> "false"),
+            routes.AmendReturnController.youNeedToCalculate()
+          )
+        }
+
+      }
+
     }
 
   }

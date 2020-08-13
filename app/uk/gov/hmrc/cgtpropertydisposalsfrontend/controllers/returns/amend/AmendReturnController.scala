@@ -17,11 +17,15 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend
 
 import com.google.inject.Inject
+import play.api.data.Form
+import play.api.data.Forms.{mapping, of}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.AmendReturnController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingToAmendReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -36,7 +40,8 @@ class AmendReturnController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
-  youNeedToCalculatePage: pages.you_need_to_calculate
+  youNeedToCalculatePage: pages.you_need_to_calculate,
+  confirmCancelPage: pages.confirm_cancel
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -50,6 +55,28 @@ class AmendReturnController @Inject() (
       }
     }
 
+  def confirmCancel(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      Ok(confirmCancelPage(confirmCancelForm, routes.AmendReturnController.youNeedToCalculate()))
+    }
+
+  def confirmCancelSubmit(): Action[AnyContent] =
+    authenticatedActionWithSessionData { implicit request =>
+      confirmCancelForm
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            BadRequest(confirmCancelPage(formWithErrors, routes.AmendReturnController.youNeedToCalculate())),
+          { cancel =>
+            val redirectTo =
+              if (cancel) controllers.returns.routes.ViewReturnController.displayReturn()
+              else routes.AmendReturnController.youNeedToCalculate()
+
+            Redirect(redirectTo)
+          }
+        )
+    }
+
   private def withStartingToAmendReturn(
     request: RequestWithSessionData[_]
   )(f: StartingToAmendReturn => Future[Result]): Future[Result] =
@@ -57,5 +84,16 @@ class AmendReturnController @Inject() (
       case Some(s: StartingToAmendReturn) => f(s)
       case _                              => Redirect(controllers.routes.StartController.start())
     }
+
+}
+
+object AmendReturnController {
+
+  val confirmCancelForm: Form[Boolean] =
+    Form(
+      mapping(
+        "confirmCancelAmendReturn" -> of(BooleanFormatter.formatter)
+      )(identity)(Some(_))
+    )
 
 }

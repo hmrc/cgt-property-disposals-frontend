@@ -30,8 +30,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, PreviousReturnData, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils.localDateOrder
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
@@ -201,7 +201,13 @@ class HomePageController @Inject() (
                 previousYtdLiability <- getPreviousYearToDateLiability(
                                           subscribed.sentReturns,
                                           subscribed.subscribedDetails.cgtReference,
-                                          Some(CompleteReturnWithSummary(sentReturn, returnSummary))
+                                          Some(
+                                            CompleteReturnWithSummary(
+                                              sentReturn.completeReturn,
+                                              returnSummary,
+                                              sentReturn.isFirstReturn
+                                            )
+                                          )
                                         )
                 _                    <- EitherT(
                                           updateSession(sessionStore, request)(
@@ -211,7 +217,8 @@ class HomePageController @Inject() (
                                                   subscribed.subscribedDetails,
                                                   subscribed.ggCredId,
                                                   subscribed.agentReferenceNumber,
-                                                  sentReturn,
+                                                  sentReturn.completeReturn,
+                                                  sentReturn.isFirstReturn,
                                                   returnSummary,
                                                   Some(PreviousReturnData(subscribed.sentReturns, previousYtdLiability))
                                                 )
@@ -307,13 +314,13 @@ class HomePageController @Inject() (
           EitherT.pure(None)
         else
           returnData match {
-            case Some(CompleteReturnWithSummary(completeReturn, summary))
+            case Some(CompleteReturnWithSummary(completeReturn, summary, _))
                 if summary.submissionId === latestReturn.submissionId =>
               EitherT.pure(Some(fromCompleteReturn(completeReturn)))
 
             case _ =>
-              returnsService.displayReturn(cgtReference, latestReturn.submissionId).map { completeReturn =>
-                Some(fromCompleteReturn(completeReturn))
+              returnsService.displayReturn(cgtReference, latestReturn.submissionId).map { displayReturn =>
+                Some(fromCompleteReturn(displayReturn.completeReturn))
               }
           }
 
