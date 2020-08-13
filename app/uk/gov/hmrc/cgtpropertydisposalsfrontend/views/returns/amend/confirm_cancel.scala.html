@@ -20,7 +20,6 @@
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
@@ -33,7 +32,7 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, submit: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"confirmCancelAmendReturn"}
 
@@ -49,7 +48,7 @@
         @errorSummary(form)
     }
 
-    @formWrapper(routes.AmendReturnController.confirmCancelSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(submit, 'novalidate -> "novalidate") {
 
         @yesNo(
             fieldId = key,
